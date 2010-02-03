@@ -25,968 +25,540 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_gd_info f_gd_info
-#else
 inline Array x_gd_info() {
-  FUNCTION_INJECTION(gd_info);
+  FUNCTION_INJECTION_BUILTIN(gd_info);
   return f_gd_info();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_getimagesize f_getimagesize
-#else
 inline Variant x_getimagesize(CStrRef filename, Variant imageinfo = null) {
-  FUNCTION_INJECTION(getimagesize);
+  FUNCTION_INJECTION_BUILTIN(getimagesize);
   return f_getimagesize(filename, ref(imageinfo));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_image_type_to_extension f_image_type_to_extension
-#else
 inline String x_image_type_to_extension(int imagetype, bool include_dot = true) {
-  FUNCTION_INJECTION(image_type_to_extension);
+  FUNCTION_INJECTION_BUILTIN(image_type_to_extension);
   return f_image_type_to_extension(imagetype, include_dot);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_image_type_to_mime_type f_image_type_to_mime_type
-#else
 inline String x_image_type_to_mime_type(int imagetype) {
-  FUNCTION_INJECTION(image_type_to_mime_type);
+  FUNCTION_INJECTION_BUILTIN(image_type_to_mime_type);
   return f_image_type_to_mime_type(imagetype);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_image2wbmp f_image2wbmp
-#else
 inline bool x_image2wbmp(CObjRef image, CStrRef filename = null_string, int threshold = -1) {
-  FUNCTION_INJECTION(image2wbmp);
+  FUNCTION_INJECTION_BUILTIN(image2wbmp);
   return f_image2wbmp(image, filename, threshold);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagealphablending f_imagealphablending
-#else
 inline bool x_imagealphablending(CObjRef image, bool blendmode) {
-  FUNCTION_INJECTION(imagealphablending);
+  FUNCTION_INJECTION_BUILTIN(imagealphablending);
   return f_imagealphablending(image, blendmode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imageantialias f_imageantialias
-#else
 inline bool x_imageantialias(CObjRef image, bool on) {
-  FUNCTION_INJECTION(imageantialias);
+  FUNCTION_INJECTION_BUILTIN(imageantialias);
   return f_imageantialias(image, on);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagearc f_imagearc
-#else
 inline bool x_imagearc(CObjRef image, int cx, int cy, int width, int height, int start, int end, int color) {
-  FUNCTION_INJECTION(imagearc);
+  FUNCTION_INJECTION_BUILTIN(imagearc);
   return f_imagearc(image, cx, cy, width, height, start, end, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagechar f_imagechar
-#else
 inline bool x_imagechar(CObjRef image, int font, int x, int y, CStrRef c, int color) {
-  FUNCTION_INJECTION(imagechar);
+  FUNCTION_INJECTION_BUILTIN(imagechar);
   return f_imagechar(image, font, x, y, c, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecharup f_imagecharup
-#else
 inline bool x_imagecharup(CObjRef image, int font, int x, int y, CStrRef c, int color) {
-  FUNCTION_INJECTION(imagecharup);
+  FUNCTION_INJECTION_BUILTIN(imagecharup);
   return f_imagecharup(image, font, x, y, c, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolorallocate f_imagecolorallocate
-#else
 inline Variant x_imagecolorallocate(CObjRef image, int red, int green, int blue) {
-  FUNCTION_INJECTION(imagecolorallocate);
+  FUNCTION_INJECTION_BUILTIN(imagecolorallocate);
   return f_imagecolorallocate(image, red, green, blue);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolorallocatealpha f_imagecolorallocatealpha
-#else
 inline Variant x_imagecolorallocatealpha(CObjRef image, int red, int green, int blue, int alpha) {
-  FUNCTION_INJECTION(imagecolorallocatealpha);
+  FUNCTION_INJECTION_BUILTIN(imagecolorallocatealpha);
   return f_imagecolorallocatealpha(image, red, green, blue, alpha);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolorat f_imagecolorat
-#else
 inline Variant x_imagecolorat(CObjRef image, int x, int y) {
-  FUNCTION_INJECTION(imagecolorat);
+  FUNCTION_INJECTION_BUILTIN(imagecolorat);
   return f_imagecolorat(image, x, y);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolorclosest f_imagecolorclosest
-#else
 inline Variant x_imagecolorclosest(CObjRef image, int red, int green, int blue) {
-  FUNCTION_INJECTION(imagecolorclosest);
+  FUNCTION_INJECTION_BUILTIN(imagecolorclosest);
   return f_imagecolorclosest(image, red, green, blue);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolorclosestalpha f_imagecolorclosestalpha
-#else
 inline Variant x_imagecolorclosestalpha(CObjRef image, int red, int green, int blue, int alpha) {
-  FUNCTION_INJECTION(imagecolorclosestalpha);
+  FUNCTION_INJECTION_BUILTIN(imagecolorclosestalpha);
   return f_imagecolorclosestalpha(image, red, green, blue, alpha);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolorclosesthwb f_imagecolorclosesthwb
-#else
 inline Variant x_imagecolorclosesthwb(CObjRef image, int red, int green, int blue) {
-  FUNCTION_INJECTION(imagecolorclosesthwb);
+  FUNCTION_INJECTION_BUILTIN(imagecolorclosesthwb);
   return f_imagecolorclosesthwb(image, red, green, blue);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolordeallocate f_imagecolordeallocate
-#else
 inline bool x_imagecolordeallocate(CObjRef image, int color) {
-  FUNCTION_INJECTION(imagecolordeallocate);
+  FUNCTION_INJECTION_BUILTIN(imagecolordeallocate);
   return f_imagecolordeallocate(image, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolorexact f_imagecolorexact
-#else
 inline Variant x_imagecolorexact(CObjRef image, int red, int green, int blue) {
-  FUNCTION_INJECTION(imagecolorexact);
+  FUNCTION_INJECTION_BUILTIN(imagecolorexact);
   return f_imagecolorexact(image, red, green, blue);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolorexactalpha f_imagecolorexactalpha
-#else
 inline Variant x_imagecolorexactalpha(CObjRef image, int red, int green, int blue, int alpha) {
-  FUNCTION_INJECTION(imagecolorexactalpha);
+  FUNCTION_INJECTION_BUILTIN(imagecolorexactalpha);
   return f_imagecolorexactalpha(image, red, green, blue, alpha);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolormatch f_imagecolormatch
-#else
 inline Variant x_imagecolormatch(CObjRef image1, CObjRef image2) {
-  FUNCTION_INJECTION(imagecolormatch);
+  FUNCTION_INJECTION_BUILTIN(imagecolormatch);
   return f_imagecolormatch(image1, image2);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolorresolve f_imagecolorresolve
-#else
 inline Variant x_imagecolorresolve(CObjRef image, int red, int green, int blue) {
-  FUNCTION_INJECTION(imagecolorresolve);
+  FUNCTION_INJECTION_BUILTIN(imagecolorresolve);
   return f_imagecolorresolve(image, red, green, blue);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolorresolvealpha f_imagecolorresolvealpha
-#else
 inline Variant x_imagecolorresolvealpha(CObjRef image, int red, int green, int blue, int alpha) {
-  FUNCTION_INJECTION(imagecolorresolvealpha);
+  FUNCTION_INJECTION_BUILTIN(imagecolorresolvealpha);
   return f_imagecolorresolvealpha(image, red, green, blue, alpha);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolorset f_imagecolorset
-#else
 inline Variant x_imagecolorset(CObjRef image, int index, int red, int green, int blue) {
-  FUNCTION_INJECTION(imagecolorset);
+  FUNCTION_INJECTION_BUILTIN(imagecolorset);
   return f_imagecolorset(image, index, red, green, blue);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolorsforindex f_imagecolorsforindex
-#else
 inline Variant x_imagecolorsforindex(CObjRef image, int index) {
-  FUNCTION_INJECTION(imagecolorsforindex);
+  FUNCTION_INJECTION_BUILTIN(imagecolorsforindex);
   return f_imagecolorsforindex(image, index);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolorstotal f_imagecolorstotal
-#else
 inline Variant x_imagecolorstotal(CObjRef image) {
-  FUNCTION_INJECTION(imagecolorstotal);
+  FUNCTION_INJECTION_BUILTIN(imagecolorstotal);
   return f_imagecolorstotal(image);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecolortransparent f_imagecolortransparent
-#else
 inline Variant x_imagecolortransparent(CObjRef image, int color = -1) {
-  FUNCTION_INJECTION(imagecolortransparent);
+  FUNCTION_INJECTION_BUILTIN(imagecolortransparent);
   return f_imagecolortransparent(image, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imageconvolution f_imageconvolution
-#else
 inline bool x_imageconvolution(CObjRef image, CArrRef matrix, double div, double offset) {
-  FUNCTION_INJECTION(imageconvolution);
+  FUNCTION_INJECTION_BUILTIN(imageconvolution);
   return f_imageconvolution(image, matrix, div, offset);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecopy f_imagecopy
-#else
 inline bool x_imagecopy(CObjRef dst_im, CObjRef src_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h) {
-  FUNCTION_INJECTION(imagecopy);
+  FUNCTION_INJECTION_BUILTIN(imagecopy);
   return f_imagecopy(dst_im, src_im, dst_x, dst_y, src_x, src_y, src_w, src_h);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecopymerge f_imagecopymerge
-#else
 inline bool x_imagecopymerge(CObjRef dst_im, CObjRef src_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct) {
-  FUNCTION_INJECTION(imagecopymerge);
+  FUNCTION_INJECTION_BUILTIN(imagecopymerge);
   return f_imagecopymerge(dst_im, src_im, dst_x, dst_y, src_x, src_y, src_w, src_h, pct);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecopymergegray f_imagecopymergegray
-#else
 inline bool x_imagecopymergegray(CObjRef dst_im, CObjRef src_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct) {
-  FUNCTION_INJECTION(imagecopymergegray);
+  FUNCTION_INJECTION_BUILTIN(imagecopymergegray);
   return f_imagecopymergegray(dst_im, src_im, dst_x, dst_y, src_x, src_y, src_w, src_h, pct);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecopyresampled f_imagecopyresampled
-#else
 inline bool x_imagecopyresampled(CObjRef dst_im, CObjRef src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h) {
-  FUNCTION_INJECTION(imagecopyresampled);
+  FUNCTION_INJECTION_BUILTIN(imagecopyresampled);
   return f_imagecopyresampled(dst_im, src_im, dst_x, dst_y, src_x, src_y, dst_w, dst_h, src_w, src_h);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecopyresized f_imagecopyresized
-#else
 inline bool x_imagecopyresized(CObjRef dst_im, CObjRef src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h) {
-  FUNCTION_INJECTION(imagecopyresized);
+  FUNCTION_INJECTION_BUILTIN(imagecopyresized);
   return f_imagecopyresized(dst_im, src_im, dst_x, dst_y, src_x, src_y, dst_w, dst_h, src_w, src_h);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecreate f_imagecreate
-#else
 inline Variant x_imagecreate(int width, int height) {
-  FUNCTION_INJECTION(imagecreate);
+  FUNCTION_INJECTION_BUILTIN(imagecreate);
   return f_imagecreate(width, height);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecreatefromgd2part f_imagecreatefromgd2part
-#else
 inline Variant x_imagecreatefromgd2part(CStrRef filename, int srcx, int srcy, int width, int height) {
-  FUNCTION_INJECTION(imagecreatefromgd2part);
+  FUNCTION_INJECTION_BUILTIN(imagecreatefromgd2part);
   return f_imagecreatefromgd2part(filename, srcx, srcy, width, height);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecreatefromgd f_imagecreatefromgd
-#else
 inline Variant x_imagecreatefromgd(CStrRef filename) {
-  FUNCTION_INJECTION(imagecreatefromgd);
+  FUNCTION_INJECTION_BUILTIN(imagecreatefromgd);
   return f_imagecreatefromgd(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecreatefromgd2 f_imagecreatefromgd2
-#else
 inline Variant x_imagecreatefromgd2(CStrRef filename) {
-  FUNCTION_INJECTION(imagecreatefromgd2);
+  FUNCTION_INJECTION_BUILTIN(imagecreatefromgd2);
   return f_imagecreatefromgd2(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecreatefromgif f_imagecreatefromgif
-#else
 inline Variant x_imagecreatefromgif(CStrRef filename) {
-  FUNCTION_INJECTION(imagecreatefromgif);
+  FUNCTION_INJECTION_BUILTIN(imagecreatefromgif);
   return f_imagecreatefromgif(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecreatefromjpeg f_imagecreatefromjpeg
-#else
 inline Variant x_imagecreatefromjpeg(CStrRef filename) {
-  FUNCTION_INJECTION(imagecreatefromjpeg);
+  FUNCTION_INJECTION_BUILTIN(imagecreatefromjpeg);
   return f_imagecreatefromjpeg(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecreatefrompng f_imagecreatefrompng
-#else
 inline Variant x_imagecreatefrompng(CStrRef filename) {
-  FUNCTION_INJECTION(imagecreatefrompng);
+  FUNCTION_INJECTION_BUILTIN(imagecreatefrompng);
   return f_imagecreatefrompng(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecreatefromstring f_imagecreatefromstring
-#else
 inline Variant x_imagecreatefromstring(CStrRef data) {
-  FUNCTION_INJECTION(imagecreatefromstring);
+  FUNCTION_INJECTION_BUILTIN(imagecreatefromstring);
   return f_imagecreatefromstring(data);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecreatefromwbmp f_imagecreatefromwbmp
-#else
 inline Variant x_imagecreatefromwbmp(CStrRef filename) {
-  FUNCTION_INJECTION(imagecreatefromwbmp);
+  FUNCTION_INJECTION_BUILTIN(imagecreatefromwbmp);
   return f_imagecreatefromwbmp(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecreatefromxbm f_imagecreatefromxbm
-#else
 inline Variant x_imagecreatefromxbm(CStrRef filename) {
-  FUNCTION_INJECTION(imagecreatefromxbm);
+  FUNCTION_INJECTION_BUILTIN(imagecreatefromxbm);
   return f_imagecreatefromxbm(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecreatefromxpm f_imagecreatefromxpm
-#else
 inline Variant x_imagecreatefromxpm(CStrRef filename) {
-  FUNCTION_INJECTION(imagecreatefromxpm);
+  FUNCTION_INJECTION_BUILTIN(imagecreatefromxpm);
   return f_imagecreatefromxpm(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagecreatetruecolor f_imagecreatetruecolor
-#else
 inline Variant x_imagecreatetruecolor(int width, int height) {
-  FUNCTION_INJECTION(imagecreatetruecolor);
+  FUNCTION_INJECTION_BUILTIN(imagecreatetruecolor);
   return f_imagecreatetruecolor(width, height);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagedashedline f_imagedashedline
-#else
 inline bool x_imagedashedline(CObjRef image, int x1, int y1, int x2, int y2, int color) {
-  FUNCTION_INJECTION(imagedashedline);
+  FUNCTION_INJECTION_BUILTIN(imagedashedline);
   return f_imagedashedline(image, x1, y1, x2, y2, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagedestroy f_imagedestroy
-#else
 inline bool x_imagedestroy(CObjRef image) {
-  FUNCTION_INJECTION(imagedestroy);
+  FUNCTION_INJECTION_BUILTIN(imagedestroy);
   return f_imagedestroy(image);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imageellipse f_imageellipse
-#else
 inline bool x_imageellipse(CObjRef image, int cx, int cy, int width, int height, int color) {
-  FUNCTION_INJECTION(imageellipse);
+  FUNCTION_INJECTION_BUILTIN(imageellipse);
   return f_imageellipse(image, cx, cy, width, height, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagefill f_imagefill
-#else
 inline bool x_imagefill(CObjRef image, int x, int y, int color) {
-  FUNCTION_INJECTION(imagefill);
+  FUNCTION_INJECTION_BUILTIN(imagefill);
   return f_imagefill(image, x, y, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagefilledarc f_imagefilledarc
-#else
 inline bool x_imagefilledarc(CObjRef image, int cx, int cy, int width, int height, int start, int end, int color, int style) {
-  FUNCTION_INJECTION(imagefilledarc);
+  FUNCTION_INJECTION_BUILTIN(imagefilledarc);
   return f_imagefilledarc(image, cx, cy, width, height, start, end, color, style);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagefilledellipse f_imagefilledellipse
-#else
 inline bool x_imagefilledellipse(CObjRef image, int cx, int cy, int width, int height, int color) {
-  FUNCTION_INJECTION(imagefilledellipse);
+  FUNCTION_INJECTION_BUILTIN(imagefilledellipse);
   return f_imagefilledellipse(image, cx, cy, width, height, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagefilledpolygon f_imagefilledpolygon
-#else
 inline bool x_imagefilledpolygon(CObjRef image, CArrRef points, int num_points, int color) {
-  FUNCTION_INJECTION(imagefilledpolygon);
+  FUNCTION_INJECTION_BUILTIN(imagefilledpolygon);
   return f_imagefilledpolygon(image, points, num_points, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagefilledrectangle f_imagefilledrectangle
-#else
 inline bool x_imagefilledrectangle(CObjRef image, int x1, int y1, int x2, int y2, int color) {
-  FUNCTION_INJECTION(imagefilledrectangle);
+  FUNCTION_INJECTION_BUILTIN(imagefilledrectangle);
   return f_imagefilledrectangle(image, x1, y1, x2, y2, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagefilltoborder f_imagefilltoborder
-#else
 inline bool x_imagefilltoborder(CObjRef image, int x, int y, int border, int color) {
-  FUNCTION_INJECTION(imagefilltoborder);
+  FUNCTION_INJECTION_BUILTIN(imagefilltoborder);
   return f_imagefilltoborder(image, x, y, border, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagefilter f_imagefilter
-#else
 inline bool x_imagefilter(CObjRef image, int filtertype, int arg1 = 0, int arg2 = 0, int arg3 = 0, int arg4 = 0) {
-  FUNCTION_INJECTION(imagefilter);
+  FUNCTION_INJECTION_BUILTIN(imagefilter);
   return f_imagefilter(image, filtertype, arg1, arg2, arg3, arg4);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagefontheight f_imagefontheight
-#else
 inline int x_imagefontheight(int font) {
-  FUNCTION_INJECTION(imagefontheight);
+  FUNCTION_INJECTION_BUILTIN(imagefontheight);
   return f_imagefontheight(font);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagefontwidth f_imagefontwidth
-#else
 inline int x_imagefontwidth(int font) {
-  FUNCTION_INJECTION(imagefontwidth);
+  FUNCTION_INJECTION_BUILTIN(imagefontwidth);
   return f_imagefontwidth(font);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imageftbbox f_imageftbbox
-#else
 inline Variant x_imageftbbox(double size, double angle, CStrRef font_file, CStrRef text, CArrRef extrainfo = null) {
-  FUNCTION_INJECTION(imageftbbox);
+  FUNCTION_INJECTION_BUILTIN(imageftbbox);
   return f_imageftbbox(size, angle, font_file, text, extrainfo);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagefttext f_imagefttext
-#else
 inline Variant x_imagefttext(CObjRef image, double size, double angle, int x, int y, int col, CStrRef font_file, CStrRef text, CArrRef extrainfo = null) {
-  FUNCTION_INJECTION(imagefttext);
+  FUNCTION_INJECTION_BUILTIN(imagefttext);
   return f_imagefttext(image, size, angle, x, y, col, font_file, text, extrainfo);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagegammacorrect f_imagegammacorrect
-#else
 inline bool x_imagegammacorrect(CObjRef image, double inputgamma, double outputgamma) {
-  FUNCTION_INJECTION(imagegammacorrect);
+  FUNCTION_INJECTION_BUILTIN(imagegammacorrect);
   return f_imagegammacorrect(image, inputgamma, outputgamma);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagegd2 f_imagegd2
-#else
 inline bool x_imagegd2(CObjRef image, CStrRef filename = null_string, int chunk_size = 0, int type = 0) {
-  FUNCTION_INJECTION(imagegd2);
+  FUNCTION_INJECTION_BUILTIN(imagegd2);
   return f_imagegd2(image, filename, chunk_size, type);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagegd f_imagegd
-#else
 inline bool x_imagegd(CObjRef image, CStrRef filename = null_string) {
-  FUNCTION_INJECTION(imagegd);
+  FUNCTION_INJECTION_BUILTIN(imagegd);
   return f_imagegd(image, filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagegif f_imagegif
-#else
 inline bool x_imagegif(CObjRef image, CStrRef filename = null_string) {
-  FUNCTION_INJECTION(imagegif);
+  FUNCTION_INJECTION_BUILTIN(imagegif);
   return f_imagegif(image, filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagegrabscreen f_imagegrabscreen
-#else
 inline Variant x_imagegrabscreen() {
-  FUNCTION_INJECTION(imagegrabscreen);
+  FUNCTION_INJECTION_BUILTIN(imagegrabscreen);
   return f_imagegrabscreen();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagegrabwindow f_imagegrabwindow
-#else
 inline Variant x_imagegrabwindow(int window, int client_area = 0) {
-  FUNCTION_INJECTION(imagegrabwindow);
+  FUNCTION_INJECTION_BUILTIN(imagegrabwindow);
   return f_imagegrabwindow(window, client_area);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imageinterlace f_imageinterlace
-#else
 inline Variant x_imageinterlace(CObjRef image, int interlace = 0) {
-  FUNCTION_INJECTION(imageinterlace);
+  FUNCTION_INJECTION_BUILTIN(imageinterlace);
   return f_imageinterlace(image, interlace);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imageistruecolor f_imageistruecolor
-#else
 inline bool x_imageistruecolor(CObjRef image) {
-  FUNCTION_INJECTION(imageistruecolor);
+  FUNCTION_INJECTION_BUILTIN(imageistruecolor);
   return f_imageistruecolor(image);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagejpeg f_imagejpeg
-#else
 inline bool x_imagejpeg(CObjRef image, CStrRef filename = null_string, int quality = -1) {
-  FUNCTION_INJECTION(imagejpeg);
+  FUNCTION_INJECTION_BUILTIN(imagejpeg);
   return f_imagejpeg(image, filename, quality);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagelayereffect f_imagelayereffect
-#else
 inline bool x_imagelayereffect(CObjRef image, int effect) {
-  FUNCTION_INJECTION(imagelayereffect);
+  FUNCTION_INJECTION_BUILTIN(imagelayereffect);
   return f_imagelayereffect(image, effect);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imageline f_imageline
-#else
 inline bool x_imageline(CObjRef image, int x1, int y1, int x2, int y2, int color) {
-  FUNCTION_INJECTION(imageline);
+  FUNCTION_INJECTION_BUILTIN(imageline);
   return f_imageline(image, x1, y1, x2, y2, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imageloadfont f_imageloadfont
-#else
 inline Variant x_imageloadfont(CStrRef file) {
-  FUNCTION_INJECTION(imageloadfont);
+  FUNCTION_INJECTION_BUILTIN(imageloadfont);
   return f_imageloadfont(file);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagepalettecopy f_imagepalettecopy
-#else
 inline void x_imagepalettecopy(CObjRef destination, CObjRef source) {
-  FUNCTION_INJECTION(imagepalettecopy);
+  FUNCTION_INJECTION_BUILTIN(imagepalettecopy);
   f_imagepalettecopy(destination, source);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagepng f_imagepng
-#else
 inline bool x_imagepng(CObjRef image, CStrRef filename = null_string, int quality = -1, int filters = -1) {
-  FUNCTION_INJECTION(imagepng);
+  FUNCTION_INJECTION_BUILTIN(imagepng);
   return f_imagepng(image, filename, quality, filters);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagepolygon f_imagepolygon
-#else
 inline bool x_imagepolygon(CObjRef image, CArrRef points, int num_points, int color) {
-  FUNCTION_INJECTION(imagepolygon);
+  FUNCTION_INJECTION_BUILTIN(imagepolygon);
   return f_imagepolygon(image, points, num_points, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagepsbbox f_imagepsbbox
-#else
 inline Array x_imagepsbbox(CStrRef text, int font, int size, int space = 0, int tightness = 0, double angle = 0.0) {
-  FUNCTION_INJECTION(imagepsbbox);
+  FUNCTION_INJECTION_BUILTIN(imagepsbbox);
   return f_imagepsbbox(text, font, size, space, tightness, angle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagepsencodefont f_imagepsencodefont
-#else
 inline bool x_imagepsencodefont(CObjRef font_index, CStrRef encodingfile) {
-  FUNCTION_INJECTION(imagepsencodefont);
+  FUNCTION_INJECTION_BUILTIN(imagepsencodefont);
   return f_imagepsencodefont(font_index, encodingfile);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagepsextendfont f_imagepsextendfont
-#else
 inline bool x_imagepsextendfont(int font_index, double extend) {
-  FUNCTION_INJECTION(imagepsextendfont);
+  FUNCTION_INJECTION_BUILTIN(imagepsextendfont);
   return f_imagepsextendfont(font_index, extend);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagepsfreefont f_imagepsfreefont
-#else
 inline bool x_imagepsfreefont(CObjRef fontindex) {
-  FUNCTION_INJECTION(imagepsfreefont);
+  FUNCTION_INJECTION_BUILTIN(imagepsfreefont);
   return f_imagepsfreefont(fontindex);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagepsloadfont f_imagepsloadfont
-#else
 inline Object x_imagepsloadfont(CStrRef filename) {
-  FUNCTION_INJECTION(imagepsloadfont);
+  FUNCTION_INJECTION_BUILTIN(imagepsloadfont);
   return f_imagepsloadfont(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagepsslantfont f_imagepsslantfont
-#else
 inline bool x_imagepsslantfont(CObjRef font_index, double slant) {
-  FUNCTION_INJECTION(imagepsslantfont);
+  FUNCTION_INJECTION_BUILTIN(imagepsslantfont);
   return f_imagepsslantfont(font_index, slant);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagepstext f_imagepstext
-#else
 inline Array x_imagepstext(CObjRef image, CStrRef text, CObjRef font, int size, int foreground, int background, int x, int y, int space = 0, int tightness = 0, double angle = 0.0, int antialias_steps = 0) {
-  FUNCTION_INJECTION(imagepstext);
+  FUNCTION_INJECTION_BUILTIN(imagepstext);
   return f_imagepstext(image, text, font, size, foreground, background, x, y, space, tightness, angle, antialias_steps);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagerectangle f_imagerectangle
-#else
 inline bool x_imagerectangle(CObjRef image, int x1, int y1, int x2, int y2, int color) {
-  FUNCTION_INJECTION(imagerectangle);
+  FUNCTION_INJECTION_BUILTIN(imagerectangle);
   return f_imagerectangle(image, x1, y1, x2, y2, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagerotate f_imagerotate
-#else
 inline Variant x_imagerotate(CObjRef source_image, double angle, int bgd_color, int ignore_transparent = 0) {
-  FUNCTION_INJECTION(imagerotate);
+  FUNCTION_INJECTION_BUILTIN(imagerotate);
   return f_imagerotate(source_image, angle, bgd_color, ignore_transparent);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagesavealpha f_imagesavealpha
-#else
 inline bool x_imagesavealpha(CObjRef image, bool saveflag) {
-  FUNCTION_INJECTION(imagesavealpha);
+  FUNCTION_INJECTION_BUILTIN(imagesavealpha);
   return f_imagesavealpha(image, saveflag);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagesetbrush f_imagesetbrush
-#else
 inline bool x_imagesetbrush(CObjRef image, CObjRef brush) {
-  FUNCTION_INJECTION(imagesetbrush);
+  FUNCTION_INJECTION_BUILTIN(imagesetbrush);
   return f_imagesetbrush(image, brush);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagesetpixel f_imagesetpixel
-#else
 inline bool x_imagesetpixel(CObjRef image, int x, int y, int color) {
-  FUNCTION_INJECTION(imagesetpixel);
+  FUNCTION_INJECTION_BUILTIN(imagesetpixel);
   return f_imagesetpixel(image, x, y, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagesetstyle f_imagesetstyle
-#else
 inline bool x_imagesetstyle(CObjRef image, CArrRef style) {
-  FUNCTION_INJECTION(imagesetstyle);
+  FUNCTION_INJECTION_BUILTIN(imagesetstyle);
   return f_imagesetstyle(image, style);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagesetthickness f_imagesetthickness
-#else
 inline bool x_imagesetthickness(CObjRef image, int thickness) {
-  FUNCTION_INJECTION(imagesetthickness);
+  FUNCTION_INJECTION_BUILTIN(imagesetthickness);
   return f_imagesetthickness(image, thickness);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagesettile f_imagesettile
-#else
 inline bool x_imagesettile(CObjRef image, CObjRef tile) {
-  FUNCTION_INJECTION(imagesettile);
+  FUNCTION_INJECTION_BUILTIN(imagesettile);
   return f_imagesettile(image, tile);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagestring f_imagestring
-#else
 inline bool x_imagestring(CObjRef image, int font, int x, int y, CStrRef str, int color) {
-  FUNCTION_INJECTION(imagestring);
+  FUNCTION_INJECTION_BUILTIN(imagestring);
   return f_imagestring(image, font, x, y, str, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagestringup f_imagestringup
-#else
 inline bool x_imagestringup(CObjRef image, int font, int x, int y, CStrRef str, int color) {
-  FUNCTION_INJECTION(imagestringup);
+  FUNCTION_INJECTION_BUILTIN(imagestringup);
   return f_imagestringup(image, font, x, y, str, color);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagesx f_imagesx
-#else
 inline Variant x_imagesx(CObjRef image) {
-  FUNCTION_INJECTION(imagesx);
+  FUNCTION_INJECTION_BUILTIN(imagesx);
   return f_imagesx(image);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagesy f_imagesy
-#else
 inline Variant x_imagesy(CObjRef image) {
-  FUNCTION_INJECTION(imagesy);
+  FUNCTION_INJECTION_BUILTIN(imagesy);
   return f_imagesy(image);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagetruecolortopalette f_imagetruecolortopalette
-#else
 inline Variant x_imagetruecolortopalette(CObjRef image, bool dither, int ncolors) {
-  FUNCTION_INJECTION(imagetruecolortopalette);
+  FUNCTION_INJECTION_BUILTIN(imagetruecolortopalette);
   return f_imagetruecolortopalette(image, dither, ncolors);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagettfbbox f_imagettfbbox
-#else
 inline Variant x_imagettfbbox(double size, double angle, CStrRef fontfile, CStrRef text) {
-  FUNCTION_INJECTION(imagettfbbox);
+  FUNCTION_INJECTION_BUILTIN(imagettfbbox);
   return f_imagettfbbox(size, angle, fontfile, text);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagettftext f_imagettftext
-#else
 inline Variant x_imagettftext(CObjRef image, double size, double angle, int x, int y, int color, CStrRef fontfile, CStrRef text) {
-  FUNCTION_INJECTION(imagettftext);
+  FUNCTION_INJECTION_BUILTIN(imagettftext);
   return f_imagettftext(image, size, angle, x, y, color, fontfile, text);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagetypes f_imagetypes
-#else
 inline int x_imagetypes() {
-  FUNCTION_INJECTION(imagetypes);
+  FUNCTION_INJECTION_BUILTIN(imagetypes);
   return f_imagetypes();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagewbmp f_imagewbmp
-#else
 inline bool x_imagewbmp(CObjRef image, CStrRef filename = null_string, int foreground = -1) {
-  FUNCTION_INJECTION(imagewbmp);
+  FUNCTION_INJECTION_BUILTIN(imagewbmp);
   return f_imagewbmp(image, filename, foreground);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_imagexbm f_imagexbm
-#else
 inline bool x_imagexbm(CObjRef image, CStrRef filename = null_string, int foreground = -1) {
-  FUNCTION_INJECTION(imagexbm);
+  FUNCTION_INJECTION_BUILTIN(imagexbm);
   return f_imagexbm(image, filename, foreground);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_iptcembed f_iptcembed
-#else
 inline Variant x_iptcembed(CStrRef iptcdata, CStrRef jpeg_file_name, int spool = 0) {
-  FUNCTION_INJECTION(iptcembed);
+  FUNCTION_INJECTION_BUILTIN(iptcembed);
   return f_iptcembed(iptcdata, jpeg_file_name, spool);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_iptcparse f_iptcparse
-#else
 inline Variant x_iptcparse(CStrRef iptcblock) {
-  FUNCTION_INJECTION(iptcparse);
+  FUNCTION_INJECTION_BUILTIN(iptcparse);
   return f_iptcparse(iptcblock);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_jpeg2wbmp f_jpeg2wbmp
-#else
 inline bool x_jpeg2wbmp(CStrRef jpegname, CStrRef wbmpname, int dest_height, int dest_width, int threshold) {
-  FUNCTION_INJECTION(jpeg2wbmp);
+  FUNCTION_INJECTION_BUILTIN(jpeg2wbmp);
   return f_jpeg2wbmp(jpegname, wbmpname, dest_height, dest_width, threshold);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_png2wbmp f_png2wbmp
-#else
 inline bool x_png2wbmp(CStrRef pngname, CStrRef wbmpname, int dest_height, int dest_width, int threshold) {
-  FUNCTION_INJECTION(png2wbmp);
+  FUNCTION_INJECTION_BUILTIN(png2wbmp);
   return f_png2wbmp(pngname, wbmpname, dest_height, dest_width, threshold);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_exif_imagetype f_exif_imagetype
-#else
 inline Variant x_exif_imagetype(CStrRef filename) {
-  FUNCTION_INJECTION(exif_imagetype);
+  FUNCTION_INJECTION_BUILTIN(exif_imagetype);
   return f_exif_imagetype(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_exif_read_data f_exif_read_data
-#else
 inline Variant x_exif_read_data(CStrRef filename, CStrRef sections = null_string, bool arrays = false, bool thumbnail = false) {
-  FUNCTION_INJECTION(exif_read_data);
+  FUNCTION_INJECTION_BUILTIN(exif_read_data);
   return f_exif_read_data(filename, sections, arrays, thumbnail);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_read_exif_data f_read_exif_data
-#else
 inline Variant x_read_exif_data(CStrRef filename, CStrRef sections = null_string, bool arrays = false, bool thumbnail = false) {
-  FUNCTION_INJECTION(read_exif_data);
+  FUNCTION_INJECTION_BUILTIN(read_exif_data);
   return f_read_exif_data(filename, sections, arrays, thumbnail);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_exif_tagname f_exif_tagname
-#else
 inline Variant x_exif_tagname(int index) {
-  FUNCTION_INJECTION(exif_tagname);
+  FUNCTION_INJECTION_BUILTIN(exif_tagname);
   return f_exif_tagname(index);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_exif_thumbnail f_exif_thumbnail
-#else
 inline Variant x_exif_thumbnail(CStrRef filename, Variant width = null, Variant height = null, Variant imagetype = null) {
-  FUNCTION_INJECTION(exif_thumbnail);
+  FUNCTION_INJECTION_BUILTIN(exif_thumbnail);
   return f_exif_thumbnail(filename, ref(width), ref(height), ref(imagetype));
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -25,95 +25,55 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_hash f_hash
-#else
 inline Variant x_hash(CStrRef algo, CStrRef data, bool raw_output = false) {
-  FUNCTION_INJECTION(hash);
+  FUNCTION_INJECTION_BUILTIN(hash);
   return f_hash(algo, data, raw_output);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hash_algos f_hash_algos
-#else
 inline Array x_hash_algos() {
-  FUNCTION_INJECTION(hash_algos);
+  FUNCTION_INJECTION_BUILTIN(hash_algos);
   return f_hash_algos();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hash_init f_hash_init
-#else
 inline Variant x_hash_init(CStrRef algo, int options = 0, CStrRef key = null_string) {
-  FUNCTION_INJECTION(hash_init);
+  FUNCTION_INJECTION_BUILTIN(hash_init);
   return f_hash_init(algo, options, key);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hash_file f_hash_file
-#else
 inline Variant x_hash_file(CStrRef algo, CStrRef filename, bool raw_output = false) {
-  FUNCTION_INJECTION(hash_file);
+  FUNCTION_INJECTION_BUILTIN(hash_file);
   return f_hash_file(algo, filename, raw_output);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hash_final f_hash_final
-#else
 inline String x_hash_final(CObjRef context, bool raw_output = false) {
-  FUNCTION_INJECTION(hash_final);
+  FUNCTION_INJECTION_BUILTIN(hash_final);
   return f_hash_final(context, raw_output);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hash_hmac_file f_hash_hmac_file
-#else
 inline Variant x_hash_hmac_file(CStrRef algo, CStrRef filename, CStrRef key, bool raw_output = false) {
-  FUNCTION_INJECTION(hash_hmac_file);
+  FUNCTION_INJECTION_BUILTIN(hash_hmac_file);
   return f_hash_hmac_file(algo, filename, key, raw_output);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hash_hmac f_hash_hmac
-#else
 inline Variant x_hash_hmac(CStrRef algo, CStrRef data, CStrRef key, bool raw_output = false) {
-  FUNCTION_INJECTION(hash_hmac);
+  FUNCTION_INJECTION_BUILTIN(hash_hmac);
   return f_hash_hmac(algo, data, key, raw_output);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hash_update_file f_hash_update_file
-#else
 inline bool x_hash_update_file(CObjRef init_context, CStrRef filename, CObjRef stream_context = null) {
-  FUNCTION_INJECTION(hash_update_file);
+  FUNCTION_INJECTION_BUILTIN(hash_update_file);
   return f_hash_update_file(init_context, filename, stream_context);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hash_update_stream f_hash_update_stream
-#else
 inline int x_hash_update_stream(CObjRef context, CObjRef handle, int length = -1) {
-  FUNCTION_INJECTION(hash_update_stream);
+  FUNCTION_INJECTION_BUILTIN(hash_update_stream);
   return f_hash_update_stream(context, handle, length);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hash_update f_hash_update
-#else
 inline bool x_hash_update(CObjRef context, CStrRef data) {
-  FUNCTION_INJECTION(hash_update);
+  FUNCTION_INJECTION_BUILTIN(hash_update);
   return f_hash_update(context, data);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

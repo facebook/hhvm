@@ -39,7 +39,7 @@ public:
 
   static String getClassName(bool skip = false);
   static String getParentClassName(bool skip = false);
-  static ObjectData *getThis() { return *s_top ? (*s_top)->m_object : NULL; }
+  static ObjectData *getThis(bool skip = false);
   static Array getBacktrace(bool skip = false, bool withSelf = false);
 
   virtual String getFileName();

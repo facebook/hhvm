@@ -25,347 +25,195 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_connect f_oci_connect
-#else
 inline Object x_oci_connect(CStrRef username, CStrRef password, CStrRef db = null_string, CStrRef charset = null_string, int session_mode = 0) {
-  FUNCTION_INJECTION(oci_connect);
+  FUNCTION_INJECTION_BUILTIN(oci_connect);
   return f_oci_connect(username, password, db, charset, session_mode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_new_connect f_oci_new_connect
-#else
 inline Object x_oci_new_connect(CStrRef username, CStrRef password, CStrRef db = null_string, CStrRef charset = null_string, int session_mode = 0) {
-  FUNCTION_INJECTION(oci_new_connect);
+  FUNCTION_INJECTION_BUILTIN(oci_new_connect);
   return f_oci_new_connect(username, password, db, charset, session_mode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_pconnect f_oci_pconnect
-#else
 inline Object x_oci_pconnect(CStrRef username, CStrRef password, CStrRef db = null_string, CStrRef charset = null_string, int session_mode = 0) {
-  FUNCTION_INJECTION(oci_pconnect);
+  FUNCTION_INJECTION_BUILTIN(oci_pconnect);
   return f_oci_pconnect(username, password, db, charset, session_mode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_server_version f_oci_server_version
-#else
 inline String x_oci_server_version(CObjRef connection) {
-  FUNCTION_INJECTION(oci_server_version);
+  FUNCTION_INJECTION_BUILTIN(oci_server_version);
   return f_oci_server_version(connection);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_password_change f_oci_password_change
-#else
 inline Variant x_oci_password_change(CVarRef connection, CStrRef username, CStrRef old_password, CStrRef new_password) {
-  FUNCTION_INJECTION(oci_password_change);
+  FUNCTION_INJECTION_BUILTIN(oci_password_change);
   return f_oci_password_change(connection, username, old_password, new_password);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_new_cursor f_oci_new_cursor
-#else
 inline Object x_oci_new_cursor(CObjRef connection) {
-  FUNCTION_INJECTION(oci_new_cursor);
+  FUNCTION_INJECTION_BUILTIN(oci_new_cursor);
   return f_oci_new_cursor(connection);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_new_descriptor f_oci_new_descriptor
-#else
 inline Object x_oci_new_descriptor(CObjRef connection, int type = 0) {
-  FUNCTION_INJECTION(oci_new_descriptor);
+  FUNCTION_INJECTION_BUILTIN(oci_new_descriptor);
   return f_oci_new_descriptor(connection, type);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_close f_oci_close
-#else
 inline bool x_oci_close(CObjRef connection) {
-  FUNCTION_INJECTION(oci_close);
+  FUNCTION_INJECTION_BUILTIN(oci_close);
   return f_oci_close(connection);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_commit f_oci_commit
-#else
 inline bool x_oci_commit(CObjRef connection) {
-  FUNCTION_INJECTION(oci_commit);
+  FUNCTION_INJECTION_BUILTIN(oci_commit);
   return f_oci_commit(connection);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_rollback f_oci_rollback
-#else
 inline bool x_oci_rollback(CObjRef connection) {
-  FUNCTION_INJECTION(oci_rollback);
+  FUNCTION_INJECTION_BUILTIN(oci_rollback);
   return f_oci_rollback(connection);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_error f_oci_error
-#else
 inline Array x_oci_error(CObjRef source = null) {
-  FUNCTION_INJECTION(oci_error);
+  FUNCTION_INJECTION_BUILTIN(oci_error);
   return f_oci_error(source);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_internal_debug f_oci_internal_debug
-#else
 inline void x_oci_internal_debug(bool onoff) {
-  FUNCTION_INJECTION(oci_internal_debug);
+  FUNCTION_INJECTION_BUILTIN(oci_internal_debug);
   f_oci_internal_debug(onoff);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_parse f_oci_parse
-#else
 inline Object x_oci_parse(CObjRef connection, CStrRef query) {
-  FUNCTION_INJECTION(oci_parse);
+  FUNCTION_INJECTION_BUILTIN(oci_parse);
   return f_oci_parse(connection, query);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_statement_type f_oci_statement_type
-#else
 inline String x_oci_statement_type(CObjRef statement) {
-  FUNCTION_INJECTION(oci_statement_type);
+  FUNCTION_INJECTION_BUILTIN(oci_statement_type);
   return f_oci_statement_type(statement);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_free_statement f_oci_free_statement
-#else
 inline bool x_oci_free_statement(CObjRef statement) {
-  FUNCTION_INJECTION(oci_free_statement);
+  FUNCTION_INJECTION_BUILTIN(oci_free_statement);
   return f_oci_free_statement(statement);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_free_descriptor f_oci_free_descriptor
-#else
 inline bool x_oci_free_descriptor(CObjRef lob) {
-  FUNCTION_INJECTION(oci_free_descriptor);
+  FUNCTION_INJECTION_BUILTIN(oci_free_descriptor);
   return f_oci_free_descriptor(lob);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_bind_array_by_name f_oci_bind_array_by_name
-#else
 inline bool x_oci_bind_array_by_name(CObjRef statement, CStrRef name, Variant var_array, int max_table_length, int max_item_length = 0, int type = 0) {
-  FUNCTION_INJECTION(oci_bind_array_by_name);
+  FUNCTION_INJECTION_BUILTIN(oci_bind_array_by_name);
   return f_oci_bind_array_by_name(statement, name, ref(var_array), max_table_length, max_item_length, type);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_bind_by_name f_oci_bind_by_name
-#else
 inline bool x_oci_bind_by_name(CObjRef statement, CStrRef ph_name, Variant variable, int max_length = 0, int type = 0) {
-  FUNCTION_INJECTION(oci_bind_by_name);
+  FUNCTION_INJECTION_BUILTIN(oci_bind_by_name);
   return f_oci_bind_by_name(statement, ph_name, ref(variable), max_length, type);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_cancel f_oci_cancel
-#else
 inline bool x_oci_cancel(CObjRef statement) {
-  FUNCTION_INJECTION(oci_cancel);
+  FUNCTION_INJECTION_BUILTIN(oci_cancel);
   return f_oci_cancel(statement);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_define_by_name f_oci_define_by_name
-#else
 inline bool x_oci_define_by_name(CObjRef statement, CStrRef column_name, Variant variable, int type = 0) {
-  FUNCTION_INJECTION(oci_define_by_name);
+  FUNCTION_INJECTION_BUILTIN(oci_define_by_name);
   return f_oci_define_by_name(statement, column_name, ref(variable), type);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_execute f_oci_execute
-#else
 inline bool x_oci_execute(CObjRef statement, int mode = 0) {
-  FUNCTION_INJECTION(oci_execute);
+  FUNCTION_INJECTION_BUILTIN(oci_execute);
   return f_oci_execute(statement, mode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_num_fields f_oci_num_fields
-#else
 inline int x_oci_num_fields(CObjRef statement) {
-  FUNCTION_INJECTION(oci_num_fields);
+  FUNCTION_INJECTION_BUILTIN(oci_num_fields);
   return f_oci_num_fields(statement);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_num_rows f_oci_num_rows
-#else
 inline int x_oci_num_rows(CObjRef statement) {
-  FUNCTION_INJECTION(oci_num_rows);
+  FUNCTION_INJECTION_BUILTIN(oci_num_rows);
   return f_oci_num_rows(statement);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_result f_oci_result
-#else
 inline Variant x_oci_result(CObjRef statement, CVarRef field) {
-  FUNCTION_INJECTION(oci_result);
+  FUNCTION_INJECTION_BUILTIN(oci_result);
   return f_oci_result(statement, field);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_set_prefetch f_oci_set_prefetch
-#else
 inline bool x_oci_set_prefetch(CObjRef statement, int rows) {
-  FUNCTION_INJECTION(oci_set_prefetch);
+  FUNCTION_INJECTION_BUILTIN(oci_set_prefetch);
   return f_oci_set_prefetch(statement, rows);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_fetch_all f_oci_fetch_all
-#else
 inline int x_oci_fetch_all(CObjRef statement, Variant output, int skip = 0, int maxrows = 0, int flags = 0) {
-  FUNCTION_INJECTION(oci_fetch_all);
+  FUNCTION_INJECTION_BUILTIN(oci_fetch_all);
   return f_oci_fetch_all(statement, ref(output), skip, maxrows, flags);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_fetch_array f_oci_fetch_array
-#else
 inline Variant x_oci_fetch_array(CObjRef statement, int mode = 0) {
-  FUNCTION_INJECTION(oci_fetch_array);
+  FUNCTION_INJECTION_BUILTIN(oci_fetch_array);
   return f_oci_fetch_array(statement, mode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_fetch_assoc f_oci_fetch_assoc
-#else
 inline Variant x_oci_fetch_assoc(CObjRef statement) {
-  FUNCTION_INJECTION(oci_fetch_assoc);
+  FUNCTION_INJECTION_BUILTIN(oci_fetch_assoc);
   return f_oci_fetch_assoc(statement);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_fetch_object f_oci_fetch_object
-#else
 inline Variant x_oci_fetch_object(CObjRef statement) {
-  FUNCTION_INJECTION(oci_fetch_object);
+  FUNCTION_INJECTION_BUILTIN(oci_fetch_object);
   return f_oci_fetch_object(statement);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_fetch_row f_oci_fetch_row
-#else
 inline Variant x_oci_fetch_row(CObjRef statement) {
-  FUNCTION_INJECTION(oci_fetch_row);
+  FUNCTION_INJECTION_BUILTIN(oci_fetch_row);
   return f_oci_fetch_row(statement);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_fetch f_oci_fetch
-#else
 inline bool x_oci_fetch(CObjRef statement) {
-  FUNCTION_INJECTION(oci_fetch);
+  FUNCTION_INJECTION_BUILTIN(oci_fetch);
   return f_oci_fetch(statement);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_field_is_null f_oci_field_is_null
-#else
 inline bool x_oci_field_is_null(CObjRef statement, CVarRef field) {
-  FUNCTION_INJECTION(oci_field_is_null);
+  FUNCTION_INJECTION_BUILTIN(oci_field_is_null);
   return f_oci_field_is_null(statement, field);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_field_name f_oci_field_name
-#else
 inline String x_oci_field_name(CObjRef statement, int field) {
-  FUNCTION_INJECTION(oci_field_name);
+  FUNCTION_INJECTION_BUILTIN(oci_field_name);
   return f_oci_field_name(statement, field);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_field_precision f_oci_field_precision
-#else
 inline int x_oci_field_precision(CObjRef statement, int field) {
-  FUNCTION_INJECTION(oci_field_precision);
+  FUNCTION_INJECTION_BUILTIN(oci_field_precision);
   return f_oci_field_precision(statement, field);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_field_scale f_oci_field_scale
-#else
 inline int x_oci_field_scale(CObjRef statement, int field) {
-  FUNCTION_INJECTION(oci_field_scale);
+  FUNCTION_INJECTION_BUILTIN(oci_field_scale);
   return f_oci_field_scale(statement, field);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_field_size f_oci_field_size
-#else
 inline int x_oci_field_size(CObjRef statement, CVarRef field) {
-  FUNCTION_INJECTION(oci_field_size);
+  FUNCTION_INJECTION_BUILTIN(oci_field_size);
   return f_oci_field_size(statement, field);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_field_type_raw f_oci_field_type_raw
-#else
 inline int x_oci_field_type_raw(CObjRef statement, int field) {
-  FUNCTION_INJECTION(oci_field_type_raw);
+  FUNCTION_INJECTION_BUILTIN(oci_field_type_raw);
   return f_oci_field_type_raw(statement, field);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_oci_field_type f_oci_field_type
-#else
 inline Variant x_oci_field_type(CObjRef statement, int field) {
-  FUNCTION_INJECTION(oci_field_type);
+  FUNCTION_INJECTION_BUILTIN(oci_field_type);
   return f_oci_field_type(statement, field);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

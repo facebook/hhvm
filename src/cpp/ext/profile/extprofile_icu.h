@@ -25,14 +25,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_icu_transliterate f_icu_transliterate
-#else
 inline String x_icu_transliterate(CStrRef str, bool remove_accents) {
-  FUNCTION_INJECTION(icu_transliterate);
+  FUNCTION_INJECTION_BUILTIN(icu_transliterate);
   return f_icu_transliterate(str, remove_accents);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

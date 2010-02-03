@@ -25,23 +25,15 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_thrift_protocol_write_binary f_thrift_protocol_write_binary
-#else
 inline void x_thrift_protocol_write_binary(CObjRef transportobj, CStrRef method_name, int64 msgtype, CObjRef request_struct, int seqid, bool strict_write) {
-  FUNCTION_INJECTION(thrift_protocol_write_binary);
+  FUNCTION_INJECTION_BUILTIN(thrift_protocol_write_binary);
   f_thrift_protocol_write_binary(transportobj, method_name, msgtype, request_struct, seqid, strict_write);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_thrift_protocol_read_binary f_thrift_protocol_read_binary
-#else
 inline Variant x_thrift_protocol_read_binary(CObjRef transportobj, CStrRef obj_typename, bool strict_read) {
-  FUNCTION_INJECTION(thrift_protocol_read_binary);
+  FUNCTION_INJECTION_BUILTIN(thrift_protocol_read_binary);
   return f_thrift_protocol_read_binary(transportobj, obj_typename, strict_read);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -25,95 +25,55 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_bcscale f_bcscale
-#else
 inline bool x_bcscale(int64 scale) {
-  FUNCTION_INJECTION(bcscale);
+  FUNCTION_INJECTION_BUILTIN(bcscale);
   return f_bcscale(scale);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_bcadd f_bcadd
-#else
 inline String x_bcadd(CStrRef left, CStrRef right, int64 scale = -1) {
-  FUNCTION_INJECTION(bcadd);
+  FUNCTION_INJECTION_BUILTIN(bcadd);
   return f_bcadd(left, right, scale);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_bcsub f_bcsub
-#else
 inline String x_bcsub(CStrRef left, CStrRef right, int64 scale = -1) {
-  FUNCTION_INJECTION(bcsub);
+  FUNCTION_INJECTION_BUILTIN(bcsub);
   return f_bcsub(left, right, scale);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_bccomp f_bccomp
-#else
 inline int64 x_bccomp(CStrRef left, CStrRef right, int64 scale = -1) {
-  FUNCTION_INJECTION(bccomp);
+  FUNCTION_INJECTION_BUILTIN(bccomp);
   return f_bccomp(left, right, scale);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_bcmul f_bcmul
-#else
 inline String x_bcmul(CStrRef left, CStrRef right, int64 scale = -1) {
-  FUNCTION_INJECTION(bcmul);
+  FUNCTION_INJECTION_BUILTIN(bcmul);
   return f_bcmul(left, right, scale);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_bcdiv f_bcdiv
-#else
 inline String x_bcdiv(CStrRef left, CStrRef right, int64 scale = -1) {
-  FUNCTION_INJECTION(bcdiv);
+  FUNCTION_INJECTION_BUILTIN(bcdiv);
   return f_bcdiv(left, right, scale);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_bcmod f_bcmod
-#else
 inline String x_bcmod(CStrRef left, CStrRef right) {
-  FUNCTION_INJECTION(bcmod);
+  FUNCTION_INJECTION_BUILTIN(bcmod);
   return f_bcmod(left, right);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_bcpow f_bcpow
-#else
 inline String x_bcpow(CStrRef left, CStrRef right, int64 scale = -1) {
-  FUNCTION_INJECTION(bcpow);
+  FUNCTION_INJECTION_BUILTIN(bcpow);
   return f_bcpow(left, right, scale);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_bcpowmod f_bcpowmod
-#else
 inline Variant x_bcpowmod(CStrRef left, CStrRef right, CStrRef modulus, int64 scale = -1) {
-  FUNCTION_INJECTION(bcpowmod);
+  FUNCTION_INJECTION_BUILTIN(bcpowmod);
   return f_bcpowmod(left, right, modulus, scale);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_bcsqrt f_bcsqrt
-#else
 inline Variant x_bcsqrt(CStrRef operand, int64 scale = -1) {
-  FUNCTION_INJECTION(bcsqrt);
+  FUNCTION_INJECTION_BUILTIN(bcsqrt);
   return f_bcsqrt(operand, scale);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

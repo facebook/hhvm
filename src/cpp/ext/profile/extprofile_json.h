@@ -25,23 +25,15 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_json_encode f_json_encode
-#else
 inline String x_json_encode(CVarRef value, bool loose = false) {
-  FUNCTION_INJECTION(json_encode);
+  FUNCTION_INJECTION_BUILTIN(json_encode);
   return f_json_encode(value, loose);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_json_decode f_json_decode
-#else
 inline Variant x_json_decode(CStrRef json, bool assoc = false, bool loose = false) {
-  FUNCTION_INJECTION(json_decode);
+  FUNCTION_INJECTION_BUILTIN(json_decode);
   return f_json_decode(json, assoc, loose);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

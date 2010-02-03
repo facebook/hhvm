@@ -25,32 +25,20 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_idn_to_ascii f_idn_to_ascii
-#else
 inline Variant x_idn_to_ascii(CStrRef domain, Variant errorcode = null) {
-  FUNCTION_INJECTION(idn_to_ascii);
+  FUNCTION_INJECTION_BUILTIN(idn_to_ascii);
   return f_idn_to_ascii(domain, ref(errorcode));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_idn_to_unicode f_idn_to_unicode
-#else
 inline Variant x_idn_to_unicode(CStrRef domain, Variant errorcode = null) {
-  FUNCTION_INJECTION(idn_to_unicode);
+  FUNCTION_INJECTION_BUILTIN(idn_to_unicode);
   return f_idn_to_unicode(domain, ref(errorcode));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_idn_to_utf8 f_idn_to_utf8
-#else
 inline Variant x_idn_to_utf8(CStrRef domain, Variant errorcode = null) {
-  FUNCTION_INJECTION(idn_to_utf8);
+  FUNCTION_INJECTION_BUILTIN(idn_to_utf8);
   return f_idn_to_utf8(domain, ref(errorcode));
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -25,185 +25,105 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_tag_list_expanded_11 f_fbml_tag_list_expanded_11
-#else
 inline bool x_fbml_tag_list_expanded_11() {
-  FUNCTION_INJECTION(fbml_tag_list_expanded_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_tag_list_expanded_11);
   return f_fbml_tag_list_expanded_11();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_complex_expand_tag_list_11 f_fbml_complex_expand_tag_list_11
-#else
 inline void x_fbml_complex_expand_tag_list_11(CArrRef new_tags, CArrRef new_attrs, CArrRef special_html, CArrRef precache, CArrRef style, CArrRef style_attrs, CArrRef script_attrs, CArrRef rewrite_attrs, CArrRef special_attrs, CArrRef schema) {
-  FUNCTION_INJECTION(fbml_complex_expand_tag_list_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_complex_expand_tag_list_11);
   f_fbml_complex_expand_tag_list_11(new_tags, new_attrs, special_html, precache, style, style_attrs, script_attrs, rewrite_attrs, special_attrs, schema);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_parse_opaque_11 f_fbml_parse_opaque_11
-#else
 inline Array x_fbml_parse_opaque_11(CStrRef unsanitized_fbml, bool body_only, bool preserve_comment, bool internal_mode = false, CVarRef css_sanitizer = null_variant, CVarRef js_sanitizer = null_variant, CVarRef attr_rewriter = null_variant) {
-  FUNCTION_INJECTION(fbml_parse_opaque_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_parse_opaque_11);
   return f_fbml_parse_opaque_11(unsanitized_fbml, body_only, preserve_comment, internal_mode, css_sanitizer, js_sanitizer, attr_rewriter);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_sanitize_css_11 f_fbml_sanitize_css_11
-#else
 inline Array x_fbml_sanitize_css_11(CStrRef unsanitized_css, bool decl_only, int line_number, CArrRef css_sanitizer) {
-  FUNCTION_INJECTION(fbml_sanitize_css_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_sanitize_css_11);
   return f_fbml_sanitize_css_11(unsanitized_css, decl_only, line_number, css_sanitizer);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_sanitize_js_11 f_fbml_sanitize_js_11
-#else
 inline Array x_fbml_sanitize_js_11(CStrRef unsanitized_js, int line_number, CArrRef js_sanitizer) {
-  FUNCTION_INJECTION(fbml_sanitize_js_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_sanitize_js_11);
   return f_fbml_sanitize_js_11(unsanitized_js, line_number, js_sanitizer);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_get_tag_name_11 f_fbml_get_tag_name_11
-#else
 inline String x_fbml_get_tag_name_11(CObjRef node) {
-  FUNCTION_INJECTION(fbml_get_tag_name_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_get_tag_name_11);
   return f_fbml_get_tag_name_11(node);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_get_children_11 f_fbml_get_children_11
-#else
 inline Array x_fbml_get_children_11(CObjRef node) {
-  FUNCTION_INJECTION(fbml_get_children_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_get_children_11);
   return f_fbml_get_children_11(node);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_get_children_count_11 f_fbml_get_children_count_11
-#else
 inline int x_fbml_get_children_count_11(CObjRef node) {
-  FUNCTION_INJECTION(fbml_get_children_count_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_get_children_count_11);
   return f_fbml_get_children_count_11(node);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_get_children_by_name_11 f_fbml_get_children_by_name_11
-#else
 inline Array x_fbml_get_children_by_name_11(CObjRef node, CStrRef tag) {
-  FUNCTION_INJECTION(fbml_get_children_by_name_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_get_children_by_name_11);
   return f_fbml_get_children_by_name_11(node, tag);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_get_attributes_11 f_fbml_get_attributes_11
-#else
 inline Array x_fbml_get_attributes_11(CObjRef node) {
-  FUNCTION_INJECTION(fbml_get_attributes_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_get_attributes_11);
   return f_fbml_get_attributes_11(node);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_get_attribute_11 f_fbml_get_attribute_11
-#else
 inline String x_fbml_get_attribute_11(CObjRef node, CStrRef name) {
-  FUNCTION_INJECTION(fbml_get_attribute_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_get_attribute_11);
   return f_fbml_get_attribute_11(node, name);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_attr_to_bool_11 f_fbml_attr_to_bool_11
-#else
 inline Variant x_fbml_attr_to_bool_11(CStrRef name) {
-  FUNCTION_INJECTION(fbml_attr_to_bool_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_attr_to_bool_11);
   return f_fbml_attr_to_bool_11(name);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_attr_to_color_11 f_fbml_attr_to_color_11
-#else
 inline String x_fbml_attr_to_color_11(CStrRef name) {
-  FUNCTION_INJECTION(fbml_attr_to_color_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_attr_to_color_11);
   return f_fbml_attr_to_color_11(name);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_get_text_11 f_fbml_get_text_11
-#else
 inline String x_fbml_get_text_11(CObjRef node) {
-  FUNCTION_INJECTION(fbml_get_text_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_get_text_11);
   return f_fbml_get_text_11(node);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_precache_11 f_fbml_precache_11
-#else
 inline void x_fbml_precache_11(CObjRef node, CVarRef data, CStrRef callback) {
-  FUNCTION_INJECTION(fbml_precache_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_precache_11);
   f_fbml_precache_11(node, data, callback);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_batch_precache_11 f_fbml_batch_precache_11
-#else
 inline Array x_fbml_batch_precache_11(CObjRef node) {
-  FUNCTION_INJECTION(fbml_batch_precache_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_batch_precache_11);
   return f_fbml_batch_precache_11(node);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_render_children_11 f_fbml_render_children_11
-#else
 inline String x_fbml_render_children_11(CObjRef node, CVarRef data, CStrRef html_callback, CStrRef fb_callback, int internal_mode = 0) {
-  FUNCTION_INJECTION(fbml_render_children_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_render_children_11);
   return f_fbml_render_children_11(node, data, html_callback, fb_callback, internal_mode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbml_flatten_11 f_fbml_flatten_11
-#else
 inline String x_fbml_flatten_11(CObjRef node) {
-  FUNCTION_INJECTION(fbml_flatten_11);
+  FUNCTION_INJECTION_BUILTIN(fbml_flatten_11);
   return f_fbml_flatten_11(node);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_html_profile f_html_profile
-#else
 inline String x_html_profile(CStrRef html) {
-  FUNCTION_INJECTION(html_profile);
+  FUNCTION_INJECTION_BUILTIN(html_profile);
   return f_html_profile(html);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fbjsparse f_fbjsparse
-#else
 inline String x_fbjsparse(CStrRef input) {
-  FUNCTION_INJECTION(fbjsparse);
+  FUNCTION_INJECTION_BUILTIN(fbjsparse);
   return f_fbjsparse(input);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -25,158 +25,90 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_apache_child_terminate f_apache_child_terminate
-#else
 inline bool x_apache_child_terminate() {
-  FUNCTION_INJECTION(apache_child_terminate);
+  FUNCTION_INJECTION_BUILTIN(apache_child_terminate);
   return f_apache_child_terminate();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apache_get_modules f_apache_get_modules
-#else
 inline Array x_apache_get_modules() {
-  FUNCTION_INJECTION(apache_get_modules);
+  FUNCTION_INJECTION_BUILTIN(apache_get_modules);
   return f_apache_get_modules();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apache_get_version f_apache_get_version
-#else
 inline String x_apache_get_version() {
-  FUNCTION_INJECTION(apache_get_version);
+  FUNCTION_INJECTION_BUILTIN(apache_get_version);
   return f_apache_get_version();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apache_getenv f_apache_getenv
-#else
 inline String x_apache_getenv(CStrRef variable, bool walk_to_top = false) {
-  FUNCTION_INJECTION(apache_getenv);
+  FUNCTION_INJECTION_BUILTIN(apache_getenv);
   return f_apache_getenv(variable, walk_to_top);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apache_lookup_uri f_apache_lookup_uri
-#else
 inline Object x_apache_lookup_uri(CStrRef filename) {
-  FUNCTION_INJECTION(apache_lookup_uri);
+  FUNCTION_INJECTION_BUILTIN(apache_lookup_uri);
   return f_apache_lookup_uri(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apache_note f_apache_note
-#else
 inline Variant x_apache_note(CStrRef note_name, CStrRef note_value = null_string) {
-  FUNCTION_INJECTION(apache_note);
+  FUNCTION_INJECTION_BUILTIN(apache_note);
   return f_apache_note(note_name, note_value);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apache_request_headers f_apache_request_headers
-#else
 inline Array x_apache_request_headers() {
-  FUNCTION_INJECTION(apache_request_headers);
+  FUNCTION_INJECTION_BUILTIN(apache_request_headers);
   return f_apache_request_headers();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apache_reset_timeout f_apache_reset_timeout
-#else
 inline bool x_apache_reset_timeout() {
-  FUNCTION_INJECTION(apache_reset_timeout);
+  FUNCTION_INJECTION_BUILTIN(apache_reset_timeout);
   return f_apache_reset_timeout();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apache_response_headers f_apache_response_headers
-#else
 inline Array x_apache_response_headers() {
-  FUNCTION_INJECTION(apache_response_headers);
+  FUNCTION_INJECTION_BUILTIN(apache_response_headers);
   return f_apache_response_headers();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apache_setenv f_apache_setenv
-#else
 inline bool x_apache_setenv(CStrRef variable, CStrRef value, bool walk_to_top = false) {
-  FUNCTION_INJECTION(apache_setenv);
+  FUNCTION_INJECTION_BUILTIN(apache_setenv);
   return f_apache_setenv(variable, value, walk_to_top);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ascii2ebcdic f_ascii2ebcdic
-#else
 inline int x_ascii2ebcdic(CStrRef ascii_str) {
-  FUNCTION_INJECTION(ascii2ebcdic);
+  FUNCTION_INJECTION_BUILTIN(ascii2ebcdic);
   return f_ascii2ebcdic(ascii_str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ebcdic2ascii f_ebcdic2ascii
-#else
 inline int x_ebcdic2ascii(CStrRef ebcdic_str) {
-  FUNCTION_INJECTION(ebcdic2ascii);
+  FUNCTION_INJECTION_BUILTIN(ebcdic2ascii);
   return f_ebcdic2ascii(ebcdic_str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_getallheaders f_getallheaders
-#else
 inline Array x_getallheaders() {
-  FUNCTION_INJECTION(getallheaders);
+  FUNCTION_INJECTION_BUILTIN(getallheaders);
   return f_getallheaders();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_virtual f_virtual
-#else
 inline bool x_virtual(CStrRef filename) {
-  FUNCTION_INJECTION(virtual);
+  FUNCTION_INJECTION_BUILTIN(virtual);
   return f_virtual(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apache_get_config f_apache_get_config
-#else
 inline Variant x_apache_get_config() {
-  FUNCTION_INJECTION(apache_get_config);
+  FUNCTION_INJECTION_BUILTIN(apache_get_config);
   return f_apache_get_config();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apache_get_scoreboard f_apache_get_scoreboard
-#else
 inline Variant x_apache_get_scoreboard() {
-  FUNCTION_INJECTION(apache_get_scoreboard);
+  FUNCTION_INJECTION_BUILTIN(apache_get_scoreboard);
   return f_apache_get_scoreboard();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apache_get_rewrite_rules f_apache_get_rewrite_rules
-#else
 inline Variant x_apache_get_rewrite_rules() {
-  FUNCTION_INJECTION(apache_get_rewrite_rules);
+  FUNCTION_INJECTION_BUILTIN(apache_get_rewrite_rules);
   return f_apache_get_rewrite_rules();
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -25,446 +25,250 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_connect f_mysql_connect
-#else
 inline Variant x_mysql_connect(CStrRef server = null_string, CStrRef username = null_string, CStrRef password = null_string, bool new_link = false, int client_flags = 0, int connect_timeout_ms = -1, int query_timeout_ms = -1) {
-  FUNCTION_INJECTION(mysql_connect);
+  FUNCTION_INJECTION_BUILTIN(mysql_connect);
   return f_mysql_connect(server, username, password, new_link, client_flags, connect_timeout_ms, query_timeout_ms);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_pconnect f_mysql_pconnect
-#else
 inline Variant x_mysql_pconnect(CStrRef server = null_string, CStrRef username = null_string, CStrRef password = null_string, int client_flags = 0, int connect_timeout_ms = -1, int query_timeout_ms = -1) {
-  FUNCTION_INJECTION(mysql_pconnect);
+  FUNCTION_INJECTION_BUILTIN(mysql_pconnect);
   return f_mysql_pconnect(server, username, password, client_flags, connect_timeout_ms, query_timeout_ms);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_set_charset f_mysql_set_charset
-#else
 inline Variant x_mysql_set_charset(CStrRef charset, CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_set_charset);
+  FUNCTION_INJECTION_BUILTIN(mysql_set_charset);
   return f_mysql_set_charset(charset, link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_ping f_mysql_ping
-#else
 inline Variant x_mysql_ping(CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_ping);
+  FUNCTION_INJECTION_BUILTIN(mysql_ping);
   return f_mysql_ping(link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_escape_string f_mysql_escape_string
-#else
 inline String x_mysql_escape_string(CStrRef unescaped_string) {
-  FUNCTION_INJECTION(mysql_escape_string);
+  FUNCTION_INJECTION_BUILTIN(mysql_escape_string);
   return f_mysql_escape_string(unescaped_string);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_real_escape_string f_mysql_real_escape_string
-#else
 inline Variant x_mysql_real_escape_string(CStrRef unescaped_string, CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_real_escape_string);
+  FUNCTION_INJECTION_BUILTIN(mysql_real_escape_string);
   return f_mysql_real_escape_string(unescaped_string, link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_client_encoding f_mysql_client_encoding
-#else
 inline Variant x_mysql_client_encoding(CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_client_encoding);
+  FUNCTION_INJECTION_BUILTIN(mysql_client_encoding);
   return f_mysql_client_encoding(link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_close f_mysql_close
-#else
 inline Variant x_mysql_close(CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_close);
+  FUNCTION_INJECTION_BUILTIN(mysql_close);
   return f_mysql_close(link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_errno f_mysql_errno
-#else
 inline Variant x_mysql_errno(CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_errno);
+  FUNCTION_INJECTION_BUILTIN(mysql_errno);
   return f_mysql_errno(link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_error f_mysql_error
-#else
 inline Variant x_mysql_error(CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_error);
+  FUNCTION_INJECTION_BUILTIN(mysql_error);
   return f_mysql_error(link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_get_client_info f_mysql_get_client_info
-#else
 inline String x_mysql_get_client_info() {
-  FUNCTION_INJECTION(mysql_get_client_info);
+  FUNCTION_INJECTION_BUILTIN(mysql_get_client_info);
   return f_mysql_get_client_info();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_get_host_info f_mysql_get_host_info
-#else
 inline Variant x_mysql_get_host_info(CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_get_host_info);
+  FUNCTION_INJECTION_BUILTIN(mysql_get_host_info);
   return f_mysql_get_host_info(link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_get_proto_info f_mysql_get_proto_info
-#else
 inline Variant x_mysql_get_proto_info(CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_get_proto_info);
+  FUNCTION_INJECTION_BUILTIN(mysql_get_proto_info);
   return f_mysql_get_proto_info(link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_get_server_info f_mysql_get_server_info
-#else
 inline Variant x_mysql_get_server_info(CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_get_server_info);
+  FUNCTION_INJECTION_BUILTIN(mysql_get_server_info);
   return f_mysql_get_server_info(link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_info f_mysql_info
-#else
 inline Variant x_mysql_info(CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_info);
+  FUNCTION_INJECTION_BUILTIN(mysql_info);
   return f_mysql_info(link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_insert_id f_mysql_insert_id
-#else
 inline Variant x_mysql_insert_id(CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_insert_id);
+  FUNCTION_INJECTION_BUILTIN(mysql_insert_id);
   return f_mysql_insert_id(link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_stat f_mysql_stat
-#else
 inline Variant x_mysql_stat(CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_stat);
+  FUNCTION_INJECTION_BUILTIN(mysql_stat);
   return f_mysql_stat(link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_thread_id f_mysql_thread_id
-#else
 inline Variant x_mysql_thread_id(CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_thread_id);
+  FUNCTION_INJECTION_BUILTIN(mysql_thread_id);
   return f_mysql_thread_id(link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_create_db f_mysql_create_db
-#else
 inline Variant x_mysql_create_db(CStrRef db, CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_create_db);
+  FUNCTION_INJECTION_BUILTIN(mysql_create_db);
   return f_mysql_create_db(db, link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_select_db f_mysql_select_db
-#else
 inline Variant x_mysql_select_db(CStrRef db, CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_select_db);
+  FUNCTION_INJECTION_BUILTIN(mysql_select_db);
   return f_mysql_select_db(db, link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_drop_db f_mysql_drop_db
-#else
 inline Variant x_mysql_drop_db(CStrRef db, CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_drop_db);
+  FUNCTION_INJECTION_BUILTIN(mysql_drop_db);
   return f_mysql_drop_db(db, link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_affected_rows f_mysql_affected_rows
-#else
 inline Variant x_mysql_affected_rows(CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_affected_rows);
+  FUNCTION_INJECTION_BUILTIN(mysql_affected_rows);
   return f_mysql_affected_rows(link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_set_timeout f_mysql_set_timeout
-#else
 inline bool x_mysql_set_timeout(int query_timeout_ms = -1, CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_set_timeout);
+  FUNCTION_INJECTION_BUILTIN(mysql_set_timeout);
   return f_mysql_set_timeout(query_timeout_ms, link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_query f_mysql_query
-#else
 inline Variant x_mysql_query(CStrRef query, CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_query);
+  FUNCTION_INJECTION_BUILTIN(mysql_query);
   return f_mysql_query(query, link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_unbuffered_query f_mysql_unbuffered_query
-#else
 inline Variant x_mysql_unbuffered_query(CStrRef query, CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_unbuffered_query);
+  FUNCTION_INJECTION_BUILTIN(mysql_unbuffered_query);
   return f_mysql_unbuffered_query(query, link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_db_query f_mysql_db_query
-#else
 inline Variant x_mysql_db_query(CStrRef database, CStrRef query, CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_db_query);
+  FUNCTION_INJECTION_BUILTIN(mysql_db_query);
   return f_mysql_db_query(database, query, link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_list_dbs f_mysql_list_dbs
-#else
 inline Variant x_mysql_list_dbs(CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_list_dbs);
+  FUNCTION_INJECTION_BUILTIN(mysql_list_dbs);
   return f_mysql_list_dbs(link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_list_tables f_mysql_list_tables
-#else
 inline Variant x_mysql_list_tables(CStrRef database, CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_list_tables);
+  FUNCTION_INJECTION_BUILTIN(mysql_list_tables);
   return f_mysql_list_tables(database, link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_list_fields f_mysql_list_fields
-#else
 inline Variant x_mysql_list_fields(CStrRef database_name, CStrRef table_name, CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_list_fields);
+  FUNCTION_INJECTION_BUILTIN(mysql_list_fields);
   return f_mysql_list_fields(database_name, table_name, link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_list_processes f_mysql_list_processes
-#else
 inline Variant x_mysql_list_processes(CVarRef link_identifier = null) {
-  FUNCTION_INJECTION(mysql_list_processes);
+  FUNCTION_INJECTION_BUILTIN(mysql_list_processes);
   return f_mysql_list_processes(link_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_db_name f_mysql_db_name
-#else
 inline Variant x_mysql_db_name(CVarRef result, int row, CVarRef field = null_variant) {
-  FUNCTION_INJECTION(mysql_db_name);
+  FUNCTION_INJECTION_BUILTIN(mysql_db_name);
   return f_mysql_db_name(result, row, field);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_tablename f_mysql_tablename
-#else
 inline Variant x_mysql_tablename(CVarRef result, int i) {
-  FUNCTION_INJECTION(mysql_tablename);
+  FUNCTION_INJECTION_BUILTIN(mysql_tablename);
   return f_mysql_tablename(result, i);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_num_fields f_mysql_num_fields
-#else
 inline Variant x_mysql_num_fields(CVarRef result) {
-  FUNCTION_INJECTION(mysql_num_fields);
+  FUNCTION_INJECTION_BUILTIN(mysql_num_fields);
   return f_mysql_num_fields(result);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_num_rows f_mysql_num_rows
-#else
 inline Variant x_mysql_num_rows(CVarRef result) {
-  FUNCTION_INJECTION(mysql_num_rows);
+  FUNCTION_INJECTION_BUILTIN(mysql_num_rows);
   return f_mysql_num_rows(result);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_free_result f_mysql_free_result
-#else
 inline Variant x_mysql_free_result(CVarRef result) {
-  FUNCTION_INJECTION(mysql_free_result);
+  FUNCTION_INJECTION_BUILTIN(mysql_free_result);
   return f_mysql_free_result(result);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_data_seek f_mysql_data_seek
-#else
 inline bool x_mysql_data_seek(CVarRef result, int row) {
-  FUNCTION_INJECTION(mysql_data_seek);
+  FUNCTION_INJECTION_BUILTIN(mysql_data_seek);
   return f_mysql_data_seek(result, row);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_fetch_row f_mysql_fetch_row
-#else
 inline Variant x_mysql_fetch_row(CVarRef result) {
-  FUNCTION_INJECTION(mysql_fetch_row);
+  FUNCTION_INJECTION_BUILTIN(mysql_fetch_row);
   return f_mysql_fetch_row(result);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_fetch_assoc f_mysql_fetch_assoc
-#else
 inline Variant x_mysql_fetch_assoc(CVarRef result) {
-  FUNCTION_INJECTION(mysql_fetch_assoc);
+  FUNCTION_INJECTION_BUILTIN(mysql_fetch_assoc);
   return f_mysql_fetch_assoc(result);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_fetch_array f_mysql_fetch_array
-#else
 inline Variant x_mysql_fetch_array(CVarRef result, int result_type = 3) {
-  FUNCTION_INJECTION(mysql_fetch_array);
+  FUNCTION_INJECTION_BUILTIN(mysql_fetch_array);
   return f_mysql_fetch_array(result, result_type);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_fetch_lengths f_mysql_fetch_lengths
-#else
 inline Variant x_mysql_fetch_lengths(CVarRef result) {
-  FUNCTION_INJECTION(mysql_fetch_lengths);
+  FUNCTION_INJECTION_BUILTIN(mysql_fetch_lengths);
   return f_mysql_fetch_lengths(result);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_fetch_object f_mysql_fetch_object
-#else
 inline Variant x_mysql_fetch_object(CVarRef result, CStrRef class_name = "stdClass", CArrRef params = null) {
-  FUNCTION_INJECTION(mysql_fetch_object);
+  FUNCTION_INJECTION_BUILTIN(mysql_fetch_object);
   return f_mysql_fetch_object(result, class_name, params);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_result f_mysql_result
-#else
 inline Variant x_mysql_result(CVarRef result, int row, CVarRef field = null_variant) {
-  FUNCTION_INJECTION(mysql_result);
+  FUNCTION_INJECTION_BUILTIN(mysql_result);
   return f_mysql_result(result, row, field);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_fetch_field f_mysql_fetch_field
-#else
 inline Variant x_mysql_fetch_field(CVarRef result, int field = -1) {
-  FUNCTION_INJECTION(mysql_fetch_field);
+  FUNCTION_INJECTION_BUILTIN(mysql_fetch_field);
   return f_mysql_fetch_field(result, field);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_field_seek f_mysql_field_seek
-#else
 inline bool x_mysql_field_seek(CVarRef result, int field = 0) {
-  FUNCTION_INJECTION(mysql_field_seek);
+  FUNCTION_INJECTION_BUILTIN(mysql_field_seek);
   return f_mysql_field_seek(result, field);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_field_name f_mysql_field_name
-#else
 inline Variant x_mysql_field_name(CVarRef result, int field = 0) {
-  FUNCTION_INJECTION(mysql_field_name);
+  FUNCTION_INJECTION_BUILTIN(mysql_field_name);
   return f_mysql_field_name(result, field);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_field_table f_mysql_field_table
-#else
 inline Variant x_mysql_field_table(CVarRef result, int field = 0) {
-  FUNCTION_INJECTION(mysql_field_table);
+  FUNCTION_INJECTION_BUILTIN(mysql_field_table);
   return f_mysql_field_table(result, field);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_field_len f_mysql_field_len
-#else
 inline Variant x_mysql_field_len(CVarRef result, int field = 0) {
-  FUNCTION_INJECTION(mysql_field_len);
+  FUNCTION_INJECTION_BUILTIN(mysql_field_len);
   return f_mysql_field_len(result, field);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_field_type f_mysql_field_type
-#else
 inline Variant x_mysql_field_type(CVarRef result, int field = 0) {
-  FUNCTION_INJECTION(mysql_field_type);
+  FUNCTION_INJECTION_BUILTIN(mysql_field_type);
   return f_mysql_field_type(result, field);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mysql_field_flags f_mysql_field_flags
-#else
 inline Variant x_mysql_field_flags(CVarRef result, int field = 0) {
-  FUNCTION_INJECTION(mysql_field_flags);
+  FUNCTION_INJECTION_BUILTIN(mysql_field_flags);
   return f_mysql_field_flags(result, field);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -25,149 +25,85 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_mail f_mail
-#else
 inline bool x_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef additional_headers = null_string, CStrRef additional_parameters = null_string) {
-  FUNCTION_INJECTION(mail);
+  FUNCTION_INJECTION_BUILTIN(mail);
   return f_mail(to, subject, message, additional_headers, additional_parameters);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ezmlm_hash f_ezmlm_hash
-#else
 inline int x_ezmlm_hash(CStrRef addr) {
-  FUNCTION_INJECTION(ezmlm_hash);
+  FUNCTION_INJECTION_BUILTIN(ezmlm_hash);
   return f_ezmlm_hash(addr);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mailparse_msg_create f_mailparse_msg_create
-#else
 inline Object x_mailparse_msg_create() {
-  FUNCTION_INJECTION(mailparse_msg_create);
+  FUNCTION_INJECTION_BUILTIN(mailparse_msg_create);
   return f_mailparse_msg_create();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mailparse_msg_free f_mailparse_msg_free
-#else
 inline bool x_mailparse_msg_free(CObjRef mimemail) {
-  FUNCTION_INJECTION(mailparse_msg_free);
+  FUNCTION_INJECTION_BUILTIN(mailparse_msg_free);
   return f_mailparse_msg_free(mimemail);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mailparse_msg_parse_file f_mailparse_msg_parse_file
-#else
 inline Object x_mailparse_msg_parse_file(CStrRef filename) {
-  FUNCTION_INJECTION(mailparse_msg_parse_file);
+  FUNCTION_INJECTION_BUILTIN(mailparse_msg_parse_file);
   return f_mailparse_msg_parse_file(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mailparse_msg_parse f_mailparse_msg_parse
-#else
 inline bool x_mailparse_msg_parse(CObjRef mimemail, CStrRef data) {
-  FUNCTION_INJECTION(mailparse_msg_parse);
+  FUNCTION_INJECTION_BUILTIN(mailparse_msg_parse);
   return f_mailparse_msg_parse(mimemail, data);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mailparse_msg_extract_part_file f_mailparse_msg_extract_part_file
-#else
 inline String x_mailparse_msg_extract_part_file(CObjRef mimemail, CStrRef filename, CStrRef callbackfunc = null_string) {
-  FUNCTION_INJECTION(mailparse_msg_extract_part_file);
+  FUNCTION_INJECTION_BUILTIN(mailparse_msg_extract_part_file);
   return f_mailparse_msg_extract_part_file(mimemail, filename, callbackfunc);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mailparse_msg_extract_whole_part_file f_mailparse_msg_extract_whole_part_file
-#else
 inline String x_mailparse_msg_extract_whole_part_file(CObjRef mimemail, CStrRef filename, CStrRef callbackfunc = null_string) {
-  FUNCTION_INJECTION(mailparse_msg_extract_whole_part_file);
+  FUNCTION_INJECTION_BUILTIN(mailparse_msg_extract_whole_part_file);
   return f_mailparse_msg_extract_whole_part_file(mimemail, filename, callbackfunc);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mailparse_msg_extract_part f_mailparse_msg_extract_part
-#else
 inline void x_mailparse_msg_extract_part(CObjRef mimemail, CStrRef msgbody, CStrRef callbackfunc = null_string) {
-  FUNCTION_INJECTION(mailparse_msg_extract_part);
+  FUNCTION_INJECTION_BUILTIN(mailparse_msg_extract_part);
   f_mailparse_msg_extract_part(mimemail, msgbody, callbackfunc);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mailparse_msg_get_part_data f_mailparse_msg_get_part_data
-#else
 inline Array x_mailparse_msg_get_part_data(CObjRef mimemail) {
-  FUNCTION_INJECTION(mailparse_msg_get_part_data);
+  FUNCTION_INJECTION_BUILTIN(mailparse_msg_get_part_data);
   return f_mailparse_msg_get_part_data(mimemail);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mailparse_msg_get_part f_mailparse_msg_get_part
-#else
 inline Object x_mailparse_msg_get_part(CObjRef mimemail, CStrRef mimesection) {
-  FUNCTION_INJECTION(mailparse_msg_get_part);
+  FUNCTION_INJECTION_BUILTIN(mailparse_msg_get_part);
   return f_mailparse_msg_get_part(mimemail, mimesection);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mailparse_msg_get_structure f_mailparse_msg_get_structure
-#else
 inline Array x_mailparse_msg_get_structure(CObjRef mimemail) {
-  FUNCTION_INJECTION(mailparse_msg_get_structure);
+  FUNCTION_INJECTION_BUILTIN(mailparse_msg_get_structure);
   return f_mailparse_msg_get_structure(mimemail);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mailparse_rfc822_parse_addresses f_mailparse_rfc822_parse_addresses
-#else
 inline Array x_mailparse_rfc822_parse_addresses(CStrRef addresses) {
-  FUNCTION_INJECTION(mailparse_rfc822_parse_addresses);
+  FUNCTION_INJECTION_BUILTIN(mailparse_rfc822_parse_addresses);
   return f_mailparse_rfc822_parse_addresses(addresses);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mailparse_stream_encode f_mailparse_stream_encode
-#else
 inline bool x_mailparse_stream_encode(CObjRef sourcefp, CObjRef destfp, CStrRef encoding) {
-  FUNCTION_INJECTION(mailparse_stream_encode);
+  FUNCTION_INJECTION_BUILTIN(mailparse_stream_encode);
   return f_mailparse_stream_encode(sourcefp, destfp, encoding);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mailparse_uudecode_all f_mailparse_uudecode_all
-#else
 inline Array x_mailparse_uudecode_all(CObjRef fp) {
-  FUNCTION_INJECTION(mailparse_uudecode_all);
+  FUNCTION_INJECTION_BUILTIN(mailparse_uudecode_all);
   return f_mailparse_uudecode_all(fp);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mailparse_determine_best_xfer_encoding f_mailparse_determine_best_xfer_encoding
-#else
 inline String x_mailparse_determine_best_xfer_encoding(CObjRef fp) {
-  FUNCTION_INJECTION(mailparse_determine_best_xfer_encoding);
+  FUNCTION_INJECTION_BUILTIN(mailparse_determine_best_xfer_encoding);
   return f_mailparse_determine_best_xfer_encoding(fp);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

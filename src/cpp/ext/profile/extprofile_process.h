@@ -25,239 +25,135 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_pcntl_alarm f_pcntl_alarm
-#else
 inline int x_pcntl_alarm(int seconds) {
-  FUNCTION_INJECTION(pcntl_alarm);
+  FUNCTION_INJECTION_BUILTIN(pcntl_alarm);
   return f_pcntl_alarm(seconds);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pcntl_exec f_pcntl_exec
-#else
 inline void x_pcntl_exec(CStrRef path, CArrRef args = null_array, CArrRef envs = null_array) {
-  FUNCTION_INJECTION(pcntl_exec);
+  FUNCTION_INJECTION_BUILTIN(pcntl_exec);
   f_pcntl_exec(path, args, envs);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pcntl_fork f_pcntl_fork
-#else
 inline int x_pcntl_fork() {
-  FUNCTION_INJECTION(pcntl_fork);
+  FUNCTION_INJECTION_BUILTIN(pcntl_fork);
   return f_pcntl_fork();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pcntl_getpriority f_pcntl_getpriority
-#else
 inline Variant x_pcntl_getpriority(int pid = 0, int process_identifier = 0) {
-  FUNCTION_INJECTION(pcntl_getpriority);
+  FUNCTION_INJECTION_BUILTIN(pcntl_getpriority);
   return f_pcntl_getpriority(pid, process_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pcntl_setpriority f_pcntl_setpriority
-#else
 inline bool x_pcntl_setpriority(int priority, int pid = 0, int process_identifier = 0) {
-  FUNCTION_INJECTION(pcntl_setpriority);
+  FUNCTION_INJECTION_BUILTIN(pcntl_setpriority);
   return f_pcntl_setpriority(priority, pid, process_identifier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pcntl_signal f_pcntl_signal
-#else
 inline bool x_pcntl_signal(int signo, CVarRef handler, bool restart_syscalls = true) {
-  FUNCTION_INJECTION(pcntl_signal);
+  FUNCTION_INJECTION_BUILTIN(pcntl_signal);
   return f_pcntl_signal(signo, handler, restart_syscalls);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pcntl_wait f_pcntl_wait
-#else
 inline int x_pcntl_wait(Variant status, int options = 0) {
-  FUNCTION_INJECTION(pcntl_wait);
+  FUNCTION_INJECTION_BUILTIN(pcntl_wait);
   return f_pcntl_wait(ref(status), options);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pcntl_waitpid f_pcntl_waitpid
-#else
 inline int x_pcntl_waitpid(int pid, Variant status, int options = 0) {
-  FUNCTION_INJECTION(pcntl_waitpid);
+  FUNCTION_INJECTION_BUILTIN(pcntl_waitpid);
   return f_pcntl_waitpid(pid, ref(status), options);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pcntl_wexitstatus f_pcntl_wexitstatus
-#else
 inline int x_pcntl_wexitstatus(int status) {
-  FUNCTION_INJECTION(pcntl_wexitstatus);
+  FUNCTION_INJECTION_BUILTIN(pcntl_wexitstatus);
   return f_pcntl_wexitstatus(status);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pcntl_wifexited f_pcntl_wifexited
-#else
 inline bool x_pcntl_wifexited(int status) {
-  FUNCTION_INJECTION(pcntl_wifexited);
+  FUNCTION_INJECTION_BUILTIN(pcntl_wifexited);
   return f_pcntl_wifexited(status);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pcntl_wifsignaled f_pcntl_wifsignaled
-#else
 inline bool x_pcntl_wifsignaled(int status) {
-  FUNCTION_INJECTION(pcntl_wifsignaled);
+  FUNCTION_INJECTION_BUILTIN(pcntl_wifsignaled);
   return f_pcntl_wifsignaled(status);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pcntl_wifstopped f_pcntl_wifstopped
-#else
 inline bool x_pcntl_wifstopped(int status) {
-  FUNCTION_INJECTION(pcntl_wifstopped);
+  FUNCTION_INJECTION_BUILTIN(pcntl_wifstopped);
   return f_pcntl_wifstopped(status);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pcntl_wstopsig f_pcntl_wstopsig
-#else
 inline int x_pcntl_wstopsig(int status) {
-  FUNCTION_INJECTION(pcntl_wstopsig);
+  FUNCTION_INJECTION_BUILTIN(pcntl_wstopsig);
   return f_pcntl_wstopsig(status);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pcntl_wtermsig f_pcntl_wtermsig
-#else
 inline int x_pcntl_wtermsig(int status) {
-  FUNCTION_INJECTION(pcntl_wtermsig);
+  FUNCTION_INJECTION_BUILTIN(pcntl_wtermsig);
   return f_pcntl_wtermsig(status);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pcntl_signal_dispatch f_pcntl_signal_dispatch
-#else
 inline bool x_pcntl_signal_dispatch() {
-  FUNCTION_INJECTION(pcntl_signal_dispatch);
+  FUNCTION_INJECTION_BUILTIN(pcntl_signal_dispatch);
   return f_pcntl_signal_dispatch();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_shell_exec f_shell_exec
-#else
 inline String x_shell_exec(CStrRef cmd) {
-  FUNCTION_INJECTION(shell_exec);
+  FUNCTION_INJECTION_BUILTIN(shell_exec);
   return f_shell_exec(cmd);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_exec f_exec
-#else
 inline String x_exec(CStrRef command, Variant output = null, Variant return_var = null) {
-  FUNCTION_INJECTION(exec);
+  FUNCTION_INJECTION_BUILTIN(exec);
   return f_exec(command, ref(output), ref(return_var));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_passthru f_passthru
-#else
 inline void x_passthru(CStrRef command, Variant return_var = null) {
-  FUNCTION_INJECTION(passthru);
+  FUNCTION_INJECTION_BUILTIN(passthru);
   f_passthru(command, ref(return_var));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_system f_system
-#else
 inline String x_system(CStrRef command, Variant return_var = null) {
-  FUNCTION_INJECTION(system);
+  FUNCTION_INJECTION_BUILTIN(system);
   return f_system(command, ref(return_var));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_proc_open f_proc_open
-#else
 inline Variant x_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes, CStrRef cwd = null_string, CVarRef env = null_variant, CVarRef other_options = null_variant) {
-  FUNCTION_INJECTION(proc_open);
+  FUNCTION_INJECTION_BUILTIN(proc_open);
   return f_proc_open(cmd, descriptorspec, ref(pipes), cwd, env, other_options);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_proc_terminate f_proc_terminate
-#else
 inline bool x_proc_terminate(CObjRef process, int signal = 0) {
-  FUNCTION_INJECTION(proc_terminate);
+  FUNCTION_INJECTION_BUILTIN(proc_terminate);
   return f_proc_terminate(process, signal);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_proc_close f_proc_close
-#else
 inline int x_proc_close(CObjRef process) {
-  FUNCTION_INJECTION(proc_close);
+  FUNCTION_INJECTION_BUILTIN(proc_close);
   return f_proc_close(process);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_proc_get_status f_proc_get_status
-#else
 inline Array x_proc_get_status(CObjRef process) {
-  FUNCTION_INJECTION(proc_get_status);
+  FUNCTION_INJECTION_BUILTIN(proc_get_status);
   return f_proc_get_status(process);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_proc_nice f_proc_nice
-#else
 inline bool x_proc_nice(int increment) {
-  FUNCTION_INJECTION(proc_nice);
+  FUNCTION_INJECTION_BUILTIN(proc_nice);
   return f_proc_nice(increment);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_escapeshellarg f_escapeshellarg
-#else
 inline String x_escapeshellarg(CStrRef arg) {
-  FUNCTION_INJECTION(escapeshellarg);
+  FUNCTION_INJECTION_BUILTIN(escapeshellarg);
   return f_escapeshellarg(arg);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_escapeshellcmd f_escapeshellcmd
-#else
 inline String x_escapeshellcmd(CStrRef command) {
-  FUNCTION_INJECTION(escapeshellcmd);
+  FUNCTION_INJECTION_BUILTIN(escapeshellcmd);
   return f_escapeshellcmd(command);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

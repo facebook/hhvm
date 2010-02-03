@@ -25,698 +25,390 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_array_change_key_case f_array_change_key_case
-#else
 inline Variant x_array_change_key_case(CVarRef input, bool upper = false) {
-  FUNCTION_INJECTION(array_change_key_case);
+  FUNCTION_INJECTION_BUILTIN(array_change_key_case);
   return f_array_change_key_case(input, upper);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_chunk f_array_chunk
-#else
 inline Variant x_array_chunk(CVarRef input, int size, bool preserve_keys = false) {
-  FUNCTION_INJECTION(array_chunk);
+  FUNCTION_INJECTION_BUILTIN(array_chunk);
   return f_array_chunk(input, size, preserve_keys);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_combine f_array_combine
-#else
 inline Variant x_array_combine(CVarRef keys, CVarRef values) {
-  FUNCTION_INJECTION(array_combine);
+  FUNCTION_INJECTION_BUILTIN(array_combine);
   return f_array_combine(keys, values);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_count_values f_array_count_values
-#else
 inline Variant x_array_count_values(CVarRef input) {
-  FUNCTION_INJECTION(array_count_values);
+  FUNCTION_INJECTION_BUILTIN(array_count_values);
   return f_array_count_values(input);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_fill_keys f_array_fill_keys
-#else
 inline Variant x_array_fill_keys(CVarRef keys, CVarRef value) {
-  FUNCTION_INJECTION(array_fill_keys);
+  FUNCTION_INJECTION_BUILTIN(array_fill_keys);
   return f_array_fill_keys(keys, value);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_fill f_array_fill
-#else
 inline Array x_array_fill(int start_index, int num, CVarRef value) {
-  FUNCTION_INJECTION(array_fill);
+  FUNCTION_INJECTION_BUILTIN(array_fill);
   return f_array_fill(start_index, num, value);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_filter f_array_filter
-#else
 inline Variant x_array_filter(CVarRef input, CVarRef callback = null_variant) {
-  FUNCTION_INJECTION(array_filter);
+  FUNCTION_INJECTION_BUILTIN(array_filter);
   return f_array_filter(input, callback);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_flip f_array_flip
-#else
 inline Variant x_array_flip(CVarRef trans) {
-  FUNCTION_INJECTION(array_flip);
+  FUNCTION_INJECTION_BUILTIN(array_flip);
   return f_array_flip(trans);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_key_exists f_array_key_exists
-#else
 inline bool x_array_key_exists(CVarRef key, CVarRef search) {
-  FUNCTION_INJECTION(array_key_exists);
+  FUNCTION_INJECTION_BUILTIN(array_key_exists);
   return f_array_key_exists(key, search);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_keys f_array_keys
-#else
 inline Variant x_array_keys(CVarRef input, CVarRef search_value = null_variant, bool strict = false) {
-  FUNCTION_INJECTION(array_keys);
+  FUNCTION_INJECTION_BUILTIN(array_keys);
   return f_array_keys(input, search_value, strict);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_map f_array_map
-#else
 inline Variant x_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_map);
+  FUNCTION_INJECTION_BUILTIN(array_map);
   return f_array_map(_argc, callback, arr1, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_merge_recursive f_array_merge_recursive
-#else
 inline Variant x_array_merge_recursive(int _argc, CVarRef array1, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_merge_recursive);
+  FUNCTION_INJECTION_BUILTIN(array_merge_recursive);
   return f_array_merge_recursive(_argc, array1, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_merge f_array_merge
-#else
 inline Variant x_array_merge(int _argc, CVarRef array1, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_merge);
+  FUNCTION_INJECTION_BUILTIN(array_merge);
   return f_array_merge(_argc, array1, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_multisort f_array_multisort
-#else
 inline bool x_array_multisort(int _argc, Variant ar1, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_multisort);
+  FUNCTION_INJECTION_BUILTIN(array_multisort);
   return f_array_multisort(_argc, ref(ar1), _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_pad f_array_pad
-#else
 inline Variant x_array_pad(CVarRef input, int pad_size, CVarRef pad_value) {
-  FUNCTION_INJECTION(array_pad);
+  FUNCTION_INJECTION_BUILTIN(array_pad);
   return f_array_pad(input, pad_size, pad_value);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_pop f_array_pop
-#else
 inline Variant x_array_pop(Variant array) {
-  FUNCTION_INJECTION(array_pop);
+  FUNCTION_INJECTION_BUILTIN(array_pop);
   return f_array_pop(ref(array));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_product f_array_product
-#else
 inline Variant x_array_product(CVarRef array) {
-  FUNCTION_INJECTION(array_product);
+  FUNCTION_INJECTION_BUILTIN(array_product);
   return f_array_product(array);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_push f_array_push
-#else
 inline Variant x_array_push(int _argc, Variant array, CVarRef var, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_push);
+  FUNCTION_INJECTION_BUILTIN(array_push);
   return f_array_push(_argc, ref(array), var, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_rand f_array_rand
-#else
 inline Variant x_array_rand(CVarRef input, int num_req = 1) {
-  FUNCTION_INJECTION(array_rand);
+  FUNCTION_INJECTION_BUILTIN(array_rand);
   return f_array_rand(input, num_req);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_reduce f_array_reduce
-#else
 inline Variant x_array_reduce(CVarRef input, CVarRef callback, CVarRef initial = null_variant) {
-  FUNCTION_INJECTION(array_reduce);
+  FUNCTION_INJECTION_BUILTIN(array_reduce);
   return f_array_reduce(input, callback, initial);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_reverse f_array_reverse
-#else
 inline Variant x_array_reverse(CVarRef array, bool preserve_keys = false) {
-  FUNCTION_INJECTION(array_reverse);
+  FUNCTION_INJECTION_BUILTIN(array_reverse);
   return f_array_reverse(array, preserve_keys);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_search f_array_search
-#else
 inline Variant x_array_search(CVarRef needle, CVarRef haystack, bool strict = false) {
-  FUNCTION_INJECTION(array_search);
+  FUNCTION_INJECTION_BUILTIN(array_search);
   return f_array_search(needle, haystack, strict);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_shift f_array_shift
-#else
 inline Variant x_array_shift(Variant array) {
-  FUNCTION_INJECTION(array_shift);
+  FUNCTION_INJECTION_BUILTIN(array_shift);
   return f_array_shift(ref(array));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_slice f_array_slice
-#else
 inline Variant x_array_slice(CVarRef array, int offset, CVarRef length = null_variant, bool preserve_keys = false) {
-  FUNCTION_INJECTION(array_slice);
+  FUNCTION_INJECTION_BUILTIN(array_slice);
   return f_array_slice(array, offset, length, preserve_keys);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_splice f_array_splice
-#else
 inline Variant x_array_splice(Variant input, int offset, CVarRef length = null_variant, CVarRef replacement = null_variant) {
-  FUNCTION_INJECTION(array_splice);
+  FUNCTION_INJECTION_BUILTIN(array_splice);
   return f_array_splice(ref(input), offset, length, replacement);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_sum f_array_sum
-#else
 inline Variant x_array_sum(CVarRef array) {
-  FUNCTION_INJECTION(array_sum);
+  FUNCTION_INJECTION_BUILTIN(array_sum);
   return f_array_sum(array);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_unique f_array_unique
-#else
 inline Variant x_array_unique(CVarRef array) {
-  FUNCTION_INJECTION(array_unique);
+  FUNCTION_INJECTION_BUILTIN(array_unique);
   return f_array_unique(array);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_unshift f_array_unshift
-#else
 inline int x_array_unshift(int _argc, Variant array, CVarRef var, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_unshift);
+  FUNCTION_INJECTION_BUILTIN(array_unshift);
   return f_array_unshift(_argc, ref(array), var, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_values f_array_values
-#else
 inline Variant x_array_values(CVarRef input) {
-  FUNCTION_INJECTION(array_values);
+  FUNCTION_INJECTION_BUILTIN(array_values);
   return f_array_values(input);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_walk_recursive f_array_walk_recursive
-#else
 inline bool x_array_walk_recursive(Variant input, CVarRef funcname, CVarRef userdata = null_variant) {
-  FUNCTION_INJECTION(array_walk_recursive);
+  FUNCTION_INJECTION_BUILTIN(array_walk_recursive);
   return f_array_walk_recursive(ref(input), funcname, userdata);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_walk f_array_walk
-#else
 inline bool x_array_walk(Variant input, CVarRef funcname, CVarRef userdata = null_variant) {
-  FUNCTION_INJECTION(array_walk);
+  FUNCTION_INJECTION_BUILTIN(array_walk);
   return f_array_walk(ref(input), funcname, userdata);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_compact f_compact
-#else
 inline Array x_compact(int _argc, CVarRef varname, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(compact);
+  FUNCTION_INJECTION_BUILTIN(compact);
   return f_compact(_argc, varname, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_shuffle f_shuffle
-#else
 inline bool x_shuffle(Variant array) {
-  FUNCTION_INJECTION(shuffle);
+  FUNCTION_INJECTION_BUILTIN(shuffle);
   return f_shuffle(ref(array));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_count f_count
-#else
 inline int x_count(CVarRef var, bool recursive = false) {
-  FUNCTION_INJECTION(count);
+  FUNCTION_INJECTION_BUILTIN(count);
   return f_count(var, recursive);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_sizeof f_sizeof
-#else
 inline int x_sizeof(CVarRef var, bool recursive = false) {
-  FUNCTION_INJECTION(sizeof);
+  FUNCTION_INJECTION_BUILTIN(sizeof);
   return f_sizeof(var, recursive);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_each f_each
-#else
 inline Variant x_each(Variant array) {
-  FUNCTION_INJECTION(each);
+  FUNCTION_INJECTION_BUILTIN(each);
   return f_each(ref(array));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_current f_current
-#else
 inline Variant x_current(Variant array) {
-  FUNCTION_INJECTION(current);
+  FUNCTION_INJECTION_BUILTIN(current);
   return f_current(ref(array));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_next f_next
-#else
 inline Variant x_next(Variant array) {
-  FUNCTION_INJECTION(next);
+  FUNCTION_INJECTION_BUILTIN(next);
   return f_next(ref(array));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pos f_pos
-#else
 inline Variant x_pos(Variant array) {
-  FUNCTION_INJECTION(pos);
+  FUNCTION_INJECTION_BUILTIN(pos);
   return f_pos(ref(array));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_prev f_prev
-#else
 inline Variant x_prev(Variant array) {
-  FUNCTION_INJECTION(prev);
+  FUNCTION_INJECTION_BUILTIN(prev);
   return f_prev(ref(array));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_reset f_reset
-#else
 inline Variant x_reset(Variant array) {
-  FUNCTION_INJECTION(reset);
+  FUNCTION_INJECTION_BUILTIN(reset);
   return f_reset(ref(array));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_end f_end
-#else
 inline Variant x_end(Variant array) {
-  FUNCTION_INJECTION(end);
+  FUNCTION_INJECTION_BUILTIN(end);
   return f_end(ref(array));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_in_array f_in_array
-#else
 inline bool x_in_array(CVarRef needle, CVarRef haystack, bool strict = false) {
-  FUNCTION_INJECTION(in_array);
+  FUNCTION_INJECTION_BUILTIN(in_array);
   return f_in_array(needle, haystack, strict);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_key f_key
-#else
 inline Variant x_key(Variant array) {
-  FUNCTION_INJECTION(key);
+  FUNCTION_INJECTION_BUILTIN(key);
   return f_key(ref(array));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_range f_range
-#else
 inline Array x_range(CVarRef low, CVarRef high, CVarRef step = 1) {
-  FUNCTION_INJECTION(range);
+  FUNCTION_INJECTION_BUILTIN(range);
   return f_range(low, high, step);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_diff f_array_diff
-#else
 inline Variant x_array_diff(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_diff);
+  FUNCTION_INJECTION_BUILTIN(array_diff);
   return f_array_diff(_argc, array1, array2, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_udiff f_array_udiff
-#else
 inline Variant x_array_udiff(int _argc, CVarRef array1, CVarRef array2, CVarRef data_compare_func, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_udiff);
+  FUNCTION_INJECTION_BUILTIN(array_udiff);
   return f_array_udiff(_argc, array1, array2, data_compare_func, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_diff_assoc f_array_diff_assoc
-#else
 inline Variant x_array_diff_assoc(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_diff_assoc);
+  FUNCTION_INJECTION_BUILTIN(array_diff_assoc);
   return f_array_diff_assoc(_argc, array1, array2, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_diff_uassoc f_array_diff_uassoc
-#else
 inline Variant x_array_diff_uassoc(int _argc, CVarRef array1, CVarRef array2, CVarRef key_compare_func, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_diff_uassoc);
+  FUNCTION_INJECTION_BUILTIN(array_diff_uassoc);
   return f_array_diff_uassoc(_argc, array1, array2, key_compare_func, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_udiff_assoc f_array_udiff_assoc
-#else
 inline Variant x_array_udiff_assoc(int _argc, CVarRef array1, CVarRef array2, CVarRef data_compare_func, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_udiff_assoc);
+  FUNCTION_INJECTION_BUILTIN(array_udiff_assoc);
   return f_array_udiff_assoc(_argc, array1, array2, data_compare_func, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_udiff_uassoc f_array_udiff_uassoc
-#else
 inline Variant x_array_udiff_uassoc(int _argc, CVarRef array1, CVarRef array2, CVarRef data_compare_func, CVarRef key_compare_func, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_udiff_uassoc);
+  FUNCTION_INJECTION_BUILTIN(array_udiff_uassoc);
   return f_array_udiff_uassoc(_argc, array1, array2, data_compare_func, key_compare_func, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_diff_key f_array_diff_key
-#else
 inline Variant x_array_diff_key(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_diff_key);
+  FUNCTION_INJECTION_BUILTIN(array_diff_key);
   return f_array_diff_key(_argc, array1, array2, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_diff_ukey f_array_diff_ukey
-#else
 inline Variant x_array_diff_ukey(int _argc, CVarRef array1, CVarRef array2, CVarRef key_compare_func, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_diff_ukey);
+  FUNCTION_INJECTION_BUILTIN(array_diff_ukey);
   return f_array_diff_ukey(_argc, array1, array2, key_compare_func, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_intersect f_array_intersect
-#else
 inline Variant x_array_intersect(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_intersect);
+  FUNCTION_INJECTION_BUILTIN(array_intersect);
   return f_array_intersect(_argc, array1, array2, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_uintersect f_array_uintersect
-#else
 inline Variant x_array_uintersect(int _argc, CVarRef array1, CVarRef array2, CVarRef data_compare_func, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_uintersect);
+  FUNCTION_INJECTION_BUILTIN(array_uintersect);
   return f_array_uintersect(_argc, array1, array2, data_compare_func, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_intersect_assoc f_array_intersect_assoc
-#else
 inline Variant x_array_intersect_assoc(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_intersect_assoc);
+  FUNCTION_INJECTION_BUILTIN(array_intersect_assoc);
   return f_array_intersect_assoc(_argc, array1, array2, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_intersect_uassoc f_array_intersect_uassoc
-#else
 inline Variant x_array_intersect_uassoc(int _argc, CVarRef array1, CVarRef array2, CVarRef key_compare_func, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_intersect_uassoc);
+  FUNCTION_INJECTION_BUILTIN(array_intersect_uassoc);
   return f_array_intersect_uassoc(_argc, array1, array2, key_compare_func, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_uintersect_assoc f_array_uintersect_assoc
-#else
 inline Variant x_array_uintersect_assoc(int _argc, CVarRef array1, CVarRef array2, CVarRef data_compare_func, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_uintersect_assoc);
+  FUNCTION_INJECTION_BUILTIN(array_uintersect_assoc);
   return f_array_uintersect_assoc(_argc, array1, array2, data_compare_func, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_uintersect_uassoc f_array_uintersect_uassoc
-#else
 inline Variant x_array_uintersect_uassoc(int _argc, CVarRef array1, CVarRef array2, CVarRef data_compare_func, CVarRef key_compare_func, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_uintersect_uassoc);
+  FUNCTION_INJECTION_BUILTIN(array_uintersect_uassoc);
   return f_array_uintersect_uassoc(_argc, array1, array2, data_compare_func, key_compare_func, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_intersect_key f_array_intersect_key
-#else
 inline Variant x_array_intersect_key(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_intersect_key);
+  FUNCTION_INJECTION_BUILTIN(array_intersect_key);
   return f_array_intersect_key(_argc, array1, array2, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_array_intersect_ukey f_array_intersect_ukey
-#else
 inline Variant x_array_intersect_ukey(int _argc, CVarRef array1, CVarRef array2, CVarRef key_compare_func, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(array_intersect_ukey);
+  FUNCTION_INJECTION_BUILTIN(array_intersect_ukey);
   return f_array_intersect_ukey(_argc, array1, array2, key_compare_func, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_sort f_sort
-#else
 inline bool x_sort(Variant array, int sort_flags = 0, bool use_collator = false) {
-  FUNCTION_INJECTION(sort);
+  FUNCTION_INJECTION_BUILTIN(sort);
   return f_sort(ref(array), sort_flags, use_collator);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_rsort f_rsort
-#else
 inline bool x_rsort(Variant array, int sort_flags = 0, bool use_collator = false) {
-  FUNCTION_INJECTION(rsort);
+  FUNCTION_INJECTION_BUILTIN(rsort);
   return f_rsort(ref(array), sort_flags, use_collator);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_asort f_asort
-#else
 inline bool x_asort(Variant array, int sort_flags = 0, bool use_collator = false) {
-  FUNCTION_INJECTION(asort);
+  FUNCTION_INJECTION_BUILTIN(asort);
   return f_asort(ref(array), sort_flags, use_collator);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_arsort f_arsort
-#else
 inline bool x_arsort(Variant array, int sort_flags = 0, bool use_collator = false) {
-  FUNCTION_INJECTION(arsort);
+  FUNCTION_INJECTION_BUILTIN(arsort);
   return f_arsort(ref(array), sort_flags, use_collator);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ksort f_ksort
-#else
 inline bool x_ksort(Variant array, int sort_flags = 0) {
-  FUNCTION_INJECTION(ksort);
+  FUNCTION_INJECTION_BUILTIN(ksort);
   return f_ksort(ref(array), sort_flags);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_krsort f_krsort
-#else
 inline bool x_krsort(Variant array, int sort_flags = 0) {
-  FUNCTION_INJECTION(krsort);
+  FUNCTION_INJECTION_BUILTIN(krsort);
   return f_krsort(ref(array), sort_flags);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_usort f_usort
-#else
 inline bool x_usort(Variant array, CVarRef cmp_function) {
-  FUNCTION_INJECTION(usort);
+  FUNCTION_INJECTION_BUILTIN(usort);
   return f_usort(ref(array), cmp_function);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_uasort f_uasort
-#else
 inline bool x_uasort(Variant array, CVarRef cmp_function) {
-  FUNCTION_INJECTION(uasort);
+  FUNCTION_INJECTION_BUILTIN(uasort);
   return f_uasort(ref(array), cmp_function);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_uksort f_uksort
-#else
 inline bool x_uksort(Variant array, CVarRef cmp_function) {
-  FUNCTION_INJECTION(uksort);
+  FUNCTION_INJECTION_BUILTIN(uksort);
   return f_uksort(ref(array), cmp_function);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_natsort f_natsort
-#else
 inline Variant x_natsort(Variant array) {
-  FUNCTION_INJECTION(natsort);
+  FUNCTION_INJECTION_BUILTIN(natsort);
   return f_natsort(ref(array));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_natcasesort f_natcasesort
-#else
 inline Variant x_natcasesort(Variant array) {
-  FUNCTION_INJECTION(natcasesort);
+  FUNCTION_INJECTION_BUILTIN(natcasesort);
   return f_natcasesort(ref(array));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_i18n_loc_get_default f_i18n_loc_get_default
-#else
 inline String x_i18n_loc_get_default() {
-  FUNCTION_INJECTION(i18n_loc_get_default);
+  FUNCTION_INJECTION_BUILTIN(i18n_loc_get_default);
   return f_i18n_loc_get_default();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_i18n_loc_set_default f_i18n_loc_set_default
-#else
 inline bool x_i18n_loc_set_default(CStrRef locale) {
-  FUNCTION_INJECTION(i18n_loc_set_default);
+  FUNCTION_INJECTION_BUILTIN(i18n_loc_set_default);
   return f_i18n_loc_set_default(locale);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_i18n_loc_set_attribute f_i18n_loc_set_attribute
-#else
 inline bool x_i18n_loc_set_attribute(int64 attr, int64 val) {
-  FUNCTION_INJECTION(i18n_loc_set_attribute);
+  FUNCTION_INJECTION_BUILTIN(i18n_loc_set_attribute);
   return f_i18n_loc_set_attribute(attr, val);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_i18n_loc_set_strength f_i18n_loc_set_strength
-#else
 inline bool x_i18n_loc_set_strength(int64 strength) {
-  FUNCTION_INJECTION(i18n_loc_set_strength);
+  FUNCTION_INJECTION_BUILTIN(i18n_loc_set_strength);
   return f_i18n_loc_set_strength(strength);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_i18n_loc_get_error_code f_i18n_loc_get_error_code
-#else
 inline Variant x_i18n_loc_get_error_code() {
-  FUNCTION_INJECTION(i18n_loc_get_error_code);
+  FUNCTION_INJECTION_BUILTIN(i18n_loc_get_error_code);
   return f_i18n_loc_get_error_code();
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

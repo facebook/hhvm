@@ -25,104 +25,60 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_debug_backtrace f_debug_backtrace
-#else
 inline Array x_debug_backtrace() {
-  FUNCTION_INJECTION(debug_backtrace);
+  FUNCTION_INJECTION_BUILTIN(debug_backtrace);
   return f_debug_backtrace();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_debug_print_backtrace f_debug_print_backtrace
-#else
 inline void x_debug_print_backtrace() {
-  FUNCTION_INJECTION(debug_print_backtrace);
+  FUNCTION_INJECTION_BUILTIN(debug_print_backtrace);
   f_debug_print_backtrace();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_error_get_last f_error_get_last
-#else
 inline Array x_error_get_last() {
-  FUNCTION_INJECTION(error_get_last);
+  FUNCTION_INJECTION_BUILTIN(error_get_last);
   return f_error_get_last();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_error_log f_error_log
-#else
 inline bool x_error_log(CStrRef message, int message_type = 0, CStrRef destination = null_string, CStrRef extra_headers = null_string) {
-  FUNCTION_INJECTION(error_log);
+  FUNCTION_INJECTION_BUILTIN(error_log);
   return f_error_log(message, message_type, destination, extra_headers);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_error_reporting f_error_reporting
-#else
 inline int x_error_reporting(int level = 0) {
-  FUNCTION_INJECTION(error_reporting);
+  FUNCTION_INJECTION_BUILTIN(error_reporting);
   return f_error_reporting(level);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_restore_error_handler f_restore_error_handler
-#else
 inline bool x_restore_error_handler() {
-  FUNCTION_INJECTION(restore_error_handler);
+  FUNCTION_INJECTION_BUILTIN(restore_error_handler);
   return f_restore_error_handler();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_restore_exception_handler f_restore_exception_handler
-#else
 inline bool x_restore_exception_handler() {
-  FUNCTION_INJECTION(restore_exception_handler);
+  FUNCTION_INJECTION_BUILTIN(restore_exception_handler);
   return f_restore_exception_handler();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_set_error_handler f_set_error_handler
-#else
 inline Variant x_set_error_handler(CStrRef error_handler, int error_types = 0) {
-  FUNCTION_INJECTION(set_error_handler);
+  FUNCTION_INJECTION_BUILTIN(set_error_handler);
   return f_set_error_handler(error_handler, error_types);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_set_exception_handler f_set_exception_handler
-#else
 inline String x_set_exception_handler(CStrRef exception_handler) {
-  FUNCTION_INJECTION(set_exception_handler);
+  FUNCTION_INJECTION_BUILTIN(set_exception_handler);
   return f_set_exception_handler(exception_handler);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_trigger_error f_trigger_error
-#else
 inline bool x_trigger_error(CStrRef error_msg, int error_type = k_E_USER_NOTICE) {
-  FUNCTION_INJECTION(trigger_error);
+  FUNCTION_INJECTION_BUILTIN(trigger_error);
   return f_trigger_error(error_msg, error_type);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_user_error f_user_error
-#else
 inline bool x_user_error(CStrRef error_msg, int error_type = k_E_USER_NOTICE) {
-  FUNCTION_INJECTION(user_error);
+  FUNCTION_INJECTION_BUILTIN(user_error);
   return f_user_error(error_msg, error_type);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

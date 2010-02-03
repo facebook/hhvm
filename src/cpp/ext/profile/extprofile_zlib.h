@@ -25,203 +25,115 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_readgzfile f_readgzfile
-#else
 inline Variant x_readgzfile(CStrRef filename, bool use_include_path = false) {
-  FUNCTION_INJECTION(readgzfile);
+  FUNCTION_INJECTION_BUILTIN(readgzfile);
   return f_readgzfile(filename, use_include_path);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzfile f_gzfile
-#else
 inline Variant x_gzfile(CStrRef filename, bool use_include_path = false) {
-  FUNCTION_INJECTION(gzfile);
+  FUNCTION_INJECTION_BUILTIN(gzfile);
   return f_gzfile(filename, use_include_path);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzcompress f_gzcompress
-#else
 inline Variant x_gzcompress(CStrRef data, int level = -1) {
-  FUNCTION_INJECTION(gzcompress);
+  FUNCTION_INJECTION_BUILTIN(gzcompress);
   return f_gzcompress(data, level);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzuncompress f_gzuncompress
-#else
 inline Variant x_gzuncompress(CStrRef data, int limit = 0) {
-  FUNCTION_INJECTION(gzuncompress);
+  FUNCTION_INJECTION_BUILTIN(gzuncompress);
   return f_gzuncompress(data, limit);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzdeflate f_gzdeflate
-#else
 inline Variant x_gzdeflate(CStrRef data, int level = -1) {
-  FUNCTION_INJECTION(gzdeflate);
+  FUNCTION_INJECTION_BUILTIN(gzdeflate);
   return f_gzdeflate(data, level);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzinflate f_gzinflate
-#else
 inline Variant x_gzinflate(CStrRef data, int limit = 0) {
-  FUNCTION_INJECTION(gzinflate);
+  FUNCTION_INJECTION_BUILTIN(gzinflate);
   return f_gzinflate(data, limit);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzencode f_gzencode
-#else
 inline Variant x_gzencode(CStrRef data, int level = -1, int encoding_mode = k_FORCE_GZIP) {
-  FUNCTION_INJECTION(gzencode);
+  FUNCTION_INJECTION_BUILTIN(gzencode);
   return f_gzencode(data, level, encoding_mode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzdecode f_gzdecode
-#else
 inline Variant x_gzdecode(CStrRef data) {
-  FUNCTION_INJECTION(gzdecode);
+  FUNCTION_INJECTION_BUILTIN(gzdecode);
   return f_gzdecode(data);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_zlib_get_coding_type f_zlib_get_coding_type
-#else
 inline String x_zlib_get_coding_type() {
-  FUNCTION_INJECTION(zlib_get_coding_type);
+  FUNCTION_INJECTION_BUILTIN(zlib_get_coding_type);
   return f_zlib_get_coding_type();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzopen f_gzopen
-#else
 inline Object x_gzopen(CStrRef filename, CStrRef mode, bool use_include_path = false) {
-  FUNCTION_INJECTION(gzopen);
+  FUNCTION_INJECTION_BUILTIN(gzopen);
   return f_gzopen(filename, mode, use_include_path);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzclose f_gzclose
-#else
 inline bool x_gzclose(CObjRef zp) {
-  FUNCTION_INJECTION(gzclose);
+  FUNCTION_INJECTION_BUILTIN(gzclose);
   return f_gzclose(zp);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzrewind f_gzrewind
-#else
 inline bool x_gzrewind(CObjRef zp) {
-  FUNCTION_INJECTION(gzrewind);
+  FUNCTION_INJECTION_BUILTIN(gzrewind);
   return f_gzrewind(zp);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzeof f_gzeof
-#else
 inline bool x_gzeof(CObjRef zp) {
-  FUNCTION_INJECTION(gzeof);
+  FUNCTION_INJECTION_BUILTIN(gzeof);
   return f_gzeof(zp);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzgetc f_gzgetc
-#else
 inline Variant x_gzgetc(CObjRef zp) {
-  FUNCTION_INJECTION(gzgetc);
+  FUNCTION_INJECTION_BUILTIN(gzgetc);
   return f_gzgetc(zp);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzgets f_gzgets
-#else
 inline String x_gzgets(CObjRef zp, int64 length = 1024) {
-  FUNCTION_INJECTION(gzgets);
+  FUNCTION_INJECTION_BUILTIN(gzgets);
   return f_gzgets(zp, length);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzgetss f_gzgetss
-#else
 inline String x_gzgetss(CObjRef zp, int64 length = 0, CStrRef allowable_tags = null_string) {
-  FUNCTION_INJECTION(gzgetss);
+  FUNCTION_INJECTION_BUILTIN(gzgetss);
   return f_gzgetss(zp, length, allowable_tags);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzread f_gzread
-#else
 inline Variant x_gzread(CObjRef zp, int64 length = 0) {
-  FUNCTION_INJECTION(gzread);
+  FUNCTION_INJECTION_BUILTIN(gzread);
   return f_gzread(zp, length);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzpassthru f_gzpassthru
-#else
 inline Variant x_gzpassthru(CObjRef zp) {
-  FUNCTION_INJECTION(gzpassthru);
+  FUNCTION_INJECTION_BUILTIN(gzpassthru);
   return f_gzpassthru(zp);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzseek f_gzseek
-#else
 inline Variant x_gzseek(CObjRef zp, int64 offset, int64 whence = SEEK_SET) {
-  FUNCTION_INJECTION(gzseek);
+  FUNCTION_INJECTION_BUILTIN(gzseek);
   return f_gzseek(zp, offset, whence);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gztell f_gztell
-#else
 inline Variant x_gztell(CObjRef zp) {
-  FUNCTION_INJECTION(gztell);
+  FUNCTION_INJECTION_BUILTIN(gztell);
   return f_gztell(zp);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzwrite f_gzwrite
-#else
 inline Variant x_gzwrite(CObjRef zp, CStrRef str, int64 length = 0) {
-  FUNCTION_INJECTION(gzwrite);
+  FUNCTION_INJECTION_BUILTIN(gzwrite);
   return f_gzwrite(zp, str, length);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gzputs f_gzputs
-#else
 inline Variant x_gzputs(CObjRef zp, CStrRef str, int64 length = 0) {
-  FUNCTION_INJECTION(gzputs);
+  FUNCTION_INJECTION_BUILTIN(gzputs);
   return f_gzputs(zp, str, length);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

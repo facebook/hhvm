@@ -25,86 +25,50 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_override_function f_override_function
-#else
 inline bool x_override_function(CStrRef name, CStrRef args, CStrRef code) {
-  FUNCTION_INJECTION(override_function);
+  FUNCTION_INJECTION_BUILTIN(override_function);
   return f_override_function(name, args, code);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_rename_function f_rename_function
-#else
 inline bool x_rename_function(CStrRef orig_name, CStrRef new_name) {
-  FUNCTION_INJECTION(rename_function);
+  FUNCTION_INJECTION_BUILTIN(rename_function);
   return f_rename_function(orig_name, new_name);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apd_set_browser_trace f_apd_set_browser_trace
-#else
 inline void x_apd_set_browser_trace() {
-  FUNCTION_INJECTION(apd_set_browser_trace);
+  FUNCTION_INJECTION_BUILTIN(apd_set_browser_trace);
   f_apd_set_browser_trace();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apd_set_pprof_trace f_apd_set_pprof_trace
-#else
 inline String x_apd_set_pprof_trace(CStrRef dumpdir = null_string, CStrRef frament = null_string) {
-  FUNCTION_INJECTION(apd_set_pprof_trace);
+  FUNCTION_INJECTION_BUILTIN(apd_set_pprof_trace);
   return f_apd_set_pprof_trace(dumpdir, frament);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apd_set_session_trace_socket f_apd_set_session_trace_socket
-#else
 inline bool x_apd_set_session_trace_socket(CStrRef ip_or_filename, int domain, int port, int mask) {
-  FUNCTION_INJECTION(apd_set_session_trace_socket);
+  FUNCTION_INJECTION_BUILTIN(apd_set_session_trace_socket);
   return f_apd_set_session_trace_socket(ip_or_filename, domain, port, mask);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apd_stop_trace f_apd_stop_trace
-#else
 inline void x_apd_stop_trace() {
-  FUNCTION_INJECTION(apd_stop_trace);
+  FUNCTION_INJECTION_BUILTIN(apd_stop_trace);
   f_apd_stop_trace();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apd_breakpoint f_apd_breakpoint
-#else
 inline bool x_apd_breakpoint() {
-  FUNCTION_INJECTION(apd_breakpoint);
+  FUNCTION_INJECTION_BUILTIN(apd_breakpoint);
   return f_apd_breakpoint();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apd_continue f_apd_continue
-#else
 inline bool x_apd_continue() {
-  FUNCTION_INJECTION(apd_continue);
+  FUNCTION_INJECTION_BUILTIN(apd_continue);
   return f_apd_continue();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apd_echo f_apd_echo
-#else
 inline bool x_apd_echo(CStrRef output) {
-  FUNCTION_INJECTION(apd_echo);
+  FUNCTION_INJECTION_BUILTIN(apd_echo);
   return f_apd_echo(output);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

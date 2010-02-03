@@ -25,275 +25,155 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_is_bool f_is_bool
-#else
 inline bool x_is_bool(CVarRef var) {
-  FUNCTION_INJECTION(is_bool);
+  FUNCTION_INJECTION_BUILTIN(is_bool);
   return f_is_bool(var);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_int f_is_int
-#else
 inline bool x_is_int(CVarRef var) {
-  FUNCTION_INJECTION(is_int);
+  FUNCTION_INJECTION_BUILTIN(is_int);
   return f_is_int(var);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_integer f_is_integer
-#else
 inline bool x_is_integer(CVarRef var) {
-  FUNCTION_INJECTION(is_integer);
+  FUNCTION_INJECTION_BUILTIN(is_integer);
   return f_is_integer(var);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_long f_is_long
-#else
 inline bool x_is_long(CVarRef var) {
-  FUNCTION_INJECTION(is_long);
+  FUNCTION_INJECTION_BUILTIN(is_long);
   return f_is_long(var);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_double f_is_double
-#else
 inline bool x_is_double(CVarRef var) {
-  FUNCTION_INJECTION(is_double);
+  FUNCTION_INJECTION_BUILTIN(is_double);
   return f_is_double(var);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_float f_is_float
-#else
 inline bool x_is_float(CVarRef var) {
-  FUNCTION_INJECTION(is_float);
+  FUNCTION_INJECTION_BUILTIN(is_float);
   return f_is_float(var);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_numeric f_is_numeric
-#else
 inline bool x_is_numeric(CVarRef var) {
-  FUNCTION_INJECTION(is_numeric);
+  FUNCTION_INJECTION_BUILTIN(is_numeric);
   return f_is_numeric(var);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_real f_is_real
-#else
 inline bool x_is_real(CVarRef var) {
-  FUNCTION_INJECTION(is_real);
+  FUNCTION_INJECTION_BUILTIN(is_real);
   return f_is_real(var);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_string f_is_string
-#else
 inline bool x_is_string(CVarRef var) {
-  FUNCTION_INJECTION(is_string);
+  FUNCTION_INJECTION_BUILTIN(is_string);
   return f_is_string(var);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_scalar f_is_scalar
-#else
 inline bool x_is_scalar(CVarRef var) {
-  FUNCTION_INJECTION(is_scalar);
+  FUNCTION_INJECTION_BUILTIN(is_scalar);
   return f_is_scalar(var);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_array f_is_array
-#else
 inline bool x_is_array(CVarRef var) {
-  FUNCTION_INJECTION(is_array);
+  FUNCTION_INJECTION_BUILTIN(is_array);
   return f_is_array(var);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_object f_is_object
-#else
 inline bool x_is_object(CVarRef var) {
-  FUNCTION_INJECTION(is_object);
+  FUNCTION_INJECTION_BUILTIN(is_object);
   return f_is_object(var);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_resource f_is_resource
-#else
 inline bool x_is_resource(CVarRef var) {
-  FUNCTION_INJECTION(is_resource);
+  FUNCTION_INJECTION_BUILTIN(is_resource);
   return f_is_resource(var);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_null f_is_null
-#else
 inline bool x_is_null(CVarRef var) {
-  FUNCTION_INJECTION(is_null);
+  FUNCTION_INJECTION_BUILTIN(is_null);
   return f_is_null(var);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gettype f_gettype
-#else
 inline String x_gettype(CVarRef v) {
-  FUNCTION_INJECTION(gettype);
+  FUNCTION_INJECTION_BUILTIN(gettype);
   return f_gettype(v);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_get_resource_type f_get_resource_type
-#else
 inline String x_get_resource_type(CObjRef handle) {
-  FUNCTION_INJECTION(get_resource_type);
+  FUNCTION_INJECTION_BUILTIN(get_resource_type);
   return f_get_resource_type(handle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_intval f_intval
-#else
 inline int64 x_intval(CVarRef v, int64 base = 10) {
-  FUNCTION_INJECTION(intval);
+  FUNCTION_INJECTION_BUILTIN(intval);
   return f_intval(v, base);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_doubleval f_doubleval
-#else
 inline double x_doubleval(CVarRef v) {
-  FUNCTION_INJECTION(doubleval);
+  FUNCTION_INJECTION_BUILTIN(doubleval);
   return f_doubleval(v);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_floatval f_floatval
-#else
 inline double x_floatval(CVarRef v) {
-  FUNCTION_INJECTION(floatval);
+  FUNCTION_INJECTION_BUILTIN(floatval);
   return f_floatval(v);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strval f_strval
-#else
 inline String x_strval(CVarRef v) {
-  FUNCTION_INJECTION(strval);
+  FUNCTION_INJECTION_BUILTIN(strval);
   return f_strval(v);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_settype f_settype
-#else
 inline bool x_settype(Variant var, CStrRef type) {
-  FUNCTION_INJECTION(settype);
+  FUNCTION_INJECTION_BUILTIN(settype);
   return f_settype(ref(var), type);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_print_r f_print_r
-#else
 inline Variant x_print_r(CVarRef expression, bool ret = false) {
-  FUNCTION_INJECTION(print_r);
+  FUNCTION_INJECTION_BUILTIN(print_r);
   return f_print_r(expression, ret);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_var_export f_var_export
-#else
 inline Variant x_var_export(CVarRef expression, bool ret = false) {
-  FUNCTION_INJECTION(var_export);
+  FUNCTION_INJECTION_BUILTIN(var_export);
   return f_var_export(expression, ret);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_var_dump f_var_dump
-#else
 inline void x_var_dump(int _argc, CVarRef expression, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(var_dump);
+  FUNCTION_INJECTION_BUILTIN(var_dump);
   f_var_dump(_argc, expression, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_debug_zval_dump f_debug_zval_dump
-#else
 inline void x_debug_zval_dump(CVarRef variable) {
-  FUNCTION_INJECTION(debug_zval_dump);
+  FUNCTION_INJECTION_BUILTIN(debug_zval_dump);
   f_debug_zval_dump(variable);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_serialize f_serialize
-#else
 inline String x_serialize(CVarRef value) {
-  FUNCTION_INJECTION(serialize);
+  FUNCTION_INJECTION_BUILTIN(serialize);
   return f_serialize(value);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_unserialize f_unserialize
-#else
 inline Variant x_unserialize(CStrRef str) {
-  FUNCTION_INJECTION(unserialize);
+  FUNCTION_INJECTION_BUILTIN(unserialize);
   return f_unserialize(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_get_defined_vars f_get_defined_vars
-#else
 inline Array x_get_defined_vars() {
-  FUNCTION_INJECTION(get_defined_vars);
+  FUNCTION_INJECTION_BUILTIN(get_defined_vars);
   return f_get_defined_vars();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_import_request_variables f_import_request_variables
-#else
 inline bool x_import_request_variables(CStrRef types, CStrRef prefix = "") {
-  FUNCTION_INJECTION(import_request_variables);
+  FUNCTION_INJECTION_BUILTIN(import_request_variables);
   return f_import_request_variables(types, prefix);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_extract f_extract
-#else
 inline int x_extract(CArrRef var_array, int extract_type = EXTR_OVERWRITE, CStrRef prefix = "") {
-  FUNCTION_INJECTION(extract);
+  FUNCTION_INJECTION_BUILTIN(extract);
   return f_extract(var_array, extract_type, prefix);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

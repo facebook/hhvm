@@ -25,176 +25,100 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_add f_apc_add
-#else
 inline bool x_apc_add(CStrRef key, CVarRef var, int64 ttl = 0, int64 cache_id = 0) {
-  FUNCTION_INJECTION(apc_add);
+  FUNCTION_INJECTION_BUILTIN(apc_add);
   return f_apc_add(key, var, ttl, cache_id);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_store f_apc_store
-#else
 inline bool x_apc_store(CStrRef key, CVarRef var, int64 ttl = 0, int64 cache_id = 0) {
-  FUNCTION_INJECTION(apc_store);
+  FUNCTION_INJECTION_BUILTIN(apc_store);
   return f_apc_store(key, var, ttl, cache_id);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_fetch f_apc_fetch
-#else
 inline Variant x_apc_fetch(CVarRef key, Variant success = null, int64 cache_id = 0) {
-  FUNCTION_INJECTION(apc_fetch);
+  FUNCTION_INJECTION_BUILTIN(apc_fetch);
   return f_apc_fetch(key, ref(success), cache_id);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_delete f_apc_delete
-#else
 inline Variant x_apc_delete(CVarRef key, int64 cache_id = 0) {
-  FUNCTION_INJECTION(apc_delete);
+  FUNCTION_INJECTION_BUILTIN(apc_delete);
   return f_apc_delete(key, cache_id);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_compile_file f_apc_compile_file
-#else
 inline bool x_apc_compile_file(CStrRef filename, bool atomic = true, int64 cache_id = 0) {
-  FUNCTION_INJECTION(apc_compile_file);
+  FUNCTION_INJECTION_BUILTIN(apc_compile_file);
   return f_apc_compile_file(filename, atomic, cache_id);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_cache_info f_apc_cache_info
-#else
 inline Variant x_apc_cache_info(int64 cache_id = 0, bool limited = false) {
-  FUNCTION_INJECTION(apc_cache_info);
+  FUNCTION_INJECTION_BUILTIN(apc_cache_info);
   return f_apc_cache_info(cache_id, limited);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_clear_cache f_apc_clear_cache
-#else
 inline bool x_apc_clear_cache(int64 cache_id = 0) {
-  FUNCTION_INJECTION(apc_clear_cache);
+  FUNCTION_INJECTION_BUILTIN(apc_clear_cache);
   return f_apc_clear_cache(cache_id);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_define_constants f_apc_define_constants
-#else
 inline bool x_apc_define_constants(CStrRef key, CStrRef constants, bool case_sensitive = true, int64 cache_id = 0) {
-  FUNCTION_INJECTION(apc_define_constants);
+  FUNCTION_INJECTION_BUILTIN(apc_define_constants);
   return f_apc_define_constants(key, constants, case_sensitive, cache_id);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_load_constants f_apc_load_constants
-#else
 inline bool x_apc_load_constants(CStrRef key, bool case_sensitive = true, int64 cache_id = 0) {
-  FUNCTION_INJECTION(apc_load_constants);
+  FUNCTION_INJECTION_BUILTIN(apc_load_constants);
   return f_apc_load_constants(key, case_sensitive, cache_id);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_sma_info f_apc_sma_info
-#else
 inline Array x_apc_sma_info(bool limited = false) {
-  FUNCTION_INJECTION(apc_sma_info);
+  FUNCTION_INJECTION_BUILTIN(apc_sma_info);
   return f_apc_sma_info(limited);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_filehits f_apc_filehits
-#else
 inline Array x_apc_filehits() {
-  FUNCTION_INJECTION(apc_filehits);
+  FUNCTION_INJECTION_BUILTIN(apc_filehits);
   return f_apc_filehits();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_delete_file f_apc_delete_file
-#else
 inline Variant x_apc_delete_file(CVarRef keys, int64 cache_id = 0) {
-  FUNCTION_INJECTION(apc_delete_file);
+  FUNCTION_INJECTION_BUILTIN(apc_delete_file);
   return f_apc_delete_file(keys, cache_id);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_inc f_apc_inc
-#else
 inline Variant x_apc_inc(CStrRef key, int64 step = 1, Variant success = null, int64 cache_id = 0) {
-  FUNCTION_INJECTION(apc_inc);
+  FUNCTION_INJECTION_BUILTIN(apc_inc);
   return f_apc_inc(key, step, ref(success), cache_id);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_dec f_apc_dec
-#else
 inline Variant x_apc_dec(CStrRef key, int64 step = 1, Variant success = null, int64 cache_id = 0) {
-  FUNCTION_INJECTION(apc_dec);
+  FUNCTION_INJECTION_BUILTIN(apc_dec);
   return f_apc_dec(key, step, ref(success), cache_id);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_cas f_apc_cas
-#else
 inline bool x_apc_cas(CStrRef key, int64 old_cas, int64 new_cas, int64 cache_id = 0) {
-  FUNCTION_INJECTION(apc_cas);
+  FUNCTION_INJECTION_BUILTIN(apc_cas);
   return f_apc_cas(key, old_cas, new_cas, cache_id);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_bin_dump f_apc_bin_dump
-#else
 inline Variant x_apc_bin_dump(int64 cache_id = 0, CVarRef filter = null_variant) {
-  FUNCTION_INJECTION(apc_bin_dump);
+  FUNCTION_INJECTION_BUILTIN(apc_bin_dump);
   return f_apc_bin_dump(cache_id, filter);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_bin_load f_apc_bin_load
-#else
 inline bool x_apc_bin_load(CStrRef data, int64 flags = 0, int64 cache_id = 0) {
-  FUNCTION_INJECTION(apc_bin_load);
+  FUNCTION_INJECTION_BUILTIN(apc_bin_load);
   return f_apc_bin_load(data, flags, cache_id);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_bin_dumpfile f_apc_bin_dumpfile
-#else
 inline Variant x_apc_bin_dumpfile(int64 cache_id, CVarRef filter, CStrRef filename, int64 flags = 0, CObjRef context = null) {
-  FUNCTION_INJECTION(apc_bin_dumpfile);
+  FUNCTION_INJECTION_BUILTIN(apc_bin_dumpfile);
   return f_apc_bin_dumpfile(cache_id, filter, filename, flags, context);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_apc_bin_loadfile f_apc_bin_loadfile
-#else
 inline bool x_apc_bin_loadfile(CStrRef filename, CObjRef context = null, int64 flags = 0, int64 cache_id = 0) {
-  FUNCTION_INJECTION(apc_bin_loadfile);
+  FUNCTION_INJECTION_BUILTIN(apc_bin_loadfile);
   return f_apc_bin_loadfile(filename, context, flags, cache_id);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

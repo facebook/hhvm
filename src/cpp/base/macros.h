@@ -273,10 +273,13 @@ namespace HPHP {
 #ifdef HOTPROFILER
 #define HOTPROFILER_INJECTION(n) ProfilerInjection pi(#n);
 #ifndef HOTPROFILER_NO_BUILTIN
-#define PROFILE_BUILTIN
+#define HOTPROFILER_INJECTION_BUILTIN(n) ProfilerInjection pi(#n);
+#else
+#define HOTPROFILER_INJECTION_BUILTIN(n)
 #endif
 #else
 #define HOTPROFILER_INJECTION(n)
+#define HOTPROFILER_INJECTION_BUILTIN(n)
 #endif
 
 #ifdef STACK_FRAME_INJECTION
@@ -307,6 +310,26 @@ namespace HPHP {
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION(n)                      \
   FRAME_INJECTION_WITH_THIS(c, n)               \
+
+// code injected into every builtin function/method
+#define FUNCTION_INJECTION_BUILTIN(n)           \
+  RECURSION_INJECTION                           \
+  REQUEST_TIMEOUT_INJECTION                     \
+  HOTPROFILER_INJECTION_BUILTIN(n)              \
+  FRAME_INJECTION(, n)                          \
+
+#define STATIC_METHOD_INJECTION_BUILTIN(c, n)   \
+  RECURSION_INJECTION                           \
+  REQUEST_TIMEOUT_INJECTION                     \
+  HOTPROFILER_INJECTION_BUILTIN(n)              \
+  FRAME_INJECTION(c, n)                         \
+
+#define INSTANCE_METHOD_INJECTION_BUILTIN(c, n) \
+  RECURSION_INJECTION                           \
+  REQUEST_TIMEOUT_INJECTION                     \
+  HOTPROFILER_INJECTION_BUILTIN(n)              \
+  FRAME_INJECTION_WITH_THIS(c, n)               \
+
 
 // for collecting function/method parameter type information at runtime
 #define RTTI_INJECTION(v, id)                   \

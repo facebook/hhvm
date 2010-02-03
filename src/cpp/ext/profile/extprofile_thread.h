@@ -25,32 +25,20 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_hphp_service_thread_started f_hphp_service_thread_started
-#else
 inline void x_hphp_service_thread_started() {
-  FUNCTION_INJECTION(hphp_service_thread_started);
+  FUNCTION_INJECTION_BUILTIN(hphp_service_thread_started);
   f_hphp_service_thread_started();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hphp_thread_is_warmup_enabled f_hphp_thread_is_warmup_enabled
-#else
 inline bool x_hphp_thread_is_warmup_enabled() {
-  FUNCTION_INJECTION(hphp_thread_is_warmup_enabled);
+  FUNCTION_INJECTION_BUILTIN(hphp_thread_is_warmup_enabled);
   return f_hphp_thread_is_warmup_enabled();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hphp_thread_set_warmup_enabled f_hphp_thread_set_warmup_enabled
-#else
 inline void x_hphp_thread_set_warmup_enabled() {
-  FUNCTION_INJECTION(hphp_thread_set_warmup_enabled);
+  FUNCTION_INJECTION_BUILTIN(hphp_thread_set_warmup_enabled);
   f_hphp_thread_set_warmup_enabled();
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

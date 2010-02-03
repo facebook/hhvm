@@ -100,7 +100,7 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
       } else if (sclass == "parent") {
         sclass = FrameInjection::getParentClassName(true);
       }
-      ObjectData *obj = FrameInjection::getThis();
+      ObjectData *obj = FrameInjection::getThis(true);
       if (obj != NULL && instanceOf(Object(obj), sclass.c_str())) {
         return obj->o_invoke_ex(sclass.c_str(), method.c_str(), param_arr, -1,
                                 false);

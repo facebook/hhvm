@@ -25,95 +25,55 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_base64_decode f_base64_decode
-#else
 inline Variant x_base64_decode(CStrRef data, bool strict = false) {
-  FUNCTION_INJECTION(base64_decode);
+  FUNCTION_INJECTION_BUILTIN(base64_decode);
   return f_base64_decode(data, strict);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_base64_encode f_base64_encode
-#else
 inline String x_base64_encode(CStrRef data) {
-  FUNCTION_INJECTION(base64_encode);
+  FUNCTION_INJECTION_BUILTIN(base64_encode);
   return f_base64_encode(data);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_get_headers f_get_headers
-#else
 inline Variant x_get_headers(CStrRef url, int format = 0) {
-  FUNCTION_INJECTION(get_headers);
+  FUNCTION_INJECTION_BUILTIN(get_headers);
   return f_get_headers(url, format);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_get_meta_tags f_get_meta_tags
-#else
 inline Array x_get_meta_tags(CStrRef filename, bool use_include_path = false) {
-  FUNCTION_INJECTION(get_meta_tags);
+  FUNCTION_INJECTION_BUILTIN(get_meta_tags);
   return f_get_meta_tags(filename, use_include_path);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_http_build_query f_http_build_query
-#else
 inline String x_http_build_query(CVarRef formdata, CStrRef numeric_prefix = null_string, CStrRef arg_separator = "&") {
-  FUNCTION_INJECTION(http_build_query);
+  FUNCTION_INJECTION_BUILTIN(http_build_query);
   return f_http_build_query(formdata, numeric_prefix, arg_separator);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_parse_url f_parse_url
-#else
 inline Variant x_parse_url(CStrRef url, int component = -1) {
-  FUNCTION_INJECTION(parse_url);
+  FUNCTION_INJECTION_BUILTIN(parse_url);
   return f_parse_url(url, component);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_rawurldecode f_rawurldecode
-#else
 inline String x_rawurldecode(CStrRef str) {
-  FUNCTION_INJECTION(rawurldecode);
+  FUNCTION_INJECTION_BUILTIN(rawurldecode);
   return f_rawurldecode(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_rawurlencode f_rawurlencode
-#else
 inline String x_rawurlencode(CStrRef str) {
-  FUNCTION_INJECTION(rawurlencode);
+  FUNCTION_INJECTION_BUILTIN(rawurlencode);
   return f_rawurlencode(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_urldecode f_urldecode
-#else
 inline String x_urldecode(CStrRef str) {
-  FUNCTION_INJECTION(urldecode);
+  FUNCTION_INJECTION_BUILTIN(urldecode);
   return f_urldecode(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_urlencode f_urlencode
-#else
 inline String x_urlencode(CStrRef str) {
-  FUNCTION_INJECTION(urlencode);
+  FUNCTION_INJECTION_BUILTIN(urlencode);
   return f_urlencode(str);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

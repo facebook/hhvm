@@ -25,248 +25,140 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_connection_aborted f_connection_aborted
-#else
 inline int x_connection_aborted() {
-  FUNCTION_INJECTION(connection_aborted);
+  FUNCTION_INJECTION_BUILTIN(connection_aborted);
   return f_connection_aborted();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_connection_status f_connection_status
-#else
 inline int x_connection_status() {
-  FUNCTION_INJECTION(connection_status);
+  FUNCTION_INJECTION_BUILTIN(connection_status);
   return f_connection_status();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_connection_timeout f_connection_timeout
-#else
 inline int x_connection_timeout() {
-  FUNCTION_INJECTION(connection_timeout);
+  FUNCTION_INJECTION_BUILTIN(connection_timeout);
   return f_connection_timeout();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_constant f_constant
-#else
 inline Variant x_constant(CStrRef name) {
-  FUNCTION_INJECTION(constant);
+  FUNCTION_INJECTION_BUILTIN(constant);
   return f_constant(name);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_define f_define
-#else
 inline bool x_define(CStrRef name, CVarRef value, bool case_insensitive = false) {
-  FUNCTION_INJECTION(define);
+  FUNCTION_INJECTION_BUILTIN(define);
   return f_define(name, value, case_insensitive);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_defined f_defined
-#else
 inline bool x_defined(CStrRef name) {
-  FUNCTION_INJECTION(defined);
+  FUNCTION_INJECTION_BUILTIN(defined);
   return f_defined(name);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_die f_die
-#else
 inline Variant x_die(CVarRef status = null_variant) {
-  FUNCTION_INJECTION(die);
+  FUNCTION_INJECTION_BUILTIN(die);
   return f_die(status);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_exit f_exit
-#else
 inline Variant x_exit(CVarRef status = null_variant) {
-  FUNCTION_INJECTION(exit);
+  FUNCTION_INJECTION_BUILTIN(exit);
   return f_exit(status);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_eval f_eval
-#else
 inline Variant x_eval(CStrRef code_str) {
-  FUNCTION_INJECTION(eval);
+  FUNCTION_INJECTION_BUILTIN(eval);
   return f_eval(code_str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_get_browser f_get_browser
-#else
 inline Variant x_get_browser(CStrRef user_agent = null_string, bool return_array = false) {
-  FUNCTION_INJECTION(get_browser);
+  FUNCTION_INJECTION_BUILTIN(get_browser);
   return f_get_browser(user_agent, return_array);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x___halt_compiler f___halt_compiler
-#else
 inline void x___halt_compiler() {
-  FUNCTION_INJECTION(__halt_compiler);
+  FUNCTION_INJECTION_BUILTIN(__halt_compiler);
   f___halt_compiler();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_highlight_file f_highlight_file
-#else
 inline Variant x_highlight_file(CStrRef filename, bool ret = false) {
-  FUNCTION_INJECTION(highlight_file);
+  FUNCTION_INJECTION_BUILTIN(highlight_file);
   return f_highlight_file(filename, ret);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_show_source f_show_source
-#else
 inline Variant x_show_source(CStrRef filename, bool ret = false) {
-  FUNCTION_INJECTION(show_source);
+  FUNCTION_INJECTION_BUILTIN(show_source);
   return f_show_source(filename, ret);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_highlight_string f_highlight_string
-#else
 inline Variant x_highlight_string(CStrRef str, bool ret = false) {
-  FUNCTION_INJECTION(highlight_string);
+  FUNCTION_INJECTION_BUILTIN(highlight_string);
   return f_highlight_string(str, ret);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ignore_user_abort f_ignore_user_abort
-#else
 inline int x_ignore_user_abort(bool setting = false) {
-  FUNCTION_INJECTION(ignore_user_abort);
+  FUNCTION_INJECTION_BUILTIN(ignore_user_abort);
   return f_ignore_user_abort(setting);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pack f_pack
-#else
 inline String x_pack(int _argc, CStrRef format, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(pack);
+  FUNCTION_INJECTION_BUILTIN(pack);
   return f_pack(_argc, format, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_php_check_syntax f_php_check_syntax
-#else
 inline bool x_php_check_syntax(CStrRef filename, Variant error_message = null) {
-  FUNCTION_INJECTION(php_check_syntax);
+  FUNCTION_INJECTION_BUILTIN(php_check_syntax);
   return f_php_check_syntax(filename, ref(error_message));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_php_strip_whitespace f_php_strip_whitespace
-#else
 inline String x_php_strip_whitespace(CStrRef filename) {
-  FUNCTION_INJECTION(php_strip_whitespace);
+  FUNCTION_INJECTION_BUILTIN(php_strip_whitespace);
   return f_php_strip_whitespace(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_sleep f_sleep
-#else
 inline int x_sleep(int seconds) {
-  FUNCTION_INJECTION(sleep);
+  FUNCTION_INJECTION_BUILTIN(sleep);
   return f_sleep(seconds);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_usleep f_usleep
-#else
 inline void x_usleep(int micro_seconds) {
-  FUNCTION_INJECTION(usleep);
+  FUNCTION_INJECTION_BUILTIN(usleep);
   f_usleep(micro_seconds);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_time_nanosleep f_time_nanosleep
-#else
 inline Variant x_time_nanosleep(int seconds, int nanoseconds) {
-  FUNCTION_INJECTION(time_nanosleep);
+  FUNCTION_INJECTION_BUILTIN(time_nanosleep);
   return f_time_nanosleep(seconds, nanoseconds);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_time_sleep_until f_time_sleep_until
-#else
 inline bool x_time_sleep_until(double timestamp) {
-  FUNCTION_INJECTION(time_sleep_until);
+  FUNCTION_INJECTION_BUILTIN(time_sleep_until);
   return f_time_sleep_until(timestamp);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_uniqid f_uniqid
-#else
 inline String x_uniqid(CStrRef prefix = null_string, bool more_entropy = false) {
-  FUNCTION_INJECTION(uniqid);
+  FUNCTION_INJECTION_BUILTIN(uniqid);
   return f_uniqid(prefix, more_entropy);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_unpack f_unpack
-#else
 inline Array x_unpack(CStrRef format, CStrRef data) {
-  FUNCTION_INJECTION(unpack);
+  FUNCTION_INJECTION_BUILTIN(unpack);
   return f_unpack(format, data);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_sys_getloadavg f_sys_getloadavg
-#else
 inline Array x_sys_getloadavg() {
-  FUNCTION_INJECTION(sys_getloadavg);
+  FUNCTION_INJECTION_BUILTIN(sys_getloadavg);
   return f_sys_getloadavg();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_token_get_all f_token_get_all
-#else
 inline Array x_token_get_all(CStrRef source) {
-  FUNCTION_INJECTION(token_get_all);
+  FUNCTION_INJECTION_BUILTIN(token_get_all);
   return f_token_get_all(source);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_token_name f_token_name
-#else
 inline String x_token_name(int64 token) {
-  FUNCTION_INJECTION(token_name);
+  FUNCTION_INJECTION_BUILTIN(token_name);
   return f_token_name(token);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

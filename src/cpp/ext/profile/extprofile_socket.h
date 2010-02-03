@@ -25,239 +25,135 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_create f_socket_create
-#else
 inline Variant x_socket_create(int domain, int type, int protocol) {
-  FUNCTION_INJECTION(socket_create);
+  FUNCTION_INJECTION_BUILTIN(socket_create);
   return f_socket_create(domain, type, protocol);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_create_listen f_socket_create_listen
-#else
 inline Variant x_socket_create_listen(int port, int backlog = 128) {
-  FUNCTION_INJECTION(socket_create_listen);
+  FUNCTION_INJECTION_BUILTIN(socket_create_listen);
   return f_socket_create_listen(port, backlog);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_create_pair f_socket_create_pair
-#else
 inline bool x_socket_create_pair(int domain, int type, int protocol, Variant fd) {
-  FUNCTION_INJECTION(socket_create_pair);
+  FUNCTION_INJECTION_BUILTIN(socket_create_pair);
   return f_socket_create_pair(domain, type, protocol, ref(fd));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_get_option f_socket_get_option
-#else
 inline Variant x_socket_get_option(CObjRef socket, int level, int optname) {
-  FUNCTION_INJECTION(socket_get_option);
+  FUNCTION_INJECTION_BUILTIN(socket_get_option);
   return f_socket_get_option(socket, level, optname);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_getpeername f_socket_getpeername
-#else
 inline bool x_socket_getpeername(CObjRef socket, Variant address, Variant port = null) {
-  FUNCTION_INJECTION(socket_getpeername);
+  FUNCTION_INJECTION_BUILTIN(socket_getpeername);
   return f_socket_getpeername(socket, ref(address), ref(port));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_getsockname f_socket_getsockname
-#else
 inline bool x_socket_getsockname(CObjRef socket, Variant address, Variant port = null) {
-  FUNCTION_INJECTION(socket_getsockname);
+  FUNCTION_INJECTION_BUILTIN(socket_getsockname);
   return f_socket_getsockname(socket, ref(address), ref(port));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_set_block f_socket_set_block
-#else
 inline bool x_socket_set_block(CObjRef socket) {
-  FUNCTION_INJECTION(socket_set_block);
+  FUNCTION_INJECTION_BUILTIN(socket_set_block);
   return f_socket_set_block(socket);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_set_nonblock f_socket_set_nonblock
-#else
 inline bool x_socket_set_nonblock(CObjRef socket) {
-  FUNCTION_INJECTION(socket_set_nonblock);
+  FUNCTION_INJECTION_BUILTIN(socket_set_nonblock);
   return f_socket_set_nonblock(socket);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_set_option f_socket_set_option
-#else
 inline bool x_socket_set_option(CObjRef socket, int level, int optname, CVarRef optval) {
-  FUNCTION_INJECTION(socket_set_option);
+  FUNCTION_INJECTION_BUILTIN(socket_set_option);
   return f_socket_set_option(socket, level, optname, optval);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_connect f_socket_connect
-#else
 inline bool x_socket_connect(CObjRef socket, CStrRef address, int port = 0) {
-  FUNCTION_INJECTION(socket_connect);
+  FUNCTION_INJECTION_BUILTIN(socket_connect);
   return f_socket_connect(socket, address, port);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_bind f_socket_bind
-#else
 inline bool x_socket_bind(CObjRef socket, CStrRef address, int port = 0) {
-  FUNCTION_INJECTION(socket_bind);
+  FUNCTION_INJECTION_BUILTIN(socket_bind);
   return f_socket_bind(socket, address, port);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_listen f_socket_listen
-#else
 inline bool x_socket_listen(CObjRef socket, int backlog = 0) {
-  FUNCTION_INJECTION(socket_listen);
+  FUNCTION_INJECTION_BUILTIN(socket_listen);
   return f_socket_listen(socket, backlog);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_select f_socket_select
-#else
 inline Variant x_socket_select(Variant read, Variant write, Variant except, CVarRef vtv_sec, int tv_usec = 0) {
-  FUNCTION_INJECTION(socket_select);
+  FUNCTION_INJECTION_BUILTIN(socket_select);
   return f_socket_select(ref(read), ref(write), ref(except), vtv_sec, tv_usec);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_server f_socket_server
-#else
 inline Variant x_socket_server(CStrRef hostname, int port = -1, Variant errnum = null, Variant errstr = null) {
-  FUNCTION_INJECTION(socket_server);
+  FUNCTION_INJECTION_BUILTIN(socket_server);
   return f_socket_server(hostname, port, ref(errnum), ref(errstr));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_accept f_socket_accept
-#else
 inline Variant x_socket_accept(CObjRef socket) {
-  FUNCTION_INJECTION(socket_accept);
+  FUNCTION_INJECTION_BUILTIN(socket_accept);
   return f_socket_accept(socket);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_read f_socket_read
-#else
 inline Variant x_socket_read(CObjRef socket, int length, int type = 0) {
-  FUNCTION_INJECTION(socket_read);
+  FUNCTION_INJECTION_BUILTIN(socket_read);
   return f_socket_read(socket, length, type);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_write f_socket_write
-#else
 inline Variant x_socket_write(CObjRef socket, CStrRef buffer, int length = 0) {
-  FUNCTION_INJECTION(socket_write);
+  FUNCTION_INJECTION_BUILTIN(socket_write);
   return f_socket_write(socket, buffer, length);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_send f_socket_send
-#else
 inline Variant x_socket_send(CObjRef socket, CStrRef buf, int len, int flags) {
-  FUNCTION_INJECTION(socket_send);
+  FUNCTION_INJECTION_BUILTIN(socket_send);
   return f_socket_send(socket, buf, len, flags);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_sendto f_socket_sendto
-#else
 inline Variant x_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags, CStrRef addr, int port = 0) {
-  FUNCTION_INJECTION(socket_sendto);
+  FUNCTION_INJECTION_BUILTIN(socket_sendto);
   return f_socket_sendto(socket, buf, len, flags, addr, port);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_recv f_socket_recv
-#else
 inline Variant x_socket_recv(CObjRef socket, Variant buf, int len, int flags) {
-  FUNCTION_INJECTION(socket_recv);
+  FUNCTION_INJECTION_BUILTIN(socket_recv);
   return f_socket_recv(socket, ref(buf), len, flags);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_recvfrom f_socket_recvfrom
-#else
 inline Variant x_socket_recvfrom(CObjRef socket, Variant buf, int len, int flags, Variant name, Variant port = 0) {
-  FUNCTION_INJECTION(socket_recvfrom);
+  FUNCTION_INJECTION_BUILTIN(socket_recvfrom);
   return f_socket_recvfrom(socket, ref(buf), len, flags, ref(name), ref(port));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_shutdown f_socket_shutdown
-#else
 inline bool x_socket_shutdown(CObjRef socket, int how = 0) {
-  FUNCTION_INJECTION(socket_shutdown);
+  FUNCTION_INJECTION_BUILTIN(socket_shutdown);
   return f_socket_shutdown(socket, how);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_close f_socket_close
-#else
 inline void x_socket_close(CObjRef socket) {
-  FUNCTION_INJECTION(socket_close);
+  FUNCTION_INJECTION_BUILTIN(socket_close);
   f_socket_close(socket);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_strerror f_socket_strerror
-#else
 inline String x_socket_strerror(int errnum) {
-  FUNCTION_INJECTION(socket_strerror);
+  FUNCTION_INJECTION_BUILTIN(socket_strerror);
   return f_socket_strerror(errnum);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_last_error f_socket_last_error
-#else
 inline int x_socket_last_error(CObjRef socket = null_object) {
-  FUNCTION_INJECTION(socket_last_error);
+  FUNCTION_INJECTION_BUILTIN(socket_last_error);
   return f_socket_last_error(socket);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_clear_error f_socket_clear_error
-#else
 inline void x_socket_clear_error(CObjRef socket = null_object) {
-  FUNCTION_INJECTION(socket_clear_error);
+  FUNCTION_INJECTION_BUILTIN(socket_clear_error);
   f_socket_clear_error(socket);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

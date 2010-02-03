@@ -25,824 +25,460 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_addcslashes f_addcslashes
-#else
 inline String x_addcslashes(CStrRef str, CStrRef charlist) {
-  FUNCTION_INJECTION(addcslashes);
+  FUNCTION_INJECTION_BUILTIN(addcslashes);
   return f_addcslashes(str, charlist);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_stripcslashes f_stripcslashes
-#else
 inline String x_stripcslashes(CStrRef str) {
-  FUNCTION_INJECTION(stripcslashes);
+  FUNCTION_INJECTION_BUILTIN(stripcslashes);
   return f_stripcslashes(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_addslashes f_addslashes
-#else
 inline String x_addslashes(CStrRef str) {
-  FUNCTION_INJECTION(addslashes);
+  FUNCTION_INJECTION_BUILTIN(addslashes);
   return f_addslashes(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_stripslashes f_stripslashes
-#else
 inline String x_stripslashes(CStrRef str) {
-  FUNCTION_INJECTION(stripslashes);
+  FUNCTION_INJECTION_BUILTIN(stripslashes);
   return f_stripslashes(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_bin2hex f_bin2hex
-#else
 inline String x_bin2hex(CStrRef str) {
-  FUNCTION_INJECTION(bin2hex);
+  FUNCTION_INJECTION_BUILTIN(bin2hex);
   return f_bin2hex(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_nl2br f_nl2br
-#else
 inline String x_nl2br(CStrRef str) {
-  FUNCTION_INJECTION(nl2br);
+  FUNCTION_INJECTION_BUILTIN(nl2br);
   return f_nl2br(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_quotemeta f_quotemeta
-#else
 inline String x_quotemeta(CStrRef str) {
-  FUNCTION_INJECTION(quotemeta);
+  FUNCTION_INJECTION_BUILTIN(quotemeta);
   return f_quotemeta(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_str_shuffle f_str_shuffle
-#else
 inline String x_str_shuffle(CStrRef str) {
-  FUNCTION_INJECTION(str_shuffle);
+  FUNCTION_INJECTION_BUILTIN(str_shuffle);
   return f_str_shuffle(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strrev f_strrev
-#else
 inline String x_strrev(CStrRef str) {
-  FUNCTION_INJECTION(strrev);
+  FUNCTION_INJECTION_BUILTIN(strrev);
   return f_strrev(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strtolower f_strtolower
-#else
 inline String x_strtolower(CStrRef str) {
-  FUNCTION_INJECTION(strtolower);
+  FUNCTION_INJECTION_BUILTIN(strtolower);
   return f_strtolower(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strtoupper f_strtoupper
-#else
 inline String x_strtoupper(CStrRef str) {
-  FUNCTION_INJECTION(strtoupper);
+  FUNCTION_INJECTION_BUILTIN(strtoupper);
   return f_strtoupper(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ucfirst f_ucfirst
-#else
 inline String x_ucfirst(CStrRef str) {
-  FUNCTION_INJECTION(ucfirst);
+  FUNCTION_INJECTION_BUILTIN(ucfirst);
   return f_ucfirst(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ucwords f_ucwords
-#else
 inline String x_ucwords(CStrRef str) {
-  FUNCTION_INJECTION(ucwords);
+  FUNCTION_INJECTION_BUILTIN(ucwords);
   return f_ucwords(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strip_tags f_strip_tags
-#else
 inline String x_strip_tags(CStrRef str, CStrRef allowable_tags = "") {
-  FUNCTION_INJECTION(strip_tags);
+  FUNCTION_INJECTION_BUILTIN(strip_tags);
   return f_strip_tags(str, allowable_tags);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_trim f_trim
-#else
 inline String x_trim(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST) {
-  FUNCTION_INJECTION(trim);
+  FUNCTION_INJECTION_BUILTIN(trim);
   return f_trim(str, charlist);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ltrim f_ltrim
-#else
 inline String x_ltrim(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST) {
-  FUNCTION_INJECTION(ltrim);
+  FUNCTION_INJECTION_BUILTIN(ltrim);
   return f_ltrim(str, charlist);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_rtrim f_rtrim
-#else
 inline String x_rtrim(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST) {
-  FUNCTION_INJECTION(rtrim);
+  FUNCTION_INJECTION_BUILTIN(rtrim);
   return f_rtrim(str, charlist);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_chop f_chop
-#else
 inline String x_chop(CStrRef str, CStrRef charlist = k_HPHP_TRIM_CHARLIST) {
-  FUNCTION_INJECTION(chop);
+  FUNCTION_INJECTION_BUILTIN(chop);
   return f_chop(str, charlist);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_explode f_explode
-#else
 inline Array x_explode(CStrRef delimiter, CStrRef str, int limit = 0x7FFFFFFF) {
-  FUNCTION_INJECTION(explode);
+  FUNCTION_INJECTION_BUILTIN(explode);
   return f_explode(delimiter, str, limit);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_implode f_implode
-#else
 inline String x_implode(CVarRef arg1, CVarRef arg2 = null_variant) {
-  FUNCTION_INJECTION(implode);
+  FUNCTION_INJECTION_BUILTIN(implode);
   return f_implode(arg1, arg2);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_join f_join
-#else
 inline String x_join(CVarRef glue, CVarRef pieces = null_variant) {
-  FUNCTION_INJECTION(join);
+  FUNCTION_INJECTION_BUILTIN(join);
   return f_join(glue, pieces);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_str_split f_str_split
-#else
 inline Array x_str_split(CStrRef str, int split_length = 1) {
-  FUNCTION_INJECTION(str_split);
+  FUNCTION_INJECTION_BUILTIN(str_split);
   return f_str_split(str, split_length);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_chunk_split f_chunk_split
-#else
 inline String x_chunk_split(CStrRef body, int chunklen = 76, CStrRef end = "\r\n") {
-  FUNCTION_INJECTION(chunk_split);
+  FUNCTION_INJECTION_BUILTIN(chunk_split);
   return f_chunk_split(body, chunklen, end);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strtok f_strtok
-#else
 inline Variant x_strtok(CStrRef str, CVarRef token = null_variant) {
-  FUNCTION_INJECTION(strtok);
+  FUNCTION_INJECTION_BUILTIN(strtok);
   return f_strtok(str, token);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_str_replace f_str_replace
-#else
 inline Variant x_str_replace(CVarRef search, CVarRef replace, CVarRef subject, Variant count = null) {
-  FUNCTION_INJECTION(str_replace);
+  FUNCTION_INJECTION_BUILTIN(str_replace);
   return f_str_replace(search, replace, subject, ref(count));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_str_ireplace f_str_ireplace
-#else
 inline Variant x_str_ireplace(CVarRef search, CVarRef replace, CVarRef subject, Variant count = null) {
-  FUNCTION_INJECTION(str_ireplace);
+  FUNCTION_INJECTION_BUILTIN(str_ireplace);
   return f_str_ireplace(search, replace, subject, ref(count));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_substr_replace f_substr_replace
-#else
 inline Variant x_substr_replace(CVarRef str, CVarRef replacement, CVarRef start, CVarRef length = 0x7FFFFFFF) {
-  FUNCTION_INJECTION(substr_replace);
+  FUNCTION_INJECTION_BUILTIN(substr_replace);
   return f_substr_replace(str, replacement, start, length);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_substr f_substr
-#else
 inline Variant x_substr(CStrRef str, int start, int length = 0x7FFFFFFF) {
-  FUNCTION_INJECTION(substr);
+  FUNCTION_INJECTION_BUILTIN(substr);
   return f_substr(str, start, length);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_str_pad f_str_pad
-#else
 inline String x_str_pad(CStrRef input, int pad_length, CStrRef pad_string = " ", int pad_type = k_STR_PAD_RIGHT) {
-  FUNCTION_INJECTION(str_pad);
+  FUNCTION_INJECTION_BUILTIN(str_pad);
   return f_str_pad(input, pad_length, pad_string, pad_type);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_str_repeat f_str_repeat
-#else
 inline String x_str_repeat(CStrRef input, int multiplier) {
-  FUNCTION_INJECTION(str_repeat);
+  FUNCTION_INJECTION_BUILTIN(str_repeat);
   return f_str_repeat(input, multiplier);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_wordwrap f_wordwrap
-#else
 inline String x_wordwrap(CStrRef str, int width = 75, CStrRef wordbreak = "\n", bool cut = false) {
-  FUNCTION_INJECTION(wordwrap);
+  FUNCTION_INJECTION_BUILTIN(wordwrap);
   return f_wordwrap(str, width, wordbreak, cut);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_html_entity_decode f_html_entity_decode
-#else
 inline String x_html_entity_decode(CStrRef str, int quote_style = k_ENT_COMPAT, CStrRef charset = "") {
-  FUNCTION_INJECTION(html_entity_decode);
+  FUNCTION_INJECTION_BUILTIN(html_entity_decode);
   return f_html_entity_decode(str, quote_style, charset);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_htmlentities f_htmlentities
-#else
 inline String x_htmlentities(CStrRef str, int quote_style = k_ENT_COMPAT, CStrRef charset = "", bool double_encode = true) {
-  FUNCTION_INJECTION(htmlentities);
+  FUNCTION_INJECTION_BUILTIN(htmlentities);
   return f_htmlentities(str, quote_style, charset, double_encode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_htmlspecialchars_decode f_htmlspecialchars_decode
-#else
 inline String x_htmlspecialchars_decode(CStrRef str, int quote_style = k_ENT_COMPAT) {
-  FUNCTION_INJECTION(htmlspecialchars_decode);
+  FUNCTION_INJECTION_BUILTIN(htmlspecialchars_decode);
   return f_htmlspecialchars_decode(str, quote_style);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_htmlspecialchars f_htmlspecialchars
-#else
 inline String x_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT, CStrRef charset = "", bool double_encode = true) {
-  FUNCTION_INJECTION(htmlspecialchars);
+  FUNCTION_INJECTION_BUILTIN(htmlspecialchars);
   return f_htmlspecialchars(str, quote_style, charset, double_encode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_quoted_printable_encode f_quoted_printable_encode
-#else
 inline String x_quoted_printable_encode(CStrRef str) {
-  FUNCTION_INJECTION(quoted_printable_encode);
+  FUNCTION_INJECTION_BUILTIN(quoted_printable_encode);
   return f_quoted_printable_encode(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_quoted_printable_decode f_quoted_printable_decode
-#else
 inline String x_quoted_printable_decode(CStrRef str) {
-  FUNCTION_INJECTION(quoted_printable_decode);
+  FUNCTION_INJECTION_BUILTIN(quoted_printable_decode);
   return f_quoted_printable_decode(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_convert_uudecode f_convert_uudecode
-#else
 inline Variant x_convert_uudecode(CStrRef data) {
-  FUNCTION_INJECTION(convert_uudecode);
+  FUNCTION_INJECTION_BUILTIN(convert_uudecode);
   return f_convert_uudecode(data);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_convert_uuencode f_convert_uuencode
-#else
 inline Variant x_convert_uuencode(CStrRef data) {
-  FUNCTION_INJECTION(convert_uuencode);
+  FUNCTION_INJECTION_BUILTIN(convert_uuencode);
   return f_convert_uuencode(data);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_str_rot13 f_str_rot13
-#else
 inline String x_str_rot13(CStrRef str) {
-  FUNCTION_INJECTION(str_rot13);
+  FUNCTION_INJECTION_BUILTIN(str_rot13);
   return f_str_rot13(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_crc32 f_crc32
-#else
 inline int64 x_crc32(CStrRef str) {
-  FUNCTION_INJECTION(crc32);
+  FUNCTION_INJECTION_BUILTIN(crc32);
   return f_crc32(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_crypt f_crypt
-#else
 inline String x_crypt(CStrRef str, CStrRef salt = "") {
-  FUNCTION_INJECTION(crypt);
+  FUNCTION_INJECTION_BUILTIN(crypt);
   return f_crypt(str, salt);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_md5 f_md5
-#else
 inline String x_md5(CStrRef str, bool raw_output = false) {
-  FUNCTION_INJECTION(md5);
+  FUNCTION_INJECTION_BUILTIN(md5);
   return f_md5(str, raw_output);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_sha1 f_sha1
-#else
 inline String x_sha1(CStrRef str, bool raw_output = false) {
-  FUNCTION_INJECTION(sha1);
+  FUNCTION_INJECTION_BUILTIN(sha1);
   return f_sha1(str, raw_output);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strtr f_strtr
-#else
 inline String x_strtr(CStrRef str, CVarRef from, CVarRef to = null_variant) {
-  FUNCTION_INJECTION(strtr);
+  FUNCTION_INJECTION_BUILTIN(strtr);
   return f_strtr(str, from, to);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_convert_cyr_string f_convert_cyr_string
-#else
 inline String x_convert_cyr_string(CStrRef str, CStrRef from, CStrRef to) {
-  FUNCTION_INJECTION(convert_cyr_string);
+  FUNCTION_INJECTION_BUILTIN(convert_cyr_string);
   return f_convert_cyr_string(str, from, to);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_get_html_translation_table f_get_html_translation_table
-#else
 inline Array x_get_html_translation_table(int table = 0, int quote_style = k_ENT_COMPAT) {
-  FUNCTION_INJECTION(get_html_translation_table);
+  FUNCTION_INJECTION_BUILTIN(get_html_translation_table);
   return f_get_html_translation_table(table, quote_style);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hebrev f_hebrev
-#else
 inline String x_hebrev(CStrRef hebrew_text, int max_chars_per_line = 0) {
-  FUNCTION_INJECTION(hebrev);
+  FUNCTION_INJECTION_BUILTIN(hebrev);
   return f_hebrev(hebrew_text, max_chars_per_line);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hebrevc f_hebrevc
-#else
 inline String x_hebrevc(CStrRef hebrew_text, int max_chars_per_line = 0) {
-  FUNCTION_INJECTION(hebrevc);
+  FUNCTION_INJECTION_BUILTIN(hebrevc);
   return f_hebrevc(hebrew_text, max_chars_per_line);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_setlocale f_setlocale
-#else
 inline Variant x_setlocale(int _argc, int category, CVarRef locale, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(setlocale);
+  FUNCTION_INJECTION_BUILTIN(setlocale);
   return f_setlocale(_argc, category, locale, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_localeconv f_localeconv
-#else
 inline Array x_localeconv() {
-  FUNCTION_INJECTION(localeconv);
+  FUNCTION_INJECTION_BUILTIN(localeconv);
   return f_localeconv();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_nl_langinfo f_nl_langinfo
-#else
 inline String x_nl_langinfo(int item) {
-  FUNCTION_INJECTION(nl_langinfo);
+  FUNCTION_INJECTION_BUILTIN(nl_langinfo);
   return f_nl_langinfo(item);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_echo f_echo
-#else
 inline void x_echo(int _argc, CStrRef arg, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(echo);
+  FUNCTION_INJECTION_BUILTIN(echo);
   f_echo(_argc, arg, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_print f_print
-#else
 inline int x_print(CStrRef arg) {
-  FUNCTION_INJECTION(print);
+  FUNCTION_INJECTION_BUILTIN(print);
   return f_print(arg);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_printf f_printf
-#else
 inline int x_printf(int _argc, CStrRef format, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(printf);
+  FUNCTION_INJECTION_BUILTIN(printf);
   return f_printf(_argc, format, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_vprintf f_vprintf
-#else
 inline int x_vprintf(CStrRef format, CArrRef args) {
-  FUNCTION_INJECTION(vprintf);
+  FUNCTION_INJECTION_BUILTIN(vprintf);
   return f_vprintf(format, args);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_sprintf f_sprintf
-#else
 inline String x_sprintf(int _argc, CStrRef format, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(sprintf);
+  FUNCTION_INJECTION_BUILTIN(sprintf);
   return f_sprintf(_argc, format, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_vsprintf f_vsprintf
-#else
 inline String x_vsprintf(CStrRef format, CArrRef args) {
-  FUNCTION_INJECTION(vsprintf);
+  FUNCTION_INJECTION_BUILTIN(vsprintf);
   return f_vsprintf(format, args);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_sscanf f_sscanf
-#else
 inline Variant x_sscanf(int _argc, CStrRef str, CStrRef format, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(sscanf);
+  FUNCTION_INJECTION_BUILTIN(sscanf);
   return f_sscanf(_argc, str, format, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_chr f_chr
-#else
 inline String x_chr(int64 ascii) {
-  FUNCTION_INJECTION(chr);
+  FUNCTION_INJECTION_BUILTIN(chr);
   return f_chr(ascii);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ord f_ord
-#else
 inline int64 x_ord(CStrRef str) {
-  FUNCTION_INJECTION(ord);
+  FUNCTION_INJECTION_BUILTIN(ord);
   return f_ord(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_money_format f_money_format
-#else
 inline String x_money_format(CStrRef format, double number) {
-  FUNCTION_INJECTION(money_format);
+  FUNCTION_INJECTION_BUILTIN(money_format);
   return f_money_format(format, number);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_number_format f_number_format
-#else
 inline String x_number_format(double number, int decimals = 0, CStrRef dec_point = ".", CStrRef thousands_sep = ",") {
-  FUNCTION_INJECTION(number_format);
+  FUNCTION_INJECTION_BUILTIN(number_format);
   return f_number_format(number, decimals, dec_point, thousands_sep);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strcmp f_strcmp
-#else
 inline int x_strcmp(CStrRef str1, CStrRef str2) {
-  FUNCTION_INJECTION(strcmp);
+  FUNCTION_INJECTION_BUILTIN(strcmp);
   return f_strcmp(str1, str2);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strncmp f_strncmp
-#else
 inline int x_strncmp(CStrRef str1, CStrRef str2, int len) {
-  FUNCTION_INJECTION(strncmp);
+  FUNCTION_INJECTION_BUILTIN(strncmp);
   return f_strncmp(str1, str2, len);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strnatcmp f_strnatcmp
-#else
 inline int x_strnatcmp(CStrRef str1, CStrRef str2) {
-  FUNCTION_INJECTION(strnatcmp);
+  FUNCTION_INJECTION_BUILTIN(strnatcmp);
   return f_strnatcmp(str1, str2);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strcasecmp f_strcasecmp
-#else
 inline int x_strcasecmp(CStrRef str1, CStrRef str2) {
-  FUNCTION_INJECTION(strcasecmp);
+  FUNCTION_INJECTION_BUILTIN(strcasecmp);
   return f_strcasecmp(str1, str2);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strncasecmp f_strncasecmp
-#else
 inline int x_strncasecmp(CStrRef str1, CStrRef str2, int len) {
-  FUNCTION_INJECTION(strncasecmp);
+  FUNCTION_INJECTION_BUILTIN(strncasecmp);
   return f_strncasecmp(str1, str2, len);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strnatcasecmp f_strnatcasecmp
-#else
 inline int x_strnatcasecmp(CStrRef str1, CStrRef str2) {
-  FUNCTION_INJECTION(strnatcasecmp);
+  FUNCTION_INJECTION_BUILTIN(strnatcasecmp);
   return f_strnatcasecmp(str1, str2);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strcoll f_strcoll
-#else
 inline int x_strcoll(CStrRef str1, CStrRef str2) {
-  FUNCTION_INJECTION(strcoll);
+  FUNCTION_INJECTION_BUILTIN(strcoll);
   return f_strcoll(str1, str2);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_substr_compare f_substr_compare
-#else
 inline Variant x_substr_compare(CStrRef main_str, CStrRef str, int offset, int length = 0, bool case_insensitivity = false) {
-  FUNCTION_INJECTION(substr_compare);
+  FUNCTION_INJECTION_BUILTIN(substr_compare);
   return f_substr_compare(main_str, str, offset, length, case_insensitivity);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strchr f_strchr
-#else
 inline Variant x_strchr(CStrRef haystack, CVarRef needle) {
-  FUNCTION_INJECTION(strchr);
+  FUNCTION_INJECTION_BUILTIN(strchr);
   return f_strchr(haystack, needle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strrchr f_strrchr
-#else
 inline Variant x_strrchr(CStrRef haystack, CVarRef needle) {
-  FUNCTION_INJECTION(strrchr);
+  FUNCTION_INJECTION_BUILTIN(strrchr);
   return f_strrchr(haystack, needle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strstr f_strstr
-#else
 inline Variant x_strstr(CStrRef haystack, CVarRef needle) {
-  FUNCTION_INJECTION(strstr);
+  FUNCTION_INJECTION_BUILTIN(strstr);
   return f_strstr(haystack, needle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_stristr f_stristr
-#else
 inline Variant x_stristr(CStrRef haystack, CVarRef needle) {
-  FUNCTION_INJECTION(stristr);
+  FUNCTION_INJECTION_BUILTIN(stristr);
   return f_stristr(haystack, needle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strpbrk f_strpbrk
-#else
 inline Variant x_strpbrk(CStrRef haystack, CStrRef char_list) {
-  FUNCTION_INJECTION(strpbrk);
+  FUNCTION_INJECTION_BUILTIN(strpbrk);
   return f_strpbrk(haystack, char_list);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strpos f_strpos
-#else
 inline Variant x_strpos(CStrRef haystack, CVarRef needle, int offset = 0) {
-  FUNCTION_INJECTION(strpos);
+  FUNCTION_INJECTION_BUILTIN(strpos);
   return f_strpos(haystack, needle, offset);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_stripos f_stripos
-#else
 inline Variant x_stripos(CStrRef haystack, CVarRef needle, int offset = 0) {
-  FUNCTION_INJECTION(stripos);
+  FUNCTION_INJECTION_BUILTIN(stripos);
   return f_stripos(haystack, needle, offset);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strrpos f_strrpos
-#else
 inline Variant x_strrpos(CStrRef haystack, CVarRef needle, int offset = -1) {
-  FUNCTION_INJECTION(strrpos);
+  FUNCTION_INJECTION_BUILTIN(strrpos);
   return f_strrpos(haystack, needle, offset);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strripos f_strripos
-#else
 inline Variant x_strripos(CStrRef haystack, CVarRef needle, int offset = -1) {
-  FUNCTION_INJECTION(strripos);
+  FUNCTION_INJECTION_BUILTIN(strripos);
   return f_strripos(haystack, needle, offset);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_substr_count f_substr_count
-#else
 inline Variant x_substr_count(CStrRef haystack, CStrRef needle, int offset = 0, int length = 0x7FFFFFFF) {
-  FUNCTION_INJECTION(substr_count);
+  FUNCTION_INJECTION_BUILTIN(substr_count);
   return f_substr_count(haystack, needle, offset, length);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strspn f_strspn
-#else
 inline Variant x_strspn(CStrRef str1, CStrRef str2, int start = 0, int length = 0x7FFFFFFF) {
-  FUNCTION_INJECTION(strspn);
+  FUNCTION_INJECTION_BUILTIN(strspn);
   return f_strspn(str1, str2, start, length);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strcspn f_strcspn
-#else
 inline Variant x_strcspn(CStrRef str1, CStrRef str2, int start = 0, int length = 0x7FFFFFFF) {
-  FUNCTION_INJECTION(strcspn);
+  FUNCTION_INJECTION_BUILTIN(strcspn);
   return f_strcspn(str1, str2, start, length);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_strlen f_strlen
-#else
 inline int x_strlen(CStrRef str) {
-  FUNCTION_INJECTION(strlen);
+  FUNCTION_INJECTION_BUILTIN(strlen);
   return f_strlen(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_count_chars f_count_chars
-#else
 inline Variant x_count_chars(CStrRef str, int64 mode = 0) {
-  FUNCTION_INJECTION(count_chars);
+  FUNCTION_INJECTION_BUILTIN(count_chars);
   return f_count_chars(str, mode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_str_word_count f_str_word_count
-#else
 inline Variant x_str_word_count(CStrRef str, int64 format = 0, CStrRef charlist = "") {
-  FUNCTION_INJECTION(str_word_count);
+  FUNCTION_INJECTION_BUILTIN(str_word_count);
   return f_str_word_count(str, format, charlist);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_levenshtein f_levenshtein
-#else
 inline int x_levenshtein(CStrRef str1, CStrRef str2, int cost_ins = 1, int cost_rep = 1, int cost_del = 1) {
-  FUNCTION_INJECTION(levenshtein);
+  FUNCTION_INJECTION_BUILTIN(levenshtein);
   return f_levenshtein(str1, str2, cost_ins, cost_rep, cost_del);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_similar_text f_similar_text
-#else
 inline int x_similar_text(CStrRef first, CStrRef second, Variant percent = null) {
-  FUNCTION_INJECTION(similar_text);
+  FUNCTION_INJECTION_BUILTIN(similar_text);
   return f_similar_text(first, second, ref(percent));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_soundex f_soundex
-#else
 inline Variant x_soundex(CStrRef str) {
-  FUNCTION_INJECTION(soundex);
+  FUNCTION_INJECTION_BUILTIN(soundex);
   return f_soundex(str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_metaphone f_metaphone
-#else
 inline Variant x_metaphone(CStrRef str, int phones = 0) {
-  FUNCTION_INJECTION(metaphone);
+  FUNCTION_INJECTION_BUILTIN(metaphone);
   return f_metaphone(str, phones);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_parse_str f_parse_str
-#else
 inline void x_parse_str(CStrRef str, Variant arr = null) {
-  FUNCTION_INJECTION(parse_str);
+  FUNCTION_INJECTION_BUILTIN(parse_str);
   f_parse_str(str, ref(arr));
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

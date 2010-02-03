@@ -25,806 +25,450 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_fopen f_fopen
-#else
 inline Variant x_fopen(CStrRef filename, CStrRef mode, bool use_include_path = false, CObjRef context = null_object) {
-  FUNCTION_INJECTION(fopen);
+  FUNCTION_INJECTION_BUILTIN(fopen);
   return f_fopen(filename, mode, use_include_path, context);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_popen f_popen
-#else
 inline Variant x_popen(CStrRef command, CStrRef mode) {
-  FUNCTION_INJECTION(popen);
+  FUNCTION_INJECTION_BUILTIN(popen);
   return f_popen(command, mode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fclose f_fclose
-#else
 inline bool x_fclose(CObjRef handle) {
-  FUNCTION_INJECTION(fclose);
+  FUNCTION_INJECTION_BUILTIN(fclose);
   return f_fclose(handle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pclose f_pclose
-#else
 inline int x_pclose(CObjRef handle) {
-  FUNCTION_INJECTION(pclose);
+  FUNCTION_INJECTION_BUILTIN(pclose);
   return f_pclose(handle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fseek f_fseek
-#else
 inline Variant x_fseek(CObjRef handle, int64 offset, int64 whence = SEEK_SET) {
-  FUNCTION_INJECTION(fseek);
+  FUNCTION_INJECTION_BUILTIN(fseek);
   return f_fseek(handle, offset, whence);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_rewind f_rewind
-#else
 inline bool x_rewind(CObjRef handle) {
-  FUNCTION_INJECTION(rewind);
+  FUNCTION_INJECTION_BUILTIN(rewind);
   return f_rewind(handle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ftell f_ftell
-#else
 inline Variant x_ftell(CObjRef handle) {
-  FUNCTION_INJECTION(ftell);
+  FUNCTION_INJECTION_BUILTIN(ftell);
   return f_ftell(handle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_feof f_feof
-#else
 inline bool x_feof(CObjRef handle) {
-  FUNCTION_INJECTION(feof);
+  FUNCTION_INJECTION_BUILTIN(feof);
   return f_feof(handle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fstat f_fstat
-#else
 inline Variant x_fstat(CObjRef handle) {
-  FUNCTION_INJECTION(fstat);
+  FUNCTION_INJECTION_BUILTIN(fstat);
   return f_fstat(handle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fread f_fread
-#else
 inline Variant x_fread(CObjRef handle, int64 length) {
-  FUNCTION_INJECTION(fread);
+  FUNCTION_INJECTION_BUILTIN(fread);
   return f_fread(handle, length);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fgetc f_fgetc
-#else
 inline Variant x_fgetc(CObjRef handle) {
-  FUNCTION_INJECTION(fgetc);
+  FUNCTION_INJECTION_BUILTIN(fgetc);
   return f_fgetc(handle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fgets f_fgets
-#else
 inline String x_fgets(CObjRef handle, int64 length = 1024) {
-  FUNCTION_INJECTION(fgets);
+  FUNCTION_INJECTION_BUILTIN(fgets);
   return f_fgets(handle, length);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fgetss f_fgetss
-#else
 inline String x_fgetss(CObjRef handle, int64 length = 0, CStrRef allowable_tags = null_string) {
-  FUNCTION_INJECTION(fgetss);
+  FUNCTION_INJECTION_BUILTIN(fgetss);
   return f_fgetss(handle, length, allowable_tags);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fscanf f_fscanf
-#else
 inline Variant x_fscanf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(fscanf);
+  FUNCTION_INJECTION_BUILTIN(fscanf);
   return f_fscanf(_argc, handle, format, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fpassthru f_fpassthru
-#else
 inline Variant x_fpassthru(CObjRef handle) {
-  FUNCTION_INJECTION(fpassthru);
+  FUNCTION_INJECTION_BUILTIN(fpassthru);
   return f_fpassthru(handle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fwrite f_fwrite
-#else
 inline int64 x_fwrite(CObjRef handle, CStrRef data, int64 length = 0) {
-  FUNCTION_INJECTION(fwrite);
+  FUNCTION_INJECTION_BUILTIN(fwrite);
   return f_fwrite(handle, data, length);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fputs f_fputs
-#else
 inline int64 x_fputs(CObjRef handle, CStrRef data, int64 length = 0) {
-  FUNCTION_INJECTION(fputs);
+  FUNCTION_INJECTION_BUILTIN(fputs);
   return f_fputs(handle, data, length);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fprintf f_fprintf
-#else
 inline Variant x_fprintf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION(fprintf);
+  FUNCTION_INJECTION_BUILTIN(fprintf);
   return f_fprintf(_argc, handle, format, _argv);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_vfprintf f_vfprintf
-#else
 inline Variant x_vfprintf(CObjRef handle, CStrRef format, CArrRef args) {
-  FUNCTION_INJECTION(vfprintf);
+  FUNCTION_INJECTION_BUILTIN(vfprintf);
   return f_vfprintf(handle, format, args);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fflush f_fflush
-#else
 inline bool x_fflush(CObjRef handle) {
-  FUNCTION_INJECTION(fflush);
+  FUNCTION_INJECTION_BUILTIN(fflush);
   return f_fflush(handle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ftruncate f_ftruncate
-#else
 inline bool x_ftruncate(CObjRef handle, int64 size) {
-  FUNCTION_INJECTION(ftruncate);
+  FUNCTION_INJECTION_BUILTIN(ftruncate);
   return f_ftruncate(handle, size);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_flock f_flock
-#else
 inline bool x_flock(CObjRef handle, int operation, Variant wouldblock = null) {
-  FUNCTION_INJECTION(flock);
+  FUNCTION_INJECTION_BUILTIN(flock);
   return f_flock(handle, operation, ref(wouldblock));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fputcsv f_fputcsv
-#else
 inline Variant x_fputcsv(CObjRef handle, CArrRef fields, CStrRef delimiter = ",", CStrRef enclosure = "\"") {
-  FUNCTION_INJECTION(fputcsv);
+  FUNCTION_INJECTION_BUILTIN(fputcsv);
   return f_fputcsv(handle, fields, delimiter, enclosure);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fgetcsv f_fgetcsv
-#else
 inline Variant x_fgetcsv(CObjRef handle, int64 length = 0, CStrRef delimiter = ",", CStrRef enclosure = "\"") {
-  FUNCTION_INJECTION(fgetcsv);
+  FUNCTION_INJECTION_BUILTIN(fgetcsv);
   return f_fgetcsv(handle, length, delimiter, enclosure);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_file_get_contents f_file_get_contents
-#else
 inline Variant x_file_get_contents(CStrRef filename, bool use_include_path = false, CObjRef context = null_object, int64 offset = 0, int64 maxlen = 0) {
-  FUNCTION_INJECTION(file_get_contents);
+  FUNCTION_INJECTION_BUILTIN(file_get_contents);
   return f_file_get_contents(filename, use_include_path, context, offset, maxlen);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_file_put_contents f_file_put_contents
-#else
 inline Variant x_file_put_contents(CStrRef filename, CVarRef data, int flags = 0, CObjRef context = null_object) {
-  FUNCTION_INJECTION(file_put_contents);
+  FUNCTION_INJECTION_BUILTIN(file_put_contents);
   return f_file_put_contents(filename, data, flags, context);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_file f_file
-#else
 inline Variant x_file(CStrRef filename, int flags = 0, CObjRef context = null_object) {
-  FUNCTION_INJECTION(file);
+  FUNCTION_INJECTION_BUILTIN(file);
   return f_file(filename, flags, context);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_readfile f_readfile
-#else
 inline Variant x_readfile(CStrRef filename, bool use_include_path = false, CObjRef context = null_object) {
-  FUNCTION_INJECTION(readfile);
+  FUNCTION_INJECTION_BUILTIN(readfile);
   return f_readfile(filename, use_include_path, context);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_move_uploaded_file f_move_uploaded_file
-#else
 inline bool x_move_uploaded_file(CStrRef filename, CStrRef destination) {
-  FUNCTION_INJECTION(move_uploaded_file);
+  FUNCTION_INJECTION_BUILTIN(move_uploaded_file);
   return f_move_uploaded_file(filename, destination);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_parse_ini_file f_parse_ini_file
-#else
 inline Variant x_parse_ini_file(CStrRef filename, bool process_sections = false) {
-  FUNCTION_INJECTION(parse_ini_file);
+  FUNCTION_INJECTION_BUILTIN(parse_ini_file);
   return f_parse_ini_file(filename, process_sections);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_md5_file f_md5_file
-#else
 inline Variant x_md5_file(CStrRef filename, bool raw_output = false) {
-  FUNCTION_INJECTION(md5_file);
+  FUNCTION_INJECTION_BUILTIN(md5_file);
   return f_md5_file(filename, raw_output);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_sha1_file f_sha1_file
-#else
 inline Variant x_sha1_file(CStrRef filename, bool raw_output = false) {
-  FUNCTION_INJECTION(sha1_file);
+  FUNCTION_INJECTION_BUILTIN(sha1_file);
   return f_sha1_file(filename, raw_output);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_chmod f_chmod
-#else
 inline bool x_chmod(CStrRef filename, int64 mode) {
-  FUNCTION_INJECTION(chmod);
+  FUNCTION_INJECTION_BUILTIN(chmod);
   return f_chmod(filename, mode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_chown f_chown
-#else
 inline bool x_chown(CStrRef filename, CVarRef user) {
-  FUNCTION_INJECTION(chown);
+  FUNCTION_INJECTION_BUILTIN(chown);
   return f_chown(filename, user);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_lchown f_lchown
-#else
 inline bool x_lchown(CStrRef filename, CVarRef user) {
-  FUNCTION_INJECTION(lchown);
+  FUNCTION_INJECTION_BUILTIN(lchown);
   return f_lchown(filename, user);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_chgrp f_chgrp
-#else
 inline bool x_chgrp(CStrRef filename, CVarRef group) {
-  FUNCTION_INJECTION(chgrp);
+  FUNCTION_INJECTION_BUILTIN(chgrp);
   return f_chgrp(filename, group);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_lchgrp f_lchgrp
-#else
 inline bool x_lchgrp(CStrRef filename, CVarRef group) {
-  FUNCTION_INJECTION(lchgrp);
+  FUNCTION_INJECTION_BUILTIN(lchgrp);
   return f_lchgrp(filename, group);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_touch f_touch
-#else
 inline bool x_touch(CStrRef filename, int64 mtime = 0, int64 atime = 0) {
-  FUNCTION_INJECTION(touch);
+  FUNCTION_INJECTION_BUILTIN(touch);
   return f_touch(filename, mtime, atime);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_copy f_copy
-#else
 inline bool x_copy(CStrRef source, CStrRef dest, CObjRef context = null_object) {
-  FUNCTION_INJECTION(copy);
+  FUNCTION_INJECTION_BUILTIN(copy);
   return f_copy(source, dest, context);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_rename f_rename
-#else
 inline bool x_rename(CStrRef oldname, CStrRef newname, CObjRef context = null_object) {
-  FUNCTION_INJECTION(rename);
+  FUNCTION_INJECTION_BUILTIN(rename);
   return f_rename(oldname, newname, context);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_umask f_umask
-#else
 inline int x_umask(CVarRef mask = null_variant) {
-  FUNCTION_INJECTION(umask);
+  FUNCTION_INJECTION_BUILTIN(umask);
   return f_umask(mask);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_unlink f_unlink
-#else
 inline bool x_unlink(CStrRef filename, CObjRef context = null_object) {
-  FUNCTION_INJECTION(unlink);
+  FUNCTION_INJECTION_BUILTIN(unlink);
   return f_unlink(filename, context);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_link f_link
-#else
 inline bool x_link(CStrRef target, CStrRef link) {
-  FUNCTION_INJECTION(link);
+  FUNCTION_INJECTION_BUILTIN(link);
   return f_link(target, link);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_symlink f_symlink
-#else
 inline bool x_symlink(CStrRef target, CStrRef link) {
-  FUNCTION_INJECTION(symlink);
+  FUNCTION_INJECTION_BUILTIN(symlink);
   return f_symlink(target, link);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_basename f_basename
-#else
 inline String x_basename(CStrRef path, CStrRef suffix = null_string) {
-  FUNCTION_INJECTION(basename);
+  FUNCTION_INJECTION_BUILTIN(basename);
   return f_basename(path, suffix);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fnmatch f_fnmatch
-#else
 inline bool x_fnmatch(CStrRef pattern, CStrRef filename, int flags = 0) {
-  FUNCTION_INJECTION(fnmatch);
+  FUNCTION_INJECTION_BUILTIN(fnmatch);
   return f_fnmatch(pattern, filename, flags);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_glob f_glob
-#else
 inline Variant x_glob(CStrRef pattern, int flags = 0) {
-  FUNCTION_INJECTION(glob);
+  FUNCTION_INJECTION_BUILTIN(glob);
   return f_glob(pattern, flags);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_tempnam f_tempnam
-#else
 inline Variant x_tempnam(CStrRef dir, CStrRef prefix) {
-  FUNCTION_INJECTION(tempnam);
+  FUNCTION_INJECTION_BUILTIN(tempnam);
   return f_tempnam(dir, prefix);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_tmpfile f_tmpfile
-#else
 inline Variant x_tmpfile() {
-  FUNCTION_INJECTION(tmpfile);
+  FUNCTION_INJECTION_BUILTIN(tmpfile);
   return f_tmpfile();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fileperms f_fileperms
-#else
 inline Variant x_fileperms(CStrRef filename) {
-  FUNCTION_INJECTION(fileperms);
+  FUNCTION_INJECTION_BUILTIN(fileperms);
   return f_fileperms(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fileinode f_fileinode
-#else
 inline Variant x_fileinode(CStrRef filename) {
-  FUNCTION_INJECTION(fileinode);
+  FUNCTION_INJECTION_BUILTIN(fileinode);
   return f_fileinode(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_filesize f_filesize
-#else
 inline Variant x_filesize(CStrRef filename) {
-  FUNCTION_INJECTION(filesize);
+  FUNCTION_INJECTION_BUILTIN(filesize);
   return f_filesize(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fileowner f_fileowner
-#else
 inline Variant x_fileowner(CStrRef filename) {
-  FUNCTION_INJECTION(fileowner);
+  FUNCTION_INJECTION_BUILTIN(fileowner);
   return f_fileowner(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_filegroup f_filegroup
-#else
 inline Variant x_filegroup(CStrRef filename) {
-  FUNCTION_INJECTION(filegroup);
+  FUNCTION_INJECTION_BUILTIN(filegroup);
   return f_filegroup(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fileatime f_fileatime
-#else
 inline Variant x_fileatime(CStrRef filename) {
-  FUNCTION_INJECTION(fileatime);
+  FUNCTION_INJECTION_BUILTIN(fileatime);
   return f_fileatime(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_filemtime f_filemtime
-#else
 inline Variant x_filemtime(CStrRef filename) {
-  FUNCTION_INJECTION(filemtime);
+  FUNCTION_INJECTION_BUILTIN(filemtime);
   return f_filemtime(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_filectime f_filectime
-#else
 inline Variant x_filectime(CStrRef filename) {
-  FUNCTION_INJECTION(filectime);
+  FUNCTION_INJECTION_BUILTIN(filectime);
   return f_filectime(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_filetype f_filetype
-#else
 inline Variant x_filetype(CStrRef filename) {
-  FUNCTION_INJECTION(filetype);
+  FUNCTION_INJECTION_BUILTIN(filetype);
   return f_filetype(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_linkinfo f_linkinfo
-#else
 inline Variant x_linkinfo(CStrRef filename) {
-  FUNCTION_INJECTION(linkinfo);
+  FUNCTION_INJECTION_BUILTIN(linkinfo);
   return f_linkinfo(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_writable f_is_writable
-#else
 inline bool x_is_writable(CStrRef filename) {
-  FUNCTION_INJECTION(is_writable);
+  FUNCTION_INJECTION_BUILTIN(is_writable);
   return f_is_writable(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_writeable f_is_writeable
-#else
 inline bool x_is_writeable(CStrRef filename) {
-  FUNCTION_INJECTION(is_writeable);
+  FUNCTION_INJECTION_BUILTIN(is_writeable);
   return f_is_writeable(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_readable f_is_readable
-#else
 inline bool x_is_readable(CStrRef filename) {
-  FUNCTION_INJECTION(is_readable);
+  FUNCTION_INJECTION_BUILTIN(is_readable);
   return f_is_readable(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_executable f_is_executable
-#else
 inline bool x_is_executable(CStrRef filename) {
-  FUNCTION_INJECTION(is_executable);
+  FUNCTION_INJECTION_BUILTIN(is_executable);
   return f_is_executable(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_file f_is_file
-#else
 inline bool x_is_file(CStrRef filename) {
-  FUNCTION_INJECTION(is_file);
+  FUNCTION_INJECTION_BUILTIN(is_file);
   return f_is_file(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_dir f_is_dir
-#else
 inline bool x_is_dir(CStrRef filename) {
-  FUNCTION_INJECTION(is_dir);
+  FUNCTION_INJECTION_BUILTIN(is_dir);
   return f_is_dir(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_link f_is_link
-#else
 inline bool x_is_link(CStrRef filename) {
-  FUNCTION_INJECTION(is_link);
+  FUNCTION_INJECTION_BUILTIN(is_link);
   return f_is_link(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_is_uploaded_file f_is_uploaded_file
-#else
 inline bool x_is_uploaded_file(CStrRef filename) {
-  FUNCTION_INJECTION(is_uploaded_file);
+  FUNCTION_INJECTION_BUILTIN(is_uploaded_file);
   return f_is_uploaded_file(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_file_exists f_file_exists
-#else
 inline bool x_file_exists(CStrRef filename) {
-  FUNCTION_INJECTION(file_exists);
+  FUNCTION_INJECTION_BUILTIN(file_exists);
   return f_file_exists(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_stat f_stat
-#else
 inline Variant x_stat(CStrRef filename) {
-  FUNCTION_INJECTION(stat);
+  FUNCTION_INJECTION_BUILTIN(stat);
   return f_stat(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_lstat f_lstat
-#else
 inline Variant x_lstat(CStrRef filename) {
-  FUNCTION_INJECTION(lstat);
+  FUNCTION_INJECTION_BUILTIN(lstat);
   return f_lstat(filename);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_clearstatcache f_clearstatcache
-#else
 inline void x_clearstatcache() {
-  FUNCTION_INJECTION(clearstatcache);
+  FUNCTION_INJECTION_BUILTIN(clearstatcache);
   f_clearstatcache();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_readlink f_readlink
-#else
 inline Variant x_readlink(CStrRef path) {
-  FUNCTION_INJECTION(readlink);
+  FUNCTION_INJECTION_BUILTIN(readlink);
   return f_readlink(path);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_realpath f_realpath
-#else
 inline Variant x_realpath(CStrRef path) {
-  FUNCTION_INJECTION(realpath);
+  FUNCTION_INJECTION_BUILTIN(realpath);
   return f_realpath(path);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pathinfo f_pathinfo
-#else
 inline Variant x_pathinfo(CStrRef path, int opt = 15) {
-  FUNCTION_INJECTION(pathinfo);
+  FUNCTION_INJECTION_BUILTIN(pathinfo);
   return f_pathinfo(path, opt);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_disk_free_space f_disk_free_space
-#else
 inline Variant x_disk_free_space(CStrRef directory) {
-  FUNCTION_INJECTION(disk_free_space);
+  FUNCTION_INJECTION_BUILTIN(disk_free_space);
   return f_disk_free_space(directory);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_diskfreespace f_diskfreespace
-#else
 inline Variant x_diskfreespace(CStrRef directory) {
-  FUNCTION_INJECTION(diskfreespace);
+  FUNCTION_INJECTION_BUILTIN(diskfreespace);
   return f_diskfreespace(directory);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_disk_total_space f_disk_total_space
-#else
 inline Variant x_disk_total_space(CStrRef directory) {
-  FUNCTION_INJECTION(disk_total_space);
+  FUNCTION_INJECTION_BUILTIN(disk_total_space);
   return f_disk_total_space(directory);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_mkdir f_mkdir
-#else
 inline bool x_mkdir(CStrRef pathname, int64 mode = 0, bool recursive = false, CObjRef context = null_object) {
-  FUNCTION_INJECTION(mkdir);
+  FUNCTION_INJECTION_BUILTIN(mkdir);
   return f_mkdir(pathname, mode, recursive, context);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_rmdir f_rmdir
-#else
 inline bool x_rmdir(CStrRef dirname, CObjRef context = null_object) {
-  FUNCTION_INJECTION(rmdir);
+  FUNCTION_INJECTION_BUILTIN(rmdir);
   return f_rmdir(dirname, context);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_dirname f_dirname
-#else
 inline String x_dirname(CStrRef path) {
-  FUNCTION_INJECTION(dirname);
+  FUNCTION_INJECTION_BUILTIN(dirname);
   return f_dirname(path);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_getcwd f_getcwd
-#else
 inline Variant x_getcwd() {
-  FUNCTION_INJECTION(getcwd);
+  FUNCTION_INJECTION_BUILTIN(getcwd);
   return f_getcwd();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_chdir f_chdir
-#else
 inline bool x_chdir(CStrRef directory) {
-  FUNCTION_INJECTION(chdir);
+  FUNCTION_INJECTION_BUILTIN(chdir);
   return f_chdir(directory);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_chroot f_chroot
-#else
 inline bool x_chroot(CStrRef directory) {
-  FUNCTION_INJECTION(chroot);
+  FUNCTION_INJECTION_BUILTIN(chroot);
   return f_chroot(directory);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_dir f_dir
-#else
 inline Variant x_dir(CStrRef directory) {
-  FUNCTION_INJECTION(dir);
+  FUNCTION_INJECTION_BUILTIN(dir);
   return f_dir(directory);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_opendir f_opendir
-#else
 inline Variant x_opendir(CStrRef path, CObjRef context = null) {
-  FUNCTION_INJECTION(opendir);
+  FUNCTION_INJECTION_BUILTIN(opendir);
   return f_opendir(path, context);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_readdir f_readdir
-#else
 inline Variant x_readdir(CObjRef dir_handle) {
-  FUNCTION_INJECTION(readdir);
+  FUNCTION_INJECTION_BUILTIN(readdir);
   return f_readdir(dir_handle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_rewinddir f_rewinddir
-#else
 inline void x_rewinddir(CObjRef dir_handle) {
-  FUNCTION_INJECTION(rewinddir);
+  FUNCTION_INJECTION_BUILTIN(rewinddir);
   f_rewinddir(dir_handle);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_scandir f_scandir
-#else
 inline Variant x_scandir(CStrRef directory, bool descending = false, CObjRef context = null) {
-  FUNCTION_INJECTION(scandir);
+  FUNCTION_INJECTION_BUILTIN(scandir);
   return f_scandir(directory, descending, context);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_closedir f_closedir
-#else
 inline void x_closedir(CObjRef dir_handle) {
-  FUNCTION_INJECTION(closedir);
+  FUNCTION_INJECTION_BUILTIN(closedir);
   f_closedir(dir_handle);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

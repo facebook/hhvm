@@ -1,3 +1,19 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 1997-2010 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
 
 #ifndef __EXTPROFILE_SIMPLEXML_H__
 #define __EXTPROFILE_SIMPLEXML_H__
@@ -9,68 +25,40 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_simplexml_load_string f_simplexml_load_string
-#else
 inline Variant x_simplexml_load_string(CStrRef data, CStrRef class_name = "SimpleXMLElement", int64 options = 0, CStrRef ns = "", bool is_prefix = false) {
-  FUNCTION_INJECTION(simplexml_load_string);
+  FUNCTION_INJECTION_BUILTIN(simplexml_load_string);
   return f_simplexml_load_string(data, class_name, options, ns, is_prefix);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_simplexml_load_file f_simplexml_load_file
-#else
 inline Variant x_simplexml_load_file(CStrRef filename, CStrRef class_name = "SimpleXMLElement", int64 options = 0, CStrRef ns = "", bool is_prefix = false) {
-  FUNCTION_INJECTION(simplexml_load_file);
+  FUNCTION_INJECTION_BUILTIN(simplexml_load_file);
   return f_simplexml_load_file(filename, class_name, options, ns, is_prefix);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_libxml_get_errors f_libxml_get_errors
-#else
 inline Variant x_libxml_get_errors() {
-  FUNCTION_INJECTION(libxml_get_errors);
+  FUNCTION_INJECTION_BUILTIN(libxml_get_errors);
   return f_libxml_get_errors();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_libxml_get_last_error f_libxml_get_last_error
-#else
 inline Variant x_libxml_get_last_error() {
-  FUNCTION_INJECTION(libxml_get_last_error);
+  FUNCTION_INJECTION_BUILTIN(libxml_get_last_error);
   return f_libxml_get_last_error();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_libxml_clear_errors f_libxml_clear_errors
-#else
 inline void x_libxml_clear_errors() {
-  FUNCTION_INJECTION(libxml_clear_errors);
+  FUNCTION_INJECTION_BUILTIN(libxml_clear_errors);
   f_libxml_clear_errors();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_libxml_use_internal_errors f_libxml_use_internal_errors
-#else
 inline bool x_libxml_use_internal_errors(CVarRef use_errors = null_variant) {
-  FUNCTION_INJECTION(libxml_use_internal_errors);
+  FUNCTION_INJECTION_BUILTIN(libxml_use_internal_errors);
   return f_libxml_use_internal_errors(use_errors);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_libxml_set_streams_context f_libxml_set_streams_context
-#else
 inline void x_libxml_set_streams_context(CObjRef streams_context) {
-  FUNCTION_INJECTION(libxml_set_streams_context);
+  FUNCTION_INJECTION_BUILTIN(libxml_set_streams_context);
   f_libxml_set_streams_context(streams_context);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

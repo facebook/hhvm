@@ -25,104 +25,60 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_iconv_mime_encode f_iconv_mime_encode
-#else
 inline Variant x_iconv_mime_encode(CStrRef field_name, CStrRef field_value, CVarRef preferences = null_variant) {
-  FUNCTION_INJECTION(iconv_mime_encode);
+  FUNCTION_INJECTION_BUILTIN(iconv_mime_encode);
   return f_iconv_mime_encode(field_name, field_value, preferences);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_iconv_mime_decode f_iconv_mime_decode
-#else
 inline Variant x_iconv_mime_decode(CStrRef encoded_string, int mode = 0, CStrRef charset = null_string) {
-  FUNCTION_INJECTION(iconv_mime_decode);
+  FUNCTION_INJECTION_BUILTIN(iconv_mime_decode);
   return f_iconv_mime_decode(encoded_string, mode, charset);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_iconv_mime_decode_headers f_iconv_mime_decode_headers
-#else
 inline Variant x_iconv_mime_decode_headers(CStrRef encoded_headers, int mode = 0, CStrRef charset = null_string) {
-  FUNCTION_INJECTION(iconv_mime_decode_headers);
+  FUNCTION_INJECTION_BUILTIN(iconv_mime_decode_headers);
   return f_iconv_mime_decode_headers(encoded_headers, mode, charset);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_iconv_get_encoding f_iconv_get_encoding
-#else
 inline Variant x_iconv_get_encoding(CStrRef type = "all") {
-  FUNCTION_INJECTION(iconv_get_encoding);
+  FUNCTION_INJECTION_BUILTIN(iconv_get_encoding);
   return f_iconv_get_encoding(type);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_iconv_set_encoding f_iconv_set_encoding
-#else
 inline bool x_iconv_set_encoding(CStrRef type, CStrRef charset) {
-  FUNCTION_INJECTION(iconv_set_encoding);
+  FUNCTION_INJECTION_BUILTIN(iconv_set_encoding);
   return f_iconv_set_encoding(type, charset);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_iconv f_iconv
-#else
 inline Variant x_iconv(CStrRef in_charset, CStrRef out_charset, CStrRef str) {
-  FUNCTION_INJECTION(iconv);
+  FUNCTION_INJECTION_BUILTIN(iconv);
   return f_iconv(in_charset, out_charset, str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_iconv_strlen f_iconv_strlen
-#else
 inline Variant x_iconv_strlen(CStrRef str, CStrRef charset = null_string) {
-  FUNCTION_INJECTION(iconv_strlen);
+  FUNCTION_INJECTION_BUILTIN(iconv_strlen);
   return f_iconv_strlen(str, charset);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_iconv_strpos f_iconv_strpos
-#else
 inline Variant x_iconv_strpos(CStrRef haystack, CStrRef needle, int offset = 0, CStrRef charset = null_string) {
-  FUNCTION_INJECTION(iconv_strpos);
+  FUNCTION_INJECTION_BUILTIN(iconv_strpos);
   return f_iconv_strpos(haystack, needle, offset, charset);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_iconv_strrpos f_iconv_strrpos
-#else
 inline Variant x_iconv_strrpos(CStrRef haystack, CStrRef needle, CStrRef charset = null_string) {
-  FUNCTION_INJECTION(iconv_strrpos);
+  FUNCTION_INJECTION_BUILTIN(iconv_strrpos);
   return f_iconv_strrpos(haystack, needle, charset);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_iconv_substr f_iconv_substr
-#else
 inline Variant x_iconv_substr(CStrRef str, int offset, int length = 0, CStrRef charset = null_string) {
-  FUNCTION_INJECTION(iconv_substr);
+  FUNCTION_INJECTION_BUILTIN(iconv_substr);
   return f_iconv_substr(str, offset, length, charset);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ob_iconv_handler f_ob_iconv_handler
-#else
 inline String x_ob_iconv_handler(CStrRef contents, int status) {
-  FUNCTION_INJECTION(ob_iconv_handler);
+  FUNCTION_INJECTION_BUILTIN(ob_iconv_handler);
   return f_ob_iconv_handler(contents, status);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

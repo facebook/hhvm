@@ -25,140 +25,80 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_preg_grep f_preg_grep
-#else
 inline Variant x_preg_grep(CStrRef pattern, CArrRef input, int flags = 0) {
-  FUNCTION_INJECTION(preg_grep);
+  FUNCTION_INJECTION_BUILTIN(preg_grep);
   return f_preg_grep(pattern, input, flags);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_preg_match f_preg_match
-#else
 inline Variant x_preg_match(CStrRef pattern, CStrRef subject, Variant matches = null, int flags = 0, int offset = 0) {
-  FUNCTION_INJECTION(preg_match);
+  FUNCTION_INJECTION_BUILTIN(preg_match);
   return f_preg_match(pattern, subject, ref(matches), flags, offset);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_preg_match_all f_preg_match_all
-#else
 inline Variant x_preg_match_all(CStrRef pattern, CStrRef subject, Variant matches, int flags = 0, int offset = 0) {
-  FUNCTION_INJECTION(preg_match_all);
+  FUNCTION_INJECTION_BUILTIN(preg_match_all);
   return f_preg_match_all(pattern, subject, ref(matches), flags, offset);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_preg_replace f_preg_replace
-#else
 inline Variant x_preg_replace(CVarRef pattern, CVarRef replacement, CVarRef subject, int limit = -1, Variant count = null) {
-  FUNCTION_INJECTION(preg_replace);
+  FUNCTION_INJECTION_BUILTIN(preg_replace);
   return f_preg_replace(pattern, replacement, subject, limit, ref(count));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_preg_replace_callback f_preg_replace_callback
-#else
 inline Variant x_preg_replace_callback(CVarRef pattern, CVarRef callback, CVarRef subject, int limit = -1, Variant count = null) {
-  FUNCTION_INJECTION(preg_replace_callback);
+  FUNCTION_INJECTION_BUILTIN(preg_replace_callback);
   return f_preg_replace_callback(pattern, callback, subject, limit, ref(count));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_preg_split f_preg_split
-#else
 inline Variant x_preg_split(CVarRef pattern, CVarRef subject, int limit = -1, int flags = 0) {
-  FUNCTION_INJECTION(preg_split);
+  FUNCTION_INJECTION_BUILTIN(preg_split);
   return f_preg_split(pattern, subject, limit, flags);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_preg_quote f_preg_quote
-#else
 inline String x_preg_quote(CStrRef str, CStrRef delimiter = null_string) {
-  FUNCTION_INJECTION(preg_quote);
+  FUNCTION_INJECTION_BUILTIN(preg_quote);
   return f_preg_quote(str, delimiter);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_preg_last_error f_preg_last_error
-#else
 inline int x_preg_last_error() {
-  FUNCTION_INJECTION(preg_last_error);
+  FUNCTION_INJECTION_BUILTIN(preg_last_error);
   return f_preg_last_error();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ereg_replace f_ereg_replace
-#else
 inline String x_ereg_replace(CStrRef pattern, CStrRef replacement, CStrRef str) {
-  FUNCTION_INJECTION(ereg_replace);
+  FUNCTION_INJECTION_BUILTIN(ereg_replace);
   return f_ereg_replace(pattern, replacement, str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_eregi_replace f_eregi_replace
-#else
 inline String x_eregi_replace(CStrRef pattern, CStrRef replacement, CStrRef str) {
-  FUNCTION_INJECTION(eregi_replace);
+  FUNCTION_INJECTION_BUILTIN(eregi_replace);
   return f_eregi_replace(pattern, replacement, str);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ereg f_ereg
-#else
 inline Variant x_ereg(CStrRef pattern, CStrRef str, Variant regs = null) {
-  FUNCTION_INJECTION(ereg);
+  FUNCTION_INJECTION_BUILTIN(ereg);
   return f_ereg(pattern, str, ref(regs));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_eregi f_eregi
-#else
 inline Variant x_eregi(CStrRef pattern, CStrRef str, Variant regs = null) {
-  FUNCTION_INJECTION(eregi);
+  FUNCTION_INJECTION_BUILTIN(eregi);
   return f_eregi(pattern, str, ref(regs));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_split f_split
-#else
 inline Variant x_split(CStrRef pattern, CStrRef str, int limit = -1) {
-  FUNCTION_INJECTION(split);
+  FUNCTION_INJECTION_BUILTIN(split);
   return f_split(pattern, str, limit);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_spliti f_spliti
-#else
 inline Variant x_spliti(CStrRef pattern, CStrRef str, int limit = -1) {
-  FUNCTION_INJECTION(spliti);
+  FUNCTION_INJECTION_BUILTIN(spliti);
   return f_spliti(pattern, str, limit);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_sql_regcase f_sql_regcase
-#else
 inline String x_sql_regcase(CStrRef str) {
-  FUNCTION_INJECTION(sql_regcase);
+  FUNCTION_INJECTION_BUILTIN(sql_regcase);
   return f_sql_regcase(str);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

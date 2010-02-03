@@ -25,275 +25,155 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_gethostbyaddr f_gethostbyaddr
-#else
 inline Variant x_gethostbyaddr(CStrRef ip_address) {
-  FUNCTION_INJECTION(gethostbyaddr);
+  FUNCTION_INJECTION_BUILTIN(gethostbyaddr);
   return f_gethostbyaddr(ip_address);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gethostbyname f_gethostbyname
-#else
 inline String x_gethostbyname(CStrRef hostname) {
-  FUNCTION_INJECTION(gethostbyname);
+  FUNCTION_INJECTION_BUILTIN(gethostbyname);
   return f_gethostbyname(hostname);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_gethostbynamel f_gethostbynamel
-#else
 inline Variant x_gethostbynamel(CStrRef hostname) {
-  FUNCTION_INJECTION(gethostbynamel);
+  FUNCTION_INJECTION_BUILTIN(gethostbynamel);
   return f_gethostbynamel(hostname);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_getprotobyname f_getprotobyname
-#else
 inline Variant x_getprotobyname(CStrRef name) {
-  FUNCTION_INJECTION(getprotobyname);
+  FUNCTION_INJECTION_BUILTIN(getprotobyname);
   return f_getprotobyname(name);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_getprotobynumber f_getprotobynumber
-#else
 inline Variant x_getprotobynumber(int number) {
-  FUNCTION_INJECTION(getprotobynumber);
+  FUNCTION_INJECTION_BUILTIN(getprotobynumber);
   return f_getprotobynumber(number);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_getservbyname f_getservbyname
-#else
 inline Variant x_getservbyname(CStrRef service, CStrRef protocol) {
-  FUNCTION_INJECTION(getservbyname);
+  FUNCTION_INJECTION_BUILTIN(getservbyname);
   return f_getservbyname(service, protocol);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_getservbyport f_getservbyport
-#else
 inline Variant x_getservbyport(int port, CStrRef protocol) {
-  FUNCTION_INJECTION(getservbyport);
+  FUNCTION_INJECTION_BUILTIN(getservbyport);
   return f_getservbyport(port, protocol);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_inet_ntop f_inet_ntop
-#else
 inline Variant x_inet_ntop(CStrRef in_addr) {
-  FUNCTION_INJECTION(inet_ntop);
+  FUNCTION_INJECTION_BUILTIN(inet_ntop);
   return f_inet_ntop(in_addr);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_inet_pton f_inet_pton
-#else
 inline Variant x_inet_pton(CStrRef address) {
-  FUNCTION_INJECTION(inet_pton);
+  FUNCTION_INJECTION_BUILTIN(inet_pton);
   return f_inet_pton(address);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ip2long f_ip2long
-#else
 inline Variant x_ip2long(CStrRef ip_address) {
-  FUNCTION_INJECTION(ip2long);
+  FUNCTION_INJECTION_BUILTIN(ip2long);
   return f_ip2long(ip_address);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_long2ip f_long2ip
-#else
 inline String x_long2ip(int proper_address) {
-  FUNCTION_INJECTION(long2ip);
+  FUNCTION_INJECTION_BUILTIN(long2ip);
   return f_long2ip(proper_address);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_dns_check_record f_dns_check_record
-#else
 inline bool x_dns_check_record(CStrRef host, CStrRef type = null_string) {
-  FUNCTION_INJECTION(dns_check_record);
+  FUNCTION_INJECTION_BUILTIN(dns_check_record);
   return f_dns_check_record(host, type);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_checkdnsrr f_checkdnsrr
-#else
 inline bool x_checkdnsrr(CStrRef host, CStrRef type = null_string) {
-  FUNCTION_INJECTION(checkdnsrr);
+  FUNCTION_INJECTION_BUILTIN(checkdnsrr);
   return f_checkdnsrr(host, type);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_dns_get_record f_dns_get_record
-#else
 inline Variant x_dns_get_record(CStrRef hostname, int type = -1, Variant authns = null, Variant addtl = null) {
-  FUNCTION_INJECTION(dns_get_record);
+  FUNCTION_INJECTION_BUILTIN(dns_get_record);
   return f_dns_get_record(hostname, type, ref(authns), ref(addtl));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_dns_get_mx f_dns_get_mx
-#else
 inline bool x_dns_get_mx(CStrRef hostname, Variant mxhosts, Variant weights = null) {
-  FUNCTION_INJECTION(dns_get_mx);
+  FUNCTION_INJECTION_BUILTIN(dns_get_mx);
   return f_dns_get_mx(hostname, ref(mxhosts), ref(weights));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_getmxrr f_getmxrr
-#else
 inline bool x_getmxrr(CStrRef hostname, Variant mxhosts, Variant weight = null) {
-  FUNCTION_INJECTION(getmxrr);
+  FUNCTION_INJECTION_BUILTIN(getmxrr);
   return f_getmxrr(hostname, ref(mxhosts), ref(weight));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_fsockopen f_fsockopen
-#else
 inline Variant x_fsockopen(CStrRef hostname, int port = -1, Variant errnum = null, Variant errstr = null, double timeout = 0.0) {
-  FUNCTION_INJECTION(fsockopen);
+  FUNCTION_INJECTION_BUILTIN(fsockopen);
   return f_fsockopen(hostname, port, ref(errnum), ref(errstr), timeout);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_pfsockopen f_pfsockopen
-#else
 inline Variant x_pfsockopen(CStrRef hostname, int port = -1, Variant errnum = null, Variant errstr = null, double timeout = 0.0) {
-  FUNCTION_INJECTION(pfsockopen);
+  FUNCTION_INJECTION_BUILTIN(pfsockopen);
   return f_pfsockopen(hostname, port, ref(errnum), ref(errstr), timeout);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_get_status f_socket_get_status
-#else
 inline Array x_socket_get_status(CObjRef stream) {
-  FUNCTION_INJECTION(socket_get_status);
+  FUNCTION_INJECTION_BUILTIN(socket_get_status);
   return f_socket_get_status(stream);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_set_blocking f_socket_set_blocking
-#else
 inline bool x_socket_set_blocking(CObjRef stream, int mode) {
-  FUNCTION_INJECTION(socket_set_blocking);
+  FUNCTION_INJECTION_BUILTIN(socket_set_blocking);
   return f_socket_set_blocking(stream, mode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_socket_set_timeout f_socket_set_timeout
-#else
 inline bool x_socket_set_timeout(CObjRef stream, int seconds, int microseconds = 0) {
-  FUNCTION_INJECTION(socket_set_timeout);
+  FUNCTION_INJECTION_BUILTIN(socket_set_timeout);
   return f_socket_set_timeout(stream, seconds, microseconds);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_header f_header
-#else
 inline void x_header(CStrRef str, bool replace = true, int http_response_code = 0) {
-  FUNCTION_INJECTION(header);
+  FUNCTION_INJECTION_BUILTIN(header);
   f_header(str, replace, http_response_code);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_headers_list f_headers_list
-#else
 inline Array x_headers_list() {
-  FUNCTION_INJECTION(headers_list);
+  FUNCTION_INJECTION_BUILTIN(headers_list);
   return f_headers_list();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_headers_sent f_headers_sent
-#else
 inline bool x_headers_sent(Variant file = null, Variant line = null) {
-  FUNCTION_INJECTION(headers_sent);
+  FUNCTION_INJECTION_BUILTIN(headers_sent);
   return f_headers_sent(ref(file), ref(line));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_setcookie f_setcookie
-#else
 inline bool x_setcookie(CStrRef name, CStrRef value = null_string, int expire = 0, CStrRef path = null_string, CStrRef domain = null_string, bool secure = false, bool httponly = false) {
-  FUNCTION_INJECTION(setcookie);
+  FUNCTION_INJECTION_BUILTIN(setcookie);
   return f_setcookie(name, value, expire, path, domain, secure, httponly);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_setrawcookie f_setrawcookie
-#else
 inline bool x_setrawcookie(CStrRef name, CStrRef value = null_string, int expire = 0, CStrRef path = null_string, CStrRef domain = null_string, bool secure = false, bool httponly = false) {
-  FUNCTION_INJECTION(setrawcookie);
+  FUNCTION_INJECTION_BUILTIN(setrawcookie);
   return f_setrawcookie(name, value, expire, path, domain, secure, httponly);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_define_syslog_variables f_define_syslog_variables
-#else
 inline void x_define_syslog_variables() {
-  FUNCTION_INJECTION(define_syslog_variables);
+  FUNCTION_INJECTION_BUILTIN(define_syslog_variables);
   f_define_syslog_variables();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_openlog f_openlog
-#else
 inline void x_openlog(CStrRef ident, int option, int facility) {
-  FUNCTION_INJECTION(openlog);
+  FUNCTION_INJECTION_BUILTIN(openlog);
   f_openlog(ident, option, facility);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_closelog f_closelog
-#else
 inline void x_closelog() {
-  FUNCTION_INJECTION(closelog);
+  FUNCTION_INJECTION_BUILTIN(closelog);
   f_closelog();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_syslog f_syslog
-#else
 inline void x_syslog(int priority, CStrRef message) {
-  FUNCTION_INJECTION(syslog);
+  FUNCTION_INJECTION_BUILTIN(syslog);
   f_syslog(priority, message);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

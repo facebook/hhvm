@@ -47,6 +47,17 @@ String FrameInjection::getParentClassName(bool skip /* = false */) {
   return "";
 }
 
+ObjectData *FrameInjection::getThis(bool skip /* = false */) {
+  FrameInjection *t = *s_top;
+  if (t && skip) {
+    t = t->m_prev;
+  }
+  if (t && t->m_object) {
+    return t->m_object;
+  }
+  return NULL;
+}
+
 Array FrameInjection::getBacktrace(bool skip /* = false */,
                                    bool withSelf /* = false */) {
   Array bt = Array::Create();

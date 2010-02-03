@@ -1773,6 +1773,20 @@ bool TestCodeRun::TestObjectMethod() {
       "$f = 'b2f';"
       "$b = 'b2b';"
       "call_user_func_array(array('B1', 'b1f'), 1);");
+
+  // calling instance method through self
+  VCR("<?php "
+      "class A {"
+      "  var $a;"
+      "  function f() {"
+      "    var_dump($this->a);"
+      "  }"
+      "  function g() {"
+      "    $this->a = 100;"
+      "    call_user_func(array('self', 'f'));"
+      "  }"
+      "}");
+
   VCR("<?php "
       "class c {"
       "function foo() { echo \"called\n\"; }"

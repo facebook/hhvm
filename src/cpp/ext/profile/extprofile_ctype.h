@@ -25,104 +25,60 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_ctype_alnum f_ctype_alnum
-#else
 inline bool x_ctype_alnum(CVarRef text) {
-  FUNCTION_INJECTION(ctype_alnum);
+  FUNCTION_INJECTION_BUILTIN(ctype_alnum);
   return f_ctype_alnum(text);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ctype_alpha f_ctype_alpha
-#else
 inline bool x_ctype_alpha(CVarRef text) {
-  FUNCTION_INJECTION(ctype_alpha);
+  FUNCTION_INJECTION_BUILTIN(ctype_alpha);
   return f_ctype_alpha(text);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ctype_cntrl f_ctype_cntrl
-#else
 inline bool x_ctype_cntrl(CVarRef text) {
-  FUNCTION_INJECTION(ctype_cntrl);
+  FUNCTION_INJECTION_BUILTIN(ctype_cntrl);
   return f_ctype_cntrl(text);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ctype_digit f_ctype_digit
-#else
 inline bool x_ctype_digit(CVarRef text) {
-  FUNCTION_INJECTION(ctype_digit);
+  FUNCTION_INJECTION_BUILTIN(ctype_digit);
   return f_ctype_digit(text);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ctype_graph f_ctype_graph
-#else
 inline bool x_ctype_graph(CVarRef text) {
-  FUNCTION_INJECTION(ctype_graph);
+  FUNCTION_INJECTION_BUILTIN(ctype_graph);
   return f_ctype_graph(text);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ctype_lower f_ctype_lower
-#else
 inline bool x_ctype_lower(CVarRef text) {
-  FUNCTION_INJECTION(ctype_lower);
+  FUNCTION_INJECTION_BUILTIN(ctype_lower);
   return f_ctype_lower(text);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ctype_print f_ctype_print
-#else
 inline bool x_ctype_print(CVarRef text) {
-  FUNCTION_INJECTION(ctype_print);
+  FUNCTION_INJECTION_BUILTIN(ctype_print);
   return f_ctype_print(text);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ctype_punct f_ctype_punct
-#else
 inline bool x_ctype_punct(CVarRef text) {
-  FUNCTION_INJECTION(ctype_punct);
+  FUNCTION_INJECTION_BUILTIN(ctype_punct);
   return f_ctype_punct(text);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ctype_space f_ctype_space
-#else
 inline bool x_ctype_space(CVarRef text) {
-  FUNCTION_INJECTION(ctype_space);
+  FUNCTION_INJECTION_BUILTIN(ctype_space);
   return f_ctype_space(text);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ctype_upper f_ctype_upper
-#else
 inline bool x_ctype_upper(CVarRef text) {
-  FUNCTION_INJECTION(ctype_upper);
+  FUNCTION_INJECTION_BUILTIN(ctype_upper);
   return f_ctype_upper(text);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ctype_xdigit f_ctype_xdigit
-#else
 inline bool x_ctype_xdigit(CVarRef text) {
-  FUNCTION_INJECTION(ctype_xdigit);
+  FUNCTION_INJECTION_BUILTIN(ctype_xdigit);
   return f_ctype_xdigit(text);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

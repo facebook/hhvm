@@ -25,194 +25,110 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_ob_start f_ob_start
-#else
 inline bool x_ob_start(CVarRef output_callback = null, int chunk_size = 0, bool erase = true) {
-  FUNCTION_INJECTION(ob_start);
+  FUNCTION_INJECTION_BUILTIN(ob_start);
   return f_ob_start(output_callback, chunk_size, erase);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ob_clean f_ob_clean
-#else
 inline void x_ob_clean() {
-  FUNCTION_INJECTION(ob_clean);
+  FUNCTION_INJECTION_BUILTIN(ob_clean);
   f_ob_clean();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ob_flush f_ob_flush
-#else
 inline void x_ob_flush() {
-  FUNCTION_INJECTION(ob_flush);
+  FUNCTION_INJECTION_BUILTIN(ob_flush);
   f_ob_flush();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ob_end_clean f_ob_end_clean
-#else
 inline bool x_ob_end_clean() {
-  FUNCTION_INJECTION(ob_end_clean);
+  FUNCTION_INJECTION_BUILTIN(ob_end_clean);
   return f_ob_end_clean();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ob_end_flush f_ob_end_flush
-#else
 inline bool x_ob_end_flush() {
-  FUNCTION_INJECTION(ob_end_flush);
+  FUNCTION_INJECTION_BUILTIN(ob_end_flush);
   return f_ob_end_flush();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_flush f_flush
-#else
 inline void x_flush() {
-  FUNCTION_INJECTION(flush);
+  FUNCTION_INJECTION_BUILTIN(flush);
   f_flush();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ob_get_clean f_ob_get_clean
-#else
 inline String x_ob_get_clean() {
-  FUNCTION_INJECTION(ob_get_clean);
+  FUNCTION_INJECTION_BUILTIN(ob_get_clean);
   return f_ob_get_clean();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ob_get_contents f_ob_get_contents
-#else
 inline String x_ob_get_contents() {
-  FUNCTION_INJECTION(ob_get_contents);
+  FUNCTION_INJECTION_BUILTIN(ob_get_contents);
   return f_ob_get_contents();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ob_get_flush f_ob_get_flush
-#else
 inline String x_ob_get_flush() {
-  FUNCTION_INJECTION(ob_get_flush);
+  FUNCTION_INJECTION_BUILTIN(ob_get_flush);
   return f_ob_get_flush();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ob_get_length f_ob_get_length
-#else
 inline int x_ob_get_length() {
-  FUNCTION_INJECTION(ob_get_length);
+  FUNCTION_INJECTION_BUILTIN(ob_get_length);
   return f_ob_get_length();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ob_get_level f_ob_get_level
-#else
 inline int x_ob_get_level() {
-  FUNCTION_INJECTION(ob_get_level);
+  FUNCTION_INJECTION_BUILTIN(ob_get_level);
   return f_ob_get_level();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ob_get_status f_ob_get_status
-#else
 inline Array x_ob_get_status(bool full_status = false) {
-  FUNCTION_INJECTION(ob_get_status);
+  FUNCTION_INJECTION_BUILTIN(ob_get_status);
   return f_ob_get_status(full_status);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ob_gzhandler f_ob_gzhandler
-#else
 inline String x_ob_gzhandler(CStrRef buffer, int mode) {
-  FUNCTION_INJECTION(ob_gzhandler);
+  FUNCTION_INJECTION_BUILTIN(ob_gzhandler);
   return f_ob_gzhandler(buffer, mode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ob_implicit_flush f_ob_implicit_flush
-#else
 inline void x_ob_implicit_flush(bool flag = true) {
-  FUNCTION_INJECTION(ob_implicit_flush);
+  FUNCTION_INJECTION_BUILTIN(ob_implicit_flush);
   f_ob_implicit_flush(flag);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_ob_list_handlers f_ob_list_handlers
-#else
 inline Array x_ob_list_handlers() {
-  FUNCTION_INJECTION(ob_list_handlers);
+  FUNCTION_INJECTION_BUILTIN(ob_list_handlers);
   return f_ob_list_handlers();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_output_add_rewrite_var f_output_add_rewrite_var
-#else
 inline bool x_output_add_rewrite_var(CStrRef name, CStrRef value) {
-  FUNCTION_INJECTION(output_add_rewrite_var);
+  FUNCTION_INJECTION_BUILTIN(output_add_rewrite_var);
   return f_output_add_rewrite_var(name, value);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_output_reset_rewrite_vars f_output_reset_rewrite_vars
-#else
 inline bool x_output_reset_rewrite_vars() {
-  FUNCTION_INJECTION(output_reset_rewrite_vars);
+  FUNCTION_INJECTION_BUILTIN(output_reset_rewrite_vars);
   return f_output_reset_rewrite_vars();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hphp_log f_hphp_log
-#else
 inline bool x_hphp_log(CStrRef filename, CStrRef message) {
-  FUNCTION_INJECTION(hphp_log);
+  FUNCTION_INJECTION_BUILTIN(hphp_log);
   return f_hphp_log(filename, message);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hphp_stats f_hphp_stats
-#else
 inline void x_hphp_stats(CStrRef name, int64 value) {
-  FUNCTION_INJECTION(hphp_stats);
+  FUNCTION_INJECTION_BUILTIN(hphp_stats);
   f_hphp_stats(name, value);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hphp_get_stats f_hphp_get_stats
-#else
 inline int64 x_hphp_get_stats(CStrRef name) {
-  FUNCTION_INJECTION(hphp_get_stats);
+  FUNCTION_INJECTION_BUILTIN(hphp_get_stats);
   return f_hphp_get_stats(name);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_hphp_output_global_state f_hphp_output_global_state
-#else
 inline void x_hphp_output_global_state(CStrRef filename = null_string) {
-  FUNCTION_INJECTION(hphp_output_global_state);
+  FUNCTION_INJECTION_BUILTIN(hphp_output_global_state);
   f_hphp_output_global_state(filename);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

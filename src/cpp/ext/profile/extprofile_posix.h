@@ -25,320 +25,180 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_access f_posix_access
-#else
 inline bool x_posix_access(CStrRef file, int mode = 0) {
-  FUNCTION_INJECTION(posix_access);
+  FUNCTION_INJECTION_BUILTIN(posix_access);
   return f_posix_access(file, mode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_ctermid f_posix_ctermid
-#else
 inline String x_posix_ctermid() {
-  FUNCTION_INJECTION(posix_ctermid);
+  FUNCTION_INJECTION_BUILTIN(posix_ctermid);
   return f_posix_ctermid();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_get_last_error f_posix_get_last_error
-#else
 inline int x_posix_get_last_error() {
-  FUNCTION_INJECTION(posix_get_last_error);
+  FUNCTION_INJECTION_BUILTIN(posix_get_last_error);
   return f_posix_get_last_error();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getcwd f_posix_getcwd
-#else
 inline String x_posix_getcwd() {
-  FUNCTION_INJECTION(posix_getcwd);
+  FUNCTION_INJECTION_BUILTIN(posix_getcwd);
   return f_posix_getcwd();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getegid f_posix_getegid
-#else
 inline int x_posix_getegid() {
-  FUNCTION_INJECTION(posix_getegid);
+  FUNCTION_INJECTION_BUILTIN(posix_getegid);
   return f_posix_getegid();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_geteuid f_posix_geteuid
-#else
 inline int x_posix_geteuid() {
-  FUNCTION_INJECTION(posix_geteuid);
+  FUNCTION_INJECTION_BUILTIN(posix_geteuid);
   return f_posix_geteuid();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getgid f_posix_getgid
-#else
 inline int x_posix_getgid() {
-  FUNCTION_INJECTION(posix_getgid);
+  FUNCTION_INJECTION_BUILTIN(posix_getgid);
   return f_posix_getgid();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getgrgid f_posix_getgrgid
-#else
 inline Variant x_posix_getgrgid(int gid) {
-  FUNCTION_INJECTION(posix_getgrgid);
+  FUNCTION_INJECTION_BUILTIN(posix_getgrgid);
   return f_posix_getgrgid(gid);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getgrnam f_posix_getgrnam
-#else
 inline Variant x_posix_getgrnam(CStrRef name) {
-  FUNCTION_INJECTION(posix_getgrnam);
+  FUNCTION_INJECTION_BUILTIN(posix_getgrnam);
   return f_posix_getgrnam(name);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getgroups f_posix_getgroups
-#else
 inline Variant x_posix_getgroups() {
-  FUNCTION_INJECTION(posix_getgroups);
+  FUNCTION_INJECTION_BUILTIN(posix_getgroups);
   return f_posix_getgroups();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getlogin f_posix_getlogin
-#else
 inline Variant x_posix_getlogin() {
-  FUNCTION_INJECTION(posix_getlogin);
+  FUNCTION_INJECTION_BUILTIN(posix_getlogin);
   return f_posix_getlogin();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getpgid f_posix_getpgid
-#else
 inline Variant x_posix_getpgid(int pid) {
-  FUNCTION_INJECTION(posix_getpgid);
+  FUNCTION_INJECTION_BUILTIN(posix_getpgid);
   return f_posix_getpgid(pid);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getpgrp f_posix_getpgrp
-#else
 inline int x_posix_getpgrp() {
-  FUNCTION_INJECTION(posix_getpgrp);
+  FUNCTION_INJECTION_BUILTIN(posix_getpgrp);
   return f_posix_getpgrp();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getpid f_posix_getpid
-#else
 inline int x_posix_getpid() {
-  FUNCTION_INJECTION(posix_getpid);
+  FUNCTION_INJECTION_BUILTIN(posix_getpid);
   return f_posix_getpid();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getppid f_posix_getppid
-#else
 inline int x_posix_getppid() {
-  FUNCTION_INJECTION(posix_getppid);
+  FUNCTION_INJECTION_BUILTIN(posix_getppid);
   return f_posix_getppid();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getpwnam f_posix_getpwnam
-#else
 inline Variant x_posix_getpwnam(CStrRef username) {
-  FUNCTION_INJECTION(posix_getpwnam);
+  FUNCTION_INJECTION_BUILTIN(posix_getpwnam);
   return f_posix_getpwnam(username);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getpwuid f_posix_getpwuid
-#else
 inline Variant x_posix_getpwuid(int uid) {
-  FUNCTION_INJECTION(posix_getpwuid);
+  FUNCTION_INJECTION_BUILTIN(posix_getpwuid);
   return f_posix_getpwuid(uid);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getrlimit f_posix_getrlimit
-#else
 inline Variant x_posix_getrlimit() {
-  FUNCTION_INJECTION(posix_getrlimit);
+  FUNCTION_INJECTION_BUILTIN(posix_getrlimit);
   return f_posix_getrlimit();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getsid f_posix_getsid
-#else
 inline Variant x_posix_getsid(int pid) {
-  FUNCTION_INJECTION(posix_getsid);
+  FUNCTION_INJECTION_BUILTIN(posix_getsid);
   return f_posix_getsid(pid);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_getuid f_posix_getuid
-#else
 inline int x_posix_getuid() {
-  FUNCTION_INJECTION(posix_getuid);
+  FUNCTION_INJECTION_BUILTIN(posix_getuid);
   return f_posix_getuid();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_initgroups f_posix_initgroups
-#else
 inline bool x_posix_initgroups(CStrRef name, int base_group_id) {
-  FUNCTION_INJECTION(posix_initgroups);
+  FUNCTION_INJECTION_BUILTIN(posix_initgroups);
   return f_posix_initgroups(name, base_group_id);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_isatty f_posix_isatty
-#else
 inline bool x_posix_isatty(CVarRef fd) {
-  FUNCTION_INJECTION(posix_isatty);
+  FUNCTION_INJECTION_BUILTIN(posix_isatty);
   return f_posix_isatty(fd);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_kill f_posix_kill
-#else
 inline bool x_posix_kill(int pid, int sig) {
-  FUNCTION_INJECTION(posix_kill);
+  FUNCTION_INJECTION_BUILTIN(posix_kill);
   return f_posix_kill(pid, sig);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_mkfifo f_posix_mkfifo
-#else
 inline bool x_posix_mkfifo(CStrRef pathname, int mode) {
-  FUNCTION_INJECTION(posix_mkfifo);
+  FUNCTION_INJECTION_BUILTIN(posix_mkfifo);
   return f_posix_mkfifo(pathname, mode);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_mknod f_posix_mknod
-#else
 inline bool x_posix_mknod(CStrRef pathname, int mode, int major = 0, int minor = 0) {
-  FUNCTION_INJECTION(posix_mknod);
+  FUNCTION_INJECTION_BUILTIN(posix_mknod);
   return f_posix_mknod(pathname, mode, major, minor);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_setegid f_posix_setegid
-#else
 inline bool x_posix_setegid(int gid) {
-  FUNCTION_INJECTION(posix_setegid);
+  FUNCTION_INJECTION_BUILTIN(posix_setegid);
   return f_posix_setegid(gid);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_seteuid f_posix_seteuid
-#else
 inline bool x_posix_seteuid(int uid) {
-  FUNCTION_INJECTION(posix_seteuid);
+  FUNCTION_INJECTION_BUILTIN(posix_seteuid);
   return f_posix_seteuid(uid);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_setgid f_posix_setgid
-#else
 inline bool x_posix_setgid(int gid) {
-  FUNCTION_INJECTION(posix_setgid);
+  FUNCTION_INJECTION_BUILTIN(posix_setgid);
   return f_posix_setgid(gid);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_setpgid f_posix_setpgid
-#else
 inline bool x_posix_setpgid(int pid, int pgid) {
-  FUNCTION_INJECTION(posix_setpgid);
+  FUNCTION_INJECTION_BUILTIN(posix_setpgid);
   return f_posix_setpgid(pid, pgid);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_setsid f_posix_setsid
-#else
 inline int x_posix_setsid() {
-  FUNCTION_INJECTION(posix_setsid);
+  FUNCTION_INJECTION_BUILTIN(posix_setsid);
   return f_posix_setsid();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_setuid f_posix_setuid
-#else
 inline bool x_posix_setuid(int uid) {
-  FUNCTION_INJECTION(posix_setuid);
+  FUNCTION_INJECTION_BUILTIN(posix_setuid);
   return f_posix_setuid(uid);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_strerror f_posix_strerror
-#else
 inline String x_posix_strerror(int errnum) {
-  FUNCTION_INJECTION(posix_strerror);
+  FUNCTION_INJECTION_BUILTIN(posix_strerror);
   return f_posix_strerror(errnum);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_times f_posix_times
-#else
 inline Variant x_posix_times() {
-  FUNCTION_INJECTION(posix_times);
+  FUNCTION_INJECTION_BUILTIN(posix_times);
   return f_posix_times();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_ttyname f_posix_ttyname
-#else
 inline Variant x_posix_ttyname(CVarRef fd) {
-  FUNCTION_INJECTION(posix_ttyname);
+  FUNCTION_INJECTION_BUILTIN(posix_ttyname);
   return f_posix_ttyname(fd);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_posix_uname f_posix_uname
-#else
 inline Variant x_posix_uname() {
-  FUNCTION_INJECTION(posix_uname);
+  FUNCTION_INJECTION_BUILTIN(posix_uname);
   return f_posix_uname();
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

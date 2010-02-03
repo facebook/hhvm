@@ -25,221 +25,125 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_init f_curl_init
-#else
 inline Variant x_curl_init(CStrRef url = null_string) {
-  FUNCTION_INJECTION(curl_init);
+  FUNCTION_INJECTION_BUILTIN(curl_init);
   return f_curl_init(url);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_copy_handle f_curl_copy_handle
-#else
 inline Object x_curl_copy_handle(CObjRef ch) {
-  FUNCTION_INJECTION(curl_copy_handle);
+  FUNCTION_INJECTION_BUILTIN(curl_copy_handle);
   return f_curl_copy_handle(ch);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_version f_curl_version
-#else
 inline Variant x_curl_version(int uversion = CURLVERSION_NOW) {
-  FUNCTION_INJECTION(curl_version);
+  FUNCTION_INJECTION_BUILTIN(curl_version);
   return f_curl_version(uversion);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_setopt f_curl_setopt
-#else
 inline bool x_curl_setopt(CObjRef ch, int option, CVarRef value) {
-  FUNCTION_INJECTION(curl_setopt);
+  FUNCTION_INJECTION_BUILTIN(curl_setopt);
   return f_curl_setopt(ch, option, value);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_setopt_array f_curl_setopt_array
-#else
 inline bool x_curl_setopt_array(CObjRef ch, CArrRef options) {
-  FUNCTION_INJECTION(curl_setopt_array);
+  FUNCTION_INJECTION_BUILTIN(curl_setopt_array);
   return f_curl_setopt_array(ch, options);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_exec f_curl_exec
-#else
 inline Variant x_curl_exec(CObjRef ch) {
-  FUNCTION_INJECTION(curl_exec);
+  FUNCTION_INJECTION_BUILTIN(curl_exec);
   return f_curl_exec(ch);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_getinfo f_curl_getinfo
-#else
 inline Variant x_curl_getinfo(CObjRef ch, int opt = 0) {
-  FUNCTION_INJECTION(curl_getinfo);
+  FUNCTION_INJECTION_BUILTIN(curl_getinfo);
   return f_curl_getinfo(ch, opt);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_errno f_curl_errno
-#else
 inline int x_curl_errno(CObjRef ch) {
-  FUNCTION_INJECTION(curl_errno);
+  FUNCTION_INJECTION_BUILTIN(curl_errno);
   return f_curl_errno(ch);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_error f_curl_error
-#else
 inline String x_curl_error(CObjRef ch) {
-  FUNCTION_INJECTION(curl_error);
+  FUNCTION_INJECTION_BUILTIN(curl_error);
   return f_curl_error(ch);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_close f_curl_close
-#else
 inline void x_curl_close(CObjRef ch) {
-  FUNCTION_INJECTION(curl_close);
+  FUNCTION_INJECTION_BUILTIN(curl_close);
   f_curl_close(ch);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_multi_init f_curl_multi_init
-#else
 inline Object x_curl_multi_init() {
-  FUNCTION_INJECTION(curl_multi_init);
+  FUNCTION_INJECTION_BUILTIN(curl_multi_init);
   return f_curl_multi_init();
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_multi_add_handle f_curl_multi_add_handle
-#else
 inline int x_curl_multi_add_handle(CObjRef mh, CObjRef ch) {
-  FUNCTION_INJECTION(curl_multi_add_handle);
+  FUNCTION_INJECTION_BUILTIN(curl_multi_add_handle);
   return f_curl_multi_add_handle(mh, ch);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_multi_remove_handle f_curl_multi_remove_handle
-#else
 inline int x_curl_multi_remove_handle(CObjRef mh, CObjRef ch) {
-  FUNCTION_INJECTION(curl_multi_remove_handle);
+  FUNCTION_INJECTION_BUILTIN(curl_multi_remove_handle);
   return f_curl_multi_remove_handle(mh, ch);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_multi_exec f_curl_multi_exec
-#else
 inline int x_curl_multi_exec(CObjRef mh, Variant still_running) {
-  FUNCTION_INJECTION(curl_multi_exec);
+  FUNCTION_INJECTION_BUILTIN(curl_multi_exec);
   return f_curl_multi_exec(mh, ref(still_running));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_multi_select f_curl_multi_select
-#else
 inline int x_curl_multi_select(CObjRef mh, double timeout = 1.0) {
-  FUNCTION_INJECTION(curl_multi_select);
+  FUNCTION_INJECTION_BUILTIN(curl_multi_select);
   return f_curl_multi_select(mh, timeout);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_multi_getcontent f_curl_multi_getcontent
-#else
 inline String x_curl_multi_getcontent(CObjRef ch) {
-  FUNCTION_INJECTION(curl_multi_getcontent);
+  FUNCTION_INJECTION_BUILTIN(curl_multi_getcontent);
   return f_curl_multi_getcontent(ch);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_multi_info_read f_curl_multi_info_read
-#else
 inline Variant x_curl_multi_info_read(CObjRef mh, Variant msgs_in_queue = null) {
-  FUNCTION_INJECTION(curl_multi_info_read);
+  FUNCTION_INJECTION_BUILTIN(curl_multi_info_read);
   return f_curl_multi_info_read(mh, ref(msgs_in_queue));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_curl_multi_close f_curl_multi_close
-#else
 inline void x_curl_multi_close(CObjRef mh) {
-  FUNCTION_INJECTION(curl_multi_close);
+  FUNCTION_INJECTION_BUILTIN(curl_multi_close);
   f_curl_multi_close(mh);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_evhttp_set_cache f_evhttp_set_cache
-#else
 inline void x_evhttp_set_cache(CStrRef address, int max_conn, int port = 80) {
-  FUNCTION_INJECTION(evhttp_set_cache);
+  FUNCTION_INJECTION_BUILTIN(evhttp_set_cache);
   f_evhttp_set_cache(address, max_conn, port);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_evhttp_get f_evhttp_get
-#else
 inline Variant x_evhttp_get(CStrRef url, CArrRef headers = null_array, int timeout = 5) {
-  FUNCTION_INJECTION(evhttp_get);
+  FUNCTION_INJECTION_BUILTIN(evhttp_get);
   return f_evhttp_get(url, headers, timeout);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_evhttp_post f_evhttp_post
-#else
 inline Variant x_evhttp_post(CStrRef url, CStrRef data, CArrRef headers = null_array, int timeout = 5) {
-  FUNCTION_INJECTION(evhttp_post);
+  FUNCTION_INJECTION_BUILTIN(evhttp_post);
   return f_evhttp_post(url, data, headers, timeout);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_evhttp_async_get f_evhttp_async_get
-#else
 inline Variant x_evhttp_async_get(CStrRef url, CArrRef headers = null_array, int timeout = 5) {
-  FUNCTION_INJECTION(evhttp_async_get);
+  FUNCTION_INJECTION_BUILTIN(evhttp_async_get);
   return f_evhttp_async_get(url, headers, timeout);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_evhttp_async_post f_evhttp_async_post
-#else
 inline Variant x_evhttp_async_post(CStrRef url, CStrRef data, CArrRef headers = null_array, int timeout = 5) {
-  FUNCTION_INJECTION(evhttp_async_post);
+  FUNCTION_INJECTION_BUILTIN(evhttp_async_post);
   return f_evhttp_async_post(url, data, headers, timeout);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_evhttp_recv f_evhttp_recv
-#else
 inline Variant x_evhttp_recv(CObjRef handle) {
-  FUNCTION_INJECTION(evhttp_recv);
+  FUNCTION_INJECTION_BUILTIN(evhttp_recv);
   return f_evhttp_recv(handle);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

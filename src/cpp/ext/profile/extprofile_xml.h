@@ -25,221 +25,125 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_parser_create f_xml_parser_create
-#else
 inline Object x_xml_parser_create(CStrRef encoding = null_string) {
-  FUNCTION_INJECTION(xml_parser_create);
+  FUNCTION_INJECTION_BUILTIN(xml_parser_create);
   return f_xml_parser_create(encoding);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_parser_free f_xml_parser_free
-#else
 inline bool x_xml_parser_free(CObjRef parser) {
-  FUNCTION_INJECTION(xml_parser_free);
+  FUNCTION_INJECTION_BUILTIN(xml_parser_free);
   return f_xml_parser_free(parser);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_parse f_xml_parse
-#else
 inline int x_xml_parse(CObjRef parser, CStrRef data, bool is_final = true) {
-  FUNCTION_INJECTION(xml_parse);
+  FUNCTION_INJECTION_BUILTIN(xml_parse);
   return f_xml_parse(parser, data, is_final);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_parse_into_struct f_xml_parse_into_struct
-#else
 inline int x_xml_parse_into_struct(CObjRef parser, CStrRef data, Variant values, Variant index = null) {
-  FUNCTION_INJECTION(xml_parse_into_struct);
+  FUNCTION_INJECTION_BUILTIN(xml_parse_into_struct);
   return f_xml_parse_into_struct(parser, data, ref(values), ref(index));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_parser_create_ns f_xml_parser_create_ns
-#else
 inline Object x_xml_parser_create_ns(CStrRef encoding = null_string, CStrRef separator = null_string) {
-  FUNCTION_INJECTION(xml_parser_create_ns);
+  FUNCTION_INJECTION_BUILTIN(xml_parser_create_ns);
   return f_xml_parser_create_ns(encoding, separator);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_parser_get_option f_xml_parser_get_option
-#else
 inline Variant x_xml_parser_get_option(CObjRef parser, int option) {
-  FUNCTION_INJECTION(xml_parser_get_option);
+  FUNCTION_INJECTION_BUILTIN(xml_parser_get_option);
   return f_xml_parser_get_option(parser, option);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_parser_set_option f_xml_parser_set_option
-#else
 inline bool x_xml_parser_set_option(CObjRef parser, int option, CVarRef value) {
-  FUNCTION_INJECTION(xml_parser_set_option);
+  FUNCTION_INJECTION_BUILTIN(xml_parser_set_option);
   return f_xml_parser_set_option(parser, option, value);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_set_character_data_handler f_xml_set_character_data_handler
-#else
 inline bool x_xml_set_character_data_handler(CObjRef parser, CStrRef handler) {
-  FUNCTION_INJECTION(xml_set_character_data_handler);
+  FUNCTION_INJECTION_BUILTIN(xml_set_character_data_handler);
   return f_xml_set_character_data_handler(parser, handler);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_set_default_handler f_xml_set_default_handler
-#else
 inline bool x_xml_set_default_handler(CObjRef parser, CStrRef handler) {
-  FUNCTION_INJECTION(xml_set_default_handler);
+  FUNCTION_INJECTION_BUILTIN(xml_set_default_handler);
   return f_xml_set_default_handler(parser, handler);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_set_element_handler f_xml_set_element_handler
-#else
 inline bool x_xml_set_element_handler(CObjRef parser, CStrRef start_element_handler, CStrRef end_element_handler) {
-  FUNCTION_INJECTION(xml_set_element_handler);
+  FUNCTION_INJECTION_BUILTIN(xml_set_element_handler);
   return f_xml_set_element_handler(parser, start_element_handler, end_element_handler);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_set_processing_instruction_handler f_xml_set_processing_instruction_handler
-#else
 inline bool x_xml_set_processing_instruction_handler(CObjRef parser, CStrRef handler) {
-  FUNCTION_INJECTION(xml_set_processing_instruction_handler);
+  FUNCTION_INJECTION_BUILTIN(xml_set_processing_instruction_handler);
   return f_xml_set_processing_instruction_handler(parser, handler);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_set_start_namespace_decl_handler f_xml_set_start_namespace_decl_handler
-#else
 inline bool x_xml_set_start_namespace_decl_handler(CObjRef parser, CStrRef handler) {
-  FUNCTION_INJECTION(xml_set_start_namespace_decl_handler);
+  FUNCTION_INJECTION_BUILTIN(xml_set_start_namespace_decl_handler);
   return f_xml_set_start_namespace_decl_handler(parser, handler);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_set_end_namespace_decl_handler f_xml_set_end_namespace_decl_handler
-#else
 inline bool x_xml_set_end_namespace_decl_handler(CObjRef parser, CStrRef handler) {
-  FUNCTION_INJECTION(xml_set_end_namespace_decl_handler);
+  FUNCTION_INJECTION_BUILTIN(xml_set_end_namespace_decl_handler);
   return f_xml_set_end_namespace_decl_handler(parser, handler);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_set_unparsed_entity_decl_handler f_xml_set_unparsed_entity_decl_handler
-#else
 inline bool x_xml_set_unparsed_entity_decl_handler(CObjRef parser, CStrRef handler) {
-  FUNCTION_INJECTION(xml_set_unparsed_entity_decl_handler);
+  FUNCTION_INJECTION_BUILTIN(xml_set_unparsed_entity_decl_handler);
   return f_xml_set_unparsed_entity_decl_handler(parser, handler);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_set_external_entity_ref_handler f_xml_set_external_entity_ref_handler
-#else
 inline bool x_xml_set_external_entity_ref_handler(CObjRef parser, CStrRef handler) {
-  FUNCTION_INJECTION(xml_set_external_entity_ref_handler);
+  FUNCTION_INJECTION_BUILTIN(xml_set_external_entity_ref_handler);
   return f_xml_set_external_entity_ref_handler(parser, handler);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_set_notation_decl_handler f_xml_set_notation_decl_handler
-#else
 inline bool x_xml_set_notation_decl_handler(CObjRef parser, CStrRef handler) {
-  FUNCTION_INJECTION(xml_set_notation_decl_handler);
+  FUNCTION_INJECTION_BUILTIN(xml_set_notation_decl_handler);
   return f_xml_set_notation_decl_handler(parser, handler);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_set_object f_xml_set_object
-#else
 inline bool x_xml_set_object(CObjRef parser, Variant object) {
-  FUNCTION_INJECTION(xml_set_object);
+  FUNCTION_INJECTION_BUILTIN(xml_set_object);
   return f_xml_set_object(parser, ref(object));
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_get_current_byte_index f_xml_get_current_byte_index
-#else
 inline int x_xml_get_current_byte_index(CObjRef parser) {
-  FUNCTION_INJECTION(xml_get_current_byte_index);
+  FUNCTION_INJECTION_BUILTIN(xml_get_current_byte_index);
   return f_xml_get_current_byte_index(parser);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_get_current_column_number f_xml_get_current_column_number
-#else
 inline int x_xml_get_current_column_number(CObjRef parser) {
-  FUNCTION_INJECTION(xml_get_current_column_number);
+  FUNCTION_INJECTION_BUILTIN(xml_get_current_column_number);
   return f_xml_get_current_column_number(parser);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_get_current_line_number f_xml_get_current_line_number
-#else
 inline int x_xml_get_current_line_number(CObjRef parser) {
-  FUNCTION_INJECTION(xml_get_current_line_number);
+  FUNCTION_INJECTION_BUILTIN(xml_get_current_line_number);
   return f_xml_get_current_line_number(parser);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_get_error_code f_xml_get_error_code
-#else
 inline int x_xml_get_error_code(CObjRef parser) {
-  FUNCTION_INJECTION(xml_get_error_code);
+  FUNCTION_INJECTION_BUILTIN(xml_get_error_code);
   return f_xml_get_error_code(parser);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_xml_error_string f_xml_error_string
-#else
 inline String x_xml_error_string(int code) {
-  FUNCTION_INJECTION(xml_error_string);
+  FUNCTION_INJECTION_BUILTIN(xml_error_string);
   return f_xml_error_string(code);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_utf8_decode f_utf8_decode
-#else
 inline String x_utf8_decode(CStrRef data) {
-  FUNCTION_INJECTION(utf8_decode);
+  FUNCTION_INJECTION_BUILTIN(utf8_decode);
   return f_utf8_decode(data);
 }
-#endif
 
-#ifndef PROFILE_BUILTIN
-#define x_utf8_encode f_utf8_encode
-#else
 inline String x_utf8_encode(CStrRef data) {
-  FUNCTION_INJECTION(utf8_encode);
+  FUNCTION_INJECTION_BUILTIN(utf8_encode);
   return f_utf8_encode(data);
 }
-#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////

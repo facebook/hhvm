@@ -218,7 +218,11 @@ void Package::findNonPHPFiles(vector<string> &out, const char *path) {
       continue;
     }
 
-    out.push_back(fe);
+    string fullname = string(path) + "/" + ename;
+    if (Option::PackageExcludeStaticFiles.find(fullname) ==
+        Option::PackageExcludeStaticFiles.end()) {
+      out.push_back(fe);
+    }
   }
 
   closedir(dir);

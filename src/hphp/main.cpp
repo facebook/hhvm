@@ -62,6 +62,7 @@ struct ProgramOptions {
   vector<string> ffiles;
   vector<string> excludeFiles;
   vector<string> excludePatterns;
+  vector<string> excludeStaticPatterns;
   vector<string> cfiles;
   vector<string> cmodules;
   bool parseOnDemand;
@@ -196,6 +197,10 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
      "regex (in 'find' command's regex command line option format)  of files "
      "or directories to exclude from the input, even if parse-on-demand finds "
      "it")
+    ("exclude-static-pattern",
+     value<vector<string> >(&po.excludeStaticPatterns)->composing(),
+     "regex (in 'find' command's regex command line option format)  of files "
+     "or directories to exclude from static content cache it")
     ("cfile", value<vector<string> >(&po.cfiles)->composing(),
      "extra static files forced to include without exclusion checking")
     ("cmodule", value<vector<string> >(&po.cmodules)->composing(),
@@ -346,6 +351,19 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     for (unsigned int j = 0; j < out.size(); j++) {
       string file = out[j].substr(po.inputDir.size());
       Option::PackageExcludeFiles.insert(file);
+    }
+  }
+  for (unsigned int i = 0; i < po.excludeStaticPatterns.size(); i++) {
+    const char *argv[] = {"", "-L", (char*)po.inputDir.c_str(),
+                          "-type", "f",
+                          "-regex", po.excludeStaticPatterns[i].c_str(),
+                          NULL};
+    string files; vector<string> out;
+    Process::Exec("find", argv, NULL, files);
+    Util::split('\n', files.c_str(), out, true);
+    for (unsigned int j = 0; j < out.size(); j++) {
+      string file = out[j].substr(po.inputDir.size());
+      Option::PackageExcludeStaticFiles.insert(file);
     }
   }
 

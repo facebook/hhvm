@@ -50,6 +50,7 @@ bool Option::Load(VariableTablePtr variables) {
   LOAD_OPTION(PackageFiles);
   LOAD_OPTION(PackageExcludeDirs);
   LOAD_OPTION(PackageExcludeFiles);
+  LOAD_OPTION(PackageExcludeStaticFiles);
   LOAD_OPTION(AllowedBadPHPIncludes);
   LOAD_OPTION(IncludeRoots);
   LOAD_OPTION(AutoloadRoots);
@@ -93,6 +94,7 @@ set<string> Option::PackageDirectories;
 set<string> Option::PackageFiles;
 set<string> Option::PackageExcludeDirs;
 set<string> Option::PackageExcludeFiles;
+set<string> Option::PackageExcludeStaticFiles;
 bool Option::CachePHPFile = false;
 
 set<string> Option::AllowedBadPHPIncludes;
@@ -471,6 +473,7 @@ void Option::Load(Hdf &config) {
   config["PackageDirectories"].get(PackageDirectories);
   config["PackageExcludeDirs"].get(PackageExcludeDirs);
   config["PackageExcludeFiles"].get(PackageExcludeFiles);
+  config["PackageExcludeStaticFiles"].get(PackageExcludeStaticFiles);
   CachePHPFile = config["CachePHPFile"].getBool(false);
   config["DynamicFunctionPrefix"].get(DynamicFunctionPrefixes);
   config["DynamicFunctionPostfix"].get(DynamicFunctionPostfixes);
@@ -528,6 +531,8 @@ void Option::Load(ServerDataPtr server) {
       PackageExcludeDirs.insert(name);
     } else if (strcmp(id, "PackageExcludeFiles") == 0) {
       PackageExcludeFiles.insert(name);
+    } else if (strcmp(id, "PackageExcludeStaticFiles") == 0) {
+      PackageExcludeStaticFiles.insert(name);
     } else if (strcmp(id, "DynamicFunctionPrefix") == 0) {
       DynamicFunctionPrefixes.push_back(name);
     } else if (strcmp(id, "DynamicFunctionPostfix") == 0) {

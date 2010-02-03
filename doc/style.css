@@ -1,0 +1,83 @@
+
+a:link    { color: navy;    }
+a:visited { color: navy;    }
+a:active  { color: #FF6600; }
+a:hover   { color: #FF6600; }
+
+body, th, td {
+  border: 0px solid #bdc7d8;
+  font-size: 13px;
+  font-family: "lucida grande", tahoma, verdana, arial, sans-serif
+}
+
+b {
+  color:          maroon
+}
+
+p {
+  line-height:    1.6em;
+  margin-left:    10px;
+}
+
+h2 {
+  font-size:      16px;
+  background:     #3B5998;
+  color:          #EFEFEF;
+  padding:        4px;
+}
+
+h3 {
+  border-bottom:  1px solid #CCCCCC;
+  margin-bottom:  0.75em;
+  margin-top:     2.5em;
+  margin-left:    10px;
+}
+
+ul {
+  list-style: square;
+}
+
+pre {
+  font-family:    "lucida console", monaco, courier;
+  font-size:      10px;
+  background:     #FFEEBB;
+  padding:        10px;
+  margin:         10px;
+  margin-left:    25px;
+  border:         1px solid #FFDD88;
+  white-space:    pre;
+  line-height:    1.4em;
+}
+
+.hphp {
+  font-family:    arial;
+  font-size:      36px;
+  color:          white;
+  border-bottom:  5px dotted #DDDDDD;
+}
+
+.file {
+  color:          white;
+  font-size:      12px;
+}
+
+.current_file {
+  background:     white;
+  font-size:      16px;
+  border-bottom:  1px dotted #DDDDDD;
+}
+
+.item_header {
+  margin-left:    25px;
+  color:          #444444;
+}
+
+.item_details {
+  color:          #888888;
+}
+
+.footer {
+  border-top:     1px solid #DDDDDD;
+  padding-bottom: 5px;
+  font-size:      10px;
+}

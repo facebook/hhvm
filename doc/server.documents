@@ -1,0 +1,71 @@
+
+<h2>Server Documents</h2>
+
+This flow is implemented in hphp/src/cpp/base/server/http_server.cpp:
+
+                              +-------------+
+                              | APC Priming |
+                              +------+------+
+                                     |
+                                     V
+                            +-----------------+
+                            | StartupDocument |
+                            +--------+--------+
+                                     |
+                                     V
+                   +---------------------------------+
+                   |                                 |
+                   V                                 V
+    +============================+          +=================+
+    |       Worker Thread        |          | Service Threads |
+    |____________________________|          |_________________|
+    |                            |          |                 |
+    |      +----------------+    |          | ThreadDocuments |
+    |      | WarmupDocument |    |          |                 |
+    |      +-------+--------+    |          +=================+
+    |              |             |
+    | +-----> (chekpoint)        | ...
+    | |            |             |
+    | |            V             |
+    | |    +----------------+    |
+    | |    |  URL Handling  |    |
+    | |    +----------------+    |
+    | |            |             |
+    | +-(rollback)-+             |
+    |                            |
+    +============================+
+
+
+1. StartupDocument
+
+This file is executed when web server starts, and it is executed before any
+thread gets started but after APC is primed. Example use:
+
+  * bootstrapping server
+  * preparing parameters for service threads (see below): in this case, we have
+    to use APC to pass those parameters into service threads.
+
+2. ThreadDocuments
+
+Each one of these files will be executed in its own thread, and they don't
+share variables with any other threads. Therefore, if we need to pass data
+between them, we have to use APC.
+
+There is a system function "hphp_service_thread_started" that needs to be
+called at certain point. This function tells the engine that this thread has
+finished any initialization sequences that have to happen before any HTTP
+request is handled. Even if a service thread doesn't have any work to do
+before HTTP requests, hphp_service_thread_started() is still needed for engine
+to proceed without infinite waiting for service threads to start.
+
+3. WarmupDocument
+
+A warmup document is executed during a worker thread's startup time, and it's
+only executed just once for the entire life of a worker thread. Right after
+this warmup document is run, a worker thread takes a checkpoint of its memory
+state. Then the worker thread will start its request handling loop. At end of
+each request handling, it will rollback its memory state to the checkpoint.
+
+A warmup document can prepare global variables and other persistent data that
+are request neutral. This way we can avoid running the same initialization
+sequence for every single request.

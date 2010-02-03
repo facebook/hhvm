@@ -1,0 +1,18 @@
+
+Log {
+  AlwaysLogUnhandledExceptions = false
+}
+
+Server {
+  Port = 8080
+  SourceRoot = /unittest/rootdoc
+
+  AllowedFiles {
+    0 = string
+  }
+}
+
+VirtualHost {
+  default {
+  }
+}

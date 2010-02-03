@@ -1,0 +1,57 @@
+
+<h2>Type System</h2>
+
+1. Primitive Types
+
+In HPHP, booleans, integers (8-, 16-, 32- and 64-bit) and doubles are
+represented as is with C++'s built-in primitive type support:
+
+- bool
+- char, short, int, long long
+- double
+
+2. String and Array classes
+
+Strings are represented as smart pointers of StringData objects, and arrays are
+represented as smart pointers of ArrayData objects:
+
+  class String : public SmartPtr<StringData>
+  class Array : public SmartPtr<ArrayData>
+
+We need smart pointers for both classes to implement pass-by-value semantics of
+PHP without making real copies of internal data (StringData or ArrayData).
+
+Both classes have also utilized smart pointers to implement copy-on-write. They
+will only make real copies, when they are being modified AND reference count is
+larger than 1.
+
+3. Object classes
+
+In HPHP, all user classes derive from ObjectData. PHP object variables will
+become smart pointers of different types of ObjectData objects.
+
+In PHP, objects are passed by reference automatically. Therefore, SmartPtr is
+only helping ObjectData to do reference counting for proper deallocation when
+reference count reaches zero.
+
+4. Variant class
+
+Variant type is union of all other types. When type inference fails to find
+out a symbol's type, it will automatically have Variant type.
+
+Variant class itself serves as both a "smart pointer wrapper" class and a
+countable class, so to make it a compact and reference-count-aware data
+structure.
+
+
+<h2>Pass-by-reference for strings and arrays</h2>
+
+Variables passed by reference are always given Variant type.
+
+A variable passed by reference is strongly bound to its argument variable.
+Strong binding is implemented by replacing a variable's original value with a
+reference cell holding that value. When another variable is strongly bound to
+that variable, it acquires a reference to the cell. The reference cell is
+implemented with a Variant. This is to easily pass operations from the outer
+variant to the inner variant. Because operations only change the inner variant,
+every outer variant that has a reference to it will see the change.

@@ -1,0 +1,36 @@
+#if EXT_TYPE == 0
+"is_bool", T(Boolean), S(0), "var", T(Some), NULL, S(0), NULL, S(4), 
+"is_int", T(Boolean), S(0), "var", T(Some), NULL, S(0), NULL, S(4), 
+"is_integer", T(Boolean), S(0), "var", T(Some), NULL, S(0), NULL, S(4), 
+"is_long", T(Boolean), S(0), "var", T(Some), NULL, S(0), NULL, S(4), 
+"is_double", T(Boolean), S(0), "var", T(Some), NULL, S(0), NULL, S(4), 
+"is_float", T(Boolean), S(0), "var", T(Some), NULL, S(0), NULL, S(4), 
+"is_numeric", T(Boolean), S(0), "var", T(Some), NULL, S(0), NULL, S(4), 
+"is_real", T(Boolean), S(0), "var", T(Some), NULL, S(0), NULL, S(4), 
+"is_string", T(Boolean), S(0), "var", T(Some), NULL, S(0), NULL, S(4), 
+"is_scalar", T(Boolean), S(0), "var", T(Some), NULL, S(0), NULL, S(4), 
+"is_array", T(Boolean), S(0), "var", T(Some), NULL, S(0), NULL, S(4), 
+"is_object", T(Boolean), S(0), "var", T(Some), NULL, S(0), NULL, S(4), 
+"is_resource", T(Boolean), S(0), "var", T(Some), NULL, S(0), NULL, S(4), 
+"is_null", T(Boolean), S(0), "var", T(Some), NULL, S(0), NULL, S(4), 
+"gettype", T(String), S(0), "v", T(Some), NULL, S(0), NULL, S(0), 
+"get_resource_type", T(String), S(0), "handle", T(Object), NULL, S(0), NULL, S(0), 
+"intval", T(Int64), S(0), "v", T(Some), NULL, S(0), "base", T(Int64), "10", S(0), NULL, S(0), 
+"doubleval", T(Double), S(0), "v", T(Some), NULL, S(0), NULL, S(0), 
+"floatval", T(Double), S(0), "v", T(Some), NULL, S(0), NULL, S(0), 
+"strval", T(String), S(0), "v", T(Some), NULL, S(0), NULL, S(0), 
+"settype", T(Boolean), S(0), "var", T(Variant), NULL, S(1), "type", T(String), NULL, S(0), NULL, S(0), 
+"print_r", T(Variant), S(0), "expression", T(Some), NULL, S(0), "ret", T(Boolean), "false", S(0), NULL, S(0), 
+"var_export", T(Variant), S(0), "expression", T(Some), NULL, S(0), "ret", T(Boolean), "false", S(0), NULL, S(0), 
+"var_dump", T(Void), S(0), "expression", T(Some), NULL, S(0), NULL, S(1), 
+"debug_zval_dump", T(Void), S(0), "variable", T(Some), NULL, S(0), NULL, S(0), 
+"serialize", T(String), S(0), "value", T(Some), NULL, S(0), NULL, S(0), 
+"unserialize", T(Variant), S(0), "str", T(String), NULL, S(0), NULL, S(0), 
+"get_defined_vars", T(Array), S(0), NULL, S(0), 
+"import_request_variables", T(Boolean), S(0), "types", T(String), NULL, S(0), "prefix", T(String), "\"\"", S(0), NULL, S(0), 
+"extract", T(Int32), S(0), "var_array", T(Array), NULL, S(0), "extract_type", T(Int32), "EXTR_OVERWRITE", S(0), "prefix", T(String), "\"\"", S(0), NULL, S(0), 
+#elif EXT_TYPE == 1
+#elif EXT_TYPE == 2
+#elif EXT_TYPE == 3
+
+#endif

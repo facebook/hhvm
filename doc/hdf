@@ -1,0 +1,134 @@
+
+<h2>Hierarchical Data Format (HDF)</h2>
+
+Please use bin/hdf.el for syntax coloring that can help identify syntax errors.
+
+1. Basic format
+
+  [node] = [value]
+
+Where, [node] can be an alphanumeric name, and [value] can be
+
+- booleans:  true, false, on, off, yes, no, 1, 0
+- numbers
+- strings: without any quoting
+
+2. Hierarchies
+
+  [node] {
+    [subnode1] = [value]
+    [subnode2] = [value]
+  }
+
+  [node] {
+    [subnode] = [value]
+    [subnode] {
+      [subsubnode1] = [value]
+      [subsubnode2] = [value]
+    }
+  }
+
+3. Dotted node names
+
+  [node] {
+    [subnode] = [value1]
+    [subnode] {
+      [subsubnode] = [value2]
+    }
+  }
+
+is the same as,
+
+  [node].[subnode] = [value1]
+  [node].[subnode].[subsubnode] = [value2]
+
+These dotted node names and paths can appear anywhere a node can be at.
+
+4. Arrays
+
+Use '*' for automatically generated node names that you don't care
+
+  [node] {
+    * = [value1]
+    * = [value2]
+  }
+
+This is fine, too, except it's harder to maintain if one needs to add/delete:
+
+  [node] {
+    0 = [value1]
+    1 = [value2]
+  }
+
+5. Node alias
+
+  [node] : [another]
+
+Watch out, this makes those two nodes symbolic linking to each other, so this
+will modify [another] as well:
+
+  [node] : [another]
+  [node] {
+    extra = value
+  }
+
+6. Node copying
+
+To avoid the above accidental modification when aliasing a node, one can do,
+
+  [node] := [another]
+  [node] {
+    extra = value
+  }
+
+Now, [node] is a different node than [another] and the modification doesn't
+affect [another]
+
+7. Node inheritance
+
+  [node] {
+    @[another]
+    extra = value
+  }
+
+is the same as
+
+  [node] := [another]
+  [node] {
+    extra = value
+  }
+
+Sometimes it's easier and clearer to write node copying in inheritance format:
+
+  [node] {
+    @[another1]
+    @[another2]
+    extra = value
+  }
+
+8. Special shell commands
+
+  [node] != [command]
+
+This will execute shell command and use its return as the node's value.
+
+9. Include statement
+
+  #include "another.hdf"
+
+10. Comments
+
+  # only one format of comment is supported
+  # it has to start from line beginning
+
+Watch out, this is NOT comment:
+
+  [node] = [value]   # this will become part of node's value
+
+11. Multiple-line strings
+
+  [node] << EOM
+  1st line
+  2nd line
+  ...
+  EOM

@@ -1,0 +1,994 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 1997-2010 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
+
+#include <cpp/ext/ext_array.h>
+#include <cpp/ext/ext_function.h>
+#include <cpp/base/util/request_local.h>
+#include <cpp/base/zend/zend_collator.h>
+#include <unicode/ucol.h> // icu
+#include <unicode/uclean.h> // icu
+#include <unicode/putil.h> // icu
+
+#define SORT_REGULAR            0
+#define SORT_NUMERIC            1
+#define SORT_STRING             2
+#define SORT_LOCALE_STRING      5
+
+#define SORT_DESC               3
+#define SORT_ASC                4
+
+namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+const int64 k_UCOL_DEFAULT = UCOL_DEFAULT;
+
+const int64 k_UCOL_PRIMARY = UCOL_PRIMARY;
+const int64 k_UCOL_SECONDARY = UCOL_SECONDARY;
+const int64 k_UCOL_TERTIARY = UCOL_TERTIARY;
+const int64 k_UCOL_DEFAULT_STRENGTH = UCOL_DEFAULT_STRENGTH;
+const int64 k_UCOL_QUATERNARY = UCOL_QUATERNARY;
+const int64 k_UCOL_IDENTICAL = UCOL_IDENTICAL;
+
+const int64 k_UCOL_OFF = UCOL_OFF;
+const int64 k_UCOL_ON = UCOL_ON;
+
+const int64 k_UCOL_SHIFTED = UCOL_SHIFTED;
+const int64 k_UCOL_NON_IGNORABLE = UCOL_NON_IGNORABLE;
+
+const int64 k_UCOL_LOWER_FIRST = UCOL_LOWER_FIRST;
+const int64 k_UCOL_UPPER_FIRST = UCOL_UPPER_FIRST;
+
+const int64 k_UCOL_FRENCH_COLLATION = UCOL_FRENCH_COLLATION;
+const int64 k_UCOL_ALTERNATE_HANDLING = UCOL_ALTERNATE_HANDLING;
+const int64 k_UCOL_CASE_FIRST = UCOL_CASE_FIRST;
+const int64 k_UCOL_CASE_LEVEL = UCOL_CASE_LEVEL;
+const int64 k_UCOL_NORMALIZATION_MODE = UCOL_NORMALIZATION_MODE;
+const int64 k_UCOL_STRENGTH = UCOL_STRENGTH;
+const int64 k_UCOL_HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
+const int64 k_UCOL_NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
+
+static bool filter_func(CVarRef value, const void *data) {
+  Variant *callback = (Variant *)data;
+  return f_call_user_func_array(*callback, CREATE_VECTOR1(value));
+}
+Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
+  if (!input.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  if (callback.isNull()) {
+    return ArrayUtil::Filter(toArray(input));
+  }
+  return ArrayUtil::Filter(toArray(input), filter_func, &callback);
+}
+
+bool f_array_key_exists(CVarRef key, CVarRef search) {
+  if (!search.isArray() && !search.is(KindOfObject)) {
+    throw_bad_type_exception("array_key_exists expects an array or an object; "
+                             "false returned.");
+    return false;
+  }
+  if (key.isString() || key.isInteger()) {
+    return toArray(search).exists(key);
+  }
+  if (key.isNull()) {
+    return toArray(search).exists("");
+  }
+  Logger::Warning("Array key should be either a string or an integer");
+  return false;
+}
+
+static Variant map_func(CArrRef params, const void *data) {
+  Variant *callback = (Variant *)data;
+  return f_call_user_func_array(*callback, params);
+}
+Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* = null_array */) {
+  Array inputs;
+  if (!arr1.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  inputs.append(arr1);
+  if (!_argv.empty()) {
+    inputs = inputs.merge(_argv);
+  }
+  return ArrayUtil::Map(inputs, map_func, &callback);
+}
+
+static void php_array_merge(Array &arr1, CArrRef arr2, bool recursive) {
+  if (arr2->supportValueRef()) {
+    for (ArrayIter iter(arr2); iter; ++iter) {
+      Variant key = iter.first();
+      CVarRef value = iter.secondRef();
+      if (key.isNumeric()) {
+        if (value.isReferenced()) value.setContagious();
+        arr1.append(value);
+      } else if (recursive && arr1.exists(key)) {
+        Array subarr1 = arr1[key].toArray();
+        php_array_merge(subarr1, value.toArray(), recursive);
+        arr1.set(key, subarr1);
+      } else {
+        if (value.isReferenced()) value.setContagious();
+        arr1.set(key, value);
+      }
+    }
+  } else {
+    for (ArrayIter iter(arr2); iter; ++iter) {
+      Variant key = iter.first();
+      Variant value = iter.second();
+      if (key.isNumeric()) {
+        arr1.append(value);
+      } else if (recursive && arr1.exists(key)) {
+        Array subarr1 = arr1[key].toArray();
+        php_array_merge(subarr1, value.toArray(), recursive);
+        arr1.set(key, subarr1);
+      } else {
+        arr1.set(key, value);
+      }
+    }
+  }
+}
+static Array php_array_merge_wrapper(Array arr1, Array args, bool recursive) {
+  Array ret = Array::Create();
+  php_array_merge(ret, arr1, recursive);
+  for (ArrayIter iter(args); iter; ++iter) {
+    php_array_merge(ret, iter.second().toArray(), recursive);
+  }
+  return ret;
+}
+Variant f_array_merge_recursive(int _argc, CVarRef array1,
+                                CArrRef _argv /* = null_array */) {
+  if (!array1.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  return php_array_merge_wrapper(array1, _argv, true);
+}
+Variant f_array_merge(int _argc, CVarRef array1,
+                      CArrRef _argv /* = null_array */) {
+  if (!array1.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  return php_array_merge_wrapper(array1, _argv, false);
+}
+
+Variant f_array_push(int _argc, Variant array, CVarRef var, CArrRef _argv /* = null_array */) {
+  if (!array.isArray()) {
+    throw_bad_array_exception(__func__);
+    return false;
+  }
+  array.append(var);
+  for (ArrayIter iter(_argv); iter; ++iter) {
+    array.append(iter.second());
+  }
+  return array.toArray().size();
+}
+
+static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
+  Variant *callback = (Variant *)data;
+  return f_call_user_func_array(*callback, CREATE_VECTOR2(result, operand));
+}
+Variant f_array_reduce(CVarRef input, CVarRef callback,
+                       CVarRef initial /* = null_variant */) {
+  if (!input.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  return ArrayUtil::Reduce(toArray(input), reduce_func, &callback, initial);
+}
+
+int f_array_unshift(int _argc, Variant array, CVarRef var, CArrRef _argv /* = null_array */) {
+  if (array.toArray()->isVectorData()) {
+    if (!_argv.empty()) {
+      for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
+           pos = _argv->iter_rewind(pos)) {
+        array.insert(0, _argv->getValue(pos));
+      }
+    }
+    array.insert(0, var);
+  } else {
+    Array newArray;
+    newArray.append(var);
+    if (!_argv.empty()) {
+      for (ssize_t pos = _argv->iter_begin(); pos != ArrayData::invalid_index;
+           pos = _argv->iter_advance(pos)) {
+        newArray.append(_argv->getValue(pos));
+      }
+    }
+    for (ArrayIter iter(array); iter; ++iter) {
+      if (iter.first().isInteger()) {
+        newArray.append(iter.second());
+      } else {
+        newArray.set(iter.first(), iter.second());
+      }
+    }
+    array = newArray;
+  }
+  return array.toArray().size();
+}
+
+static void walk_func(Variant value, CVarRef key, CVarRef userdata,
+                      const void *data) {
+  Variant *callback = (Variant *)data;
+  f_call_user_func_array(*callback, CREATE_VECTOR3(ref(value), key, userdata));
+}
+bool f_array_walk_recursive(Variant input, CVarRef funcname,
+                            CVarRef userdata /* = null_variant */) {
+  if (!input.isArray()) {
+    throw_bad_array_exception(__func__);
+    return false;
+  }
+  ArrayUtil::Walk(ref(input), walk_func, &funcname, true, userdata);
+  return true;
+}
+bool f_array_walk(Variant input, CVarRef funcname,
+                  CVarRef userdata /* = null_variant */) {
+  if (!input.isArray()) {
+    throw_bad_array_exception(__func__);
+    return false;
+  }
+  ArrayUtil::Walk(ref(input), walk_func, &funcname, false, userdata);
+  return true;
+}
+
+Array f_compact(int _argc, CVarRef varname, CArrRef _argv /* = null_array */) {
+  throw FatalErrorException("bad HPHP code generation");
+}
+
+template<typename T>
+static void compact(T *variables, Array &ret, CVarRef var) {
+  if (var.isArray()) {
+    Array vars = var.toArray();
+    for (ArrayIter iter(vars); iter; ++iter) {
+      compact(variables, ret, iter.second());
+    }
+  } else {
+    String varname = var.toString();
+    if (!varname.empty() && variables->exists(varname)) {
+      ret.set(varname, variables->get(varname));
+    }
+  }
+}
+
+Array compact(RVariableTable *variables, int _argc, CVarRef varname,
+              CArrRef _argv /* = null_array */) {
+  FUNCTION_INJECTION(compact);
+  Array ret = Array::Create();
+  compact(variables, ret, varname);
+  compact(variables, ret, _argv);
+  return ret;
+}
+
+Array compact(LVariableTable *variables, int _argc, CVarRef varname,
+              CArrRef _argv /* = null_array */) {
+  FUNCTION_INJECTION(compact);
+  Array ret = Array::Create();
+  compact(variables, ret, varname);
+  compact(variables, ret, _argv);
+  return ret;
+}
+
+static int php_count_recursive(CArrRef array) {
+  long cnt = array.size();
+  for (ArrayIter iter(array); iter; ++iter) {
+    Variant value = iter.second();
+    if (value.isArray()) {
+      cnt += php_count_recursive(value.toArray());
+    }
+  }
+  return cnt;
+}
+
+int f_count(CVarRef var, bool recursive /* = false */) {
+  switch (var.getType()) {
+  case KindOfNull:
+    return 0;
+  case KindOfObject:
+    {
+      Object obj = var.toObject();
+      if (obj.instanceof("countable")) {
+        return obj->o_invoke_few_args("count", -1, 0);
+      } else if (recursive) {
+        return php_count_recursive(var.toArray());
+      } else {
+        return var.toArray().getArrayData()->size();
+      }
+    }
+    break;
+  case KindOfArray:
+    if (recursive) {
+      return php_count_recursive(var.toArray());
+    }
+    return var.getArrayData()->size();
+  default:
+    break;
+  }
+  return 1;
+}
+
+Array f_range(CVarRef low, CVarRef high, CVarRef step /* = 1 */) {
+  if (low.isString() && high.isString()) {
+    String slow = low.toString();
+    String shigh = high.toString();
+    int64 n1, n2;
+    double d1, d2;
+    DataType type1 = is_numeric_string(slow.data(), slow.size(), &n1, &d1, 0);
+    DataType type2 = is_numeric_string(shigh.data(), shigh.size(), &n2, &d2, 0);
+    if (type1 == KindOfDouble || type2 == KindOfDouble ||
+        step.is(KindOfDouble)) {
+      return ArrayUtil::Range(d1, d2, step.toDouble());
+    }
+
+    if (type1 == KindOfInt64 || type2 == KindOfInt64) {
+      return ArrayUtil::Range(n1, n2, step.toInt64());
+    }
+
+    return ArrayUtil::Range(slow.charAt(0), shigh.charAt(0), step.toInt32());
+  }
+
+  if (low.is(KindOfDouble) || high.is(KindOfDouble) || step.is(KindOfDouble)) {
+    return ArrayUtil::Range(low.toDouble(), high.toDouble(), step.toDouble());
+  }
+
+  return ArrayUtil::Range(low.toInt64(), high.toInt64(), step.toInt64());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// diff functions
+
+static int cmp_func(CVarRef v1, CVarRef v2, const void *data) {
+  Variant *callback = (Variant *)data;
+  return f_call_user_func_array(*callback, CREATE_VECTOR2(v1, v2));
+}
+
+Variant f_array_diff(int _argc, CVarRef array1, CVarRef array2,
+                   CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Array ret = toArray(array1).diff(toArray(array2), false, true);
+  for (ArrayIter iter(_argv); iter; ++iter) {
+    ret = ret.diff(iter.second(), false, true);
+  }
+  return ret;
+}
+Variant f_array_udiff(int _argc, CVarRef array1, CVarRef array2,
+                      CVarRef data_compare_func,
+                      CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Variant func = data_compare_func;
+  Array extra = _argv;
+  if (!extra.empty()) {
+    extra.insert(0, func);
+    func = extra.pop();
+  }
+  Array ret =
+    toArray(array1).diff(toArray(array2), false, true, NULL, NULL, cmp_func,
+                         &func);
+  for (ArrayIter iter(extra); iter; ++iter) {
+    ret = ret.diff(iter.second(), false, true, NULL, NULL, cmp_func, &func);
+  }
+  return ret;
+}
+
+Variant f_array_diff_assoc(int _argc, CVarRef array1, CVarRef array2,
+                           CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Array ret = toArray(array1).diff(toArray(array2), true, true);
+  for (ArrayIter iter(_argv); iter; ++iter) {
+    ret = ret.diff(iter.second(), true, true);
+  }
+  return ret;
+}
+
+Variant f_array_diff_uassoc(int _argc, CVarRef array1, CVarRef array2,
+                            CVarRef key_compare_func,
+                            CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Variant func = key_compare_func;
+  Array extra = _argv;
+  if (!extra.empty()) {
+    extra.insert(0, func);
+    func = extra.pop();
+  }
+  Array ret =
+    toArray(array1).diff(toArray(array2), true, true, cmp_func, &func);
+  for (ArrayIter iter(extra); iter; ++iter) {
+    ret = ret.diff(iter.second(), true, true, cmp_func, &func);
+  }
+  return ret;
+}
+
+Variant f_array_udiff_assoc(int _argc, CVarRef array1, CVarRef array2,
+                            CVarRef data_compare_func,
+                            CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Variant func = data_compare_func;
+  Array extra = _argv;
+  if (!extra.empty()) {
+    extra.insert(0, func);
+    func = extra.pop();
+  }
+  Array ret = toArray(array1).diff(toArray(array2), true, true, NULL, NULL,
+                                   cmp_func, &func);
+  for (ArrayIter iter(extra); iter; ++iter) {
+    ret = ret.diff(iter.second(), true, true, NULL, NULL, cmp_func, &func);
+  }
+  return ret;
+}
+
+Variant f_array_udiff_uassoc(int _argc, CVarRef array1, CVarRef array2,
+                             CVarRef data_compare_func,
+                             CVarRef key_compare_func,
+                             CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Variant data_func = data_compare_func;
+  Variant key_func = key_compare_func;
+  Array extra = _argv;
+  if (!extra.empty()) {
+    extra.insert(0, key_func);
+    extra.insert(0, data_func);
+    key_func = extra.pop();
+    data_func = extra.pop();
+  }
+  Array ret =
+    toArray(array1).diff(toArray(array2), true, true, cmp_func, &key_func,
+                         cmp_func, &data_func);
+  for (ArrayIter iter(extra); iter; ++iter) {
+    ret = ret.diff(iter.second(), true, true, cmp_func, &key_func,
+                   cmp_func, &data_func);
+  }
+  return ret;
+}
+
+Variant f_array_diff_key(int _argc, CVarRef array1, CVarRef array2,
+                         CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Array ret = toArray(array1).diff(toArray(array2), true, false);
+  for (ArrayIter iter(_argv); iter; ++iter) {
+    ret = ret.diff(iter.second(), true, false);
+  }
+  return ret;
+}
+
+Variant f_array_diff_ukey(int _argc, CVarRef array1, CVarRef array2,
+                          CVarRef key_compare_func,
+                          CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Variant func = key_compare_func;
+  Array extra = _argv;
+  if (!extra.empty()) {
+    extra.insert(0, func);
+    func = extra.pop();
+  }
+  Array ret =
+    toArray(array1).diff(toArray(array2), true, false, cmp_func, &func);
+  for (ArrayIter iter(extra); iter; ++iter) {
+    ret = ret.diff(iter.second(), true, false, cmp_func, &func);
+  }
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// intersect functions
+
+Variant f_array_intersect(int _argc, CVarRef array1, CVarRef array2,
+                          CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Array ret = toArray(array1).intersect(toArray(array2), false, true);
+  for (ArrayIter iter(_argv); iter; ++iter) {
+    ret = ret.intersect(iter.second(), false, true);
+  }
+  return ret;
+}
+
+Variant f_array_uintersect(int _argc, CVarRef array1, CVarRef array2,
+                           CVarRef data_compare_func,
+                           CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Variant func = data_compare_func;
+  Array extra = _argv;
+  if (!extra.empty()) {
+    extra.insert(0, func);
+    func = extra.pop();
+  }
+  Array ret =
+    toArray(array1).intersect(toArray(array2), false, true, NULL, NULL,
+                              cmp_func, &func);
+  for (ArrayIter iter(extra); iter; ++iter) {
+    ret = ret.intersect(iter.second(), false, true, NULL, NULL,
+                        cmp_func, &func);
+  }
+  return ret;
+}
+
+Variant f_array_intersect_assoc(int _argc, CVarRef array1, CVarRef array2,
+                                CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Array ret = toArray(array1).intersect(toArray(array2), true, true);
+  for (ArrayIter iter(_argv); iter; ++iter) {
+    ret = ret.intersect(iter.second(), true, true);
+  }
+  return ret;
+}
+
+Variant f_array_intersect_uassoc(int _argc, CVarRef array1, CVarRef array2,
+                                 CVarRef key_compare_func,
+                                 CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Variant func = key_compare_func;
+  Array extra = _argv;
+  if (!extra.empty()) {
+    extra.insert(0, func);
+    func = extra.pop();
+  }
+  Array ret =
+    toArray(array1).intersect(toArray(array2), true, true, cmp_func, &func);
+  for (ArrayIter iter(extra); iter; ++iter) {
+    ret = ret.intersect(iter.second(), true, true, cmp_func, &func);
+  }
+  return ret;
+}
+
+Variant f_array_uintersect_assoc(int _argc, CVarRef array1, CVarRef array2,
+                                 CVarRef data_compare_func,
+                                 CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Variant func = data_compare_func;
+  Array extra = _argv;
+  if (!extra.empty()) {
+    extra.insert(0, func);
+    func = extra.pop();
+  }
+  Array ret =
+    toArray(array1).intersect(toArray(array2), true, true, NULL, NULL,
+                              cmp_func, &func);
+  for (ArrayIter iter(extra); iter; ++iter) {
+    ret = ret.intersect(iter.second(), true, true, NULL, NULL,
+                        cmp_func, &func);
+  }
+  return ret;
+}
+
+Variant f_array_uintersect_uassoc(int _argc, CVarRef array1, CVarRef array2,
+                                  CVarRef data_compare_func,
+                                  CVarRef key_compare_func,
+                                  CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Variant data_func = data_compare_func;
+  Variant key_func = key_compare_func;
+  Array extra = _argv;
+  if (!extra.empty()) {
+    extra.insert(0, key_func);
+    extra.insert(0, data_func);
+    key_func = extra.pop();
+    data_func = extra.pop();
+  }
+  Array ret =
+    toArray(array1).intersect(toArray(array2), true, true, cmp_func, &key_func,
+                              cmp_func, &data_func);
+  for (ArrayIter iter(extra); iter; ++iter) {
+    ret = ret.intersect(iter.second(), true, true, cmp_func, &key_func,
+                        cmp_func, &data_func);
+  }
+  return ret;
+}
+
+Variant f_array_intersect_key(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv /* = null_array */) {
+  Array ret = toArray(array1).intersect(toArray(array2), true, false);
+  for (ArrayIter iter(_argv); iter; ++iter) {
+    ret = ret.intersect(iter.second(), true, false);
+  }
+  return ret;
+}
+
+Variant f_array_intersect_ukey(int _argc, CVarRef array1, CVarRef array2,
+                             CVarRef key_compare_func, CArrRef _argv /* = null_array */) {
+  Variant func = key_compare_func;
+  Array extra = _argv;
+  if (!extra.empty()) {
+    extra.insert(0, func);
+    func = extra.pop();
+  }
+  Array ret =
+    toArray(array1).intersect(toArray(array2), true, false, cmp_func, &func);
+  for (ArrayIter iter(extra); iter; ++iter) {
+    ret = ret.intersect(iter.second(), true, false, cmp_func, &func);
+  }
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// sorting functions
+
+class Collator : public RequestEventHandler {
+public:
+  String getLocale() {
+    return m_locale;
+  }
+  UErrorCode &getErrorCodeRef() {
+    return m_errcode;
+  }
+  bool setLocale(CStrRef locale) {
+    if (m_locale.same(locale)) {
+      return true;
+    }
+    if (m_ucoll) {
+      ucol_close(m_ucoll);
+      m_ucoll = NULL;
+    }
+    m_errcode = U_ZERO_ERROR;
+    m_ucoll = ucol_open(locale.data(), &m_errcode);
+    if (m_ucoll == NULL) {
+      Logger::Error("failed to load %s locale from icu data", locale.data());
+      return false;
+    }
+    if (U_FAILURE(m_errcode)) {
+      ucol_close(m_ucoll);
+      m_ucoll = NULL;
+      return false;
+    }
+    m_locale = locale;
+    return true;
+  }
+
+  UCollator *getCollator() {
+    return m_ucoll;
+  }
+
+  bool setAttribute(int64 attr, int64 val) {
+    if (!m_ucoll) {
+      Logger::Verbose("m_ucoll is NULL");
+      return false;
+    }
+    m_errcode = U_ZERO_ERROR;
+    ucol_setAttribute(m_ucoll, (UColAttribute)attr,
+                      (UColAttributeValue)val, &m_errcode);
+    if (U_FAILURE(m_errcode)) {
+      Logger::Verbose("Error setting attribute value");
+      return false;
+    }
+    return true;
+  }
+
+  bool setStrength(int64 strength) {
+    if (!m_ucoll) {
+      Logger::Verbose("m_ucoll is NULL");
+      return false;
+    }
+    ucol_setStrength(m_ucoll, (UCollationStrength)strength);
+    return true;
+  }
+
+  Variant getErrorCode() {
+    if (!m_ucoll) {
+      Logger::Verbose("m_ucoll is NULL");
+      return false;
+    }
+    return m_errcode;
+  }
+
+  virtual void requestInit() {
+    m_locale = String(uloc_getDefault(), CopyString);
+    m_errcode = U_ZERO_ERROR;
+    m_ucoll = ucol_open(m_locale.data(), &m_errcode);
+    ASSERT(m_ucoll);
+  }
+  virtual void requestShutdown() {
+    m_locale.reset();
+    if (m_ucoll) {
+      ucol_close(m_ucoll);
+      m_ucoll = NULL;
+    }
+  }
+
+private:
+  String     m_locale;
+  UCollator *m_ucoll;
+  UErrorCode m_errcode;
+};
+static RequestLocal<Collator> s_collator;
+
+static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
+  switch (sort_flags) {
+  case SORT_REGULAR:
+    return ascending ?
+      Array::SortRegularAscending : Array::SortRegularDescending;
+  case SORT_NUMERIC:
+    return ascending ?
+      Array::SortNumericAscending : Array::SortNumericDescending;
+  case SORT_STRING:
+    return ascending ?
+      Array::SortStringAscending : Array::SortStringDescending;
+  case SORT_LOCALE_STRING:
+    return ascending ?
+      Array::SortLocaleStringAscending : Array::SortLocaleStringDescending;
+  default:
+    break;
+  }
+  throw InvalidArgumentException("sort_flags", sort_flags);
+}
+
+bool f_sort(Variant array, int sort_flags /* = 0 */,
+            bool use_collator /* = false */) {
+  if (!array.isArray()) {
+    throw_bad_array_exception(__func__);
+    return false;
+  }
+  if (use_collator && sort_flags != SORT_LOCALE_STRING) {
+    UCollator *coll = s_collator->getCollator();
+    if (coll) {
+      UErrorCode &errcode = s_collator->getErrorCodeRef();
+      return collator_sort(array, sort_flags, true, coll, &errcode);
+    }
+  }
+  Array temp = array.toArray();
+  temp.sort(get_cmp_func(sort_flags, true), false, true);
+  array = temp;
+  return true;
+}
+
+bool f_rsort(Variant array, int sort_flags /* = 0 */,
+             bool use_collator /* = false */) {
+  if (!array.isArray()) {
+    throw_bad_array_exception(__func__);
+    return false;
+  }
+  if (use_collator && sort_flags != SORT_LOCALE_STRING) {
+    UCollator *coll = s_collator->getCollator();
+    if (coll) {
+      UErrorCode &errcode = s_collator->getErrorCodeRef();
+      return collator_sort(array, sort_flags, false, coll, &errcode);
+    }
+  }
+  Array temp = array.toArray();
+  temp.sort(get_cmp_func(sort_flags, false), false, true);
+  array = temp;
+  return true;
+}
+
+bool f_asort(Variant array, int sort_flags /* = 0 */,
+             bool use_collator /* = false */) {
+  if (!array.isArray()) {
+    throw_bad_array_exception(__func__);
+    return false;
+  }
+  if (use_collator && sort_flags != SORT_LOCALE_STRING) {
+    UCollator *coll = s_collator->getCollator();
+    if (coll) {
+      UErrorCode &errcode = s_collator->getErrorCodeRef();
+      return collator_asort(array, sort_flags, true, coll, &errcode);
+    }
+  }
+  Array temp = array.toArray();
+  temp.sort(get_cmp_func(sort_flags, true), false, false);
+  array = temp;
+  return true;
+}
+
+bool f_arsort(Variant array, int sort_flags /* = 0 */,
+              bool use_collator /* = false */) {
+  if (!array.isArray()) {
+    throw_bad_array_exception(__func__);
+    return false;
+  }
+  if (use_collator && sort_flags != SORT_LOCALE_STRING) {
+    UCollator *coll = s_collator->getCollator();
+    if (coll) {
+      UErrorCode &errcode = s_collator->getErrorCodeRef();
+      return collator_asort(array, sort_flags, false, coll, &errcode);
+    }
+  }
+  Array temp = array.toArray();
+  temp.sort(get_cmp_func(sort_flags, false), false, false);
+  array = temp;
+  return true;
+}
+
+bool f_ksort(Variant array, int sort_flags /* = 0 */) {
+  if (!array.isArray()) {
+    throw_bad_array_exception(__func__);
+    return false;
+  }
+  Array temp = array.toArray();
+  temp.sort(get_cmp_func(sort_flags, true), true, false);
+  array = temp;
+  return true;
+}
+
+bool f_krsort(Variant array, int sort_flags /* = 0 */) {
+  if (!array.isArray()) {
+    throw_bad_array_exception(__func__);
+    return false;
+  }
+  Array temp = array.toArray();
+  temp.sort(get_cmp_func(sort_flags, false), true, false);
+  array = temp;
+  return true;
+}
+
+bool f_usort(Variant array, CVarRef cmp_function) {
+  if (!array.isArray()) {
+    throw_bad_array_exception(__func__);
+    return false;
+  }
+  Array temp = array.toArray();
+  temp.sort(cmp_func, false, true, &cmp_function);
+  array = temp;
+  return true;
+}
+
+bool f_uasort(Variant array, CVarRef cmp_function) {
+  if (!array.isArray()) {
+    throw_bad_array_exception(__func__);
+    return false;
+  }
+  Array temp = array.toArray();
+  temp.sort(cmp_func, false, false, &cmp_function);
+  array = temp;
+  return true;
+}
+
+bool f_uksort(Variant array, CVarRef cmp_function) {
+  if (!array.isArray()) {
+    throw_bad_array_exception(__func__);
+    return false;
+  }
+  Array temp = array.toArray();
+  temp.sort(cmp_func, true, false, &cmp_function);
+  array = temp;
+  return true;
+}
+
+Variant f_natsort(Variant array) {
+  // NOTE, PHP natsort accepts ArrayAccess objects as well,
+  // which does not make much sense, and which is not supported here.
+  if (!array.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Array temp = array.toArray();
+  temp.sort(Array::SortNatural, false, false);
+  array = temp;
+  return true;
+}
+
+Variant f_natcasesort(Variant array) {
+  // NOTE, PHP natcasesort accepts ArrayAccess objects as well,
+  // which does not make much sense, and which is not supported here.
+  if (!array.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
+  Array temp = array.toArray();
+  temp.sort(Array::SortNaturalCase, false, false);
+  array = temp;
+  return true;
+}
+
+bool f_array_multisort(int _argc, Variant ar1,
+                       CArrRef _argv /* = null_array */) {
+  if (!ar1.isArray()) {
+    throw_bad_array_exception(__func__);
+    return false;
+  }
+  std::vector<Array::SortData> data;
+  std::vector<Array> arrays;
+  arrays.reserve(1 + _argv.size()); // so no resize would happen
+
+  Array::SortData sd;
+  sd.original = &ar1;
+  arrays.push_back(ar1.toArray());
+  sd.array = &arrays.back();
+  sd.by_key = false;
+
+  int sort_flags = SORT_REGULAR;
+  bool ascending = true;
+  for (int i = 0; i < _argv.size(); i++) {
+    Variant *v = &((Array&)_argv).lvalAt(i);
+    if (v->isArray()) {
+      sd.cmp_func = get_cmp_func(sort_flags, ascending);
+      data.push_back(sd);
+
+      sort_flags = SORT_REGULAR;
+      ascending = true;
+
+      sd.original = v;
+      arrays.push_back(sd.original->toArray());
+      sd.array = &arrays.back();
+    } else {
+      int n = v->toInt32();
+      if (n == SORT_ASC) {
+        ascending = true;
+      } else if (n == SORT_DESC) {
+        ascending = false;
+      } else {
+        sort_flags = n;
+      }
+    }
+  }
+
+  sd.cmp_func = get_cmp_func(sort_flags, ascending);
+  data.push_back(sd);
+
+  Array::MultiSort(data, true);
+  return true;
+}
+
+String f_i18n_loc_get_default() {
+  return s_collator->getLocale();
+}
+
+bool f_i18n_loc_set_default(CStrRef locale) {
+  return s_collator->setLocale(locale);
+}
+
+bool f_i18n_loc_set_attribute(int64 attr, int64 val) {
+  return s_collator->setAttribute(attr, val);
+}
+
+bool f_i18n_loc_set_strength(int64 strength) {
+  return s_collator->setStrength(strength);
+}
+
+Variant f_i18n_loc_get_error_code() {
+  return s_collator->getErrorCode();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+}

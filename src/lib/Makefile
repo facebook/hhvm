@@ -1,0 +1,53 @@
+
+PROJECT_ROOT = ../..
+PROJECT_NAME = hphp_analysis
+
+AUTO_SOURCES = 1
+SOURCE_SUBDIRS = expression statement analysis system util
+
+GENERATED_CPP_SOURCES = parser/lex.yy.c parser/hphp.tab.c
+CXX_SOURCES = $(wildcard parser/*.cpp)
+INTERMEDIATE_FILES = $(wildcard parser/*~) $(wildcard parser/*.d) \
+	parser/hphp.tab.h parser/hphp.tab.c parser/lex.yy.c
+
+include $(PROJECT_ROOT)/src/rules.mk
+TARGETS = $(STATIC_LIB)
+all: $(TARGETS)
+
+parser/lex.yy.c: parser/hphp.x parser/hphp.tab.c
+	@echo "Generating scanner code..."
+	@cd parser && flex -w -i hphp.x
+
+parser/hphp.tab.c: parser/hphp.y
+	@echo "Generating parser code..."
+	@cd parser && bison -d hphp.y
+
+parser/ylmm/basic_scanner.hh: \
+	parser/ylmm/basic_buffer.hh \
+	parser/ylmm/basic_location.hh \
+	parser/ylmm/basic_messenger.hh \
+
+parser/ylmm/basic_parser.hh: \
+	parser/ylmm/basic_location.hh \
+	parser/ylmm/basic_messenger.hh \
+
+ERROR_INC := analysis/core_code_error.inc
+DEPENDENCY_INC := analysis/core_dependency.inc
+HOOK_RULE_FILE = $(wildcard hook.mk)
+ifneq ($(strip $(HOOK_RULE_FILE)),)
+ include hook.mk
+endif
+
+$(PROJECT_ROOT)/src/lib/analysis/code_error.inc: $(ERROR_INC)
+	@cat $^ > $@
+
+$(PROJECT_ROOT)/src/lib/analysis/dependency.inc: $(DEPENDENCY_INC)
+	@cat $^ > $@
+
+$(OBJECTS): $(PROJECT_ROOT)/src/lib/analysis/code_error.inc
+$(OBJECTS): $(PROJECT_ROOT)/src/lib/analysis/dependency.inc
+
+clobber:
+	@rm -f analysis/code_error.inc
+	@rm -f analysis/dependency.inc
+	@rm -f $(INTERMEDIATE_FILES)

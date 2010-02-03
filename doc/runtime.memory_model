@@ -1,0 +1,116 @@
+
+<h2>Memory Model</h2>
+
+In HPHP, there are several different types of variables, depending on how
+their lifetime is controled and how they allocate and deallocate memories.
+
+1. Process Memory Variables
+
+(1) APC Variables
+
+APC stands for Alternative PHP Cache in PHP/Zend terminology, and they are
+shared by multiple processes in pre-forking Apache environment. In HPHP, APC's
+semantics is kept by two different implementations, depending on how program
+is configured:
+
+- If HPHP is configured to run as one single process with multiple threads,
+  APC variables are merely the ones that are shared by all threads. They are
+  accessed through apc_store() and apc_fetch() functions by name-value lookups.
+  In this model, APC variables are implemented with plain memory, allocated and
+  deallocated through malloc/free calls. Then, granularity locking is
+  implemented to ensure access from multiple threads are safe and efficient.
+
+- If HPHP is configured to run with shared memory for APC, those variables
+  are allocated and deallocated through boost::inter_process classes, which
+  operate on real shared memory regions that multiple processes can attach to.
+  In this model, we used the same type of granularity locking for safe reads
+  and writes of these variables.
+
+(2) C++ Static Variables
+
+Regular C++ static variables will be accessible from multiple threads
+automatically. Proper locking is needed for thread-safety.
+
+2. Thread Local Variables
+
+(1) ThreadLocal<T>
+
+HPHP implemented ThreadLocal<T> template class that wraps any C++ data
+structures to make them thread local. A ThreadLocal<T> object is only intended
+to be accessed by a single thread, thus avoiding mutex locking.
+
+(2) Persistent Objects
+
+In PHP extensions, some objects are persistent across multiple requests, and
+HPHP has also implemented this type of variables for resource data. They are
+thread local, therefore, each thread has its own persistent object storage.
+They are also accessed by names, just like how PHP/Zend has implemented it.
+
+3. Request Local Variables
+
+A request local variable is automatically thread local. In addition, they also
+have initialization and shutdown processes at beginning and end of each
+HTTP request.
+
+(1) PHP Variables
+
+All variables from user PHP code are request local variables. These variables
+will go out of scope when a request is finished, even if it was a global
+variable.
+
+These variables can be pritimive types, String, Array, Object or Variant. They
+are allocated and deallocated through smart allocators and linear allocators.
+
+(2) RequestLocal<T>
+
+HPHP also implemented RequestLocal<T> template class to allow PHP extensions
+to properly initialize and uninitialize certain request local variables.
+
+The template class simply implemented requestInit() and requestShutdown()
+virtual functions that will be called by execution engine at startup and
+shutdown time of an HTTP request.
+
+
+<h2>Memory Allocators</h2>
+
+Two speciailized memory allocators are implemented in HPHP, in addition to
+the general purpose tcmalloc we used for replacing glic's malloc/free.
+
+1. SmartAllocator<T>
+
+A SmartAllocator simply allocates one slab of multiple objects with the same
+size a time. Then it will use replacement new (macro-ed as NEW in HPHP code
+base) for any caller to allocate a new one from the slab.
+
+When an object is deallocated, it will be pushed to a free list maintained by
+the allocator. Such free list is first consulted when a new allocation is
+requested.
+
+By doing so, many malloc/free calls otherwise will turn into push/pop
+operations on the free list, with some rare malloc/free calls for slabs.
+
+The tradeoff is, each object will take an extra 64-bit pointer storage in
+free list.
+
+2. LinearAllocator
+
+HPHP supports memory state check points, so that on subsequent requests,
+certain user PHP code doesn't have to be executed again, if its sole purpose
+is to initialize global states to certain values.
+
+To support this feature, we also implemented a so-called "linear allocator"
+to allocate variable-sized objects during backup time of doing a checkpoint.
+
+For example, a String class wraps StringData that's in fixed size. So
+StringData may use SmartAllocator for its allocation/deallocation. But
+StringData may internally keep a char pointer that has a variable size. This
+string pointer will be allocated through general purpose malloc/free initially,
+but it will be copied into linear allocator, if it is allocated before a
+check point is taken. When we restore a checkpoint, we then don't have to
+make a new copy of the string any more, as all we have to do is to copy over
+the string pointer that's always valid, as long as we hold the linear allocator
+memory for the entire life.
+
+By doing so, we can memcpy entire linear allocator's memory each time we
+restore a checkpoint, thus making it cheaper than many smaller malloc/free
+calls.

@@ -1,0 +1,15 @@
+#if EXT_TYPE == 0
+"simplexml_load_string", T(Variant), S(0), "data", T(String), NULL, S(0), "class_name", T(String), "\"SimpleXMLElement\"", S(0), "options", T(Int64), "0", S(0), "ns", T(String), "\"\"", S(0), "is_prefix", T(Boolean), "false", S(0), NULL, S(0), 
+"simplexml_load_file", T(Variant), S(0), "filename", T(String), NULL, S(0), "class_name", T(String), "\"SimpleXMLElement\"", S(0), "options", T(Int64), "0", S(0), "ns", T(String), "\"\"", S(0), "is_prefix", T(Boolean), "false", S(0), NULL, S(0), 
+"libxml_get_errors", T(Variant), S(0), NULL, S(0), 
+"libxml_get_last_error", T(Variant), S(0), NULL, S(0), 
+"libxml_clear_errors", T(Void), S(0), NULL, S(0), 
+"libxml_use_internal_errors", T(Boolean), S(0), "use_errors", T(Variant), "null_variant", S(0), NULL, S(0), 
+"libxml_set_streams_context", T(Void), S(0), "streams_context", T(Object), NULL, S(0), NULL, S(0), 
+#elif EXT_TYPE == 1
+#elif EXT_TYPE == 2
+"simplexmlelement", "", "arrayaccess",NULL, "__construct", T(Void), S(0), "data", T(String), NULL, S(0), "options", T(Int64), "0", S(0), "data_is_url", T(Boolean), "false", S(0), "ns", T(String), "\"\"", S(0), "is_prefix", T(Boolean), "false", S(0), NULL, S(0), S(0), S(0), S(0),"offsetexists", T(Boolean), S(0), "index", T(Variant), NULL, S(0), NULL, S(0), S(0), S(0), S(0),"offsetget", T(Variant), S(0), "index", T(Variant), NULL, S(0), NULL, S(0), S(0), S(0), S(0),"offsetset", T(Void), S(0), "index", T(Variant), NULL, S(0), "newvalue", T(Variant), NULL, S(0), NULL, S(0), S(0), S(0), S(0),"offsetunset", T(Void), S(0), "index", T(Variant), NULL, S(0), NULL, S(0), S(0), S(0), S(0),"xpath", T(Variant), S(0), "path", T(String), NULL, S(0), NULL, S(0), S(0), S(0), S(0),"registerxpathnamespace", T(Boolean), S(0), "prefix", T(String), NULL, S(0), "ns", T(String), NULL, S(0), NULL, S(0), S(0), S(0), S(0),"asxml", T(Variant), S(0), "filename", T(String), NULL, S(0), NULL, S(0), S(0), S(0), S(0),"getnamespaces", T(Array), S(0), "recursive", T(Boolean), "false", S(0), NULL, S(0), S(0), S(0), S(0),"getdocnamespaces", T(Array), S(0), "recursive", T(Boolean), "false", S(0), NULL, S(0), S(0), S(0), S(0),"children", T(Array), S(0), "ns", T(String), "\"\"", S(0), "is_prefix", T(Boolean), "false", S(0), NULL, S(0), S(0), S(0), S(0),"getname", T(String), S(0), NULL, S(0), S(0), S(0), S(0),"attributes", T(Object), S(0), "ns", T(String), "\"\"", S(0), "is_prefix", T(Boolean), "false", S(0), NULL, S(0), S(0), S(0), S(0),"addchild", T(Variant), S(0), "qname", T(String), NULL, S(0), "value", T(String), "null_string", S(0), "ns", T(String), "null_string", S(0), NULL, S(0), S(0), S(0), S(0),"addattribute", T(Void), S(0), "qname", T(String), NULL, S(0), "value", T(String), "null_string", S(0), "ns", T(String), "null_string", S(0), NULL, S(0), S(0), S(0), S(0),"__tostring", T(String), S(0), NULL, S(0), S(0), S(0), S(0),"__destruct", T(Variant), S(0), NULL, S(0), S(0), S(0), S(0),NULL,NULL,
+"libxmlerror", "", NULL, "__construct", T(Void), S(0), NULL, S(0), S(0), S(0), S(0),"__destruct", T(Variant), S(0), NULL, S(0), S(0), S(0), S(0),NULL,NULL,
+#elif EXT_TYPE == 3
+
+#endif

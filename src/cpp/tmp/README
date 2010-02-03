@@ -1,0 +1,2 @@
+
+Do not manually add any files in this directory. This is for holding generated .cpp files, compiling them and linking with hphp_cpp_base.so.

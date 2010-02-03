@@ -1,0 +1,17 @@
+
+Log {
+  AlwaysLogUnhandledExceptions = false
+}
+
+Server {
+  Port = 8080
+
+  AllowedFiles {
+    0 = string
+  }
+}
+
+VirtualHost {
+  default {
+  }
+}

@@ -1053,7 +1053,9 @@ Variant f_evhttp_get(CStrRef url, CArrRef headers /* = null_array */,
   LibEventHttpClientPtr client = prepare_client(url, "", headers, timeout,
                                                 false, false);
   if (client) {
-    return prepare_response(client);
+    Variant ret = prepare_response(client);
+    client->release();
+    return ret;
   }
   return false;
 }
@@ -1064,7 +1066,9 @@ Variant f_evhttp_post(CStrRef url, CStrRef data,
   LibEventHttpClientPtr client = prepare_client(url, data, headers, timeout,
                                                 false, true);
   if (client) {
-    return prepare_response(client);
+    Variant ret = prepare_response(client);
+    client->release();
+    return ret;
   }
   return false;
 }

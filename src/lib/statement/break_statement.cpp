@@ -86,30 +86,64 @@ void BreakStatement::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     return;
   }
 
+  int64 depth = 1;
+
   if (m_exp) {
-    cg.printf("switch (");
-    m_exp->outputCPP(cg, ar);
-    cg.printf(") {\n");
-    for (unsigned int i = 0; i < labelIds.size(); i++) {
-      int labelId = labelIds[i];
-      labelId &= ~CodeGenerator::BreakScopeBitMask;
-      cg.printf("case %d: goto %s%d;\n", labelIds.size() - i, m_name, labelId);
-      cg.addLabelId(m_name, labelId);
-    }
-    cg.printf("default: throw_fatal(\"bad %s\");\n", m_name);
-    cg.printf("}\n");
-  } else {
-    int labelId = labelIds.back();
-    if (labelId & CodeGenerator::InsideSwitch) {
-      if (labelId & CodeGenerator::StaticCases) {
-        cg.printf("break;\n"); // continue will turn into break as well
+    Variant v;
+    if (m_exp->getScalarValue(v) &&
+        v.isInteger()) {
+      depth = v.toInt64();
+    } else {
+      unsigned size = labelIds.size();
+      int labelId;
+      if (size > 1) {
+        cg.printf("switch (");
+        m_exp->outputCPP(cg, ar);
+        cg.printf(") {\n");
+        for (unsigned int i = 0; i < size; i++) {
+          labelId = labelIds[i];
+          labelId &= ~CodeGenerator::BreakScopeBitMask;
+          cg.printf("case %d: goto %s%d;\n",
+                    labelIds.size() - i, m_name, labelId);
+          cg.addLabelId(m_name, labelId);
+        }
+        cg.printf("default:\n");
       } else {
+        labelId = labelIds.back();
         labelId &= ~CodeGenerator::BreakScopeBitMask;
-        cg.printf("goto %s%d;\n", m_name, labelId);
         cg.addLabelId(m_name, labelId);
       }
-    } else {
-      cg.printf("%s;\n", m_name);
+      cg.printf("if ((");
+      m_exp->outputCPP(cg, ar);
+      cg.printf(")<2) {\n");
+      cg.printf("goto %s%d;\n", m_name, labelId);
+      cg.printf("} else {\n");
+      cg.printf("throw_fatal(\"bad %s\");\n", m_name);
+      cg.printf("}\n");
+      if (size > 1) {
+        cg.printf("}\n");
+      }
+      return;
     }
+  }
+
+  if (depth < 1) {
+    depth = 1;
+  } else if (depth > (int64)labelIds.size()) {
+    cg.printf("throw_fatal(\"bad %s\");\n", m_name);
+    return;
+  }    
+    
+  int labelId = labelIds[labelIds.size() - depth];
+  if (depth > 1 || labelId & CodeGenerator::InsideSwitch) {
+    if (depth == 1 && labelId & CodeGenerator::StaticCases) {
+      cg.printf("break;\n"); // continue will turn into break as well
+    } else {
+      labelId &= ~CodeGenerator::BreakScopeBitMask;
+      cg.printf("goto %s%d;\n", m_name, labelId);
+      cg.addLabelId(m_name, labelId);
+    }
+  } else {
+    cg.printf("%s;\n", m_name);
   }
 }

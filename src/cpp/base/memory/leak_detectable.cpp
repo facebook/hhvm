@@ -292,6 +292,8 @@ bool LeakDetectable::SuppressStackTrace(const std::string &st) {
     "gdCacheGet",
     "ThreadSharedStore::",
     "ThreadSharedVariant::ThreadSharedVariant",
+    "NS_NewPermanentAtom",
+    "Transliterator::createBasicInstance",
   };
 
   for (unsigned int i = 0;

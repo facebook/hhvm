@@ -315,15 +315,16 @@ class SmartAllocator : public SmartAllocatorImpl {
   virtual void release();                                               \
   virtual void sweep();
 
-#define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T)                \
-  static ObjectAllocatorBase *get_ ## T ## _allocator() {                     \
-    static ThreadLocalStatic<ObjectAllocator<ItemSize<sizeof(T)>::value> > v; \
-    return v.get();                                                           \
-  }                                                                           \
-  ObjectAllocatorWrapper NS::T::Allocator(get_ ## T ## _allocator);           \
-  void NS::T::release() {                                                     \
-    destruct();                                                               \
-    DELETE_EX_CLS(NS, T);                                                     \
+#define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T)           \
+  static ThreadLocalStatic<ObjectAllocator<ItemSize<sizeof(T)>::value> > \
+    g_ ## T ## _allocator;                                               \
+  static ObjectAllocatorBase *get_ ## T ## _allocator() {                \
+    return g_ ## T ## _allocator.get();                                  \
+  }                                                                      \
+  ObjectAllocatorWrapper NS::T::Allocator(get_ ## T ## _allocator);      \
+  void NS::T::release() {                                                \
+    destruct();                                                          \
+    DELETE_EX_CLS(NS, T);                                                \
   }
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(T)                 \

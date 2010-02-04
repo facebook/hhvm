@@ -1,29 +1,13 @@
-/*
-   +----------------------------------------------------------------------+
-   | HipHop for PHP                                                       |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
-   | Copyright (c) 1997-2010 The PHP Group                                |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
-   +----------------------------------------------------------------------+
-*/
-
-#ifndef __EXT_PHP_MCC_RESOURCE_H__
-#define __EXT_PHP_MCC_RESOURCE_H__
-
-#include <util/base.h>
+#if !defined(__EXT_PHPMCC_TYPES_H__)
+#define __EXT_PHPMCC_TYPES_H__
 
 #define HAVE_UDP_REPLY_PORTS 1
 #include <mcc/mcc.h>
 
+#include <cpp/base/base_includes.h>
+
 namespace HPHP {
+
 
 class MccResource;
 typedef SmartPtr<MccResource> MccResourcePtr;
@@ -184,6 +168,78 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// types
+
+enum phpmcc_flags_t {
+  phpmcc_serialized = 0x1,
+  phpmcc_compressed = 0x2,
+  phpmcc_fb_serialized = 0x4,
+  phpmcc_proxy_replicate = 0x400,
+  phpmcc_nzlib_compressed = 0x800,
+  phpmcc_async_set = 0x1000,
+};
+
+enum phpmcc_get_details_t {
+  PHPMCC_GET_DEFAULT,                 /* default mode of operation. */
+  PHPMCC_GET_RECORD_ERRORS,           /* record the keys that caused errors */
+};
+
+enum phpmcc_delete_details_t {
+  PHPMCC_DELETE_DELETED,              /* deleted from cache */
+  PHPMCC_DELETE_NOTFOUND,             /* not found in cache */
+  PHPMCC_DELETE_ERROR_LOG,            /* delete error should be logged */
+  PHPMCC_DELETE_ERROR_NOLOG,          /* delete error should not be logged */
+};
+
+typedef std::deque<MccListener*>::iterator ListenerIt;
+typedef std::deque<MccApEvent>::iterator ApEventIt;
+typedef std::deque<MccMirrorMcc*>::iterator MirrorIt;
+
+/*
+  The context structure used to communicate between phpmcc_get(..) and the
+  callback functions.
+*/
+typedef struct phpmcc_get_processor_context_s {
+  Variant* results;
+  Variant* additional_context;
+  int hits;
+  int errors;
+} phpmcc_get_processor_context_t;
+
+/*
+  The type definition for the callbacks and the actual callback functions.
+*/
+typedef void (*phpmcc_get_processor_funcptr_t)
+  (const nstring_t search_key,
+   mcc_res_t final_result,
+   CVarRef result,
+   phpmcc_get_processor_context_t* context);
+
+///////////////////////////////////////////////////////////////////////////////
+// nstring
+
+static inline void phpstring_to_nstring(nstring_t &nstring, std::string s) {
+  nstring.str = const_cast<char*>(s.data());
+  nstring.len = s.size();
 }
 
-#endif // __EXT_PHP_MCC_RESOURCE_H__
+static inline void phpstring_to_nstring(nstring_t &nstring, HPHP::CStrRef s) {
+  nstring.str = const_cast<char*>(s.data());
+  nstring.len = s.size();
+}
+
+static inline void phpstring_to_nstring(nstring_t &nstring, HPHP::Variant var) {
+  if (var.isString()) {
+    HPHP::String s = var.toString();
+    nstring.str = const_cast<char*>(s.data());
+    nstring.len = s.size();
+  } else {
+    nstring.str = NULL;
+    nstring.len = 0;
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+}
+
+#endif /* #if !defined(__EXT_PHPMCC_TYPES_H__) */

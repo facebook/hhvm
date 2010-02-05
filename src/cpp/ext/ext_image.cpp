@@ -706,7 +706,7 @@ static struct gfxinfo *php_handle_jp2(CObjRef stream) {
 
 /* tiff constants */
 static const int php_tiff_bytes_per_format[] =
-  {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
+  {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8, 1};
 
 static int get_php_tiff_bytes_per_format(int format) {
   int size = sizeof(php_tiff_bytes_per_format)/sizeof(int);

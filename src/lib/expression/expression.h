@@ -73,19 +73,19 @@ public:
 
   enum Context {
     RValue       = 0,
-    LValue       = 1,           // assignment exp; foreach stmt
-    Declaration  = LValue | 2,  // global or static stmt
-    NoLValueWrapper = 4,        // ok to not have lval() wrapper
-    RefValue  = 8,              // &exp
-    NoRefWrapper = 16,          // ok to not have ref() wrapper
-    ObjectContext = 32,         // $obj->
-    InParameterExpression = 64, // for default value expression
-    IssetContext = 128,         // isset(...)
-    AssignmentLHS = 256,        // LHS in assignment
-    DeepAssignmentLHS = 512,    // LHS in assignment, deep
-    UnsetContext = 1024,        // Within unset(...), arr el recursively
-    InvokeArgument = 2048,      // Invoke arguments
-    RefParameter   = 4096       // eg f(&$x)
+    LValue       = 1,            // assignment exp; foreach stmt
+    Declaration  = LValue | 2,   // global or static stmt
+    NoLValueWrapper = 4,         // ok to not have lval() wrapper
+    RefValue  = 8,               // &exp
+    NoRefWrapper = 0x10,         // ok to not have ref() wrapper
+    ObjectContext = 0x20,        // $obj->
+    InParameterExpression = 0x40,// for default value expression
+    IssetContext = 0x80,         // isset(...)
+    AssignmentLHS = 0x100,       // LHS in assignment
+    DeepAssignmentLHS = 0x200,   // LHS in assignment, deep
+    UnsetContext = 0x400,        // Within unset(...), arr el recursively
+    InvokeArgument = 0x800,      // Invoke arguments
+    RefParameter   = 0x1000      // eg f(&$x)
   };
 
 public:

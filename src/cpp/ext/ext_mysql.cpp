@@ -190,7 +190,7 @@ enum MysqlTimeoutType {
 // Abstraction of setting timeout so that dependency on mysql customizations
 // can be removed.
 static int set_mysql_timeout(MYSQL *mysql, MysqlTimeoutType type, int ms) {
-  mysql_option opt;
+  mysql_option opt = MYSQL_OPT_CONNECT_TIMEOUT;
 #ifdef MYSQL_MILLISECOND_TIMEOUT
   switch (type) {
   case ConnectTimeout: opt = MYSQL_OPT_CONNECT_TIMEOUT_MS; break;

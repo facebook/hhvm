@@ -36,40 +36,40 @@ f('xml_parser_set_option', Boolean,
 
 f('xml_set_character_data_handler', Boolean,
   array('parser' => Resource,
-        'handler' => String));
+        'handler' => Variant));
 
 f('xml_set_default_handler', Boolean,
   array('parser' => Resource,
-        'handler' => String));
+        'handler' => Variant));
 
 f('xml_set_element_handler', Boolean,
   array('parser' => Resource,
-        'start_element_handler' => String,
-        'end_element_handler' => String));
+        'start_element_handler' => Variant,
+        'end_element_handler' => Variant));
 
 f('xml_set_processing_instruction_handler', Boolean,
   array('parser' => Resource,
-        'handler' => String));
+        'handler' => Variant));
 
 f('xml_set_start_namespace_decl_handler', Boolean,
   array('parser' => Resource,
-        'handler' => String));
+        'handler' => Variant));
 
 f('xml_set_end_namespace_decl_handler', Boolean,
   array('parser' => Resource,
-        'handler' => String));
+        'handler' => Variant));
 
 f('xml_set_unparsed_entity_decl_handler', Boolean,
   array('parser' => Resource,
-        'handler' => String));
+        'handler' => Variant));
 
 f('xml_set_external_entity_ref_handler', Boolean,
   array('parser' => Resource,
-        'handler' => String));
+        'handler' => Variant));
 
 f('xml_set_notation_decl_handler', Boolean,
   array('parser' => Resource,
-        'handler' => String));
+        'handler' => Variant));
 
 f('xml_set_object', Boolean,
   array('parser' => Resource,

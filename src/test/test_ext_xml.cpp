@@ -69,6 +69,23 @@ bool TestExtXml::test_xml_parse() {
 
 bool TestExtXml::test_xml_parse_into_struct() {
   //VCB("<?php ");
+  String simple = "<para><note attrib1='foo'>simple&amp;note</note></para>";
+  Variant p = f_xml_parser_create();
+  Variant vals, index;
+  f_xml_parse_into_struct(p, simple, ref(vals), ref(index));
+  f_xml_parser_free(p);
+  VS(f_print_r(index.rvalAt("PARA"),1),
+    "Array\n(\n    [0] => 0\n    [1] => 2\n)\n");
+  VS(f_print_r(index.rvalAt("NOTE"),1),
+    "Array\n(\n    [0] => 1\n)\n");
+  VS(f_print_r(vals.rvalAt(0),1),
+    "Array\n(\n    [tag] => PARA\n    [type] => open\n    [level] => 1\n)\n");
+  VS(f_print_r(vals.rvalAt(1),1),
+    "Array\n(\n    [tag] => NOTE\n    [type] => complete\n    [level] => 2\n"
+    "    [attributes] => Array\n        (\n            [ATTRIB1] => foo\n"
+    "        )\n\n    [value] => simple&note\n)\n");
+  VS(f_print_r(vals.rvalAt(2),1),
+    "Array\n(\n    [tag] => PARA\n    [type] => close\n    [level] => 1\n)\n");
   return true;
 }
 

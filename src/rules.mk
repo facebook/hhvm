@@ -474,7 +474,7 @@ MOZILLA_LIBS = $(EXT_DIR)/mozilla/libmozutil_s.a \
 
 CURL_LIBS = $(EXT_DIR)/libcurl/lib/libcurl.a
 
-LIBXML_LIBS = -lxml2
+LIBXML_LIBS = -lxml2 -lexpat
 
 TIME_LIBS = $(EXT_DIR)/timelib/lib/libtimelib.a
 

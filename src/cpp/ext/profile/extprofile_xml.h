@@ -60,47 +60,47 @@ inline bool x_xml_parser_set_option(CObjRef parser, int option, CVarRef value) {
   return f_xml_parser_set_option(parser, option, value);
 }
 
-inline bool x_xml_set_character_data_handler(CObjRef parser, CStrRef handler) {
+inline bool x_xml_set_character_data_handler(CObjRef parser, CVarRef handler) {
   FUNCTION_INJECTION_BUILTIN(xml_set_character_data_handler);
   return f_xml_set_character_data_handler(parser, handler);
 }
 
-inline bool x_xml_set_default_handler(CObjRef parser, CStrRef handler) {
+inline bool x_xml_set_default_handler(CObjRef parser, CVarRef handler) {
   FUNCTION_INJECTION_BUILTIN(xml_set_default_handler);
   return f_xml_set_default_handler(parser, handler);
 }
 
-inline bool x_xml_set_element_handler(CObjRef parser, CStrRef start_element_handler, CStrRef end_element_handler) {
+inline bool x_xml_set_element_handler(CObjRef parser, CVarRef start_element_handler, CVarRef end_element_handler) {
   FUNCTION_INJECTION_BUILTIN(xml_set_element_handler);
   return f_xml_set_element_handler(parser, start_element_handler, end_element_handler);
 }
 
-inline bool x_xml_set_processing_instruction_handler(CObjRef parser, CStrRef handler) {
+inline bool x_xml_set_processing_instruction_handler(CObjRef parser, CVarRef handler) {
   FUNCTION_INJECTION_BUILTIN(xml_set_processing_instruction_handler);
   return f_xml_set_processing_instruction_handler(parser, handler);
 }
 
-inline bool x_xml_set_start_namespace_decl_handler(CObjRef parser, CStrRef handler) {
+inline bool x_xml_set_start_namespace_decl_handler(CObjRef parser, CVarRef handler) {
   FUNCTION_INJECTION_BUILTIN(xml_set_start_namespace_decl_handler);
   return f_xml_set_start_namespace_decl_handler(parser, handler);
 }
 
-inline bool x_xml_set_end_namespace_decl_handler(CObjRef parser, CStrRef handler) {
+inline bool x_xml_set_end_namespace_decl_handler(CObjRef parser, CVarRef handler) {
   FUNCTION_INJECTION_BUILTIN(xml_set_end_namespace_decl_handler);
   return f_xml_set_end_namespace_decl_handler(parser, handler);
 }
 
-inline bool x_xml_set_unparsed_entity_decl_handler(CObjRef parser, CStrRef handler) {
+inline bool x_xml_set_unparsed_entity_decl_handler(CObjRef parser, CVarRef handler) {
   FUNCTION_INJECTION_BUILTIN(xml_set_unparsed_entity_decl_handler);
   return f_xml_set_unparsed_entity_decl_handler(parser, handler);
 }
 
-inline bool x_xml_set_external_entity_ref_handler(CObjRef parser, CStrRef handler) {
+inline bool x_xml_set_external_entity_ref_handler(CObjRef parser, CVarRef handler) {
   FUNCTION_INJECTION_BUILTIN(xml_set_external_entity_ref_handler);
   return f_xml_set_external_entity_ref_handler(parser, handler);
 }
 
-inline bool x_xml_set_notation_decl_handler(CObjRef parser, CStrRef handler) {
+inline bool x_xml_set_notation_decl_handler(CObjRef parser, CVarRef handler) {
   FUNCTION_INJECTION_BUILTIN(xml_set_notation_decl_handler);
   return f_xml_set_notation_decl_handler(parser, handler);
 }

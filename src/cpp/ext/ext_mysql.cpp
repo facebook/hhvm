@@ -22,6 +22,7 @@
 #include <cpp/base/server/server_stats.h>
 #include <cpp/base/util/request_local.h>
 #include <util/timer.h>
+#include <util/db_mysql.h>
 #include <netinet/in.h>
 #include <netdb.h>
 
@@ -181,44 +182,15 @@ void MySQL::SetDefaultConn(MySQL *conn) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // class MySQL
-enum MysqlTimeoutType {
-  ConnectTimeout,
-  ReadTimeout,
-  WriteTimeout
-};
-
-// Abstraction of setting timeout so that dependency on mysql customizations
-// can be removed.
-static int set_mysql_timeout(MYSQL *mysql, MysqlTimeoutType type, int ms) {
-  mysql_option opt = MYSQL_OPT_CONNECT_TIMEOUT;
-#ifdef MYSQL_MILLISECOND_TIMEOUT
-  switch (type) {
-  case ConnectTimeout: opt = MYSQL_OPT_CONNECT_TIMEOUT_MS; break;
-  case ReadTimeout: opt =  MYSQL_OPT_READ_TIMEOUT_MS; break;
-  case WriteTimeout: opt =  MYSQL_OPT_WRITE_TIMEOUT_MS; break;
-  default: ASSERT(false); break;
-  }
-#else
-  switch (type) {
-  case ConnectTimeout: opt = MYSQL_OPT_CONNECT_TIMEOUT; break;
-  case ReadTimeout: opt =  MYSQL_OPT_READ_TIMEOUT; break;
-  case WriteTimeout: opt =  MYSQL_OPT_WRITE_TIMEOUT; break;
-  default: ASSERT(false); break;
-  }
-  ms = (ms + 999) / 1000;
-#endif
-  return mysql_options(mysql, opt, (const char*)&ms);
-}
-
 static MYSQL *create_new_conn() {
   MYSQL *ret = mysql_init(NULL);
   if (RuntimeOption::MySQLConnectTimeout) {
-    set_mysql_timeout(ret, ConnectTimeout, RuntimeOption::MySQLConnectTimeout);
+    MySQLUtil::set_mysql_timeout(ret, MySQLUtil::ConnectTimeout, RuntimeOption::MySQLConnectTimeout);
   }
   int readTimeout = s_mysql_data->readTimeout;
   if (readTimeout) {
-    set_mysql_timeout(ret, ReadTimeout, readTimeout);
-    set_mysql_timeout(ret, WriteTimeout, readTimeout);
+    MySQLUtil::set_mysql_timeout(ret, MySQLUtil::ReadTimeout, readTimeout);
+    MySQLUtil::set_mysql_timeout(ret, MySQLUtil::WriteTimeout, readTimeout);
   }
   return ret;
 }
@@ -249,7 +221,7 @@ bool MySQL::connect(CStrRef host, int port, CStrRef socket, CStrRef username,
     m_conn = create_new_conn();
   }
   if (connect_timeout >= 0) {
-    set_mysql_timeout(m_conn, ConnectTimeout, connect_timeout);
+    MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout, connect_timeout);
   }
   if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
     ServerStats::Log("sql.conn", 1);
@@ -265,7 +237,7 @@ bool MySQL::reconnect(CStrRef host, int port, CStrRef socket, CStrRef username,
   if (m_conn == NULL) {
     m_conn = create_new_conn();
     if (connect_timeout >= 0) {
-      set_mysql_timeout(m_conn, ConnectTimeout, connect_timeout);
+      MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout, connect_timeout);
     }
     if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
       ServerStats::Log("sql.reconn_new", 1);
@@ -283,7 +255,7 @@ bool MySQL::reconnect(CStrRef host, int port, CStrRef socket, CStrRef username,
   }
 
   if (connect_timeout >= 0) {
-    set_mysql_timeout(m_conn, ConnectTimeout, connect_timeout);
+    MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout, connect_timeout);
   }
   if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
     ServerStats::Log("sql.reconn_old", 1);

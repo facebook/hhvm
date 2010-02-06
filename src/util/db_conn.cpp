@@ -16,6 +16,7 @@
 
 #include "db_conn.h"
 #include "db_query.h"
+#include "db_mysql.h"
 #include "exception.h"
 #include "lock.h"
 #include "async_job.h"
@@ -137,10 +138,8 @@ void DBConn::open(ServerDataPtr server, int connectTimeout /* = -1 */,
   if (readTimeout <= 0) readTimeout = DefaultReadTimeout;
 
   m_conn = mysql_init(NULL);
-  mysql_options(m_conn, MYSQL_OPT_CONNECT_TIMEOUT_MS,
-                (const char*)&connectTimeout);
-  mysql_options(m_conn, MYSQL_OPT_READ_TIMEOUT_MS,
-                (const char*)&readTimeout);
+  MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout, connectTimeout);
+  MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ReadTimeout, readTimeout);
   MYSQL *ret = mysql_real_connect(m_conn, server->getIP().c_str(),
                                   server->getUserName().c_str(),
                                   server->getPassword().c_str(),

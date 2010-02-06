@@ -60,7 +60,7 @@ String TimeStamp::CurrentMicroTime() {
 
 int TimeStamp::Get(bool &error, int hou, int min, int sec, int mon, int day,
                    int yea, bool gmt) {
-  DateTime dt;
+  DateTime dt(Current());
   if (gmt) {
     dt.setTimezone(SmartObject<TimeZone>(NEW(TimeZone)("UTC")));
   }

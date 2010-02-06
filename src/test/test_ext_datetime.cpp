@@ -400,6 +400,8 @@ bool TestExtDatetime::test_mktime() {
   VS(f_date("M-d-Y", f_mktime(0, 0, 0, 1, 1, 1998)),   "Jan-01-1998");
   VS(f_date("M-d-Y", f_mktime(0, 0, 0, 1, 1, 98)),     "Jan-01-1998");
 
+  VS(f_mktime(), time(NULL));
+
   return Count(true);
 }
 

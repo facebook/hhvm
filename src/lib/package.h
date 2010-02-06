@@ -91,7 +91,8 @@ private:
   void findFiles(std::vector<std::string> &out, const char *path,
                  const char *postfix);
   void findPHPFiles(std::vector<std::string> &out, const char *path);
-  void findNonPHPFiles(std::vector<std::string> &out, const char *path);
+  void findNonPHPFiles(std::vector<std::string> &out, const char *path,
+                       bool exclude);
   void addDependencyParents(const char *path, const char *postfix,
                             DependencyGraph::KindOf kindOf);
 

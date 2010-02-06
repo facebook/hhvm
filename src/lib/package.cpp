@@ -165,7 +165,8 @@ void Package::findPHPFiles(std::vector<std::string> &out, const char *path) {
   Util::split('\n', files.c_str(), out, true);
 }
 
-void Package::findNonPHPFiles(vector<string> &out, const char *path) {
+void Package::findNonPHPFiles(vector<string> &out, const char *path,
+                              bool exclude) {
   if (!path) path = "";
   if (*path == '/') path++;
 
@@ -197,7 +198,7 @@ void Package::findNonPHPFiles(vector<string> &out, const char *path) {
         string subdir = path;
         if (subdir[subdir.length() - 1] != '/') subdir += '/';
         subdir += ename;
-        findNonPHPFiles(out, subdir.c_str());
+        findNonPHPFiles(out, subdir.c_str(), exclude);
       }
       continue;
     }
@@ -219,7 +220,8 @@ void Package::findNonPHPFiles(vector<string> &out, const char *path) {
     }
 
     string fullname = string(path) + "/" + ename;
-    if (Option::PackageExcludeStaticFiles.find(fullname) ==
+    if (!exclude ||
+        Option::PackageExcludeStaticFiles.find(fullname) ==
         Option::PackageExcludeStaticFiles.end()) {
       out.push_back(fe);
     }
@@ -275,7 +277,7 @@ FileCachePtr Package::getFileCache() {
   for (set<string>::const_iterator iter = m_directories.begin();
        iter != m_directories.end(); ++iter) {
     vector<string> files;
-    findNonPHPFiles(files, iter->c_str());
+    findNonPHPFiles(files, iter->c_str(), true);
     for (unsigned int i = 0; i < files.size(); i++) {
       string &file = files[i];
       string rpath = file.substr(m_root.size());
@@ -288,7 +290,7 @@ FileCachePtr Package::getFileCache() {
   for (set<string>::const_iterator iter = m_staticDirectories.begin();
        iter != m_staticDirectories.end(); ++iter) {
     vector<string> files;
-    findNonPHPFiles(files, iter->c_str());
+    findNonPHPFiles(files, iter->c_str(), false);
     for (unsigned int i = 0; i < files.size(); i++) {
       string &file = files[i];
       string rpath = file.substr(m_root.size());

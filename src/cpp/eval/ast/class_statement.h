@@ -30,6 +30,7 @@ DECLARE_AST_PTR(ClassVariable);
 DECLARE_AST_PTR(ClassStatement);
 DECLARE_AST_PTR(MethodStatement);
 DECLARE_AST_PTR(ScalarExpression);
+DECLARE_AST_PTR(ClassStatementMarker);
 class EvalObjectData;
 class ClassInfoEvaled;
 class ClassEvalState;
@@ -92,7 +93,8 @@ public:
   void initializeObject(EvalObjectData *obj) const;
   void initializeStatics(LVariableTable &statics) const;
 
-  const MethodStatement* findMethod(const char* name) const;
+  const MethodStatement* findMethod(const char* name,
+                                    bool recursive = false) const;
   bool getConstant(Variant &res, const char *c) const;
 
   virtual void dump() const;
@@ -107,6 +109,8 @@ public:
   void loadMethodTable(hphp_const_char_imap<const MethodStatement*> &mtable)
     const;
 
+  void semanticCheck(const ClassStatement *cls) const;
+  ClassStatementMarkerPtr getMarker() const;
 protected:
   std::string m_name;
   std::string m_lname;
@@ -123,8 +127,19 @@ protected:
   std::map<std::string, ExpressionPtr> m_constants;
 
   std::string m_docComment;
+  ClassStatementMarkerPtr m_marker;
 
   void loadProperties(ClassInfoEvaled &info) const;
+
+};
+
+class ClassStatementMarker : public Statement {
+public:
+  ClassStatementMarker(STATEMENT_ARGS, ClassStatement *cls);
+  virtual void eval(VariableEnvironment &env) const;
+  virtual void dump() const;
+protected:
+  ClassStatement *m_class;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

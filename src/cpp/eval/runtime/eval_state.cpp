@@ -62,17 +62,26 @@ const MethodStatement *ClassEvalState::getMethod(const char *m) {
   return it->second;
 }
 
-void ClassEvalState::initializeMethods() {
-  if (!m_initializedMethods) {
+void ClassEvalState::initializeInstance() {
+  if (!m_initializedInstance) {
+    semanticCheck();
     m_class->loadMethodTable(m_methodTable);
-    m_initializedMethods = true;
+    m_initializedInstance = true;
   }
 }
 
 void ClassEvalState::initializeStatics() {
   if (!m_initializedStatics) {
+    semanticCheck();
     m_class->initializeStatics(m_statics);
     m_initializedStatics = true;
+  }
+}
+
+void ClassEvalState::semanticCheck() {
+  if (!m_doneSemanticCheck) {
+    m_class->semanticCheck(NULL);
+    m_doneSemanticCheck = true;
   }
 }
 

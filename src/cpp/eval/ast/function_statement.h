@@ -24,7 +24,6 @@
 
 #include <cpp/eval/analysis/block.h>
 
-
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,6 +47,7 @@ public:
   virtual void dump() const;
   void getInfo(ClassInfo::ParameterInfo &info) const;
   bool isOptional() const;
+  void dropDefault();
 private:
   std::string m_type;
   NamePtr m_name;

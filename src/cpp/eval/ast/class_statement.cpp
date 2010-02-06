@@ -23,6 +23,7 @@
 #include <cpp/eval/runtime/variable_environment.h>
 #include <cpp/eval/strict_mode.h>
 #include <cpp/base/runtime_option.h>
+#include <cpp/eval/eval.h>
 #include <util/util.h>
 
 namespace HPHP {
@@ -77,15 +78,23 @@ ClassStatement::ClassStatement(STATEMENT_ARGS, const string &name,
                                const string &parent, const string &doc)
   : Statement(STATEMENT_PASS), m_name(name),
     m_lname(Util::toLower(m_name)),
-    m_modifiers(0), m_parent(parent), m_docComment(doc) {}
+    m_modifiers(0), m_parent(parent), m_docComment(doc),
+    m_marker(new ClassStatementMarker(STATEMENT_PASS, this)) {}
 
 void ClassStatement::finish() {
 }
 
 const ClassStatement *ClassStatement::parentStatement() const {
-  return RequestEvalState::findClass(m_parent.c_str());
+  if (!m_parent.empty()) {
+    const ClassStatement *cls = RequestEvalState::findClass(m_parent.c_str());
+    if (!cls && !ClassInfo::HasClass(m_parent.c_str()) &&
+        eval_try_autoload(m_parent.c_str())) {
+      cls = RequestEvalState::findClass(m_parent.c_str());
+    }
+    return cls;
+  }
+  return NULL;
 }
-
 
 void ClassStatement::
 loadMethodTable(hphp_const_char_imap<const MethodStatement*> &mtable) const {
@@ -132,13 +141,8 @@ void ClassStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
   RequestEvalState::declareClass(this);
 
-  const ClassStatement* parent_cls = parentStatement();
-  if (parent_cls && parent_cls->getModifiers() & Final) {
-    // Extended a final class
-    throw FatalErrorException("Class %s may not inherit from final class (%s)",
-                              name().c_str(), parent_cls->name().c_str());
-  }
-  if (RuntimeOption::EnableStrict && parent_cls) {
+  const ClassStatement* parent_cls;
+  if (RuntimeOption::EnableStrict && (parent_cls = parentStatement())) {
     for (vector<MethodStatementPtr>::const_iterator it = m_methodsVec.begin();
          it != m_methodsVec.end(); ++it) {
 
@@ -198,7 +202,7 @@ Object ClassStatement::create(ClassEvalState &ce, CArrRef params,
   }
 
   EvalObjectData *eo;
-  ce.initializeMethods();
+  ce.initializeInstance();
 
   // Only need a parent for the dynamic class if the parent
   // is builtin or compiled
@@ -280,12 +284,20 @@ bool ClassStatement::subclassOf(const char *c) const {
   return false;
 }
 
-const MethodStatement* ClassStatement::findMethod(const char* name) const {
+const MethodStatement* ClassStatement::findMethod(const char* name,
+                                                  bool recursive /* = false */)
+  const {
   hphp_const_char_imap<MethodStatementPtr>::const_iterator it =
     m_methods.find(name);
   if (it != m_methods.end()) {
     return it->second.get();
   } else {
+    if (recursive) {
+      const ClassStatement *parent = parentStatement();
+      if (parent) {
+        return parent->findMethod(name, true);
+      }
+    }
     return NULL;
   }
 }
@@ -412,6 +424,93 @@ bool ClassStatement::attemptPropertyAccess(CStrRef prop) const {
   }
 
   return true;
+}
+
+void ClassStatement::semanticCheck(const ClassStatement *cls)
+  const {
+  const ClassStatement *parent = parentStatement();
+  if (cls) {
+    if (!(getModifiers() & (Interface|Abstract))) return;
+    for (vector<MethodStatementPtr>::const_iterator it = m_methodsVec.begin();
+         it != m_methodsVec.end(); ++it) {
+      if ((*it)->isAbstract()) {
+        const MethodStatement *m = cls->findMethod((*it)->name().c_str(), true);
+        if (!m) {
+          throw FatalErrorException("Class %s does not implement abstract "
+                                    "method %s::%s", cls->name().c_str(),
+                                    name().c_str(), (*it)->name().c_str());
+        }
+        bool incompatible = false;
+        if (strcmp(m->name().c_str(), "__construct") == 0) {
+          // for some reason construct params aren't checked
+        } else if (m->getParams().size() < (*it)->getParams().size() ||
+            (m->getModifiers() & Static) !=
+            ((*it)->getModifiers() & Static)) {
+          incompatible = true;
+        } else {
+          const vector<ParameterPtr> &p1 = (*it)->getParams();
+          const vector<ParameterPtr> &p2 = m->getParams();
+          for (uint i = 0; i < p2.size(); ++i) {
+            if (i >= p1.size()) {
+              if (!p2[i]->isOptional()) {
+                incompatible = true;
+                break;
+              }
+            } else if (p1[i]->isRef() != p2[i]->isRef() ||
+                       p1[i]->isOptional() != p2[i]->isOptional()) {
+              incompatible = true;
+              break;
+            }
+          }
+        }
+        if (incompatible) {
+          throw FatalErrorException("Declaration of %s::%s() must be "
+                                    "compatible with that of %s::%s",
+                                    cls->name().c_str(), m->name().c_str(),
+                                    name().c_str(), (*it)->name().c_str());
+        }
+      }
+    }
+  } else {
+    if (parent && parent->getModifiers() & Final) {
+      // Extended a final class
+      throw FatalErrorException("Class %s may not inherit from final class "
+                                "(%s)",
+                                name().c_str(), parent->name().c_str());
+    }
+    if (getModifiers() & (Interface|Abstract)) return;
+    cls = this;
+  }
+
+  if (parent) {
+    parent->semanticCheck(cls);
+  }
+  for (vector<string>::const_iterator it = m_basesVec.begin();
+       it != m_basesVec.end(); ++it) {
+    const ClassStatement *iface = RequestEvalState::findClass(it->c_str());
+    if (iface) {
+      iface->semanticCheck(cls);
+    }
+  }
+}
+
+ClassStatementMarkerPtr ClassStatement::getMarker() const {
+  return m_marker;
+}
+
+ClassStatementMarker::ClassStatementMarker(STATEMENT_ARGS,
+                                           ClassStatement *cls)
+  : Statement(STATEMENT_PASS), m_class(cls) {
+}
+
+void ClassStatementMarker::eval(VariableEnvironment &env) const {
+  ClassEvalState *ce = RequestEvalState::findClassState(m_class->
+                                                        name().c_str());
+  ASSERT(ce);
+  ce->semanticCheck();
+}
+
+void ClassStatementMarker::dump() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////

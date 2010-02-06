@@ -35,8 +35,10 @@ class EvalObjectData;
 
 class ClassEvalState {
 public:
-  ClassEvalState() : m_initializedMethods(false),
-                     m_initializedStatics(false) {}
+  ClassEvalState() : m_initializedInstance(false),
+                     m_initializedStatics(false),
+                     m_doneSemanticCheck(false)
+  {}
   void init(const ClassStatement *cls);
   const ClassStatement *getClass() const {
     return m_class;
@@ -48,15 +50,16 @@ public:
   LVariableTable &getStatics() {
     return m_statics;
   }
-  void initializeMethods();
+  void initializeInstance();
   void initializeStatics();
-
+  void semanticCheck();
 private:
   const ClassStatement *m_class;
   hphp_const_char_imap<const MethodStatement*> m_methodTable;
   LVariableTable m_statics;
-  bool m_initializedMethods;
+  bool m_initializedInstance;
   bool m_initializedStatics;
+  bool m_doneSemanticCheck;
 };
 
 /**

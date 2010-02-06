@@ -44,6 +44,7 @@ public:
   const ClassStatement *getClass() const { return m_class; }
   int getModifiers() const { return m_modifiers; }
   void attemptAccess(const char *context) const;
+  bool isAbstract() const;
 private:
   const ClassStatement *m_class;
   int m_modifiers;

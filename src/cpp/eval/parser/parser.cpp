@@ -875,8 +875,12 @@ void Parser::saveParseTree(Token &tree) {
     const std::vector<StatementPtr> &svec = s->stmts();
     for (std::vector<StatementPtr>::const_iterator it = svec.begin();
          it != svec.end(); ++it) {
-      if ((*it)->cast<ClassStatement>() || (*it)->cast<FunctionStatement>()) {
+      ClassStatementPtr cs = (*it)->cast<ClassStatement>();
+      if (cs || (*it)->cast<FunctionStatement>()) {
         scopes.push_back(*it);
+        if (cs) {
+          rest.push_back(cs->getMarker());
+        }
       } else {
         rest.push_back(*it);
       }

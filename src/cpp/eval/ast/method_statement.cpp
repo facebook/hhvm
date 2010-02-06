@@ -53,6 +53,11 @@ Variant MethodStatement::invokeInstance(CObjRef obj,
   // The debug frame should have been pushed at ObjectMethodExpression
   MethScopeVariableEnvironment env(this, params.size());
   env.setCurrentObject(obj);
+  RECURSION_INJECTION
+  REQUEST_TIMEOUT_INJECTION
+#ifdef HOTPROFILER
+  ProfilerInjection pi(m_fullName.c_str());
+#endif
   EvalFrameInjection fi(m_class->name().c_str(), m_fullName.c_str(), env,
                         loc()->file, obj.get());
   if (m_ref) {
@@ -68,6 +73,11 @@ invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
   MethScopeVariableEnvironment fenv(this, 0);
   directBind(env, caller, fenv);
   fenv.setCurrentObject(obj);
+  RECURSION_INJECTION
+  REQUEST_TIMEOUT_INJECTION
+#ifdef HOTPROFILER
+  ProfilerInjection pi(m_fullName.c_str());
+#endif
   EvalFrameInjection fi(m_class->name().c_str(), m_fullName.c_str(), fenv,
                         loc()->file, obj.get());
   if (m_ref) {
@@ -80,6 +90,11 @@ Variant MethodStatement::invokeStatic(const char* cls, CArrRef params) const {
   MethScopeVariableEnvironment env(this, params.size());
   // Debug frame pushad at StaticMethodExpression
   env.setCurrentClass(cls);
+  RECURSION_INJECTION
+  REQUEST_TIMEOUT_INJECTION
+#ifdef HOTPROFILER
+  ProfilerInjection pi(m_fullName.c_str());
+#endif
   EvalFrameInjection fi(m_class->name().c_str(), m_fullName.c_str(), env,
                         loc()->file);
   if (m_ref) {
@@ -96,6 +111,11 @@ invokeStaticDirect(const char* cls, VariableEnvironment &env,
   MethScopeVariableEnvironment fenv(this, 0);
   directBind(env, caller, fenv);
   fenv.setCurrentClass(cls);
+  RECURSION_INJECTION
+  REQUEST_TIMEOUT_INJECTION
+#ifdef HOTPROFILER
+  ProfilerInjection pi(m_fullName.c_str());
+#endif
   EvalFrameInjection fi(m_class->name().c_str(), m_fullName.c_str(), fenv,
                         loc()->file);
   if (m_ref) {
@@ -147,6 +167,11 @@ void MethodStatement::attemptAccess(const char *context) const {
     if (context[0]) msg += string(" from ") + context;
     throw_fatal(msg.c_str());
   }
+}
+
+bool MethodStatement::isAbstract() const {
+  return getModifiers() & ClassStatement::Abstract ||
+    m_class->getModifiers() & ClassStatement::Interface;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

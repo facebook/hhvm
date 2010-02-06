@@ -136,6 +136,10 @@ bool Parameter::isOptional() const {
   return m_defVal;
 }
 
+void Parameter::dropDefault() {
+  m_defVal.reset();
+}
+
 FunctionStatement::FunctionStatement(STATEMENT_ARGS, const string &name,
                                      const string &doc)
   : Statement(STATEMENT_PASS), m_name(name),
@@ -150,6 +154,17 @@ void FunctionStatement::init(bool ref, const vector<ParameterPtr> params,
   m_params = params;
   m_body = body;
   m_hasCallToGetArgs = has_call_to_get_args;
+
+  bool seenNonOptional = false;
+  for (int i = m_params.size() - 1; i >= 0; --i) {
+    if (!seenNonOptional) {
+      if (!m_params[i]->isOptional()) {
+        seenNonOptional = true;
+      }
+    } else if (m_params[i]->isOptional()) {
+      m_params[i]->dropDefault();
+    }
+  }
 }
 
 const string &FunctionStatement::fullName() const {
@@ -169,6 +184,11 @@ void FunctionStatement::eval(VariableEnvironment &env) const {
 
 Variant FunctionStatement::invoke(CArrRef params) const {
   FuncScopeVariableEnvironment env(this, params.size());
+  RECURSION_INJECTION
+  REQUEST_TIMEOUT_INJECTION
+#ifdef HOTPROFILER
+  ProfilerInjection pi(m_name.c_str());
+#endif
   EvalFrameInjection fi("", m_name.c_str(), env, loc()->file);
   if (m_ref) {
     return ref(invokeImpl(env, params));
@@ -237,6 +257,11 @@ Variant FunctionStatement::directInvoke(VariableEnvironment &env,
   const {
   FuncScopeVariableEnvironment fenv(this, 0);
   directBind(env, caller, fenv);
+  RECURSION_INJECTION
+  REQUEST_TIMEOUT_INJECTION
+#ifdef HOTPROFILER
+  ProfilerInjection pi(m_name.c_str());
+#endif
   EvalFrameInjection fi("", m_name.c_str(), fenv, loc()->file);
   if (m_ref) {
     return ref(evalBody(fenv));

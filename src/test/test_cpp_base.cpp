@@ -83,6 +83,12 @@ public:
   int m_data;
 };
 
+class TestResource : public ResourceData {
+public:
+  // overriding ResourceData
+  const char *o_getClassName() const { return "TestResource";}
+};
+
 typedef SmartAllocator<SomeClass, -1, SmartAllocatorImpl::NoCallbacks>
         SomeClassAlloc;
 
@@ -622,6 +628,7 @@ bool TestCppBase::TestObject() {
     String s = "O:1:\"B\":1:{s:3:\"obj\";O:1:\"A\":1:{s:1:\"a\";i:10;}}";
     VS(f_serialize(f_unserialize(s)), "O:22:\"__PHP_Incomplete_Class\":2:{s:27:\"__PHP_Incomplete_Class_Name\";s:1:\"B\";s:3:\"obj\";O:22:\"__PHP_Incomplete_Class\":2:{s:27:\"__PHP_Incomplete_Class_Name\";s:1:\"A\";s:1:\"a\";i:10;}}");
   }
+  VERIFY(!equal(Object(new TestResource()), Object(new TestResource()) ));
   return Count(true);
 }
 

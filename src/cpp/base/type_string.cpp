@@ -456,6 +456,8 @@ bool String::equal(CObjRef v2) const {
   if (m_px == NULL || v2.get() == NULL) {
     return HPHP::equal(toBoolean(), v2.toBoolean());
   }
+  if (v2.isResource())
+    return false;
   try {
     return equal(v2.toString());
   } catch (BadTypeConversionException &e) {

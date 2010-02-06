@@ -102,9 +102,14 @@ class Object : public SmartPtr<ObjectData> {
    */
   bool same (CObjRef v2) const { return m_px == v2.get();}
   bool equal(CObjRef v2) const {
-    return m_px == v2.get() ||
-      (v2.get() && m_px && v2.get()->o_isClass(m_px->o_getClassName()) &&
-       toArray().equal(v2.toArray()));
+    if (m_px == v2.get())
+      return true;
+    if (!m_px || !v2.get())
+      return false;
+    if (isResource() || v2.isResource())
+      return false;
+    return (v2.get()->o_isClass(m_px->o_getClassName()) &&
+            toArray().equal(v2.toArray()));
   }
   bool less (CObjRef v2) const { return false;}
   bool more (CObjRef v2) const { return false;}

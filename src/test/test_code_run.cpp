@@ -1682,6 +1682,11 @@ bool TestCodeRun::TestObjectProperty() {
       "  var_dump($v);"
       "}");
 
+  VCR("<?php "
+      "$one = array('cluster'=> 1, 'version'=>2);"
+      "var_dump(isset($one->cluster));"
+      "var_dump(empty($one->cluster));");
+
   return true;
 }
 

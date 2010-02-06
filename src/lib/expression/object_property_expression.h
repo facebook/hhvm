@@ -43,7 +43,8 @@ public:
   ExpressionPtr getObject() { return m_object;}
   ExpressionPtr getProperty() { return m_property;}
 
-  virtual void outputCPPIsset(CodeGenerator &cg, AnalysisResultPtr ar);
+  virtual void outputCPPExistTest(CodeGenerator &cg, AnalysisResultPtr ar,
+                                  int op);
   virtual void outputCPPUnset(CodeGenerator &cg, AnalysisResultPtr ar);
 
 private:
@@ -55,6 +56,8 @@ private:
   ClassScopePtr m_class; // when m_object's type was inferred
   // for avoiding code generate toObject(Variant)
   bool directVariantProxy(AnalysisResultPtr ar);
+  void outputCPPObjProperty(CodeGenerator &cg, AnalysisResultPtr ar,
+                            bool directVariant);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

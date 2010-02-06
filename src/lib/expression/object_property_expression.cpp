@@ -25,6 +25,7 @@
 #include <lib/option.h>
 #include <lib/expression/simple_variable.h>
 #include <util/hash.h>
+#include <lib/parser/hphp.tab.h>
 
 using namespace HPHP;
 using namespace std;
@@ -222,6 +223,12 @@ bool ObjectPropertyExpression::directVariantProxy(AnalysisResultPtr ar) {
 
 void ObjectPropertyExpression::outputCPPImpl(CodeGenerator &cg,
                                              AnalysisResultPtr ar) {
+  outputCPPObjProperty(cg, ar, directVariantProxy(ar));
+}
+
+void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
+                                                    AnalysisResultPtr ar,
+                                                    bool directVariant) {
   bool bThis = m_object->isThis();
 
   const char *op = ".";
@@ -255,7 +262,7 @@ void ObjectPropertyExpression::outputCPPImpl(CodeGenerator &cg,
         }
       } else {
         if (!bThis) {
-          if (directVariantProxy(ar)) {
+          if (directVariant) {
             TypePtr expectedType = m_object->getExpectedType();
             ASSERT(expectedType->is(Type::KindOfObject));
             // Clear m_expectedType to avoid type cast (toObject).
@@ -272,7 +279,7 @@ void ObjectPropertyExpression::outputCPPImpl(CodeGenerator &cg,
       }
     } else {
       if (!bThis) {
-        if (directVariantProxy(ar)) {
+        if (directVariant) {
           TypePtr expectedType = m_object->getExpectedType();
           ASSERT(expectedType->is(Type::KindOfObject));
           // Clear m_expectedType to avoid type cast (toObject).
@@ -289,7 +296,7 @@ void ObjectPropertyExpression::outputCPPImpl(CodeGenerator &cg,
     }
   } else {
     if (!bThis) {
-      if (directVariantProxy(ar)) {
+      if (directVariant) {
         TypePtr expectedType = m_object->getExpectedType();
         ASSERT(expectedType->is(Type::KindOfObject));
         // Clear m_expectedType to avoid type cast (toObject).
@@ -307,23 +314,30 @@ void ObjectPropertyExpression::outputCPPImpl(CodeGenerator &cg,
   }
 }
 
-void ObjectPropertyExpression::outputCPPIsset(CodeGenerator &cg,
-                                              AnalysisResultPtr ar) {
-  bool bThis = m_object->isThis();
-  if (!bThis) {
-    m_object->outputCPP(cg, ar);
-    cg.printf("->");
+void ObjectPropertyExpression::outputCPPExistTest(CodeGenerator &cg,
+                                                  AnalysisResultPtr ar,
+                                                  int op) {
+  if (op == T_ISSET) {
+    bool bThis = m_object->isThis();
+    if (!bThis) {
+      m_object->outputCPP(cg, ar);
+      cg.printf("->");
+    }
+    cg.printf("t___isset(");
+    bool direct = m_property->getKindOf() == Expression::KindOfScalarExpression;
+    if (direct) {
+      cg.printf("\"");
+    }
+    m_property->outputCPP(cg, ar);
+    if (direct) {
+      cg.printf("\"");
+    }
+    cg.printf(")");
+  } else {
+    cg.printf("empty(");
+    outputCPPObjProperty(cg, ar, false);
+    cg.printf(")");
   }
-  cg.printf("t___isset(");
-  bool direct = m_property->getKindOf() == Expression::KindOfScalarExpression;
-  if (direct) {
-    cg.printf("\"");
-  }
-  m_property->outputCPP(cg, ar);
-  if (direct) {
-    cg.printf("\"");
-  }
-  cg.printf(")");
 }
 void ObjectPropertyExpression::outputCPPUnset(CodeGenerator &cg,
                                               AnalysisResultPtr ar) {

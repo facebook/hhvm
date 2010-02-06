@@ -70,7 +70,7 @@ void Package::addAllFiles(bool force) {
 
 void Package::addSourceFile(const char *fileName) {
   ASSERT(fileName && *fileName);
-  m_files.add(fileName);
+  m_files.add(Util::canonicalize(fileName).c_str());
 }
 
 void Package::addListFiles(const char *listFileName) {

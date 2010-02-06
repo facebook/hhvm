@@ -14,20 +14,23 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_ITERATORAGGREGATE_H__
-#define __GENERATED_CLS_ITERATORAGGREGATE_H__
+#ifndef __GENERATED_PHP_CLASSES_SPLOBJECTSTORAGE_FW_H__
+#define __GENERATED_PHP_CLASSES_SPLOBJECTSTORAGE_FW_H__
 
-#include <cls/traversable.h>
+#include <cpp/base/hphp_system.h>
+
+// Forward Declarations
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 137 */
-class c_iteratoraggregate : virtual public c_traversable {
-  // public: void t_getiterator() = 0;
-};
+// 1. Constants
+
+// 2. Classes
+FORWARD_DECLARE_CLASS(splobjectstorage)
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+#include <php/classes/iterator.fw.h>
 
-#endif // __GENERATED_CLS_ITERATORAGGREGATE_H__
+#endif // __GENERATED_PHP_CLASSES_SPLOBJECTSTORAGE_FW_H__

@@ -106,7 +106,7 @@ void f_debug_zval_dump(CVarRef variable) {
 // variable table
 
 Array f_get_defined_vars() {
-  throw NotSupportedException(__func__, "Although this is theoretically possible to implement, having such a function requires a VariableTable to be constructed in current scope and every parent scope. Maybe VariableTable should be chained together anyway, but this is the only place that needs it.");
+  return Array::Create();
 }
 
 bool f_import_request_variables(CStrRef types, CStrRef prefix /* = "" */) {

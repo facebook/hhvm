@@ -82,6 +82,7 @@ public:
    */
   static std::map<std::string, std::string> IncludeRoots;
   static std::map<std::string, std::string> AutoloadRoots;
+  static std::vector<std::string> IncludePaths;
 
   /**
    * PHP include root expression to use when generating PHP trimmed code.
@@ -301,6 +302,7 @@ private:
   static bool Load(std::vector<std::string> &option, ExpressionPtr value);
   static void LoadRootHdf(const Hdf &roots, std::map<std::string,
                           std::string> &map);
+  static void LoadRootHdf(const Hdf &roots, std::vector<std::string> &vec);
 
   static bool isDynamic(const std::string &name,
                         const std::vector<std::string> &prefixes,

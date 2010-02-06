@@ -137,6 +137,8 @@ int main(int argc, char **argv) {
     }
     if (ret) {
       Logger::Error("hphp failed");
+    } else {
+      Logger::Info("all files saved in %s ...", po.outputDir.c_str());
     }
     return ret;
   } catch (Exception &e) {
@@ -181,6 +183,10 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     ("inputs,i", value<vector<string> >(&po.inputs), "input file names")
     ("input-list", value<string>(&po.inputList),
      "file containing list of file names, one per line")
+    ("include-path",
+     value<vector<string> >(&Option::IncludePaths)->composing(),
+     "a list of include paths to search for files being included in includes "
+     "or requires but cannot be found assuming relative paths")
     ("module", value<vector<string> >(&po.modules)->composing(),
      "directories containing all input files")
     ("exclude-dir", value<vector<string> >(&po.excludeDirs)->composing(),
@@ -218,7 +224,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
      "optimization level")
     ("gen-stats", value<bool>(&po.genStats)->default_value(false),
      "whether to generate dependency graphs and code errors")
-    ("keep-tempdir", value<bool>(&po.keepTempDir)->default_value(false),
+    ("keep-tempdir,k", value<bool>(&po.keepTempDir)->default_value(false),
      "whether to keep the temporary directory")
     ("static-method-autofix",
       value<bool>(&po.staticMethodAutoFix)->default_value(true),

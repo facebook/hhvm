@@ -27,6 +27,7 @@
 #include <cls/countable.h>
 #include <cls/arrayiterator.h>
 #include <cls/iterator.h>
+#include <cls/appenditerator.h>
 #include <cls/seekableiterator.h>
 #include <cls/iteratoraggregate.h>
 #include <cls/filteriterator.h>
@@ -37,6 +38,7 @@ namespace HPHP {
 
 Variant pm_php$classes$iterator_php(bool incOnce = false, LVariableTable* variables = NULL);
 Object co_arrayiterator(CArrRef params, bool init = true);
+Object co_appenditerator(CArrRef params, bool init = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

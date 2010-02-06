@@ -90,14 +90,26 @@ string DependencyGraph::getIncludeFilePath(const string &source,
       return expText;
     }
 
+    struct stat sb;
+
     // relative path to containing file's directory
     ASSERT(source.size() > 1);
-    int pos = source.size() - 1;
-    for (; pos >= 0; pos--) {
-      if (source[pos] == '/') {
-        return source.substr(0, pos + 1) + expText;
+    size_t pos = source.rfind('/');
+    if (pos != string::npos) {
+      string filename = source.substr(0, pos + 1) + expText;
+      if (stat(filename.c_str(), &sb) == 0) {
+        return filename;
       }
     }
+
+    // if file cannot be found, resolve it using search paths
+    for (unsigned int i = 0; i < Option::IncludePaths.size(); i++) {
+      string filename = Option::IncludePaths[i] + "/" + expText;
+      if (stat(filename.c_str(), &sb) == 0) {
+        return filename;
+      }
+    }
+
     return expText;
   }
 
@@ -174,7 +186,8 @@ string DependencyGraph::add(KindOf kindOf, ConstructPtr childExp,
   default:
     if (!m_hookHandler ||
         !m_hookHandler(this, kindOf, childExp, parentExp, codeError,
-                       documentRoot, child, parent, beforeDependencyGraphAdd)) {
+                       documentRoot, child, parent,
+                       beforeDependencyGraphAdd)) {
       return "";
     }
     break;

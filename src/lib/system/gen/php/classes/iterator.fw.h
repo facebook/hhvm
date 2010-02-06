@@ -33,6 +33,7 @@ FORWARD_DECLARE_CLASS(traversable);
 FORWARD_DECLARE_CLASS(countable);
 FORWARD_DECLARE_CLASS(arrayiterator)
 FORWARD_DECLARE_CLASS(iterator);
+FORWARD_DECLARE_CLASS(appenditerator)
 FORWARD_DECLARE_CLASS(seekableiterator);
 FORWARD_DECLARE_CLASS(iteratoraggregate);
 FORWARD_DECLARE_CLASS(filteriterator);

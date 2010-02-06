@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 131 */
+/* SRC: classes/iterator.php line 133 */
 class c_filteriterator : virtual public c_iterator, virtual public c_outeriterator {
 };
 

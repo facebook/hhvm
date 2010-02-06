@@ -54,6 +54,10 @@ Variant cw_arrayiterator$os_get(const char *s);
 Variant &cw_arrayiterator$os_lval(const char *s);
 Variant cw_arrayiterator$os_constant(const char *s);
 Variant cw_arrayiterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
+Variant cw_appenditerator$os_get(const char *s);
+Variant &cw_appenditerator$os_lval(const char *s);
+Variant cw_appenditerator$os_constant(const char *s);
+Variant cw_appenditerator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
 Variant cw_outofboundsexception$os_get(const char *s);
 Variant &cw_outofboundsexception$os_lval(const char *s);
 Variant cw_outofboundsexception$os_constant(const char *s);
@@ -66,6 +70,10 @@ Variant cw_rangeexception$os_get(const char *s);
 Variant &cw_rangeexception$os_lval(const char *s);
 Variant cw_rangeexception$os_constant(const char *s);
 Variant cw_rangeexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
+Variant cw_splobjectstorage$os_get(const char *s);
+Variant &cw_splobjectstorage$os_lval(const char *s);
+Variant cw_splobjectstorage$os_constant(const char *s);
+Variant cw_splobjectstorage$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
 Variant cw_invalidargumentexception$os_get(const char *s);
 Variant &cw_invalidargumentexception$os_lval(const char *s);
 Variant cw_invalidargumentexception$os_constant(const char *s);
@@ -20051,6 +20059,9 @@ Object create_builtin_object(const char *s, CArrRef params, bool init /* = true 
       HASH_CREATE_OBJECT(0x196F76C9C527B946LL, domnamednodemap);
       HASH_CREATE_OBJECT(0x66282FC8E4EF4E46LL, badfunctioncallexception);
       break;
+    case 72:
+      HASH_CREATE_OBJECT(0x2E363D51549781C8LL, appenditerator);
+      break;
     case 73:
       HASH_CREATE_OBJECT(0x5AA2EE582E0D3849LL, unexpectedvalueexception);
       break;
@@ -20063,6 +20074,9 @@ Object create_builtin_object(const char *s, CArrRef params, bool init /* = true 
       break;
     case 78:
       HASH_CREATE_OBJECT(0x308D1D59986A3D4ELL, soapheader);
+      break;
+    case 79:
+      HASH_CREATE_OBJECT(0x5BA243B9FBA7A64FLL, splobjectstorage);
       break;
     case 82:
       HASH_CREATE_OBJECT(0x52E5CC58B841AED2LL, sqlite3stmt);
@@ -20223,6 +20237,9 @@ Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef 
       HASH_INVOKE_STATIC_METHOD(0x196F76C9C527B946LL, domnamednodemap);
       HASH_INVOKE_STATIC_METHOD(0x66282FC8E4EF4E46LL, badfunctioncallexception);
       break;
+    case 72:
+      HASH_INVOKE_STATIC_METHOD(0x2E363D51549781C8LL, appenditerator);
+      break;
     case 73:
       HASH_INVOKE_STATIC_METHOD(0x5AA2EE582E0D3849LL, unexpectedvalueexception);
       break;
@@ -20235,6 +20252,9 @@ Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef 
       break;
     case 78:
       HASH_INVOKE_STATIC_METHOD(0x308D1D59986A3D4ELL, soapheader);
+      break;
+    case 79:
+      HASH_INVOKE_STATIC_METHOD(0x5BA243B9FBA7A64FLL, splobjectstorage);
       break;
     case 82:
       HASH_INVOKE_STATIC_METHOD(0x52E5CC58B841AED2LL, sqlite3stmt);
@@ -20400,6 +20420,9 @@ Variant get_builtin_static_property(const char *s, const char *prop) {
       HASH_GET_STATIC_PROPERTY(0x196F76C9C527B946LL, domnamednodemap);
       HASH_GET_STATIC_PROPERTY(0x66282FC8E4EF4E46LL, badfunctioncallexception);
       break;
+    case 72:
+      HASH_GET_STATIC_PROPERTY(0x2E363D51549781C8LL, appenditerator);
+      break;
     case 73:
       HASH_GET_STATIC_PROPERTY(0x5AA2EE582E0D3849LL, unexpectedvalueexception);
       break;
@@ -20412,6 +20435,9 @@ Variant get_builtin_static_property(const char *s, const char *prop) {
       break;
     case 78:
       HASH_GET_STATIC_PROPERTY(0x308D1D59986A3D4ELL, soapheader);
+      break;
+    case 79:
+      HASH_GET_STATIC_PROPERTY(0x5BA243B9FBA7A64FLL, splobjectstorage);
       break;
     case 82:
       HASH_GET_STATIC_PROPERTY(0x52E5CC58B841AED2LL, sqlite3stmt);
@@ -20572,6 +20598,9 @@ Variant *get_builtin_static_property_lv(const char *s, const char *prop) {
       HASH_GET_STATIC_PROPERTY_LV(0x196F76C9C527B946LL, domnamednodemap);
       HASH_GET_STATIC_PROPERTY_LV(0x66282FC8E4EF4E46LL, badfunctioncallexception);
       break;
+    case 72:
+      HASH_GET_STATIC_PROPERTY_LV(0x2E363D51549781C8LL, appenditerator);
+      break;
     case 73:
       HASH_GET_STATIC_PROPERTY_LV(0x5AA2EE582E0D3849LL, unexpectedvalueexception);
       break;
@@ -20584,6 +20613,9 @@ Variant *get_builtin_static_property_lv(const char *s, const char *prop) {
       break;
     case 78:
       HASH_GET_STATIC_PROPERTY_LV(0x308D1D59986A3D4ELL, soapheader);
+      break;
+    case 79:
+      HASH_GET_STATIC_PROPERTY_LV(0x5BA243B9FBA7A64FLL, splobjectstorage);
       break;
     case 82:
       HASH_GET_STATIC_PROPERTY_LV(0x52E5CC58B841AED2LL, sqlite3stmt);
@@ -20744,6 +20776,9 @@ Variant get_builtin_class_constant(const char *s, const char *constant) {
       HASH_GET_CLASS_CONSTANT(0x196F76C9C527B946LL, domnamednodemap);
       HASH_GET_CLASS_CONSTANT(0x66282FC8E4EF4E46LL, badfunctioncallexception);
       break;
+    case 72:
+      HASH_GET_CLASS_CONSTANT(0x2E363D51549781C8LL, appenditerator);
+      break;
     case 73:
       HASH_GET_CLASS_CONSTANT(0x5AA2EE582E0D3849LL, unexpectedvalueexception);
       break;
@@ -20756,6 +20791,9 @@ Variant get_builtin_class_constant(const char *s, const char *constant) {
       break;
     case 78:
       HASH_GET_CLASS_CONSTANT(0x308D1D59986A3D4ELL, soapheader);
+      break;
+    case 79:
+      HASH_GET_CLASS_CONSTANT(0x5BA243B9FBA7A64FLL, splobjectstorage);
       break;
     case 82:
       HASH_GET_CLASS_CONSTANT(0x52E5CC58B841AED2LL, sqlite3stmt);

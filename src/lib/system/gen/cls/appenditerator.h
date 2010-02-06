@@ -14,20 +14,39 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_ITERATORAGGREGATE_H__
-#define __GENERATED_CLS_ITERATORAGGREGATE_H__
+#ifndef __GENERATED_CLS_APPENDITERATOR_H__
+#define __GENERATED_CLS_APPENDITERATOR_H__
 
-#include <cls/traversable.h>
+#include <cls/outeriterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 137 */
-class c_iteratoraggregate : virtual public c_traversable {
-  // public: void t_getiterator() = 0;
+/* SRC: classes/iterator.php line 145 */
+class c_appenditerator : virtual public c_outeriterator {
+  BEGIN_CLASS_MAP(appenditerator)
+    PARENT_CLASS(outeriterator)
+  END_CLASS_MAP(appenditerator)
+  DECLARE_CLASS(appenditerator, AppendIterator, ObjectData)
+  DECLARE_INVOKES_FROM_EVAL
+  void init();
+  public: p_arrayiterator m_iterators;
+  Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
+  public: void t___construct();
+  public: ObjectData *create();
+  public: ObjectData *dynCreate(CArrRef params, bool init = true);
+  public: void dynConstruct(CArrRef params);
+  public: void t_append(p_iterator v_it);
+  public: Variant t_getinneriterator();
+  public: void t_rewind();
+  public: bool t_valid();
+  public: Variant t_current();
+  public: Variant t_key();
+  public: void t_next();
+  public: Variant t___call(Variant v_func, Variant v_params);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_ITERATORAGGREGATE_H__
+#endif // __GENERATED_CLS_APPENDITERATOR_H__

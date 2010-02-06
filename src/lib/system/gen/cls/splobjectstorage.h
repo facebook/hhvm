@@ -14,20 +14,39 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_ITERATORAGGREGATE_H__
-#define __GENERATED_CLS_ITERATORAGGREGATE_H__
+#ifndef __GENERATED_CLS_SPLOBJECTSTORAGE_H__
+#define __GENERATED_CLS_SPLOBJECTSTORAGE_H__
 
-#include <cls/traversable.h>
+#include <cls/iterator.h>
+#include <cls/countable.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 137 */
-class c_iteratoraggregate : virtual public c_traversable {
-  // public: void t_getiterator() = 0;
+/* SRC: classes/splobjectstorage.php line 3 */
+class c_splobjectstorage : virtual public c_iterator, virtual public c_countable {
+  BEGIN_CLASS_MAP(splobjectstorage)
+    PARENT_CLASS(traversable)
+    PARENT_CLASS(iterator)
+    PARENT_CLASS(countable)
+  END_CLASS_MAP(splobjectstorage)
+  DECLARE_CLASS(splobjectstorage, SplObjectStorage, ObjectData)
+  DECLARE_INVOKES_FROM_EVAL
+  void init();
+  public: Variant m_storage;
+  public: int64 m_index;
+  public: void t_rewind();
+  public: bool t_valid();
+  public: int64 t_key();
+  public: Variant t_current();
+  public: void t_next();
+  public: int t_count();
+  public: bool t_contains(CVarRef v_obj);
+  public: void t_attach(CVarRef v_obj);
+  public: void t_detach(CVarRef v_obj);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_ITERATORAGGREGATE_H__
+#endif // __GENERATED_CLS_SPLOBJECTSTORAGE_H__

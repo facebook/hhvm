@@ -346,12 +346,8 @@ bool TestExtVariable::test_unserialize() {
 }
 
 bool TestExtVariable::test_get_defined_vars() {
-  try {
-    f_get_defined_vars();
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  f_get_defined_vars();
+  return Count(true);
 }
 
 bool TestExtVariable::test_import_request_variables() {

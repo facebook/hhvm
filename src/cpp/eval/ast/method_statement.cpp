@@ -53,10 +53,11 @@ Variant MethodStatement::invokeInstance(CObjRef obj,
   // The debug frame should have been pushed at ObjectMethodExpression
   MethScopeVariableEnvironment env(this, params.size());
   env.setCurrentObject(obj);
+  DECLARE_THREAD_INFO
   RECURSION_INJECTION
   REQUEST_TIMEOUT_INJECTION
 #ifdef HOTPROFILER
-  ProfilerInjection pi(m_fullName.c_str());
+  ProfilerInjection pi(info, m_fullName.c_str());
 #endif
   EvalFrameInjection fi(m_class->name().c_str(), m_fullName.c_str(), env,
                         loc()->file, obj.get());
@@ -73,10 +74,11 @@ invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
   MethScopeVariableEnvironment fenv(this, 0);
   directBind(env, caller, fenv);
   fenv.setCurrentObject(obj);
+  DECLARE_THREAD_INFO
   RECURSION_INJECTION
   REQUEST_TIMEOUT_INJECTION
 #ifdef HOTPROFILER
-  ProfilerInjection pi(m_fullName.c_str());
+  ProfilerInjection pi(info, m_fullName.c_str());
 #endif
   EvalFrameInjection fi(m_class->name().c_str(), m_fullName.c_str(), fenv,
                         loc()->file, obj.get());
@@ -90,10 +92,11 @@ Variant MethodStatement::invokeStatic(const char* cls, CArrRef params) const {
   MethScopeVariableEnvironment env(this, params.size());
   // Debug frame pushad at StaticMethodExpression
   env.setCurrentClass(cls);
+  DECLARE_THREAD_INFO
   RECURSION_INJECTION
   REQUEST_TIMEOUT_INJECTION
 #ifdef HOTPROFILER
-  ProfilerInjection pi(m_fullName.c_str());
+  ProfilerInjection pi(info, m_fullName.c_str());
 #endif
   EvalFrameInjection fi(m_class->name().c_str(), m_fullName.c_str(), env,
                         loc()->file);
@@ -111,10 +114,11 @@ invokeStaticDirect(const char* cls, VariableEnvironment &env,
   MethScopeVariableEnvironment fenv(this, 0);
   directBind(env, caller, fenv);
   fenv.setCurrentClass(cls);
+  DECLARE_THREAD_INFO
   RECURSION_INJECTION
   REQUEST_TIMEOUT_INJECTION
 #ifdef HOTPROFILER
-  ProfilerInjection pi(m_fullName.c_str());
+  ProfilerInjection pi(info, m_fullName.c_str());
 #endif
   EvalFrameInjection fi(m_class->name().c_str(), m_fullName.c_str(), fenv,
                         loc()->file);

@@ -884,7 +884,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
   if (!system) {
     cg.printf("\n");
     cg.printf("void init_static_variables() { ScalarArrays::initialize();}\n");
-    cg.printf("static ThreadLocalStatic<GlobalVariables> g_variables;\n");
+    cg.printf("static ThreadLocalSingleton<GlobalVariables> g_variables;\n");
 
     cg.printf("static IMPLEMENT_THREAD_LOCAL"
               "(GlobalArrayWrapper, g_array_wrapper);\n");

@@ -19,6 +19,7 @@
 
 #include <util/base.h>
 #include <util/thread_local.h>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -152,50 +153,71 @@ typedef const Variant & CVarRef;
 ///////////////////////////////////////////////////////////////////////////////
 // code injection classes
 
-extern void throw_infinite_recursion_exception();
-class RecursionInjection {
-public:
-  // This integer is reset during every hphp_session_init()
-  static DECLARE_THREAD_LOCAL(int, s_stackdepth);
-
-  RecursionInjection() {
-    if (++*s_stackdepth > 1000) throw_infinite_recursion_exception();
-  }
-  ~RecursionInjection() {
-    --*s_stackdepth;
-  }
-};
-
-extern void throw_request_timeout_exception();
-extern bool f_pcntl_signal_dispatch();
-
-// implemented in cpp/base/timeout_thread
 class RequestInjectionData {
 public:
   RequestInjectionData() : started(0), timedout(false), signaled(false) {}
 
   time_t started; // when a request was started
   bool timedout;  // flag to set when timeout is detected
-
   bool signaled;  // flag to set when a signal was raised
 };
 
+class FrameInjection;
+class ObjectAllocatorBase;
+class Profiler;
+
+// implemented in cpp/base/thread_info
+class ThreadInfo {
+public:
+  static DECLARE_THREAD_LOCAL(ThreadInfo, s_threadInfo);
+
+  std::vector<ObjectAllocatorBase *> m_allocators;
+  FrameInjection *m_top;
+  RequestInjectionData m_reqInjectionData;
+
+  // This integer is reset during every hphp_session_init()
+  int m_stackdepth;
+
+  // This pointer is set by ProfilerFactory
+  Profiler *m_profiler;
+
+  ThreadInfo();
+};
+
+extern void throw_infinite_recursion_exception();
+class RecursionInjection {
+public:
+  RecursionInjection(ThreadInfo *info) : m_info(info) {
+    if (++m_info->m_stackdepth > 1000) throw_infinite_recursion_exception();
+  }
+  ~RecursionInjection() {
+    --m_info->m_stackdepth;
+  }
+
+private:
+  ThreadInfo *m_info;
+};
+
+// implemented in cpp/base/timeout_thread
+extern void throw_request_timeout_exception();
+extern bool f_pcntl_signal_dispatch();
+
 class RequestInjection {
 public:
-  static DECLARE_THREAD_LOCAL(RequestInjectionData, s_reqInjectionData);
-
-  RequestInjection() {
-    RequestInjectionData *p = s_reqInjectionData.get();
-    if (p->timedout) throw_request_timeout_exception();
-    if (p->signaled) f_pcntl_signal_dispatch();
+  RequestInjection(ThreadInfo *info) {
+    RequestInjectionData &p = info->m_reqInjectionData;
+    if (p.timedout) throw_request_timeout_exception();
+    if (p.signaled) f_pcntl_signal_dispatch();
   }
 };
 
 // implemented in cpp/ext/ext_hotprofiler.cpp
 class ProfilerInjection {
 public:
-  ProfilerInjection(const char *symbol);
+  ProfilerInjection(ThreadInfo *info, const char *symbol);
   ~ProfilerInjection();
+private:
+  ThreadInfo *m_info;
 };
 
 // definitions for various numeric limits

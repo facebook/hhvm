@@ -23,9 +23,6 @@ namespace HPHP {
 // statics
 
 // class defined in cpp/base/types.h
-IMPLEMENT_THREAD_LOCAL(RequestInjectionData,
-                       RequestInjection::s_reqInjectionData);
-
 static void on_timer(int fd, short events, void *context) {
   ((TimeoutThread*)context)->onTimer(fd);
 }
@@ -38,7 +35,7 @@ static void on_thread_stop(int fd, short events, void *context) {
 
 void TimeoutThread::DeferTimeout(int seconds) {
   // cheating by resetting started to desired timestamp
-  RequestInjection::s_reqInjectionData->started = time(0)
+  ThreadInfo::s_threadInfo->m_reqInjectionData.started = time(0)
     + (seconds - RuntimeOption::RequestTimeoutSeconds);
 }
 

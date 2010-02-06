@@ -593,13 +593,12 @@ void hphp_process_init() {
   XboxServer::Restart();
 }
 
-IMPLEMENT_THREAD_LOCAL(int, RecursionInjection::s_stackdepth);
-
 void hphp_session_init() {
-  RequestInjection::s_reqInjectionData->started = time(0);
-  RequestInjection::s_reqInjectionData->timedout = false;
-  *RecursionInjection::s_stackdepth = 0;
-  *FrameInjection::s_top = NULL;
+  ThreadInfo *info = ThreadInfo::s_threadInfo.get();
+  info->m_reqInjectionData.started = time(0);
+  info->m_reqInjectionData.timedout = false;
+  info->m_stackdepth = 0;
+  info->m_top = NULL;
 
   MemoryManager::TheMemoryManager()->resetStats();
 

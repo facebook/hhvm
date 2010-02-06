@@ -76,7 +76,6 @@ GCC_VERSION = $(shell echo `gcc --version | head -1 | cut -d ' ' -f3`)
 INFINITE_LOOP_DETECTION = 1
 INFINITE_RECURSION_DETECTION = 1
 REQUEST_TIMEOUT_DETECTION = 1
-STACK_FRAME_INJECTION = 1
 
 #MYSQL_MILLISECOND_TIMEOUT = 1;
 
@@ -102,7 +101,7 @@ RELEASE = 1
 endif
 
 # For hotprofiler instrumentation
-#HOTPROFILER = 1
+HOTPROFILER = 1
 
 ifndef USE_JEMALLOC
 # For google profilers

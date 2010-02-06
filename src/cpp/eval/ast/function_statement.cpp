@@ -184,10 +184,11 @@ void FunctionStatement::eval(VariableEnvironment &env) const {
 
 Variant FunctionStatement::invoke(CArrRef params) const {
   FuncScopeVariableEnvironment env(this, params.size());
+  DECLARE_THREAD_INFO
   RECURSION_INJECTION
   REQUEST_TIMEOUT_INJECTION
 #ifdef HOTPROFILER
-  ProfilerInjection pi(m_name.c_str());
+  ProfilerInjection pi(info, m_name.c_str());
 #endif
   EvalFrameInjection fi("", m_name.c_str(), env, loc()->file);
   if (m_ref) {
@@ -257,10 +258,11 @@ Variant FunctionStatement::directInvoke(VariableEnvironment &env,
   const {
   FuncScopeVariableEnvironment fenv(this, 0);
   directBind(env, caller, fenv);
+  DECLARE_THREAD_INFO
   RECURSION_INJECTION
   REQUEST_TIMEOUT_INJECTION
 #ifdef HOTPROFILER
-  ProfilerInjection pi(m_name.c_str());
+  ProfilerInjection pi(info, m_name.c_str());
 #endif
   EvalFrameInjection fi("", m_name.c_str(), fenv, loc()->file);
   if (m_ref) {

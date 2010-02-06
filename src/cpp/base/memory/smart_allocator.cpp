@@ -523,5 +523,16 @@ void ObjectAllocatorBase::dump(void *p) {
   printf("%p", p);
 }
 
+int ObjectAllocatorWrapper::getAllocatorSeqno(int size) {
+  int r = 0;
+  int s = sizeof(ObjectData);
+  while (s < size) {
+    r++;
+    s += (s >> 1);
+    s = ALIGN_WORD(s);
+  }
+  return r;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

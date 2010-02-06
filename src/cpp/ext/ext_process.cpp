@@ -196,12 +196,12 @@ static RequestLocal<SignalHandlers> s_signal_handlers;
 static void pcntl_signal_handler(int signo) {
   if (signo > 0 && signo < _NSIG) {
     s_signal_handlers->signaled[signo] = 1;
-    RequestInjection::s_reqInjectionData->signaled = true;
+    ThreadInfo::s_threadInfo->m_reqInjectionData.signaled = true;
   }
 }
 
 bool f_pcntl_signal_dispatch() {
-  RequestInjection::s_reqInjectionData->signaled = false;
+  ThreadInfo::s_threadInfo->m_reqInjectionData.signaled = false;
   int *signaled = s_signal_handlers->signaled;
   bool error = false;
   for (int i = 0; i < _NSIG; i++) {

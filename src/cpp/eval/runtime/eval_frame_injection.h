@@ -30,8 +30,8 @@ public:
   EvalFrameInjection(const char *cls, const char *name,
                      VariableEnvironment &env, const char *file,
                      ObjectData *obj = NULL)
-    : FrameInjection(cls, name, obj), m_env(env), m_file(file) {
-  }
+    : FrameInjection(ThreadInfo::s_threadInfo.get(), cls, name, obj),
+      m_env(env), m_file(file) { }
 
   virtual String getFileName();
   virtual Array getArgs();

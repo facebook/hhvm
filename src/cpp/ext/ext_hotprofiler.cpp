@@ -738,6 +738,8 @@ public:
         throw InvalidArgumentException("level", level);
       }
       m_profiler->beginFrame("main()");
+
+      ThreadInfo::s_threadInfo->m_profiler = m_profiler;
     }
   }
 
@@ -749,6 +751,8 @@ public:
       m_profiler->writeStats(ret);
       delete m_profiler;
       m_profiler = NULL;
+      ThreadInfo::s_threadInfo->m_profiler = NULL;
+
       return ret;
     }
     return null;
@@ -831,15 +835,16 @@ Variant f_xhprof_sample_disable() {
 ///////////////////////////////////////////////////////////////////////////////
 // injected code
 
-ProfilerInjection::ProfilerInjection(const char *symbol) {
-  Profiler *profiler = s_factory->getProfiler();
+ProfilerInjection::ProfilerInjection(ThreadInfo *info, const char *symbol)
+  : m_info(info) {
+  Profiler *profiler = m_info->m_profiler;
   if (profiler) {
     profiler->beginFrame(symbol);
   }
 }
 
 ProfilerInjection::~ProfilerInjection() {
-  Profiler *profiler = s_factory->getProfiler();
+  Profiler *profiler = m_info->m_profiler;
   if (profiler) {
     profiler->endFrame();
   }

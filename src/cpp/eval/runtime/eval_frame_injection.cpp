@@ -31,12 +31,10 @@ Array EvalFrameInjection::getArgs() {
 }
 
 void EvalFrameInjection::SetLine(const Construct *c) {
-  (*s_top)->line = c->loc()->line1;
+  ThreadInfo::s_threadInfo->m_top->line = c->loc()->line1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
-
-
 

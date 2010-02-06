@@ -166,7 +166,7 @@ void throw_infinite_recursion_exception() {
 }
 void throw_request_timeout_exception() {
   if (RuntimeOption::RequestTimeoutSeconds > 0) {
-    RequestInjectionData &data = *RequestInjection::s_reqInjectionData;
+    RequestInjectionData &data = ThreadInfo::s_threadInfo->m_reqInjectionData;
     ASSERT(data.timedout);
     data.timedout = false; // avoid going through here twice in a row
 

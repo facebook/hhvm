@@ -145,10 +145,9 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
   if (!m_name.empty() && !m_redeclared && m_validClass) {
     bool tooManyArgs =
       (m_params && m_params->outputCPPTooManyArgsPre(cg, ar, m_name));
-    cg.printf("%s%s(%s%s(NEW(%s%s)())->create(",
+    cg.printf("%s%s(%s%s(NEWOBJ(%s%s)())->create(",
               Option::SmartPtrPrefix, m_name.c_str(),
               Option::SmartPtrPrefix, m_name.c_str(),
-              Option::ClassPrefix, m_name.c_str(),
               Option::ClassPrefix, m_name.c_str());
     FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
                                       m_variableArgument);

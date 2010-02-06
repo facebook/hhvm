@@ -248,7 +248,7 @@ void LibEventServer::stop() {
 
 void LibEventServer::onThreadEnter() {
   m_timeoutThreadData.registerRequestThread
-    (RequestInjection::s_reqInjectionData.get());
+    (&ThreadInfo::s_threadInfo->m_reqInjectionData);
 }
 
 void LibEventServer::onRequest(struct evhttp_request *request) {

@@ -25,17 +25,16 @@ namespace HPHP {
 
 class FrameInjection {
 public:
-  FrameInjection(const char *cls, const char *name, ObjectData *obj = NULL)
-               : line(0), m_class(cls), m_name(name), m_object(obj) {
-    m_topPtr = s_top.get();
-    m_prev = *m_topPtr;
-    *m_topPtr = this;
+  FrameInjection(ThreadInfo *info,
+                 const char *cls, const char *name, ObjectData *obj = NULL)
+               : line(0), m_info(info),
+                 m_class(cls), m_name(name), m_object(obj) {
+    m_prev = m_info->m_top;
+    m_info->m_top = this;
   }
   virtual ~FrameInjection() {
-    *m_topPtr = m_prev;
+    m_info->m_top = m_prev;
   }
-
-  static DECLARE_THREAD_LOCAL(FrameInjection *, s_top);
 
   static String getClassName(bool skip = false);
   static String getParentClassName(bool skip = false);
@@ -49,7 +48,7 @@ public:
   virtual Array getArgs();
 
 private:
-  FrameInjection **m_topPtr;
+  ThreadInfo *m_info;
   FrameInjection *m_prev;
   const char *m_class;
   const char *m_name;

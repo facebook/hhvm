@@ -249,6 +249,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // code instrumentation or injections
 
+#define DECLARE_THREAD_INFO \
+  ThreadInfo *info = ThreadInfo::s_threadInfo.get();
+
 #ifdef INFINITE_LOOP_DETECTION
 #define LOOP_COUNTER(n) int lc##n = 0;
 #define LOOP_COUNTER_CHECK(n) \
@@ -259,21 +262,21 @@ namespace HPHP {
 #endif
 
 #ifdef INFINITE_RECURSION_DETECTION
-#define RECURSION_INJECTION RecursionInjection ri;
+#define RECURSION_INJECTION RecursionInjection ri(info);
 #else
 #define RECURSION_INJECTION
 #endif
 
 #ifdef REQUEST_TIMEOUT_DETECTION
-#define REQUEST_TIMEOUT_INJECTION RequestInjection ti;
+#define REQUEST_TIMEOUT_INJECTION RequestInjection ti(info);
 #else
 #define REQUEST_TIMEOUT_INJECTION
 #endif
 
 #ifdef HOTPROFILER
-#define HOTPROFILER_INJECTION(n) ProfilerInjection pi(#n);
+#define HOTPROFILER_INJECTION(n) ProfilerInjection pi(info, #n);
 #ifndef HOTPROFILER_NO_BUILTIN
-#define HOTPROFILER_INJECTION_BUILTIN(n) ProfilerInjection pi(#n);
+#define HOTPROFILER_INJECTION_BUILTIN(n) ProfilerInjection pi(info, #n);
 #else
 #define HOTPROFILER_INJECTION_BUILTIN(n)
 #endif
@@ -282,30 +285,28 @@ namespace HPHP {
 #define HOTPROFILER_INJECTION_BUILTIN(n)
 #endif
 
-#ifdef STACK_FRAME_INJECTION
-#define FRAME_INJECTION(c, n) FrameInjection fi(#c, #n);
-#define FRAME_INJECTION_WITH_THIS(c, n) FrameInjection fi(#c, #n, this);
+// Stack frame injection is also for correctness, and cannot be disabled.
+#define FRAME_INJECTION(c, n) FrameInjection fi(info, #c, #n);
+#define FRAME_INJECTION_WITH_THIS(c, n) FrameInjection fi(info, #c, #n, this);
 #define LINE(n, e) (set_ln(fi.line, n), e)
-#else
-#define FRAME_INJECTION(c, n)
-#define FRAME_INJECTION_WITH_THIS(c, n)
-#define LINE(n, e) e
-#endif
 
 // code injected into beginning of every function/method
 #define FUNCTION_INJECTION(n)                   \
+  DECLARE_THREAD_INFO                           \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION(n)                      \
   FRAME_INJECTION(, n)                          \
 
 #define STATIC_METHOD_INJECTION(c, n)           \
+  DECLARE_THREAD_INFO                           \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION(n)                      \
   FRAME_INJECTION(c, n)                         \
 
 #define INSTANCE_METHOD_INJECTION(c, n)         \
+  DECLARE_THREAD_INFO                           \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION(n)                      \
@@ -313,18 +314,21 @@ namespace HPHP {
 
 // code injected into every builtin function/method
 #define FUNCTION_INJECTION_BUILTIN(n)           \
+  DECLARE_THREAD_INFO                           \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION_BUILTIN(n)              \
   FRAME_INJECTION(, n)                          \
 
 #define STATIC_METHOD_INJECTION_BUILTIN(c, n)   \
+  DECLARE_THREAD_INFO                           \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION_BUILTIN(n)              \
   FRAME_INJECTION(c, n)                         \
 
 #define INSTANCE_METHOD_INJECTION_BUILTIN(c, n) \
+  DECLARE_THREAD_INFO                           \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION_BUILTIN(n)              \

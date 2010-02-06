@@ -44,10 +44,11 @@ PhpFile::~PhpFile() {
 
 Variant PhpFile::eval(LVariableTable *vars) {
   NestedVariableEnvironment env(vars, *this);
+  DECLARE_THREAD_INFO
   RECURSION_INJECTION
   REQUEST_TIMEOUT_INJECTION
 #ifdef HOTPROFILER
-  ProfilerInjection pi(m_profName.c_str());
+  ProfilerInjection pi(info, m_profName.c_str());
 #endif
   EvalFrameInjection fi("", m_profName.c_str(), env,
                         m_tree->loc()->file);

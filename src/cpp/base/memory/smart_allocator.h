@@ -21,6 +21,7 @@
 #include <util/thread_local.h>
 #include <util/stack_trace.h>
 #include <cpp/base/memory/linear_allocator.h>
+#include <map>
 
 namespace HPHP {
 
@@ -46,11 +47,13 @@ namespace HPHP {
 
 #ifdef DEBUGGING_SMART_ALLOCATOR
 #define NEW(T) new T
+#define NEWOBJ(T) new T
 #define DELETE(T) delete
 #define DELETE_EX_CLS(NS,T) delete this
 #define DELETE_OBJECT(T) delete this
 #else
 #define NEW(T) new (T::Allocator.get()) T
+#define NEWOBJ(T) new (info->m_allocators[T::AllocatorSeqno]) T
 #define DELETE(T) T::Allocator->release
 #define DELETE_EX_CLS(NS,T) this->~T(); NS::T::Allocator->release(this)
 #define DELETE_OBJECT(T) this->~T()
@@ -311,20 +314,24 @@ class SmartAllocator : public SmartAllocatorImpl {
 
 #define DECLARE_OBJECT_ALLOCATION(T)                                    \
   public:                                                               \
+  static int AllocatorSeqno;                                            \
   static ObjectAllocatorWrapper Allocator;                              \
   virtual void release();                                               \
   virtual void sweep();
 
-#define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T)           \
-  static ThreadLocalStatic<ObjectAllocator<ItemSize<sizeof(T)>::value> > \
-    g_ ## T ## _allocator;                                               \
-  static ObjectAllocatorBase *get_ ## T ## _allocator() {                \
-    return g_ ## T ## _allocator.get();                                  \
-  }                                                                      \
-  ObjectAllocatorWrapper NS::T::Allocator(get_ ## T ## _allocator);      \
-  void NS::T::release() {                                                \
-    destruct();                                                          \
-    DELETE_EX_CLS(NS, T);                                                \
+#define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T)              \
+  static ThreadLocalSingleton<ObjectAllocator<ItemSize<sizeof(T)>::value> > \
+    g_ ## T ## _allocator;                                                  \
+  static ObjectAllocatorBase *get_ ## T ## _allocator() {                   \
+    return g_ ## T ## _allocator.get();                                     \
+  }                                                                         \
+  int NS::T::AllocatorSeqno =                                               \
+    ObjectAllocatorWrapper::getAllocatorSeqno(sizeof(T));                   \
+  ObjectAllocatorWrapper NS::T::Allocator(NS::T::AllocatorSeqno,            \
+                                          get_ ## T ## _allocator);         \
+  void NS::T::release() {                                                   \
+    destruct();                                                             \
+    DELETE_EX_CLS(NS, T);                                                   \
   }
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(T)                 \
@@ -368,9 +375,21 @@ public:
   ObjectAllocator() : ObjectAllocatorBase(S) { }
 };
 
+class ObjectAllocatorWrapper;
+class ObjectAllocatorCollector {
+public:
+  static std::map<int, ObjectAllocatorWrapper *> &getWrappers() {
+    static std::map<int, ObjectAllocatorWrapper *> wrappers;
+    return wrappers;
+  }
+};
+
 class ObjectAllocatorWrapper {
 public:
-  ObjectAllocatorWrapper(ObjectAllocatorBase *(*get)(void)) : m_get(get) { }
+  ObjectAllocatorWrapper(int seqno, ObjectAllocatorBase *(*get)(void))
+  : m_get(get) {
+    ObjectAllocatorCollector::getWrappers()[seqno] = this;
+  }
 
   ObjectAllocatorBase *operator->() const {
     return m_get();
@@ -379,6 +398,8 @@ public:
   ObjectAllocatorBase *get() const {
     return m_get();
   }
+
+  static int getAllocatorSeqno(int size);
 
 private:
   ObjectAllocatorBase *(*m_get)(void);

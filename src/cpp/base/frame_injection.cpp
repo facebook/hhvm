@@ -21,10 +21,9 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-IMPLEMENT_THREAD_LOCAL(FrameInjection *, FrameInjection::s_top);
 
 String FrameInjection::getClassName(bool skip /* = false */) {
-  FrameInjection *t = *s_top;
+  FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {
     t = t->m_prev;
   }
@@ -48,7 +47,7 @@ String FrameInjection::getParentClassName(bool skip /* = false */) {
 }
 
 ObjectData *FrameInjection::getThis(bool skip /* = false */) {
-  FrameInjection *t = *s_top;
+  FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {
     t = t->m_prev;
   }
@@ -61,7 +60,7 @@ ObjectData *FrameInjection::getThis(bool skip /* = false */) {
 Array FrameInjection::getBacktrace(bool skip /* = false */,
                                    bool withSelf /* = false */) {
   Array bt = Array::Create();
-  FrameInjection *t = *s_top;
+  FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (skip && t) {
     t = t->m_prev;
   }

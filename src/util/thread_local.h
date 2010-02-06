@@ -194,7 +194,6 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
 // Only gcc >= 4.3.0 will work
 #if defined(USE_TLS) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 3))
 
@@ -272,8 +271,11 @@ private:
   T *&(*m_get)(void);
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// Singleton thread-local storage for T
+
 template<typename T>
-class ThreadLocalStatic {
+class ThreadLocalSingleton {
 public:
   T *get() const {
     T *&p = get_loc();
@@ -327,10 +329,13 @@ private:
 
 #else /* USE_TLS */
 
+///////////////////////////////////////////////////////////////////////////////
+// Singleton thread-local storage for T
+
 template<typename T>
-class ThreadLocalStatic {
+class ThreadLocalSingleton {
 public:
-  ThreadLocalStatic() : key_(0) {
+  ThreadLocalSingleton() : key_(0) {
     key_ = getKey();
   }
 
@@ -378,9 +383,6 @@ private:
 #define IMPLEMENT_THREAD_LOCAL_CREATE(T, f) ThreadLocalCreate<T> f
 
 #endif /* USE_TLS */
-
-///////////////////////////////////////////////////////////////////////////////
-
 
 ///////////////////////////////////////////////////////////////////////////////
 }

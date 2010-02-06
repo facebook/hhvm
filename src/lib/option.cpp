@@ -28,7 +28,7 @@
 #include <lib/expression/scalar_expression.h>
 #include <lib/expression/array_pair_expression.h>
 #include <lib/parser/parser.h>
-#include <lib/parser/hphp.tab.h>
+#include <lib/parser/hphp.tab.hpp>
 #include <lib/expression/expression_list.h>
 #include <util/db_query.h>
 #include <boost/algorithm/string/trim.hpp>

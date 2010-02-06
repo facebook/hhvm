@@ -15,7 +15,7 @@
 */
 
 #include <lib/parser/scanner.h>
-#include <lib/parser/hphp.tab.h>
+#include <lib/parser/hphp.tab.hpp>
 
 using namespace std;
 using namespace HPHP;

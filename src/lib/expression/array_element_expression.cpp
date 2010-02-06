@@ -23,7 +23,7 @@
 #include <lib/option.h>
 #include <lib/expression/static_member_expression.h>
 #include <lib/analysis/function_scope.h>
-#include <lib/parser/hphp.tab.h>
+#include <lib/parser/hphp.tab.hpp>
 
 using namespace HPHP;
 using namespace std;

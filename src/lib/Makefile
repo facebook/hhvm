@@ -5,22 +5,22 @@ PROJECT_NAME = hphp_analysis
 AUTO_SOURCES = 1
 SOURCE_SUBDIRS = expression statement analysis system util
 
-GENERATED_CPP_SOURCES = parser/lex.yy.c parser/hphp.tab.c
-CXX_SOURCES = $(wildcard parser/*.cpp)
+GENERATED_CXX_SOURCES = parser/lex.yy.cpp parser/hphp.tab.cpp
+CXX_SOURCES = $(filter-out $(GENERATED_CXX_SOURCES), $(wildcard parser/*.cpp))
 INTERMEDIATE_FILES = $(wildcard parser/*~) $(wildcard parser/*.d) \
-	parser/hphp.tab.h parser/hphp.tab.c parser/lex.yy.c
+	parser/hphp.tab.hpp parser/hphp.tab.cpp parser/lex.yy.cpp
 
 include $(PROJECT_ROOT)/src/rules.mk
 TARGETS = $(STATIC_LIB)
 all: $(TARGETS)
 
-parser/lex.yy.c: parser/hphp.x parser/hphp.tab.c
+parser/lex.yy.cpp: parser/hphp.x parser/hphp.tab.cpp
 	@echo "Generating scanner code..."
-	@cd parser && flex -w -i hphp.x
+	@cd parser && flex -w -i -olex.yy.cpp hphp.x
 
-parser/hphp.tab.c: parser/hphp.y
+parser/hphp.tab.cpp: parser/hphp.y
 	@echo "Generating parser code..."
-	@cd parser && bison -d hphp.y
+	@cd parser && bison -d -o hphp.tab.cpp hphp.y
 
 parser/ylmm/basic_scanner.hh: \
 	parser/ylmm/basic_buffer.hh \

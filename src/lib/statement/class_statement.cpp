@@ -15,7 +15,7 @@
 */
 
 #include <lib/statement/class_statement.h>
-#include <lib/parser/hphp.tab.h>
+#include <lib/parser/hphp.tab.hpp>
 #include <lib/expression/expression_list.h>
 #include <lib/statement/statement_list.h>
 #include <lib/expression/scalar_expression.h>

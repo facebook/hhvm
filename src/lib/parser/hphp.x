@@ -1,5 +1,5 @@
 %{
-#include <lib/parser/hphp.tab.h>
+#include <lib/parser/hphp.tab.hpp>
 #include <lib/parser/scanner.h>
 #define YLMM_SCANNER_CLASS HPHP::Scanner
 #include <util/ylmm/lexmm.hh>

@@ -15,7 +15,7 @@
 */
 
 #include <lib/expression/binary_op_expression.h>
-#include <lib/parser/hphp.tab.h>
+#include <lib/parser/hphp.tab.hpp>
 #include <lib/expression/scalar_expression.h>
 #include <lib/expression/constant_expression.h>
 #include <cpp/base/type_string.h>

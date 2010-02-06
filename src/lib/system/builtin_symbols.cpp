@@ -29,7 +29,7 @@
 #include <lib/analysis/constant_table.h>
 #include <util/util.h>
 #include <lib/analysis/dependency_graph.h>
-#include <lib/parser/hphp.tab.h>
+#include <lib/parser/hphp.tab.hpp>
 
 using namespace HPHP;
 using namespace std;

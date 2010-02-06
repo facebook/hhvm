@@ -30,7 +30,7 @@
 #include <lib/analysis/class_scope.h>
 #include <util/util.h>
 #include <cpp/base/class_info.h>
-#include <lib/parser/hphp.tab.h>
+#include <lib/parser/hphp.tab.hpp>
 
 using namespace HPHP;
 using namespace std;

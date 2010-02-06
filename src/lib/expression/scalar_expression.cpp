@@ -17,7 +17,7 @@
 #include <sstream>
 #include <limits.h>
 #include <lib/expression/scalar_expression.h>
-#include <lib/parser/hphp.tab.h>
+#include <lib/parser/hphp.tab.hpp>
 #include <util/util.h>
 #include <lib/analysis/dependency_graph.h>
 #include <lib/analysis/code_error.h>

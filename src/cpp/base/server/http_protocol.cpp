@@ -133,8 +133,12 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     }
   }
   String hostName(VirtualHost::GetCurrent()->serverName());
-  if (transport->getHeader("Host").empty()) {
+  string hostHeader(transport->getHeader("Host"));
+  if (hostHeader.empty()) {
     server.set("HTTP_HOST", hostName);
+  }
+  if (hostName.empty() || RuntimeOption::ForceServerNameToHeader) {
+    hostName = hostHeader;
   }
 
   // APE sets CONTENT_TYPE and CONTENT_LENGTH without HTTP_

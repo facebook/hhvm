@@ -78,6 +78,7 @@ bool RuntimeOption::LibEventSyncSend = true;
 bool RuntimeOption::ExpiresActive = true;
 int RuntimeOption::ExpiresDefault = 2592000;
 std::string RuntimeOption::DefaultCharsetName = "UTF-8";
+bool RuntimeOption::ForceServerNameToHeader = false;
 
 VirtualHostPtrVec RuntimeOption::VirtualHosts;
 IpBlockMapPtr RuntimeOption::IpBlocks;
@@ -487,6 +488,8 @@ void RuntimeOption::Load(Hdf &config) {
     LightProcessCount = server["LightProcessCount"].getInt32(0);
 
     InjectedStacktrace = server["InjectedStacktrace"].getBool(false);
+
+    ForceServerNameToHeader = server["ForceServerNameToHeader"].getBool(false);
   }
   {
     Hdf hosts = config["VirtualHost"];

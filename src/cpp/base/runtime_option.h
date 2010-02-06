@@ -78,6 +78,7 @@ public:
   static bool ExpiresActive;
   static int ExpiresDefault;
   static std::string DefaultCharsetName;
+  static bool ForceServerNameToHeader;
   static VirtualHostPtrVec VirtualHosts;
   static IpBlockMapPtr IpBlocks;
   static SatelliteServerInfoPtrVec SatelliteServerInfos;

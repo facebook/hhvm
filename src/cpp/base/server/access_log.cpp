@@ -257,7 +257,14 @@ bool AccessLog::genField(ostringstream &out, const char* &format,
     }
     break;
   case 'v':
-    out << VirtualHost::GetCurrent()->serverName();
+    {
+      const string &sname = VirtualHost::GetCurrent()->serverName();
+      if (sname.empty() || RuntimeOption::ForceServerNameToHeader) {
+        out << transport->getHeader("Host");
+      } else {
+        out << sname;
+      }
+    }
     break;
   default:
     return false;

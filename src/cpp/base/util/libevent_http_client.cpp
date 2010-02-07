@@ -300,9 +300,6 @@ void LibEventHttpClient::onRequestCompleted() {
 
 void LibEventHttpClient::onConnectionClosed() {
   m_conn = NULL;
-  string hash = get_hash(m_address, m_port);
-  ServerStats::Log("evhttp.close", 1);
-  ServerStats::Log("evhttp.close." + hash, 1);
 }
 
 char *LibEventHttpClient::recv(int &len) {

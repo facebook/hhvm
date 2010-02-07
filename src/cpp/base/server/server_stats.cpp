@@ -722,6 +722,7 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
   w->writeFooter("process");
 
   w->writeHeader("threads");
+  Lock lock(s_lock, false);
   for (unsigned int i = 0; i < s_loggers.size(); i++) {
     ThreadStatus &ts = s_loggers[i]->m_threadStatus;
 

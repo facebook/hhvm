@@ -17,6 +17,10 @@
 #include "preprocess.h"
 #include "base.h"
 #include "exception.h"
+
+/* The following code is only used if XHP is available */
+#if defined(HAVE_XHP)
+
 #include <xhp_preprocess.hpp>
 
 using namespace std;
@@ -48,3 +52,30 @@ istream *preprocessXHP(istream &input, iostream &output,
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+/* This code is for the case that XHP isn't available */
+#else
+
+using namespace std;
+
+namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+istream *preprocessXHP(istream &input, iostream &output,
+                       const std::string &fullPath) {
+  istream *is = &input;
+  string code, error;
+  uint32_t errline;
+
+  is = &input;
+  is->clear();
+  is->seekg(0, ios::beg);
+  return is;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+}
+
+#endif
+

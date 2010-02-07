@@ -36,6 +36,8 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
   m_threadCount = hdf["ThreadCount"].getInt32(5);
   m_maxRequest = hdf["MaxRequest"].getInt32(500);
   m_maxDuration = hdf["MaxDuration"].getInt32(120);
+  m_timeoutSeconds =
+    hdf["TimeoutSeconds"].getInt32(RuntimeOption::RequestTimeoutSeconds);
   m_warmupDoc = hdf["WarmupDocument"].getString("");
   m_reqInitFunc = hdf["RequestInitFunction"].getString("");
   m_password = hdf["Password"].getString("");
@@ -69,8 +71,9 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
 DECLARE_BOOST_TYPES(InternalPageServerImpl);
 class InternalPageServerImpl : public LibEventServer {
 public:
-  InternalPageServerImpl(const std::string &address, int port, int thread) :
-    LibEventServer(address, port, thread) {
+  InternalPageServerImpl(const std::string &address, int port, int thread,
+                         int timeoutSeconds) :
+    LibEventServer(address, port, thread, timeoutSeconds) {
   }
   void create(const std::set<std::string> &urls) {
     m_allowedURLs = urls;
@@ -98,7 +101,8 @@ public:
   InternalPageServer(SatelliteServerInfoPtr info) {
     InternalPageServerImplPtr server
       (new TypedServer<InternalPageServerImpl, HttpRequestHandler>
-       (RuntimeOption::ServerIP, info->getPort(), info->getThreadCount()));
+       (RuntimeOption::ServerIP, info->getPort(), info->getThreadCount(),
+        info->getTimeoutSeconds()));
     server->create(info->getURLs());
     m_server = server;
   }
@@ -122,7 +126,8 @@ public:
   DanglingPageServer(SatelliteServerInfoPtr info) {
     m_server = ServerPtr
       (new TypedServer<LibEventServer, HttpRequestHandler>
-       (RuntimeOption::ServerIP, info->getPort(), info->getThreadCount()));
+       (RuntimeOption::ServerIP, info->getPort(), info->getThreadCount(),
+        info->getTimeoutSeconds()));
   }
 
   virtual void start() {
@@ -144,7 +149,8 @@ static ThreadLocal<RPCRequestHandler> s_rpc_request_handler;
 class RPCServerImpl : public LibEventServer {
 public:
   RPCServerImpl(const std::string &address, SatelliteServerInfoPtr info)
-    : LibEventServer(address, info->getPort(), info->getThreadCount()),
+    : LibEventServer(address, info->getPort(), info->getThreadCount(),
+                     info->getTimeoutSeconds()),
       m_serverInfo(info) {
   }
 

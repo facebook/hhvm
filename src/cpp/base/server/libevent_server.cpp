@@ -133,10 +133,10 @@ void LibEventWorker::onThreadExit() {
 // constructor and destructor
 
 LibEventServer::LibEventServer(const std::string &address, int port,
-                               int thread)
+                               int thread, int timeoutSeconds)
   : Server(address, port, thread),
     m_accept_sock(-1),
-    m_timeoutThreadData(thread),
+    m_timeoutThreadData(thread, timeoutSeconds),
     m_timeoutThread(&m_timeoutThreadData, &TimeoutThread::run),
     m_dispatcher(thread, this),
     m_dispatcherThread(this, &LibEventServer::dispatch) {

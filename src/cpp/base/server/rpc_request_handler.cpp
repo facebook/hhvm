@@ -86,6 +86,9 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
                                            SourceRootInfo &sourceRootInfo) {
   ExecutionContext *context = hphp_context_init();
 
+  // reset timeout counter
+  ThreadInfo::s_threadInfo->m_reqInjectionData.started = time(0);
+
   std::string rpcFunc = transport->getCommand();
   {
     ServerStatsHelper ssh("input");

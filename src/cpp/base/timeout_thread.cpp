@@ -35,13 +35,14 @@ static void on_thread_stop(int fd, short events, void *context) {
 
 void TimeoutThread::DeferTimeout(int seconds) {
   // cheating by resetting started to desired timestamp
-  ThreadInfo::s_threadInfo->m_reqInjectionData.started = time(0)
-    + (seconds - RuntimeOption::RequestTimeoutSeconds);
+  RequestInjectionData &data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  data.started = time(0) + (seconds - data.timeoutSeconds);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TimeoutThread::TimeoutThread(int timerCount) : m_index(0), m_stopped(false) {
+TimeoutThread::TimeoutThread(int timerCount, int timeoutSeconds)
+  : m_index(0), m_stopped(false), m_timeoutSeconds(timeoutSeconds) {
   ASSERT(timerCount > 0);
 
   m_eventBase = event_base_new();
@@ -55,6 +56,7 @@ TimeoutThread::~TimeoutThread() {
 
 void TimeoutThread::registerRequestThread(RequestInjectionData* data) {
   ASSERT(data);
+  data->timeoutSeconds = m_timeoutSeconds;
 
   Lock lock(this);
   ASSERT(m_index < (int)m_timeoutData.size());
@@ -73,7 +75,7 @@ void TimeoutThread::run() {
     ASSERT(m_index == (int)m_timeoutData.size());
   }
 
-  if (RuntimeOption::RequestTimeoutSeconds <= 0) {
+  if (m_timeoutSeconds <= 0) {
     return;
   }
 
@@ -82,8 +84,8 @@ void TimeoutThread::run() {
 
   // +2 to make sure when it times out, this equation always holds:
   //   time(0) - RequestInjection::s_reqInjectionData->started >=
-  //     RuntimeOption::RequestTimeoutSeconds
-  timeout.tv_sec = RuntimeOption::RequestTimeoutSeconds + 2;
+  //     m_timeoutSeconds
+  timeout.tv_sec = m_timeoutSeconds + 2;
 
   for (unsigned int i = 0; i < m_eventTimeouts.size(); i++) {
     event *e = &m_eventTimeouts[i];
@@ -126,15 +128,15 @@ void TimeoutThread::onTimer(int index) {
   timeout.tv_usec = 0;
   time_t now = time(0);
   int delta = now - data->started;
-  if (delta >= RuntimeOption::RequestTimeoutSeconds) {
-    timeout.tv_sec = RuntimeOption::RequestTimeoutSeconds + 2;
+  if (delta >= m_timeoutSeconds) {
+    timeout.tv_sec = m_timeoutSeconds + 2;
     data->timedout = true; // finally sure request is timed out
   } else {
     ASSERT(delta >= 0);
     if (delta < 0) delta = 0;
 
     // otherwise, a new request started after we started the timer
-    timeout.tv_sec = RuntimeOption::RequestTimeoutSeconds - delta + 2;
+    timeout.tv_sec = m_timeoutSeconds - delta + 2;
   }
 
   event_set(e, index, 0, on_timer, this);

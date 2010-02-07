@@ -164,9 +164,10 @@ void throw_infinite_loop_exception() {
 void throw_infinite_recursion_exception() {
   throw FatalErrorException("infinite recursion detected");
 }
-void throw_request_timeout_exception() {
-  if (RuntimeOption::RequestTimeoutSeconds > 0) {
-    RequestInjectionData &data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+void throw_request_timeout_exception(ThreadInfo *info) {
+  ASSERT(info);
+  RequestInjectionData &data = info->m_reqInjectionData;
+  if (data.timeoutSeconds > 0) {
     ASSERT(data.timedout);
     data.timedout = false; // avoid going through here twice in a row
 
@@ -174,7 +175,7 @@ void throw_request_timeout_exception() {
     // a TimeoutThread sets flag "true" right after an old request finishes and
     // right before a new requets resets "started". In this case, we flag
     // "timedout" back to "false".
-    if (time(0) - data.started >= RuntimeOption::RequestTimeoutSeconds) {
+    if (time(0) - data.started >= data.timeoutSeconds) {
       throw FatalErrorException("request has timed-out");
     }
   }

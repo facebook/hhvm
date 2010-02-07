@@ -48,7 +48,7 @@ static ServerPtr runServer() {
   for (int port = 8080; port <= 8088; port++) {
     try {
       ServerPtr server(new TypedServer<LibEventServer, TestRequestHandler>
-                       ("127.0.0.1", port, 4));
+                       ("127.0.0.1", port, 4, -1));
       server->start();
       return server;
 

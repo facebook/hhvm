@@ -30,9 +30,8 @@ class TakeoverListener;
  */
 class LibEventServerWithTakeover : public LibEventServer {
 public:
-  LibEventServerWithTakeover(const std::string &address,
-                             int port,
-                             int thread);
+  LibEventServerWithTakeover(const std::string &address, int port, int thread,
+                             int timeoutSeconds);
 
   virtual void stop();
 

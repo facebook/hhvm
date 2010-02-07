@@ -155,11 +155,13 @@ typedef const Variant & CVarRef;
 
 class RequestInjectionData {
 public:
-  RequestInjectionData() : started(0), timedout(false), signaled(false) {}
+  RequestInjectionData()
+    : started(0), timeoutSeconds(-1), timedout(false), signaled(false) {}
 
-  time_t started; // when a request was started
-  bool timedout;  // flag to set when timeout is detected
-  bool signaled;  // flag to set when a signal was raised
+  time_t started;     // when a request was started
+  int timeoutSeconds; // how many seconds to timeout
+  bool timedout;      // flag to set when timeout is detected
+  bool signaled;      // flag to set when a signal was raised
 };
 
 class FrameInjection;
@@ -199,14 +201,14 @@ private:
 };
 
 // implemented in cpp/base/timeout_thread
-extern void throw_request_timeout_exception();
+extern void throw_request_timeout_exception(ThreadInfo *info);
 extern bool f_pcntl_signal_dispatch();
 
 class RequestInjection {
 public:
   RequestInjection(ThreadInfo *info) {
     RequestInjectionData &p = info->m_reqInjectionData;
-    if (p.timedout) throw_request_timeout_exception();
+    if (p.timedout) throw_request_timeout_exception(info);
     if (p.signaled) f_pcntl_signal_dispatch();
   }
 };

@@ -61,12 +61,14 @@ HttpServer::HttpServer()
     m_pageServer = ServerPtr
       (new TypedServer<LibEventServer, HttpRequestHandler>
        (RuntimeOption::ServerIP, RuntimeOption::ServerPort,
-        RuntimeOption::ServerThreadCount));
+        RuntimeOption::ServerThreadCount,
+        RuntimeOption::RequestTimeoutSeconds));
   } else {
     LibEventServerWithTakeover* server =
       (new TypedServer<LibEventServerWithTakeover, HttpRequestHandler>
        (RuntimeOption::ServerIP, RuntimeOption::ServerPort,
-        RuntimeOption::ServerThreadCount));
+        RuntimeOption::ServerThreadCount,
+        RuntimeOption::RequestTimeoutSeconds));
     server->setTransferFilename(RuntimeOption::TakeoverFilename);
     server->addTakeoverListener(this);
     m_pageServer = ServerPtr(server);
@@ -75,7 +77,8 @@ HttpServer::HttpServer()
   m_adminServer = ServerPtr
     (new TypedServer<LibEventServer, AdminRequestHandler>
      (RuntimeOption::ServerIP, RuntimeOption::AdminServerPort,
-      RuntimeOption::AdminThreadCount));
+      RuntimeOption::AdminThreadCount,
+      RuntimeOption::RequestTimeoutSeconds));
 
   for (unsigned int i = 0; i < RuntimeOption::SatelliteServerInfos.size();
        i++) {

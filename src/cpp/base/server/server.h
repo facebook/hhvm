@@ -185,8 +185,9 @@ private:
 template<class TServer, class TRequestHandler>
 class TypedServer : public TServer {
 public:
-  TypedServer(const std::string &address, int port, int threadCount)
-    : TServer(address, port, threadCount) {
+  TypedServer(const std::string &address, int port, int threadCount,
+              int timeoutSeconds)
+    : TServer(address, port, threadCount, timeoutSeconds) {
   }
 
   virtual RequestHandler *createRequestHandler() {

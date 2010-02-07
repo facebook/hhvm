@@ -31,7 +31,7 @@ public:
   static void DeferTimeout(int seconds);
 
 public:
-  TimeoutThread(int timerCount);
+  TimeoutThread(int timerCount, int timeoutSeconds);
   ~TimeoutThread();
 
   void registerRequestThread(RequestInjectionData* data);
@@ -47,6 +47,7 @@ private:
   event_base *m_eventBase;
   std::vector<event> m_eventTimeouts;
   std::vector<RequestInjectionData*> m_timeoutData;
+  int m_timeoutSeconds;
 
   // signal to stop the thread
   event m_eventStop;

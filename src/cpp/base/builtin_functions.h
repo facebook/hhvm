@@ -519,7 +519,7 @@ void throw_bad_type_exception(const char *fmt, ...);
  */
 void throw_infinite_loop_exception();
 void throw_infinite_recursion_exception();
-void throw_request_timeout_exception();
+void throw_request_timeout_exception(ThreadInfo *info);
 
 /**
  * Cloning an object.

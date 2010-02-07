@@ -395,7 +395,7 @@ public:
 
 bool TestServer::TestLibeventServer() {
   ServerPtr server(new TypedServer<LibEventServer, TestRequestHandler>
-                   ("127.0.0.1", 8080, 50));
+                   ("127.0.0.1", 8080, 50, -1));
   server->start();
   server->waitForEnd();
   return Count(true);
@@ -440,7 +440,7 @@ public:
 
 bool TestServer::TestHttpClient() {
   ServerPtr server(new TypedServer<LibEventServer, EchoHandler>
-                   ("127.0.0.1", 8080, 50));
+                   ("127.0.0.1", 8080, 50, -1));
   server->start();
 
   HeaderMap headers;

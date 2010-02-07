@@ -123,7 +123,8 @@ public:
   /**
    * Constructor and destructor.
    */
-  LibEventServer(const std::string &address, int port, int thread);
+  LibEventServer(const std::string &address, int port, int thread,
+                 int timeoutSeconds);
   ~LibEventServer();
 
   // implemting Server

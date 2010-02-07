@@ -131,7 +131,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
      RuntimeOption::StaticFileGenerators.end());
 
   // If this is not a php file, check the static cnd dynamic content caches
-  if (ext == NULL || (strcasecmp(ext, "php") != 0 && strcasecmp(ext, "phpt") != 0)) {
+  if (ext == NULL || strcasecmp(ext, "php") != 0) {
     if (RuntimeOption::EnableStaticContentCache) {
       // check against static content cache
       if (StaticContentCache::TheCache.find(path, data, len, compressed)) {

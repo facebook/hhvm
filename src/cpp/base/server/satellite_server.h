@@ -70,6 +70,9 @@ public:
   int getPort() const { return m_port;}
   int getThreadCount() const { return m_threadCount;}
 
+  // for all libevent servers
+  int getTimeoutSeconds() const { return m_timeoutSeconds;}
+
   // only for InternalPageServer
   const std::set<std::string> &getURLs() const { return m_urls;}
 
@@ -87,6 +90,7 @@ protected:
   int m_threadCount;
   int m_maxRequest;
   int m_maxDuration;
+  int m_timeoutSeconds;
   std::set<std::string> m_urls; // url regex patterns
   std::string m_warmupDoc;
   std::string m_reqInitFunc;

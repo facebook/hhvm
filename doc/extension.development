@@ -19,21 +19,21 @@ idl/base.php.
 
 If it is a new IDL file, run
 
-  make -C idl [new extension name].install
+  EXT=[new extension name] make -C idl install
 
 For example,
 
-  make -C idl my_extension.install
+  EXT=my_extension make -C idl install
 
 This will add several files to different places.
 
 Otherwise, run
 
-  make -C idl [existing extension name].update
+  EXT=[existing extension name] make -C idl update
 
 For example,
 
-  make -C idl string.update
+  EXT=string make -C idl update
 
 This will modify several files with the new function/classes.
 
@@ -41,33 +41,33 @@ This will modify several files with the new function/classes.
 
 Some files are not automatically updated, including
 
-  cpp/ext/ext_<name>.h
-  cpp/ext/ext_<name>.cpp
+  cpp/ext/ext_[name].h
+  cpp/ext/ext_[name].cpp
 
 They are created under idl/ to serve as templates that one can copy portions
 of them manually. These are the two files that you will add implementation to.
 
 5. Unit tests
 
-The "make <name>.update" does the following for test files:
-  creates  test/test_ext_<name>.h -- entry points for this unit test, don't modify
+The "EXT=name make update" does the following for test files:
+  creates  test/test_ext_[name].h -- entry points for this unit test, don't modify
   updates  test/test_ext.inc      -- to invoke the test, don't modify
-  creates  idl/test_ext_<name>.cpp -- A template to be modified.
+  creates  idl/test_ext_[name].cpp -- A template to be modified.
 
 You will have to add new unit tests to
 
-  test/test_ext_<name>.cpp
+  test/test_ext_[name].cpp
 
 into both the list of RUN_TEST() at top portion of the file and a real
 unit test function like this,
 
-  void TestExt<Name>::test_ext_<function> () { ... }
+  void TestExt[Name]::test_ext_[function] () { ... }
 
 6. How to modify existing extension functions/classes
 
 Modify the IDL file. Then run
 
-  make -C idl <existing>.update
+  EXT=existing make -C idl update
 
 Follow all steps after step 3 at above.
 

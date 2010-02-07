@@ -2521,10 +2521,6 @@ Variant i_ldap_get_entries(CArrRef params) {
   FUNCTION_INJECTION(ldap_get_entries);
   return (f_ldap_get_entries(params.rvalAt(0), params.rvalAt(1)));
 }
-Variant i_fb_run_mcproxy(CArrRef params) {
-  FUNCTION_INJECTION(fb_run_mcproxy);
-  return (f_fb_run_mcproxy(), null);
-}
 Variant i_ob_iconv_handler(CArrRef params) {
   FUNCTION_INJECTION(ob_iconv_handler);
   return (f_ob_iconv_handler(params.rvalAt(0), params.rvalAt(1)));
@@ -3702,10 +3698,6 @@ Variant i_mysql_fetch_field(CArrRef params) {
   int count = params.size();
   if (count <= 1) return (f_mysql_fetch_field(params.rvalAt(0)));
   return (f_mysql_fetch_field(params.rvalAt(0), params.rvalAt(1)));
-}
-Variant i_fb_start_mcproxy(CArrRef params) {
-  FUNCTION_INJECTION(fb_start_mcproxy);
-  return (f_fb_start_mcproxy(params.rvalAt(0), params.rvalAt(1)));
 }
 Variant i_chmod(CArrRef params) {
   FUNCTION_INJECTION(chmod);
@@ -11211,9 +11203,6 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x03098F16B0AD5838LL, mcrypt_module_get_supported_key_sizes);
       HASH_INVOKE(0x0890F9052322E838LL, fstat);
       break;
-    case 2105:
-      HASH_INVOKE(0x4F148A9F4E2C5839LL, fb_start_mcproxy);
-      break;
     case 2107:
       HASH_INVOKE(0x63E2EA180786B83BLL, pixelsetblack);
       break;
@@ -11418,9 +11407,6 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 2302:
       HASH_INVOKE(0x047BF4D3D0ED08FELL, strchr);
-      break;
-    case 2306:
-      HASH_INVOKE(0x010760453DD28902LL, fb_run_mcproxy);
       break;
     case 2315:
       HASH_INVOKE(0x67B879A1120C190BLL, headers_sent);
@@ -23887,17 +23873,6 @@ Variant ei_ldap_get_entries(Eval::VariableEnvironment &env, const Eval::Function
   FUNCTION_INJECTION(ldap_get_entries);
   return (f_ldap_get_entries(a0, a1));
 }
-Variant ei_fb_run_mcproxy(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(fb_run_mcproxy);
-  return (f_fb_run_mcproxy(), null);
-}
 Variant ei_ob_iconv_handler(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -28829,25 +28804,6 @@ Variant ei_mysql_fetch_field(Eval::VariableEnvironment &env, const Eval::Functio
   int count = params.size();
   if (count <= 1) return (f_mysql_fetch_field(a0));
   return (f_mysql_fetch_field(a0, a1));
-}
-Variant ei_fb_start_mcproxy(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(fb_start_mcproxy);
-  return (f_fb_start_mcproxy(a0, a1));
 }
 Variant ei_chmod(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -52504,9 +52460,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x03098F16B0AD5838LL, mcrypt_module_get_supported_key_sizes);
       HASH_INVOKE_FROM_EVAL(0x0890F9052322E838LL, fstat);
       break;
-    case 2105:
-      HASH_INVOKE_FROM_EVAL(0x4F148A9F4E2C5839LL, fb_start_mcproxy);
-      break;
     case 2107:
       HASH_INVOKE_FROM_EVAL(0x63E2EA180786B83BLL, pixelsetblack);
       break;
@@ -52711,9 +52664,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2302:
       HASH_INVOKE_FROM_EVAL(0x047BF4D3D0ED08FELL, strchr);
-      break;
-    case 2306:
-      HASH_INVOKE_FROM_EVAL(0x010760453DD28902LL, fb_run_mcproxy);
       break;
     case 2315:
       HASH_INVOKE_FROM_EVAL(0x67B879A1120C190BLL, headers_sent);

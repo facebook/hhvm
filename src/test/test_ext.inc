@@ -13,6 +13,7 @@ RUN_TESTSUITE(TestExtDatetime);
 RUN_TESTSUITE(TestExtDomdocument);
 RUN_TESTSUITE(TestExtError);
 RUN_TESTSUITE(TestExtFacebook);
+RUN_TESTSUITE(TestExtFbintern);
 RUN_TESTSUITE(TestExtFbml);
 RUN_TESTSUITE(TestExtFile);
 RUN_TESTSUITE(TestExtFunction);

@@ -28,7 +28,7 @@ lists: ../lib/system/ext.inc ../test/test_ext.h ../test/test_ext.inc ../cpp/ext/
 	@echo 'Generating $@'
 	@php idl_list.php ext $@
 
-%: %.idl.php idl.php base.php
+$(EXT): $(EXT).idl.php idl.php base.php
 	@echo 'Generating files from $<...'
 	@echo ' --> ext_$@.h ext_$@.cpp'
 	@php idl.php cpp  $< ext_$@.h ext_$@.cpp
@@ -42,7 +42,7 @@ lists: ../lib/system/ext.inc ../test/test_ext.h ../test/test_ext.inc ../cpp/ext/
 	@php idl.php profile $< ../cpp/ext/profile/extprofile_$@.h
 
 # run this for a newly prepared idl file
-%.install: % lists
+install: $(EXT) lists
 	cp ext_$<.h ext_$<.cpp ../cpp/ext/
 	svn add ../cpp/ext/ext_$<.h ../cpp/ext/ext_$<.cpp
 	svn add ../cpp/ext/profile/extprofile_$<.h
@@ -53,7 +53,7 @@ lists: ../lib/system/ext.inc ../test/test_ext.h ../test/test_ext.inc ../cpp/ext/
 	svn add ../test/test_ext_$<.h ../test/test_ext_$<.cpp
 
 # run this to add or remove a function from an existing idl file
-%.update: % lists
+update: $(EXT) lists
 	cp $<.inc ../lib/system/
 	touch ../lib/system/builtin_symbols.cpp
 

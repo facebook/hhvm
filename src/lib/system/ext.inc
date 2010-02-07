@@ -13,6 +13,7 @@
 #include "domdocument.inc"
 #include "error.inc"
 #include "facebook.inc"
+#include "fbintern.inc"
 #include "fbml.inc"
 #include "file.inc"
 #include "function.inc"

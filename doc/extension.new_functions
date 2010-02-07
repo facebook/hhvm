@@ -1,6 +1,10 @@
 
 <h2>New Extension Functions</h2>
 
+Warning, these functions are not ported to PHP yet. Do NOT use them if the code
+is intended to run with PHP as well, unless guarded with function_exists()
+testing and some alternative PHP implementation.
+
 - hphp_log
 - hphp_stats
 - hphp_get_stats
@@ -20,11 +24,17 @@
 
 - mysql_set_timeout
 
+- fb_load_local_databases
+- fb_parallel_query
+- fb_crossall_query
+
 - dangling_server_proxy_old_request
 - dangling_server_proxy_new_request
+
 - pagelet_server_task_start
 - pagelet_server_task_status
 - pagelet_server_task_result
+
 - xbox_send_message
 - xbox_post_message
 - xbox_task_start
@@ -84,3 +94,14 @@
 
    list($called, $ret) = fb_call_user_func_safe(...);
    if (!$called) ...
+
+
+- fb_thrift_serialize
+- fb_thrift_unserialize
+- fb_rename_function
+- fb_utf8ize
+
+- xhprof_enable
+- xhprof_disable
+- xhprof_sample_enable
+- xhprof_sample_disable

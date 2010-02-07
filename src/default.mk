@@ -16,7 +16,7 @@ unexport SUB_CLEAN_DIRS
 .PHONY: clobber
 clobber:
 	@$(RM) $(SUB_INTERMEDIATE_FILES) $(SUB_OBJECTS)
-	@$(RM) *.merge-left.* *.merge-right.* *.working
+	@$(RM) *.merge-left.* *.merge-right.* *.working www.pid
 	@$(RM) lib$(PROJECT_NAME).so lib$(PROJECT_NAME).a *~ $(OBJECTS:.o=)
 	@$(RM) $(filter-out $(SUB_PROGRAMS) $(SUB_LIB_TARGETS), $(TARGETS))
 	@$(RM) $(shell echo `find . -name "*.o"`)

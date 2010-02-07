@@ -180,7 +180,12 @@ ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultPtr ar) {
   if (!m_exp2->isScalar()) {
     if (!m_exp1->isScalar()) return ExpressionPtr();
   }
-  ExpressionPtr optExp = foldConst(ar);
+  ExpressionPtr optExp;
+  try {
+    optExp = foldConst(ar);
+  } catch (Exception &e) {
+    // cpp/base threw an exception, perhaps bad operands
+  }
   if (optExp) return optExp;
   if (isShortCircuitOperator()) return simplifyLogical(ar);
   return ExpressionPtr();

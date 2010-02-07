@@ -801,12 +801,12 @@ void createOutputDirectory(ProgramOptions &po) {
     strncpy(path, temp.c_str(), sizeof(path));
     path[temp.size()] = '\0';
     po.outputDir = mkdtemp(path);
-    Logger::Info("generating temporary directory %s...", po.outputDir.c_str());
+    Logger::Info("creating temporary directory %s ...", po.outputDir.c_str());
   }
   mkdir(po.outputDir.c_str(), 0777);
 
   if (!po.syncDir.empty()) {
-    Logger::Info("re-creating sync directory %s...", po.syncDir.c_str());
+    Logger::Info("re-creating sync directory %s ...", po.syncDir.c_str());
     boost::filesystem::remove_all(po.syncDir);
     mkdir(po.syncDir.c_str(), 0777);
   }

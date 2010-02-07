@@ -15,7 +15,7 @@
 */
 
 #include <cpp/eval/ast/unary_op_expression.h>
-#include <cpp/eval/parser/hphp.tab.h>
+#include <cpp/eval/parser/hphp.tab.hpp>
 #include <cpp/ext/ext_misc.h>
 #include <cpp/eval/eval.h>
 #include <cpp/eval/runtime/variable_environment.h>

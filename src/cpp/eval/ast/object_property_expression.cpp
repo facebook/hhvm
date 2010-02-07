@@ -17,7 +17,7 @@
 #include <cpp/eval/ast/object_property_expression.h>
 #include <cpp/eval/ast/name.h>
 #include <cpp/eval/runtime/variable_environment.h>
-#include <cpp/eval/parser/hphp.tab.h>
+#include <cpp/eval/parser/hphp.tab.hpp>
 
 namespace HPHP {
 namespace Eval {

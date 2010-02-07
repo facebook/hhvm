@@ -15,7 +15,7 @@
 */
 
 #include <cpp/eval/parser/parser.h>
-#include <cpp/eval/parser/hphp.tab.h>
+#include <cpp/eval/parser/hphp.tab.hpp>
 
 #include <cpp/eval/ast/array_element_expression.h>
 #include <cpp/eval/ast/array_expression.h>

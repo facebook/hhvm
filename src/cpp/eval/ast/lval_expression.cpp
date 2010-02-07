@@ -15,7 +15,7 @@
 */
 
 #include <cpp/eval/ast/lval_expression.h>
-#include <cpp/eval/parser/hphp.tab.h>
+#include <cpp/eval/parser/hphp.tab.hpp>
 
 namespace HPHP {
 namespace Eval {

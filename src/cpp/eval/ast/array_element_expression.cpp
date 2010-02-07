@@ -19,7 +19,7 @@
 #include <cpp/eval/ast/variable_expression.h>
 #include <cpp/eval/ast/static_member_expression.h>
 #include <cpp/eval/ast/name.h>
-#include <cpp/eval/parser/hphp.tab.h>
+#include <cpp/eval/parser/hphp.tab.hpp>
 
 namespace HPHP {
 namespace Eval {

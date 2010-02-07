@@ -15,7 +15,7 @@
 */
 
 #include <cpp/eval/parser/scanner.h>
-#include <cpp/eval/parser/hphp.tab.h>
+#include <cpp/eval/parser/hphp.tab.hpp>
 #include <cpp/eval/ast/statement_list_statement.h>
 #include <cpp/eval/ast/if_statement.h>
 #include <cpp/eval/ast/try_statement.h>

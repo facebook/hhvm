@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class DynamicObjectData : virtual public ObjectData {
+class DynamicObjectData : public ObjectData {
  public:
   DynamicObjectData(const char* pname, ObjectData *r = NULL);
 

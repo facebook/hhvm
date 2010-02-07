@@ -373,6 +373,9 @@ ifdef USE_TLS
 CPPFLAGS += -DUSE_TLS
 endif
 
+# facebook specific stuff
+CPPFLAGS += -DHAVE_FB_FUNCTIONS
+
 ###############################################################################
 # Linking
 

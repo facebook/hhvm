@@ -327,7 +327,12 @@ void apc_load_impl(const char **int_keys, int64 *int_values,
         item.len = (int)(int64)*(p+1);
         String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
         Variant success;
+#if defined(HAVE_FB_FUNCTIONS)
         Variant v = f_fb_thrift_unserialize(value, ref(success));
+#else
+        Variant v = null_variant;
+        success = false;
+#endif
         if (same(success, false)) {
           throw Exception("bad apc archive, f_fb_thrift_unserialize failed");
         }

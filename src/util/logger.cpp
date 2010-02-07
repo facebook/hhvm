@@ -20,23 +20,39 @@
 #include "process.h"
 #include "exception.h"
 #include "log_aggregator.h"
-#include <cpp/base/execution_context.h>
 
 using namespace std;
 
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                            \
   void Logger::LOGLEVEL(const char *fmt, ...) {                 \
     if (LogLevel < Log ## LOGLEVEL) return;                     \
-    if (g_context->isSilenced()) return;                        \
+    if (s_logger->silenced) return;                             \
     va_list ap; va_start(ap, fmt); Log(fmt, ap); va_end(ap);    \
   }                                                             \
   void Logger::LOGLEVEL(const std::string &msg) {               \
     if (LogLevel < Log ## LOGLEVEL) return;                     \
-    if (g_context->isSilenced()) return;                        \
+    if (s_logger->silenced) return;                             \
     Log(msg, NULL);                                             \
   }                                                             \
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+// statics
+
+class LoggerInfo {
+public:
+  LoggerInfo() : silenced(false) {}
+
+  bool silenced;
+};
+
+static ThreadLocal<LoggerInfo> s_logger;
+
+void Logger::SetSilenced(bool silence) {
+  s_logger->silenced = silence;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_LOGLEVEL(Error);
 IMPLEMENT_LOGLEVEL(Warning);
@@ -80,7 +96,7 @@ void Logger::Log(const char *fmt, va_list ap) {
 }
 
 void Logger::Log(const char *type, const Exception &e) {
-  if (g_context->isSilenced()) return;
+  if (s_logger->silenced) return;
   if (!UseLogAggregator && !UseLogFile) return;
 
   std::string msg = type;

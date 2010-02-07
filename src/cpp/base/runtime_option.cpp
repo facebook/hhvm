@@ -22,6 +22,7 @@
 #include <util/logger.h>
 #include <util/stack_trace.h>
 #include <util/process.h>
+#include <util/file_cache.h>
 #include <cpp/base/preg.h>
 #include <cpp/base/server/access_log.h>
 
@@ -389,7 +390,7 @@ void RuntimeOption::Load(Hdf &config) {
     if (!SourceRoot.empty() && SourceRoot[SourceRoot.length() - 1] != '/') {
       SourceRoot += '/';
     }
-
+    FileCache::SourceRoot = SourceRoot;
     FileCache = server["FileCache"].getString("");
     DefaultDocument = server["DefaultDocument"].getString("");
     ErrorDocument404 = server["ErrorDocument404"].getString("");

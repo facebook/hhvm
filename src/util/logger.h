@@ -61,6 +61,7 @@ public:
   static void VSNPrintf(std::string &msg, const char *fmt, va_list ap);
 
   static void OnNewRequest();
+  static void SetSilenced(bool silence);
 
   static bool SetThreadLog(const char *file);
   static void ClearThreadLog();

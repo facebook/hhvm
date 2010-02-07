@@ -18,11 +18,14 @@
 #include "exception.h"
 #include "compression.h"
 #include "util.h"
-#include <cpp/base/runtime_option.h>
 
 using namespace std;
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+std::string FileCache::SourceRoot;
+
 ///////////////////////////////////////////////////////////////////////////////
 // helper
 
@@ -70,9 +73,9 @@ std::string FileCache::GetRelativePath(const char *path) {
   ASSERT(path);
 
   string relative = path;
-  unsigned int len = RuntimeOption::SourceRoot.size();
+  unsigned int len = SourceRoot.size();
   if (len > 0 && relative.size() > len &&
-      strncmp(relative.data(), RuntimeOption::SourceRoot.c_str(), len) == 0) {
+      strncmp(relative.data(), SourceRoot.c_str(), len) == 0) {
     relative = relative.substr(len);
   }
   if (!relative.empty() && relative[relative.length() - 1] == '/') {

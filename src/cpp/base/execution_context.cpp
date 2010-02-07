@@ -231,11 +231,13 @@ void ExecutionContext::flush() {
 
 void ExecutionContext::silenceInc() {
   m_silencer++;
+  Logger::SetSilenced(isSilenced());
 }
 
 void ExecutionContext::silenceDec() {
   ASSERT(m_silencer > 0);
   m_silencer--;
+  Logger::SetSilenced(isSilenced());
 }
 
 bool ExecutionContext::isSilenced() {

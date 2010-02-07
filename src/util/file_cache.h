@@ -29,6 +29,9 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(FileCache);
 class FileCache {
 public:
+  static std::string SourceRoot;
+
+public:
   ~FileCache();
 
   /**

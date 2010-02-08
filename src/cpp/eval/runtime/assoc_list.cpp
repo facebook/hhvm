@@ -64,6 +64,16 @@ bool AssocList::exists(CStrRef name) const {
   return false;
 }
 
+Array AssocList::toArray() const {
+  Array res = Array::Create();
+  for (VarAssocPair *vp = m_list; vp; vp = vp->next()) {
+    if (vp->var().isInitialized()) {
+      res.set(vp->name(), vp->var());
+    }
+  }
+  return res;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

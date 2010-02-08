@@ -76,6 +76,8 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
     FunctionTypeMap["constant"]             = ConstantFunction;
 
     FunctionTypeMap["unserialize"]          = UnserializeFunction;
+
+    FunctionTypeMap["get_defined_vars"]     = GetDefinedVarsFunction;
   }
 }
 
@@ -153,6 +155,10 @@ void SimpleFunctionCall::onParse(AnalysisResultPtr ar) {
       break;
     case ShellExecFunction:
       ar->getCodeError()->record(self, CodeError::UseShellExec, self);
+      break;
+    case GetDefinedVarsFunction:
+      ar->getFileScope()->setAttribute(FileScope::ContainsGetDefinedVars);
+      ar->getFileScope()->setAttribute(FileScope::ContainsCompact);
       break;
     default:
       CHECK_HOOK(onSimpleFunctionCallFuncType);
@@ -781,6 +787,10 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
         }
       }
       break;
+    case GetDefinedVarsFunction:
+      cg.printf("get_defined_vars(variables)");
+      if (linemap) cg.printf(")");
+      return;
     default:
       break;
     }

@@ -56,6 +56,7 @@ public:
     ContainsUnset = 128,
     NeedGlobalPointer = 256,
     ContainsDynamicStatic  = 512,
+    ContainsGetDefinedVars = 1024,
   };
 
   enum VariableProperty {

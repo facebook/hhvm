@@ -23,5 +23,14 @@ Variant &LVariableTable::getImpl(CStrRef s, int64 hash) {
   return lvalAt(s, hash);
 }
 
+Array RVariableTable::getDefinedVars() const {
+  return *this;
+}
+
+Array LVariableTable::getDefinedVars() {
+  return *this;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 }

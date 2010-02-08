@@ -230,6 +230,8 @@ Variant f_unserialize(CStrRef str);
 // variable table
 
 Array f_get_defined_vars();
+Array get_defined_vars(LVariableTable *variables);
+
 bool f_import_request_variables(CStrRef types, CStrRef prefix = "");
 
 #define EXTR_OVERWRITE          0

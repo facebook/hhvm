@@ -55,6 +55,8 @@ class RVariableTable : public Array {
    * entry per variable.
    */
   virtual Variant getImpl(const char *s) = 0;
+
+  virtual Array getDefinedVars() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -89,6 +91,8 @@ class LVariableTable : public Array {
    * entry per variable.
    */
   virtual Variant &getImpl(CStrRef s, int64 hash);
+
+  virtual Array getDefinedVars();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

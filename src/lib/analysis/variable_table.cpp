@@ -1190,6 +1190,23 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
     }
   }
 
+  if (getAttribute(ContainsGetDefinedVars)) {
+    cg.indentBegin("virtual Array getDefinedVars() {\n");
+    cg.printf("Array ret = %sVariableTable::getDefinedVars();\n",
+              m_allVariants ? "L" : "R");
+    for (unsigned int i = 0; i < m_symbols.size(); i++) {
+      const string &name = m_symbols[i];
+      const char *prefix = getVariablePrefix(ar, name);
+      string varName = string(prefix) + name;
+      if (prefix == Option::GlobalVariablePrefix) {
+        varName = string("g->") + getGlobalVariableName(ar, name);
+      }
+      cg.printf("ret.set(\"%s\", %s);\n", name.c_str(), varName.c_str());
+    }
+    cg.printf("return ret;\n");
+    cg.indentEnd("}\n");
+  }
+
   if (!inGlobalScope) {
     if (!params.empty()) {
       cg.indentEnd("} variableTable(%s);\n", params.c_str());

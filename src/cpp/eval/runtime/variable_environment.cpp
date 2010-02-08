@@ -69,6 +69,10 @@ Variant &VariableEnvironment::getIdx(int idx) {
   throw FatalErrorException("getIdx not supported in this env");
 }
 
+Array VariableEnvironment::getDefinedVariables() const {
+  return Array::Create();
+}
+
 DummyVariableEnvironment::DummyVariableEnvironment()
 {}
 
@@ -211,6 +215,10 @@ Variant &FuncScopeVariableEnvironment::getImpl(CStrRef s, int64 hash) {
   //return LVariableTable::getImpl(s, hash);
 }
 
+Array FuncScopeVariableEnvironment::getDefinedVariables() const {
+  return m_alist.toArray();
+}
+
 MethScopeVariableEnvironment::
 MethScopeVariableEnvironment(const MethodStatement *meth, int argc)
   : FuncScopeVariableEnvironment(meth, argc), m_cls(meth->getClass()) {}
@@ -248,6 +256,10 @@ Variant &NestedVariableEnvironment::getImpl(CStrRef s, int64 hash) {
 
 Array NestedVariableEnvironment::getParams() const {
   return m_params;
+}
+
+Array NestedVariableEnvironment::getDefinedVariables() const {
+  return m_ext->getDefinedVars();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

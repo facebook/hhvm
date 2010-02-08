@@ -81,6 +81,9 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
   if (m_attribute & FileScope::ContainsUnset) {
     m_variables->setAttribute(VariableTable::ContainsUnset);
   }
+  if (m_attribute & FileScope::ContainsGetDefinedVars) {
+    m_variables->setAttribute(VariableTable::ContainsGetDefinedVars);
+  }
 
   m_dynamic = Option::isDynamicFunction(method, m_name) ||
     Option::EnableEval == Option::FullEval;

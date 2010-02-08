@@ -70,6 +70,7 @@ EVAL_EXT(Compact);
 EVAL_EXT(CreateFunction);
 EVAL_EXT(Assert);
 EVAL_EXT(ClassExists);
+EVAL_EXT(GetDefinedVars);
 #undef EVAL_EXT
 
 class EvalFunctionExists : public ExtFunction {
@@ -92,6 +93,7 @@ EvalOverrides::EvalOverrides() {
   m_functions["assert"] = new EvalAssert();
   m_functions["function_exists"] = new EvalFunctionExists();
   m_functions["class_exists"] = new EvalClassExists();
+  m_functions["get_defined_vars"] = new EvalGetDefinedVars();
 }
 EvalOverrides::~EvalOverrides() {
   for (hphp_const_char_imap<const Function*>::iterator it =
@@ -232,6 +234,12 @@ Variant EvalClassExists::invokeImpl(VariableEnvironment &env,
     return false;
   }
   return true;
+}
+
+
+Variant EvalGetDefinedVars::invokeImpl(VariableEnvironment &env,
+                                       CArrRef params) const {
+  return env.getDefinedVariables();
 }
 
 EvalFunctionExists::EvalFunctionExists() {

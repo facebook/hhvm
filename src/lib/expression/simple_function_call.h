@@ -69,6 +69,7 @@ private:
     ClassExistsFunction,
     InterfaceExistsFunction,
     UnserializeFunction,
+    GetDefinedVarsFunction,
 
     LastType, // marker, not a valid type
   };

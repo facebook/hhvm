@@ -44,6 +44,7 @@ public:
   virtual const char* currentContext() const;
   virtual Array getParams() const = 0;
   virtual bool refReturn() const { return false; }
+  virtual Array getDefinedVariables() const;
 
   void setBreak(int n) { m_breakLevel = n; }
   void decBreak() {
@@ -110,6 +111,7 @@ public:
   virtual bool exists(const char *name, int64 hash = -1) const;
   virtual Variant &getImpl(CStrRef s, int64 hash);
   void incArgc() { m_argc++; }
+  virtual Array getDefinedVariables() const;
 private:
   Array m_statics;
   const FunctionStatement *m_func;
@@ -142,6 +144,7 @@ public:
   virtual bool exists(const char *s, int64 hash = 1) const;
   virtual Variant &getImpl(CStrRef s, int64 hash);
   virtual Array getParams() const;
+  virtual Array getDefinedVariables() const;
 private:
   LVariableTable *m_ext;
   const Block &m_block;

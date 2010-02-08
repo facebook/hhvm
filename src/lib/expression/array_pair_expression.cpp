@@ -126,7 +126,12 @@ void ArrayPairExpression::outputCPPControlledEval(CodeGenerator &cg,
     m_name->outputCPP(cg, ar);
     cg.printf(", ");
   }
-  cg.printf("%s%d", Option::EvalOrderTempPrefix, temp);
+  if (m_value->isScalar()) {
+    // scalars do not need order enforcement
+    m_value->outputCPP(cg, ar);
+  } else {
+    cg.printf("%s%d", Option::EvalOrderTempPrefix, temp);
+  }
   if (m_name) {
     ScalarExpressionPtr sc = dynamic_pointer_cast<ScalarExpression>(m_name);
     if (sc) {

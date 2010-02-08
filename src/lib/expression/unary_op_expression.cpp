@@ -438,6 +438,10 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   }
 
   if (m_front) {
+    if (m_op == T_ARRAY) {
+      ExpressionListPtr exps = dynamic_pointer_cast<ExpressionList>(m_exp);
+      if (exps) exps->outputCPPControlledEvalOrderPre(cg, ar);
+    }
     switch (m_op) {
     case T_CLONE:         cg.printf("f_clone(");   break;
     case T_INC:           cg.printf("++");         break;
@@ -523,8 +527,12 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   if (m_front) {
     switch (m_op) {
     case T_ARRAY:
-      cg.printf(")");
-      break;
+      {
+        ExpressionListPtr exps = dynamic_pointer_cast<ExpressionList>(m_exp);
+        if (exps) exps->outputCPPControlledEvalOrderPost(cg, ar);
+        cg.printf(")");
+        break;
+      }
     case T_CLONE:
     case '!':
     case '(':

@@ -117,3 +117,24 @@ void ArrayPairExpression::outputCPPImpl(CodeGenerator &cg,
   }
   cg.printf(")");
 }
+
+void ArrayPairExpression::outputCPPControlledEval(CodeGenerator &cg,
+                                                  AnalysisResultPtr ar,
+                                                  int temp) {
+  cg.printf("ArrayElement(");
+  if (m_name) {
+    m_name->outputCPP(cg, ar);
+    cg.printf(", ");
+  }
+  cg.printf("%s%d", Option::EvalOrderTempPrefix, temp);
+  if (m_name) {
+    ScalarExpressionPtr sc = dynamic_pointer_cast<ScalarExpression>(m_name);
+    if (sc) {
+      int64 hash = sc->getHash();
+      if (hash >= 0) {
+        cg.printf(", 0x%016llXLL", hash);
+      }
+    }
+  }
+  cg.printf(")");
+}

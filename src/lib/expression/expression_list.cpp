@@ -243,6 +243,8 @@ void ExpressionList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void ExpressionList::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
+  bool effectArr = controllingOrder();
+  int tempstart = tempOffset();
   if (m_arrayElements) {
     cg.printf("ArrayInit(%d).", m_exps.size());
   }
@@ -254,7 +256,11 @@ void ExpressionList::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         ArrayPairExpressionPtr ap =
           dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
         cg.printf("set(%d, ", i);
-        m_exps[i]->outputCPP(cg, ar);
+        if (effectArr) {
+          ap->outputCPPControlledEval(cg, ar, tempstart +  i);
+        } else {
+          m_exps[i]->outputCPP(cg, ar);
+        }
         cg.printf(")");
       } else {
         m_exps[i]->outputCPP(cg, ar);

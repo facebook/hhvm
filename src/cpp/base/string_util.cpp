@@ -80,7 +80,8 @@ String StringUtil::Reverse(CStrRef input) {
 
 String StringUtil::Repeat(CStrRef input, int count) {
   if (count < 0) {
-    throw InvalidArgumentException("count", count);
+    Logger::Warning("Second argument has to be greater than or equal to 0");
+    return String();
   }
   if (count == 0) {
     return "";
@@ -477,7 +478,7 @@ void StringUtil::InitLiteralStrings(StaticString literalStrings[],
   const char *pl = uncompressedLen;
   const char *endBuf = pb + bufSize;
   const char *endLen = pl + lenSize;
-   
+
   for (int i = 0; i < nliteralStrings; i++) {
     int size;
     memcpy(&size, pl, sizeof(size));

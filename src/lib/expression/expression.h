@@ -25,7 +25,7 @@
   LocationPtr loc, Expression::KindOf kindOf
 #define EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES \
   loc, kindOf
-#define DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS                            \
+#define DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS                       \
   virtual void analyzeProgram(AnalysisResultPtr ar);                    \
   virtual ExpressionPtr clone();                                        \
   virtual ExpressionPtr preOptimize(AnalysisResultPtr ar);              \
@@ -34,6 +34,11 @@
                              bool coerce);                              \
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);      \
   virtual void outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar)
+#define DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS                            \
+  DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;                            \
+  virtual ConstructPtr getNthKid(int n) const;                          \
+  virtual int getKidCount() const;                                      \
+  virtual int setNthKid(int n, ConstructPtr cp)
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -110,6 +115,14 @@ public:
   virtual void outputCPPExistTest(CodeGenerator &cg, AnalysisResultPtr ar,
                                   int op);
   virtual void outputCPPUnset(CodeGenerator &cg, AnalysisResultPtr ar);
+
+  /**
+   * For generic walks
+   */
+  virtual ConstructPtr getNthKid(int n) const { return ConstructPtr(); }
+  virtual int setNthKid(int n, ConstructPtr cp) { return 0; }
+  virtual int getKidCount() const { return 0; }
+  ExpressionPtr getNthExpr(int n) const { return boost::static_pointer_cast<Expression>(getNthKid(n)); }
 
   /**
    * Type checking without RTTI.

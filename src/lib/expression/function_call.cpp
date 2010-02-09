@@ -65,6 +65,36 @@ void FunctionCall::reset() {
   m_voidWrapper = false;
 }
 
+ConstructPtr FunctionCall::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_nameExp;
+    case 1:
+      return m_params;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int FunctionCall::getKidCount() const {
+  return 2;
+}
+
+int FunctionCall::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_nameExp = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 1:
+      m_params = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 ExpressionPtr FunctionCall::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_nameExp);
   ar->preOptimize(m_params);

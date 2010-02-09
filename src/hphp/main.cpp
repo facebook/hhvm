@@ -85,6 +85,7 @@ struct ProgramOptions {
   string rttiDirectory;
   string javaRoot;
   bool generateFFI;
+  bool dump;
 };
 
 int prepareOptions(ProgramOptions &po, int argc, char **argv);
@@ -270,6 +271,9 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     ("generate-ffi",
      value<bool>(&po.generateFFI)->default_value(false),
      "generate ffi stubs")
+    ("dump",
+     value<bool>(&po.dump)->default_value(false),
+     "dump the program graph")
     ;
 
   positional_options_description p;
@@ -480,6 +484,10 @@ int process(const ProgramOptions &po) {
     Logger::Info("%dMB %s saved", (int64)sb.st_size/(1024*1024),
                  po.filecache.c_str());
   }
+  
+  if (po.dump) {
+    ar->dump();
+  }
 
   int ret = 0;
   bool fatalErrorOnly = false;
@@ -498,6 +506,10 @@ int process(const ProgramOptions &po) {
   } else {
     Logger::Error("Unknown target: %s", po.target.c_str());
     return 1;
+  }
+
+  if (po.dump) {
+    ar->dump();
   }
 
   // saving stats

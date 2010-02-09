@@ -75,6 +75,36 @@ void ObjectPropertyExpression::analyzeProgram(AnalysisResultPtr ar) {
   m_property->analyzeProgram(ar);
 }
 
+ConstructPtr ObjectPropertyExpression::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_object;
+    case 1:
+      return m_property;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int ObjectPropertyExpression::getKidCount() const {
+  return 2;
+}
+
+int ObjectPropertyExpression::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_object = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 1:
+      m_property = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 ExpressionPtr ObjectPropertyExpression::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_object);
   ar->preOptimize(m_property);

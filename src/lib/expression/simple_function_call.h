@@ -34,7 +34,7 @@ public:
                      const std::string *className);
 
   ~SimpleFunctionCall();
-  DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   bool isDefineWithoutImpl(AnalysisResultPtr ar);
   void setValid() { m_valid = true; }
   void setNoPrefix() { m_noPrefix = true; }
@@ -54,6 +54,7 @@ public:
     m_hookHandler = hookHandler;
   }
 
+  const std::string &getName() const { return m_name;}  
 private:
   enum FunctionType {
     UnknownType,

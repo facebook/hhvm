@@ -55,6 +55,41 @@ void QOpExpression::analyzeProgram(AnalysisResultPtr ar) {
   m_expNo->analyzeProgram(ar);
 }
 
+ConstructPtr QOpExpression::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_condition;
+    case 1:
+      return m_expYes;
+    case 2:
+      return m_expNo;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int QOpExpression::getKidCount() const {
+  return 3;
+}
+
+int QOpExpression::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_condition = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 1:
+      m_expYes = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 2:
+      m_expNo = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 ExpressionPtr QOpExpression::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_condition);
   ar->preOptimize(m_expYes);

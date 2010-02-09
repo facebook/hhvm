@@ -259,6 +259,28 @@ bool StatementList::mergeConcatAssign(AnalysisResultPtr ar) {
   return merged;
 }
 
+ConstructPtr StatementList::getNthKid(int n) const {
+  if (n < (int)m_stmts.size()) {
+    return m_stmts[n];
+  }
+  return ConstructPtr();
+}
+
+int StatementList::getKidCount() const {
+  return m_stmts.size();
+}
+
+int StatementList::setNthKid(int n, ConstructPtr cp) {
+  int s = m_stmts.size();
+  if (n >= s) {
+    return 0;
+  } else {
+    m_stmts[n] = boost::dynamic_pointer_cast<Statement>(cp);
+    return 1;
+  }
+  ASSERT(0);
+}
+
 StatementPtr StatementList::preOptimize(AnalysisResultPtr ar) {
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     ar->preOptimize(m_stmts[i]);

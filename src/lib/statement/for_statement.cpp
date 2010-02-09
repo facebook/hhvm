@@ -54,6 +54,46 @@ void ForStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_stmt) m_stmt->analyzeProgram(ar);
 }
 
+ConstructPtr ForStatement::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_exp1;
+    case 1:
+      return m_exp2;
+    case 2:
+      return m_exp3;
+    case 3:
+      return m_stmt;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int ForStatement::getKidCount() const {
+  return 4;
+}
+
+int ForStatement::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_exp1 = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 1:
+      m_exp2 = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 2:
+      m_exp3 = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 3:
+      m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 StatementPtr ForStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_exp1);
   ar->preOptimize(m_exp2);

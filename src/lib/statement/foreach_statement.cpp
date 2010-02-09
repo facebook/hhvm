@@ -76,6 +76,46 @@ void ForEachStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_stmt) m_stmt->analyzeProgram(ar);
 }
 
+ConstructPtr ForEachStatement::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_array;
+    case 1:
+      return m_name;
+    case 2:
+      return m_value;
+    case 3:
+      return m_stmt;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int ForEachStatement::getKidCount() const {
+  return 4;
+}
+
+int ForEachStatement::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_array = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 1:
+      m_name = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 2:
+      m_value = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 3:
+      m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 StatementPtr ForEachStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_array);
   ar->preOptimize(m_name);

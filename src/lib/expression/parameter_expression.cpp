@@ -74,6 +74,31 @@ void ParameterExpression::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
+ConstructPtr ParameterExpression::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_defaultValue;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int ParameterExpression::getKidCount() const {
+  return 1;
+}
+
+int ParameterExpression::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_defaultValue = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 ExpressionPtr ParameterExpression::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_defaultValue);
   return ExpressionPtr();

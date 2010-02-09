@@ -71,6 +71,23 @@ public:
   virtual void analyzeProgram(AnalysisResultPtr ar) = 0;
 
   /**
+   * return the nth child construct
+   */
+  virtual ConstructPtr getNthKid(int n) const = 0;
+
+  /**
+   * set the nth child construct
+   */
+  virtual int setNthKid(int n, ConstructPtr cp) = 0;
+  
+  /**
+   * get the kid count
+   */
+  virtual int getKidCount() const = 0;
+
+  virtual void dump(int spc, AnalysisResultPtr ar);
+
+  /**
    * Called when generating code.
    */
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) = 0;

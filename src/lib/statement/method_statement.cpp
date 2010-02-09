@@ -286,6 +286,41 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
   ar->popScope();
 }
 
+ConstructPtr MethodStatement::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_modifiers;
+    case 1:
+      return m_params;
+    case 2:
+      return m_stmt;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int MethodStatement::getKidCount() const {
+  return 3;
+}
+
+int MethodStatement::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_modifiers = boost::dynamic_pointer_cast<ModifierExpression>(cp);
+      return 1;
+    case 1:
+      m_params = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      return 1;
+    case 2:
+      m_stmt = boost::dynamic_pointer_cast<StatementList>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 StatementPtr MethodStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_modifiers);
   ar->preOptimize(m_params);

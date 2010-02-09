@@ -64,6 +64,36 @@ bool TryStatement::hasRetExp() const {
   return m_catches->hasRetExp();
 }
 
+ConstructPtr TryStatement::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_tryStmt;
+    case 1:
+      return m_catches;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int TryStatement::getKidCount() const {
+  return 2;
+}
+
+int TryStatement::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_tryStmt = boost::dynamic_pointer_cast<Statement>(cp);
+      return 1;
+    case 1:
+      m_catches = boost::dynamic_pointer_cast<StatementList>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 StatementPtr TryStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_tryStmt);
   ar->preOptimize(m_catches);

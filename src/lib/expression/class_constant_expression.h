@@ -30,7 +30,7 @@ public:
                           const std::string &className,
                           const std::string &varName);
 
-  DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   virtual bool hasEffect() const { return false;}
 
 private:

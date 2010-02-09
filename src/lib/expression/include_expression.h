@@ -30,7 +30,7 @@ public:
   IncludeExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                     ExpressionPtr exp, int op);
 
-  DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
   // implementing IParseHandler
   virtual void onParse(AnalysisResultPtr ar);

@@ -122,6 +122,36 @@ void InterfaceStatement::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
+ConstructPtr InterfaceStatement::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_stmt;
+    case 1:
+      return m_base;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int InterfaceStatement::getKidCount() const {
+  return 2;
+}
+
+int InterfaceStatement::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_stmt = boost::dynamic_pointer_cast<StatementList>(cp);
+      return 1;
+    case 1:
+      m_base = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 StatementPtr InterfaceStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_base);
   if (m_stmt) {

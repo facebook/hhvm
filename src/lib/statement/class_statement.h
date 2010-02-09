@@ -32,7 +32,7 @@ public:
                  const std::string &parent, ExpressionListPtr base,
                  StatementListPtr stmt);
 
-  DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
+  DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;
   virtual bool hasDecl() const { return true; }
   virtual bool hasImpl() const;
 

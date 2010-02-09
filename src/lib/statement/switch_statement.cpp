@@ -64,6 +64,36 @@ bool SwitchStatement::hasRetExp() const {
   return m_cases && m_cases->hasRetExp();
 }
 
+ConstructPtr SwitchStatement::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_exp;
+    case 1:
+      return m_cases;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int SwitchStatement::getKidCount() const {
+  return 2;
+}
+
+int SwitchStatement::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_exp = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 1:
+      m_cases = boost::dynamic_pointer_cast<StatementList>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 StatementPtr SwitchStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_exp);
   ar->preOptimize(m_cases);

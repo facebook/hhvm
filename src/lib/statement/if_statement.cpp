@@ -60,6 +60,31 @@ bool IfStatement::hasRetExp() const {
   return m_stmts && m_stmts->hasRetExp();
 }
 
+ConstructPtr IfStatement::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_stmts;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int IfStatement::getKidCount() const {
+  return 1;
+}
+
+int IfStatement::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_stmts = boost::dynamic_pointer_cast<StatementList>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 StatementPtr IfStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_stmts);
   if (ar->getPhase() != AnalysisResult::SecondPreOptimize) {

@@ -131,6 +131,9 @@ public:
 
   void analyzeProgram(AnalysisResultPtr ar);
   void inferTypes(AnalysisResultPtr ar);
+  void visit(AnalysisResultPtr ar,
+             void (*cb)(AnalysisResultPtr, StatementPtr, void*),
+             void *data);
   void preOptimize(AnalysisResultPtr ar);
   void postOptimize(AnalysisResultPtr ar);
   const std::string &pseudoMainName();

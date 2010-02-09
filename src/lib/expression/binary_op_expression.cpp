@@ -174,6 +174,36 @@ ExpressionPtr BinaryOpExpression::simplifyLogical(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
+ConstructPtr BinaryOpExpression::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_exp1;
+    case 1:
+      return m_exp2;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int BinaryOpExpression::getKidCount() const {
+  return 2;
+}
+
+int BinaryOpExpression::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_exp1 = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 1:
+      m_exp2 = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_exp1);
   ar->preOptimize(m_exp2);

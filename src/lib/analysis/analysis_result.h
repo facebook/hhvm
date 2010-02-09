@@ -114,6 +114,8 @@ public:
   void analyzeProgram();
   void analyzeProgramFinal();
   void inferTypes(int maxPass = 100);
+  void dump();
+  void visitFiles(void (*cb)(AnalysisResultPtr, StatementPtr, void*), void *data);
   void preOptimize(int maxPass = 100);
   void postOptimize(int maxPass = 100);
   void incOptCounter() { m_optCounter++; }

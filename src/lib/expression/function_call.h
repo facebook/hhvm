@@ -36,6 +36,10 @@ public:
   virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
   virtual bool isRefable() const { return true;}
 
+  virtual ConstructPtr getNthKid(int n) const;
+  virtual int setNthKid(int n, ConstructPtr cp);
+  virtual int getKidCount() const;
+
   virtual ExpressionPtr preOptimize(AnalysisResultPtr ar);
   virtual ExpressionPtr postOptimize(AnalysisResultPtr ar);
 

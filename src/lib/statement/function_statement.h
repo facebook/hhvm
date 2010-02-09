@@ -34,7 +34,7 @@ public:
                     ExpressionListPtr params, StatementListPtr stmt,
                     int attr);
 
-  DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
+  DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;
   virtual bool hasDecl() const { return true; }
   virtual bool hasImpl() const;
 

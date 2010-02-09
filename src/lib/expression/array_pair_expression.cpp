@@ -65,6 +65,36 @@ void ArrayPairExpression::analyzeProgram(AnalysisResultPtr ar) {
   m_value->analyzeProgram(ar);
 }
 
+ConstructPtr ArrayPairExpression::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_name;
+    case 1:
+      return m_value;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int ArrayPairExpression::getKidCount() const {
+  return 2;
+}
+
+int ArrayPairExpression::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_name = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 1:
+      m_value = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 ExpressionPtr ArrayPairExpression::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_name);
   ar->preOptimize(m_value);

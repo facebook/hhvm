@@ -188,6 +188,19 @@ void FileScope::analyzeProgram(AnalysisResultPtr ar) {
   ar->popScope();
 }
 
+void FileScope::visit(AnalysisResultPtr ar,
+                      void (*cb)(AnalysisResultPtr, StatementPtr, void*),
+                      void *data)
+{
+  for (StringToFunctionScopePtrVecMap::iterator it = m_functions.begin();
+       it != m_functions.end(); ++it) {
+    if (it->second[0]->inPseudoMain()) {
+      cb(ar, it->second[0]->getStmt(), data);
+      break;
+    }
+  }
+}
+
 void FileScope::preOptimize(AnalysisResultPtr ar) {
   for (StringToFunctionScopePtrVecMap::iterator it = m_functions.begin();
        it != m_functions.end(); ++it) {

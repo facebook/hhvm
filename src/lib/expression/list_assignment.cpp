@@ -75,6 +75,36 @@ void ListAssignment::analyzeProgram(AnalysisResultPtr ar) {
   if (func) func->disableInline();
 }
 
+ConstructPtr ListAssignment::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_variables;
+    case 1:
+      return m_array;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int ListAssignment::getKidCount() const {
+  return 2;
+}
+
+int ListAssignment::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_variables = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      return 1;
+    case 1:
+      m_array = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 ExpressionPtr ListAssignment::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_variables);
   ar->preOptimize(m_array);

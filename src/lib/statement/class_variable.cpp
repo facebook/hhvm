@@ -87,6 +87,36 @@ void ClassVariable::analyzeProgram(AnalysisResultPtr ar) {
   m_declaration->analyzeProgram(ar);
 }
 
+ConstructPtr ClassVariable::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_modifiers;
+    case 1:
+      return m_declaration;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int ClassVariable::getKidCount() const {
+  return 2;
+}
+
+int ClassVariable::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_modifiers = boost::dynamic_pointer_cast<ModifierExpression>(cp);
+      return 1;
+    case 1:
+      m_declaration = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 StatementPtr ClassVariable::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_modifiers);
   ar->preOptimize(m_declaration);

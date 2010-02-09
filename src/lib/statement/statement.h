@@ -23,7 +23,7 @@
   LocationPtr loc, Statement::KindOf kindOf
 #define STATEMENT_CONSTRUCTOR_PARAMETER_VALUES  \
   loc, kindOf
-#define DECLARE_STATEMENT_VIRTUAL_FUNCTIONS                             \
+#define DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS                        \
   virtual void analyzeProgram(AnalysisResultPtr ar);                    \
   virtual StatementPtr clone();                                         \
   virtual StatementPtr preOptimize(AnalysisResultPtr ar);               \
@@ -31,6 +31,11 @@
   virtual void inferTypes(AnalysisResultPtr ar);                        \
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);      \
   virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar)
+#define DECLARE_STATEMENT_VIRTUAL_FUNCTIONS                             \
+  DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;                             \
+  virtual ConstructPtr getNthKid(int n) const;                          \
+  virtual int getKidCount() const;                                      \
+  virtual int setNthKid(int n, ConstructPtr cp)
 #define NULL_STATEMENT()                                                \
   BlockStatementPtr(new BlockStatement(getLocation(), KindOfBlockStatement, \
                                        StatementListPtr()))
@@ -92,6 +97,10 @@ public:
    */
   virtual std::string getName() const { return "";}
 
+  virtual ConstructPtr getNthKid(int n) const { return ConstructPtr(); }
+  virtual int setNthKid(int n, ConstructPtr cp) { return 0; }
+
+  StatementPtr getNthStmt(int n) { return boost::static_pointer_cast<Statement>(getNthKid(n)); }
   /**
    * Called before type inference.
    */

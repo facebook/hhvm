@@ -29,7 +29,7 @@ public:
   NewObjectExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                       ExpressionPtr variable, ExpressionListPtr params);
 
-  DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
 private:
   bool m_redeclared;

@@ -133,6 +133,36 @@ void AssignmentExpression::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
+ConstructPtr AssignmentExpression::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_variable;
+    case 1:
+      return m_value;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int AssignmentExpression::getKidCount() const {
+  return 2;
+}
+
+int AssignmentExpression::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_variable = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 1:
+      m_value = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_variable);
   ar->preOptimize(m_value);

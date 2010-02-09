@@ -28,7 +28,7 @@ class ModifierExpression : public Expression {
 public:
   ModifierExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS);
 
-  DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
   void add(int modifier);
   int getCount() const { return m_modifiers.size();}

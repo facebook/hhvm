@@ -106,6 +106,31 @@ bool ObjectMethodExpression::canInvokeFewArgs() {
   return m_invokeFewArgsDecision;
 }
 
+ConstructPtr ObjectMethodExpression::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_object;
+    default:
+      return FunctionCall::getNthKid(n-1);
+  }
+  ASSERT(0);
+}
+
+int ObjectMethodExpression::getKidCount() const {
+  return FunctionCall::getKidCount() + 1;
+}
+
+int ObjectMethodExpression::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_object = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    default:
+      return FunctionCall::setNthKid(n-1, cp);
+  }
+  ASSERT(0);
+}
+
 ExpressionPtr ObjectMethodExpression::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_object);
   return FunctionCall::preOptimize(ar);

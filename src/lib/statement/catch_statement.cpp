@@ -62,6 +62,31 @@ void CatchStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_stmt) m_stmt->analyzeProgram(ar);
 }
 
+ConstructPtr CatchStatement::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_stmt;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int CatchStatement::getKidCount() const {
+  return 1;
+}
+
+int CatchStatement::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 StatementPtr CatchStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_stmt);
   return StatementPtr();

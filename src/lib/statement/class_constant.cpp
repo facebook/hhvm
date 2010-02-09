@@ -58,6 +58,31 @@ void ClassConstant::analyzeProgram(AnalysisResultPtr ar) {
   m_exp->analyzeProgram(ar);
 }
 
+ConstructPtr ClassConstant::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_exp;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int ClassConstant::getKidCount() const {
+  return 1;
+}
+
+int ClassConstant::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_exp = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 StatementPtr ClassConstant::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_exp);
   return StatementPtr();

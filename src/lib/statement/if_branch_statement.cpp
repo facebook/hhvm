@@ -49,6 +49,36 @@ void IfBranchStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_stmt) m_stmt->analyzeProgram(ar);
 }
 
+ConstructPtr IfBranchStatement::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_condition;
+    case 1:
+      return m_stmt;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int IfBranchStatement::getKidCount() const {
+  return 2;
+}
+
+int IfBranchStatement::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_condition = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 1:
+      m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 StatementPtr IfBranchStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_condition);
   ar->preOptimize(m_stmt);

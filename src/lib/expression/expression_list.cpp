@@ -210,6 +210,28 @@ void ExpressionList::analyzeProgramEnd(AnalysisResultPtr ar) {
   }
 }
 
+ConstructPtr ExpressionList::getNthKid(int n) const {
+  if (n < (int)m_exps.size()) {
+    return m_exps[n];
+  }
+  return ConstructPtr();
+}
+
+int ExpressionList::getKidCount() const {
+  return m_exps.size();
+}
+
+int ExpressionList::setNthKid(int n, ConstructPtr cp) {
+  int m = m_exps.size();
+  if (n >= m) {
+    return 0;
+  } else {
+    m_exps[n] = boost::dynamic_pointer_cast<Expression>(cp);
+    return 1;
+  }
+  ASSERT(0);
+}
+
 ExpressionPtr ExpressionList::preOptimize(AnalysisResultPtr ar) {
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     ar->preOptimize(m_exps[i]);

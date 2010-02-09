@@ -49,6 +49,31 @@ void DynamicVariable::analyzeProgram(AnalysisResultPtr ar) {
   m_exp->analyzeProgram(ar);
 }
 
+ConstructPtr DynamicVariable::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_exp;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int DynamicVariable::getKidCount() const {
+  return 1;
+}
+
+int DynamicVariable::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_exp = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 ExpressionPtr DynamicVariable::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_exp);
   return ExpressionPtr();

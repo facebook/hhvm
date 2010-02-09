@@ -32,7 +32,7 @@ public:
   ConstantExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                      const std::string &name);
 
-  DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   virtual bool isScalar() const;
   virtual bool hasEffect() const { return false;}
   virtual bool getScalarValue(Variant &value);

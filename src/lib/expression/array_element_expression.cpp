@@ -104,6 +104,36 @@ void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_offset) m_offset->analyzeProgram(ar);
 }
 
+ConstructPtr ArrayElementExpression::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_variable;
+    case 1:
+      return m_offset;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int ArrayElementExpression::getKidCount() const {
+  return 2;
+}
+
+int ArrayElementExpression::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_variable = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    case 1:
+      m_offset = boost::dynamic_pointer_cast<Expression>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_variable);
   ar->preOptimize(m_offset);

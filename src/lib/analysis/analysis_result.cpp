@@ -523,6 +523,25 @@ void AnalysisResult::inferTypes(int maxPass /* = 100 */) {
   ASSERT(false);
 }
 
+static void dumpVisitor(AnalysisResultPtr ar, StatementPtr s, void *data)
+{
+  s->dump(0, ar);
+}
+
+void AnalysisResult::dump() {
+  visitFiles(dumpVisitor, 0);
+}
+
+void AnalysisResult::visitFiles(void (*cb)(AnalysisResultPtr, StatementPtr, void*), void *data) {
+  AnalysisResultPtr ar = shared_from_this();
+  for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
+       iter != m_files.end(); ++iter) {
+    FileScopePtr file = iter->second;
+
+    file->visit(ar, cb, data);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // optimization functions
 

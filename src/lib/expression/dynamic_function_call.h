@@ -30,7 +30,7 @@ public:
                       ExpressionPtr name, ExpressionListPtr params,
                       const std::string *classname);
 
-  DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

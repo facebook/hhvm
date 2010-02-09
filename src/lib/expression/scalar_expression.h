@@ -36,7 +36,7 @@ public:
   // change case to lower so to make it case insensitive
   void toLower();
 
-  DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   virtual bool hasEffect() const { return false;}
   virtual bool isScalar() const { return true;}
   virtual bool isLiteralString() const;

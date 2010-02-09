@@ -53,6 +53,31 @@ void EncapsListExpression::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
+ConstructPtr EncapsListExpression::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_exps;
+    default:
+      return ConstructPtr();
+  }
+  ASSERT(0);
+}
+
+int EncapsListExpression::getKidCount() const {
+  return 1;
+}
+
+int EncapsListExpression::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_exps = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      return 1;
+    default:
+      return 0;
+  }
+  ASSERT(0);
+}
+
 ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_exps);
   if (m_type != '`' && m_type != '\'' && m_exps) {

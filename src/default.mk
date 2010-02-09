@@ -15,18 +15,18 @@ unexport SUB_CLEAN_DIRS
 # delete all intermediate files and built targets
 .PHONY: clobber
 clobber:
-	@$(RM) $(SUB_INTERMEDIATE_FILES) $(SUB_OBJECTS)
-	@$(RM) *.merge-left.* *.merge-right.* *.working www.pid
-	@$(RM) lib$(PROJECT_NAME).so lib$(PROJECT_NAME).a *~ $(OBJECTS:.o=)
-	@$(RM) $(filter-out $(SUB_PROGRAMS) $(SUB_LIB_TARGETS), $(TARGETS))
-	@$(RM) $(shell echo `find . -name "*.o"`)
-	@$(RM) $(shell echo `find . -name "*.d"`)
-	@$(RM) $(shell echo `find . -name "*~"`)
-	@$(RMDIR) gen-cpp
-	@for mdir in $(SUB_CLEAN_DIRS); do $(MAKE) -C $$mdir clobber; done
-	@for mdir in $(SUB_PROGRAMS); do $(MAKE) -C $$mdir clobber; done
-	@for mdir in $(SUB_LIB_TARGETS); do $(MAKE) -C $$mdir clobber; done
-	@for mdir in $(INTERMEDIATE_DIRS); do rm -fR $$mdir; done
+	$(V)$(RM) $(SUB_INTERMEDIATE_FILES) $(SUB_OBJECTS)
+	$(V)$(RM) *.merge-left.* *.merge-right.* *.working www.pid
+	$(V)$(RM) lib$(PROJECT_NAME).so lib$(PROJECT_NAME).a *~ $(OBJECTS:.o=)
+	$(V)$(RM) $(filter-out $(SUB_PROGRAMS) $(SUB_LIB_TARGETS), $(TARGETS))
+	$(V)$(RM) $(shell echo `find . -name "*.o"`)
+	$(V)$(RM) $(shell echo `find . -name "*.d"`)
+	$(V)$(RM) $(shell echo `find . -name "*~"`)
+	$(V)$(RMDIR) gen-cpp
+	$(V)for mdir in $(SUB_CLEAN_DIRS); do $(MAKE) -C $$mdir clobber; done
+	$(V)for mdir in $(SUB_PROGRAMS); do $(MAKE) -C $$mdir clobber; done
+	$(V)for mdir in $(SUB_LIB_TARGETS); do $(MAKE) -C $$mdir clobber; done
+	$(V)for mdir in $(INTERMEDIATE_DIRS); do rm -fR $$mdir; done
 
 .PHONY: clean
 clean: clobber
@@ -34,27 +34,27 @@ clean: clobber
 # delete targets only
 .PHONY: clear-targets
 cleartargets:
-	@$(RM) $(TARGETS)
-	@for mdir in $(SUB_PROGRAMS); do $(MAKE) -C $$mdir cleartargets; done
-	@for mdir in $(SUB_LIB_TARGETS); do $(MAKE) -C $$mdir cleartargets; done
+	$(V)$(RM) $(TARGETS)
+	$(V)for mdir in $(SUB_PROGRAMS); do $(MAKE) -C $$mdir cleartargets; done
+	$(V)for mdir in $(SUB_LIB_TARGETS); do $(MAKE) -C $$mdir cleartargets; done
 
 # default no-op "make install"
 .PHONY: install
 install:
-	@for mdir in $(SUB_PROGRAMS); do $(MAKE) -C $$mdir install; done
-	@for mdir in $(SUB_LIB_TARGETS); do $(MAKE) -C $$mdir install; done
+	$(V)for mdir in $(SUB_PROGRAMS); do $(MAKE) -C $$mdir install; done
+	$(V)for mdir in $(SUB_LIB_TARGETS); do $(MAKE) -C $$mdir install; done
 
 .PHONY: list-targets
 list-targets:
-	@echo $(TARGETS) | tr ' ' '\n'
-	@for mdir in $(SUB_PROGRAMS); do $(MAKE) -C $$mdir list-targets; done
-	@for mdir in $(SUB_LIB_TARGETS); do $(MAKE) -C $$mdir list-targets; done
+	$(V)echo $(TARGETS) | tr ' ' '\n'
+	$(V)for mdir in $(SUB_PROGRAMS); do $(MAKE) -C $$mdir list-targets; done
+	$(V)for mdir in $(SUB_LIB_TARGETS); do $(MAKE) -C $$mdir list-targets; done
 
 .PHONY: list-sources
 list-sources:
-	@echo $(SOURCES) | tr ' ' '\n'
-	@for mdir in $(SUB_PROGRAMS); do $(MAKE) -C $$mdir list-sources; done
-	@for mdir in $(SUB_LIB_TARGETS); do $(MAKE) -C $$mdir list-sources; done
+	$(V)echo $(SOURCES) | tr ' ' '\n'
+	$(V)for mdir in $(SUB_PROGRAMS); do $(MAKE) -C $$mdir list-sources; done
+	$(V)for mdir in $(SUB_LIB_TARGETS); do $(MAKE) -C $$mdir list-sources; done
 
 .EXPORT_ALL_VARIABLES:;
 unexport SUB_PROGRAMS SUB_LIB_TARGETS

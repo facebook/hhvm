@@ -73,6 +73,8 @@ GCC_VERSION = $(shell echo `gcc --version | head -1 | cut -d ' ' -f3`)
 ###############################################################################
 # Command line switches. For example, "make RELEASE=1".
 
+V = @
+NO_PRINT = $(if $(V),--no-print-directory,)
 INFINITE_LOOP_DETECTION = 1
 INFINITE_RECURSION_DETECTION = 1
 REQUEST_TIMEOUT_DETECTION = 1
@@ -197,22 +199,29 @@ EXTERNAL =
 ###############################################################################
 # Compilation
 
+ifneq ($(USE_CCACHE),)
+USE_CCACHE := $(wildcard /usr/bin/ccache)
+endif
+
 # To time compilation time and link time, run "TIME_BUILD=1 make -j1", and it
 # will generate time_build.out for analysis.
 ifdef TIME_BUILD
 TIMECMD = /usr/bin/time -f "%e %C" -o time_build.out --append
 NO_DISTCC = 1
+USE_CCACHE :=
 else
 TIMECMD =
 endif
-
-ifdef NO_DISTCC
-CC = $(TIMECMD) gcc
-CXX = $(TIMECMD) g++
-else
-CC = $(TIMECMD) distcc gcc
-CXX = $(TIMECMD) distcc g++
+ifneq ($(USE_CCACHE),)
+ifndef NO_DISTCC
+NO_DISTCC=1
 endif
+endif
+
+PREFIX := $(TIMECMD)$(if $(NO_DISTCC),, distcc)$(if $(USE_CCACHE), ccache)
+
+CC = $(PREFIX) gcc
+CXX = $(PREFIX) g++
 
 # Both $(CC) and $(CXX) will now generate .d dependency files.
 CPPFLAGS += -MMD -fPIC
@@ -548,8 +557,8 @@ $(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@)  $<
 endef
 else
 define COMPILE_CXX
-@echo 'Compiling $<...'
-@$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
+$(V)echo 'Compiling $<...'
+$(V)$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 endef
 endif
 
@@ -559,8 +568,8 @@ $(LD) $@ $(LDFLAGS) $(filter %.o,$^) $(LIBS)
 endef
 else
 define LINK_OBJECTS
-@echo 'Linking $@...'
-@$(LD) $@ $(LDFLAGS) $(filter %.o,$^) $(LIBS)
+$(V)echo 'Linking $@...'
+$(V)$(LD) $@ $(LDFLAGS) $(filter %.o,$^) $(LIBS)
 endef
 endif
 
@@ -590,24 +599,24 @@ $(GENERATED_CPP_SOURCES:%.c=%.o): %.o:%.c
 else
 
 $(CXX_NOOPT_SOURCES:%.cpp=%.o) $(GENERATED_CXX_NOOPT_SOURCES:%.cpp=%.o): %.o:%.cpp
-	@echo 'Compiling $<...'
-	@$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
+	$(V)echo 'Compiling $<...'
+	$(V)$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 
 $(CXX_SOURCES:%.cpp=%.o) $(GENERATED_CXX_SOURCES:%.cpp=%.o): %.o:%.cpp
-	@echo 'Compiling $<...'
-	@$(CXX) -c $(CPPFLAGS) $(OPT) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
+	$(V)echo 'Compiling $<...'
+	$(V)$(CXX) -c $(CPPFLAGS) $(OPT) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 
 $(C_SOURCES:%.c=%.o) $(GENERATED_C_SOURCES:%.c=%.o): %.o:%.c
-	@echo 'Compiling $<...'
-	@$(CC) -c $(CPPFLAGS) $(OPT) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
+	$(V)echo 'Compiling $<...'
+	$(V)$(CC) -c $(CPPFLAGS) $(OPT) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 
 $(GENERATED_CPP_SOURCES:%.c=%.o): %.o:%.c
-	@echo 'Compiling $<...'
-	@$(CXX) -c $(CPPFLAGS) $(OPT) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
+	$(V)echo 'Compiling $<...'
+	$(V)$(CXX) -c $(CPPFLAGS) $(OPT) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 
 %.o:%.cpp
-	@echo 'Compiling $<...'
-	@$(CXX) -c $(CPPFLAGS) $(OPT) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
+	$(V)echo 'Compiling $<...'
+	$(V)$(CXX) -c $(CPPFLAGS) $(OPT) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 
 endif
 
@@ -626,7 +635,7 @@ SUB_INTERMEDIATE_FILES = $(INTERMEDIATE_FILES)
 # SUB_CLEAN_DIRS without passing into child directories
 
 .DEFAULT:
-	@$(MAKE) --no-print-directory -f $(PROJECT_ROOT)/src/default.mk $@
+	$(V)$(MAKE) $(NO_PRINT) -f $(PROJECT_ROOT)/src/default.mk $@
 
 $(OBJECTS): $(GENERATED_SOURCES)
 
@@ -644,16 +653,16 @@ $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 else
 
 $(SHARED_LIB): $(OBJECTS)
-	@echo 'Linking $@...'
-	@$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wl,-soname,lib$(PROJECT_NAME).so -o $@ $(OBJECTS) $(EXTERNAL)
+	$(V)echo 'Linking $@...'
+	$(V)$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wl,-soname,lib$(PROJECT_NAME).so -o $@ $(OBJECTS) $(EXTERNAL)
 
 $(STATIC_LIB): $(OBJECTS)
-	@echo 'Linking $@...'
-	@$(AR) $@ $(OBJECTS)
+	$(V)echo 'Linking $@...'
+	$(V)$(AR) $@ $(OBJECTS)
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
-	@echo 'Linking $@...'
-	@$(LD) $@ $(LDFLAGS) $< $(LIBS)
+	$(V)echo 'Linking $@...'
+	$(V)$(LD) $@ $(LDFLAGS) $< $(LIBS)
 
 endif
 
@@ -662,20 +671,20 @@ $(APP_TARGET): $(OBJECTS) $(DEP_LIBS)
 
 .PHONY: $(LIB_TARGETS)
 $(LIB_TARGETS): $(CODEGEN_TARGETS)
-	@$(MAKE) --no-print-directory -C $@
+	$(V)$(MAKE) $(NO_PRINT) -C $@
 
 .PHONY: $(PROGRAMS)
 $(PROGRAMS): $(LIB_TARGETS)
-	@$(MAKE) --no-print-directory -C $@
+	$(V)$(MAKE) $(NO_PRINT) -C $@
 
 .PHONY: report
 report:
-	@echo "Time    PID  Source File"
-	@echo "---------------------------------------------"
-	@ps wwaxo pid,etime,command k start | grep distcc | grep -v grep | \
+	$(V)echo "Time    PID  Source File"
+	$(V)echo "---------------------------------------------"
+	$(V)ps wwaxo pid,etime,command k start | grep distcc | grep -v grep | \
 	sed 's/^\( *[0-9]\+\) \+\([0-9:]\+\) .* \([^ ]\+\)$$/\2 \1  \3/' | \
 	head -`tput lines`
 
 .PHONY: top
 top:
-	@watch $(MAKE) -s report
+	$(V)watch $(MAKE) -s report

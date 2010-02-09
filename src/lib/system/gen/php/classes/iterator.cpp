@@ -1218,7 +1218,7 @@ Variant c_appenditerator::t___call(Variant v_func, Variant v_params) {
   INCALL_HELPER(v_func);
   Variant eo_0;
   Variant eo_1;
-  return x_call_user_func_array(Array(ArrayInit(2).set(0, ArrayElement(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0))).set(1, ArrayElement(v_func)).create()), toArray(v_params));
+  return x_call_user_func_array((assignCallTemp(eo_0, o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0)),assignCallTemp(eo_1, v_func),Array(ArrayInit(2).set(0, ArrayElement(eo_0)).set(1, ArrayElement(eo_1)).create())), toArray(v_params));
 } /* function */
 Object co_arrayiterator(CArrRef params, bool init /* = true */) {
   return Object(p_arrayiterator(NEW(c_arrayiterator)())->dynCreate(params, init));

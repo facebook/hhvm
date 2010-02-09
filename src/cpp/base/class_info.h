@@ -126,7 +126,7 @@ public:
   /**
    * Return a list of declared classes.
    */
-  static Array GetClasses();
+  static Array GetClasses(bool declaredOnly);
 
   /**
    * Whether a class exists, without considering interfaces.
@@ -141,7 +141,7 @@ public:
   /**
    * Return a list of declared interfaces.
    */
-  static Array GetInterfaces();
+  static Array GetInterfaces(bool declaredOnly);
 
   /**
    * Whether an interface exists.
@@ -187,6 +187,11 @@ public:
   Attribute getAttribute() const { return m_attribute;}
   virtual const char *getName() const { return m_name;}
   const char *getDocComment() const { return m_docComment; }
+
+  /**
+   * Whether or not declaration is executed.
+   */
+  bool isDeclared() const;
 
   /**
    * Parents of this class.

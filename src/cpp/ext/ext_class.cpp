@@ -33,44 +33,23 @@ static String get_classname(Variant class_or_object) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Array f_get_declared_classes() {
-  return ClassInfo::GetClasses();
+  return ClassInfo::GetClasses(true);
 }
 
 Array f_get_declared_interfaces() {
-  return ClassInfo::GetInterfaces();
+  return ClassInfo::GetInterfaces(true);
 }
 
 bool f_class_exists(CStrRef class_name, bool autoload /* = false */) {
-  const ClassInfo::ClassInfo *info = ClassInfo::FindClass(class_name.data());
-  if (info) {
-    ClassInfo::Attribute attr = info->getAttribute();
-    if (attr & ClassInfo::IsSystem) return true;
-    if (attr & ClassInfo::IsVolatile) {
-      return ((Globals*)get_global_variables())->
-             class_exists(class_name.data());
-    } else {
-      return true;
-    }
-  } else {
-    return false;
-  }
+  const ClassInfo::ClassInfo *info =
+    ClassInfo::FindClass(class_name.data());
+  return info && info->isDeclared();
 }
 
 bool f_interface_exists(CStrRef interface_name, bool autoload /* = false */) {
   const ClassInfo::ClassInfo *info =
     ClassInfo::FindInterface(interface_name.data());
-  if (info) {
-    ClassInfo::Attribute attr = info->getAttribute();
-    if (attr & ClassInfo::IsSystem) return true;
-    if (attr & ClassInfo::IsVolatile) {
-      return ((Globals*)get_global_variables())->
-             interface_exists(interface_name.data());
-    } else {
-      return true;
-    }
-  } else {
-    return false;
-  }
+  return info && info->isDeclared();
 }
 
 Array f_get_class_methods(CVarRef class_or_object) {

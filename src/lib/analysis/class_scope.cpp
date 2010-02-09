@@ -46,8 +46,11 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
     m_kindOf(kindOf), m_parent(parent), m_bases(bases), m_attribute(0),
     m_redeclaring(-1), m_volatile(false), m_needStaticInitializer(false),
     m_derivesFromRedeclaring(FromNormal) {
+
   m_dynamic = Option::isDynamicClass(m_name);
-  m_volatile = m_dynamic; // dynamic class is also volatile
+
+  // dynamic class is also volatile
+  m_volatile = Option::AllClassesVolatile || m_dynamic;
 
   ASSERT(m_parent.empty() || (!m_bases.empty() && m_bases[0] == m_parent));
 }
@@ -58,7 +61,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
                        const std::vector<FunctionScopePtr> &methods)
   : BlockScope(name, StatementPtr(), BlockScope::ClassScope),
     m_kindOf(KindOfObjectClass), m_parent(parent), m_bases(bases),
-    m_attribute(0), m_redeclaring(-1), m_volatile(false),
+    m_attribute(0), m_dynamic(false), m_redeclaring(-1), m_volatile(false),
     m_needStaticInitializer(false),
     m_derivesFromRedeclaring(FromNormal) {
   BOOST_FOREACH(FunctionScopePtr f, methods) {
@@ -276,6 +279,7 @@ void ClassScope::setDynamic(AnalysisResultPtr ar, const std::string &name) {
 
 void ClassScope::setSystem() {
   setAttribute(ClassScope::System);
+  m_volatile = m_dynamic = false;
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
          m_functions.begin(); iter != m_functions.end(); ++iter) {
     iter->second[0]->setSystem();

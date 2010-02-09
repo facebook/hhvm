@@ -83,13 +83,15 @@ const ClassInfo::MethodInfo *ClassInfo::FindFunction(const char *name) {
   return ret;
 }
 
-Array ClassInfo::GetClasses() {
+Array ClassInfo::GetClasses(bool declaredOnly) {
   if (!s_loaded) Load();
 
   Array ret;
   for (ClassMap::const_iterator iter = s_classes.begin();
        iter != s_classes.end(); ++iter) {
-    ret.append(iter->first);
+    if (!declaredOnly || iter->second->isDeclared()) {
+      ret.append(iter->first);
+    }
   }
   if (s_hook) {
     Array dyn = s_hook->getClasses();
@@ -124,13 +126,15 @@ const ClassInfo *ClassInfo::FindClass(const char *name) {
   return NULL;
 }
 
-Array ClassInfo::GetInterfaces() {
+Array ClassInfo::GetInterfaces(bool declaredOnly) {
   if (!s_loaded) Load();
 
   Array ret;
   for (ClassMap::const_iterator iter = s_interfaces.begin();
        iter != s_interfaces.end(); ++iter) {
-    ret.append(iter->first);
+    if (!declaredOnly || iter->second->isDeclared()) {
+      ret.append(iter->first);
+    }
   }
   if (s_hook) {
     Array dyn = s_hook->getInterfaces();
@@ -269,6 +273,13 @@ void ClassInfo::GetClassProperties(PropertyVec &props, const char *classname) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // ClassInfo
+
+bool ClassInfo::isDeclared() const {
+  if (m_attribute & IsVolatile) {
+    return get_globals()->class_exists(m_name);
+  }
+  return true;
+}
 
 bool ClassInfo::derivesFrom(const char *name, bool considerInterface) const {
   ASSERT(name);

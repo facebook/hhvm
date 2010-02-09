@@ -272,7 +272,12 @@ public:
   static bool EnableXHP;
   static std::string FlibDirectory;
 
-  static bool AllDynamic;
+  /**
+   * "Dynamic function" means a function can be invoked dynamically.
+   * "Volatile class" means a class can be declared dynamically.
+   */
+  static bool AllFunctionsDynamic;
+  static bool AllClassesVolatile;
 
   /**
    * Optimizations

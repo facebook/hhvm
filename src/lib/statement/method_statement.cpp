@@ -265,7 +265,7 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (ar->isFirstPass()) {
     ar->getDependencyGraph()->addParent(DependencyGraph::KindOfFunctionCall,
                                         "", getFullName(), shared_from_this());
-    if (Option::AllDynamic || hasHphpNote("Dynamic") ||
+    if (Option::AllFunctionsDynamic || hasHphpNote("Dynamic") ||
         BuiltinSymbols::isDeclaredDynamic(m_name) ||
         Option::isDynamicFunction(m_method, m_name)) {
       funcScope->setDynamic();

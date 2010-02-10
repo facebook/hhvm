@@ -390,7 +390,11 @@ void RuntimeOption::Load(Hdf &config) {
     if (!SourceRoot.empty() && SourceRoot[SourceRoot.length() - 1] != '/') {
       SourceRoot += '/';
     }
-    FileCache::SourceRoot = SourceRoot;
+    if (!SourceRoot.empty()) {
+      // Guaranteed empty on empty load so avoid setting FileCache::SourceRoot
+      // since it may not be initialized
+      FileCache::SourceRoot = SourceRoot;
+    }
     FileCache = server["FileCache"].getString("");
     DefaultDocument = server["DefaultDocument"].getString("");
     ErrorDocument404 = server["ErrorDocument404"].getString("");

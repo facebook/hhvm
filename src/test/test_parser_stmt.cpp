@@ -96,28 +96,28 @@ bool TestParserStmt::TestClassStatement() {
     "class test {\n}\n");
 
   V("<?php class Test { public $data;}",
-    "class test {\n  public $data;\n}\n");
+    "class test {\n  public $data = null;\n}\n");
 
   V("<?php abstract class Test { public $data;}",
-    "abstract class test {\n  public $data;\n}\n");
+    "abstract class test {\n  public $data = null;\n}\n");
 
   V("<?php final class Test { public $data;}",
-    "final class test {\n  public $data;\n}\n");
+    "final class test {\n  public $data = null;\n}\n");
 
   V("<?php class Test extends Base { public $data;}",
-    "class test extends base {\n  public $data;\n}\n");
+    "class test extends base {\n  public $data = null;\n}\n");
 
   V("<?php class Test implements Base { public $data;}",
-    "class test implements base {\n  public $data;\n}\n");
+    "class test implements base {\n  public $data = null;\n}\n");
 
   V("<?php class Test implements Base,Base2 { public $data;}",
-    "class test implements base, base2 {\n  public $data;\n}\n");
+    "class test implements base, base2 {\n  public $data = null;\n}\n");
 
   V("<?php class Test { public $data; function test() {}}",
-    "class test {\n  public $data;\n  public function test() {\n  }\n}\n");
+    "class test {\n  public $data = null;\n  public function test() {\n  }\n}\n");
 
   V("<?php class Test { private $data; function test() {}}",
-    "class test {\n  private $data;\n  public function test() {\n  }\n}\n");
+    "class test {\n  private $data = null;\n  public function test() {\n  }\n}\n");
 
   V("<?php class Test { function test() {}}",
     "class test {\n  public function test() {\n  }\n}\n");
@@ -146,37 +146,37 @@ bool TestParserStmt::TestInterfaceStatement() {
 
 bool TestParserStmt::TestClassVariable() {
   V("<?php class Test { public $data;}",
-    "class test {\n  public $data;\n}\n");
+    "class test {\n  public $data = null;\n}\n");
 
   V("<?php class Test { protected $data;}",
-    "class test {\n  protected $data;\n}\n");
+    "class test {\n  protected $data = null;\n}\n");
 
   V("<?php class Test { private $data;}",
-    "class test {\n  private $data;\n}\n");
+    "class test {\n  private $data = null;\n}\n");
 
   V("<?php class Test { static $data;}",
-    "class test {\n  static $data;\n}\n");
+    "class test {\n  static $data = null;\n}\n");
 
   V("<?php class Test { abstract $data;}",
-    "class test {\n  abstract $data;\n}\n");
+    "class test {\n  abstract $data = null;\n}\n");
 
   V("<?php class Test { final $data;}",
-    "class test {\n  final $data;\n}\n");
+    "class test {\n  final $data = null;\n}\n");
 
   V("<?php class Test { private static $data;}",
-    "class test {\n  private static $data;\n}\n");
+    "class test {\n  private static $data = null;\n}\n");
 
   V("<?php class Test { private static $data=2;}",
     "class test {\n  private static $data = 2;\n}\n");
 
   V("<?php class Test { var $data,$data2;}",
-    "class test {\n  public $data, $data2;\n}\n");
+    "class test {\n  public $data = null, $data2 = null;\n}\n");
 
   V("<?php class Test { var $data,$data2=2;}",
-    "class test {\n  public $data, $data2 = 2;\n}\n");
+    "class test {\n  public $data = null, $data2 = 2;\n}\n");
 
   V("<?php class Test { var $data=2,$data2;}",
-    "class test {\n  public $data = 2, $data2;\n}\n");
+    "class test {\n  public $data = 2, $data2 = null;\n}\n");
 
   V("<?php class Test { var $data=2,$data2=3;}",
     "class test {\n  public $data = 2, $data2 = 3;\n}\n");
@@ -521,19 +521,19 @@ bool TestParserStmt::TestGlobalStatement() {
 
 bool TestParserStmt::TestStaticStatement() {
   V("<?php static $a;",
-    "static $a;\n");
+    "static $a = null;\n");
 
   V("<?php static $a = 1;",
     "static $a = 1;\n");
 
   V("<?php static $a, $b;",
-    "static $a, $b;\n");
+    "static $a = null, $b = null;\n");
 
   V("<?php static $a = 1, $b;",
-    "static $a = 1, $b;\n");
+    "static $a = 1, $b = null;\n");
 
   V("<?php static $a, $b = 1;",
-    "static $a, $b = 1;\n");
+    "static $a = null, $b = 1;\n");
 
   V("<?php static $a = \"$-\";",
     "static $a = '$-';\n");

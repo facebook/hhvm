@@ -3177,6 +3177,8 @@ bool TestCodeRun::TestCompilation() {
       "$obj->f(date('m/d/y H:i:s', 123456789));"
       "$v = date(\"m\",123456789)+1;");
 
+  // no side effect optimization met if() short
+  VCR("<?php if ($a) $a == 0;");
   return true;
 }
 

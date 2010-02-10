@@ -153,6 +153,6 @@ void ExpStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void ExpStatement::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (hasEffect() || Option::KeepStatementsWithNoEffect) {
     m_exp->outputCPP(cg, ar);
-    cg.printf(";\n");
   }
+  cg.printf(";\n");
 }

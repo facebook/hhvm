@@ -40,7 +40,7 @@ Variant f_gzfile(CStrRef filename, bool use_include_path /* = false */) {
   }
 
   Array ret;
-  String line;
+  Variant line;
   while (!(line = f_gzgets(stream)).isNull()) {
     ret.append(line);
   }

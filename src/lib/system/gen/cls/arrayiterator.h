@@ -43,7 +43,7 @@ class c_arrayiterator : virtual public c_iterator, virtual public c_arrayaccess,
   public: ObjectData *create(Variant v_array, Variant v_flags = 0LL /* SORT_REGULAR */);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
-  public: void t_append(p_iterator v_value);
+  public: void t_append(CVarRef v_value);
   public: bool t_asort();
   public: int t_count();
   public: Variant t_current();

@@ -31,7 +31,7 @@ class c_reflectionclass : virtual public c_reflector {
   DECLARE_INVOKES_FROM_EVAL
   void init();
   public: Variant m_name;
-  public: Array m_info;
+  public: Variant m_info;
   public: void t___construct(Variant v_name);
   public: ObjectData *create(Variant v_name);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);

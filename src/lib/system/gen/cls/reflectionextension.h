@@ -30,8 +30,8 @@ class c_reflectionextension : virtual public c_reflector {
   DECLARE_CLASS(reflectionextension, ReflectionExtension, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
   void init();
-  public: Variant m_name;
-  public: Array m_info;
+  public: String m_name;
+  public: Variant m_info;
   public: void t___construct(Variant v_name);
   public: ObjectData *create(Variant v_name);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);

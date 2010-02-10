@@ -64,10 +64,10 @@ inline bool f_gzrewind(CObjRef zp) {
 inline Variant f_gzgetc(CObjRef zp) {
   return f_fgetc(zp);
 }
-inline String f_gzgets(CObjRef zp, int64 length = 1024) {
+inline Variant f_gzgets(CObjRef zp, int64 length = 1024) {
   return f_fgets(zp, length);
 }
-inline String f_gzgetss(CObjRef zp, int64 length = 0,
+inline Variant f_gzgetss(CObjRef zp, int64 length = 0,
                         CStrRef allowable_tags = null_string) {
   return f_fgetss(zp, length, allowable_tags);
 }

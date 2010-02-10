@@ -43,7 +43,7 @@ Variant f_fopen(CStrRef filename, CStrRef mode, bool use_include_path = false,
                 CObjRef context = null_object);
 Variant f_popen(CStrRef command, CStrRef mode);
 bool f_fclose(CObjRef handle);
-int f_pclose(CObjRef handle);
+Variant f_pclose(CObjRef handle);
 Variant f_fseek(CObjRef handle, int64 offset, int64 whence = SEEK_SET);
 bool f_rewind(CObjRef handle);
 Variant f_ftell(CObjRef handle);
@@ -51,13 +51,13 @@ bool f_feof(CObjRef handle);
 Variant f_fstat(CObjRef handle);
 Variant f_fread(CObjRef handle, int64 length);
 Variant f_fgetc(CObjRef handle);
-String f_fgets(CObjRef handle, int64 length = 1024);
-String f_fgetss(CObjRef handle, int64 length = 0,
+Variant f_fgets(CObjRef handle, int64 length = 1024);
+Variant f_fgetss(CObjRef handle, int64 length = 0,
                 CStrRef allowable_tags = null_string);
 Variant f_fscanf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv = null_array);
 Variant f_fpassthru(CObjRef handle);
-int64 f_fwrite(CObjRef handle, CStrRef data, int64 length = 0);
-int64 f_fputs(CObjRef handle, CStrRef data, int64 length = 0);
+Variant f_fwrite(CObjRef handle, CStrRef data, int64 length = 0);
+Variant f_fputs(CObjRef handle, CStrRef data, int64 length = 0);
 Variant f_fprintf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv = null_array);
 Variant f_vfprintf(CObjRef handle, CStrRef format, CArrRef args);
 bool f_fflush(CObjRef handle);

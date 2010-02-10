@@ -406,6 +406,7 @@ Variant cw_reflectionfunctionabstract$os_invoke(const char *c, const char *s, CA
   return c_reflectionfunctionabstract::os_invoke(c, s, params, -1, fatal);
 }
 void c_reflectionfunctionabstract::init() {
+  m_info = null;
 }
 /* SRC: classes/reflection.php line 95 */
 Variant c_reflectionfunctionabstract::t_getname() {
@@ -1848,7 +1849,7 @@ Variant &c_reflectionclass::os_lval(const char *s, int64 hash) {
 }
 void c_reflectionclass::o_get(ArrayElementVec &props) const {
   props.push_back(NEW(ArrayElement)("name", m_name.isReferenced() ? ref(m_name) : m_name));
-  props.push_back(NEW(ArrayElement)("info", m_info));
+  props.push_back(NEW(ArrayElement)("info", m_info.isReferenced() ? ref(m_info) : m_info));
   c_ObjectData::o_get(props);
 }
 bool c_reflectionclass::o_exists(CStrRef s, int64 hash) const {
@@ -1899,10 +1900,14 @@ Variant c_reflectionclass::o_set(CStrRef s, int64 hash, CVarRef v,bool forInit /
 }
 Variant &c_reflectionclass::o_lval(CStrRef s, int64 hash) {
   if (hash < 0) hash = hash_string(s.data(), s.length());
-  switch (hash & 1) {
+  switch (hash & 3) {
     case 0:
       HASH_RETURN_STRING(0x0BCDB293DC3CBDDCLL, m_name,
                          name, 4);
+      break;
+    case 2:
+      HASH_RETURN_STRING(0x59E9384E33988B3ELL, m_info,
+                         info, 4);
       break;
     default:
       break;
@@ -1933,7 +1938,7 @@ ObjectData *c_reflectionclass::cloneImpl() {
 }
 void c_reflectionclass::cloneSet(c_reflectionclass *clone) {
   clone->m_name = m_name.isReferenced() ? ref(m_name) : m_name;
-  clone->m_info = m_info;
+  clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
   ObjectData::cloneSet(clone);
 }
 Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
@@ -2940,6 +2945,8 @@ Variant cw_reflectionclass$os_invoke(const char *c, const char *s, CArrRef param
   return c_reflectionclass::os_invoke(c, s, params, -1, fatal);
 }
 void c_reflectionclass::init() {
+  m_name = null;
+  m_info = null;
 }
 /* SRC: classes/reflection.php line 204 */
 void c_reflectionclass::t___construct(Variant v_name) {
@@ -3366,8 +3373,8 @@ Variant &c_reflectionextension::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
 void c_reflectionextension::o_get(ArrayElementVec &props) const {
-  props.push_back(NEW(ArrayElement)("name", m_name.isReferenced() ? ref(m_name) : m_name));
-  props.push_back(NEW(ArrayElement)("info", m_info));
+  props.push_back(NEW(ArrayElement)("name", m_name));
+  props.push_back(NEW(ArrayElement)("info", m_info.isReferenced() ? ref(m_info) : m_info));
   c_ObjectData::o_get(props);
 }
 bool c_reflectionextension::o_exists(CStrRef s, int64 hash) const {
@@ -3420,8 +3427,8 @@ Variant &c_reflectionextension::o_lval(CStrRef s, int64 hash) {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 1) {
     case 0:
-      HASH_RETURN_STRING(0x0BCDB293DC3CBDDCLL, m_name,
-                         name, 4);
+      HASH_RETURN_STRING(0x59E9384E33988B3ELL, m_info,
+                         info, 4);
       break;
     default:
       break;
@@ -3451,8 +3458,8 @@ ObjectData *c_reflectionextension::cloneImpl() {
   return obj;
 }
 void c_reflectionextension::cloneSet(c_reflectionextension *clone) {
-  clone->m_name = m_name.isReferenced() ? ref(m_name) : m_name;
-  clone->m_info = m_info;
+  clone->m_name = m_name;
+  clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
   ObjectData::cloneSet(clone);
 }
 Variant c_reflectionextension::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
@@ -3775,6 +3782,8 @@ Variant cw_reflectionextension$os_invoke(const char *c, const char *s, CArrRef p
   return c_reflectionextension::os_invoke(c, s, params, -1, fatal);
 }
 void c_reflectionextension::init() {
+  m_name = null;
+  m_info = null;
 }
 /* SRC: classes/reflection.php line 680 */
 void c_reflectionextension::t___construct(Variant v_name) {
@@ -4683,6 +4692,8 @@ Variant cw_reflectionmethod$os_invoke(const char *c, const char *s, CArrRef para
 }
 void c_reflectionmethod::init() {
   c_reflectionfunctionabstract::init();
+  m_name = null;
+  m_class = null;
 }
 /* SRC: classes/reflection.php line 587 */
 void c_reflectionmethod::t___construct(Variant v_cls, Variant v_name) {
@@ -5343,6 +5354,9 @@ Variant cw_reflectionproperty$os_invoke(const char *c, const char *s, CArrRef pa
   return c_reflectionproperty::os_invoke(c, s, params, -1, fatal);
 }
 void c_reflectionproperty::init() {
+  m_info = null;
+  m_name = null;
+  m_class = null;
 }
 /* SRC: classes/reflection.php line 495 */
 void c_reflectionproperty::t___construct(Variant v_cls, Variant v_name) {
@@ -6486,6 +6500,7 @@ Variant cw_reflectionparameter$os_invoke(const char *c, const char *s, CArrRef p
   return c_reflectionparameter::os_invoke(c, s, params, -1, fatal);
 }
 void c_reflectionparameter::init() {
+  m_info = null;
 }
 /* SRC: classes/reflection.php line 20 */
 void c_reflectionparameter::t___construct(Variant v_func, Variant v_param) {

@@ -2905,6 +2905,8 @@ Variant cw_exception$os_invoke(const char *c, const char *s, CArrRef params, boo
 void c_exception::init() {
   m_message = "Unknown exception";
   m_code = 0LL;
+  m_file = null;
+  m_line = null;
 }
 /* SRC: classes/exception.php line 9 */
 void c_exception::t___construct(Variant v_message /* = "" */, Variant v_code /* = 0LL */) {

@@ -59,11 +59,11 @@ f('gzeof', Boolean,
 f('gzgetc', Variant,
   array('zp' => Resource));
 
-f('gzgets', String,
+f('gzgets', Variant,
   array('zp' => Resource,
         'length' => array(Int64, '1024')));
 
-f('gzgetss', String,
+f('gzgetss', Variant,
   array('zp' => Resource,
         'length' => array(Int64, '0'),
         'allowable_tags' => array(String, 'null_string')));

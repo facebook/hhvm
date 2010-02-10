@@ -30,13 +30,13 @@ class c_appenditerator : virtual public c_outeriterator {
   DECLARE_CLASS(appenditerator, AppendIterator, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
   void init();
-  public: p_arrayiterator m_iterators;
+  public: Variant m_iterators;
   Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   public: void t___construct();
   public: ObjectData *create();
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
-  public: void t_append(p_iterator v_it);
+  public: void t_append(Variant v_it);
   public: Variant t_getinneriterator();
   public: void t_rewind();
   public: bool t_valid();

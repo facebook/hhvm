@@ -686,6 +686,8 @@ Variant cw_arrayiterator$os_invoke(const char *c, const char *s, CArrRef params,
   return c_arrayiterator::os_invoke(c, s, params, -1, fatal);
 }
 void c_arrayiterator::init() {
+  m_arr = null;
+  m_flags = null;
 }
 /* SRC: classes/iterator.php line 38 */
 void c_arrayiterator::t___construct(Variant v_array, Variant v_flags /* = 0LL (SORT_REGULAR) */) {
@@ -696,9 +698,9 @@ void c_arrayiterator::t___construct(Variant v_array, Variant v_flags /* = 0LL (S
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/iterator.php line 43 */
-void c_arrayiterator::t_append(p_iterator v_value) {
+void c_arrayiterator::t_append(CVarRef v_value) {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::append);
-  m_arr.append((((Object)(v_value))));
+  m_arr.append((v_value));
 } /* function */
 /* SRC: classes/iterator.php line 47 */
 bool c_arrayiterator::t_asort() {
@@ -829,7 +831,7 @@ Variant &c_appenditerator::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
 void c_appenditerator::o_get(ArrayElementVec &props) const {
-  props.push_back(NEW(ArrayElement)("iterators", m_iterators));
+  props.push_back(NEW(ArrayElement)("iterators", m_iterators.isReferenced() ? ref(m_iterators) : m_iterators));
   c_ObjectData::o_get(props);
 }
 bool c_appenditerator::o_exists(CStrRef s, int64 hash) const {
@@ -868,6 +870,15 @@ Variant c_appenditerator::o_set(CStrRef s, int64 hash, CVarRef v,bool forInit /*
   return c_ObjectData::o_set(s, hash, v, forInit);
 }
 Variant &c_appenditerator::o_lval(CStrRef s, int64 hash) {
+  if (hash < 0) hash = hash_string(s.data(), s.length());
+  switch (hash & 1) {
+    case 0:
+      HASH_RETURN_STRING(0x1F6E21DFD4AF8244LL, m_iterators,
+                         iterators, 9);
+      break;
+    default:
+      break;
+  }
   return c_ObjectData::o_lval(s, hash);
 }
 Variant c_appenditerator::os_constant(const char *s) {
@@ -893,7 +904,7 @@ ObjectData *c_appenditerator::cloneImpl() {
   return obj;
 }
 void c_appenditerator::cloneSet(c_appenditerator *clone) {
-  clone->m_iterators = m_iterators;
+  clone->m_iterators = m_iterators.isReferenced() ? ref(m_iterators) : m_iterators;
   ObjectData::cloneSet(clone);
 }
 Variant c_appenditerator::doCall(Variant v_name, Variant v_arguments, bool fatal) {
@@ -1146,68 +1157,69 @@ Variant cw_appenditerator$os_invoke(const char *c, const char *s, CArrRef params
   return c_appenditerator::os_invoke(c, s, params, -1, fatal);
 }
 void c_appenditerator::init() {
+  m_iterators = null;
 }
 /* SRC: classes/iterator.php line 148 */
 void c_appenditerator::t___construct() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::__construct);
   bool oldInCtor = gasInCtor(true);
-  ((Object)(m_iterators = ((Object)(create_object("arrayiterator", Array())))));
+  m_iterators = ((Object)(create_object("arrayiterator", Array())));
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/iterator.php line 152 */
-void c_appenditerator::t_append(p_iterator v_it) {
+void c_appenditerator::t_append(Variant v_it) {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::append);
-  m_iterators->t_append(((Object)(v_it)));
+  m_iterators.o_invoke_few_args("append", 0x4DEE4A472DC69EC2LL, 1, v_it);
 } /* function */
 /* SRC: classes/iterator.php line 156 */
 Variant c_appenditerator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::getInnerIterator);
-  return m_iterators->o_invoke_few_args("current", 0x5B3A4A72846B21DCLL, 0);
+  return m_iterators.o_invoke_few_args("current", 0x5B3A4A72846B21DCLL, 0);
 } /* function */
 /* SRC: classes/iterator.php line 160 */
 void c_appenditerator::t_rewind() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::rewind);
-  m_iterators->o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
-  if (toBoolean(m_iterators->o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
+  m_iterators.o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
+  if (toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
     o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
   }
 } /* function */
 /* SRC: classes/iterator.php line 167 */
 bool c_appenditerator::t_valid() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::valid);
-  return toBoolean(m_iterators->o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) && toBoolean(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0));
+  return toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) && toBoolean(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0));
 } /* function */
 /* SRC: classes/iterator.php line 171 */
 Variant c_appenditerator::t_current() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::current);
-  return toBoolean(m_iterators->o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("current", 0x5B3A4A72846B21DCLL, 0))) : ((Variant)(null));
+  return toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("current", 0x5B3A4A72846B21DCLL, 0))) : ((Variant)(null));
 } /* function */
 /* SRC: classes/iterator.php line 180 */
 Variant c_appenditerator::t_key() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::key);
-  return toBoolean(m_iterators->o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("key", 0x56EDB60C824E8C51LL, 0))) : ((Variant)(null));
+  return toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("key", 0x56EDB60C824E8C51LL, 0))) : ((Variant)(null));
 } /* function */
 /* SRC: classes/iterator.php line 184 */
 void c_appenditerator::t_next() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::next);
-  if (!(toBoolean(m_iterators->o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)))) {
+  if (!(toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)))) {
     return;
   }
   o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);
   if (toBoolean(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
     return;
   }
-  m_iterators->o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);
+  m_iterators.o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);
   LOOP_COUNTER(2);
   {
-    while (toBoolean(m_iterators->o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
+    while (toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
       LOOP_COUNTER_CHECK(2);
       {
         o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
         if (toBoolean(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
           return;
         }
-        m_iterators->o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);
+        m_iterators.o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);
       }
     }
   }

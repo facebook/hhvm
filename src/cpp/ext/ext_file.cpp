@@ -36,12 +36,19 @@
 #include <cpp/base/util/request_local.h>
 #include <cpp/base/server/static_content_cache.h>
 
-#define CHECK_SYSTEM(exp)                                \
-  if ((exp) != 0) {                                      \
+#define CHECK_HANDLE(handle, f)                         \
+  File *f = handle.getTyped<File>(true, true);          \
+  if (f == NULL) {                                      \
+    Logger::Warning("Not a valid stream resource");     \
+    return false;                                       \
+  }                                                     \
+
+#define CHECK_SYSTEM(exp)                                 \
+  if ((exp) != 0) {                                       \
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,  \
-                    Util::safe_strerror(errno).c_str()); \
-    return false;                                        \
-  }                                                      \
+                    Util::safe_strerror(errno).c_str());  \
+    return false;                                         \
+  }                                                       \
 
 // libxml/xpathInternals.h defines CHECK_ERROR,
 // we need to undef it first
@@ -129,28 +136,28 @@ Variant f_popen(CStrRef command, CStrRef mode) {
 }
 
 bool f_fclose(CObjRef handle) {
-  SmartObject<File> f = handle.getTyped<File>(true, true);
-  if (f.get() == NULL) {
-    Logger::Warning("Not a valid stream resource");
-    return false;
-  }
+  CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->close());
 }
 
-int f_pclose(CObjRef handle) {
-  return CHECK_ERROR(handle.getTyped<File>()->close());
+Variant f_pclose(CObjRef handle) {
+  CHECK_HANDLE(handle, f);
+  return CHECK_ERROR(f->close());
 }
 
 Variant f_fseek(CObjRef handle, int64 offset, int64 whence /* = SEEK_SET */) {
-  return CHECK_ERROR(handle.getTyped<File>()->seek(offset, whence)) ? 0 : -1;
+  CHECK_HANDLE(handle, f);
+  return CHECK_ERROR(f->seek(offset, whence)) ? 0 : -1;
 }
 
 bool f_rewind(CObjRef handle) {
-  return CHECK_ERROR(handle.getTyped<File>()->rewind());
+  CHECK_HANDLE(handle, f);
+  return CHECK_ERROR(f->rewind());
 }
 
 Variant f_ftell(CObjRef handle) {
-  int64 ret = handle.getTyped<File>()->tell();
+  CHECK_HANDLE(handle, f);
+  int64 ret = f->tell();
   if (!CHECK_ERROR(ret != -1)) {
     return false;
   }
@@ -158,41 +165,44 @@ Variant f_ftell(CObjRef handle) {
 }
 
 bool f_feof(CObjRef handle) {
-  return handle.getTyped<File>()->eof();
+  CHECK_HANDLE(handle, f);
+  return f->eof();
 }
 
 Variant f_fstat(CObjRef handle) {
-  PlainFile *file = handle.getTyped<PlainFile>();
+  PlainFile *file = handle.getTyped<PlainFile>(true, true);
+  if (file == NULL) {
+    Logger::Warning("Not a valid stream resource");
+    return false;
+  }
   struct stat sb;
   CHECK_SYSTEM(fstat(file->fd(), &sb));
   return stat_impl(&sb);
 }
 
 Variant f_fread(CObjRef handle, int64 length) {
-  return handle.getTyped<File>()->read(length);
+  CHECK_HANDLE(handle, f);
+  return f->read(length);
 }
 
 Variant f_fgetc(CObjRef handle) {
-  int result = handle.getTyped<File>()->getc();
+  CHECK_HANDLE(handle, f);
+  int result = f->getc();
   if (result == EOF) {
     return false;
   }
   return String::FromChar(result);
 }
 
-String f_fgets(CObjRef handle, int64 length /* = 1024 */) {
+Variant f_fgets(CObjRef handle, int64 length /* = 1024 */) {
   if (length < 0) {
     throw InvalidArgumentException("length", "(negative)");
   }
-  SmartObject<File> f = handle.getTyped<File>(true, true);
-  if (f.get() == NULL) {
-    Logger::Warning("Not a valid stream resource");
-    return "";
-  }
+  CHECK_HANDLE(handle, f);
   return f->readLine(length);
 }
 
-String f_fgetss(CObjRef handle, int64 length /* = 0 */,
+Variant f_fgetss(CObjRef handle, int64 length /* = 0 */,
                 CStrRef allowable_tags /* = null_string */) {
   String ret = f_fgets(handle, length);
   if (!ret.empty()) {
@@ -202,47 +212,55 @@ String f_fgetss(CObjRef handle, int64 length /* = 0 */,
 }
 
 Variant f_fscanf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv /* = null_array */) {
-  File *file = handle.getTyped<File>();
+  CHECK_HANDLE(handle, f);
   StringBuffer str;
-  str.read(file);
+  str.read(f);
   return f_sscanf(_argc, str.detach(), format, _argv);
 }
 
 Variant f_fpassthru(CObjRef handle) {
-  return handle.getTyped<File>()->print();
+  CHECK_HANDLE(handle, f);
+  return f->print();
 }
 
-int64 f_fwrite(CObjRef handle, CStrRef data, int64 length /* = 0 */) {
-  int64 ret = handle.getTyped<File>()->write(data, length);
+Variant f_fwrite(CObjRef handle, CStrRef data, int64 length /* = 0 */) {
+  CHECK_HANDLE(handle, f);
+  int64 ret = f->write(data, length);
   if (ret < 0) ret = 0;
   return ret;
 }
 
-int64 f_fputs(CObjRef handle, CStrRef data, int64 length /* = 0 */) {
-  int64 ret = handle.getTyped<File>()->write(data, length);
+Variant f_fputs(CObjRef handle, CStrRef data, int64 length /* = 0 */) {
+  CHECK_HANDLE(handle, f);
+  int64 ret = f->write(data, length);
   if (ret < 0) ret = 0;
   return ret;
 }
 
 Variant f_fprintf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv /* = null_array */) {
-  return handle.getTyped<File>()->printf(format, _argv);
+  CHECK_HANDLE(handle, f);
+  return f->printf(format, _argv);
 }
 
 Variant f_vfprintf(CObjRef handle, CStrRef format, CArrRef args) {
-  return handle.getTyped<File>()->printf(format, args);
+  CHECK_HANDLE(handle, f);
+  return f->printf(format, args);
 }
 
 bool f_fflush(CObjRef handle) {
-  return CHECK_ERROR(handle.getTyped<File>()->flush());
+  CHECK_HANDLE(handle, f);
+  return CHECK_ERROR(f->flush());
 }
 
 bool f_ftruncate(CObjRef handle, int64 size) {
-  return CHECK_ERROR(handle.getTyped<File>()->truncate(size));
+  CHECK_HANDLE(handle, f);
+  return CHECK_ERROR(f->truncate(size));
 }
 
 bool f_flock(CObjRef handle, int operation, Variant wouldblock /* = null */) {
+  CHECK_HANDLE(handle, f);
   bool block = false;
-  bool ret = handle.getTyped<File>()->lock(operation, block);
+  bool ret = f->lock(operation, block);
   wouldblock = block;
   return ret;
 }
@@ -255,8 +273,8 @@ Variant f_fputcsv(CObjRef handle, CArrRef fields, CStrRef delimiter /* = "," */,
   if (enclosure.size() != 1) {
     throw InvalidArgumentException("enclosure", enclosure.data());
   }
-  return handle.getTyped<File>()->writeCSV(fields, delimiter.charAt(0),
-                                           enclosure.charAt(0));
+  CHECK_HANDLE(handle, f);
+  return f->writeCSV(fields, delimiter.charAt(0), enclosure.charAt(0));
 }
 
 Variant f_fgetcsv(CObjRef handle, int64 length /* = 0 */,
@@ -268,8 +286,8 @@ Variant f_fgetcsv(CObjRef handle, int64 length /* = 0 */,
   if (enclosure.size() != 1) {
     throw InvalidArgumentException("enclosure", enclosure.data());
   }
-  Array ret = handle.getTyped<File>()->readCSV(length, delimiter.charAt(0),
-                                               enclosure.charAt(0));
+  CHECK_HANDLE(handle, f);
+  Array ret = f->readCSV(length, delimiter.charAt(0), enclosure.charAt(0));
   if (!ret.isNull()) {
     return ret;
   }
@@ -308,7 +326,11 @@ Variant f_file_put_contents(CStrRef filename, CVarRef data,
   switch (data.getType()) {
   case KindOfObject:
     {
-      File *fsrc = data.toObject().getTyped<File>();
+      File *fsrc = data.toObject().getTyped<File>(true, true);
+      if (fsrc == NULL) {
+        Logger::Warning("Not a valid stream resource");
+        return false;
+      }
       while (true) {
         char buffer[1024];
         int len = fsrc->readImpl(buffer, sizeof(buffer));

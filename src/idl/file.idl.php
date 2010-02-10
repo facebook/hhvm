@@ -18,7 +18,7 @@ f('popen', Variant,
 f('fclose', Boolean,
   array('handle' => Resource));
 
-f('pclose', Int32,
+f('pclose', Variant,
   array('handle' => Resource));
 
 f('fseek', Variant,
@@ -45,11 +45,11 @@ f('fread', Variant,
 f('fgetc', Variant,
   array('handle' => Resource));
 
-f('fgets', String,
+f('fgets', Variant,
   array('handle' => Resource,
         'length' => array(Int64, '1024')));
 
-f('fgetss', String,
+f('fgetss', Variant,
   array('handle' => Resource,
         'length' => array(Int64, '0'),
         'allowable_tags' => array(String, 'null_string')));
@@ -62,12 +62,12 @@ f('fscanf', Variant,
 f('fpassthru', Variant,
   array('handle' => Resource));
 
-f('fwrite', Int64,
+f('fwrite', Variant,
   array('handle' => Resource,
         'data' => String,
         'length' => array(Int64, '0')));
 
-f('fputs', Int64,
+f('fputs', Variant,
   array('handle' => Resource,
         'data' => String,
         'length' => array(Int64, '0')));

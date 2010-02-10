@@ -231,9 +231,9 @@ inline String f_mysql_get_client_info() {
 }
 inline Variant f_mysql_set_charset(CStrRef charset,
                                    CVarRef link_identifier = null) {
-  throw NotSupportedException(__func__, "added in MySQL 4.1.13");
-  //return mysql_set_character_set(MySQL::GetConn(link_identifier),
-  //                               charset.data()) == 0;
+  MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (!conn) return null;
+  return !mysql_set_character_set(conn, charset.data());
 }
 inline Variant f_mysql_ping(CVarRef link_identifier = null) {
   MYSQL *conn = MySQL::GetConn(link_identifier);

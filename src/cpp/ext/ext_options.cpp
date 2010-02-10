@@ -104,7 +104,8 @@ bool f_extension_loaded(CStrRef name) {
     !strcasecmp(name, "bcmath") ||
     !strcasecmp(name, "spl") ||
     !strcasecmp(name, "curl") ||
-    !strcasecmp(name, "simplexml");
+    !strcasecmp(name, "simplexml") ||
+    !strcasecmp(name, "mysql");
 }
 
 Array f_get_loaded_extensions(bool zend_extensions /* = false */) {

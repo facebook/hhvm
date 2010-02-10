@@ -102,14 +102,10 @@ bool TestExtMysql::test_mysql_pconnect() {
 }
 
 bool TestExtMysql::test_mysql_set_charset() {
-  try {
-    Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME,
-                                   TEST_PASSWORD);
-    VERIFY(f_mysql_set_charset("utf8", conn));
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  Variant conn = f_mysql_connect(TEST_HOSTNAME, TEST_USERNAME,
+                                 TEST_PASSWORD);
+  VERIFY(f_mysql_set_charset("utf8", conn));
+  return Count(true);
 }
 
 bool TestExtMysql::test_mysql_ping() {

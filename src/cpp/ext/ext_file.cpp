@@ -1197,7 +1197,12 @@ static DIR *get_dir(CObjRef dir_handle) {
     }
   }
   if (obj.get()) {
-    return obj.getTyped<Directory>()->dir;
+    Directory *d = obj.getTyped<Directory>(true, true);
+    if (d == NULL) {
+      Logger::Warning("Not a valid directory");
+      return NULL;
+    }
+    return d->dir;
   }
   return NULL;
 }
@@ -1291,7 +1296,12 @@ void f_closedir(CObjRef dir_handle) {
     if (same(s_directory_data->defaultDirectory, obj)) {
       s_directory_data->defaultDirectory = NULL;
     }
-    obj.getTyped<Directory>()->close();
+    Directory *d = obj.getTyped<Directory>(true, true);
+    if (d == NULL) {
+      Logger::Warning("Not a valid directory");
+    } else {
+      d->close();
+    }
   }
 }
 

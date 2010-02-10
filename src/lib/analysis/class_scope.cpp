@@ -50,7 +50,7 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
   m_dynamic = Option::isDynamicClass(m_name);
 
   // dynamic class is also volatile
-  m_volatile = Option::AllClassesVolatile || m_dynamic;
+  m_volatile = Option::AllVolatile || m_dynamic;
 
   ASSERT(m_parent.empty() || (!m_bases.empty() && m_bases[0] == m_parent));
 }

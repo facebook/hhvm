@@ -19,6 +19,7 @@
 #include <cpp/base/externals.h>
 #include <cpp/base/class_info.h>
 #include <cpp/base/source_info.h>
+#include <cpp/base/runtime_option.h>
 #include <lib/system/gen/php/classes/reflection.h>
 #include <cpp/base/string_util.h>
 
@@ -235,9 +236,13 @@ Array f_hphp_get_class_info(CVarRef name) {
     const char *file =
       SourceInfo::TheSourceInfo.getClassDeclaringFile(className.data());
     if (!file) file = "";
-    ret.set("file",       file);
-    ret.set("line1",      0);
-    ret.set("line2",      0);
+    if (file[0] != '/') {
+      ret.set("file", String(RuntimeOption::SourceRoot + file));
+    } else {
+      ret.set("file", file);
+    }
+    ret.set("line1", 0);
+    ret.set("line2", 0);
     const char *dc = cls->getDocComment();
     if (dc) {
       ret.set("doc", dc);
@@ -267,9 +272,13 @@ Array f_hphp_get_function_info(CStrRef name) {
   const char *file =
     SourceInfo::TheSourceInfo.getFunctionDeclaringFile(name.data());
   if (!file) file = "";
-  ret.set("file",       file);
-  ret.set("line1",      0);
-  ret.set("line2",      0);
+  if (file[0] != '/') {
+    ret.set("file", String(RuntimeOption::SourceRoot + file));
+  } else {
+    ret.set("file", file);
+  }
+  ret.set("line1", 0);
+  ret.set("line2", 0);
   const char *dc = info->docComment;
   if (dc) {
     ret.set("doc", dc);

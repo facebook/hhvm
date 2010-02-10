@@ -273,11 +273,11 @@ public:
   static std::string FlibDirectory;
 
   /**
-   * "Dynamic function" means a function can be invoked dynamically.
-   * "Volatile class" means a class can be declared dynamically.
+   * "Dynamic" means a function or a method can be invoked dynamically.
+   * "Volatile" means a class or a function can be declared dynamically.
    */
-  static bool AllFunctionsDynamic;
-  static bool AllClassesVolatile;
+  static bool AllDynamic;
+  static bool AllVolatile;
 
   /**
    * Optimizations

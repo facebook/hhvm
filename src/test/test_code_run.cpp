@@ -2704,7 +2704,7 @@ bool TestCodeRun::TestDynamicFunctions() {
 }
 
 bool TestCodeRun::TestDynamicMethods() {
-  Option::AllFunctionsDynamic = true;
+  Option::AllDynamic = true;
   VCR("<?php "
       "class A { public function test() { print 'in A';} } "
       "class B extends A { public function test() { print 'in B';} } "

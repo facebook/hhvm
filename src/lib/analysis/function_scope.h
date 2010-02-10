@@ -101,6 +101,7 @@ public:
 
   void setSystem() {
     m_system = true;
+    m_volatile = false;
   }
 
   void setStatic();

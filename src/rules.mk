@@ -383,7 +383,7 @@ CPPFLAGS += -DUSE_TLS
 endif
 
 # facebook specific stuff
-CPPFLAGS += -DHAVE_XHP
+CPPFLAGS += -DHAVE_XHP -DHAVE_PHPT
 
 ###############################################################################
 # Linking

@@ -90,7 +90,7 @@ void FunctionStatement::analyzeProgram(AnalysisResultPtr ar) {
   FunctionScopePtr func = ar->getFunctionScope(); // containing function scope
   FunctionScopePtr fs = m_funcScope.lock();
   // redeclared functions are automatically volatile
-  if (fs->isVolatile()) {
+  if (func && fs->isVolatile()) {
     func->getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
   }
   MethodStatement::analyzeProgram(ar);

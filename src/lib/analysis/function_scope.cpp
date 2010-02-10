@@ -85,6 +85,10 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
     m_variables->setAttribute(VariableTable::ContainsGetDefinedVars);
   }
 
+  if (m_stmt && Option::AllVolatile) {
+    m_volatile = true;
+  }
+
   m_dynamic = Option::isDynamicFunction(method, m_name) ||
     Option::EnableEval == Option::FullEval;
   if (modifiers) {

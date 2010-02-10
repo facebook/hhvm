@@ -218,8 +218,8 @@ bool Option::FlattenInvoke = true;
 int Option::InlineFunctionThreshold = -1;
 bool Option::ControlEvalOrder = true;
 
-bool Option::AllFunctionsDynamic = false;
-bool Option::AllClassesVolatile = false;
+bool Option::AllDynamic = false;
+bool Option::AllVolatile = false;
 
 std::string Option::FlibDirectory;
 
@@ -502,8 +502,8 @@ void Option::Load(Hdf &config) {
   EnableXHP = config["EnableXHP"].getBool();
   RTTIOutputFile = config["RTTIOutputFile"].getString();
   EnableEval = (EvalLevel)config["EnableEval"].getByte(0);
-  AllFunctionsDynamic = config["AllFunctionsDynamic"].getBool();
-  AllClassesVolatile = config["AllClassesVolatile"].getBool();
+  AllDynamic = config["AllDynamic"].getBool();
+  AllVolatile = config["AllVolatile"].getBool();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

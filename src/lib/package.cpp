@@ -106,7 +106,9 @@ void Package::addDirectory(const char *path, bool force) {
   m_directories.insert(path);
 
   addDirectory(path, "*.php", force);
+#ifdef HAVE_PHPT
   addDirectory(path, "*.phpt", force);
+#endif
   addDirectory(path, "", force); // look for PHP files without postfix
 
   if (m_hookHandler) {
@@ -212,13 +214,14 @@ void Package::findNonPHPFiles(vector<string> &out, const char *path,
       // ending with .php
       continue;
     }
+#ifdef HAVE_PHPT
     if (len >= 5 && ename[len - 5] == '.' && ename[len - 4] == 'p' &&
         ename[len - 3] == 'h' && ename[len - 2] == 'p' &&
         ename[len - 1] == 't') {
       // ending with .phpt
       continue;
     }
-
+#endif
     string fullname = string(path) + "/" + ename;
     if (!exclude ||
         Option::PackageExcludeStaticFiles.find(fullname) ==

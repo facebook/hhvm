@@ -89,8 +89,16 @@ Array ClassInfo::GetClasses(bool declaredOnly) {
   Array ret;
   for (ClassMap::const_iterator iter = s_classes.begin();
        iter != s_classes.end(); ++iter) {
-    if (!declaredOnly || iter->second->isDeclared()) {
+    if (!declaredOnly || !(iter->second->m_attribute & IsVolatile)) {
       ret.append(iter->first);
+    }
+  }
+  // This way, the order of newly declared classes can be more consistent
+  // with PHP.
+  if (declaredOnly) {
+    Array classes = get_globals()->getVolatileClasses();
+    for (ArrayIter iter(classes); iter; ++iter) {
+      ret.append(iter.first());
     }
   }
   if (s_hook) {

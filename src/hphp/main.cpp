@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
     if (ret == 0) {
 // This forking is needed, if parser holds large amount of memory and later
 // Process::Exec() will try to fork with failures.
-#if 1
+#if HAVE_LARGE_COMPILATION
       int pid = fork();
       if (pid == 0) {
         ret = process(po);
@@ -484,7 +484,7 @@ int process(const ProgramOptions &po) {
     Logger::Info("%dMB %s saved", (int64)sb.st_size/(1024*1024),
                  po.filecache.c_str());
   }
-  
+
   if (po.dump) {
     ar->dump();
   }

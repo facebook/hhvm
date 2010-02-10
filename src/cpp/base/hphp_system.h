@@ -80,6 +80,10 @@ public:
     return m_dynamicConstants;
   }
 
+  Array getVolatileClasses() const {
+    return m_volatileClasses;
+  }
+
   bool function_exists(const char *name) {
     return m_volatileFunctions.exists(Util::toLower(name).c_str());
   }

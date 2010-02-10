@@ -389,9 +389,6 @@ void ExecutionContext::onTick() {
 }
 
 void ExecutionContext::onError(const Exception &e) {
-  if (RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log("Unhandled error: ", e);
-  }
   int errline = 0;
   String errfile;
   Array backtrace;
@@ -411,6 +408,10 @@ void ExecutionContext::onError(const Exception &e) {
     backtrace = stackTraceToBackTrace(e.getStackTrace());
   }
 
+  if (RuntimeOption::AlwaysLogUnhandledExceptions) {
+    Logger::Log("Unhandled error: ", e, errfile.c_str(), errline);
+  }
+
   RequestData::Data *data = s_request_data->data;
   // For errors: if the user handler function returns FALSE then the normal
   // error handler continues. Pass -1LL so that we log all the errors.
@@ -425,7 +426,7 @@ void ExecutionContext::onError(const Exception &e) {
   data->lastError = String(e.getMessage());
 
   if (!RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log("Unhandled error: ", e);
+    Logger::Log("Unhandled error: ", e, errfile.c_str(), errline);
   }
 }
 

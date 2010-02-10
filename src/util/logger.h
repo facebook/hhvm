@@ -56,7 +56,8 @@ public:
   static void Info(const char *fmt, ...);
   static void Verbose(const char *fmt, ...);
 
-  static void Log(const char *type, const Exception &e);
+  static void Log(const char *type, const Exception &e,
+                  const char *file = NULL, int line = 0);
 
   static void VSNPrintf(std::string &msg, const char *fmt, va_list ap);
 

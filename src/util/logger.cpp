@@ -95,12 +95,18 @@ void Logger::Log(const char *fmt, va_list ap) {
   Log(msg, NULL);
 }
 
-void Logger::Log(const char *type, const Exception &e) {
+void Logger::Log(const char *type, const Exception &e,
+                 const char *file /* = NULL */, int line /* = 0 */) {
   if (s_logger->silenced) return;
   if (!UseLogAggregator && !UseLogFile) return;
 
   std::string msg = type;
   msg += e.getMessage();
+  if (file && file[0]) {
+    ostringstream os;
+    os << " in " << file << " on line " << line;
+    msg += os.str();
+  }
   Log(msg, &e.getStackTrace());
 }
 

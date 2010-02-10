@@ -241,7 +241,7 @@ void ExecutionContext::silenceDec() {
 }
 
 bool ExecutionContext::isSilenced() {
-  return (m_silencer > 0);
+  return !RuntimeOption::NoSilencer && m_silencer > 0;
 }
 
 void ExecutionContext::resetCurrentBuffer() {

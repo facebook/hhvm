@@ -40,6 +40,7 @@ std::string RuntimeOption::LogAggregatorFile;
 std::string RuntimeOption::LogAggregatorDatabase;
 int RuntimeOption::LogAggregatorSleepSeconds = 10;
 bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
+bool RuntimeOption::NoSilencer = false;
 bool RuntimeOption::EnableApplicationLog = true;
 
 bool RuntimeOption::ThrowBadTypeExceptions = false;
@@ -315,6 +316,7 @@ void RuntimeOption::Load(Hdf &config) {
 
     AlwaysLogUnhandledExceptions =
       logger["AlwaysLogUnhandledExceptions"].getBool(true);
+    NoSilencer = logger["NoSilencer"].getBool(false);
     EnableApplicationLog = logger["ApplicationLog"].getBool(true);
 
     AccessLogDefaultFormat = logger["AccessLogDefaultFormat"].

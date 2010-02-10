@@ -40,6 +40,7 @@ public:
   static std::string LogAggregatorDatabase;
   static int LogAggregatorSleepSeconds;
   static bool AlwaysLogUnhandledExceptions;
+  static bool NoSilencer;
   static bool EnableApplicationLog;
 
   static bool ThrowBadTypeExceptions;

@@ -189,7 +189,7 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
                                    const string &sourceRoot,
                                    const string &pathTranslation,
                                    CStrRef filename) {
-  if (!filename.empty() && filename.charAt(filename.length() - 1) == '/') {
+  if (filename.empty() || filename.charAt(filename.length() - 1) == '/') {
     return false;
   }
   if (!vhost->getDocumentRoot().empty()) {

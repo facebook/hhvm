@@ -7093,6 +7093,12 @@ bool TestCodeRun::TestTernary() {
   VCR("<?php $t = true; $f = false;"
       "$a = $t ? null : ($f ? \"hello\" : \"world\");");
   VCR("<?php $t = true; $a = $t ? \"\" : \"a\" . $t . \"b\";");
+  VCR("<?php "
+      "function add_cssclass($add, $class) {"
+      "  $class = empty($class) ? $add : $class .= ' ' . $add;"
+      "  return $class;"
+      "}"
+      "add_cssclass('test', $a);");
   return true;
 }
 

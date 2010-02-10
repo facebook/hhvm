@@ -551,7 +551,8 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     break;
   case '.':
   case T_CONCAT_EQUAL:
-    et1 = et2 = rt = Type::String;
+    et1 = et2 = Type::String;
+    rt = Type::Variant;
     break;
   case '%':
     et1 = et2 = Type::Int64;
@@ -612,7 +613,6 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_MINUS_EQUAL:
   case T_MUL_EQUAL:
   case T_DIV_EQUAL:
-  case T_CONCAT_EQUAL:
   case T_MOD_EQUAL:
   case T_AND_EQUAL:
   case T_OR_EQUAL:
@@ -622,6 +622,14 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     {
       TypePtr ret = m_exp2->inferAndCheck(ar, et2, coerce2);
       m_exp1->inferAndCheck(ar, ret, true);
+    }
+    break;
+  case T_CONCAT_EQUAL:
+    {
+      TypePtr ret = m_exp2->inferAndCheck(ar, et2, coerce2);
+      m_exp1->inferAndCheck(ar, ret, true);
+      TypePtr act1 = m_exp1->getActualType();
+      if (act1 && act1->is(Type::KindOfString)) rt = Type::String;
     }
     break;
   case '+':

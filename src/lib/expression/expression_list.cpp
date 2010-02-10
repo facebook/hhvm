@@ -330,7 +330,7 @@ int ExpressionList::outputCPPControlledEvalOrderPre(CodeGenerator &cg,
   uint oc = getOutputCount();
   cg.printf("(");
   int tempStart = tempOffset();
-  if (obj && !obj->isScalar()) {
+  if (obj) {
     cg.printf("assignCallTemp(%s%d, ", Option::EvalOrderTempPrefix,
               m_tempStart);
     obj->outputCPP(cg, ar);

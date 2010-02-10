@@ -31,7 +31,6 @@ ObjectMethodExpression::ObjectMethodExpression(EXPRESSION_ARGS,
   : SimpleFunctionCallExpression(EXPRESSION_PASS, name, param), m_obj(obj) {}
 
 Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
-  SET_LINE;
   String name = m_name->get(env);
   Object obj = toObject(m_obj->eval(env));
   Variant cobj = env.currentObject();
@@ -49,6 +48,7 @@ Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
   if (!ms) {
     ms = obj->getMethodStatement(name.data());
   }
+  SET_LINE;
   if (ms) {
     return ref(ms->invokeInstanceDirect(obj, env, this));
   }

@@ -157,7 +157,7 @@ public:
   Context getContext() const { return m_context;}
 
   /**
-   * Remember comment nested level to avoid double comments.
+    * Remember comment nested level to avoid double comments.
    */
   bool inComments() const;
   void startComments();
@@ -183,6 +183,9 @@ public:
    */
   int getLineNo(Stream stream) const;
 
+  int getPHPLineNo() { return m_phpLineNo; }
+  void setPHPLineNo(int ln) { m_phpLineNo = ln; }
+
 private:
   std::string m_filename;
   Stream m_curStream;
@@ -203,6 +206,8 @@ private:
   std::set<int> m_breakLabelIds; // break labels referenced
   std::set<int> m_contLabelIds;  // continue labels referenced
   int m_itemIndex;
+
+  int m_phpLineNo;
 
   void print(const char *fmt, va_list ap);
   void print(const std::string &msg);

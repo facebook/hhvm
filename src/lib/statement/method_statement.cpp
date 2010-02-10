@@ -405,6 +405,8 @@ void MethodStatement::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (outputFFI(cg, ar)) return;
 
+  cg.setPHPLineNo(-1);
+
   if (cg.getContext() == CodeGenerator::CppImplementation) {
     printSource(cg);
   }

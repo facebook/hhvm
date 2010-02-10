@@ -181,8 +181,11 @@ bool Expression::outputLineMap(CodeGenerator &cg, AnalysisResultPtr ar) {
       string fileline = cg.getFileName() + ":" + lexical_cast<string>(line);
       LocationPtr loc = getLocation();
       ar->recordSourceInfo(fileline, loc);
-      cg.printf("LINE(%d,", loc->line1);
-      return true;
+      if (cg.getPHPLineNo() != loc->line1) {
+        cg.setPHPLineNo(loc->line1);
+        cg.printf("LINE(%d,", loc->line1);
+        return true;
+      }
     }
     break;
   default:

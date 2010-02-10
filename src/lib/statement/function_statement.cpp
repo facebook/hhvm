@@ -162,6 +162,8 @@ void FunctionStatement::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       (funcScope->isInlined() || pseudoMain)) return;
   ar->pushScope(funcScope);
 
+  cg.setPHPLineNo(-1);
+
   if (pseudoMain && !Option::GenerateCPPMain) {
     if (cg.getContext() == CodeGenerator::CppPseudoMain) {
       if (cg.getOutput() != CodeGenerator::SystemCPP) {

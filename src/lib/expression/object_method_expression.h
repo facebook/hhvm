@@ -45,6 +45,8 @@ private:
   bool directVariantProxy(AnalysisResultPtr ar);
   bool canInvokeFewArgs();
   bool m_invokeFewArgsDecision;
+  // index for assignCallTemp of the receiver, for correct line number.
+  int m_objTemp;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -27,6 +27,7 @@
 #include <lib/option.h>
 #include <lib/expression/simple_variable.h>
 #include <lib/analysis/variable_table.h>
+#include <lib/parser/parser.h>
 
 using namespace HPHP;
 using namespace std;
@@ -43,6 +44,7 @@ ObjectMethodExpression::ObjectMethodExpression
     m_invokeFewArgsDecision(true) {
   m_object->setContext(Expression::ObjectContext);
   m_object->clearContext(Expression::LValue);
+  m_objTemp = -1;
 }
 
 ExpressionPtr ObjectMethodExpression::clone() {
@@ -82,9 +84,15 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
   m_params->controlOrder(m_object->hasEffect() ? 2 : 1);
   m_params->analyzeProgramStart(ar);
   m_object->analyzeProgram(ar);
+  if (ar->getPhase() == AnalysisResult::AnalyzeFinal &&
+      !m_params->controllingOrder() &&
+      getLocation()->line1 != m_object->getLocation()->line1) {
+    FunctionScopePtr func = ar->getFunctionScope();
+    ASSERT(func);
+    m_objTemp = func->requireCallTemps(1);
+  }
   m_params->analyzeProgramEnd(ar);
   m_nameExp->analyzeProgram(ar);
-
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll &&
       m_object->isThis() && !m_name.empty()) {
@@ -296,10 +304,10 @@ bool ObjectMethodExpression::directVariantProxy(AnalysisResultPtr ar) {
 
 void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
-  bool linemap = outputLineMap(cg, ar);
   bool isThis = m_object->isThis();
 
   if (isThis && ar->getFunctionScope()->isStatic()) {
+    bool linemap = outputLineMap(cg, ar);
     cg.printf("throw_fatal(\"Using $this when not in object context\")");
     if (linemap) cg.printf(")");
     return;
@@ -312,11 +320,27 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       m_params->outputCPPControlledEvalOrderPre(cg, ar,
                                                 isThis ? ExpressionPtr()
                                                 : m_object);
+    if (objIdx != -1) objTmp << Option::EvalOrderTempPrefix << objIdx;
+  }
+  bool lineTemp = false;
+  if (objIdx == -1 && m_objTemp != -1) {
+    // When the receiver is not on the same line as the call itself,
+    // set the line number of call after computing the receiver,
+    // o.w., the call might get the line number of the receiver.
+    objIdx = m_objTemp;
+    lineTemp = true;
+    cg.printf("(assignCallTemp(%s%d, ", Option::EvalOrderTempPrefix,
+              objIdx);
+    m_object->outputCPP(cg, ar);
+    cg.printf("),");
     objTmp << Option::EvalOrderTempPrefix << objIdx;
   }
   bool fewParams = canInvokeFewArgs();
   bool tooManyArgs = m_params &&
     m_params->outputCPPTooManyArgsPre(cg, ar, m_name);
+
+  bool linemap = outputLineMap(cg, ar);
+
   if (!isThis) {
     if (directVariantProxy(ar)) {
       if (objIdx == -1) {
@@ -407,6 +431,7 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       cg.printf(", -1LL)");
     }
   }
-  if (m_params) m_params->outputCPPControlledEvalOrderPost(cg, ar);
   if (linemap) cg.printf(")");
+  if (lineTemp) cg.printf(")");
+  if (m_params) m_params->outputCPPControlledEvalOrderPost(cg, ar);
 }

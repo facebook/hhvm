@@ -518,7 +518,7 @@ Variant f_filectime(CStrRef filename) {
 
 Variant f_filetype(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename).data(), &sb));
+  CHECK_SYSTEM(lstat(File::TranslatePath(filename).data(), &sb));
 
   switch (sb.st_mode & S_IFMT) {
   case S_IFLNK:  return "link";
@@ -654,7 +654,7 @@ bool f_is_dir(CStrRef filename) {
 
 bool f_is_link(CStrRef filename) {
   struct stat sb;
-  CHECK_SYSTEM(stat(File::TranslatePath(filename).data(), &sb));
+  CHECK_SYSTEM(lstat(File::TranslatePath(filename).data(), &sb));
   return (sb.st_mode & S_IFMT) == S_IFLNK;
 }
 

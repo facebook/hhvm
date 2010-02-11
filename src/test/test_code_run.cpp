@@ -3180,6 +3180,13 @@ bool TestCodeRun::TestCompilation() {
 
   // no side effect optimization met if() short
   VCR("<?php if ($a) $a == 0;");
+
+  // */ and // in default argument
+  VCR("<?php "
+      "function foo($p1=\"/.*/\", $p2=\"//\") {"
+      "  var_dump($p1, $p2);"
+      "}"
+      "foo();");
   return true;
 }
 

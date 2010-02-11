@@ -214,7 +214,7 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
     bool comment =  context == CodeGenerator::CppImplementation ||
       (context == CodeGenerator::CppDeclaration && func->isInlined());
     if (comment) {
-      cg.startComments();
+      cg.printf(" // ");
     }
     cg.printf(" = ");
     ConstantExpressionPtr con =
@@ -231,7 +231,7 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
       cg.setContext(context);
     }
     if (comment) {
-      cg.endComments();
+      cg.printf("\n");
     }
   }
 }

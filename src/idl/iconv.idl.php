@@ -49,7 +49,7 @@ f('iconv_strrpos', Variant,
 f('iconv_substr', Variant,
   array('str' => String,
         'offset' => Int32,
-        'length' => array(Int32, '0'),
+        'length' => array(Int32, 'INT_MAX'),
         'charset' => array(String, 'null_string')));
 
 f('ob_iconv_handler', String,

@@ -34,7 +34,7 @@ Variant f_iconv(CStrRef in_charset, CStrRef out_charset, CStrRef str);
 Variant f_iconv_strlen(CStrRef str, CStrRef charset = null_string);
 Variant f_iconv_strpos(CStrRef haystack, CStrRef needle, int offset = 0, CStrRef charset = null_string);
 Variant f_iconv_strrpos(CStrRef haystack, CStrRef needle, CStrRef charset = null_string);
-Variant f_iconv_substr(CStrRef str, int offset, int length = 0, CStrRef charset = null_string);
+Variant f_iconv_substr(CStrRef str, int offset, int length = INT_MAX, CStrRef charset = null_string);
 String f_ob_iconv_handler(CStrRef contents, int status);
 
 ///////////////////////////////////////////////////////////////////////////////

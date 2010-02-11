@@ -1773,12 +1773,8 @@ Variant f_iconv_strrpos(CStrRef haystack, CStrRef needle,
   return false;
 }
 
-Variant f_iconv_substr(CStrRef str, int offset, int length /* = 0 */,
+Variant f_iconv_substr(CStrRef str, int offset, int length /* = INT_MAX */,
                        CStrRef charset /* = null_string */) {
-  if (length == 0) {
-    length = str.size();
-  }
-
   String enc = check_charset(charset);
   StringBuffer retval;
   php_iconv_err_t err = _php_iconv_substr(retval, str.data(), str.size(),

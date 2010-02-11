@@ -159,10 +159,14 @@ void throw_bad_type_exception(const char *fmt, ...) {
 }
 
 void throw_infinite_loop_exception() {
-  throw FatalErrorException("infinite loop detected");
+  if (!RuntimeOption::NoInfiniteLoopDetection) {
+    throw FatalErrorException("infinite loop detected");
+  }
 }
 void throw_infinite_recursion_exception() {
-  throw FatalErrorException("infinite recursion detected");
+  if (!RuntimeOption::NoInfiniteRecursionDetection) {
+    throw FatalErrorException("infinite recursion detected");
+  }
 }
 void throw_request_timeout_exception(ThreadInfo *info) {
   ASSERT(info);

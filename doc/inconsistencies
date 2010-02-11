@@ -61,12 +61,17 @@ Example unsupported case: phpt...bug24403
 
 are not supported, e.g. (phpt...bug24396)
 
-  global $$k; /
+  global $$k;
   $$k = $v;
 
-5. Misc
+5. Dynamic declared constants
+
+are not supported, e.g.
+
+  define($name, $value);
+
+6. Misc
 
 (1) get_declared_classes
 
-Can return something substantially different than PHP
-Example unsupported case: phpt...bug19566
+Can return classes in different order from PHP's.

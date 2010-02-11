@@ -43,6 +43,8 @@ bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
 bool RuntimeOption::NoSilencer = false;
 bool RuntimeOption::EnableApplicationLog = true;
 
+bool RuntimeOption::NoInfiniteLoopDetection = false;
+bool RuntimeOption::NoInfiniteRecursionDetection = false;
 bool RuntimeOption::ThrowBadTypeExceptions = false;
 bool RuntimeOption::ThrowNotices = false;
 bool RuntimeOption::AssertActive = false;
@@ -104,6 +106,7 @@ std::string RuntimeOption::ErrorDocument404;
 std::string RuntimeOption::FatalErrorMessage;
 std::string RuntimeOption::FontPath;
 bool RuntimeOption::EnableStaticContentCache = true;
+bool RuntimeOption::EnableStaticContentFromDisk = true;
 
 std::string RuntimeOption::RTTIDirectory;
 bool RuntimeOption::EnableCliRTTI = false;
@@ -301,7 +304,7 @@ void RuntimeOption::Load(Hdf &config) {
     } else if (logger["Level"] == "Verbose") {
       Logger::LogLevel = Logger::LogVerbose;
     }
-    Logger::LogHeader = logger["Header"].getBool(false);
+    Logger::LogHeader = logger["Header"].getBool();
     Logger::MaxMessagesPerRequest =
       logger["MaxMessagesPerRequest"].getInt32(-1);
 
@@ -311,14 +314,14 @@ void RuntimeOption::Load(Hdf &config) {
     }
 
     Hdf aggregator = logger["Aggregator"];
-    Logger::UseLogAggregator = aggregator.getBool(false);
+    Logger::UseLogAggregator = aggregator.getBool();
     LogAggregatorFile = aggregator["File"].getString("");
     LogAggregatorDatabase = aggregator["Database"].getString("");
     LogAggregatorSleepSeconds = aggregator["SleepSeconds"].getInt16(10);
 
     AlwaysLogUnhandledExceptions =
       logger["AlwaysLogUnhandledExceptions"].getBool(true);
-    NoSilencer = logger["NoSilencer"].getBool(false);
+    NoSilencer = logger["NoSilencer"].getBool();
     EnableApplicationLog = logger["ApplicationLog"].getBool(true);
 
     AccessLogDefaultFormat = logger["AccessLogDefaultFormat"].
@@ -342,10 +345,13 @@ void RuntimeOption::Load(Hdf &config) {
   }
   {
     Hdf error = config["ErrorHandling"];
-    ThrowBadTypeExceptions = error["ThrowBadTypeExceptions"].getBool(false);
-    ThrowNotices = error["ThrowNotices"].getBool(false);
-    AssertActive = error["AssertActive"].getBool(false);
-    AssertWarning = error["AssertWarning"].getBool(false);
+    NoInfiniteLoopDetection = error["NoInfiniteLoopDetection"].getBool();
+    NoInfiniteRecursionDetection =
+      error["NoInfiniteRecursionDetection"].getBool();
+    ThrowBadTypeExceptions = error["ThrowBadTypeExceptions"].getBool();
+    ThrowNotices = error["ThrowNotices"].getBool();
+    AssertActive = error["AssertActive"].getBool();
+    AssertWarning = error["AssertWarning"].getBool();
   }
   {
     Hdf rlimit = config["ResourceLimit"];
@@ -379,7 +385,7 @@ void RuntimeOption::Load(Hdf &config) {
     GzipCompressionLevel = server["GzipCompressionLevel"].getInt16(3);
     EnableKeepAlive = server["EnableKeepAlive"].getBool(true);
     EnableEarlyFlush = server["EnableEarlyFlush"].getBool(true);
-    ForceChunkedEncoding = server["ForceChunkedEncoding"].getBool(false);
+    ForceChunkedEncoding = server["ForceChunkedEncoding"].getBool();
     MaxPostSize = (server["MaxPostSize"].getInt32(8)) * (1 << 20);
     UploadMaxFileSize = (server["MaxPostSize"].getInt32(10)) * (1 << 20);
     EnableFileUploads = server["EnableFileUploads"].getBool(true);
@@ -410,13 +416,15 @@ void RuntimeOption::Load(Hdf &config) {
     }
     EnableStaticContentCache =
       server["EnableStaticContentCache"].getBool(true);
+    EnableStaticContentFromDisk =
+      server["EnableStaticContentFromDisk"].getBool(true);
 
     RTTIDirectory = server["RTTIDirectory"].getString("/tmp/");
     if (!RTTIDirectory.empty() &&
         RTTIDirectory[RTTIDirectory.length() - 1] != '/') {
       RTTIDirectory += "/";
     }
-    EnableCliRTTI = server["EnableCliRTTI"].getBool(false);
+    EnableCliRTTI = server["EnableCliRTTI"].getBool();
 
     StartupDocument = server["StartupDocument"].getString("");
     normalizePath(StartupDocument);
@@ -427,7 +435,7 @@ void RuntimeOption::Load(Hdf &config) {
       normalizePath(ThreadDocuments[i]);
     }
 
-    SafeFileAccess = server["SafeFileAccess"].getBool(false);
+    SafeFileAccess = server["SafeFileAccess"].getBool();
     server["AllowedDirectories"].get(AllowedDirectories);
     for (unsigned int i = 0; i < AllowedDirectories.size(); i++) {
       string &directory = AllowedDirectories[i];
@@ -439,13 +447,13 @@ void RuntimeOption::Load(Hdf &config) {
     }
     server["AllowedFiles"].get(AllowedFiles);
 
-    EnableMemoryManager = server["EnableMemoryManager"].getBool(false);
-    CheckMemory = server["CheckMemory"].getBool(false);
+    EnableMemoryManager = server["EnableMemoryManager"].getBool();
+    CheckMemory = server["CheckMemory"].getBool();
     UseZendArray = server["UseZendArray"].getBool(true);
 
     Hdf apc = server["APC"];
     EnableApc = apc["EnableApc"].getBool(true);
-    ApcUseSharedMemory = apc["UseSharedMemory"].getBool(false);
+    ApcUseSharedMemory = apc["UseSharedMemory"].getBool();
     ApcSharedMemorySize = apc["SharedMemorySize"].getInt32(1024 /* 1GB */);
     ApcPrimeLibrary = apc["PrimeLibrary"].getString("");
     ApcLoadThread = apc["LoadThread"].getInt16(2);
@@ -472,8 +480,8 @@ void RuntimeOption::Load(Hdf &config) {
                                      "Invalid lock type");
     }
 
-    ApcUseLockedRefs = apc["UseLockedRefs"].getBool(false);
-    ApcExpireOnSets = apc["ExpireOnSets"].getBool(false);
+    ApcUseLockedRefs = apc["UseLockedRefs"].getBool();
+    ApcExpireOnSets = apc["ExpireOnSets"].getBool();
     ApcPurgeFrequency = apc["PurgeFrequency"].getInt32(4096);
 
     ApcKeyMaturityThreshold = apc["KeyMaturityThreshold"].getInt32(20);
@@ -483,7 +491,7 @@ void RuntimeOption::Load(Hdf &config) {
 
 
     Hdf dns = server["DnsCache"];
-    EnableDnsCache = dns["Enable"].getBool(false);
+    EnableDnsCache = dns["Enable"].getBool();
     DnsCacheTTL = dns["TTL"].getInt32(600); // 10 minutes
     DnsCacheKeyMaturityThreshold = dns["KeyMaturityThreshold"].getInt32(20);
     DnsCacheMaximumCapacity = dns["MaximumCapacity"].getInt64(0);
@@ -496,9 +504,9 @@ void RuntimeOption::Load(Hdf &config) {
       server["LightProcessFilePrefix"].getString("./lightprocess");
     LightProcessCount = server["LightProcessCount"].getInt32(0);
 
-    InjectedStacktrace = server["InjectedStacktrace"].getBool(false);
+    InjectedStacktrace = server["InjectedStacktrace"].getBool();
 
-    ForceServerNameToHeader = server["ForceServerNameToHeader"].getBool(false);
+    ForceServerNameToHeader = server["ForceServerNameToHeader"].getBool();
   }
   {
     Hdf hosts = config["VirtualHost"];
@@ -565,20 +573,20 @@ void RuntimeOption::Load(Hdf &config) {
     Hdf proxy = config["Proxy"];
     ProxyOrigin = proxy["Origin"].getString("");
     ProxyRetry = proxy["Retry"].getInt16(3);
-    UseServeURLs = proxy["ServeURLs"].getBool(false);
+    UseServeURLs = proxy["ServeURLs"].getBool();
     proxy["ServeURLs"].get(ServeURLs);
-    UseProxyURLs = proxy["ProxyURLs"].getBool(false);
+    UseProxyURLs = proxy["ProxyURLs"].getBool();
     ProxyPercentage = proxy["Percentage"].getByte(0);
     proxy["ProxyURLs"].get(ProxyURLs);
   }
   {
     Hdf mysql = config["MySQL"];
-    MySQLReadOnly = mysql["ReadOnly"].getBool(false);
-    MySQLLocalize = mysql["Localize"].getBool(false);
+    MySQLReadOnly = mysql["ReadOnly"].getBool();
+    MySQLLocalize = mysql["Localize"].getBool();
     MySQLConnectTimeout = mysql["ConnectTimeout"].getInt32(1000);
     MySQLReadTimeout = mysql["ReadTimeout"].getInt32(1000);
     MySQLSlowQueryThreshold = mysql["SlowQueryThreshold"].getInt32(1000);
-    MySQLKillOnTimeout = mysql["KillOnTimeout"].getBool(false);
+    MySQLKillOnTimeout = mysql["KillOnTimeout"].getBool();
   }
   {
     Hdf http = config["Http"];
@@ -588,16 +596,16 @@ void RuntimeOption::Load(Hdf &config) {
   {
     Hdf sandbox = config["Sandbox"];
     SocketDefaultTimeout = sandbox["SocketDefaultTimeout"].getInt16(5);
-    LocalMemcache = sandbox["LocalMemcache"].getBool(false);
-    MemcacheReadOnly = sandbox["MemcacheReadOnly"].getBool(false);
+    LocalMemcache = sandbox["LocalMemcache"].getBool();
+    MemcacheReadOnly = sandbox["MemcacheReadOnly"].getBool();
   }
   {
     Hdf debug = config["Debug"];
-    FullBacktrace = debug["FullBacktrace"].getBool(false);
-    ServerStackTrace = debug["ServerStackTrace"].getBool(false);
-    ServerErrorMessage = debug["ServerErrorMessage"].getBool(false);
-    TranslateSource = debug["TranslateSource"].getBool(false);
-    RecordInput = debug["RecordInput"].getBool(false);
+    FullBacktrace = debug["FullBacktrace"].getBool();
+    ServerStackTrace = debug["ServerStackTrace"].getBool();
+    ServerErrorMessage = debug["ServerErrorMessage"].getBool();
+    TranslateSource = debug["TranslateSource"].getBool();
+    RecordInput = debug["RecordInput"].getBool();
     ClearInputOnSuccess = debug["ClearInputOnSuccess"].getBool(true);
     ProfilerOutputDir = debug["ProfilerOutputDir"].getString("/tmp");
     CoreDumpEmail = debug["CoreDumpEmail"].getString("");
@@ -611,15 +619,15 @@ void RuntimeOption::Load(Hdf &config) {
   }
   {
     Hdf stats = config["Stats"];
-    EnableStats = stats.getBool(false); // main switch
+    EnableStats = stats.getBool(); // main switch
 
-    EnableWebStats = stats["Web"].getBool(false);
-    EnableMemoryStats = stats["Memory"].getBool(false);
-    EnableMallocStats = stats["Malloc"].getBool(false);
-    EnableAPCStats = stats["APC"].getBool(false);
-    EnableAPCKeyStats = stats["APCKey"].getBool(false);
-    EnableMemcacheStats = stats["Memcache"].getBool(false);
-    EnableSQLStats = stats["SQL"].getBool(false);
+    EnableWebStats = stats["Web"].getBool();
+    EnableMemoryStats = stats["Memory"].getBool();
+    EnableMallocStats = stats["Malloc"].getBool();
+    EnableAPCStats = stats["APC"].getBool();
+    EnableAPCKeyStats = stats["APCKey"].getBool();
+    EnableMemcacheStats = stats["Memcache"].getBool();
+    EnableSQLStats = stats["SQL"].getBool();
 
     if (EnableStats && EnableMallocStats) {
       LeakDetectable::EnableMallocStats(true);
@@ -640,7 +648,7 @@ void RuntimeOption::Load(Hdf &config) {
     EnableXHP = eval["EnableXHP"].getBool(true);
     EnableStrict = eval["EnableStrict"].getBool(0);
     StrictLevel = eval["StrictLevel"].getInt32(1); // StrictBasic
-    StrictFatal = eval["StrictFatal"].getBool(false);
+    StrictFatal = eval["StrictFatal"].getBool();
     Hdf searchPaths = eval["IncludePaths"];
     if (searchPaths.exists()) {
       searchPaths.get(IncludeSearchPaths);
@@ -652,7 +660,7 @@ void RuntimeOption::Load(Hdf &config) {
   }
   {
     Hdf sandbox = config["Sandbox"];
-    SandboxMode = sandbox["SandboxMode"].getBool(false);
+    SandboxMode = sandbox["SandboxMode"].getBool();
     SandboxPattern = format_pattern(sandbox["Pattern"].getString(""));
     SandboxHome = sandbox["Home"].getString("");
     SandboxConfFile = sandbox["ConfFile"].getString("");

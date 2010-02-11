@@ -43,6 +43,8 @@ public:
   static bool NoSilencer;
   static bool EnableApplicationLog;
 
+  static bool NoInfiniteLoopDetection;
+  static bool NoInfiniteRecursionDetection;
   static bool ThrowBadTypeExceptions;
   static bool ThrowNotices;
   static bool AssertActive;
@@ -102,6 +104,7 @@ public:
   static std::string FatalErrorMessage;
   static std::string FontPath;
   static bool EnableStaticContentCache;
+  static bool EnableStaticContentFromDisk;
 
   static std::string RTTIDirectory;
   static bool EnableCliRTTI;

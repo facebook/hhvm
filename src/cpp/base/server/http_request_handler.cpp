@@ -143,18 +143,17 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
       }
     }
 
-    if (ext != NULL) {
-      if (RuntimeOption::StaticFileExtensions.find(ext) !=
-          RuntimeOption::StaticFileExtensions.end()) {
-        StringBuffer sb(absPath.c_str());
-        if (sb.valid()) {
-          struct stat st;
-          stat(absPath.c_str(), &st);
-          sendStaticContent(transport, sb.data(), sb.size(), st.st_mtime,
-                            false, path);
-          ServerStats::LogPage(path, 200);
-          return;
-        }
+    if (ext && RuntimeOption::EnableStaticContentFromDisk &&
+        RuntimeOption::StaticFileExtensions.find(ext) !=
+        RuntimeOption::StaticFileExtensions.end()) {
+      StringBuffer sb(absPath.c_str());
+      if (sb.valid()) {
+        struct stat st;
+        stat(absPath.c_str(), &st);
+        sendStaticContent(transport, sb.data(), sb.size(), st.st_mtime,
+                          false, path);
+        ServerStats::LogPage(path, 200);
+        return;
       }
     }
 

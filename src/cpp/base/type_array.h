@@ -21,7 +21,6 @@
 #include <cpp/base/array/array_iterator.h>
 #include <cpp/base/array/array_element.h>
 #include <cpp/base/type_string.h>
-#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -580,25 +579,6 @@ public:
     // prevent ~SmartPtr from calling decRefCount after data is released
     m_px = NULL;
   }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
-class ArrayInit {
-public:
-  ArrayInit(int n) : m_elements(n) { }
-
-  ArrayInit &set(int p, const ArrayElement &e) {
-    m_elements[p] = (ArrayElement *)&e;
-    return *this;
-  }
-
-  ArrayData *create() {
-    return ArrayData::Create(m_elements, true, false);
-  }
-
-private:
-  ArrayElementVec m_elements;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -267,30 +267,18 @@ void ExpressionList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void ExpressionList::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool effectArr = controllingOrder();
   int tempstart = tempOffset();
-  if (m_arrayElements) {
-    cg.printf("ArrayInit(%d).", m_exps.size());
-  }
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     cg.setItemIndex(i);
-    if (i > 0) cg.printf(m_arrayElements ? "." : ", ");
+    if (i > 0) cg.printf(", ");
     if (m_exps[i]) {
-      if (m_arrayElements) {
+      if (effectArr) {
         ArrayPairExpressionPtr ap =
           dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
-        cg.printf("set(%d, ", i);
-        if (effectArr) {
-          ap->outputCPPControlledEval(cg, ar, tempstart +  i);
-        } else {
-          m_exps[i]->outputCPP(cg, ar);
-        }
-        cg.printf(")");
+        ap->outputCPPControlledEval(cg, ar, tempstart + i);
       } else {
         m_exps[i]->outputCPP(cg, ar);
       }
     }
-  }
-  if (m_arrayElements) {
-    cg.printf(".create()");
   }
 }
 
@@ -338,7 +326,7 @@ int ExpressionList::outputCPPControlledEvalOrderPre(CodeGenerator &cg,
     cg.printf("),");
   }
   for (unsigned int i = 0; i < oc; i++) {
-    if (m_exps[i] && !m_exps[i]->isScalar()) {
+    if (m_exps[i]) {
       cg.printf("assignCallTemp(%s%d, ", Option::EvalOrderTempPrefix,
                 tempStart + i);
       if (m_arrayElements) {

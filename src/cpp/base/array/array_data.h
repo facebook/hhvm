@@ -54,7 +54,7 @@ class ArrayData : public Countable {
   static ArrayData *Create(CVarRef value);
   static ArrayData *Create(CVarRef name, CVarRef value);
   static ArrayData *Create(const std::vector<ArrayElement *> &elems,
-                           bool replace = true, bool release = true);
+                           bool replace = true);
 
   /**
    * Type conversion functions. All other types are handled inside Array class.

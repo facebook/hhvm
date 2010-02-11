@@ -130,7 +130,7 @@ void ArrayPairExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void ArrayPairExpression::outputCPPImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
-  cg.printf("ArrayElement(");
+  cg.printf("NEW(ArrayElement)(");
   if (m_name) {
     m_name->outputCPP(cg, ar);
     cg.printf(", ");
@@ -151,17 +151,12 @@ void ArrayPairExpression::outputCPPImpl(CodeGenerator &cg,
 void ArrayPairExpression::outputCPPControlledEval(CodeGenerator &cg,
                                                   AnalysisResultPtr ar,
                                                   int temp) {
-  cg.printf("ArrayElement(");
+  cg.printf("NEW(ArrayElement)(");
   if (m_name) {
     m_name->outputCPP(cg, ar);
     cg.printf(", ");
   }
-  if (m_value->isScalar()) {
-    // scalars do not need order enforcement
-    m_value->outputCPP(cg, ar);
-  } else {
-    cg.printf("%s%d", Option::EvalOrderTempPrefix, temp);
-  }
+  cg.printf("%s%d", Option::EvalOrderTempPrefix, temp);
   if (m_name) {
     ScalarExpressionPtr sc = dynamic_pointer_cast<ScalarExpression>(m_name);
     if (sc) {

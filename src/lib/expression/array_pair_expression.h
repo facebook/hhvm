@@ -41,7 +41,6 @@ public:
 
   void outputCPPControlledEval(CodeGenerator &cg, AnalysisResultPtr ar,
                                int temp);
-
 private:
   ExpressionPtr m_name;
   ExpressionPtr m_value;

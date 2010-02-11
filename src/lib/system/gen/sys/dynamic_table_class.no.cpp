@@ -3076,7 +3076,7 @@ Variant c_sqlite3stmt::os_constant(const char *s) {
 IMPLEMENT_CLASS(sqlite3stmt)
 ObjectData *c_sqlite3stmt::create(Object a0, String a1) {
   init();
-  t___construct(a0, a1);
+  t___construct(a0,a1);
   return this;
 }
 ObjectData *c_sqlite3stmt::dynCreate(CArrRef params, bool init /* = true */) {
@@ -5579,7 +5579,7 @@ Variant c_soapheader::os_constant(const char *s) {
 IMPLEMENT_CLASS(soapheader)
 ObjectData *c_soapheader::create(String a0, String a1, Variant a2, bool a3, Variant a4) {
   init();
-  t___construct(a0, a1, a2, a3, a4);
+  t___construct(a0,a1,a2,a3,a4);
   return this;
 }
 ObjectData *c_soapheader::dynCreate(CArrRef params, bool init /* = true */) {
@@ -7754,7 +7754,7 @@ Variant c_domattr::os_constant(const char *s) {
 IMPLEMENT_CLASS(domattr)
 ObjectData *c_domattr::create(Variant a0, Variant a1) {
   init();
-  t___construct(a0, a1);
+  t___construct(a0,a1);
   return this;
 }
 ObjectData *c_domattr::dynCreate(CArrRef params, bool init /* = true */) {
@@ -8403,7 +8403,7 @@ Variant c_soapvar::os_constant(const char *s) {
 IMPLEMENT_CLASS(soapvar)
 ObjectData *c_soapvar::create(Variant a0, Variant a1, String a2, String a3, String a4, String a5) {
   init();
-  t___construct(a0, a1, a2, a3, a4, a5);
+  t___construct(a0,a1,a2,a3,a4,a5);
   return this;
 }
 ObjectData *c_soapvar::dynCreate(CArrRef params, bool init /* = true */) {
@@ -9105,7 +9105,7 @@ Variant c_simplexmlelement::os_constant(const char *s) {
 IMPLEMENT_CLASS(simplexmlelement)
 ObjectData *c_simplexmlelement::create(String a0, int64 a1, bool a2, String a3, bool a4) {
   init();
-  t___construct(a0, a1, a2, a3, a4);
+  t___construct(a0,a1,a2,a3,a4);
   return this;
 }
 ObjectData *c_simplexmlelement::dynCreate(CArrRef params, bool init /* = true */) {
@@ -9742,7 +9742,7 @@ Variant c_domprocessinginstruction::os_constant(const char *s) {
 IMPLEMENT_CLASS(domprocessinginstruction)
 ObjectData *c_domprocessinginstruction::create(Variant a0, Variant a1) {
   init();
-  t___construct(a0, a1);
+  t___construct(a0,a1);
   return this;
 }
 ObjectData *c_domprocessinginstruction::dynCreate(CArrRef params, bool init /* = true */) {
@@ -10384,7 +10384,7 @@ Variant c_soapclient::os_constant(const char *s) {
 IMPLEMENT_CLASS(soapclient)
 ObjectData *c_soapclient::create(Variant a0, Array a1) {
   init();
-  t___construct(a0, a1);
+  t___construct(a0,a1);
   return this;
 }
 ObjectData *c_soapclient::dynCreate(CArrRef params, bool init /* = true */) {
@@ -10882,7 +10882,7 @@ Variant c_soapparam::os_constant(const char *s) {
 IMPLEMENT_CLASS(soapparam)
 ObjectData *c_soapparam::create(Variant a0, String a1) {
   init();
-  t___construct(a0, a1);
+  t___construct(a0,a1);
   return this;
 }
 ObjectData *c_soapparam::dynCreate(CArrRef params, bool init /* = true */) {
@@ -11063,7 +11063,7 @@ Variant c_datetime::os_constant(const char *s) {
 IMPLEMENT_CLASS(datetime)
 ObjectData *c_datetime::create(String a0, Object a1) {
   init();
-  t___construct(a0, a1);
+  t___construct(a0,a1);
   return this;
 }
 ObjectData *c_datetime::dynCreate(CArrRef params, bool init /* = true */) {
@@ -13975,7 +13975,7 @@ Variant c_soapserver::os_constant(const char *s) {
 IMPLEMENT_CLASS(soapserver)
 ObjectData *c_soapserver::create(Variant a0, Array a1) {
   init();
-  t___construct(a0, a1);
+  t___construct(a0,a1);
   return this;
 }
 ObjectData *c_soapserver::dynCreate(CArrRef params, bool init /* = true */) {
@@ -15002,7 +15002,7 @@ Variant c_domdocument::os_constant(const char *s) {
 IMPLEMENT_CLASS(domdocument)
 ObjectData *c_domdocument::create(String a0, String a1) {
   init();
-  t___construct(a0, a1);
+  t___construct(a0,a1);
   return this;
 }
 ObjectData *c_domdocument::dynCreate(CArrRef params, bool init /* = true */) {
@@ -16590,7 +16590,7 @@ Variant c_soapfault::os_constant(const char *s) {
 IMPLEMENT_CLASS(soapfault)
 ObjectData *c_soapfault::create(Variant a0, String a1, String a2, Variant a3, String a4, Variant a5) {
   init();
-  t___construct(a0, a1, a2, a3, a4, a5);
+  t___construct(a0,a1,a2,a3,a4,a5);
   return this;
 }
 ObjectData *c_soapfault::dynCreate(CArrRef params, bool init /* = true */) {
@@ -16929,7 +16929,7 @@ Variant c_domelement::os_constant(const char *s) {
 IMPLEMENT_CLASS(domelement)
 ObjectData *c_domelement::create(Variant a0, Variant a1, Variant a2) {
   init();
-  t___construct(a0, a1, a2);
+  t___construct(a0,a1,a2);
   return this;
 }
 ObjectData *c_domelement::dynCreate(CArrRef params, bool init /* = true */) {
@@ -18075,7 +18075,7 @@ Variant c_phpmcc::os_constant(const char *s) {
 IMPLEMENT_CLASS(phpmcc)
 ObjectData *c_phpmcc::create(String a0, bool a1, int64 a2, int64 a3, int64 a4, int64 a5, int64 a6, int64 a7, int64 a8, int64 a9, double a10, int64 a11, int64 a12, int64 a13) {
   init();
-  t___construct(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
+  t___construct(a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13);
   return this;
 }
 ObjectData *c_phpmcc::dynCreate(CArrRef params, bool init /* = true */) {

@@ -280,13 +280,12 @@ Variant Variant::refvalAtImpl(const T &key, int64 prehash /* = -1 */) {
 
 #define WORD_SIZE sizeof(void *)
 #define ALIGN_WORD(n) (n + (WORD_SIZE - n % WORD_SIZE) % WORD_SIZE)
-#define UNIT_SIZE sizeof(ObjectData)
 
 template<int M>
 class ItemSize {
 public:
   enum {
-    prev = (M + M + 3) / 3 >= UNIT_SIZE ? (M + M + 3) / 3 : UNIT_SIZE,
+    prev = (M + M + 3) / 3 < M - 1 ? (M + M + 3) / 3 : M - 1,
     value = (ItemSize<prev>::value < M ?
              ALIGN_WORD(ItemSize<prev>::value + (ItemSize<prev>::value >> 1)) :
              ItemSize<prev>::value)
@@ -294,11 +293,11 @@ public:
 };
 
 template<>
-class ItemSize<UNIT_SIZE> {
+class ItemSize<0> {
 public:
   enum {
     prev = 0,
-    value = UNIT_SIZE
+    value = sizeof(ObjectData)
   };
 };
 

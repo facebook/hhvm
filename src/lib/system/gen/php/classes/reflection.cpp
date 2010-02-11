@@ -3266,7 +3266,7 @@ Variant c_reflectionclass::t_issubclassof(Variant v_cls) {
   if (equal(x_strcasecmp(toString(v_cls), toString(m_info.rvalAt("parent", 0x16E2F26FFB10FD8CLL))), 0LL)) {
     return true;
   }
-  return (assignCallTemp(eo_0, toObject(t_getparentclass())),assignCallTemp(eo_1, ref(v_cls)),eo_0.o_invoke("isSubclassOf", Array(ArrayInit(1).set(0, ArrayElement(eo_1)).create()), 0x373333991926C97ELL));
+  return (assignCallTemp(eo_0, toObject(t_getparentclass())),assignCallTemp(eo_1, ref(v_cls)),eo_0.o_invoke("isSubclassOf", Array(NEW(ArrayElement)(eo_1), NULL), 0x373333991926C97ELL));
 } /* function */
 /* SRC: classes/reflection.php line 412 */
 Variant c_reflectionclass::t_getstaticproperties() {
@@ -3291,7 +3291,8 @@ Variant c_reflectionclass::t_getstaticproperties() {
   return v_ret;
 } /* function */
 /* SRC: classes/reflection.php line 422 */
-Variant c_reflectionclass::t_getstaticpropertyvalue(CVarRef v_name, CVarRef v_default /* = null_variant */) {
+Variant c_reflectionclass::t_getstaticpropertyvalue(CVarRef v_name, CVarRef v_default //  = null_variant
+) {
   INSTANCE_METHOD_INJECTION(ReflectionClass, ReflectionClass::getStaticPropertyValue);
   if (t_hasproperty(v_name) && toBoolean(t_getproperty(v_name)->t_isstatic())) {
     return x_hphp_get_static_property(toString(m_info.rvalAt("name", 0x0BCDB293DC3CBDDCLL)), toString(v_name));
@@ -3946,7 +3947,7 @@ Variant c_reflectionmethod::os_constant(const char *s) {
 IMPLEMENT_CLASS(reflectionmethod)
 ObjectData *c_reflectionmethod::create(Variant v_cls, Variant v_name) {
   init();
-  t___construct(v_cls, v_name);
+  t___construct(v_cls,v_name);
   return this;
 }
 ObjectData *c_reflectionmethod::dynCreate(CArrRef params, bool init /* = true */) {
@@ -4737,7 +4738,7 @@ Variant c_reflectionmethod::t_invoke(int num_args, CVarRef v_obj, Array args /* 
   INSTANCE_METHOD_INJECTION(ReflectionMethod, ReflectionMethod::invoke);
   Variant v_args;
 
-  v_args = func_get_args(num_args, Array(ArrayInit(1).set(0, ArrayElement(v_obj)).create()),args);
+  v_args = func_get_args(num_args, Array(NEW(ArrayElement)(v_obj), NULL),args);
   x_array_shift(ref(v_args));
   return x_hphp_invoke_method(v_obj, toString(m_info.rvalAt("class", 0x45397FE5C82DBD12LL)), toString(m_info.rvalAt("name", 0x0BCDB293DC3CBDDCLL)), toArray(v_args));
 } /* function */
@@ -4900,7 +4901,7 @@ Variant c_reflectionproperty::os_constant(const char *s) {
 IMPLEMENT_CLASS(reflectionproperty)
 ObjectData *c_reflectionproperty::create(Variant v_cls, Variant v_name) {
   init();
-  t___construct(v_cls, v_name);
+  t___construct(v_cls,v_name);
   return this;
 }
 ObjectData *c_reflectionproperty::dynCreate(CArrRef params, bool init /* = true */) {
@@ -6104,7 +6105,7 @@ Variant c_reflectionparameter::os_constant(const char *s) {
 IMPLEMENT_CLASS(reflectionparameter)
 ObjectData *c_reflectionparameter::create(Variant v_func, Variant v_param) {
   init();
-  t___construct(v_func, v_param);
+  t___construct(v_func,v_param);
   return this;
 }
 ObjectData *c_reflectionparameter::dynCreate(CArrRef params, bool init /* = true */) {

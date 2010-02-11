@@ -112,8 +112,7 @@ ArrayData *ArrayData::Create(CVarRef name, CVarRef value) {
 }
 
 ArrayData *ArrayData::Create(const std::vector<ArrayElement *> &elems,
-                             bool replace /* = true */,
-                             bool release /* = true */) {
+                             bool replace /* = true */) {
   if (elems.empty()) {
     return Create();
   }
@@ -128,7 +127,7 @@ ArrayData *ArrayData::Create(const std::vector<ArrayElement *> &elems,
       } else {
         ret->append(elem->getVariant(), false);
       }
-      if (release) elem->release();
+      elem->release();
     }
     return ret;
   }
@@ -188,11 +187,9 @@ ArrayData *ArrayData::Create(const std::vector<ArrayElement *> &elems,
     ret = NEW(VectorVariant)(elems);
   }
 #endif
-  if (release) {
-    size = elems.size();
-    for (unsigned int i = 0; i < size; i++) {
-      elems[i]->release();
-    }
+  size = elems.size();
+  for (unsigned int i = 0; i < size; i++) {
+    elems[i]->release();
   }
 
   return ret;

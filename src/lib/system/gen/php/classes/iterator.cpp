@@ -103,9 +103,10 @@ Variant c_arrayiterator::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 IMPLEMENT_CLASS(arrayiterator)
-ObjectData *c_arrayiterator::create(Variant v_array, Variant v_flags /* = 0LL (SORT_REGULAR) */) {
+ObjectData *c_arrayiterator::create(Variant v_array, Variant v_flags //  = 0LL /* SORT_REGULAR */
+) {
   init();
-  t___construct(v_array, v_flags);
+  t___construct(v_array,v_flags);
   return this;
 }
 ObjectData *c_arrayiterator::dynCreate(CArrRef params, bool init /* = true */) {
@@ -690,7 +691,8 @@ void c_arrayiterator::init() {
   m_flags = null;
 }
 /* SRC: classes/iterator.php line 38 */
-void c_arrayiterator::t___construct(Variant v_array, Variant v_flags /* = 0LL (SORT_REGULAR) */) {
+void c_arrayiterator::t___construct(Variant v_array, Variant v_flags //  = 0LL /* SORT_REGULAR */
+) {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::__construct);
   bool oldInCtor = gasInCtor(true);
   m_arr = v_array;
@@ -816,7 +818,7 @@ bool c_arrayiterator::t_uasort(CVarRef v_cmp_function) {
 /* SRC: classes/iterator.php line 124 */
 bool c_arrayiterator::t_uksort(Variant v_cmp_function) {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::uksort);
-  return invoke_failed("uksort", Array(ArrayInit(1).set(0, ArrayElement(ref(v_cmp_function))).create()), 0x4842AF70A71BE6C4LL);
+  return invoke_failed("uksort", Array(NEW(ArrayElement)(ref(v_cmp_function)), NULL), 0x4842AF70A71BE6C4LL);
 } /* function */
 /* SRC: classes/iterator.php line 128 */
 bool c_arrayiterator::t_valid() {
@@ -1230,7 +1232,7 @@ Variant c_appenditerator::t___call(Variant v_func, Variant v_params) {
   INCALL_HELPER(v_func);
   Variant eo_0;
   Variant eo_1;
-  return x_call_user_func_array((assignCallTemp(eo_0, o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0)),assignCallTemp(eo_1, v_func),Array(ArrayInit(2).set(0, ArrayElement(eo_0)).set(1, ArrayElement(eo_1)).create())), toArray(v_params));
+  return x_call_user_func_array((assignCallTemp(eo_0, o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0)),assignCallTemp(eo_1, v_func),Array(NEW(ArrayElement)(eo_0), NEW(ArrayElement)(eo_1), NULL)), toArray(v_params));
 } /* function */
 Object co_arrayiterator(CArrRef params, bool init /* = true */) {
   return Object(p_arrayiterator(NEW(c_arrayiterator)())->dynCreate(params, init));

@@ -2655,9 +2655,11 @@ Variant c_exception::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 IMPLEMENT_CLASS(exception)
-ObjectData *c_exception::create(Variant v_message /* = "" */, Variant v_code /* = 0LL */) {
+ObjectData *c_exception::create(Variant v_message //  = ""
+, Variant v_code //  = 0LL
+) {
   init();
-  t___construct(v_message, v_code);
+  t___construct(v_message,v_code);
   return this;
 }
 ObjectData *c_exception::dynCreate(CArrRef params, bool init /* = true */) {
@@ -2909,7 +2911,9 @@ void c_exception::init() {
   m_line = null;
 }
 /* SRC: classes/exception.php line 9 */
-void c_exception::t___construct(Variant v_message /* = "" */, Variant v_code /* = 0LL */) {
+void c_exception::t___construct(Variant v_message //  = ""
+, Variant v_code //  = 0LL
+) {
   INSTANCE_METHOD_INJECTION(Exception, Exception::__construct);
   bool oldInCtor = gasInCtor(true);
   Variant v_frame;

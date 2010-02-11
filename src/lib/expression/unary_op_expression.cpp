@@ -553,11 +553,15 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     switch (m_op) {
     case T_ARRAY:
       {
+        if (m_exp) {
+          cg.printf(", NULL)");
+        } else {
+          cg.printf("(ArrayElement*)NULL)");
+        }
         ExpressionListPtr exps = dynamic_pointer_cast<ExpressionList>(m_exp);
         if (exps) exps->outputCPPControlledEvalOrderPost(cg, ar);
-        cg.printf(")");
-        break;
       }
+      break;
     case T_CLONE:
     case '!':
     case '(':

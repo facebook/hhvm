@@ -49,9 +49,14 @@ Variant c_pear_error::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 IMPLEMENT_CLASS(pear_error)
-ObjectData *c_pear_error::create(CStrRef v_message /* = "unknown error" */, CVarRef v_code /* = null_variant */, CVarRef v_mode /* = null_variant */, CVarRef v_options /* = null_variant */, CVarRef v_userinfo /* = null_variant */) {
+ObjectData *c_pear_error::create(CStrRef v_message //  = "unknown error"
+, CVarRef v_code //  = null_variant
+, CVarRef v_mode //  = null_variant
+, CVarRef v_options //  = null_variant
+, CVarRef v_userinfo //  = null_variant
+) {
   init();
-  t_pear_error(v_message, v_code, v_mode, v_options, v_userinfo);
+  t_pear_error(v_message,v_code,v_mode,v_options,v_userinfo);
   return this;
 }
 ObjectData *c_pear_error::dynCreate(CArrRef params, bool init /* = true */) {
@@ -404,7 +409,12 @@ Variant cw_pear_error$os_invoke(const char *c, const char *s, CArrRef params, bo
 void c_pear_error::init() {
 }
 /* SRC: classes/pear_error.php line 4 */
-void c_pear_error::t_pear_error(CStrRef v_message /* = "unknown error" */, CVarRef v_code /* = null_variant */, CVarRef v_mode /* = null_variant */, CVarRef v_options /* = null_variant */, CVarRef v_userinfo /* = null_variant */) {
+void c_pear_error::t_pear_error(CStrRef v_message //  = "unknown error"
+, CVarRef v_code //  = null_variant
+, CVarRef v_mode //  = null_variant
+, CVarRef v_options //  = null_variant
+, CVarRef v_userinfo //  = null_variant
+) {
   INSTANCE_METHOD_INJECTION(pear_error, pear_error::pear_error);
   bool oldInCtor = gasInCtor(true);
   gasInCtor(oldInCtor);
@@ -442,7 +452,8 @@ void c_pear_error::t_getuserinfo() {
   INSTANCE_METHOD_INJECTION(pear_error, pear_error::getUserInfo);
 } /* function */
 /* SRC: classes/pear_error.php line 16 */
-void c_pear_error::t_getbacktrace(CVarRef v_frame /* = null_variant */) {
+void c_pear_error::t_getbacktrace(CVarRef v_frame //  = null_variant
+) {
   INSTANCE_METHOD_INJECTION(pear_error, pear_error::getBacktrace);
 } /* function */
 /* SRC: classes/pear_error.php line 18 */

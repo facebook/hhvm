@@ -415,12 +415,12 @@ bool ClassStatement::attemptPropertyAccess(CStrRef prop) const {
   if (mods & Private) level = Private;
   else if (mods & Protected) level = Protected;
   if (!hasAccess(context, level)) {
-    string msg("Attempt to access ");
-    if (level == Private) msg += "private ";
-    else msg += string("protected ");
-    msg += m_name + "::" + prop.data();
-    if (!context.empty()) msg += string(" from ") + context.c_str();
-    throw_fatal(msg.c_str());
+    const char *mod = "protected";
+    if (level == ClassStatement::Private) mod = "private";
+    throw FatalErrorException("Attempt to access %s %s::%s%s%s",
+                              mod, m_name.c_str(), prop.data(),
+                              !context.empty() ? " from " : "",
+                              !context.empty() ? context.c_str() : "");
   }
 
   return true;

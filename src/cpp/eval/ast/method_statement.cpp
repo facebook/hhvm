@@ -164,12 +164,12 @@ void MethodStatement::attemptAccess(const char *context) const {
     access = cs->hasAccess(context, level);
   }
   if (!access) {
-    string msg("Attempt to call ");
-    if (level == ClassStatement::Private) msg += "private ";
-    else msg += string("protected ");
-    msg += cs->name() + "::" + m_name.c_str() + "()";
-    if (context[0]) msg += string(" from ") + context;
-    throw_fatal(msg.c_str());
+    const char *mod = "protected";
+    if (level == ClassStatement::Private) mod = "private";
+    throw FatalErrorException("Attempt to call %s %s::%s()%s%s",
+                              mod, getClass()->name().c_str(), m_name.c_str(),
+                              context[0] ? " from " : "",
+                              context[0] ? context : "");
   }
 }
 

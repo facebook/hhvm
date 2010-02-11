@@ -164,6 +164,8 @@ class ReflectionFunctionAbstract {
 
 class ReflectionFunction extends ReflectionFunctionAbstract
 implements Reflector {
+  const IS_DEPRECATED = 262144;
+
   public function __construct($name) {
     $this->info = hphp_get_function_info($name);
     if (empty($this->info)) {
@@ -198,6 +200,10 @@ implements Reflector {
 // class
 
 class ReflectionClass implements Reflector {
+  const IS_IMPLICIT_ABSTRACT = 16 ;
+  const IS_EXPLICIT_ABSTRACT = 32 ;
+  const IS_FINAL = 64 ;
+
   public $name;
   protected $info;
 
@@ -488,6 +494,11 @@ class ReflectionObject extends ReflectionClass {
 // property
 
 class ReflectionProperty implements Reflector {
+  const IS_STATIC = 1;
+  const IS_PUBLIC = 256;
+  const IS_PROTECTED = 512;
+  const IS_PRIVATE = 1024;
+
   public $info;
   public $name;
   public $class;
@@ -581,6 +592,13 @@ class ReflectionProperty implements Reflector {
 
 class ReflectionMethod extends ReflectionFunctionAbstract
 implements Reflector {
+  const IS_STATIC = 1;
+  const IS_PUBLIC = 256;
+  const IS_PROTECTED = 512;
+  const IS_PRIVATE = 1024;
+  const IS_ABSTRACT = 2;
+  const IS_FINAL = 4;
+
   public $name;
   public $class;
 

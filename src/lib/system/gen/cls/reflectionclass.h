@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 200 */
+/* SRC: classes/reflection.php line 202 */
 class c_reflectionclass : virtual public c_reflector {
   BEGIN_CLASS_MAP(reflectionclass)
     PARENT_CLASS(reflector)

@@ -25,6 +25,7 @@ namespace Eval {
 
 DECLARE_AST_PTR(Expression);
 DECLARE_AST_PTR(LvalExpression);
+class ByteCodeProgram;
 
 #define EXPRESSION_ARGS CONSTRUCT_ARGS
 #define EXPRESSION_PASS CONSTRUCT_PASS
@@ -39,8 +40,13 @@ public:
   virtual const LvalExpression *toLval() const;
   virtual bool isRefParam() const;
 
+  virtual void byteCodeEval(ByteCodeProgram &code) const;
+  virtual void byteCodeRefval(ByteCodeProgram &code) const;
+
   static Variant evalVector(const std::vector<ExpressionPtr> &v,
                             VariableEnvironment &env);
+  static void byteCodeEvalVector(const std::vector<ExpressionPtr> &v,
+                                 ByteCodeProgram &code);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

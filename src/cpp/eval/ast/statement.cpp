@@ -1,0 +1,14 @@
+#include <cpp/eval/ast/statement.h>
+
+namespace HPHP {
+namespace Eval {
+///////////////////////////////////////////////////////////////////////////////
+
+void Statement::byteCode(ByteCodeProgram &code) const {
+  throw FatalErrorException("Cannot compile %s:%d", m_loc.file, m_loc.line1);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+}
+}
+

@@ -31,6 +31,7 @@ public:
                      ExpressionPtr exp2);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual void dump() const;
+  virtual void byteCodeEval(ByteCodeProgram &code) const;
 private:
   ExpressionPtr m_exp1;
   ExpressionPtr m_exp2;

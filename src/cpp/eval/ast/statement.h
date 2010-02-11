@@ -25,6 +25,8 @@ namespace Eval {
 
 DECLARE_AST_PTR(Statement);
 
+class ByteCodeProgram;
+
 #define STATEMENT_ARGS CONSTRUCT_ARGS
 #define STATEMENT_PASS CONSTRUCT_PASS
 
@@ -32,6 +34,7 @@ class Statement : public Construct {
 public:
   Statement(STATEMENT_ARGS) : Construct(CONSTRUCT_PASS) {};
   virtual void eval(VariableEnvironment &env) const = 0;
+  virtual void byteCode(ByteCodeProgram &code) const;
 };
 
 #define EVAL_STMT(stmt, env)                                                  \

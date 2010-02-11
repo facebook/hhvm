@@ -19,6 +19,7 @@
 #include <cpp/eval/ast/name.h>
 #include <cpp/base/runtime_option.h>
 #include <cpp/eval/strict_mode.h>
+#include <cpp/eval/bytecode/bytecode.h>
 
 namespace HPHP {
 namespace Eval {
@@ -108,6 +109,31 @@ void VariableExpression::dump() const {
   m_name->dump();
 }
 
+void VariableExpression::byteCodeEval(ByteCodeProgram &code) const {
+  if (m_idx != -1) {
+    code.add(ByteCode::Var, m_idx);
+  } else {
+    m_name->byteCode(code);
+    code.add(ByteCode::VarInd);
+  }
+}
+
+void VariableExpression::byteCodeLval(ByteCodeProgram &code) const {
+  if (m_idx != -1) {
+    code.add(ByteCode::VarRef, m_idx);
+  } else {
+    m_name->byteCode(code);
+    code.add(ByteCode::VarRefInd);
+  }
+}
+void VariableExpression::byteCodeSet(ByteCodeProgram &code) const {
+  if (m_idx != -1) {
+    code.add(ByteCode::SetVar, m_idx);
+  } else {
+    m_name->byteCode(code);
+    code.add(ByteCode::SetVarInd);
+  }
+}
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

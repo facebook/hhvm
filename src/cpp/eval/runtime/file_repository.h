@@ -21,6 +21,7 @@
 #include <cpp/eval/analysis/block.h>
 #include <time.h>
 #include <util/lock.h>
+#include <cpp/eval/bytecode/bytecode.h>
 
 namespace HPHP {
 namespace Eval {
@@ -44,6 +45,7 @@ private:
   time_t m_timestamp;
   StatementPtr m_tree;
   std::string m_profName;
+  ByteCodeProgram m_byteCode;
 };
 
 /**

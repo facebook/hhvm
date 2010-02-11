@@ -56,6 +56,15 @@ void AssignmentOpExpression::dump() const {
   m_rhs->dump();
 }
 
+void AssignmentOpExpression::byteCodeEval(ByteCodeProgram &code) const {
+  m_rhs->byteCodeEval(code);
+  if (m_op == '=') {
+    m_lhs->byteCodeSet(code);
+    return;
+  }
+  throw FatalErrorException("Cannot compile %s:%d", m_loc.file, m_loc.line1);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

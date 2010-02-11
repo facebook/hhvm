@@ -35,6 +35,8 @@ public:
   Variant getValue() const;
   virtual void dump() const;
   const std::string &getString() const { return m_value; }
+
+  virtual void byteCodeEval(ByteCodeProgram &code) const;
 private:
   enum Kind {
     SNull,
@@ -44,6 +46,7 @@ private:
     SString
   };
   std::string m_value;
+  StaticString m_svalue;
   union {
     int64 num;
     double dbl;

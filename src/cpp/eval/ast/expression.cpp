@@ -17,6 +17,7 @@
 #include <cpp/eval/ast/expression.h>
 #include <cpp/eval/ast/lval_expression.h>
 #include <cpp/eval/parser/hphp.tab.hpp>
+#include <cpp/eval/bytecode/bytecode.h>
 
 namespace HPHP {
 namespace Eval {
@@ -52,6 +53,24 @@ const LvalExpression *Expression::toLval() const {
 
 bool Expression::isRefParam() const {
   return false;
+}
+
+void Expression::byteCodeEval(ByteCodeProgram &code) const {
+  throw FatalErrorException("Cannot compile %s:%d", m_loc.file, m_loc.line1);
+}
+void Expression::byteCodeRefval(ByteCodeProgram &code) const {
+  throw FatalErrorException("Cannot compile %s:%d", m_loc.file, m_loc.line1);
+
+}
+
+void Expression::byteCodeEvalVector(const std::vector<ExpressionPtr> &v,
+                                    ByteCodeProgram &code) {
+  uint i;
+  for (i = 0; i < v.size() - 1; ++i) {
+    v[i]->byteCodeEval(code);
+    code.add(ByteCode::Discard);
+  }
+  v[i]->byteCodeEval(code);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

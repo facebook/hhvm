@@ -17,9 +17,11 @@
 #include <cpp/eval/ast/if_statement.h>
 #include <cpp/eval/ast/expression.h>
 #include <cpp/eval/runtime/variable_environment.h>
+#include <cpp/eval/bytecode/bytecode.h>
 
 namespace HPHP {
 namespace Eval {
+using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 IfBranch::IfBranch(CONSTRUCT_ARGS, ExpressionPtr cond, StatementPtr body)
@@ -47,13 +49,13 @@ void IfBranch::dump() const {
 }
 
 IfStatement::IfStatement(STATEMENT_ARGS,
-                         const std::vector<IfBranchPtr> &branches,
+                         const vector<IfBranchPtr> &branches,
                          StatementPtr els)
   : Statement(STATEMENT_PASS), m_branches(branches), m_else(els) {}
 
 void IfStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
-  for (std::vector<IfBranchPtr>::const_iterator it = m_branches.begin();
+  for (vector<IfBranchPtr>::const_iterator it = m_branches.begin();
        it != m_branches.end(); ++it) {
     if ((*it)->evalCond(env)) {
       if ((*it)->body()) {
@@ -71,6 +73,24 @@ void IfStatement::dump() const {
     printf(" else {");
     m_else->dump();
     printf("}");
+  }
+}
+
+void IfStatement::byteCode(ByteCodeProgram &code) const {
+  vector<ByteCodeProgram::JumpTag> exits;
+  exits.reserve(m_branches.size());
+  for (vector<IfBranchPtr>::const_iterator it = m_branches.begin();
+       it != m_branches.end(); ++it) {
+    (*it)->cond()->byteCodeEval(code);
+    ByteCodeProgram::JumpTag fail = code.jumpIfNot();
+    (*it)->body()->byteCode(code);
+    exits.push_back(code.jump());
+    code.bindJumpTag(fail);
+  }
+  if (m_else) m_else->byteCode(code);
+  for (vector<ByteCodeProgram::JumpTag>::iterator it = exits.begin();
+       it != exits.end(); ++it) {
+    code.bindJumpTag(*it);
   }
 }
 

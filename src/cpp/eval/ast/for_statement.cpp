@@ -17,6 +17,7 @@
 #include <cpp/eval/ast/for_statement.h>
 #include <cpp/eval/ast/expression.h>
 #include <cpp/eval/runtime/variable_environment.h>
+#include <cpp/eval/bytecode/bytecode.h>
 
 namespace HPHP {
 namespace Eval {
@@ -50,6 +51,24 @@ void ForStatement::dump() const {
   if (m_body) m_body->dump();
   printf("}");
 
+}
+
+void ForStatement::byteCode(ByteCodeProgram &code) const {
+  Expression::byteCodeEvalVector(m_init, code);
+  code.add(ByteCode::Discard);
+  ByteCodeProgram::Label preCond = code.here();
+  ByteCodeProgram::JumpTag fail = 0;
+  if (!m_cond.empty()) {
+    Expression::byteCodeEvalVector(m_cond, code);
+    fail = code.jumpIfNot();
+  }
+  m_body->byteCode(code);
+  Expression::byteCodeEvalVector(m_next, code);
+  code.add(ByteCode::Discard);
+  code.bindJumpTag(code.jump(), preCond);
+  if (!m_cond.empty()) {
+    code.bindJumpTag(fail);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

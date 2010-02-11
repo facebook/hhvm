@@ -208,6 +208,8 @@ bool RuntimeOption::EnableStrict = false;
 int RuntimeOption::StrictLevel = 1; // StrictBasic, cf strict_mode.h
 bool RuntimeOption::StrictFatal = false;
 std::vector<std::string> RuntimeOption::IncludeSearchPaths;
+bool RuntimeOption::EvalBytecodeInterpreter = false;
+bool RuntimeOption::DumpBytecode = false;
 
 bool RuntimeOption::SandboxMode = false;
 std::string RuntimeOption::SandboxPattern;
@@ -645,6 +647,8 @@ void RuntimeOption::Load(Hdf &config) {
     } else {
       IncludeSearchPaths.push_back(".");
     }
+    EvalBytecodeInterpreter = eval["BytecodeInterpreter"].getBool(false);
+    DumpBytecode = eval["DumpBytecode"].getBool(false);
   }
   {
     Hdf sandbox = config["Sandbox"];

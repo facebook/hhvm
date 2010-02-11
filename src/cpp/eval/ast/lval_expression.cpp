@@ -16,6 +16,7 @@
 
 #include <cpp/eval/ast/lval_expression.h>
 #include <cpp/eval/parser/hphp.tab.hpp>
+#include <cpp/eval/bytecode/bytecode.h>
 
 namespace HPHP {
 namespace Eval {
@@ -85,6 +86,15 @@ Variant LvalExpression::refval(VariableEnvironment &env) const {
 
 const LvalExpression *LvalExpression::toLval() const {
   return this;
+}
+
+void LvalExpression::byteCodeLval(ByteCodeProgram &code) const {
+  throw FatalErrorException("Cannot compile %s:%d", m_loc.file, m_loc.line1);
+}
+
+void LvalExpression::byteCodeSet(ByteCodeProgram &code) const {
+  byteCodeLval(code);
+  code.add(ByteCode::Bind);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

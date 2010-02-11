@@ -45,6 +45,13 @@ void StatementListStatement::dump() const {
   dumpVector(m_stmts, " ");
 }
 
+void StatementListStatement::byteCode(ByteCodeProgram &code) const {
+  for (vector<StatementPtr>::const_iterator it = m_stmts.begin();
+       it != m_stmts.end(); ++it) {
+    (*it)->byteCode(code);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

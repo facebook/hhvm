@@ -13,53 +13,54 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <cpp/eval/runtime/arg_stack.h>
+
+#ifndef __EVAL_RUNTIME_VARIANT_STACK_H__
+#define __EVAL_RUNTIME_VARIANT_STACK_H__
+
+#include <cpp/eval/base/eval_base.h>
 
 namespace HPHP {
 namespace Eval {
-using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
-ArgStack::ArgStack() : m_ptr(0), m_cap(400) {
-  m_stack = (Variant*)calloc(m_cap, sizeof(Variant));
-}
-
-ArgStack::~ArgStack() {
-  free(m_stack);
-}
-
-void ArgStack::push(CVarRef v) {
-  if (m_ptr == m_cap) {
-    uint oldcap = m_cap;
-    m_cap *= 2;
-    m_stack = (Variant*)realloc(m_stack, m_cap * sizeof(Variant));
-    memset(m_stack + oldcap, 0, oldcap * sizeof(Variant));
+class VariantStack {
+public:
+  VariantStack();
+  ~VariantStack();
+  void push(CVarRef v) {
+    if (m_ptr == m_cap) {
+      grow();
+    }
+    m_stack[m_ptr++] = v;
   }
-  m_stack[m_ptr++] = v;
-}
-
-void ArgStack::pop(uint n) {
-  ASSERT(m_ptr >= n);
-  for (uint i = m_ptr - n; i < m_ptr; i++) {
-    m_stack[i].unset();
+  void pop(uint n);
+  void pop() {
+    ASSERT(m_ptr >= 1);
+    m_stack[m_ptr-1].unset();
+    m_ptr--;
   }
-  m_ptr -= n;
-}
-
-Array ArgStack::pull(uint s, uint n) const {
-  ASSERT(m_ptr >= s + n);
-  Array r = Array::Create();
-  for (uint i = 0; i < n; i++) {
-    r.append(m_stack[s + i]);
+  Variant &top() {
+    ASSERT(m_ptr > 0);
+    return m_stack[m_ptr - 1];
   }
-  return r;
-}
+  Variant &top(uint n) {
+    ASSERT(m_ptr > 0);
+    return m_stack[m_ptr - n - 1];
+  }
+  Variant topPop();
+  Array pull(uint s, uint n) const;
+  void clear();
+  uint pos() const { return m_ptr; }
+private:
+  uint m_ptr;
+  uint m_cap;
+  Variant *m_stack;
+  void grow();
+};
 
-void ArgStack::clear() {
-  ASSERT(m_ptr == 0);
-  m_ptr = 0;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
+
+#endif /* __EVAL_RUNTIME_VARIANT_STACK_H__ */

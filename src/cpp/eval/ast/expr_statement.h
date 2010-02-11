@@ -31,6 +31,7 @@ public:
   ExprStatement(STATEMENT_ARGS, ExpressionPtr exp);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump() const;
+  virtual void byteCode(ByteCodeProgram &code) const;
 private:
   ExpressionPtr m_exp;
 };

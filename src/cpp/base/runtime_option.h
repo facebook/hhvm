@@ -219,6 +219,8 @@ public:
   static int StrictLevel;
   static bool StrictFatal;
   static std::vector<std::string> IncludeSearchPaths;
+  static bool EvalBytecodeInterpreter;
+  static bool DumpBytecode;
 
   // Sandbox options
   static bool SandboxMode;

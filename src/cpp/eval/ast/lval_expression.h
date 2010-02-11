@@ -41,6 +41,10 @@ public:
   virtual Variant setOpVariant(Variant &lhs, int op, CVarRef rhs) const;
   virtual void unset(VariableEnvironment &env) const;
   virtual const LvalExpression *toLval() const;
+
+  virtual void byteCodeLval(ByteCodeProgram &code) const;
+  virtual void byteCodeSet(ByteCodeProgram &code) const;
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

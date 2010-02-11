@@ -16,6 +16,7 @@
 
 #include <cpp/eval/ast/expr_statement.h>
 #include <cpp/eval/ast/expression.h>
+#include <cpp/eval/bytecode/bytecode.h>
 
 namespace HPHP {
 namespace Eval {
@@ -32,6 +33,11 @@ void ExprStatement::eval(VariableEnvironment &env) const {
 void ExprStatement::dump() const {
   m_exp->dump();
   printf(";");
+}
+
+void ExprStatement::byteCode(ByteCodeProgram &code) const {
+  m_exp->byteCodeEval(code);
+  code.add(ByteCode::Discard);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

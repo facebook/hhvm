@@ -36,6 +36,10 @@ public:
   virtual Variant setOp(VariableEnvironment &env, int op, CVarRef rhs) const;
   NamePtr getName() const;
   virtual void dump() const;
+
+  virtual void byteCodeEval(ByteCodeProgram &code) const;
+  virtual void byteCodeLval(ByteCodeProgram &code) const;
+  virtual void byteCodeSet(ByteCodeProgram &code) const;
 private:
   NamePtr m_name;
   int m_idx;

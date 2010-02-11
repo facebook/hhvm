@@ -477,10 +477,17 @@ void RequestEvalState::info() {
   }
 }
 
-ArgStack &RequestEvalState::argStack() {
+VariantStack &RequestEvalState::argStack() {
   RequestEvalState *self = s_res.get();
   return self->m_argStack;
 }
+
+
+VariantStack &RequestEvalState::bytecodeStack() {
+  RequestEvalState *self = s_res.get();
+  return self->m_bytecodeStack;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

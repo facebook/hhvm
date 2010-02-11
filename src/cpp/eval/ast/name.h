@@ -26,6 +26,7 @@ namespace Eval {
 DECLARE_AST_PTR(Name);
 DECLARE_AST_PTR(Expression);
 class VariableEnvironment;
+class ByteCodeProgram;
 
 class Name : public Construct {
 public:
@@ -34,6 +35,9 @@ public:
   virtual int64 hash() const;
   virtual int64 hashLwr() const;
   virtual String getStatic() const { return String(); }
+
+  virtual void byteCode(ByteCodeProgram &code) const = 0;
+
   static NamePtr fromString(CONSTRUCT_ARGS, const std::string &name);
   static NamePtr fromExp(CONSTRUCT_ARGS, ExpressionPtr e);
 };
@@ -46,10 +50,13 @@ public:
   virtual int64 hashLwr() const;
   virtual String getStatic() const;
   virtual void dump() const;
+
+  virtual void byteCode(ByteCodeProgram &code) const;
 private:
   std::string m_name;
   int64 m_hash;
   int64 m_hashLwr;
+  StaticString m_sname;
 };
 
 class ExprName : public Name {
@@ -57,6 +64,8 @@ public:
   ExprName(CONSTRUCT_ARGS, ExpressionPtr name);
   virtual String get(VariableEnvironment &env) const;
   virtual void dump() const;
+
+  virtual void byteCode(ByteCodeProgram &code) const;
 private:
   ExpressionPtr m_name;
 };

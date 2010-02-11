@@ -31,6 +31,7 @@ public:
   EchoStatement(STATEMENT_ARGS, const std::vector<ExpressionPtr> &args);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump() const;
+  virtual void byteCode(ByteCodeProgram &code) const;
 private:
   std::vector<ExpressionPtr> m_args;
 };

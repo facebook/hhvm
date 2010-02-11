@@ -22,6 +22,7 @@
 #include <cpp/eval/ast/static_statement.h>
 #include <cpp/base/runtime_option.h>
 #include <util/process.h>
+#include <cpp/eval/runtime/eval_state.h>
 
 using namespace std;
 
@@ -36,6 +37,12 @@ PhpFile::PhpFile(StatementPtr tree, const vector<StaticStatementPtr> &statics,
   : Block(statics), m_lock(lock), m_refCount(1), m_timestamp(time(NULL)),
     m_tree(tree), m_profName(string("run_init::") + string(m_tree->loc()->file))
 {
+  if (RuntimeOption::EvalBytecodeInterpreter) {
+    m_tree->byteCode(m_byteCode);
+    if (RuntimeOption::DumpBytecode) {
+      cout << m_byteCode.toString();
+    }
+  }
 }
 
 PhpFile::~PhpFile() {
@@ -52,7 +59,11 @@ Variant PhpFile::eval(LVariableTable *vars) {
 #endif
   EvalFrameInjection fi("", m_profName.c_str(), env,
                         m_tree->loc()->file);
-  m_tree->eval(env);
+  if (RuntimeOption::EvalBytecodeInterpreter) {
+    m_byteCode.execute(RequestEvalState::bytecodeStack(), env);
+  } else {
+    m_tree->eval(env);
+  }
   if (env.isReturning()) {
     return env.getRet();
   } else if (env.isBreaking()) {

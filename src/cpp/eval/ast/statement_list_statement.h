@@ -34,6 +34,8 @@ public:
   void add(StatementPtr stmt);
   const std::vector<StatementPtr> &stmts() const { return m_stmts; }
   virtual void dump() const;
+
+  virtual void byteCode(ByteCodeProgram &code) const;
 private:
   std::vector<StatementPtr> m_stmts;
 };

@@ -16,6 +16,7 @@
 
 #include <cpp/eval/ast/binary_op_expression.h>
 #include <cpp/eval/parser/hphp.tab.hpp>
+#include <cpp/eval/bytecode/bytecode.h>
 
 namespace HPHP {
 namespace Eval {
@@ -99,6 +100,37 @@ void BinaryOpExpression::dump() const {
   }
   printf(" %s ", op);
   m_exp2->dump();
+}
+
+void BinaryOpExpression::byteCodeEval(ByteCodeProgram &code) const {
+  ByteCode::Operation op = ByteCode::Nop;
+  switch (m_op) {
+  case T_LOGICAL_XOR: op = ByteCode::LogXor; break;
+  case '|': op = ByteCode::BitOr; break;
+  case '&': op = ByteCode::BitAnd; break;
+  case '^': op = ByteCode::BitXor; break;
+  case '.': op = ByteCode::Concat; break;
+  case '+': op = ByteCode::Add; break;
+  case '-': op = ByteCode::Sub; break;
+  case '*': op = ByteCode::Mul; break;
+  case '/': op = ByteCode::Div; break;
+  case '%': op = ByteCode::Mod; break;
+  case T_SL: op = ByteCode::Sl; break;
+  case T_SR: op = ByteCode::Sr; break;
+  case T_IS_IDENTICAL: op = ByteCode::Same; break;
+  case T_IS_NOT_IDENTICAL: op = ByteCode::NotSame; break;
+  case T_IS_EQUAL: op = ByteCode::Equal; break;
+  case T_IS_NOT_EQUAL: op = ByteCode::NotEqual; break;
+  case '<': op = ByteCode::LT; break;
+  case T_IS_SMALLER_OR_EQUAL: op = ByteCode::LEQ; break;
+  case '>': op = ByteCode::GT; break;
+  case T_IS_GREATER_OR_EQUAL: op = ByteCode::GEQ; break;
+  default:
+    Expression::byteCodeEval(code);
+  }
+  m_exp1->byteCodeEval(code);
+  m_exp2->byteCodeEval(code);
+  code.add(op);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

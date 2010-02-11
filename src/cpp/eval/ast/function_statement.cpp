@@ -204,7 +204,7 @@ void FunctionStatement::directBind(VariableEnvironment &env,
   vector<ParameterPtr>::const_iterator piter = m_params.begin();
   const vector<ExpressionPtr> &args = caller->params();
   vector<ExpressionPtr>::const_iterator it = args.begin();
-  ArgStack &as = RequestEvalState::argStack();
+  VariantStack &as = RequestEvalState::argStack();
   for (; it != args.end() && piter != m_params.end(); ++it, ++piter) {
     Variant v;
     if ((*piter)->isRef() || (*it)->isRefParam()) {
@@ -279,7 +279,7 @@ LVariableTable *FunctionStatement::getStaticVars(VariableEnvironment &env)
 
 Variant FunctionStatement::invokeImpl(VariableEnvironment &env,
                                       CArrRef params) const {
-  ArgStack &as = RequestEvalState::argStack();
+  VariantStack &as = RequestEvalState::argStack();
   vector<ParameterPtr>::const_iterator piter = m_params.begin();
   for (ArrayIter iter(params); !iter.end() && piter != m_params.end();
        ++piter, iter.next()) {

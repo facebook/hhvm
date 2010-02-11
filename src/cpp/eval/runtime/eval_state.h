@@ -19,7 +19,7 @@
 
 #include <cpp/eval/base/eval_base.h>
 #include <cpp/base/class_info.h>
-#include <cpp/eval/runtime/arg_stack.h>
+#include <cpp/eval/runtime/variant_stack.h>
 #include <util/case_insensitive.h>
 
 namespace HPHP {
@@ -149,7 +149,8 @@ public:
   static int64 unique();
   static void info();
 
-  static ArgStack &argStack();
+  static VariantStack &argStack();
+  static VariantStack &bytecodeStack();
 
   static void registerObject(EvalObjectData *obj);
   static void deregisterObject(EvalObjectData *obj);
@@ -169,7 +170,8 @@ private:
   std::map<std::string, ClassInfoEvaled> m_interfaceInfos;
   std::set<EvalObjectData*> m_livingObjects;
   int64 m_ids;
-  ArgStack m_argStack;
+  VariantStack m_argStack;
+  VariantStack m_bytecodeStack;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

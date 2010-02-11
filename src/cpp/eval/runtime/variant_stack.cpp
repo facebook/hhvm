@@ -13,34 +13,56 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
-#ifndef __EVAL_ARG_STACK_H__
-#define __EVAL_ARG_STACK_H__
-
-#include <cpp/eval/base/eval_base.h>
+#include <cpp/eval/runtime/variant_stack.h>
 
 namespace HPHP {
 namespace Eval {
+using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
-class ArgStack {
-public:
-  ArgStack();
-  ~ArgStack();
-  void push(CVarRef v);
-  void pop(uint n);
-  Array pull(uint s, uint n) const;
-  void clear();
-  uint pos() const { return m_ptr; }
-private:
-  uint m_ptr;
-  uint m_cap;
-  Variant *m_stack;
-};
+VariantStack::VariantStack() : m_ptr(0), m_cap(400) {
+  m_stack = (Variant*)calloc(m_cap, sizeof(Variant));
+}
 
+VariantStack::~VariantStack() {
+  free(m_stack);
+}
+
+void VariantStack::pop(uint n /* = 1 */) {
+  ASSERT(m_ptr >= n);
+  for (uint i = m_ptr - n; i < m_ptr; i++) {
+    m_stack[i].unset();
+  }
+  m_ptr -= n;
+}
+
+Variant VariantStack::topPop() {
+  Variant r(top());
+  pop();
+  return r;
+}
+
+Array VariantStack::pull(uint s, uint n) const {
+  ASSERT(m_ptr >= s + n);
+  Array r = Array::Create();
+  for (uint i = 0; i < n; i++) {
+    r.append(m_stack[s + i]);
+  }
+  return r;
+}
+
+void VariantStack::clear() {
+  ASSERT(m_ptr == 0);
+  m_ptr = 0;
+}
+
+void VariantStack::grow() {
+  uint oldcap = m_cap;
+  m_cap *= 2;
+  m_stack = (Variant*)realloc(m_stack, m_cap * sizeof(Variant));
+  memset(m_stack + oldcap, 0, oldcap * sizeof(Variant));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
-
-#endif /* __EVAL_ARG_STACK_H__ */

@@ -16,6 +16,7 @@
 
 #include <cpp/eval/ast/scalar_expression.h>
 #include <cpp/eval/parser/hphp.tab.hpp>
+#include <cpp/eval/bytecode/bytecode.h>
 
 namespace HPHP {
 namespace Eval {
@@ -24,7 +25,8 @@ using namespace std;
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
                                    const string &value)
-  : Expression(EXPRESSION_PASS), m_value(value) {
+  : Expression(EXPRESSION_PASS), m_value(value),
+    m_svalue(m_value.c_str(), m_value.size()) {
   switch (type) {
   case T_NUM_STRING: {
     const char *s = m_value.c_str();
@@ -42,7 +44,7 @@ ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
     break;
   }
   case T_DNUMBER: {
-    m_num.dbl = String(m_value).toDouble();
+    m_num.dbl = m_svalue.toDouble();
     m_kind = SDouble;
     break;
   }
@@ -61,8 +63,8 @@ ScalarExpression::ScalarExpression(EXPRESSION_ARGS, bool b)
   m_num.num = b ? 1 : 0;
 }
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, const string &s)
-  : Expression(EXPRESSION_PASS), m_value(s), m_kind(SString)
-{}
+  : Expression(EXPRESSION_PASS), m_value(s),
+    m_svalue(m_value.c_str(), m_value.size()), m_kind(SString) {}
 
 Variant ScalarExpression::eval(VariableEnvironment &env) const {
   return getValue();
@@ -75,7 +77,7 @@ Variant ScalarExpression::getValue() const {
   case SBool:
     return (bool)m_num.num;
   case SString:
-    return String(m_value.c_str(), m_value.size(), AttachLiteral);
+    return m_svalue;
   case SInt:
     return m_num.num;
   case SDouble:
@@ -106,6 +108,19 @@ void ScalarExpression::dump() const {
   default:
     ASSERT(false);
   }
+}
+
+void ScalarExpression::byteCodeEval(ByteCodeProgram &code) const {
+  switch (m_kind) {
+  case SNull:   code.add(ByteCode::Null); break;
+  case SBool:   code.add(ByteCode::Bool, m_num.num); break;
+  case SString: code.add(ByteCode::String, (void*)m_svalue.get()); break;
+  case SInt:    code.add(ByteCode::Int, m_num.num); break;
+  case SDouble: code.add(ByteCode::Double, m_num.dbl); break;
+  default:
+    ASSERT(false);
+  }
+  return;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

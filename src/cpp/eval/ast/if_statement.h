@@ -33,6 +33,7 @@ public:
   bool proc(VariableEnvironment &env) const;
   virtual void dump() const;
   Variant evalCond(VariableEnvironment &env) const;
+  const ExpressionPtr &cond() { return m_cond; }
   const StatementPtr &body() { return m_body; }
 private:
   ExpressionPtr m_cond;
@@ -45,6 +46,7 @@ public:
               StatementPtr els);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump() const;
+  virtual void byteCode(ByteCodeProgram &code) const;
 private:
   std::vector<IfBranchPtr> m_branches;
   StatementPtr m_else;

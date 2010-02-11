@@ -18,6 +18,7 @@
 #include <cpp/eval/ast/expression.h>
 #include <cpp/base/type_string.h>
 #include <util/util.h>
+#include <cpp/eval/bytecode/bytecode.h>
 
 namespace HPHP {
 namespace Eval {
@@ -44,14 +45,15 @@ NamePtr Name::fromExp(CONSTRUCT_ARGS, ExpressionPtr e) {
 StringName::StringName(CONSTRUCT_ARGS, const string &name)
   : Name(CONSTRUCT_PASS), m_name(name),
     m_hash(hash_string(m_name.c_str(), m_name.size())),
-    m_hashLwr(hash_string_i(m_name.c_str(), m_name.size())) {}
+    m_hashLwr(hash_string_i(m_name.c_str(), m_name.size())),
+    m_sname(m_name.c_str(), m_name.size()) {}
 
 String StringName::get(VariableEnvironment &env) const {
   return getStatic();
 }
 
 String StringName::getStatic() const {
-  return String(m_name.c_str(), m_name.size(), AttachLiteral);
+  return m_sname;
 }
 
 int64 StringName::hash() const {
@@ -66,6 +68,10 @@ void StringName::dump() const {
   printf("%s", m_name.c_str());
 }
 
+void StringName::byteCode(ByteCodeProgram &code) const {
+  code.add(ByteCode::String, (void*)m_sname.get());
+}
+
 ExprName::ExprName(CONSTRUCT_ARGS, ExpressionPtr name)
   : Name(CONSTRUCT_PASS), m_name(name) {}
 
@@ -77,6 +83,10 @@ void ExprName::dump() const {
   printf("${");
   m_name->dump();
   printf("}");
+}
+
+void ExprName::byteCode(ByteCodeProgram &code) const {
+  m_name->byteCodeEval(code);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

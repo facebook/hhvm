@@ -16,6 +16,7 @@
 
 #include <cpp/eval/ast/echo_statement.h>
 #include <cpp/eval/ast/expression.h>
+#include <cpp/eval/bytecode/bytecode.h>
 
 using namespace std;
 
@@ -39,6 +40,14 @@ void EchoStatement::dump() const {
   printf("echo(");
   dumpVector(m_args, ", ");
   printf(");");
+}
+
+void EchoStatement::byteCode(ByteCodeProgram &code) const {
+  for (vector<ExpressionPtr>::const_iterator it = m_args.begin();
+       it != m_args.end(); ++it) {
+    (*it)->byteCodeEval(code);
+    code.add(ByteCode::Echo);
+  }
 }
 
 

@@ -275,6 +275,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestDefined);
   RUN_TEST(TestSimpleXML);
   RUN_TEST(TestFile);
+  RUN_TEST(TestDirectory);
   RUN_TEST(TestAssignment);
   RUN_TEST(TestBadFunctionCalls);
   RUN_TEST(TestConstructor);
@@ -7033,6 +7034,21 @@ bool TestCodeRun::TestFile() {
       "var_dump(is_link('test/test_ext_file2.tmp'));"
       "$a = lstat('test/test_ext_file2.tmp');"
       "var_dump($a['mtime']);");
+  return true;
+}
+
+bool TestCodeRun::TestDirectory() {
+  VCR("<?php "
+      "$d = dir(\"/tmp/\");"
+      "echo \"Path: \" . $d->path . \"\\n\";"
+      "while (false !== ($entry = $d->read())) {"
+      "   echo $entry.\"\\n\";"
+      "}"
+      "$d->rewind();"
+      "while (false !== ($entry = $d->read())) {"
+      "   echo $entry.\"\\n\";"
+      "}"
+      "$d->close();");
   return true;
 }
 

@@ -1212,11 +1212,10 @@ Variant f_dir(CStrRef directory) {
   if (same(dir, false)) {
     return false;
   }
-
-  Array ret;
-  ret.set("path", directory);
-  ret.set("handle", dir);
-  return ret;
+  c_directory *c_d = NEW(c_directory)();
+  c_d->m_path = directory;
+  c_d->m_handle = dir;
+  return c_d;
 }
 
 Variant f_opendir(CStrRef path, CObjRef context /* = null */) {

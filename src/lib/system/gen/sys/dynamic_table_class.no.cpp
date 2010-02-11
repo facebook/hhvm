@@ -138,6 +138,10 @@ Variant cw_domainexception$os_get(const char *s);
 Variant &cw_domainexception$os_lval(const char *s);
 Variant cw_domainexception$os_constant(const char *s);
 Variant cw_domainexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
+Variant cw_directory$os_get(const char *s);
+Variant &cw_directory$os_lval(const char *s);
+Variant cw_directory$os_constant(const char *s);
+Variant cw_directory$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
 Variant cw_reflectionparameter$os_get(const char *s);
 Variant &cw_reflectionparameter$os_lval(const char *s);
 Variant cw_reflectionparameter$os_constant(const char *s);
@@ -19998,6 +20002,9 @@ Object create_builtin_object(const char *s, CArrRef params, bool init /* = true 
     case 11:
       HASH_CREATE_OBJECT(0x4365BE9E5A85E60BLL, domnotation);
       break;
+    case 15:
+      HASH_CREATE_OBJECT(0x34C95AF311506C8FLL, directory);
+      break;
     case 16:
       HASH_CREATE_OBJECT(0x06335FF83CDEA590LL, badmethodcallexception);
       break;
@@ -20175,6 +20182,9 @@ Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef 
       break;
     case 11:
       HASH_INVOKE_STATIC_METHOD(0x4365BE9E5A85E60BLL, domnotation);
+      break;
+    case 15:
+      HASH_INVOKE_STATIC_METHOD(0x34C95AF311506C8FLL, directory);
       break;
     case 16:
       HASH_INVOKE_STATIC_METHOD(0x06335FF83CDEA590LL, badmethodcallexception);
@@ -20359,6 +20369,9 @@ Variant get_builtin_static_property(const char *s, const char *prop) {
     case 11:
       HASH_GET_STATIC_PROPERTY(0x4365BE9E5A85E60BLL, domnotation);
       break;
+    case 15:
+      HASH_GET_STATIC_PROPERTY(0x34C95AF311506C8FLL, directory);
+      break;
     case 16:
       HASH_GET_STATIC_PROPERTY(0x06335FF83CDEA590LL, badmethodcallexception);
       break;
@@ -20537,6 +20550,9 @@ Variant *get_builtin_static_property_lv(const char *s, const char *prop) {
     case 11:
       HASH_GET_STATIC_PROPERTY_LV(0x4365BE9E5A85E60BLL, domnotation);
       break;
+    case 15:
+      HASH_GET_STATIC_PROPERTY_LV(0x34C95AF311506C8FLL, directory);
+      break;
     case 16:
       HASH_GET_STATIC_PROPERTY_LV(0x06335FF83CDEA590LL, badmethodcallexception);
       break;
@@ -20714,6 +20730,9 @@ Variant get_builtin_class_constant(const char *s, const char *constant) {
       break;
     case 11:
       HASH_GET_CLASS_CONSTANT(0x4365BE9E5A85E60BLL, domnotation);
+      break;
+    case 15:
+      HASH_GET_CLASS_CONSTANT(0x34C95AF311506C8FLL, directory);
       break;
     case 16:
       HASH_GET_CLASS_CONSTANT(0x06335FF83CDEA590LL, badmethodcallexception);

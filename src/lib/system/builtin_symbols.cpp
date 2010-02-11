@@ -91,6 +91,8 @@ const char *BuiltinSymbols::SystemClasses[] = {
   "iterator",
   "pear_error",
   "reflection",
+  "splobjectstorage",
+  "directory",
   NULL
 };
 

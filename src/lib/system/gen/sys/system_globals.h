@@ -18,6 +18,7 @@
 #define __GENERATED_SYS_SYSTEM_GLOBALS_H__
 
 #include <php/classes/arrayaccess.h>
+#include <php/classes/directory.h>
 #include <php/classes/exception.h>
 #include <php/classes/iterator.h>
 #include <php/classes/pear_error.h>
@@ -66,6 +67,7 @@ public:
 
   // PseudoMain Variables
   bool run_pm_php$classes$arrayaccess_php;
+  bool run_pm_php$classes$directory_php;
   bool run_pm_php$classes$exception_php;
   bool run_pm_php$classes$iterator_php;
   bool run_pm_php$classes$pear_error_php;

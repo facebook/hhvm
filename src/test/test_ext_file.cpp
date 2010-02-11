@@ -814,10 +814,10 @@ bool TestExtFile::test_chroot() {
 
 bool TestExtFile::test_dir() {
   Variant d = f_dir("test");
-  VS(d["path"], "test");
+  VS(d.toArray()["path"], "test");
   Variant entry;
   bool seen = false;
-  while (!same(entry = f_readdir(d["handle"]), false)) {
+  while (!same(entry = f_readdir(d.toArray()["handle"]), false)) {
     if (same(entry, "test_ext_file.txt")) {
       seen = true;
     }

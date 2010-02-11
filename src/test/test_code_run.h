@@ -129,6 +129,7 @@ class TestCodeRun : public TestBase {
   bool TestThrift();
   bool TestCreateFunction();
   bool TestSimpleXML();
+  bool TestDirectory();
   bool TestFile();
   bool TestUselessAssignment();
   bool TestExtImage();

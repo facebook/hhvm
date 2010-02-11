@@ -14,46 +14,32 @@
    +----------------------------------------------------------------------+
 */
 
-#include <sys/system_globals.h>
+#ifndef __GENERATED_CLS_DIRECTORY_H__
+#define __GENERATED_CLS_DIRECTORY_H__
+
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-SystemGlobals::SystemGlobals() : dummy(false),
-  run_pm_php$classes$arrayaccess_php(false),
-  run_pm_php$classes$directory_php(false),
-  run_pm_php$classes$exception_php(false),
-  run_pm_php$classes$iterator_php(false),
-  run_pm_php$classes$pear_error_php(false),
-  run_pm_php$classes$reflection_php(false),
-  run_pm_php$classes$splobjectstorage_php(false),
-  run_pm_php$classes$stdclass_php(false),
-  run_pm_php$globals$constants_php(false),
-  run_pm_php$globals$symbols_php(false) {
-
-  // Dynamic Constants
-
-  // Primitive Function/Method Static Variables
-
-  // Primitive Class Static Variables
-
-  // Redeclared Functions
-
-  // Redeclared Classes
-}
-
-void SystemGlobals::initialize() {
-  pm_php$classes$arrayaccess_php(false);
-  pm_php$classes$directory_php(false);
-  pm_php$classes$exception_php(false);
-  pm_php$classes$iterator_php(false);
-  pm_php$classes$pear_error_php(false);
-  pm_php$classes$reflection_php(false);
-  pm_php$classes$splobjectstorage_php(false);
-  pm_php$classes$stdclass_php(false);
-  pm_php$globals$constants_php(false);
-  pm_php$globals$symbols_php(false);
-}
+/* SRC: classes/directory.php line 3 */
+class c_directory : virtual public ObjectData {
+  BEGIN_CLASS_MAP(directory)
+  END_CLASS_MAP(directory)
+  DECLARE_CLASS(directory, Directory, ObjectData)
+  DECLARE_INVOKES_FROM_EVAL
+  void init();
+  public: Variant m_path;
+  public: Variant m_handle;
+  public: void t___construct(Variant v_path);
+  public: ObjectData *create(Variant v_path);
+  public: ObjectData *dynCreate(CArrRef params, bool init = true);
+  public: void dynConstruct(CArrRef params);
+  public: Variant t_read();
+  public: Variant t_rewind();
+  public: Variant t_close();
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif // __GENERATED_CLS_DIRECTORY_H__

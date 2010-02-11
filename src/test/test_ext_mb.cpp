@@ -127,7 +127,7 @@ bool TestExtMb::test_mb_convert_encoding() {
 }
 
 bool TestExtMb::test_mb_convert_kana() {
-  //TODO
+  VS(f_mb_convert_kana("foo"), "foo");
   return Count(true);
 }
 

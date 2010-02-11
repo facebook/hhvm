@@ -1206,6 +1206,7 @@ Variant f_mb_convert_kana(CStrRef str, CStrRef option /* = null_string */,
   string.no_language = MBSTRG(current_language);
   string.no_encoding = MBSTRG(current_internal_encoding);
   string.val = (unsigned char *)str.data();
+  string.len = str.size();
 
   int opt = 0x900;
   if (!option.empty()) {

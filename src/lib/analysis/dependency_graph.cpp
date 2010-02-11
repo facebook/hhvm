@@ -95,10 +95,11 @@ string DependencyGraph::getIncludeFilePath(const string &source,
     // relative path to containing file's directory
     ASSERT(source.size() > 1);
     size_t pos = source.rfind('/');
+    string resolved;
     if (pos != string::npos) {
-      string filename = source.substr(0, pos + 1) + expText;
-      if (stat(filename.c_str(), &sb) == 0) {
-        return filename;
+      resolved = source.substr(0, pos + 1) + expText;
+      if (stat(resolved.c_str(), &sb) == 0) {
+        return resolved;
       }
     }
 
@@ -108,6 +109,11 @@ string DependencyGraph::getIncludeFilePath(const string &source,
       if (stat(filename.c_str(), &sb) == 0) {
         return filename;
       }
+    }
+
+    // try still use relative path to containing file's directory
+    if (!resolved.empty()) {
+      return resolved;
     }
 
     return expText;

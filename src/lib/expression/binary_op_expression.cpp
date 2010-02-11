@@ -550,6 +550,8 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     rt  = NEW_TYPE(Numeric);
     break;
   case '.':
+    et1 = et2 = rt = Type::String;
+    break;
   case T_CONCAT_EQUAL:
     et1 = et2 = Type::String;
     rt = Type::Variant;

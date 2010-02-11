@@ -157,19 +157,20 @@ std::string Logger::GetHeader() {
   static std::string host = Process::GetHostName();
   static pid_t pid = Process::GetProcessId();
 
-  struct tm now;
-  time_t tnow = time(NULL);
-  localtime_r(&tnow, &now);
+  time_t now = time(NULL);
   char snow[64];
-  strftime(snow, sizeof(snow), "%D %T", &now);
+  ctime_r(&now, snow);
+  // Eliminate trailing newilne from ctime_r.
+  snow[24] = '\0';
 
   char header[128];
   ThreadData *threadData = s_threadData.get();
-  snprintf(header, sizeof(header), "[%s:%lld:%llx:%d:%d:%s%s]", host.c_str(),
+  snprintf(header, sizeof(header), "[%s] [hphp] [%lld:%llx:%d:%06d%s]",
+           snow,
            (unsigned long long)pid,
            (unsigned long long)Process::GetThreadId(),
            threadData->request, threadData->message,
-           snow, ExtraHeader.c_str());
+           ExtraHeader.c_str());
   return header;
 }
 

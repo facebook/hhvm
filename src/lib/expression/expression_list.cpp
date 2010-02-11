@@ -313,18 +313,11 @@ void ExpressionList::outputCPPTooManyArgsPost(CodeGenerator &cg,
 }
 
 int ExpressionList::outputCPPControlledEvalOrderPre(CodeGenerator &cg,
-                                                     AnalysisResultPtr ar,
-                                                     ExpressionPtr obj /* = ExpressionPtr() */) {
+                                                     AnalysisResultPtr ar) {
   if (!controllingOrder()) return -1;
   uint oc = getOutputCount();
   cg.printf("(");
   int tempStart = tempOffset();
-  if (obj) {
-    cg.printf("assignCallTemp(%s%d, ", Option::EvalOrderTempPrefix,
-              m_tempStart);
-    obj->outputCPP(cg, ar);
-    cg.printf("),");
-  }
   for (unsigned int i = 0; i < oc; i++) {
     if (m_exps[i]) {
       cg.printf("assignCallTemp(%s%d, ", Option::EvalOrderTempPrefix,

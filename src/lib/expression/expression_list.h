@@ -72,8 +72,7 @@ public:
                                 bool voidReturn);
 
   int outputCPPControlledEvalOrderPre(CodeGenerator &cg,
-                                      AnalysisResultPtr ar,
-                                      ExpressionPtr obj = ExpressionPtr());
+                                      AnalysisResultPtr ar);
   void outputCPPControlledEvalOrderPost(CodeGenerator &cg,
                                         AnalysisResultPtr ar);
 

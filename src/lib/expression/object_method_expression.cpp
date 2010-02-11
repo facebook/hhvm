@@ -81,16 +81,17 @@ ClassScopePtr ObjectMethodExpression::resolveClass(AnalysisResultPtr ar,
 // static analysis functions
 
 void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_params->controlOrder(m_object->hasEffect() ? 2 : 1);
-  m_params->analyzeProgramStart(ar);
-  m_object->analyzeProgram(ar);
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal &&
-      !m_params->controllingOrder() &&
-      getLocation()->line1 != m_object->getLocation()->line1) {
+  bool objTempRequired = m_object->hasEffect() ||
+    (getLocation()->line1 != m_object->getLocation()->line1 &&
+     !m_object->isThis());
+  if (objTempRequired && ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     FunctionScopePtr func = ar->getFunctionScope();
     ASSERT(func);
     m_objTemp = func->requireCallTemps(1);
   }
+  m_params->controlOrder();
+  m_params->analyzeProgramStart(ar);
+  m_object->analyzeProgram(ar);
   m_params->analyzeProgramEnd(ar);
   m_nameExp->analyzeProgram(ar);
 
@@ -314,27 +315,20 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
   }
 
   stringstream objTmp;
-  int objIdx = -1;
-  if (m_params) {
-    objIdx =
-      m_params->outputCPPControlledEvalOrderPre(cg, ar,
-                                                isThis ? ExpressionPtr()
-                                                : m_object);
-    if (objIdx != -1) objTmp << Option::EvalOrderTempPrefix << objIdx;
-  }
-  bool lineTemp = false;
-  if (objIdx == -1 && m_objTemp != -1) {
+  if (m_objTemp != -1) {
     // When the receiver is not on the same line as the call itself,
     // set the line number of call after computing the receiver,
     // o.w., the call might get the line number of the receiver.
-    objIdx = m_objTemp;
-    lineTemp = true;
     cg.printf("(assignCallTemp(%s%d, ", Option::EvalOrderTempPrefix,
-              objIdx);
+              m_objTemp);
     m_object->outputCPP(cg, ar);
     cg.printf("),");
-    objTmp << Option::EvalOrderTempPrefix << objIdx;
+    objTmp << Option::EvalOrderTempPrefix << m_objTemp;
   }
+  if (m_params) {
+    m_params->outputCPPControlledEvalOrderPre(cg, ar);
+  }
+
   bool fewParams = canInvokeFewArgs();
   bool tooManyArgs = m_params &&
     m_params->outputCPPTooManyArgsPre(cg, ar, m_name);
@@ -343,7 +337,7 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
 
   if (!isThis) {
     if (directVariantProxy(ar)) {
-      if (objIdx == -1) {
+      if (m_objTemp == -1) {
         TypePtr expectedType = m_object->getExpectedType();
         ASSERT(expectedType->is(Type::KindOfObject));
         // Clear m_expectedType to avoid type cast (toObject).
@@ -355,7 +349,7 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       }
       cg.printf(".");
     } else {
-      if (objIdx == -1) {
+      if (m_objTemp == -1) {
         m_object->outputCPP(cg, ar);
       } else {
         TypePtr type = m_object->getType();
@@ -432,6 +426,6 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
     }
   }
   if (linemap) cg.printf(")");
-  if (lineTemp) cg.printf(")");
   if (m_params) m_params->outputCPPControlledEvalOrderPost(cg, ar);
+  if (m_objTemp != -1) cg.printf(")");
 }

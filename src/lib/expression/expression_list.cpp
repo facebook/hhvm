@@ -309,7 +309,7 @@ bool ExpressionList::outputCPPTooManyArgsPre(CodeGenerator &cg,
       }
     }
     if (count > 0) cg.printf(", ");
-    cg.printf("%d), (", m_exps.size() - m_outputCount);
+    cg.printf("%d), ((", m_exps.size() - m_outputCount);
     return true;
   }
   return false;
@@ -319,6 +319,7 @@ void ExpressionList::outputCPPTooManyArgsPost(CodeGenerator &cg,
                                               AnalysisResultPtr ar,
                                               bool voidReturn) {
   ASSERT(m_outputCount >= 0);
+  cg.printf(")");
   if (voidReturn) cg.printf(", null");
   cg.printf("))");
 }

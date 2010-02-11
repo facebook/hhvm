@@ -7140,6 +7140,9 @@ bool TestCodeRun::TestTernary() {
       "  return $class;"
       "}"
       "add_cssclass('test', $a);");
+  VCR("<?php "
+      "$a = 123;"
+      "echo $a ? @mysql_data_seek(null, null) : false;");
   return true;
 }
 

@@ -257,7 +257,7 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_DEC:
   case '~':             et = rt = NEW_TYPE(Primitive);                   break;
   case T_CLONE:         et = rt = NEW_TYPE(Object);                      break;
-  case '@':
+  case '@':             et = type;                rt = Type::Variant;    break;
   case '(':             et = rt = type;                                  break;
   case T_INT_CAST:      et = NEW_TYPE(Some);      rt = Type::Int64;      break;
   case T_DOUBLE_CAST:   et = NEW_TYPE(Some);      rt = Type::Double;     break;
@@ -326,7 +326,6 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     }
 
     switch (m_op) {
-    case '@':
     case '(':
       rt = expType;
       break;

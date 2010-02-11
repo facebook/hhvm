@@ -4,7 +4,7 @@ $css = 'style'; // default
 if (isset($_GET['css'])) $css = $_GET['css'];
 echo "<link type='text/css' rel='stylesheet' href='$css.css' />";
 
-$file = 'debug.leak';
+$file = 'coding_guideline';
 if (isset($_GET['file'])) $file = $_GET['file'];
 $doc = file_get_contents(realpath(dirname(__FILE__))."/$file");
 

@@ -2691,6 +2691,20 @@ bool TestCodeRun::TestDynamicFunctions() {
   VCR("<?php function test($a, $b) { print $a.$b;} $a = 'Test'; "
       "$y = array('k','q','q'); $a('o',$y[0]);");
 
+  VCR("<?php "
+      "$a = 'test';"
+      "if ($a) {"
+      "  function bar() {}"
+      "} else {"
+      "  function bar() {}"
+      "}"
+      "function foo() {}"
+      "function goo(&$p) {}"
+      "$goo = 'goo';"
+      "goo(foo());"
+      "$goo(foo());"
+      "bar(foo());");
+
   Option::DynamicInvokeFunctions.insert("test1");
   Option::DynamicInvokeFunctions.insert("test2");
   VCR("<?php "

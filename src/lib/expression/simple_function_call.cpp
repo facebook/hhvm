@@ -502,7 +502,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         ar->getCodeError()->record(self, CodeError::UnknownClass, self);
       }
       if (m_params) {
-        m_params->inferAndCheck(ar, NEW_TYPE(Any), false);
+        m_params->inferAndCheck(ar, NEW_TYPE(Some), false);
       }
       return checkTypesImpl(ar, type, Type::Variant, coerce);
     }
@@ -547,7 +547,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         (*m_params)[i]->setContext(Expression::RefValue);
         (*m_params)[i]->setContext(Expression::InvokeArgument);
       }
-      m_params->inferAndCheck(ar, NEW_TYPE(Any), false);
+      m_params->inferAndCheck(ar, NEW_TYPE(Some), false);
     }
     return checkTypesImpl(ar, type, Type::Variant, coerce);
   }
@@ -555,7 +555,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
 
   if (m_redeclared) {
     if (m_params) {
-      m_params->inferAndCheck(ar, NEW_TYPE(Any), false);
+      m_params->inferAndCheck(ar, NEW_TYPE(Some), false);
     }
     return checkTypesImpl(ar, type, type, coerce);
   }

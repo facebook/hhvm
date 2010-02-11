@@ -141,6 +141,8 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
 void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_voidWrapper) {
     cg.printf("(");
+    // void wrapper means void return, means we can't put ref around the call
+    clearContext(RefValue);
   }
   Expression::outputCPP(cg, ar);
   if (m_voidWrapper) {

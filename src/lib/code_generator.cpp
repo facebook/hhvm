@@ -156,11 +156,10 @@ void CodeGenerator::headerBegin(const std::string &file) {
   Util::replaceAll(formatted, "/", "_");
   Util::replaceAll(formatted, "-", "_");
   Util::replaceAll(formatted, "$", "_");
-  string id = Util::toUpper(formatted);
 
   printf("\n");
-  printf("#ifndef __GENERATED_%s__\n", id.c_str());
-  printf("#define __GENERATED_%s__\n", id.c_str());
+  printf("#ifndef __GENERATED_%s__\n", formatted.c_str());
+  printf("#define __GENERATED_%s__\n", formatted.c_str());
   printf("\n");
 }
 
@@ -170,10 +169,9 @@ void CodeGenerator::headerEnd(const std::string &file) {
   Util::replaceAll(formatted, "/", "_");
   Util::replaceAll(formatted, "-", "_");
   Util::replaceAll(formatted, "$", "_");
-  string id = Util::toUpper(formatted);
 
   printf("\n");
-  printf("#endif // __GENERATED_%s__\n", id.c_str());
+  printf("#endif // __GENERATED_%s__\n", formatted.c_str());
 }
 
 void CodeGenerator::printInclude(const std::string &file) {

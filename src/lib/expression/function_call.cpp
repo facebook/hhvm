@@ -23,6 +23,7 @@
 #include <lib/statement/statement.h>
 #include <lib/analysis/class_scope.h>
 #include <lib/expression/expression_list.h>
+#include <lib/expression/array_pair_expression.h>
 
 using namespace HPHP;
 using namespace std;
@@ -39,7 +40,8 @@ FunctionCall::FunctionCall
     m_nameExp(nameExp), m_params(params), m_valid(false), m_validClass(false),
     m_extraArg(0), m_variableArgument(false), m_voidReturn(false),
     m_voidWrapper(false), m_allowVoidReturn(false), m_redeclared(false),
-    m_redeclaredClass(false), m_derivedFromRedeclaring(false) {
+    m_redeclaredClass(false), m_derivedFromRedeclaring(false),
+    m_argArrayId(-1) {
 
   if (m_nameExp &&
       m_nameExp->getKindOf() == Expression::KindOfScalarExpression) {
@@ -104,6 +106,7 @@ ExpressionPtr FunctionCall::preOptimize(AnalysisResultPtr ar) {
 ExpressionPtr FunctionCall::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_nameExp);
   ar->postOptimize(m_params);
+  optimizeArgArray(ar);
   return ExpressionPtr();
 }
 
@@ -154,4 +157,31 @@ void FunctionCall::setFunctionAndClassScope(FunctionScopePtr fsp,
                                             ClassScopePtr csp) {
   m_funcScope = fsp;
   m_classScope = csp;
+}
+
+void FunctionCall::optimizeArgArray(AnalysisResultPtr ar) {
+  if (m_extraArg <= 0) return;
+  int paramCount = m_params->getOutputCount();
+  int iMax = paramCount - m_extraArg;
+  bool isScalar = true;
+  for (int i = iMax; i < paramCount; i++) {
+    ExpressionPtr param = (*m_params)[i];
+    if (!param->isScalar()) {
+      isScalar = false;
+      break;
+    }
+  }
+  if (isScalar) {
+    ExpressionPtr argArrayPairs =
+      ExpressionListPtr(new ExpressionList(getLocation(),
+                                           Expression::KindOfExpressionList));
+    for (int i = iMax; i < paramCount; i++) {
+      ExpressionPtr param = (*m_params)[i];
+      argArrayPairs->addElement(ArrayPairExpressionPtr(
+        new ArrayPairExpression(param->getLocation(),
+                                Expression::KindOfArrayPairExpression,
+                                ExpressionPtr(), param, false)));
+    }
+    m_argArrayId = ar->registerScalarArray(argArrayPairs);
+  }
 }

@@ -504,25 +504,32 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
     MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
     params = stmt->getParams();
   }
-  if (aggregateParams) cg.printf("Array(");
+  if (aggregateParams) {
+    cg.printf("Array(");
+    if (m_maxParam) cg.printf("ArrayInit(%d).", m_maxParam);
+  }
   for (int i = 0; i < m_maxParam; i++) {
-    if (i > 0) cg.printf(",");
+    if (i > 0) cg.printf(aggregateParams ? "." : ", ");
+    if (aggregateParams) {
+      cg.printf("set(%d, ", i);
+    }
     bool isRef;
     if (userFunc) {
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*params)[i]);
       isRef = param->isRef();
-      cg.printf(aggregateParams ? "NEW(ArrayElement)(%sv_%s%s)" : "%sv_%s%s",
+      cg.printf("%sv_%s%s",
                 isRef ? "ref(" : "", param->getName().c_str(),
                 isRef ? ")" : "");
     } else {
       isRef = isRefParam(i);
-      cg.printf(aggregateParams ? "NEW(ArrayElement)(%sa%d%s))" : "%sa%d%s",
+      cg.printf("%sa%d%s",
                 isRef ? "ref(" : "", i, isRef ? ")" : "");
     }
+    if (aggregateParams) cg.printf(")");
   }
   if (aggregateParams) {
-    if (m_maxParam) cg.printf(", NULL");
+    if (m_maxParam) cg.printf(".create()");
     cg.printf(")");
   }
   if (isVariableArgument()) {
@@ -534,7 +541,8 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
 void FunctionScope::outputCPPArguments(ExpressionListPtr params,
                                        CodeGenerator &cg,
                                        AnalysisResultPtr ar, int extraArg,
-                                       bool variableArgument) {
+                                       bool variableArgument,
+                                       int extraArgArrayId /* = -1 */) {
   int paramCount = params ? params->getOutputCount() : 0;
   ASSERT(extraArg <= paramCount);
   int iMax = paramCount - extraArg;
@@ -549,24 +557,36 @@ void FunctionScope::outputCPPArguments(ExpressionListPtr params,
   }
   bool hasEffect = params && params->controllingOrder();
   int tempOffset = params ? params->tempOffset() : 0;
+  int firstExtra = 0;
   for (int i = 0; i < paramCount; i++) {
     ExpressionPtr param = (*params)[i];
     cg.setItemIndex(i);
-    if (i > 0) cg.printf(", ");
+    if (i > 0) cg.printf(extra ? "." : ", ");
     if (!extra && (i == iMax || extraArg < 0)) {
+      if (extraArgArrayId != -1) {
+        if (cg.getOutput() == CodeGenerator::SystemCPP) {
+          cg.printf("SystemScalarArrays::%s[%d]",
+                    Option::SystemScalarArrayName, extraArgArrayId);
+        } else {
+          cg.printf("ScalarArrays::%s[%d]",
+                    Option::ScalarArrayName, extraArgArrayId);
+        }
+        break;
+      }
       extra = true;
-      cg.printf("Array(");
+      cg.printf("Array(ArrayInit(%d).", paramCount - i);
+      firstExtra = i;
     }
     if (extra) {
-      cg.printf("NEW(ArrayElement)(");
-      if (hasEffect) {
+      cg.printf("set(%d, ", i - firstExtra);
+      if (hasEffect && !param->isScalar()) {
         cg.printf("%s%d", Option::EvalOrderTempPrefix, tempOffset + i);
       } else {
         param->outputCPP(cg, ar);
       }
       cg.printf(")");
     } else {
-      if (hasEffect) {
+      if (hasEffect && !param->isScalar()) {
         cg.printf("%s%d", Option::EvalOrderTempPrefix, tempOffset + i);
       } else {
         param->outputCPP(cg, ar);
@@ -574,7 +594,7 @@ void FunctionScope::outputCPPArguments(ExpressionListPtr params,
     }
   }
   if (extra) {
-    cg.printf(", NULL)");
+    cg.printf(".create())");
   }
 }
 

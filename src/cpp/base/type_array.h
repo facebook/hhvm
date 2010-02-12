@@ -20,6 +20,7 @@
 #include <cpp/base/util/smart_ptr.h>
 #include <cpp/base/array/array_iterator.h>
 #include <cpp/base/array/array_element.h>
+#include <cpp/base/array/array_init.h>
 #include <cpp/base/type_string.h>
 
 namespace HPHP {

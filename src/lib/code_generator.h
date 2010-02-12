@@ -186,6 +186,9 @@ public:
   int getPHPLineNo() { return m_phpLineNo; }
   void setPHPLineNo(int ln) { m_phpLineNo = ln; }
 
+  bool insideArrayInit() { return m_insideArrayInit; }
+  void setInsideArrayInit(bool flag) { m_insideArrayInit = flag; }
+
 private:
   std::string m_filename;
   Stream m_curStream;
@@ -208,6 +211,8 @@ private:
   int m_itemIndex;
 
   int m_phpLineNo;
+
+  bool m_insideArrayInit; // skips ArrayElement construction
 
   void print(const char *fmt, va_list ap);
   void print(const std::string &msg);

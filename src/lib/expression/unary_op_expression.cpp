@@ -240,7 +240,24 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultPtr ar) {
+  bool insideScalarArray = ar->getInsideScalarArray();
+
+  if (m_op == T_ARRAY &&
+      (getContext() & (RefValue|LValue)) == 0) {
+    if (m_exp) {
+      ExpressionListPtr pairs = dynamic_pointer_cast<ExpressionList>(m_exp);
+      if (pairs && pairs->isScalarArrayPairs()) {
+        m_arrayId = ar->registerScalarArray(m_exp);
+        ar->setInsideScalarArray(true);
+      }
+    } else {
+      m_arrayId = ar->registerScalarArray(m_exp); // empty array
+    }
+  }
+
   ar->postOptimize(m_exp);
+
+  ar->setInsideScalarArray(insideScalarArray);
   return ExpressionPtr();
 }
 
@@ -292,21 +309,6 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_FILE:          et = rt = Type::String;                          break;
   default:
     ASSERT(false);
-  }
-
-  bool insideScalarArray = ar->getInsideScalarArray();
-
-  if (m_op == T_ARRAY &&
-      (getContext() & (RefValue|LValue)) == 0) {
-    if (m_exp) {
-      ExpressionListPtr pairs = dynamic_pointer_cast<ExpressionList>(m_exp);
-      if (pairs && pairs->isScalarArrayPairs()) {
-        m_arrayId = ar->registerScalarArray(m_exp);
-        ar->setInsideScalarArray(true);
-      }
-    } else {
-      m_arrayId = ar->registerScalarArray(m_exp); // empty array
-    }
   }
 
   if (m_exp) {
@@ -362,8 +364,6 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       break;
     }
   }
-
-  ar->setInsideScalarArray(insideScalarArray);
 
   return rt;
 }
@@ -552,13 +552,9 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     switch (m_op) {
     case T_ARRAY:
       {
-        if (m_exp) {
-          cg.printf(", NULL)");
-        } else {
-          cg.printf("(ArrayElement*)NULL)");
-        }
         ExpressionListPtr exps = dynamic_pointer_cast<ExpressionList>(m_exp);
         if (exps) exps->outputCPPControlledEvalOrderPost(cg, ar);
+        cg.printf(")");
       }
       break;
     case T_CLONE:

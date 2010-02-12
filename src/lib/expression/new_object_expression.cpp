@@ -150,7 +150,7 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
               Option::SmartPtrPrefix, m_name.c_str(),
               Option::ClassPrefix, m_name.c_str());
     FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
-                                      m_variableArgument);
+                                      m_variableArgument, m_argArrayId);
     cg.printf("))");
     if (tooManyArgs) {
       m_params->outputCPPTooManyArgsPost(cg, ar, m_voidReturn);

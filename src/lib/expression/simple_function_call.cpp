@@ -833,7 +833,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
       }
     }
     FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
-                                      m_variableArgument);
+                                      m_variableArgument, m_argArrayId);
     cg.printf(")");
     if (tooManyArgs) {
       m_params->outputCPPTooManyArgsPost(cg, ar, m_voidReturn);

@@ -69,6 +69,11 @@ protected:
   bool m_redeclaredClass;
   bool m_derivedFromRedeclaring;
 
+  // Extra arguments form an array, to which the scalar array optimization
+  // should also apply.
+  int m_argArrayId;
+  void optimizeArgArray(AnalysisResultPtr ar);
+
   /**
    * Each program needs to reset this object's members to revalidate
    * a function call.

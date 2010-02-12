@@ -818,7 +818,7 @@ bool c_arrayiterator::t_uasort(CVarRef v_cmp_function) {
 /* SRC: classes/iterator.php line 124 */
 bool c_arrayiterator::t_uksort(Variant v_cmp_function) {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::uksort);
-  return invoke_failed("uksort", Array(NEW(ArrayElement)(ref(v_cmp_function)), NULL), 0x4842AF70A71BE6C4LL);
+  return invoke_failed("uksort", Array(ArrayInit(1).set(0, ref(v_cmp_function)).create()), 0x4842AF70A71BE6C4LL);
 } /* function */
 /* SRC: classes/iterator.php line 128 */
 bool c_arrayiterator::t_valid() {
@@ -1232,7 +1232,7 @@ Variant c_appenditerator::t___call(Variant v_func, Variant v_params) {
   INCALL_HELPER(v_func);
   Variant eo_0;
   Variant eo_1;
-  return x_call_user_func_array((assignCallTemp(eo_0, o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0)),assignCallTemp(eo_1, v_func),Array(NEW(ArrayElement)(eo_0), NEW(ArrayElement)(eo_1), NULL)), toArray(v_params));
+  return x_call_user_func_array((assignCallTemp(eo_0, o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0)),assignCallTemp(eo_1, v_func),Array(ArrayInit(2).set(0, eo_0).set(1, eo_1).create())), toArray(v_params));
 } /* function */
 Object co_arrayiterator(CArrRef params, bool init /* = true */) {
   return Object(p_arrayiterator(NEW(c_arrayiterator)())->dynCreate(params, init));

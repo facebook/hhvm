@@ -3281,7 +3281,7 @@ Variant c_reflectionclass::t_issubclassof(Variant v_cls) {
   if (equal(x_strcasecmp(toString(v_cls), toString(m_info.rvalAt("parent", 0x16E2F26FFB10FD8CLL))), 0LL)) {
     return true;
   }
-  return (assignCallTemp(eo_0, toObject(t_getparentclass())),assignCallTemp(eo_1, ref(v_cls)),eo_0.o_invoke("isSubclassOf", Array(NEW(ArrayElement)(eo_1), NULL), 0x373333991926C97ELL));
+  return (assignCallTemp(eo_0, toObject(t_getparentclass())),assignCallTemp(eo_1, ref(v_cls)),eo_0.o_invoke("isSubclassOf", Array(ArrayInit(1).set(0, eo_1).create()), 0x373333991926C97ELL));
 } /* function */
 /* SRC: classes/reflection.php line 419 */
 Variant c_reflectionclass::t_getstaticproperties() {
@@ -4780,7 +4780,7 @@ Variant c_reflectionmethod::t_invoke(int num_args, CVarRef v_obj, Array args /* 
   INSTANCE_METHOD_INJECTION(ReflectionMethod, ReflectionMethod::invoke);
   Variant v_args;
 
-  v_args = func_get_args(num_args, Array(NEW(ArrayElement)(v_obj), NULL),args);
+  v_args = func_get_args(num_args, Array(ArrayInit(1).set(0, v_obj).create()),args);
   x_array_shift(ref(v_args));
   return x_hphp_invoke_method(v_obj, toString(m_info.rvalAt("class", 0x45397FE5C82DBD12LL)), toString(m_info.rvalAt("name", 0x0BCDB293DC3CBDDCLL)), toArray(v_args));
 } /* function */

@@ -367,7 +367,7 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
     if (m_valid && m_object->getType()->isSpecificObject()) {
       cg.printf("%s%s(", Option::MethodPrefix, m_name.c_str());
       FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
-                                        m_variableArgument);
+                                        m_variableArgument, m_argArrayId);
       cg.printf(")");
       if (tooManyArgs) {
         m_params->outputCPPTooManyArgsPost(cg, ar, m_voidReturn);

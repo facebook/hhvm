@@ -206,7 +206,6 @@ std::string RuntimeOption::LightProcessFilePrefix;
 int RuntimeOption::LightProcessCount;
 
 bool RuntimeOption::InjectedStacktrace = false;
-std::string RuntimeOption::StacktraceFilePrefix;
 
 bool RuntimeOption::EnableXHP = true;
 bool RuntimeOption::EnableStrict = false;
@@ -515,7 +514,6 @@ void RuntimeOption::Load(Hdf &config) {
     LightProcessCount = server["LightProcessCount"].getInt32(0);
 
     InjectedStacktrace = server["InjectedStacktrace"].getBool();
-    StacktraceFilePrefix = server["StacktraceFilePrefix"].getString();
 
     ForceServerNameToHeader = server["ForceServerNameToHeader"].getBool();
   }

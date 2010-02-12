@@ -1,0 +1,66 @@
+<h2>Various Commands for Developing HipHop</h2>
+
+= Learning "make"
+
+"make" is used extensively for different commands throughout the project. The
+most common way is,
+
+  cd {directory}
+  make {target}
+
+This can be simplied to,
+
+  make -C {directory} {target}
+
+Throughout this doc, we will use -C form to show which directory under hphp/
+the target is at, but you may always change to the directory to run "make
+{target}" directly.
+
+= Building the project
+
+Just do a simple,
+
+  make -C src
+
+For verbose outputs,
+
+  SHOW_COMPILE=1 make -C src    # show all compilation commands
+  SHOW_LINK=1 make -C src       # show all linking commands
+  V= make -C src                # show all commands
+
+= "make clean" or "make clobber"
+
+Whenever you want to remove all intermediate files, you can run "make clean"
+or "make clobber" from almost every directory. These two commands are the same,
+although historically, "make clean" leaves built targets or binaries while
+deleting all intermediate files, whereas "make clobber" removes everything. In
+our case, they will both remove everything.
+
+= Monitoring build status
+
+This command can bring up "top" like screen to show you which .cpp files are
+being built by distcc:
+
+  make -C src top
+
+= Running a unit test
+
+These commands are available to run some unit tests:
+
+  cd src/
+  test/test
+  test/test TestExtFile
+  test/test TestExtFile test_fseek
+  test/test TestExtFile::test_fseek
+
+  make fast_tests   # 2 minutes to finish, required for every check-in
+  make slow_tests   # hours to finish, required for in-depth changes
+
+= Running a benchmark
+
+We have "benchmark" directory set up, and you can simply throw in a PHP file
+and run it under benchmark mode,
+
+  make -C benchmark {test.run}  # if the file name is "test.php"
+
+

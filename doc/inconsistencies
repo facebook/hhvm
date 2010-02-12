@@ -75,3 +75,14 @@ are not supported, e.g.
 (1) get_declared_classes
 
 Can return classes in different order from PHP's.
+
+(2) uninitialized variables
+
+If an uninitialized variable is being used before it's assigned with a value,
+and this variable is inferred as integers, it will be 0, instead of null.
+
+(3) calling a function with wrong number of parameters
+
+Currently it's a fatal, and we should change it to warnings as what PHP does.
+This only applies to functions that don't have variable arguments, meaning
+func_get_arg() or func_get_args() is not called inside the function.

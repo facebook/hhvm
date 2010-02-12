@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_PHP_CLASSES_ITERATOR_H__
-#define __GENERATED_PHP_CLASSES_ITERATOR_H__
+#ifndef __GENERATED_php_classes_iterator_h__
+#define __GENERATED_php_classes_iterator_h__
 
 #include <cpp/base/hphp_system.h>
 #include <php/classes/iterator.fw.h>
@@ -43,4 +43,4 @@ Object co_appenditerator(CArrRef params, bool init = true);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_PHP_CLASSES_ITERATOR_H__
+#endif // __GENERATED_php_classes_iterator_h__

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_APPENDITERATOR_H__
-#define __GENERATED_CLS_APPENDITERATOR_H__
+#ifndef __GENERATED_cls_appenditerator_h__
+#define __GENERATED_cls_appenditerator_h__
 
 #include <cls/outeriterator.h>
 
@@ -49,4 +49,4 @@ class c_appenditerator : virtual public c_outeriterator {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_APPENDITERATOR_H__
+#endif // __GENERATED_cls_appenditerator_h__

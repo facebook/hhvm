@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_REFLECTIONOBJECT_H__
-#define __GENERATED_CLS_REFLECTIONOBJECT_H__
+#ifndef __GENERATED_cls_reflectionobject_h__
+#define __GENERATED_cls_reflectionobject_h__
 
 #include <cls/reflectionclass.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 479 */
+/* SRC: classes/reflection.php line 478 */
 class c_reflectionobject : virtual public c_reflectionclass {
   BEGIN_CLASS_MAP(reflectionobject)
     PARENT_CLASS(reflector)
@@ -42,4 +42,4 @@ class c_reflectionobject : virtual public c_reflectionclass {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_REFLECTIONOBJECT_H__
+#endif // __GENERATED_cls_reflectionobject_h__

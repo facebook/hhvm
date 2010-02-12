@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_PHP_CLASSES_ARRAYACCESS_FW_H__
-#define __GENERATED_PHP_CLASSES_ARRAYACCESS_FW_H__
+#ifndef __GENERATED_php_classes_arrayaccess_fw_h__
+#define __GENERATED_php_classes_arrayaccess_fw_h__
 
 #include <cpp/base/hphp_system.h>
 
@@ -32,4 +32,4 @@ FORWARD_DECLARE_CLASS(arrayaccess);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_PHP_CLASSES_ARRAYACCESS_FW_H__
+#endif // __GENERATED_php_classes_arrayaccess_fw_h__

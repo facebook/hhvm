@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_PEAR_ERROR_H__
-#define __GENERATED_CLS_PEAR_ERROR_H__
+#ifndef __GENERATED_cls_pear_error_h__
+#define __GENERATED_cls_pear_error_h__
 
 
 namespace HPHP {
@@ -46,4 +46,4 @@ class c_pear_error : virtual public ObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_PEAR_ERROR_H__
+#endif // __GENERATED_cls_pear_error_h__

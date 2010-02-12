@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_REFLECTIONEXCEPTION_H__
-#define __GENERATED_CLS_REFLECTIONEXCEPTION_H__
+#ifndef __GENERATED_cls_reflectionexception_h__
+#define __GENERATED_cls_reflectionexception_h__
 
 #include <cls/exception.h>
 
@@ -35,4 +35,4 @@ class c_reflectionexception : virtual public c_exception {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_REFLECTIONEXCEPTION_H__
+#endif // __GENERATED_cls_reflectionexception_h__

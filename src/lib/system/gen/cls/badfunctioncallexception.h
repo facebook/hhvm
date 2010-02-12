@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_BADFUNCTIONCALLEXCEPTION_H__
-#define __GENERATED_CLS_BADFUNCTIONCALLEXCEPTION_H__
+#ifndef __GENERATED_cls_badfunctioncallexception_h__
+#define __GENERATED_cls_badfunctioncallexception_h__
 
 #include <cls/logicexception.h>
 
@@ -36,4 +36,4 @@ class c_badfunctioncallexception : virtual public c_logicexception {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_BADFUNCTIONCALLEXCEPTION_H__
+#endif // __GENERATED_cls_badfunctioncallexception_h__

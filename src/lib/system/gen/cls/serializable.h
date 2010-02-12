@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_SERIALIZABLE_H__
-#define __GENERATED_CLS_SERIALIZABLE_H__
+#ifndef __GENERATED_cls_serializable_h__
+#define __GENERATED_cls_serializable_h__
 
 
 namespace HPHP {
@@ -30,4 +30,4 @@ class c_serializable : virtual public ObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_SERIALIZABLE_H__
+#endif // __GENERATED_cls_serializable_h__

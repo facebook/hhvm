@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_FILTERITERATOR_H__
-#define __GENERATED_CLS_FILTERITERATOR_H__
+#ifndef __GENERATED_cls_filteriterator_h__
+#define __GENERATED_cls_filteriterator_h__
 
 #include <cls/iterator.h>
 #include <cls/outeriterator.h>
@@ -30,4 +30,4 @@ class c_filteriterator : virtual public c_iterator, virtual public c_outeriterat
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_FILTERITERATOR_H__
+#endif // __GENERATED_cls_filteriterator_h__

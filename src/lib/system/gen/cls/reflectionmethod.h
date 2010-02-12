@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_REFLECTIONMETHOD_H__
-#define __GENERATED_CLS_REFLECTIONMETHOD_H__
+#ifndef __GENERATED_cls_reflectionmethod_h__
+#define __GENERATED_cls_reflectionmethod_h__
 
 #include <cls/reflectionfunctionabstract.h>
 #include <cls/reflector.h>
@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 594 */
+/* SRC: classes/reflection.php line 593 */
 class c_reflectionmethod : virtual public c_reflectionfunctionabstract, virtual public c_reflector {
   BEGIN_CLASS_MAP(reflectionmethod)
     PARENT_CLASS(reflectionfunctionabstract)
@@ -59,4 +59,4 @@ class c_reflectionmethod : virtual public c_reflectionfunctionabstract, virtual 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_REFLECTIONMETHOD_H__
+#endif // __GENERATED_cls_reflectionmethod_h__

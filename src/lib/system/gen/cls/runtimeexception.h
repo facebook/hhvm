@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_RUNTIMEEXCEPTION_H__
-#define __GENERATED_CLS_RUNTIMEEXCEPTION_H__
+#ifndef __GENERATED_cls_runtimeexception_h__
+#define __GENERATED_cls_runtimeexception_h__
 
 #include <cls/exception.h>
 
@@ -35,4 +35,4 @@ class c_runtimeexception : virtual public c_exception {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_RUNTIMEEXCEPTION_H__
+#endif // __GENERATED_cls_runtimeexception_h__

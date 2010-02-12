@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_EXCEPTION_H__
-#define __GENERATED_CLS_EXCEPTION_H__
+#ifndef __GENERATED_cls_exception_h__
+#define __GENERATED_cls_exception_h__
 
 
 namespace HPHP {
@@ -48,4 +48,4 @@ class c_exception : virtual public ObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_EXCEPTION_H__
+#endif // __GENERATED_cls_exception_h__

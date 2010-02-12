@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_SPLOBJECTSTORAGE_H__
-#define __GENERATED_CLS_SPLOBJECTSTORAGE_H__
+#ifndef __GENERATED_cls_splobjectstorage_h__
+#define __GENERATED_cls_splobjectstorage_h__
 
 #include <cls/iterator.h>
 #include <cls/countable.h>
@@ -49,4 +49,4 @@ class c_splobjectstorage : virtual public c_iterator, virtual public c_countable
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_SPLOBJECTSTORAGE_H__
+#endif // __GENERATED_cls_splobjectstorage_h__

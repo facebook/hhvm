@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_ARRAYACCESS_H__
-#define __GENERATED_CLS_ARRAYACCESS_H__
+#ifndef __GENERATED_cls_arrayaccess_h__
+#define __GENERATED_cls_arrayaccess_h__
 
 
 namespace HPHP {
@@ -32,4 +32,4 @@ class c_arrayaccess : virtual public ObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_ARRAYACCESS_H__
+#endif // __GENERATED_cls_arrayaccess_h__

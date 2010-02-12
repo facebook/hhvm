@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_PHP_CLASSES_ARRAYACCESS_H__
-#define __GENERATED_PHP_CLASSES_ARRAYACCESS_H__
+#ifndef __GENERATED_php_classes_arrayaccess_h__
+#define __GENERATED_php_classes_arrayaccess_h__
 
 #include <cpp/base/hphp_system.h>
 #include <php/classes/arrayaccess.fw.h>
@@ -31,4 +31,4 @@ Variant pm_php$classes$arrayaccess_php(bool incOnce = false, LVariableTable* var
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_PHP_CLASSES_ARRAYACCESS_H__
+#endif // __GENERATED_php_classes_arrayaccess_h__

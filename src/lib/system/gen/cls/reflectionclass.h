@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_REFLECTIONCLASS_H__
-#define __GENERATED_CLS_REFLECTIONCLASS_H__
+#ifndef __GENERATED_cls_reflectionclass_h__
+#define __GENERATED_cls_reflectionclass_h__
 
 #include <cls/reflector.h>
 
@@ -80,4 +80,4 @@ class c_reflectionclass : virtual public c_reflector {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_REFLECTIONCLASS_H__
+#endif // __GENERATED_cls_reflectionclass_h__

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_DOMAINEXCEPTION_H__
-#define __GENERATED_CLS_DOMAINEXCEPTION_H__
+#ifndef __GENERATED_cls_domainexception_h__
+#define __GENERATED_cls_domainexception_h__
 
 #include <cls/logicexception.h>
 
@@ -36,4 +36,4 @@ class c_domainexception : virtual public c_logicexception {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_DOMAINEXCEPTION_H__
+#endif // __GENERATED_cls_domainexception_h__

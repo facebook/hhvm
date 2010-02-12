@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_PHP_GLOBALS_SYMBOLS_FW_H__
-#define __GENERATED_PHP_GLOBALS_SYMBOLS_FW_H__
+#ifndef __GENERATED_php_globals_symbols_fw_h__
+#define __GENERATED_php_globals_symbols_fw_h__
 
 #include <cpp/base/hphp_system.h>
 
@@ -31,4 +31,4 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_PHP_GLOBALS_SYMBOLS_FW_H__
+#endif // __GENERATED_php_globals_symbols_fw_h__

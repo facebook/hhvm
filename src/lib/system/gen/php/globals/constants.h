@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_PHP_GLOBALS_CONSTANTS_H__
-#define __GENERATED_PHP_GLOBALS_CONSTANTS_H__
+#ifndef __GENERATED_php_globals_constants_h__
+#define __GENERATED_php_globals_constants_h__
 
 #include <cpp/base/hphp_system.h>
 #include <php/globals/constants.fw.h>
@@ -30,4 +30,4 @@ Variant pm_php$globals$constants_php(bool incOnce = false, LVariableTable* varia
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_PHP_GLOBALS_CONSTANTS_H__
+#endif // __GENERATED_php_globals_constants_h__

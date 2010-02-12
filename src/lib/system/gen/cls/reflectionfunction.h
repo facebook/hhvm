@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_REFLECTIONFUNCTION_H__
-#define __GENERATED_CLS_REFLECTIONFUNCTION_H__
+#ifndef __GENERATED_cls_reflectionfunction_h__
+#define __GENERATED_cls_reflectionfunction_h__
 
 #include <cls/reflectionfunctionabstract.h>
 #include <cls/reflector.h>
@@ -46,4 +46,4 @@ class c_reflectionfunction : virtual public c_reflectionfunctionabstract, virtua
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_REFLECTIONFUNCTION_H__
+#endif // __GENERATED_cls_reflectionfunction_h__

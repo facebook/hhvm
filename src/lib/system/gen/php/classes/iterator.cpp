@@ -106,7 +106,7 @@ IMPLEMENT_CLASS(arrayiterator)
 ObjectData *c_arrayiterator::create(Variant v_array, Variant v_flags //  = 0LL /* SORT_REGULAR */
 ) {
   init();
-  t___construct(v_array,v_flags);
+  t___construct(v_array, v_flags);
   return this;
 }
 ObjectData *c_arrayiterator::dynCreate(CArrRef params, bool init /* = true */) {
@@ -1181,34 +1181,42 @@ Variant c_appenditerator::t_getinneriterator() {
 /* SRC: classes/iterator.php line 160 */
 void c_appenditerator::t_rewind() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::rewind);
+  Variant eo_0;
   m_iterators.o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
   if (toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
-    o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
+    (assignCallTemp(eo_0, toObject(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0))),eo_0.o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0));
   }
 } /* function */
 /* SRC: classes/iterator.php line 167 */
 bool c_appenditerator::t_valid() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::valid);
-  return toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) && toBoolean(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0));
+  Variant eo_0;
+  return toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) && toBoolean((assignCallTemp(eo_0, toObject(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0))),eo_0.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)));
 } /* function */
 /* SRC: classes/iterator.php line 171 */
 Variant c_appenditerator::t_current() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::current);
-  return toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("current", 0x5B3A4A72846B21DCLL, 0))) : ((Variant)(null));
+  Variant eo_0;
+  return toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)((assignCallTemp(eo_0, toObject(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0))),eo_0.o_invoke_few_args("current", 0x5B3A4A72846B21DCLL, 0)))) : ((Variant)(null));
 } /* function */
 /* SRC: classes/iterator.php line 180 */
 Variant c_appenditerator::t_key() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::key);
-  return toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("key", 0x56EDB60C824E8C51LL, 0))) : ((Variant)(null));
+  Variant eo_0;
+  return toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)((assignCallTemp(eo_0, toObject(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0))),eo_0.o_invoke_few_args("key", 0x56EDB60C824E8C51LL, 0)))) : ((Variant)(null));
 } /* function */
 /* SRC: classes/iterator.php line 184 */
 void c_appenditerator::t_next() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::next);
+  Variant eo_0;
+  Variant eo_1;
+  Variant eo_2;
+  Variant eo_3;
   if (!(toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)))) {
     return;
   }
-  o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);
-  if (toBoolean(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
+  (assignCallTemp(eo_0, toObject(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0))),eo_0.o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0));
+  if (toBoolean((assignCallTemp(eo_1, toObject(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0))),eo_1.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)))) {
     return;
   }
   m_iterators.o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);
@@ -1217,8 +1225,8 @@ void c_appenditerator::t_next() {
     while (toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
       LOOP_COUNTER_CHECK(2);
       {
-        o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
-        if (toBoolean(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
+        (assignCallTemp(eo_2, toObject(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0))),eo_2.o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0));
+        if (toBoolean((assignCallTemp(eo_3, toObject(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0))),eo_3.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)))) {
           return;
         }
         m_iterators.o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);

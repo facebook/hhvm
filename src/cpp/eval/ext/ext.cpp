@@ -30,7 +30,9 @@
 #include <cpp/ext/ext_error.h>
 #include <cpp/ext/ext_options.h>
 #include <cpp/ext/ext_function.h>
+#include <cpp/ext/ext_reflection.h>
 #include <cpp/eval/eval.h>
+
 
 namespace HPHP {
 namespace Eval {
@@ -70,6 +72,7 @@ EVAL_EXT(Compact);
 EVAL_EXT(CreateFunction);
 EVAL_EXT(Assert);
 EVAL_EXT(ClassExists);
+EVAL_EXT(InterfaceExists);
 EVAL_EXT(GetDefinedVars);
 #undef EVAL_EXT
 
@@ -80,6 +83,12 @@ public:
                      CArrRef params) const;
 private:
   hphp_const_char_imap<bool> m_blacklist;
+};
+
+class EvalHphpGetClassInfo : public ExtFunction {
+public:
+  Variant invoke(CArrRef params) const;
+  Variant invokeImpl(VariableEnvironment &env, CArrRef params) const;
 };
 
 EvalOverrides::EvalOverrides() {
@@ -93,7 +102,9 @@ EvalOverrides::EvalOverrides() {
   m_functions["assert"] = new EvalAssert();
   m_functions["function_exists"] = new EvalFunctionExists();
   m_functions["class_exists"] = new EvalClassExists();
+  m_functions["interface_exists"] = new EvalInterfaceExists();
   m_functions["get_defined_vars"] = new EvalGetDefinedVars();
+  m_functions["hphp_get_class_info"] = new EvalHphpGetClassInfo();
 }
 EvalOverrides::~EvalOverrides() {
   for (hphp_const_char_imap<const Function*>::iterator it =
@@ -236,10 +247,36 @@ Variant EvalClassExists::invokeImpl(VariableEnvironment &env,
   return true;
 }
 
+Variant EvalInterfaceExists::invokeImpl(VariableEnvironment &env,
+                                        CArrRef params) const {
+  String cname = params.rvalAt(0);
+  if (!f_interface_exists(cname)) {
+    if ((params.size() == 1 || params.rvalAt(1).toBoolean()) &&
+        eval_try_autoload(cname.data())) {
+      return f_interface_exists(cname);
+    }
+    return false;
+  }
+  return true;
+}
 
 Variant EvalGetDefinedVars::invokeImpl(VariableEnvironment &env,
                                        CArrRef params) const {
   return env.getDefinedVariables();
+}
+
+
+Variant EvalHphpGetClassInfo::invoke(CArrRef params) const {
+  String cname = params.rvalAt(0);
+  if (!f_class_exists(cname)) {
+    eval_try_autoload(cname.data());
+  }
+  return f_hphp_get_class_info(cname);
+}
+
+Variant EvalHphpGetClassInfo::invokeImpl(VariableEnvironment &env,
+                                         CArrRef params) const {
+  return invoke(params);
 }
 
 EvalFunctionExists::EvalFunctionExists() {

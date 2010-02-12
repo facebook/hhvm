@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_SYS_SYSTEM_GLOBALS_H__
-#define __GENERATED_SYS_SYSTEM_GLOBALS_H__
+#ifndef __GENERATED_sys_system_globals_h__
+#define __GENERATED_sys_system_globals_h__
 
 #include <php/classes/arrayaccess.h>
 #include <php/classes/directory.h>
@@ -202,4 +202,4 @@ extern const int64 k_MCC_HAVE_ZLIB_COMPRESSION;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_SYS_SYSTEM_GLOBALS_H__
+#endif // __GENERATED_sys_system_globals_h__

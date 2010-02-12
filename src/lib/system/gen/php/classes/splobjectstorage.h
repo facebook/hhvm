@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_PHP_CLASSES_SPLOBJECTSTORAGE_H__
-#define __GENERATED_PHP_CLASSES_SPLOBJECTSTORAGE_H__
+#ifndef __GENERATED_php_classes_splobjectstorage_h__
+#define __GENERATED_php_classes_splobjectstorage_h__
 
 #include <cpp/base/hphp_system.h>
 #include <php/classes/splobjectstorage.fw.h>
@@ -33,4 +33,4 @@ Object co_splobjectstorage(CArrRef params, bool init = true);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_PHP_CLASSES_SPLOBJECTSTORAGE_H__
+#endif // __GENERATED_php_classes_splobjectstorage_h__

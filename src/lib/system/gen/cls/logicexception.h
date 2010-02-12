@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_LOGICEXCEPTION_H__
-#define __GENERATED_CLS_LOGICEXCEPTION_H__
+#ifndef __GENERATED_cls_logicexception_h__
+#define __GENERATED_cls_logicexception_h__
 
 #include <cls/exception.h>
 
@@ -35,4 +35,4 @@ class c_logicexception : virtual public c_exception {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_LOGICEXCEPTION_H__
+#endif // __GENERATED_cls_logicexception_h__

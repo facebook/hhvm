@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_REFLECTIONPARAMETER_H__
-#define __GENERATED_CLS_REFLECTIONPARAMETER_H__
+#ifndef __GENERATED_cls_reflectionparameter_h__
+#define __GENERATED_cls_reflectionparameter_h__
 
 #include <cls/reflector.h>
 
@@ -53,4 +53,4 @@ class c_reflectionparameter : virtual public c_reflector {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_REFLECTIONPARAMETER_H__
+#endif // __GENERATED_cls_reflectionparameter_h__

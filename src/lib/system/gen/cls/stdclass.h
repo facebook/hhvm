@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_STDCLASS_H__
-#define __GENERATED_CLS_STDCLASS_H__
+#ifndef __GENERATED_cls_stdclass_h__
+#define __GENERATED_cls_stdclass_h__
 
 
 namespace HPHP {
@@ -33,4 +33,4 @@ class c_stdclass : virtual public ObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_STDCLASS_H__
+#endif // __GENERATED_cls_stdclass_h__

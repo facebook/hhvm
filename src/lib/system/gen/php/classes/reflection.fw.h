@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_PHP_CLASSES_REFLECTION_FW_H__
-#define __GENERATED_PHP_CLASSES_REFLECTION_FW_H__
+#ifndef __GENERATED_php_classes_reflection_fw_h__
+#define __GENERATED_php_classes_reflection_fw_h__
 
 #include <cpp/base/hphp_system.h>
 
@@ -56,4 +56,4 @@ FORWARD_DECLARE_CLASS(reflectionparameter)
 }
 #include <php/classes/exception.fw.h>
 
-#endif // __GENERATED_PHP_CLASSES_REFLECTION_FW_H__
+#endif // __GENERATED_php_classes_reflection_fw_h__

@@ -82,7 +82,8 @@ bool eval_invoke_hook(Variant &res, const char *s, CArrRef params, int64 hash) {
 }
 bool eval_create_object_hook(Variant &res, const char *s, CArrRef params,
                              bool init, ObjectData *root) {
-  Eval::ClassEvalState *ce = Eval::RequestEvalState::findClassState(s);
+  Eval::ClassEvalState *ce = Eval::RequestEvalState::findClassState(s,
+                                                                    true);
   if (ce) {
     res = ce->getClass()->create(*ce, params, init, root);
     return true;
@@ -102,7 +103,8 @@ bool eval_invoke_static_method_hook(Variant &res, const char *s,
                                     const char* method, CArrRef params,
                                     bool &foundClass) {
   const MethodStatement *ms = Eval::RequestEvalState::findMethod(s, method,
-                                                                 foundClass);
+                                                                 foundClass,
+                                                                 true);
   if (ms) {
     res = ref(ms->invokeStatic(s, params));
     ref(res);
@@ -121,7 +123,7 @@ bool eval_get_static_property_hook(Variant &res, const char *s,
 }
 bool eval_get_static_property_lv_hook(Variant *&res, const char *s,
                                       const char *prop) {
-  const Eval::ClassStatement *cls = Eval::RequestEvalState::findClass(s);
+  const Eval::ClassStatement *cls = Eval::RequestEvalState::findClass(s, true);
   while (cls) {
     LVariableTable *statics = Eval::RequestEvalState::getClassStatics(cls);
     if (!statics) return false;
@@ -136,12 +138,12 @@ bool eval_get_static_property_lv_hook(Variant *&res, const char *s,
 }
 bool eval_get_class_constant_hook(Variant &res, const char *s,
                                   const char* constant) {
-const Eval::ClassStatement *cls = Eval::RequestEvalState::findClass(s);
- while (cls) {
-   if (cls->getConstant(res, constant)) return true;
-   cls = cls->parentStatement();
- }
- return false;
+  const Eval::ClassStatement *cls = Eval::RequestEvalState::findClass(s, true);
+  while (cls) {
+    if (cls->getConstant(res, constant)) return true;
+    cls = cls->parentStatement();
+  }
+  return false;
 }
 bool eval_constant_hook(Variant &res, CStrRef name) {
   return Eval::RequestEvalState::findConstant(name, res);

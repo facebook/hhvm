@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_PHP_GLOBALS_SYMBOLS_H__
-#define __GENERATED_PHP_GLOBALS_SYMBOLS_H__
+#ifndef __GENERATED_php_globals_symbols_h__
+#define __GENERATED_php_globals_symbols_h__
 
 #include <cpp/base/hphp_system.h>
 #include <php/globals/symbols.fw.h>
@@ -30,4 +30,4 @@ Variant pm_php$globals$symbols_php(bool incOnce = false, LVariableTable* variabl
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_PHP_GLOBALS_SYMBOLS_H__
+#endif // __GENERATED_php_globals_symbols_h__

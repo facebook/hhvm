@@ -485,9 +485,7 @@ void ClassScope::outputCPPDynamicClassCreateImpl
     // See if there's an eval'd version
     cg.indentBegin("{\n");
     cg.printf("Variant r;\n");
-    cg.printf("if ((ClassInfo::HasClass(s) || (eval_try_autoload(s) && "
-              "ClassInfo::HasClass(s))) && "
-              "eval_create_object_hook(r, s, params, init, root)) "
+    cg.printf("if (eval_create_object_hook(r, s, params, init, root)) "
               "return r;\n");
     cg.indentEnd("}\n");
   }
@@ -523,26 +521,8 @@ void ClassScope::outputCPPInvokeStaticMethodImpl
 
   // There should be invoke_failed for static methods...
   if (!system) {
-    bool withEval = !system && Option::EnableEval == Option::FullEval;
-    if (withEval) {
-      cg.indentBegin("try {\n");
-    }
     cg.printf("return invoke_builtin_static_method(s, method, params, fatal);"
               "\n");
-    if (withEval) {
-      cg.indentEnd("");
-      cg.indentBegin("} catch (ClassNotFoundException &e) {\n");
-      cg.indentBegin("if (eval_try_autoload(s)) {\n");
-      cg.printf("Variant r;\n");
-      cg.printf("if (eval_invoke_static_method_hook(r, s, method, params, "
-                "foundClass)) return r;\n");
-      cg.indentBegin("else if (foundClass) {\n");
-      cg.printf("return o_invoke_failed(s, method, fatal);\n");
-      cg.indentEnd("}\n");
-      cg.indentEnd("}\n");
-      cg.printf("throw e;\n");
-      cg.indentEnd("}\n");
-    }
   } else {
     cg.indentBegin("if (fatal) {\n");
     cg.printf("return throw_missing_class(s);\n");

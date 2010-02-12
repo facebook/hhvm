@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_DIRECTORY_H__
-#define __GENERATED_CLS_DIRECTORY_H__
+#ifndef __GENERATED_cls_directory_h__
+#define __GENERATED_cls_directory_h__
 
 
 namespace HPHP {
@@ -42,4 +42,4 @@ class c_directory : virtual public ObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_DIRECTORY_H__
+#endif // __GENERATED_cls_directory_h__

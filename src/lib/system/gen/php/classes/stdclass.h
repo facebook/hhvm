@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_PHP_CLASSES_STDCLASS_H__
-#define __GENERATED_PHP_CLASSES_STDCLASS_H__
+#ifndef __GENERATED_php_classes_stdclass_h__
+#define __GENERATED_php_classes_stdclass_h__
 
 #include <cpp/base/hphp_system.h>
 #include <php/classes/stdclass.fw.h>
@@ -34,4 +34,4 @@ Object co___php_incomplete_class(CArrRef params, bool init = true);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_PHP_CLASSES_STDCLASS_H__
+#endif // __GENERATED_php_classes_stdclass_h__

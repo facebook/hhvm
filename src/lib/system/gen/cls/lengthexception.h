@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_LENGTHEXCEPTION_H__
-#define __GENERATED_CLS_LENGTHEXCEPTION_H__
+#ifndef __GENERATED_cls_lengthexception_h__
+#define __GENERATED_cls_lengthexception_h__
 
 #include <cls/logicexception.h>
 
@@ -36,4 +36,4 @@ class c_lengthexception : virtual public c_logicexception {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_LENGTHEXCEPTION_H__
+#endif // __GENERATED_cls_lengthexception_h__

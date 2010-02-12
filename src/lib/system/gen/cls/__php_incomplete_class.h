@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS___PHP_INCOMPLETE_CLASS_H__
-#define __GENERATED_CLS___PHP_INCOMPLETE_CLASS_H__
+#ifndef __GENERATED_cls___php_incomplete_class_h__
+#define __GENERATED_cls___php_incomplete_class_h__
 
 
 namespace HPHP {
@@ -33,4 +33,4 @@ class c___php_incomplete_class : virtual public ObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS___PHP_INCOMPLETE_CLASS_H__
+#endif // __GENERATED_cls___php_incomplete_class_h__

@@ -27,6 +27,7 @@
 #include <cpp/eval/parser/parser.h>
 #include <cpp/eval/runtime/eval_object_data.h>
 #include <cpp/eval/ast/method_statement.h>
+#include <cpp/eval/eval.h>
 
 namespace HPHP {
 namespace Eval {
@@ -181,30 +182,42 @@ ClassInfoEvaled::~ClassInfoEvaled() {
   }
 }
 
-const ClassStatement *RequestEvalState::findClass(const char *name) {
+const ClassStatement *RequestEvalState::findClass(const char *name,
+                                                  bool autoload /* = false */)
+{
   RequestEvalState *self = s_res.get();
   hphp_const_char_imap<ClassEvalState>::const_iterator it =
     self->m_classes.find(name);
   if (it != self->m_classes.end()) {
     return it->second.getClass();
   }
+  if (autoload && !ClassInfo::HasClass(name) && eval_try_autoload(name)) {
+    return findClass(name, false);
+  }
   return NULL;
 }
 
-ClassEvalState *RequestEvalState::findClassState(const char *name) {
+ClassEvalState *RequestEvalState::findClassState(const char *name,
+                                                 bool autoload /* = false */) {
   RequestEvalState *self = s_res.get();
   hphp_const_char_imap<ClassEvalState>::iterator it =
     self->m_classes.find(name);
   if (it != self->m_classes.end()) {
     return &it->second;
   }
+  if (autoload && !ClassInfo::HasClass(name) && eval_try_autoload(name)) {
+    return findClassState(name, false);
+  }
   return NULL;
 }
 
 const MethodStatement *RequestEvalState::findMethod(const char *cname,
                                                     const char *name,
-                                                    bool &foundClass) {
-  const Eval::ClassStatement *cls = Eval::RequestEvalState::findClass(cname);
+                                                    bool &foundClass,
+                                                    bool autoload /* = false */)
+{
+  const Eval::ClassStatement *cls =
+    Eval::RequestEvalState::findClass(cname, autoload);
   if (cls) {
     foundClass = true;
   }

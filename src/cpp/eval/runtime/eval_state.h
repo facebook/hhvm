@@ -125,10 +125,13 @@ public:
   static ClassEvalState &declareClass(const ClassStatement *cls);
   static void declareFunction(const FunctionStatement *cls);
   static bool declareConstant(CStrRef name, CVarRef value);
-  static const ClassStatement *findClass(const char *name);
-  static ClassEvalState *findClassState(const char *name);
+  static const ClassStatement *findClass(const char *name,
+                                         bool autoload = false);
+  static ClassEvalState *findClassState(const char *name,
+                                        bool autoload = false);
   static const MethodStatement *findMethod(const char *cname, const char *name,
-                                           bool &foundClass);
+                                           bool &foundClass,
+                                           bool autoload = false);
   static const FunctionStatement *findUserFunction(const char *name);
   static const Function *findFunction(const char *name);
   static bool findConstant(CStrRef name, Variant &ret);

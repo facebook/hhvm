@@ -208,7 +208,7 @@ class ReflectionClass implements Reflector {
   protected $info;
 
   public function __construct($name) {
-    $this->info = hphp_get_class_info($name);
+    $this->info = call_user_func("hphp_get_class_info", $name);
     if (empty($this->info)) {
       if (is_object($name)) $name = get_class($name);
       throw new ReflectionException("Class $name does not exist");

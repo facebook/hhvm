@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_COUNTABLE_H__
-#define __GENERATED_CLS_COUNTABLE_H__
+#ifndef __GENERATED_cls_countable_h__
+#define __GENERATED_cls_countable_h__
 
 
 namespace HPHP {
@@ -29,4 +29,4 @@ class c_countable : virtual public ObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_COUNTABLE_H__
+#endif // __GENERATED_cls_countable_h__

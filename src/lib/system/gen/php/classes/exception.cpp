@@ -2659,7 +2659,7 @@ ObjectData *c_exception::create(Variant v_message //  = ""
 , Variant v_code //  = 0LL
 ) {
   init();
-  t___construct(v_message,v_code);
+  t___construct(v_message, v_code);
   return this;
 }
 ObjectData *c_exception::dynCreate(CArrRef params, bool init /* = true */) {
@@ -2968,12 +2968,12 @@ String c_exception::t_gettraceasstring() {
       v_frame = iter3->second();
       {
         if (!(x_is_array(v_frame))) continue;
-        concat_assign(v_s, toString(concat_rev(concat6("(", toString(v_frame.rvalAt("line", 0x21093C71DDF8728CLL)), "): ", (toString(isset(v_frame, "class", 0x45397FE5C82DBD12LL) ? ((Variant)(concat(toString(v_frame.rvalAt("class", 0x45397FE5C82DBD12LL)), toString(v_frame.rvalAt("type", 0x508FC7C8724A760ALL))))) : ((Variant)("")))), toString(v_frame.rvalAt("function", 0x736D912A52403931LL)), "()\n"), concat4("#", toString(v_i), " ", toString(v_frame.rvalAt("file", 0x612E37678CE7DB5BLL))))));
+        concat_assign(v_s, concat_rev(concat6("(", toString(v_frame.rvalAt("line", 0x21093C71DDF8728CLL)), "): ", (toString(isset(v_frame, "class", 0x45397FE5C82DBD12LL) ? ((Variant)(concat(toString(v_frame.rvalAt("class", 0x45397FE5C82DBD12LL)), toString(v_frame.rvalAt("type", 0x508FC7C8724A760ALL))))) : ((Variant)("")))), toString(v_frame.rvalAt("function", 0x736D912A52403931LL)), "()\n"), concat4("#", toString(v_i), " ", toString(v_frame.rvalAt("file", 0x612E37678CE7DB5BLL)))));
         v_i++;
       }
     }
   }
-  concat_assign(v_s, toString(concat3("#", toString(v_i), " {main}")));
+  concat_assign(v_s, concat3("#", toString(v_i), " {main}"));
   return v_s;
 } /* function */
 /* SRC: classes/exception.php line 62 */

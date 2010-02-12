@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_UNEXPECTEDVALUEEXCEPTION_H__
-#define __GENERATED_CLS_UNEXPECTEDVALUEEXCEPTION_H__
+#ifndef __GENERATED_cls_unexpectedvalueexception_h__
+#define __GENERATED_cls_unexpectedvalueexception_h__
 
 #include <cls/runtimeexception.h>
 
@@ -36,4 +36,4 @@ class c_unexpectedvalueexception : virtual public c_runtimeexception {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_UNEXPECTEDVALUEEXCEPTION_H__
+#endif // __GENERATED_cls_unexpectedvalueexception_h__

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_ARRAYITERATOR_H__
-#define __GENERATED_CLS_ARRAYITERATOR_H__
+#ifndef __GENERATED_cls_arrayiterator_h__
+#define __GENERATED_cls_arrayiterator_h__
 
 #include <cls/iterator.h>
 #include <cls/arrayaccess.h>
@@ -70,4 +70,4 @@ class c_arrayiterator : virtual public c_iterator, virtual public c_arrayaccess,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_ARRAYITERATOR_H__
+#endif // __GENERATED_cls_arrayiterator_h__

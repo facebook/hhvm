@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_CLS_ITERATORAGGREGATE_H__
-#define __GENERATED_CLS_ITERATORAGGREGATE_H__
+#ifndef __GENERATED_cls_iteratoraggregate_h__
+#define __GENERATED_cls_iteratoraggregate_h__
 
 #include <cls/traversable.h>
 
@@ -30,4 +30,4 @@ class c_iteratoraggregate : virtual public c_traversable {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_CLS_ITERATORAGGREGATE_H__
+#endif // __GENERATED_cls_iteratoraggregate_h__

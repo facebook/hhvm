@@ -86,12 +86,7 @@ void ClassStatement::finish() {
 
 const ClassStatement *ClassStatement::parentStatement() const {
   if (!m_parent.empty()) {
-    const ClassStatement *cls = RequestEvalState::findClass(m_parent.c_str());
-    if (!cls && !ClassInfo::HasClass(m_parent.c_str()) &&
-        eval_try_autoload(m_parent.c_str())) {
-      cls = RequestEvalState::findClass(m_parent.c_str());
-    }
-    return cls;
+    return RequestEvalState::findClass(m_parent.c_str(), true);
   }
   return NULL;
 }

@@ -56,7 +56,7 @@ ObjectData *c_pear_error::create(CStrRef v_message //  = "unknown error"
 , CVarRef v_userinfo //  = null_variant
 ) {
   init();
-  t_pear_error(v_message,v_code,v_mode,v_options,v_userinfo);
+  t_pear_error(v_message, v_code, v_mode, v_options, v_userinfo);
   return this;
 }
 ObjectData *c_pear_error::dynCreate(CArrRef params, bool init /* = true */) {

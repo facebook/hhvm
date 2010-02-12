@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_PHP_CLASSES_REFLECTION_H__
-#define __GENERATED_PHP_CLASSES_REFLECTION_H__
+#ifndef __GENERATED_php_classes_reflection_h__
+#define __GENERATED_php_classes_reflection_h__
 
 #include <cpp/base/hphp_system.h>
 #include <php/classes/reflection.fw.h>
@@ -50,4 +50,4 @@ Object co_reflectionparameter(CArrRef params, bool init = true);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_PHP_CLASSES_REFLECTION_H__
+#endif // __GENERATED_php_classes_reflection_h__

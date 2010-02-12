@@ -15,6 +15,7 @@
 */
 
 #include <cpp/base/array/array_element.h>
+#include <cpp/base/array/array_init.h>
 
 namespace HPHP {
 
@@ -25,6 +26,11 @@ void ArrayElement::dump() {
   m_name.dump();
   m_value.dump();
   printf("hash: %lld\n", m_hash);
+}
+
+Variant ArrayElement::getName() const {
+  ASSERT(hasName());
+  return ArrayInit::getName(m_name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

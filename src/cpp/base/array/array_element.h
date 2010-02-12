@@ -58,25 +58,8 @@ class ArrayElement {
   bool hasName() const {
     return !m_name.isNull();
   }
-  Variant getName() const {
-    ASSERT(hasName());
-    switch(m_name.getType()) {
-    case KindOfBoolean:
-      return m_name.toBoolean() ? 1LL : 0LL;
-    case KindOfByte:
-    case KindOfInt16:
-    case KindOfInt32:
-    case KindOfInt64:
-      return m_name.toInt64();
-    case KindOfDouble:
-    case LiteralString:
-    case KindOfString:
-      return m_name.toKey();
-    default:
-      break;
-    }
-    return m_name;
-  }
+
+  Variant getName() const;
 
   int64 getHash() const {
     return m_hash;

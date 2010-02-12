@@ -41,7 +41,7 @@ public:
   ArrayInit &set(int p, CVarRef name, const T &value, int64 prehash = -1) {
     if (m_data) {
       Variant v(value);
-      m_data->set(name, v, false, prehash);
+      m_data->set(getName(name), v, false, prehash);
     } else {
       (*m_elements)[p] = NEW(ArrayElement)(value);
     }
@@ -50,7 +50,7 @@ public:
 
   ArrayInit &set(int p, CVarRef name, CVarRef v, int64 prehash = -1) {
     if (m_data) {
-      m_data->set(name, v, false, prehash);
+      m_data->set(getName(name), v, false, prehash);
     } else {
       (*m_elements)[p] = NEW(ArrayElement)(v);
     }
@@ -62,6 +62,26 @@ public:
     ArrayData *ret = ArrayData::Create(m_elements, true);
     delete m_elements;
     return ret;
+  }
+
+  static Variant getName(CVarRef name) {
+    if (name.isNull()) return "";
+    switch (name.getType()) {
+    case KindOfBoolean:
+      return name.toBoolean() ? 1LL : 0LL;
+    case KindOfByte:
+    case KindOfInt16:
+    case KindOfInt32:
+    case KindOfInt64:
+      return name.toInt64();
+    case KindOfDouble:
+    case LiteralString:
+    case KindOfString:
+      return name.toKey();
+    default:
+      break;
+    }
+    return name;
   }
 
 private:

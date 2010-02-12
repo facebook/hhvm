@@ -106,8 +106,7 @@ public:
   bool hasAccess(CStrRef context, Modifier level) const;
   bool attemptPropertyAccess(CStrRef prop) const;
 
-  void loadMethodTable(hphp_const_char_imap<const MethodStatement*> &mtable)
-    const;
+  void loadMethodTable(ClassEvalState &ce) const;
 
   void semanticCheck(const ClassStatement *cls) const;
   ClassStatementMarkerPtr getMarker() const;

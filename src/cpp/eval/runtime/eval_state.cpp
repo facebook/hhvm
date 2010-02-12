@@ -65,7 +65,7 @@ const MethodStatement *ClassEvalState::getMethod(const char *m) {
 void ClassEvalState::initializeInstance() {
   if (!m_initializedInstance) {
     semanticCheck();
-    m_class->loadMethodTable(m_methodTable);
+    m_class->loadMethodTable(*this);
     m_initializedInstance = true;
   }
 }

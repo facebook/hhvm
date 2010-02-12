@@ -35,6 +35,7 @@ public:
   virtual void dump() const;
 protected:
   std::string m_cname;
+  bool m_construct;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

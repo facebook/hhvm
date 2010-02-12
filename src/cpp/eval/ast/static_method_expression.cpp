@@ -29,7 +29,8 @@ StaticMethodExpression::
 StaticMethodExpression(EXPRESSION_ARGS, const string &cname,
                        NamePtr &name,
                        const vector<ExpressionPtr> &params) :
-  SimpleFunctionCallExpression(EXPRESSION_PASS, name, params), m_cname(cname) {}
+  SimpleFunctionCallExpression(EXPRESSION_PASS, name, params), m_cname(cname),
+  m_construct(name->getStatic() == "__construct") {}
 
 Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
   SET_LINE;
@@ -38,22 +39,29 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
   // Super slow.
   String name = m_name->get(env);
   Object co = env.currentObject();
+  bool withinClass = !co.isNull() && co->o_instanceof(m_cname.data());
   bool foundClass;
   const MethodStatement *ms = RequestEvalState::findMethod(m_cname.data(),
                                                            name.data(),
                                                            foundClass);
-  if (ms) {
-    if (!co.isNull() && co->o_instanceof(m_cname.data())) {
+  if (withinClass) {
+    if (m_construct && !ms) {
+      // In a class method doing __construct will go to the name constructor
+      ms = RequestEvalState::findMethod(m_cname.data(),
+                                        m_cname.data(),
+                                        foundClass);
+    }
+    if (ms) {
       return ref(ms->invokeInstanceDirect(co, env, this));
     }
+    return ref(co->o_invoke_ex(m_cname.data(), name.data(), getParams(env),
+                               m_name->hashLwr()));
+
+  }
+  if (ms) {
     return ref(ms->invokeStaticDirect(m_cname.data(), env, this));
   }
-  Array params = getParams(env);
-  if (!co.isNull() && co->o_instanceof(m_cname.data())) {
-    return ref(co->o_invoke_ex(m_cname.data(), name.data(), params,
-                               m_name->hashLwr()));
-  }
-  return ref(invoke_static_method(m_cname.data(), name.data(), params));
+  return ref(invoke_static_method(m_cname.data(), name.data(), getParams(env)));
 }
 
 void StaticMethodExpression::dump() const {

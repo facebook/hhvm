@@ -54,7 +54,7 @@ void EvalObjectData::init() {
 }
 
 void EvalObjectData::dynConstruct(CArrRef params) {
-  const MethodStatement *ms = getMethodStatement("__construct");
+  const MethodStatement *ms = m_cls.getConstructor();
   if (ms) {
     ms->invokeInstance(Object(root), params);
   } else {

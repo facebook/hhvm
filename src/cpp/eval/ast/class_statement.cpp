@@ -97,11 +97,12 @@ const ClassStatement *ClassStatement::parentStatement() const {
 }
 
 void ClassStatement::
-loadMethodTable(hphp_const_char_imap<const MethodStatement*> &mtable) const {
+loadMethodTable(ClassEvalState &ce) const {
+  hphp_const_char_imap<const MethodStatement*> &mtable = ce.getMethodTable();
   if (!m_parent.empty()) {
     const ClassStatement* parent_cls = parentStatement();
     if (parent_cls) {
-      parent_cls->loadMethodTable(mtable);
+      parent_cls->loadMethodTable(ce);
     } else {
       // Built in
       ClassInfo::MethodVec meths;
@@ -116,24 +117,15 @@ loadMethodTable(hphp_const_char_imap<const MethodStatement*> &mtable) const {
        it != m_methodsVec.end(); ++it) {
     mtable[(*it)->name().c_str()] = it->get();
   }
-  MethodStatement *constructor = NULL;
-  bool nameMethod = false;
-  bool constructMethod = false;
+
   hphp_const_char_imap<MethodStatementPtr>::const_iterator it =
     m_methods.find(m_name.c_str());
   if (it != m_methods.end()) {
-    constructor = it->second.get();
-    nameMethod = true;
+    ce.getConstructor() = it->second.get();
   }
   it = m_methods.find("__construct");
   if (it != m_methods.end()) {
-    constructor = it->second.get();
-    constructMethod = true;
-  }
-  if (constructMethod && !nameMethod) {
-    mtable[m_name.c_str()] = constructor;
-  } else if (!constructMethod && nameMethod) {
-    mtable["__construct"] = constructor;
+    ce.getConstructor() = it->second.get();
   }
 }
 

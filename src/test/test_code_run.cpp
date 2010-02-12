@@ -63,10 +63,23 @@ bool TestCodeRun::GenerateFiles(const char *input) {
   return true;
 }
 
+string filter_distcc(string &msg) {
+  istringstream is(msg);
+  ostringstream os;
+  string line;
+  while (getline(is, line)) {
+    if (line.compare(0, 6, "distcc")) {
+      os << line << endl;
+    }
+  }
+  return os.str();
+}
+
 bool TestCodeRun::CompileFiles(const char *input, const char *file, int line) {
   const char *argv[] = {"", NULL};
   string out, err;
   Process::Exec("cpp/makeall.sh", argv, NULL, out, &err);
+  err = filter_distcc(err);
   if (!err.empty()) {
     printf("%s:%d\nParsing: [%s]\nFailed to compile files: %s\n",
            file, line, input, err.c_str());

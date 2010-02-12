@@ -7,8 +7,8 @@ fast_tests:
 
 slow_tests:
 	$(MAKE) -C src
-	cd src && NO_DISTCC=1 time test/test TestCodeRun
-	cd src && NO_DISTCC=1 time test/test TestServer
+	cd src && time test/test TestCodeRun
+	cd src && time test/test TestServer
 
 clobber:
 	$(MAKE) -C src clobber

@@ -18,6 +18,7 @@
 #include <cpp/base/source_info.h>
 #include <cpp/base/class_info.h>
 #include <cpp/base/frame_injection.h>
+#include <cpp/base/runtime_option.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -113,7 +114,10 @@ Array FrameInjection::getBacktrace(bool skip /* = false */,
 
 String FrameInjection::getFileName() {
   if (strncmp(m_name, "run_init::", 10) == 0) {
-    return m_name + 10;
+    if (RuntimeOption::StacktraceFilePrefix.empty()) {
+      return m_name + 10;
+    }
+    return String(RuntimeOption::StacktraceFilePrefix) + (m_name + 10);
   }
   const char *c = strstr(m_name, "::");
   const char *f = NULL;
@@ -123,7 +127,10 @@ String FrameInjection::getFileName() {
     f = SourceInfo::TheSourceInfo.getFunctionDeclaringFile(m_name);
   }
   if (f != NULL) {
-    return f;
+    if (RuntimeOption::StacktraceFilePrefix.empty()) {
+      return f;
+    }
+    return String(RuntimeOption::StacktraceFilePrefix) + f;
   }
   return String();
 }

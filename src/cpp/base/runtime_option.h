@@ -215,6 +215,7 @@ public:
 
   // Use FrameInjection-based backtrace, which does not contain C++ frames.
   static bool InjectedStacktrace;
+  static std::string StacktraceFilePrefix;
 
   // Eval options
   static bool EnableXHP;

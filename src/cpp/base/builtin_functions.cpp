@@ -348,26 +348,59 @@ String get_source_filename(litstr path) {
   return RuntimeOption::SourceRoot + "/" + path;
 }
 
+static Variant include_impl(CStrRef file, bool once,
+                            LVariableTable* variables,
+                            const char *currentDir, bool required) {
+  try {
+    return invoke_file(file, once, variables, currentDir);
+  } catch (PhpFileDoesNotExistException &e) {}
 
-Variant include(CStrRef file, bool once /* = false */,
-                LVariableTable* variables /* = NULL */,
-                const char *currentDir /* = NULL */) {
-  try {
-    return invoke_file(file, once, variables, currentDir);
-  } catch (PhpFileDoesNotExistException &e) {
-    return false;
+  // resolving relative path
+  if (!file.empty() && file[0] != '/') {
+    // use containing file's location to resolve the file
+    if (currentDir && *currentDir) {
+      String path = String(currentDir) + file;
+      try {
+        return invoke_file(path, once, variables, currentDir);
+      } catch (PhpFileDoesNotExistException &e) {}
+    }
+
+    // use current directory to resolve the file
+    String path = g_context->getCwd() + "/" + file;
+    try {
+      return invoke_file(path, once, variables, currentDir);
+    } catch (PhpFileDoesNotExistException &e) {}
+
+    // use include paths to resolve the file
+    ASSERT(RuntimeOption::IncludeSearchPaths[0] == "."); // skipping it
+    for (unsigned int i = 1; i < RuntimeOption::IncludeSearchPaths.size();
+         i++) {
+      String path(RuntimeOption::IncludeSearchPaths[i]);
+      path += file;
+      try {
+        return invoke_file(path, once, variables, currentDir);
+      } catch (PhpFileDoesNotExistException &e) {}
+    }
   }
-}
-Variant require(CStrRef file, bool once /* = false */,
-                LVariableTable* variables /* = NULL */,
-                const char *currentDir /* = NULL */) {
-  try {
-    return invoke_file(file, once, variables, currentDir);
-  } catch (PhpFileDoesNotExistException &e) {
+
+  if (required) {
     String ms = "Required file that does not exist: ";
     ms += file;
     throw FatalErrorException(ms.data());
   }
+  return false;
+}
+
+Variant include(CStrRef file, bool once /* = false */,
+                LVariableTable* variables /* = NULL */,
+                const char *currentDir /* = NULL */) {
+  return include_impl(file, once, variables, currentDir, false);
+}
+
+Variant require(CStrRef file, bool once /* = false */,
+                LVariableTable* variables /* = NULL */,
+                const char *currentDir /* = NULL */) {
+  return include_impl(file, once, variables, currentDir, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

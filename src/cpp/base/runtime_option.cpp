@@ -100,6 +100,7 @@ std::string RuntimeOption::XboxProcessMessageFunc = "xbox_process_message";
 std::string RuntimeOption::XboxPassword;
 
 std::string RuntimeOption::SourceRoot;
+std::vector<std::string> RuntimeOption::IncludeSearchPaths;
 std::string RuntimeOption::FileCache;
 std::string RuntimeOption::DefaultDocument;
 std::string RuntimeOption::ErrorDocument404;
@@ -211,7 +212,6 @@ bool RuntimeOption::EnableXHP = true;
 bool RuntimeOption::EnableStrict = false;
 int RuntimeOption::StrictLevel = 1; // StrictBasic, cf strict_mode.h
 bool RuntimeOption::StrictFatal = false;
-std::vector<std::string> RuntimeOption::IncludeSearchPaths;
 bool RuntimeOption::EvalBytecodeInterpreter = false;
 bool RuntimeOption::DumpBytecode = false;
 
@@ -406,6 +406,15 @@ void RuntimeOption::Load(Hdf &config) {
       // since it may not be initialized
       FileCache::SourceRoot = SourceRoot;
     }
+    server["IncludeSearchPaths"].get(IncludeSearchPaths);
+    for (unsigned int i = 0; i < IncludeSearchPaths.size(); i++) {
+      string &path = IncludeSearchPaths[i];
+      if (!path.empty() && path[path.length() - 1] != '/') {
+        path += '/';
+      }
+    }
+    IncludeSearchPaths.insert(IncludeSearchPaths.begin(), "./");
+
     FileCache = server["FileCache"].getString("");
     DefaultDocument = server["DefaultDocument"].getString("");
     ErrorDocument404 = server["ErrorDocument404"].getString("");
@@ -651,12 +660,6 @@ void RuntimeOption::Load(Hdf &config) {
     EnableStrict = eval["EnableStrict"].getBool(0);
     StrictLevel = eval["StrictLevel"].getInt32(1); // StrictBasic
     StrictFatal = eval["StrictFatal"].getBool();
-    Hdf searchPaths = eval["IncludePaths"];
-    if (searchPaths.exists()) {
-      searchPaths.get(IncludeSearchPaths);
-    } else {
-      IncludeSearchPaths.push_back(".");
-    }
     EvalBytecodeInterpreter = eval["BytecodeInterpreter"].getBool(false);
     DumpBytecode = eval["DumpBytecode"].getBool(false);
   }

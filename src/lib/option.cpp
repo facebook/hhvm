@@ -54,7 +54,7 @@ bool Option::Load(VariableTablePtr variables) {
   LOAD_OPTION(AllowedBadPHPIncludes);
   LOAD_OPTION(IncludeRoots);
   LOAD_OPTION(AutoloadRoots);
-  LOAD_OPTION(IncludePaths);
+  LOAD_OPTION(IncludeSearchPaths);
   LOAD_OPTION(DefaultIncludeRoot);
   LOAD_OPTION(DynamicFunctionCalls);
   LOAD_OPTION(GeneratePickledPHP);
@@ -101,7 +101,7 @@ bool Option::CachePHPFile = false;
 set<string> Option::AllowedBadPHPIncludes;
 map<string, string> Option::IncludeRoots;
 map<string, string> Option::AutoloadRoots;
-vector<string> Option::IncludePaths;
+vector<string> Option::IncludeSearchPaths;
 string Option::DefaultIncludeRoot;
 map<string, int> Option::DynamicFunctionCalls;
 
@@ -480,7 +480,7 @@ void Option::LoadRootHdf(const Hdf &roots, vector<string> &vec) {
 void Option::Load(Hdf &config) {
   LoadRootHdf(config["IncludeRoots"], IncludeRoots);
   LoadRootHdf(config["AutoloadRoots"], AutoloadRoots);
-  LoadRootHdf(config["IncludePaths"], IncludePaths);
+  LoadRootHdf(config["IncludeSearchPaths"], IncludeSearchPaths);
 
   config["PackageDirectories"].get(PackageDirectories);
   config["PackageExcludeDirs"].get(PackageExcludeDirs);
@@ -538,8 +538,8 @@ void Option::Load(ServerDataPtr server) {
       IncludeRoots[name] = value;
     } else if (strcmp(id, "AutoloadRoots") == 0) {
       AutoloadRoots[name] = value;
-    } else if (strcmp(id, "IncludePaths") == 0) {
-      IncludePaths.push_back(name);
+    } else if (strcmp(id, "IncludeSearchPaths") == 0) {
+      IncludeSearchPaths.push_back(name);
     } else if (strcmp(id, "PackageDirectories") == 0) {
       PackageDirectories.insert(name);
     } else if (strcmp(id, "PackageExcludeDirs") == 0) {

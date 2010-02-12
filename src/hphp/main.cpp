@@ -185,7 +185,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     ("input-list", value<string>(&po.inputList),
      "file containing list of file names, one per line")
     ("include-path",
-     value<vector<string> >(&Option::IncludePaths)->composing(),
+     value<vector<string> >(&Option::IncludeSearchPaths)->composing(),
      "a list of include paths to search for files being included in includes "
      "or requires but cannot be found assuming relative paths")
     ("module", value<vector<string> >(&po.modules)->composing(),

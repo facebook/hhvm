@@ -345,7 +345,7 @@ bool TestExtOptions::test_phpinfo() {
 }
 
 bool TestExtOptions::test_phpversion() {
-  VS(f_phpversion(), "5.2.5.hphp");
+  VS(f_phpversion(), "5.2.5.hiphop");
   return Count(true);
 }
 

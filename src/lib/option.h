@@ -82,7 +82,7 @@ public:
    */
   static std::map<std::string, std::string> IncludeRoots;
   static std::map<std::string, std::string> AutoloadRoots;
-  static std::vector<std::string> IncludePaths;
+  static std::vector<std::string> IncludeSearchPaths;
 
   /**
    * PHP include root expression to use when generating PHP trimmed code.

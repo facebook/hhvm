@@ -144,7 +144,7 @@ bool FileRepository::findFile(std::string &path, time_t &modTime,
     } else {
       p = *it;
     }
-    p += string("/") + path;
+    p += path;
     if (modifyTime(p, modTime)) {
       path = p;
       return true;

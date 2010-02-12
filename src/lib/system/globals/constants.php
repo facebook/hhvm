@@ -19,7 +19,7 @@ define('TRUE', true);
 define('FALSE', false);
 define('NULL', null);
 define('ZEND_THREAD_SAFE', false);
-define('PHP_VERSION', 'HPHP');
+define('PHP_VERSION', '5.2.5.hiphop');
 define('PHP_OS', 'Linux');
 define('PHP_SAPI', 'cli');
 define('DEFAULT_INCLUDE_PATH', '');

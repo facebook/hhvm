@@ -501,10 +501,6 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
         cg.printf("f_eval(");
       }
       break;
-    case T_INCLUDE:
-    case T_INCLUDE_ONCE:
-    case T_REQUIRE:
-    case T_REQUIRE_ONCE:  cg.printf("f_include("); break;
     case '@':
       cg.printf("(silenceInc(), silenceDec(");
       break;

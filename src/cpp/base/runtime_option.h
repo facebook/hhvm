@@ -98,6 +98,7 @@ public:
   static std::string XboxPassword;
 
   static std::string SourceRoot;
+  static std::vector<std::string> IncludeSearchPaths;
   static std::string FileCache;
   static std::string DefaultDocument;
   static std::string ErrorDocument404;
@@ -222,7 +223,6 @@ public:
   static bool EnableStrict;
   static int StrictLevel;
   static bool StrictFatal;
-  static std::vector<std::string> IncludeSearchPaths;
   static bool EvalBytecodeInterpreter;
   static bool DumpBytecode;
 

@@ -104,8 +104,8 @@ string DependencyGraph::getIncludeFilePath(const string &source,
     }
 
     // if file cannot be found, resolve it using search paths
-    for (unsigned int i = 0; i < Option::IncludePaths.size(); i++) {
-      string filename = Option::IncludePaths[i] + "/" + expText;
+    for (unsigned int i = 0; i < Option::IncludeSearchPaths.size(); i++) {
+      string filename = Option::IncludeSearchPaths[i] + "/" + expText;
       if (stat(filename.c_str(), &sb) == 0) {
         return filename;
       }

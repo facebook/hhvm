@@ -345,12 +345,12 @@ bool f_phpcredits(int flag /* = 0 */) {
 }
 
 bool f_phpinfo(int what /* = 0 */) {
-  echo("HPHP\n");
+  echo("HipHop\n");
   return false;
 }
 
 String f_phpversion(CStrRef extension /* = null_string */) {
-  return "5.2.5.hphp";
+  return k_PHP_VERSION;
 }
 
 bool f_putenv(CStrRef setting) {

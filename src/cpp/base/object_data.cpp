@@ -400,8 +400,34 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
   if (serializer->incNestedLevel((void*)this, true)) {
     serializer->writeOverflow((void*)this, true);
   } else {
-    serializer->setObjectInfo(o_getClassName(), o_getId());
-    o_toArray().serialize(serializer);
+    setAttribute(HasSleep);
+    Variant ret = const_cast<ObjectData*>(this)->t___sleep();
+    if (getAttribute(HasSleep)) {
+      if (ret.isArray()) {
+        Array wanted = Array::Create();
+        Array props = ret.toArray();
+        for (ArrayIter iter(props); iter; ++iter) {
+          String name = iter.second().toString();
+          if (o_exists(name, -1)) {
+            wanted.set(name, const_cast<ObjectData*>(this)->o_get(name, -1));
+          } else {
+            Logger::Warning("\"%s\" returned as member variable from "
+                            "__sleep() but does not exist", name.data());
+            wanted.set(name, null);
+          }
+        }
+        serializer->setObjectInfo(o_getClassName(), o_getId());
+        wanted.serialize(serializer);
+      } else {
+        Logger::Warning("serialize(): __sleep should return an array only "
+                        "containing the names of instance-variables to "
+                        "serialize");
+        null.serialize(serializer);
+      }
+    } else {
+      serializer->setObjectInfo(o_getClassName(), o_getId());
+      o_toArray().serialize(serializer);
+    }
   }
   serializer->decNestedLevel((void*)this);
 }
@@ -491,7 +517,7 @@ Variant ObjectData::t___unset(Variant v_name) {
 }
 
 Variant ObjectData::t___sleep() {
-  // do nothing
+  clearAttribute(HasSleep);
   return null;
 }
 

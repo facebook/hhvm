@@ -50,6 +50,7 @@ Follow existing code when in doubt.
 - Class instance methods use <b>camelCase</b>.
 - Class static methods start with <b>CapitalLetters</b>.
 - Global functions use <b>small_underscore_small</b>() style.
+- Enums start with <b>UpperCase</b>.
 
 (6) Headers
 

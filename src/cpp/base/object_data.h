@@ -54,31 +54,32 @@ class VariableEnvironment;
  *    o_invoke()
  */
 class ObjectData : public Countable {
-  public:
+public:
   enum Attribute {
-    inConstructor = 1, // __construct()
-    inDestructor  = 2, // __destruct()
+    InConstructor = 1, // __construct()
+    InDestructor  = 2, // __destruct()
+    HasSleep      = 4, // __sleep()
   };
 
-  public:
+public:
   ObjectData();
   virtual ~ObjectData(); // all PHP classes need virtual tables
 
   bool getAttribute(Attribute attr) const { return o_attribute & attr; }
-  void setAttribute(Attribute attr) { o_attribute |= attr;}
-  void clearAttribute(Attribute attr) { o_attribute &= ~attr;}
-  bool inDtor() { return getAttribute(inDestructor); }
-  bool inCtor() { return getAttribute(inConstructor); }
+  void setAttribute(Attribute attr) const { o_attribute |= attr;}
+  void clearAttribute(Attribute attr) const { o_attribute &= ~attr;}
+  bool inDtor() { return getAttribute(InDestructor); }
+  bool inCtor() { return getAttribute(InConstructor); }
   bool inCtorDtor() { return inCtor() || inDtor(); }
-  void setInDtor() { setAttribute(inDestructor); }
+  void setInDtor() { setAttribute(InDestructor); }
   void setInCall(CStrRef name);
   void clearInCall() { --o_inCall;}
-  bool gasInCtor(bool inCtor) { // get and set inConstructor
-    bool oldInCtor = getAttribute(inConstructor);
+  bool gasInCtor(bool inCtor) { // get and set InConstructor
+    bool oldInCtor = getAttribute(InConstructor);
     if (inCtor) {
-      setAttribute(inConstructor);
+      setAttribute(InConstructor);
     } else {
-      clearAttribute(inConstructor);
+      clearAttribute(InConstructor);
     }
     return oldInCtor;
   }
@@ -204,13 +205,13 @@ class ObjectData : public Countable {
   virtual String t___tostring();
   virtual Variant t___clone();
 
-  protected:
+protected:
   virtual ObjectData* cloneImpl() = 0;
   void cloneSet(ObjectData *clone);
   int o_id;                      // a numeric identifier of this object
   mutable Array *o_properties;   // dynamic properties
 
-  private:
+private:
   mutable int16  o_attribute;    // vairous flags
   mutable int16  o_inCall;       // counter for __call() recursion checking
 

@@ -34,6 +34,10 @@ Variant cw_reflectionobject$os_get(const char *s);
 Variant &cw_reflectionobject$os_lval(const char *s);
 Variant cw_reflectionobject$os_constant(const char *s);
 Variant cw_reflectionobject$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
+Variant cw_splfileobject$os_get(const char *s);
+Variant &cw_splfileobject$os_lval(const char *s);
+Variant cw_splfileobject$os_constant(const char *s);
+Variant cw_splfileobject$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
 Variant cw_unexpectedvalueexception$os_get(const char *s);
 Variant &cw_unexpectedvalueexception$os_lval(const char *s);
 Variant cw_unexpectedvalueexception$os_constant(const char *s);
@@ -50,6 +54,10 @@ Variant cw_overflowexception$os_get(const char *s);
 Variant &cw_overflowexception$os_lval(const char *s);
 Variant cw_overflowexception$os_constant(const char *s);
 Variant cw_overflowexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
+Variant cw_splfileinfo$os_get(const char *s);
+Variant &cw_splfileinfo$os_lval(const char *s);
+Variant cw_splfileinfo$os_constant(const char *s);
+Variant cw_splfileinfo$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
 Variant cw_arrayiterator$os_get(const char *s);
 Variant &cw_arrayiterator$os_lval(const char *s);
 Variant cw_arrayiterator$os_constant(const char *s);
@@ -126,6 +134,14 @@ Variant cw_reflectionfunction$os_get(const char *s);
 Variant &cw_reflectionfunction$os_lval(const char *s);
 Variant cw_reflectionfunction$os_constant(const char *s);
 Variant cw_reflectionfunction$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
+Variant cw_recursivedirectoryiterator$os_get(const char *s);
+Variant &cw_recursivedirectoryiterator$os_lval(const char *s);
+Variant cw_recursivedirectoryiterator$os_constant(const char *s);
+Variant cw_recursivedirectoryiterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
+Variant cw_directoryiterator$os_get(const char *s);
+Variant &cw_directoryiterator$os_lval(const char *s);
+Variant cw_directoryiterator$os_constant(const char *s);
+Variant cw_directoryiterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
 Variant cw_badfunctioncallexception$os_get(const char *s);
 Variant &cw_badfunctioncallexception$os_lval(const char *s);
 Variant cw_badfunctioncallexception$os_constant(const char *s);
@@ -138,6 +154,10 @@ Variant cw_domainexception$os_get(const char *s);
 Variant &cw_domainexception$os_lval(const char *s);
 Variant cw_domainexception$os_constant(const char *s);
 Variant cw_domainexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
+Variant cw_recursiveiteratoriterator$os_get(const char *s);
+Variant &cw_recursiveiteratoriterator$os_lval(const char *s);
+Variant cw_recursiveiteratoriterator$os_constant(const char *s);
+Variant cw_recursiveiteratoriterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
 Variant cw_directory$os_get(const char *s);
 Variant &cw_directory$os_lval(const char *s);
 Variant cw_directory$os_constant(const char *s);
@@ -19983,45 +20003,18 @@ Variant cw_phpmcc$os_invoke(const char *c, const char *s, CArrRef params, bool f
 Object create_builtin_object(const char *s, CArrRef params, bool init /* = true */,ObjectData* root /* = NULL*/) {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = hash_string_i(s);
-  switch (hash & 127) {
-    case 0:
-      HASH_CREATE_OBJECT(0x59B3EFD1CD987F80LL, domprocessinginstruction);
-      break;
-    case 2:
-      HASH_CREATE_OBJECT(0x33BD46E935281082LL, reflectionfunctionabstract);
-      break;
-    case 3:
-      HASH_CREATE_OBJECT(0x24DE53FD7D3E8383LL, datetimezone);
-      break;
-    case 4:
-      HASH_CREATE_OBJECT(0x70D4A29DE6A7BA84LL, domainexception);
-      break;
+  switch (hash & 255) {
     case 9:
       HASH_CREATE_OBJECT(0x21EF70351574EC09LL, reflectionfunction);
       break;
     case 11:
       HASH_CREATE_OBJECT(0x4365BE9E5A85E60BLL, domnotation);
       break;
-    case 15:
-      HASH_CREATE_OBJECT(0x34C95AF311506C8FLL, directory);
-      break;
-    case 16:
-      HASH_CREATE_OBJECT(0x06335FF83CDEA590LL, badmethodcallexception);
-      break;
     case 19:
       HASH_CREATE_OBJECT(0x6A76B9AABB7CC713LL, simplexmlelement);
-      HASH_CREATE_OBJECT(0x2E7081C468A05993LL, reflectionparameter);
-      break;
-    case 20:
-      HASH_CREATE_OBJECT(0x6FFDF8DF15CABE94LL, domcdatasection);
-      HASH_CREATE_OBJECT(0x6576EACCCE24D694LL, __php_incomplete_class);
-      HASH_CREATE_OBJECT(0x47D93E6F80B66A94LL, exception);
       break;
     case 21:
       HASH_CREATE_OBJECT(0x32E5C767255D2515LL, soapfault);
-      break;
-    case 24:
-      HASH_CREATE_OBJECT(0x3CEBA108A1BAB998LL, pear_error);
       break;
     case 26:
       HASH_CREATE_OBJECT(0x5CBA5B52C68B501ALL, domentityreference);
@@ -20032,20 +20025,8 @@ Object create_builtin_object(const char *s, CArrRef params, bool init /* = true 
     case 30:
       HASH_CREATE_OBJECT(0x3DB8FB455A602A1ELL, datetime);
       break;
-    case 40:
-      HASH_CREATE_OBJECT(0x7D46DB2E09C6DBA8LL, domxpath);
-      break;
-    case 41:
-      HASH_CREATE_OBJECT(0x1D35C3EFD00E11A9LL, sqlite3);
-      break;
-    case 47:
-      HASH_CREATE_OBJECT(0x2E650138BA043AAFLL, domdocument);
-      break;
-    case 48:
-      HASH_CREATE_OBJECT(0x43BBC8F6F28E44B0LL, reflectionmethod);
-      break;
-    case 49:
-      HASH_CREATE_OBJECT(0x6DD772FA3B20B8B1LL, domnodelist);
+    case 50:
+      HASH_CREATE_OBJECT(0x365899865E2EAA32LL, recursiveiteratoriterator);
       break;
     case 53:
       HASH_CREATE_OBJECT(0x7909270014376235LL, soapvar);
@@ -20059,21 +20040,14 @@ Object create_builtin_object(const char *s, CArrRef params, bool init /* = true 
     case 65:
       HASH_CREATE_OBJECT(0x227C70ED5B143841LL, outofboundsexception);
       break;
-    case 67:
-      HASH_CREATE_OBJECT(0x40B3C44077F5DDC3LL, domelement);
-      break;
     case 70:
       HASH_CREATE_OBJECT(0x196F76C9C527B946LL, domnamednodemap);
       HASH_CREATE_OBJECT(0x66282FC8E4EF4E46LL, badfunctioncallexception);
-      break;
-    case 72:
-      HASH_CREATE_OBJECT(0x2E363D51549781C8LL, appenditerator);
       break;
     case 73:
       HASH_CREATE_OBJECT(0x5AA2EE582E0D3849LL, unexpectedvalueexception);
       break;
     case 75:
-      HASH_CREATE_OBJECT(0x253AC17234FC8CCBLL, libxmlerror);
       HASH_CREATE_OBJECT(0x4860DC2F9B0E6D4BLL, logicexception);
       break;
     case 77:
@@ -20085,33 +20059,18 @@ Object create_builtin_object(const char *s, CArrRef params, bool init /* = true 
     case 79:
       HASH_CREATE_OBJECT(0x5BA243B9FBA7A64FLL, splobjectstorage);
       break;
-    case 82:
-      HASH_CREATE_OBJECT(0x52E5CC58B841AED2LL, sqlite3stmt);
-      break;
     case 83:
       HASH_CREATE_OBJECT(0x02239AA5D64B1453LL, domcharacterdata);
       HASH_CREATE_OBJECT(0x6AF83706F76A9D53LL, rangeexception);
       break;
-    case 84:
-      HASH_CREATE_OBJECT(0x5E623FEAF7B068D4LL, underflowexception);
-      break;
-    case 89:
-      HASH_CREATE_OBJECT(0x0E4CCE95F6A727D9LL, overflowexception);
-      break;
-    case 90:
-      HASH_CREATE_OBJECT(0x7A52EBE538182BDALL, soapclient);
-      break;
-    case 92:
-      HASH_CREATE_OBJECT(0x1078CB3118A8B3DCLL, runtimeexception);
+    case 94:
+      HASH_CREATE_OBJECT(0x7754323897E8A15ELL, directoryiterator);
       break;
     case 97:
       HASH_CREATE_OBJECT(0x70EBB2CC1FBF9761LL, domdocumenttype);
       break;
     case 98:
       HASH_CREATE_OBJECT(0x70747A09B3523662LL, domnode);
-      break;
-    case 100:
-      HASH_CREATE_OBJECT(0x75AA2571BDB659E4LL, reflectionproperty);
       break;
     case 101:
       HASH_CREATE_OBJECT(0x2FF1EF6EBB3DA065LL, xmlwriter);
@@ -20130,30 +20089,110 @@ Object create_builtin_object(const char *s, CArrRef params, bool init /* = true 
       HASH_CREATE_OBJECT(0x3D5870E53BF89873LL, arrayiterator);
       HASH_CREATE_OBJECT(0x0B61E0BFCFA06573LL, reflectionextension);
       break;
-    case 116:
-      HASH_CREATE_OBJECT(0x297174231D4912F4LL, domattr);
-      break;
     case 117:
       HASH_CREATE_OBJECT(0x085A4F6FD393D475LL, invalidargumentexception);
       break;
     case 118:
       HASH_CREATE_OBJECT(0x3C57A5EF08527376LL, phpmcc);
       break;
-    case 119:
-      HASH_CREATE_OBJECT(0x3D69936178BA13F7LL, stdclass);
-      break;
     case 122:
       HASH_CREATE_OBJECT(0x41A9F7D81254DD7ALL, reflectionobject);
       break;
-    case 124:
-      HASH_CREATE_OBJECT(0x622D4DF07E2A01FCLL, outofrangeexception);
-      break;
     case 125:
       HASH_CREATE_OBJECT(0x7AD161197633B87DLL, domdocumentfragment);
-      HASH_CREATE_OBJECT(0x74419B70A46387FDLL, domimplementation);
       HASH_CREATE_OBJECT(0x2E899D2A2572EF7DLL, sqlite3result);
       break;
-    case 127:
+    case 128:
+      HASH_CREATE_OBJECT(0x59B3EFD1CD987F80LL, domprocessinginstruction);
+      break;
+    case 130:
+      HASH_CREATE_OBJECT(0x33BD46E935281082LL, reflectionfunctionabstract);
+      break;
+    case 131:
+      HASH_CREATE_OBJECT(0x24DE53FD7D3E8383LL, datetimezone);
+      break;
+    case 132:
+      HASH_CREATE_OBJECT(0x70D4A29DE6A7BA84LL, domainexception);
+      break;
+    case 143:
+      HASH_CREATE_OBJECT(0x34C95AF311506C8FLL, directory);
+      break;
+    case 144:
+      HASH_CREATE_OBJECT(0x06335FF83CDEA590LL, badmethodcallexception);
+      break;
+    case 147:
+      HASH_CREATE_OBJECT(0x2E7081C468A05993LL, reflectionparameter);
+      break;
+    case 148:
+      HASH_CREATE_OBJECT(0x6FFDF8DF15CABE94LL, domcdatasection);
+      HASH_CREATE_OBJECT(0x6576EACCCE24D694LL, __php_incomplete_class);
+      HASH_CREATE_OBJECT(0x47D93E6F80B66A94LL, exception);
+      break;
+    case 152:
+      HASH_CREATE_OBJECT(0x3CEBA108A1BAB998LL, pear_error);
+      break;
+    case 167:
+      HASH_CREATE_OBJECT(0x71089C29FE923FA7LL, splfileinfo);
+      break;
+    case 168:
+      HASH_CREATE_OBJECT(0x7D46DB2E09C6DBA8LL, domxpath);
+      break;
+    case 169:
+      HASH_CREATE_OBJECT(0x1D35C3EFD00E11A9LL, sqlite3);
+      break;
+    case 175:
+      HASH_CREATE_OBJECT(0x2E650138BA043AAFLL, domdocument);
+      break;
+    case 176:
+      HASH_CREATE_OBJECT(0x43BBC8F6F28E44B0LL, reflectionmethod);
+      break;
+    case 177:
+      HASH_CREATE_OBJECT(0x6DD772FA3B20B8B1LL, domnodelist);
+      break;
+    case 195:
+      HASH_CREATE_OBJECT(0x40B3C44077F5DDC3LL, domelement);
+      break;
+    case 200:
+      HASH_CREATE_OBJECT(0x2E363D51549781C8LL, appenditerator);
+      break;
+    case 203:
+      HASH_CREATE_OBJECT(0x253AC17234FC8CCBLL, libxmlerror);
+      break;
+    case 210:
+      HASH_CREATE_OBJECT(0x52E5CC58B841AED2LL, sqlite3stmt);
+      HASH_CREATE_OBJECT(0x297ECCC7A259EDD2LL, splfileobject);
+      break;
+    case 212:
+      HASH_CREATE_OBJECT(0x5E623FEAF7B068D4LL, underflowexception);
+      break;
+    case 216:
+      HASH_CREATE_OBJECT(0x464D3427431A6ED8LL, recursivedirectoryiterator);
+      break;
+    case 217:
+      HASH_CREATE_OBJECT(0x0E4CCE95F6A727D9LL, overflowexception);
+      break;
+    case 218:
+      HASH_CREATE_OBJECT(0x7A52EBE538182BDALL, soapclient);
+      break;
+    case 220:
+      HASH_CREATE_OBJECT(0x1078CB3118A8B3DCLL, runtimeexception);
+      break;
+    case 228:
+      HASH_CREATE_OBJECT(0x75AA2571BDB659E4LL, reflectionproperty);
+      break;
+    case 244:
+      HASH_CREATE_OBJECT(0x297174231D4912F4LL, domattr);
+      break;
+    case 247:
+      HASH_CREATE_OBJECT(0x3D69936178BA13F7LL, stdclass);
+      break;
+    case 252:
+      HASH_CREATE_OBJECT(0x622D4DF07E2A01FCLL, outofrangeexception);
+      break;
+    case 253:
+      HASH_CREATE_OBJECT(0x74419B70A46387FDLL, domimplementation);
+      break;
+    case 255:
       HASH_CREATE_OBJECT(0x624835B2D74B86FFLL, domentity);
       break;
     default:
@@ -20164,45 +20203,18 @@ Object create_builtin_object(const char *s, CArrRef params, bool init /* = true 
 Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef params, bool fatal) {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = hash_string_i(s);
-  switch (hash & 127) {
-    case 0:
-      HASH_INVOKE_STATIC_METHOD(0x59B3EFD1CD987F80LL, domprocessinginstruction);
-      break;
-    case 2:
-      HASH_INVOKE_STATIC_METHOD(0x33BD46E935281082LL, reflectionfunctionabstract);
-      break;
-    case 3:
-      HASH_INVOKE_STATIC_METHOD(0x24DE53FD7D3E8383LL, datetimezone);
-      break;
-    case 4:
-      HASH_INVOKE_STATIC_METHOD(0x70D4A29DE6A7BA84LL, domainexception);
-      break;
+  switch (hash & 255) {
     case 9:
       HASH_INVOKE_STATIC_METHOD(0x21EF70351574EC09LL, reflectionfunction);
       break;
     case 11:
       HASH_INVOKE_STATIC_METHOD(0x4365BE9E5A85E60BLL, domnotation);
       break;
-    case 15:
-      HASH_INVOKE_STATIC_METHOD(0x34C95AF311506C8FLL, directory);
-      break;
-    case 16:
-      HASH_INVOKE_STATIC_METHOD(0x06335FF83CDEA590LL, badmethodcallexception);
-      break;
     case 19:
       HASH_INVOKE_STATIC_METHOD(0x6A76B9AABB7CC713LL, simplexmlelement);
-      HASH_INVOKE_STATIC_METHOD(0x2E7081C468A05993LL, reflectionparameter);
-      break;
-    case 20:
-      HASH_INVOKE_STATIC_METHOD(0x6FFDF8DF15CABE94LL, domcdatasection);
-      HASH_INVOKE_STATIC_METHOD(0x6576EACCCE24D694LL, __php_incomplete_class);
-      HASH_INVOKE_STATIC_METHOD(0x47D93E6F80B66A94LL, exception);
       break;
     case 21:
       HASH_INVOKE_STATIC_METHOD(0x32E5C767255D2515LL, soapfault);
-      break;
-    case 24:
-      HASH_INVOKE_STATIC_METHOD(0x3CEBA108A1BAB998LL, pear_error);
       break;
     case 26:
       HASH_INVOKE_STATIC_METHOD(0x5CBA5B52C68B501ALL, domentityreference);
@@ -20213,20 +20225,8 @@ Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef 
     case 30:
       HASH_INVOKE_STATIC_METHOD(0x3DB8FB455A602A1ELL, datetime);
       break;
-    case 40:
-      HASH_INVOKE_STATIC_METHOD(0x7D46DB2E09C6DBA8LL, domxpath);
-      break;
-    case 41:
-      HASH_INVOKE_STATIC_METHOD(0x1D35C3EFD00E11A9LL, sqlite3);
-      break;
-    case 47:
-      HASH_INVOKE_STATIC_METHOD(0x2E650138BA043AAFLL, domdocument);
-      break;
-    case 48:
-      HASH_INVOKE_STATIC_METHOD(0x43BBC8F6F28E44B0LL, reflectionmethod);
-      break;
-    case 49:
-      HASH_INVOKE_STATIC_METHOD(0x6DD772FA3B20B8B1LL, domnodelist);
+    case 50:
+      HASH_INVOKE_STATIC_METHOD(0x365899865E2EAA32LL, recursiveiteratoriterator);
       break;
     case 53:
       HASH_INVOKE_STATIC_METHOD(0x7909270014376235LL, soapvar);
@@ -20240,21 +20240,14 @@ Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef 
     case 65:
       HASH_INVOKE_STATIC_METHOD(0x227C70ED5B143841LL, outofboundsexception);
       break;
-    case 67:
-      HASH_INVOKE_STATIC_METHOD(0x40B3C44077F5DDC3LL, domelement);
-      break;
     case 70:
       HASH_INVOKE_STATIC_METHOD(0x196F76C9C527B946LL, domnamednodemap);
       HASH_INVOKE_STATIC_METHOD(0x66282FC8E4EF4E46LL, badfunctioncallexception);
-      break;
-    case 72:
-      HASH_INVOKE_STATIC_METHOD(0x2E363D51549781C8LL, appenditerator);
       break;
     case 73:
       HASH_INVOKE_STATIC_METHOD(0x5AA2EE582E0D3849LL, unexpectedvalueexception);
       break;
     case 75:
-      HASH_INVOKE_STATIC_METHOD(0x253AC17234FC8CCBLL, libxmlerror);
       HASH_INVOKE_STATIC_METHOD(0x4860DC2F9B0E6D4BLL, logicexception);
       break;
     case 77:
@@ -20266,33 +20259,18 @@ Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef 
     case 79:
       HASH_INVOKE_STATIC_METHOD(0x5BA243B9FBA7A64FLL, splobjectstorage);
       break;
-    case 82:
-      HASH_INVOKE_STATIC_METHOD(0x52E5CC58B841AED2LL, sqlite3stmt);
-      break;
     case 83:
       HASH_INVOKE_STATIC_METHOD(0x02239AA5D64B1453LL, domcharacterdata);
       HASH_INVOKE_STATIC_METHOD(0x6AF83706F76A9D53LL, rangeexception);
       break;
-    case 84:
-      HASH_INVOKE_STATIC_METHOD(0x5E623FEAF7B068D4LL, underflowexception);
-      break;
-    case 89:
-      HASH_INVOKE_STATIC_METHOD(0x0E4CCE95F6A727D9LL, overflowexception);
-      break;
-    case 90:
-      HASH_INVOKE_STATIC_METHOD(0x7A52EBE538182BDALL, soapclient);
-      break;
-    case 92:
-      HASH_INVOKE_STATIC_METHOD(0x1078CB3118A8B3DCLL, runtimeexception);
+    case 94:
+      HASH_INVOKE_STATIC_METHOD(0x7754323897E8A15ELL, directoryiterator);
       break;
     case 97:
       HASH_INVOKE_STATIC_METHOD(0x70EBB2CC1FBF9761LL, domdocumenttype);
       break;
     case 98:
       HASH_INVOKE_STATIC_METHOD(0x70747A09B3523662LL, domnode);
-      break;
-    case 100:
-      HASH_INVOKE_STATIC_METHOD(0x75AA2571BDB659E4LL, reflectionproperty);
       break;
     case 101:
       HASH_INVOKE_STATIC_METHOD(0x2FF1EF6EBB3DA065LL, xmlwriter);
@@ -20311,30 +20289,110 @@ Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef 
       HASH_INVOKE_STATIC_METHOD(0x3D5870E53BF89873LL, arrayiterator);
       HASH_INVOKE_STATIC_METHOD(0x0B61E0BFCFA06573LL, reflectionextension);
       break;
-    case 116:
-      HASH_INVOKE_STATIC_METHOD(0x297174231D4912F4LL, domattr);
-      break;
     case 117:
       HASH_INVOKE_STATIC_METHOD(0x085A4F6FD393D475LL, invalidargumentexception);
       break;
     case 118:
       HASH_INVOKE_STATIC_METHOD(0x3C57A5EF08527376LL, phpmcc);
       break;
-    case 119:
-      HASH_INVOKE_STATIC_METHOD(0x3D69936178BA13F7LL, stdclass);
-      break;
     case 122:
       HASH_INVOKE_STATIC_METHOD(0x41A9F7D81254DD7ALL, reflectionobject);
       break;
-    case 124:
-      HASH_INVOKE_STATIC_METHOD(0x622D4DF07E2A01FCLL, outofrangeexception);
-      break;
     case 125:
       HASH_INVOKE_STATIC_METHOD(0x7AD161197633B87DLL, domdocumentfragment);
-      HASH_INVOKE_STATIC_METHOD(0x74419B70A46387FDLL, domimplementation);
       HASH_INVOKE_STATIC_METHOD(0x2E899D2A2572EF7DLL, sqlite3result);
       break;
-    case 127:
+    case 128:
+      HASH_INVOKE_STATIC_METHOD(0x59B3EFD1CD987F80LL, domprocessinginstruction);
+      break;
+    case 130:
+      HASH_INVOKE_STATIC_METHOD(0x33BD46E935281082LL, reflectionfunctionabstract);
+      break;
+    case 131:
+      HASH_INVOKE_STATIC_METHOD(0x24DE53FD7D3E8383LL, datetimezone);
+      break;
+    case 132:
+      HASH_INVOKE_STATIC_METHOD(0x70D4A29DE6A7BA84LL, domainexception);
+      break;
+    case 143:
+      HASH_INVOKE_STATIC_METHOD(0x34C95AF311506C8FLL, directory);
+      break;
+    case 144:
+      HASH_INVOKE_STATIC_METHOD(0x06335FF83CDEA590LL, badmethodcallexception);
+      break;
+    case 147:
+      HASH_INVOKE_STATIC_METHOD(0x2E7081C468A05993LL, reflectionparameter);
+      break;
+    case 148:
+      HASH_INVOKE_STATIC_METHOD(0x6FFDF8DF15CABE94LL, domcdatasection);
+      HASH_INVOKE_STATIC_METHOD(0x6576EACCCE24D694LL, __php_incomplete_class);
+      HASH_INVOKE_STATIC_METHOD(0x47D93E6F80B66A94LL, exception);
+      break;
+    case 152:
+      HASH_INVOKE_STATIC_METHOD(0x3CEBA108A1BAB998LL, pear_error);
+      break;
+    case 167:
+      HASH_INVOKE_STATIC_METHOD(0x71089C29FE923FA7LL, splfileinfo);
+      break;
+    case 168:
+      HASH_INVOKE_STATIC_METHOD(0x7D46DB2E09C6DBA8LL, domxpath);
+      break;
+    case 169:
+      HASH_INVOKE_STATIC_METHOD(0x1D35C3EFD00E11A9LL, sqlite3);
+      break;
+    case 175:
+      HASH_INVOKE_STATIC_METHOD(0x2E650138BA043AAFLL, domdocument);
+      break;
+    case 176:
+      HASH_INVOKE_STATIC_METHOD(0x43BBC8F6F28E44B0LL, reflectionmethod);
+      break;
+    case 177:
+      HASH_INVOKE_STATIC_METHOD(0x6DD772FA3B20B8B1LL, domnodelist);
+      break;
+    case 195:
+      HASH_INVOKE_STATIC_METHOD(0x40B3C44077F5DDC3LL, domelement);
+      break;
+    case 200:
+      HASH_INVOKE_STATIC_METHOD(0x2E363D51549781C8LL, appenditerator);
+      break;
+    case 203:
+      HASH_INVOKE_STATIC_METHOD(0x253AC17234FC8CCBLL, libxmlerror);
+      break;
+    case 210:
+      HASH_INVOKE_STATIC_METHOD(0x52E5CC58B841AED2LL, sqlite3stmt);
+      HASH_INVOKE_STATIC_METHOD(0x297ECCC7A259EDD2LL, splfileobject);
+      break;
+    case 212:
+      HASH_INVOKE_STATIC_METHOD(0x5E623FEAF7B068D4LL, underflowexception);
+      break;
+    case 216:
+      HASH_INVOKE_STATIC_METHOD(0x464D3427431A6ED8LL, recursivedirectoryiterator);
+      break;
+    case 217:
+      HASH_INVOKE_STATIC_METHOD(0x0E4CCE95F6A727D9LL, overflowexception);
+      break;
+    case 218:
+      HASH_INVOKE_STATIC_METHOD(0x7A52EBE538182BDALL, soapclient);
+      break;
+    case 220:
+      HASH_INVOKE_STATIC_METHOD(0x1078CB3118A8B3DCLL, runtimeexception);
+      break;
+    case 228:
+      HASH_INVOKE_STATIC_METHOD(0x75AA2571BDB659E4LL, reflectionproperty);
+      break;
+    case 244:
+      HASH_INVOKE_STATIC_METHOD(0x297174231D4912F4LL, domattr);
+      break;
+    case 247:
+      HASH_INVOKE_STATIC_METHOD(0x3D69936178BA13F7LL, stdclass);
+      break;
+    case 252:
+      HASH_INVOKE_STATIC_METHOD(0x622D4DF07E2A01FCLL, outofrangeexception);
+      break;
+    case 253:
+      HASH_INVOKE_STATIC_METHOD(0x74419B70A46387FDLL, domimplementation);
+      break;
+    case 255:
       HASH_INVOKE_STATIC_METHOD(0x624835B2D74B86FFLL, domentity);
       break;
     default:
@@ -20350,45 +20408,18 @@ Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef 
 Variant get_builtin_static_property(const char *s, const char *prop) {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = hash_string_i(s);
-  switch (hash & 127) {
-    case 0:
-      HASH_GET_STATIC_PROPERTY(0x59B3EFD1CD987F80LL, domprocessinginstruction);
-      break;
-    case 2:
-      HASH_GET_STATIC_PROPERTY(0x33BD46E935281082LL, reflectionfunctionabstract);
-      break;
-    case 3:
-      HASH_GET_STATIC_PROPERTY(0x24DE53FD7D3E8383LL, datetimezone);
-      break;
-    case 4:
-      HASH_GET_STATIC_PROPERTY(0x70D4A29DE6A7BA84LL, domainexception);
-      break;
+  switch (hash & 255) {
     case 9:
       HASH_GET_STATIC_PROPERTY(0x21EF70351574EC09LL, reflectionfunction);
       break;
     case 11:
       HASH_GET_STATIC_PROPERTY(0x4365BE9E5A85E60BLL, domnotation);
       break;
-    case 15:
-      HASH_GET_STATIC_PROPERTY(0x34C95AF311506C8FLL, directory);
-      break;
-    case 16:
-      HASH_GET_STATIC_PROPERTY(0x06335FF83CDEA590LL, badmethodcallexception);
-      break;
     case 19:
       HASH_GET_STATIC_PROPERTY(0x6A76B9AABB7CC713LL, simplexmlelement);
-      HASH_GET_STATIC_PROPERTY(0x2E7081C468A05993LL, reflectionparameter);
-      break;
-    case 20:
-      HASH_GET_STATIC_PROPERTY(0x6FFDF8DF15CABE94LL, domcdatasection);
-      HASH_GET_STATIC_PROPERTY(0x6576EACCCE24D694LL, __php_incomplete_class);
-      HASH_GET_STATIC_PROPERTY(0x47D93E6F80B66A94LL, exception);
       break;
     case 21:
       HASH_GET_STATIC_PROPERTY(0x32E5C767255D2515LL, soapfault);
-      break;
-    case 24:
-      HASH_GET_STATIC_PROPERTY(0x3CEBA108A1BAB998LL, pear_error);
       break;
     case 26:
       HASH_GET_STATIC_PROPERTY(0x5CBA5B52C68B501ALL, domentityreference);
@@ -20399,20 +20430,8 @@ Variant get_builtin_static_property(const char *s, const char *prop) {
     case 30:
       HASH_GET_STATIC_PROPERTY(0x3DB8FB455A602A1ELL, datetime);
       break;
-    case 40:
-      HASH_GET_STATIC_PROPERTY(0x7D46DB2E09C6DBA8LL, domxpath);
-      break;
-    case 41:
-      HASH_GET_STATIC_PROPERTY(0x1D35C3EFD00E11A9LL, sqlite3);
-      break;
-    case 47:
-      HASH_GET_STATIC_PROPERTY(0x2E650138BA043AAFLL, domdocument);
-      break;
-    case 48:
-      HASH_GET_STATIC_PROPERTY(0x43BBC8F6F28E44B0LL, reflectionmethod);
-      break;
-    case 49:
-      HASH_GET_STATIC_PROPERTY(0x6DD772FA3B20B8B1LL, domnodelist);
+    case 50:
+      HASH_GET_STATIC_PROPERTY(0x365899865E2EAA32LL, recursiveiteratoriterator);
       break;
     case 53:
       HASH_GET_STATIC_PROPERTY(0x7909270014376235LL, soapvar);
@@ -20426,21 +20445,14 @@ Variant get_builtin_static_property(const char *s, const char *prop) {
     case 65:
       HASH_GET_STATIC_PROPERTY(0x227C70ED5B143841LL, outofboundsexception);
       break;
-    case 67:
-      HASH_GET_STATIC_PROPERTY(0x40B3C44077F5DDC3LL, domelement);
-      break;
     case 70:
       HASH_GET_STATIC_PROPERTY(0x196F76C9C527B946LL, domnamednodemap);
       HASH_GET_STATIC_PROPERTY(0x66282FC8E4EF4E46LL, badfunctioncallexception);
-      break;
-    case 72:
-      HASH_GET_STATIC_PROPERTY(0x2E363D51549781C8LL, appenditerator);
       break;
     case 73:
       HASH_GET_STATIC_PROPERTY(0x5AA2EE582E0D3849LL, unexpectedvalueexception);
       break;
     case 75:
-      HASH_GET_STATIC_PROPERTY(0x253AC17234FC8CCBLL, libxmlerror);
       HASH_GET_STATIC_PROPERTY(0x4860DC2F9B0E6D4BLL, logicexception);
       break;
     case 77:
@@ -20452,33 +20464,18 @@ Variant get_builtin_static_property(const char *s, const char *prop) {
     case 79:
       HASH_GET_STATIC_PROPERTY(0x5BA243B9FBA7A64FLL, splobjectstorage);
       break;
-    case 82:
-      HASH_GET_STATIC_PROPERTY(0x52E5CC58B841AED2LL, sqlite3stmt);
-      break;
     case 83:
       HASH_GET_STATIC_PROPERTY(0x02239AA5D64B1453LL, domcharacterdata);
       HASH_GET_STATIC_PROPERTY(0x6AF83706F76A9D53LL, rangeexception);
       break;
-    case 84:
-      HASH_GET_STATIC_PROPERTY(0x5E623FEAF7B068D4LL, underflowexception);
-      break;
-    case 89:
-      HASH_GET_STATIC_PROPERTY(0x0E4CCE95F6A727D9LL, overflowexception);
-      break;
-    case 90:
-      HASH_GET_STATIC_PROPERTY(0x7A52EBE538182BDALL, soapclient);
-      break;
-    case 92:
-      HASH_GET_STATIC_PROPERTY(0x1078CB3118A8B3DCLL, runtimeexception);
+    case 94:
+      HASH_GET_STATIC_PROPERTY(0x7754323897E8A15ELL, directoryiterator);
       break;
     case 97:
       HASH_GET_STATIC_PROPERTY(0x70EBB2CC1FBF9761LL, domdocumenttype);
       break;
     case 98:
       HASH_GET_STATIC_PROPERTY(0x70747A09B3523662LL, domnode);
-      break;
-    case 100:
-      HASH_GET_STATIC_PROPERTY(0x75AA2571BDB659E4LL, reflectionproperty);
       break;
     case 101:
       HASH_GET_STATIC_PROPERTY(0x2FF1EF6EBB3DA065LL, xmlwriter);
@@ -20497,30 +20494,110 @@ Variant get_builtin_static_property(const char *s, const char *prop) {
       HASH_GET_STATIC_PROPERTY(0x3D5870E53BF89873LL, arrayiterator);
       HASH_GET_STATIC_PROPERTY(0x0B61E0BFCFA06573LL, reflectionextension);
       break;
-    case 116:
-      HASH_GET_STATIC_PROPERTY(0x297174231D4912F4LL, domattr);
-      break;
     case 117:
       HASH_GET_STATIC_PROPERTY(0x085A4F6FD393D475LL, invalidargumentexception);
       break;
     case 118:
       HASH_GET_STATIC_PROPERTY(0x3C57A5EF08527376LL, phpmcc);
       break;
-    case 119:
-      HASH_GET_STATIC_PROPERTY(0x3D69936178BA13F7LL, stdclass);
-      break;
     case 122:
       HASH_GET_STATIC_PROPERTY(0x41A9F7D81254DD7ALL, reflectionobject);
       break;
-    case 124:
-      HASH_GET_STATIC_PROPERTY(0x622D4DF07E2A01FCLL, outofrangeexception);
-      break;
     case 125:
       HASH_GET_STATIC_PROPERTY(0x7AD161197633B87DLL, domdocumentfragment);
-      HASH_GET_STATIC_PROPERTY(0x74419B70A46387FDLL, domimplementation);
       HASH_GET_STATIC_PROPERTY(0x2E899D2A2572EF7DLL, sqlite3result);
       break;
-    case 127:
+    case 128:
+      HASH_GET_STATIC_PROPERTY(0x59B3EFD1CD987F80LL, domprocessinginstruction);
+      break;
+    case 130:
+      HASH_GET_STATIC_PROPERTY(0x33BD46E935281082LL, reflectionfunctionabstract);
+      break;
+    case 131:
+      HASH_GET_STATIC_PROPERTY(0x24DE53FD7D3E8383LL, datetimezone);
+      break;
+    case 132:
+      HASH_GET_STATIC_PROPERTY(0x70D4A29DE6A7BA84LL, domainexception);
+      break;
+    case 143:
+      HASH_GET_STATIC_PROPERTY(0x34C95AF311506C8FLL, directory);
+      break;
+    case 144:
+      HASH_GET_STATIC_PROPERTY(0x06335FF83CDEA590LL, badmethodcallexception);
+      break;
+    case 147:
+      HASH_GET_STATIC_PROPERTY(0x2E7081C468A05993LL, reflectionparameter);
+      break;
+    case 148:
+      HASH_GET_STATIC_PROPERTY(0x6FFDF8DF15CABE94LL, domcdatasection);
+      HASH_GET_STATIC_PROPERTY(0x6576EACCCE24D694LL, __php_incomplete_class);
+      HASH_GET_STATIC_PROPERTY(0x47D93E6F80B66A94LL, exception);
+      break;
+    case 152:
+      HASH_GET_STATIC_PROPERTY(0x3CEBA108A1BAB998LL, pear_error);
+      break;
+    case 167:
+      HASH_GET_STATIC_PROPERTY(0x71089C29FE923FA7LL, splfileinfo);
+      break;
+    case 168:
+      HASH_GET_STATIC_PROPERTY(0x7D46DB2E09C6DBA8LL, domxpath);
+      break;
+    case 169:
+      HASH_GET_STATIC_PROPERTY(0x1D35C3EFD00E11A9LL, sqlite3);
+      break;
+    case 175:
+      HASH_GET_STATIC_PROPERTY(0x2E650138BA043AAFLL, domdocument);
+      break;
+    case 176:
+      HASH_GET_STATIC_PROPERTY(0x43BBC8F6F28E44B0LL, reflectionmethod);
+      break;
+    case 177:
+      HASH_GET_STATIC_PROPERTY(0x6DD772FA3B20B8B1LL, domnodelist);
+      break;
+    case 195:
+      HASH_GET_STATIC_PROPERTY(0x40B3C44077F5DDC3LL, domelement);
+      break;
+    case 200:
+      HASH_GET_STATIC_PROPERTY(0x2E363D51549781C8LL, appenditerator);
+      break;
+    case 203:
+      HASH_GET_STATIC_PROPERTY(0x253AC17234FC8CCBLL, libxmlerror);
+      break;
+    case 210:
+      HASH_GET_STATIC_PROPERTY(0x52E5CC58B841AED2LL, sqlite3stmt);
+      HASH_GET_STATIC_PROPERTY(0x297ECCC7A259EDD2LL, splfileobject);
+      break;
+    case 212:
+      HASH_GET_STATIC_PROPERTY(0x5E623FEAF7B068D4LL, underflowexception);
+      break;
+    case 216:
+      HASH_GET_STATIC_PROPERTY(0x464D3427431A6ED8LL, recursivedirectoryiterator);
+      break;
+    case 217:
+      HASH_GET_STATIC_PROPERTY(0x0E4CCE95F6A727D9LL, overflowexception);
+      break;
+    case 218:
+      HASH_GET_STATIC_PROPERTY(0x7A52EBE538182BDALL, soapclient);
+      break;
+    case 220:
+      HASH_GET_STATIC_PROPERTY(0x1078CB3118A8B3DCLL, runtimeexception);
+      break;
+    case 228:
+      HASH_GET_STATIC_PROPERTY(0x75AA2571BDB659E4LL, reflectionproperty);
+      break;
+    case 244:
+      HASH_GET_STATIC_PROPERTY(0x297174231D4912F4LL, domattr);
+      break;
+    case 247:
+      HASH_GET_STATIC_PROPERTY(0x3D69936178BA13F7LL, stdclass);
+      break;
+    case 252:
+      HASH_GET_STATIC_PROPERTY(0x622D4DF07E2A01FCLL, outofrangeexception);
+      break;
+    case 253:
+      HASH_GET_STATIC_PROPERTY(0x74419B70A46387FDLL, domimplementation);
+      break;
+    case 255:
       HASH_GET_STATIC_PROPERTY(0x624835B2D74B86FFLL, domentity);
       break;
     default:
@@ -20531,45 +20608,18 @@ Variant get_builtin_static_property(const char *s, const char *prop) {
 Variant *get_builtin_static_property_lv(const char *s, const char *prop) {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = hash_string_i(s);
-  switch (hash & 127) {
-    case 0:
-      HASH_GET_STATIC_PROPERTY_LV(0x59B3EFD1CD987F80LL, domprocessinginstruction);
-      break;
-    case 2:
-      HASH_GET_STATIC_PROPERTY_LV(0x33BD46E935281082LL, reflectionfunctionabstract);
-      break;
-    case 3:
-      HASH_GET_STATIC_PROPERTY_LV(0x24DE53FD7D3E8383LL, datetimezone);
-      break;
-    case 4:
-      HASH_GET_STATIC_PROPERTY_LV(0x70D4A29DE6A7BA84LL, domainexception);
-      break;
+  switch (hash & 255) {
     case 9:
       HASH_GET_STATIC_PROPERTY_LV(0x21EF70351574EC09LL, reflectionfunction);
       break;
     case 11:
       HASH_GET_STATIC_PROPERTY_LV(0x4365BE9E5A85E60BLL, domnotation);
       break;
-    case 15:
-      HASH_GET_STATIC_PROPERTY_LV(0x34C95AF311506C8FLL, directory);
-      break;
-    case 16:
-      HASH_GET_STATIC_PROPERTY_LV(0x06335FF83CDEA590LL, badmethodcallexception);
-      break;
     case 19:
       HASH_GET_STATIC_PROPERTY_LV(0x6A76B9AABB7CC713LL, simplexmlelement);
-      HASH_GET_STATIC_PROPERTY_LV(0x2E7081C468A05993LL, reflectionparameter);
-      break;
-    case 20:
-      HASH_GET_STATIC_PROPERTY_LV(0x6FFDF8DF15CABE94LL, domcdatasection);
-      HASH_GET_STATIC_PROPERTY_LV(0x6576EACCCE24D694LL, __php_incomplete_class);
-      HASH_GET_STATIC_PROPERTY_LV(0x47D93E6F80B66A94LL, exception);
       break;
     case 21:
       HASH_GET_STATIC_PROPERTY_LV(0x32E5C767255D2515LL, soapfault);
-      break;
-    case 24:
-      HASH_GET_STATIC_PROPERTY_LV(0x3CEBA108A1BAB998LL, pear_error);
       break;
     case 26:
       HASH_GET_STATIC_PROPERTY_LV(0x5CBA5B52C68B501ALL, domentityreference);
@@ -20580,20 +20630,8 @@ Variant *get_builtin_static_property_lv(const char *s, const char *prop) {
     case 30:
       HASH_GET_STATIC_PROPERTY_LV(0x3DB8FB455A602A1ELL, datetime);
       break;
-    case 40:
-      HASH_GET_STATIC_PROPERTY_LV(0x7D46DB2E09C6DBA8LL, domxpath);
-      break;
-    case 41:
-      HASH_GET_STATIC_PROPERTY_LV(0x1D35C3EFD00E11A9LL, sqlite3);
-      break;
-    case 47:
-      HASH_GET_STATIC_PROPERTY_LV(0x2E650138BA043AAFLL, domdocument);
-      break;
-    case 48:
-      HASH_GET_STATIC_PROPERTY_LV(0x43BBC8F6F28E44B0LL, reflectionmethod);
-      break;
-    case 49:
-      HASH_GET_STATIC_PROPERTY_LV(0x6DD772FA3B20B8B1LL, domnodelist);
+    case 50:
+      HASH_GET_STATIC_PROPERTY_LV(0x365899865E2EAA32LL, recursiveiteratoriterator);
       break;
     case 53:
       HASH_GET_STATIC_PROPERTY_LV(0x7909270014376235LL, soapvar);
@@ -20607,21 +20645,14 @@ Variant *get_builtin_static_property_lv(const char *s, const char *prop) {
     case 65:
       HASH_GET_STATIC_PROPERTY_LV(0x227C70ED5B143841LL, outofboundsexception);
       break;
-    case 67:
-      HASH_GET_STATIC_PROPERTY_LV(0x40B3C44077F5DDC3LL, domelement);
-      break;
     case 70:
       HASH_GET_STATIC_PROPERTY_LV(0x196F76C9C527B946LL, domnamednodemap);
       HASH_GET_STATIC_PROPERTY_LV(0x66282FC8E4EF4E46LL, badfunctioncallexception);
-      break;
-    case 72:
-      HASH_GET_STATIC_PROPERTY_LV(0x2E363D51549781C8LL, appenditerator);
       break;
     case 73:
       HASH_GET_STATIC_PROPERTY_LV(0x5AA2EE582E0D3849LL, unexpectedvalueexception);
       break;
     case 75:
-      HASH_GET_STATIC_PROPERTY_LV(0x253AC17234FC8CCBLL, libxmlerror);
       HASH_GET_STATIC_PROPERTY_LV(0x4860DC2F9B0E6D4BLL, logicexception);
       break;
     case 77:
@@ -20633,33 +20664,18 @@ Variant *get_builtin_static_property_lv(const char *s, const char *prop) {
     case 79:
       HASH_GET_STATIC_PROPERTY_LV(0x5BA243B9FBA7A64FLL, splobjectstorage);
       break;
-    case 82:
-      HASH_GET_STATIC_PROPERTY_LV(0x52E5CC58B841AED2LL, sqlite3stmt);
-      break;
     case 83:
       HASH_GET_STATIC_PROPERTY_LV(0x02239AA5D64B1453LL, domcharacterdata);
       HASH_GET_STATIC_PROPERTY_LV(0x6AF83706F76A9D53LL, rangeexception);
       break;
-    case 84:
-      HASH_GET_STATIC_PROPERTY_LV(0x5E623FEAF7B068D4LL, underflowexception);
-      break;
-    case 89:
-      HASH_GET_STATIC_PROPERTY_LV(0x0E4CCE95F6A727D9LL, overflowexception);
-      break;
-    case 90:
-      HASH_GET_STATIC_PROPERTY_LV(0x7A52EBE538182BDALL, soapclient);
-      break;
-    case 92:
-      HASH_GET_STATIC_PROPERTY_LV(0x1078CB3118A8B3DCLL, runtimeexception);
+    case 94:
+      HASH_GET_STATIC_PROPERTY_LV(0x7754323897E8A15ELL, directoryiterator);
       break;
     case 97:
       HASH_GET_STATIC_PROPERTY_LV(0x70EBB2CC1FBF9761LL, domdocumenttype);
       break;
     case 98:
       HASH_GET_STATIC_PROPERTY_LV(0x70747A09B3523662LL, domnode);
-      break;
-    case 100:
-      HASH_GET_STATIC_PROPERTY_LV(0x75AA2571BDB659E4LL, reflectionproperty);
       break;
     case 101:
       HASH_GET_STATIC_PROPERTY_LV(0x2FF1EF6EBB3DA065LL, xmlwriter);
@@ -20678,30 +20694,110 @@ Variant *get_builtin_static_property_lv(const char *s, const char *prop) {
       HASH_GET_STATIC_PROPERTY_LV(0x3D5870E53BF89873LL, arrayiterator);
       HASH_GET_STATIC_PROPERTY_LV(0x0B61E0BFCFA06573LL, reflectionextension);
       break;
-    case 116:
-      HASH_GET_STATIC_PROPERTY_LV(0x297174231D4912F4LL, domattr);
-      break;
     case 117:
       HASH_GET_STATIC_PROPERTY_LV(0x085A4F6FD393D475LL, invalidargumentexception);
       break;
     case 118:
       HASH_GET_STATIC_PROPERTY_LV(0x3C57A5EF08527376LL, phpmcc);
       break;
-    case 119:
-      HASH_GET_STATIC_PROPERTY_LV(0x3D69936178BA13F7LL, stdclass);
-      break;
     case 122:
       HASH_GET_STATIC_PROPERTY_LV(0x41A9F7D81254DD7ALL, reflectionobject);
       break;
-    case 124:
-      HASH_GET_STATIC_PROPERTY_LV(0x622D4DF07E2A01FCLL, outofrangeexception);
-      break;
     case 125:
       HASH_GET_STATIC_PROPERTY_LV(0x7AD161197633B87DLL, domdocumentfragment);
-      HASH_GET_STATIC_PROPERTY_LV(0x74419B70A46387FDLL, domimplementation);
       HASH_GET_STATIC_PROPERTY_LV(0x2E899D2A2572EF7DLL, sqlite3result);
       break;
-    case 127:
+    case 128:
+      HASH_GET_STATIC_PROPERTY_LV(0x59B3EFD1CD987F80LL, domprocessinginstruction);
+      break;
+    case 130:
+      HASH_GET_STATIC_PROPERTY_LV(0x33BD46E935281082LL, reflectionfunctionabstract);
+      break;
+    case 131:
+      HASH_GET_STATIC_PROPERTY_LV(0x24DE53FD7D3E8383LL, datetimezone);
+      break;
+    case 132:
+      HASH_GET_STATIC_PROPERTY_LV(0x70D4A29DE6A7BA84LL, domainexception);
+      break;
+    case 143:
+      HASH_GET_STATIC_PROPERTY_LV(0x34C95AF311506C8FLL, directory);
+      break;
+    case 144:
+      HASH_GET_STATIC_PROPERTY_LV(0x06335FF83CDEA590LL, badmethodcallexception);
+      break;
+    case 147:
+      HASH_GET_STATIC_PROPERTY_LV(0x2E7081C468A05993LL, reflectionparameter);
+      break;
+    case 148:
+      HASH_GET_STATIC_PROPERTY_LV(0x6FFDF8DF15CABE94LL, domcdatasection);
+      HASH_GET_STATIC_PROPERTY_LV(0x6576EACCCE24D694LL, __php_incomplete_class);
+      HASH_GET_STATIC_PROPERTY_LV(0x47D93E6F80B66A94LL, exception);
+      break;
+    case 152:
+      HASH_GET_STATIC_PROPERTY_LV(0x3CEBA108A1BAB998LL, pear_error);
+      break;
+    case 167:
+      HASH_GET_STATIC_PROPERTY_LV(0x71089C29FE923FA7LL, splfileinfo);
+      break;
+    case 168:
+      HASH_GET_STATIC_PROPERTY_LV(0x7D46DB2E09C6DBA8LL, domxpath);
+      break;
+    case 169:
+      HASH_GET_STATIC_PROPERTY_LV(0x1D35C3EFD00E11A9LL, sqlite3);
+      break;
+    case 175:
+      HASH_GET_STATIC_PROPERTY_LV(0x2E650138BA043AAFLL, domdocument);
+      break;
+    case 176:
+      HASH_GET_STATIC_PROPERTY_LV(0x43BBC8F6F28E44B0LL, reflectionmethod);
+      break;
+    case 177:
+      HASH_GET_STATIC_PROPERTY_LV(0x6DD772FA3B20B8B1LL, domnodelist);
+      break;
+    case 195:
+      HASH_GET_STATIC_PROPERTY_LV(0x40B3C44077F5DDC3LL, domelement);
+      break;
+    case 200:
+      HASH_GET_STATIC_PROPERTY_LV(0x2E363D51549781C8LL, appenditerator);
+      break;
+    case 203:
+      HASH_GET_STATIC_PROPERTY_LV(0x253AC17234FC8CCBLL, libxmlerror);
+      break;
+    case 210:
+      HASH_GET_STATIC_PROPERTY_LV(0x52E5CC58B841AED2LL, sqlite3stmt);
+      HASH_GET_STATIC_PROPERTY_LV(0x297ECCC7A259EDD2LL, splfileobject);
+      break;
+    case 212:
+      HASH_GET_STATIC_PROPERTY_LV(0x5E623FEAF7B068D4LL, underflowexception);
+      break;
+    case 216:
+      HASH_GET_STATIC_PROPERTY_LV(0x464D3427431A6ED8LL, recursivedirectoryiterator);
+      break;
+    case 217:
+      HASH_GET_STATIC_PROPERTY_LV(0x0E4CCE95F6A727D9LL, overflowexception);
+      break;
+    case 218:
+      HASH_GET_STATIC_PROPERTY_LV(0x7A52EBE538182BDALL, soapclient);
+      break;
+    case 220:
+      HASH_GET_STATIC_PROPERTY_LV(0x1078CB3118A8B3DCLL, runtimeexception);
+      break;
+    case 228:
+      HASH_GET_STATIC_PROPERTY_LV(0x75AA2571BDB659E4LL, reflectionproperty);
+      break;
+    case 244:
+      HASH_GET_STATIC_PROPERTY_LV(0x297174231D4912F4LL, domattr);
+      break;
+    case 247:
+      HASH_GET_STATIC_PROPERTY_LV(0x3D69936178BA13F7LL, stdclass);
+      break;
+    case 252:
+      HASH_GET_STATIC_PROPERTY_LV(0x622D4DF07E2A01FCLL, outofrangeexception);
+      break;
+    case 253:
+      HASH_GET_STATIC_PROPERTY_LV(0x74419B70A46387FDLL, domimplementation);
+      break;
+    case 255:
       HASH_GET_STATIC_PROPERTY_LV(0x624835B2D74B86FFLL, domentity);
       break;
     default:
@@ -20712,45 +20808,18 @@ Variant *get_builtin_static_property_lv(const char *s, const char *prop) {
 Variant get_builtin_class_constant(const char *s, const char *constant) {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = hash_string_i(s);
-  switch (hash & 127) {
-    case 0:
-      HASH_GET_CLASS_CONSTANT(0x59B3EFD1CD987F80LL, domprocessinginstruction);
-      break;
-    case 2:
-      HASH_GET_CLASS_CONSTANT(0x33BD46E935281082LL, reflectionfunctionabstract);
-      break;
-    case 3:
-      HASH_GET_CLASS_CONSTANT(0x24DE53FD7D3E8383LL, datetimezone);
-      break;
-    case 4:
-      HASH_GET_CLASS_CONSTANT(0x70D4A29DE6A7BA84LL, domainexception);
-      break;
+  switch (hash & 255) {
     case 9:
       HASH_GET_CLASS_CONSTANT(0x21EF70351574EC09LL, reflectionfunction);
       break;
     case 11:
       HASH_GET_CLASS_CONSTANT(0x4365BE9E5A85E60BLL, domnotation);
       break;
-    case 15:
-      HASH_GET_CLASS_CONSTANT(0x34C95AF311506C8FLL, directory);
-      break;
-    case 16:
-      HASH_GET_CLASS_CONSTANT(0x06335FF83CDEA590LL, badmethodcallexception);
-      break;
     case 19:
       HASH_GET_CLASS_CONSTANT(0x6A76B9AABB7CC713LL, simplexmlelement);
-      HASH_GET_CLASS_CONSTANT(0x2E7081C468A05993LL, reflectionparameter);
-      break;
-    case 20:
-      HASH_GET_CLASS_CONSTANT(0x6FFDF8DF15CABE94LL, domcdatasection);
-      HASH_GET_CLASS_CONSTANT(0x6576EACCCE24D694LL, __php_incomplete_class);
-      HASH_GET_CLASS_CONSTANT(0x47D93E6F80B66A94LL, exception);
       break;
     case 21:
       HASH_GET_CLASS_CONSTANT(0x32E5C767255D2515LL, soapfault);
-      break;
-    case 24:
-      HASH_GET_CLASS_CONSTANT(0x3CEBA108A1BAB998LL, pear_error);
       break;
     case 26:
       HASH_GET_CLASS_CONSTANT(0x5CBA5B52C68B501ALL, domentityreference);
@@ -20761,20 +20830,8 @@ Variant get_builtin_class_constant(const char *s, const char *constant) {
     case 30:
       HASH_GET_CLASS_CONSTANT(0x3DB8FB455A602A1ELL, datetime);
       break;
-    case 40:
-      HASH_GET_CLASS_CONSTANT(0x7D46DB2E09C6DBA8LL, domxpath);
-      break;
-    case 41:
-      HASH_GET_CLASS_CONSTANT(0x1D35C3EFD00E11A9LL, sqlite3);
-      break;
-    case 47:
-      HASH_GET_CLASS_CONSTANT(0x2E650138BA043AAFLL, domdocument);
-      break;
-    case 48:
-      HASH_GET_CLASS_CONSTANT(0x43BBC8F6F28E44B0LL, reflectionmethod);
-      break;
-    case 49:
-      HASH_GET_CLASS_CONSTANT(0x6DD772FA3B20B8B1LL, domnodelist);
+    case 50:
+      HASH_GET_CLASS_CONSTANT(0x365899865E2EAA32LL, recursiveiteratoriterator);
       break;
     case 53:
       HASH_GET_CLASS_CONSTANT(0x7909270014376235LL, soapvar);
@@ -20788,21 +20845,14 @@ Variant get_builtin_class_constant(const char *s, const char *constant) {
     case 65:
       HASH_GET_CLASS_CONSTANT(0x227C70ED5B143841LL, outofboundsexception);
       break;
-    case 67:
-      HASH_GET_CLASS_CONSTANT(0x40B3C44077F5DDC3LL, domelement);
-      break;
     case 70:
       HASH_GET_CLASS_CONSTANT(0x196F76C9C527B946LL, domnamednodemap);
       HASH_GET_CLASS_CONSTANT(0x66282FC8E4EF4E46LL, badfunctioncallexception);
-      break;
-    case 72:
-      HASH_GET_CLASS_CONSTANT(0x2E363D51549781C8LL, appenditerator);
       break;
     case 73:
       HASH_GET_CLASS_CONSTANT(0x5AA2EE582E0D3849LL, unexpectedvalueexception);
       break;
     case 75:
-      HASH_GET_CLASS_CONSTANT(0x253AC17234FC8CCBLL, libxmlerror);
       HASH_GET_CLASS_CONSTANT(0x4860DC2F9B0E6D4BLL, logicexception);
       break;
     case 77:
@@ -20814,33 +20864,18 @@ Variant get_builtin_class_constant(const char *s, const char *constant) {
     case 79:
       HASH_GET_CLASS_CONSTANT(0x5BA243B9FBA7A64FLL, splobjectstorage);
       break;
-    case 82:
-      HASH_GET_CLASS_CONSTANT(0x52E5CC58B841AED2LL, sqlite3stmt);
-      break;
     case 83:
       HASH_GET_CLASS_CONSTANT(0x02239AA5D64B1453LL, domcharacterdata);
       HASH_GET_CLASS_CONSTANT(0x6AF83706F76A9D53LL, rangeexception);
       break;
-    case 84:
-      HASH_GET_CLASS_CONSTANT(0x5E623FEAF7B068D4LL, underflowexception);
-      break;
-    case 89:
-      HASH_GET_CLASS_CONSTANT(0x0E4CCE95F6A727D9LL, overflowexception);
-      break;
-    case 90:
-      HASH_GET_CLASS_CONSTANT(0x7A52EBE538182BDALL, soapclient);
-      break;
-    case 92:
-      HASH_GET_CLASS_CONSTANT(0x1078CB3118A8B3DCLL, runtimeexception);
+    case 94:
+      HASH_GET_CLASS_CONSTANT(0x7754323897E8A15ELL, directoryiterator);
       break;
     case 97:
       HASH_GET_CLASS_CONSTANT(0x70EBB2CC1FBF9761LL, domdocumenttype);
       break;
     case 98:
       HASH_GET_CLASS_CONSTANT(0x70747A09B3523662LL, domnode);
-      break;
-    case 100:
-      HASH_GET_CLASS_CONSTANT(0x75AA2571BDB659E4LL, reflectionproperty);
       break;
     case 101:
       HASH_GET_CLASS_CONSTANT(0x2FF1EF6EBB3DA065LL, xmlwriter);
@@ -20859,30 +20894,110 @@ Variant get_builtin_class_constant(const char *s, const char *constant) {
       HASH_GET_CLASS_CONSTANT(0x3D5870E53BF89873LL, arrayiterator);
       HASH_GET_CLASS_CONSTANT(0x0B61E0BFCFA06573LL, reflectionextension);
       break;
-    case 116:
-      HASH_GET_CLASS_CONSTANT(0x297174231D4912F4LL, domattr);
-      break;
     case 117:
       HASH_GET_CLASS_CONSTANT(0x085A4F6FD393D475LL, invalidargumentexception);
       break;
     case 118:
       HASH_GET_CLASS_CONSTANT(0x3C57A5EF08527376LL, phpmcc);
       break;
-    case 119:
-      HASH_GET_CLASS_CONSTANT(0x3D69936178BA13F7LL, stdclass);
-      break;
     case 122:
       HASH_GET_CLASS_CONSTANT(0x41A9F7D81254DD7ALL, reflectionobject);
       break;
-    case 124:
-      HASH_GET_CLASS_CONSTANT(0x622D4DF07E2A01FCLL, outofrangeexception);
-      break;
     case 125:
       HASH_GET_CLASS_CONSTANT(0x7AD161197633B87DLL, domdocumentfragment);
-      HASH_GET_CLASS_CONSTANT(0x74419B70A46387FDLL, domimplementation);
       HASH_GET_CLASS_CONSTANT(0x2E899D2A2572EF7DLL, sqlite3result);
       break;
-    case 127:
+    case 128:
+      HASH_GET_CLASS_CONSTANT(0x59B3EFD1CD987F80LL, domprocessinginstruction);
+      break;
+    case 130:
+      HASH_GET_CLASS_CONSTANT(0x33BD46E935281082LL, reflectionfunctionabstract);
+      break;
+    case 131:
+      HASH_GET_CLASS_CONSTANT(0x24DE53FD7D3E8383LL, datetimezone);
+      break;
+    case 132:
+      HASH_GET_CLASS_CONSTANT(0x70D4A29DE6A7BA84LL, domainexception);
+      break;
+    case 143:
+      HASH_GET_CLASS_CONSTANT(0x34C95AF311506C8FLL, directory);
+      break;
+    case 144:
+      HASH_GET_CLASS_CONSTANT(0x06335FF83CDEA590LL, badmethodcallexception);
+      break;
+    case 147:
+      HASH_GET_CLASS_CONSTANT(0x2E7081C468A05993LL, reflectionparameter);
+      break;
+    case 148:
+      HASH_GET_CLASS_CONSTANT(0x6FFDF8DF15CABE94LL, domcdatasection);
+      HASH_GET_CLASS_CONSTANT(0x6576EACCCE24D694LL, __php_incomplete_class);
+      HASH_GET_CLASS_CONSTANT(0x47D93E6F80B66A94LL, exception);
+      break;
+    case 152:
+      HASH_GET_CLASS_CONSTANT(0x3CEBA108A1BAB998LL, pear_error);
+      break;
+    case 167:
+      HASH_GET_CLASS_CONSTANT(0x71089C29FE923FA7LL, splfileinfo);
+      break;
+    case 168:
+      HASH_GET_CLASS_CONSTANT(0x7D46DB2E09C6DBA8LL, domxpath);
+      break;
+    case 169:
+      HASH_GET_CLASS_CONSTANT(0x1D35C3EFD00E11A9LL, sqlite3);
+      break;
+    case 175:
+      HASH_GET_CLASS_CONSTANT(0x2E650138BA043AAFLL, domdocument);
+      break;
+    case 176:
+      HASH_GET_CLASS_CONSTANT(0x43BBC8F6F28E44B0LL, reflectionmethod);
+      break;
+    case 177:
+      HASH_GET_CLASS_CONSTANT(0x6DD772FA3B20B8B1LL, domnodelist);
+      break;
+    case 195:
+      HASH_GET_CLASS_CONSTANT(0x40B3C44077F5DDC3LL, domelement);
+      break;
+    case 200:
+      HASH_GET_CLASS_CONSTANT(0x2E363D51549781C8LL, appenditerator);
+      break;
+    case 203:
+      HASH_GET_CLASS_CONSTANT(0x253AC17234FC8CCBLL, libxmlerror);
+      break;
+    case 210:
+      HASH_GET_CLASS_CONSTANT(0x52E5CC58B841AED2LL, sqlite3stmt);
+      HASH_GET_CLASS_CONSTANT(0x297ECCC7A259EDD2LL, splfileobject);
+      break;
+    case 212:
+      HASH_GET_CLASS_CONSTANT(0x5E623FEAF7B068D4LL, underflowexception);
+      break;
+    case 216:
+      HASH_GET_CLASS_CONSTANT(0x464D3427431A6ED8LL, recursivedirectoryiterator);
+      break;
+    case 217:
+      HASH_GET_CLASS_CONSTANT(0x0E4CCE95F6A727D9LL, overflowexception);
+      break;
+    case 218:
+      HASH_GET_CLASS_CONSTANT(0x7A52EBE538182BDALL, soapclient);
+      break;
+    case 220:
+      HASH_GET_CLASS_CONSTANT(0x1078CB3118A8B3DCLL, runtimeexception);
+      break;
+    case 228:
+      HASH_GET_CLASS_CONSTANT(0x75AA2571BDB659E4LL, reflectionproperty);
+      break;
+    case 244:
+      HASH_GET_CLASS_CONSTANT(0x297174231D4912F4LL, domattr);
+      break;
+    case 247:
+      HASH_GET_CLASS_CONSTANT(0x3D69936178BA13F7LL, stdclass);
+      break;
+    case 252:
+      HASH_GET_CLASS_CONSTANT(0x622D4DF07E2A01FCLL, outofrangeexception);
+      break;
+    case 253:
+      HASH_GET_CLASS_CONSTANT(0x74419B70A46387FDLL, domimplementation);
+      break;
+    case 255:
       HASH_GET_CLASS_CONSTANT(0x624835B2D74B86FFLL, domentity);
       break;
     default:

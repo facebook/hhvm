@@ -35,12 +35,27 @@ FORWARD_DECLARE_CLASS(arrayiterator)
 FORWARD_DECLARE_CLASS(iterator);
 FORWARD_DECLARE_CLASS(appenditerator)
 FORWARD_DECLARE_CLASS(seekableiterator);
+FORWARD_DECLARE_CLASS(recursiveiterator);
+FORWARD_DECLARE_CLASS(recursivedirectoryiterator)
+extern const int64 q_recursivedirectoryiterator_CURRENT_AS_SELF;
+extern const int64 q_recursivedirectoryiterator_CURRENT_AS_FILEINFO;
+extern const int64 q_recursivedirectoryiterator_CURRENT_AS_PATHNAME;
+extern const int64 q_recursivedirectoryiterator_KEY_AS_PATHNAME;
+extern const int64 q_recursivedirectoryiterator_KEY_AS_FILENAME;
+extern const int64 q_recursivedirectoryiterator_NEW_CURRENT_AND_KEY;
+FORWARD_DECLARE_CLASS(directoryiterator)
 FORWARD_DECLARE_CLASS(iteratoraggregate);
+FORWARD_DECLARE_CLASS(recursiveiteratoriterator)
+extern const int64 q_recursiveiteratoriterator_LEAVES_ONLY;
+extern const int64 q_recursiveiteratoriterator_SELF_FIRST;
+extern const int64 q_recursiveiteratoriterator_CHILD_FIRST;
+extern const int64 q_recursiveiteratoriterator_CATCH_GET_CHILD;
 FORWARD_DECLARE_CLASS(filteriterator);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 #include <php/classes/arrayaccess.fw.h>
+#include <php/classes/splfile.fw.h>
 #include <php/globals/constants.fw.h>
 
 #endif // __GENERATED_php_classes_iterator_fw_h__

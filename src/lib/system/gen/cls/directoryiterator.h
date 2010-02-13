@@ -14,39 +14,44 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_cls_appenditerator_h__
-#define __GENERATED_cls_appenditerator_h__
+#ifndef __GENERATED_cls_directoryiterator_h__
+#define __GENERATED_cls_directoryiterator_h__
 
-#include <cls/outeriterator.h>
+#include <cls/splfileinfo.h>
+#include <cls/iterator.h>
+#include <cls/traversable.h>
+#include <cls/seekableiterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 280 */
-class c_appenditerator : virtual public c_outeriterator {
-  BEGIN_CLASS_MAP(appenditerator)
-    PARENT_CLASS(outeriterator)
-  END_CLASS_MAP(appenditerator)
-  DECLARE_CLASS(appenditerator, AppendIterator, ObjectData)
+/* SRC: classes/iterator.php line 170 */
+class c_directoryiterator : virtual public c_splfileinfo, virtual public c_iterator, virtual public c_traversable, virtual public c_seekableiterator {
+  BEGIN_CLASS_MAP(directoryiterator)
+    PARENT_CLASS(splfileinfo)
+    PARENT_CLASS(traversable)
+    PARENT_CLASS(iterator)
+    PARENT_CLASS(traversable)
+    PARENT_CLASS(seekableiterator)
+  END_CLASS_MAP(directoryiterator)
+  DECLARE_CLASS(directoryiterator, DirectoryIterator, splfileinfo)
   DECLARE_INVOKES_FROM_EVAL
   void init();
-  public: Variant m_iterators;
-  Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
-  public: void t___construct();
-  public: ObjectData *create();
+  public: void t___construct(Variant v_path);
+  public: ObjectData *create(Variant v_path);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
-  public: void t_append(Variant v_it);
-  public: Variant t_getinneriterator();
-  public: void t_rewind();
-  public: bool t_valid();
   public: Variant t_current();
   public: Variant t_key();
-  public: void t_next();
-  public: Variant t___call(Variant v_func, Variant v_params);
+  public: Variant t_next();
+  public: Variant t_rewind();
+  public: Variant t_seek(CVarRef v_position);
+  public: String t___tostring();
+  public: bool t_valid();
+  public: bool t_isdot();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_cls_appenditerator_h__
+#endif // __GENERATED_cls_directoryiterator_h__

@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 137 */
+/* SRC: classes/iterator.php line 272 */
 class c_iteratoraggregate : virtual public c_traversable {
   // public: void t_getiterator() = 0;
 };

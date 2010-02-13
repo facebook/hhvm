@@ -133,6 +133,8 @@ class TestCodeRun : public TestBase {
   bool TestFile();
   bool TestUselessAssignment();
   bool TestExtImage();
+  bool TestSplFile();
+  bool TestIterator();
 
   // debugging purpose
   bool TestAdHoc();

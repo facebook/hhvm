@@ -14,20 +14,28 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_cls_filteriterator_h__
-#define __GENERATED_cls_filteriterator_h__
+#ifndef __GENERATED_php_classes_splfile_fw_h__
+#define __GENERATED_php_classes_splfile_fw_h__
 
-#include <cls/iterator.h>
-#include <cls/outeriterator.h>
+#include <cpp/base/hphp_system.h>
+
+// Forward Declarations
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 268 */
-class c_filteriterator : virtual public c_iterator, virtual public c_outeriterator {
-};
+// 1. Constants
+
+// 2. Classes
+FORWARD_DECLARE_CLASS(splfileobject)
+extern const int64 q_splfileobject_DROP_NEW_LINE;
+extern const int64 q_splfileobject_READ_AHEAD;
+extern const int64 q_splfileobject_SKIP_EMPTY;
+extern const int64 q_splfileobject_READ_CSV;
+FORWARD_DECLARE_CLASS(splfileinfo)
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+#include <php/classes/iterator.fw.h>
 
-#endif // __GENERATED_cls_filteriterator_h__
+#endif // __GENERATED_php_classes_splfile_fw_h__

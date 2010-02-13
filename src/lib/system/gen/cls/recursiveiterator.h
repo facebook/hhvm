@@ -14,20 +14,21 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_cls_filteriterator_h__
-#define __GENERATED_cls_filteriterator_h__
+#ifndef __GENERATED_cls_recursiveiterator_h__
+#define __GENERATED_cls_recursiveiterator_h__
 
 #include <cls/iterator.h>
-#include <cls/outeriterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 268 */
-class c_filteriterator : virtual public c_iterator, virtual public c_outeriterator {
+/* SRC: classes/iterator.php line 23 */
+class c_recursiveiterator : virtual public c_iterator {
+  // public: void t_getchildren() = 0;
+  // public: void t_haschildren() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_cls_filteriterator_h__
+#endif // __GENERATED_cls_recursiveiterator_h__

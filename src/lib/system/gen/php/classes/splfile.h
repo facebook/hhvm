@@ -14,20 +14,25 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_cls_filteriterator_h__
-#define __GENERATED_cls_filteriterator_h__
+#ifndef __GENERATED_php_classes_splfile_h__
+#define __GENERATED_php_classes_splfile_h__
 
-#include <cls/iterator.h>
-#include <cls/outeriterator.h>
+#include <cpp/base/hphp_system.h>
+#include <php/classes/splfile.fw.h>
+
+// Declarations
+#include <cls/splfileobject.h>
+#include <cls/splfileinfo.h>
+#include <php/classes/iterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 268 */
-class c_filteriterator : virtual public c_iterator, virtual public c_outeriterator {
-};
+Variant pm_php$classes$splfile_php(bool incOnce = false, LVariableTable* variables = NULL);
+Object co_splfileobject(CArrRef params, bool init = true);
+Object co_splfileinfo(CArrRef params, bool init = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_cls_filteriterator_h__
+#endif // __GENERATED_php_classes_splfile_h__

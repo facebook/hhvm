@@ -47,6 +47,8 @@ public:
                             VariableTablePtr variables);
   static void loadConstants(AnalysisResultPtr ar,
                             ConstantTablePtr constants);
+  static void loadBaseSysRsrcClasses(AnalysisResultPtr ar,
+                                     std::set<std::string> &baseSysRsrcClasses);
 
   /**
    * Testing whether a variable is a PHP superglobal.
@@ -68,6 +70,7 @@ private:
   static const char *ExtensionConsts[];
   static const char *ExtensionDeclaredDynamic[];
   static const char *SystemClasses[];
+  static const char *BaseSysRsrcClasses[];
   static const char *HelperFunctions[];
   static AnalysisResultPtr loadGlobalSymbols(const char *fileName);
 

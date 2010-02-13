@@ -40,6 +40,7 @@
 #include <cpp/ext/profile/extprofile_idn.h>
 #include <cpp/ext/profile/extprofile_image.h>
 #include <cpp/ext/profile/extprofile_ipc.h>
+#include <cpp/ext/profile/extprofile_iterator.h>
 #include <cpp/ext/profile/extprofile_json.h>
 #include <cpp/ext/profile/extprofile_ldap.h>
 #include <cpp/ext/profile/extprofile_magick.h>
@@ -63,6 +64,7 @@
 #include <cpp/ext/profile/extprofile_simplexml.h>
 #include <cpp/ext/profile/extprofile_soap.h>
 #include <cpp/ext/profile/extprofile_socket.h>
+#include <cpp/ext/profile/extprofile_splfile.h>
 #include <cpp/ext/profile/extprofile_sqlite3.h>
 #include <cpp/ext/profile/extprofile_stream.h>
 #include <cpp/ext/profile/extprofile_string.h>

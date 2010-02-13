@@ -256,6 +256,7 @@ public:
   BlockScopePtr findConstantDeclarer(const std::string &constName);
   bool isConstantDeclared(const std::string &constName);
   bool isConstantRedeclared(const std::string &constName);
+  bool isBaseSysRsrcClass(const std::string &className);
 
   /**
    * For function declaration parsing.
@@ -329,6 +330,7 @@ private:
   StringToClassScopePtrVecMap m_methodToClassDecs;
   StringToFileScopePtrMap m_constDecs;
   std::set<std::string> m_constRedeclared;
+  std::set<std::string> m_baseSysRsrcClasses;
 
   bool m_dynamicClass;
   bool m_dynamicFunction;

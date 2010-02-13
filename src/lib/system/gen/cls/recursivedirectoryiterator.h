@@ -14,60 +14,49 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __GENERATED_cls_arrayiterator_h__
-#define __GENERATED_cls_arrayiterator_h__
+#ifndef __GENERATED_cls_recursivedirectoryiterator_h__
+#define __GENERATED_cls_recursivedirectoryiterator_h__
 
-#include <cls/iterator.h>
-#include <cls/arrayaccess.h>
-#include <cls/seekableiterator.h>
-#include <cls/countable.h>
+#include <cls/directoryiterator.h>
+#include <cls/recursiveiterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 70 */
-class c_arrayiterator : virtual public c_iterator, virtual public c_arrayaccess, virtual public c_seekableiterator, virtual public c_countable {
-  BEGIN_CLASS_MAP(arrayiterator)
+/* SRC: classes/iterator.php line 209 */
+class c_recursivedirectoryiterator : virtual public c_directoryiterator, virtual public c_recursiveiterator {
+  BEGIN_CLASS_MAP(recursivedirectoryiterator)
+    PARENT_CLASS(splfileinfo)
     PARENT_CLASS(traversable)
     PARENT_CLASS(iterator)
-    PARENT_CLASS(arrayaccess)
+    PARENT_CLASS(traversable)
     PARENT_CLASS(seekableiterator)
-    PARENT_CLASS(countable)
-  END_CLASS_MAP(arrayiterator)
-  DECLARE_CLASS(arrayiterator, ArrayIterator, ObjectData)
+    PARENT_CLASS(directoryiterator)
+    PARENT_CLASS(traversable)
+    PARENT_CLASS(iterator)
+    PARENT_CLASS(recursiveiterator)
+  END_CLASS_MAP(recursivedirectoryiterator)
+  DECLARE_CLASS(recursivedirectoryiterator, RecursiveDirectoryIterator, directoryiterator)
   DECLARE_INVOKES_FROM_EVAL
   void init();
-  public: Variant m_arr;
-  public: Variant m_flags;
-  public: void t___construct(Variant v_array, Variant v_flags = 0LL /* SORT_REGULAR */);
-  public: ObjectData *create(Variant v_array, Variant v_flags = 0LL /* SORT_REGULAR */);
+  public: void t___construct(Variant v_path, Variant v_flags = 16LL /* recursivedirectoryiterator::CURRENT_AS_FILEINFO */);
+  public: ObjectData *create(Variant v_path, Variant v_flags = 16LL /* recursivedirectoryiterator::CURRENT_AS_FILEINFO */);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
-  public: void t_append(CVarRef v_value);
-  public: bool t_asort();
-  public: int t_count();
   public: Variant t_current();
-  public: Variant t_getarraycopy();
-  public: Variant t_getflags();
   public: Variant t_key();
-  public: bool t_ksort();
-  public: Variant t_natcasesort();
-  public: Variant t_natsort();
   public: Variant t_next();
-  public: bool t_offsetexists(CVarRef v_index);
-  public: Variant t_offsetget(Variant v_index);
-  public: virtual Variant &___offsetget_lval(Variant v_index);
-  public: void t_offsetset(CVarRef v_index, CVarRef v_newval);
-  public: void t_offsetunset(CVarRef v_index);
   public: Variant t_rewind();
-  public: void t_seek(CVarRef v_position);
-  public: void t_setflags(CVarRef v_flags);
-  public: bool t_uasort(CVarRef v_cmp_function);
-  public: bool t_uksort(Variant v_cmp_function);
+  public: Variant t_seek(CVarRef v_position);
+  public: String t___tostring();
   public: bool t_valid();
+  public: bool t_haschildren();
+  public: Object t_getchildren();
+  public: String t_getsubpath();
+  public: String t_getsubpathname();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __GENERATED_cls_arrayiterator_h__
+#endif // __GENERATED_cls_recursivedirectoryiterator_h__

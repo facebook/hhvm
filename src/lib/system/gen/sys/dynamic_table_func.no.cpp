@@ -31,6 +31,10 @@ Variant i_utf8_encode(CArrRef params) {
   FUNCTION_INJECTION(utf8_encode);
   return (f_utf8_encode(params.rvalAt(0)));
 }
+Variant i_hphp_splfileobject___construct(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject___construct);
+  return (f_hphp_splfileobject___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+}
 Variant i_func_get_args(CArrRef params) {
   FUNCTION_INJECTION(func_get_args);
   return (f_func_get_args());
@@ -54,6 +58,14 @@ Variant i_mysql_result(CArrRef params) {
   int count = params.size();
   if (count <= 2) return (f_mysql_result(params.rvalAt(0), params.rvalAt(1)));
   return (f_mysql_result(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+}
+Variant i_hphp_splfileobject_current(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_current);
+  return (f_hphp_splfileobject_current(params.rvalAt(0)));
+}
+Variant i_hphp_splfileinfo_getgroup(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getgroup);
+  return (f_hphp_splfileinfo_getgroup(params.rvalAt(0)));
 }
 Variant i_register_shutdown_function(CArrRef params) {
   FUNCTION_INJECTION(register_shutdown_function);
@@ -131,6 +143,10 @@ Variant i_drawsetfontstretch(CArrRef params) {
 Variant i_posix_setsid(CArrRef params) {
   FUNCTION_INJECTION(posix_setsid);
   return (f_posix_setsid());
+}
+Variant i_hphp_splfileinfo_setfileclass(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_setfileclass);
+  return (f_hphp_splfileinfo_setfileclass(params.rvalAt(0), params.rvalAt(1)), null);
 }
 Variant i_posix_getpwnam(CArrRef params) {
   FUNCTION_INJECTION(posix_getpwnam);
@@ -240,6 +256,10 @@ Variant i_msg_set_queue(CArrRef params) {
 Variant i_cos(CArrRef params) {
   FUNCTION_INJECTION(cos);
   return (f_cos(params.rvalAt(0)));
+}
+Variant i_hphp_recursivedirectoryiterator_valid(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_valid);
+  return (f_hphp_recursivedirectoryiterator_valid(params.rvalAt(0)));
 }
 Variant i_bcmul(CArrRef params) {
   FUNCTION_INJECTION(bcmul);
@@ -379,6 +399,10 @@ Variant i_php_check_syntax(CArrRef params) {
 Variant i_drawgetstrokemiterlimit(CArrRef params) {
   FUNCTION_INJECTION(drawgetstrokemiterlimit);
   return (f_drawgetstrokemiterlimit(params.rvalAt(0)));
+}
+Variant i_hphp_splfileobject_fpassthru(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_fpassthru);
+  return (f_hphp_splfileobject_fpassthru(params.rvalAt(0)));
 }
 Variant i_pixelsetquantumcolor(CArrRef params) {
   FUNCTION_INJECTION(pixelsetquantumcolor);
@@ -677,6 +701,10 @@ Variant i_mcrypt_module_get_algo_block_size(CArrRef params) {
   if (count <= 1) return (f_mcrypt_module_get_algo_block_size(params.rvalAt(0)));
   return (f_mcrypt_module_get_algo_block_size(params.rvalAt(0), params.rvalAt(1)));
 }
+Variant i_hphp_splfileobject_ftruncate(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_ftruncate);
+  return (f_hphp_splfileobject_ftruncate(params.rvalAt(0), params.rvalAt(1)));
+}
 Variant i_key(CArrRef params) {
   FUNCTION_INJECTION(key);
   return (f_key(ref(const_cast<Array&>(params).lvalAt(0))));
@@ -795,6 +823,10 @@ Variant i_fbml_render_children_11(CArrRef params) {
   if (count <= 4) return (f_fbml_render_children_11(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
   return (f_fbml_render_children_11(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
 }
+Variant i_hphp_recursivedirectoryiterator_getsubpathname(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_getsubpathname);
+  return (f_hphp_recursivedirectoryiterator_getsubpathname(params.rvalAt(0)));
+}
 Variant i_socket_close(CArrRef params) {
   FUNCTION_INJECTION(socket_close);
   return (f_socket_close(params.rvalAt(0)), null);
@@ -906,6 +938,10 @@ Variant i_magicksetresourcelimit(CArrRef params) {
 Variant i_date_timezone_get(CArrRef params) {
   FUNCTION_INJECTION(date_timezone_get);
   return (f_date_timezone_get(params.rvalAt(0)));
+}
+Variant i_hphp_splfileobject_fwrite(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_fwrite);
+  return (f_hphp_splfileobject_fwrite(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
 }
 Variant i_apache_get_rewrite_rules(CArrRef params) {
   FUNCTION_INJECTION(apache_get_rewrite_rules);
@@ -1026,6 +1062,14 @@ Variant i_drawsettextundercolor(CArrRef params) {
   FUNCTION_INJECTION(drawsettextundercolor);
   return (f_drawsettextundercolor(params.rvalAt(0), params.rvalAt(1)), null);
 }
+Variant i_hphp_splfileobject_getflags(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_getflags);
+  return (f_hphp_splfileobject_getflags(params.rvalAt(0)));
+}
+Variant i_hphp_recursivedirectoryiterator_rewind(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_rewind);
+  return (f_hphp_recursivedirectoryiterator_rewind(params.rvalAt(0)), null);
+}
 Variant i_magickgetstringwidth(CArrRef params) {
   FUNCTION_INJECTION(magickgetstringwidth);
   int count = params.size();
@@ -1051,6 +1095,10 @@ Variant i_gmstrftime(CArrRef params) {
   int count = params.size();
   if (count <= 1) return (f_gmstrftime(params.rvalAt(0)));
   return (f_gmstrftime(params.rvalAt(0), params.rvalAt(1)));
+}
+Variant i_hphp_recursiveiteratoriterator_next(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursiveiteratoriterator_next);
+  return (f_hphp_recursiveiteratoriterator_next(params.rvalAt(0)), null);
 }
 Variant i_stream_socket_get_name(CArrRef params) {
   FUNCTION_INJECTION(stream_socket_get_name);
@@ -1281,6 +1329,10 @@ Variant i_getrandmax(CArrRef params) {
   FUNCTION_INJECTION(getrandmax);
   return (f_getrandmax());
 }
+Variant i_hphp_splfileobject_fseek(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_fseek);
+  return (f_hphp_splfileobject_fseek(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+}
 Variant i_ctype_alnum(CArrRef params) {
   FUNCTION_INJECTION(ctype_alnum);
   return (f_ctype_alnum(params.rvalAt(0)));
@@ -1306,6 +1358,10 @@ Variant i_magickstereoimage(CArrRef params) {
 Variant i_magickgetimagescene(CArrRef params) {
   FUNCTION_INJECTION(magickgetimagescene);
   return (f_magickgetimagescene(params.rvalAt(0)));
+}
+Variant i_hphp_splfileinfo_isfile(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_isfile);
+  return (f_hphp_splfileinfo_isfile(params.rvalAt(0)));
 }
 Variant i_openssl_csr_sign(CArrRef params) {
   FUNCTION_INJECTION(openssl_csr_sign);
@@ -1701,6 +1757,10 @@ Variant i_date_modify(CArrRef params) {
   FUNCTION_INJECTION(date_modify);
   return (f_date_modify(params.rvalAt(0), params.rvalAt(1)), null);
 }
+Variant i_hphp_splfileinfo_setinfoclass(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_setinfoclass);
+  return (f_hphp_splfileinfo_setinfoclass(params.rvalAt(0), params.rvalAt(1)), null);
+}
 Variant i_umask(CArrRef params) {
   FUNCTION_INJECTION(umask);
   int count = params.size();
@@ -1726,6 +1786,10 @@ Variant i_flock(CArrRef params) {
   int count = params.size();
   if (count <= 2) return (f_flock(params.rvalAt(0), params.rvalAt(1)));
   return (f_flock(params.rvalAt(0), params.rvalAt(1), ref(const_cast<Array&>(params).lvalAt(2))));
+}
+Variant i_hphp_splfileobject_ftell(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_ftell);
+  return (f_hphp_splfileobject_ftell(params.rvalAt(0)));
 }
 Variant i_pcntl_wifexited(CArrRef params) {
   FUNCTION_INJECTION(pcntl_wifexited);
@@ -1792,6 +1856,10 @@ Variant i_mcrypt_decrypt(CArrRef params) {
   if (count <= 4) return (f_mcrypt_decrypt(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
   return (f_mcrypt_decrypt(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
 }
+Variant i_hphp_directoryiterator_next(CArrRef params) {
+  FUNCTION_INJECTION(hphp_directoryiterator_next);
+  return (f_hphp_directoryiterator_next(params.rvalAt(0)), null);
+}
 Variant i_natcasesort(CArrRef params) {
   FUNCTION_INJECTION(natcasesort);
   return (f_natcasesort(ref(const_cast<Array&>(params).lvalAt(0))));
@@ -1829,9 +1897,17 @@ Variant i_touch(CArrRef params) {
   if (count == 2) return (f_touch(params.rvalAt(0), params.rvalAt(1)));
   return (f_touch(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
 }
+Variant i_hphp_recursivedirectoryiterator___tostring(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator___tostring);
+  return (f_hphp_recursivedirectoryiterator___tostring(params.rvalAt(0)));
+}
 Variant i_magicksetimagebordercolor(CArrRef params) {
   FUNCTION_INJECTION(magicksetimagebordercolor);
   return (f_magicksetimagebordercolor(params.rvalAt(0), params.rvalAt(1)));
+}
+Variant i_hphp_directoryiterator_rewind(CArrRef params) {
+  FUNCTION_INJECTION(hphp_directoryiterator_rewind);
+  return (f_hphp_directoryiterator_rewind(params.rvalAt(0)), null);
 }
 Variant i_magickspliceimage(CArrRef params) {
   FUNCTION_INJECTION(magickspliceimage);
@@ -1904,6 +1980,10 @@ Variant i_array_pad(CArrRef params) {
 Variant i_sem_release(CArrRef params) {
   FUNCTION_INJECTION(sem_release);
   return (f_sem_release(params.rvalAt(0)));
+}
+Variant i_hphp_splfileinfo_getctime(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getctime);
+  return (f_hphp_splfileinfo_getctime(params.rvalAt(0)));
 }
 Variant i_highlight_string(CArrRef params) {
   FUNCTION_INJECTION(highlight_string);
@@ -1995,6 +2075,10 @@ Variant i_mb_substr_count(CArrRef params) {
 Variant i_hotprofiler_disable(CArrRef params) {
   FUNCTION_INJECTION(hotprofiler_disable);
   return (f_hotprofiler_disable());
+}
+Variant i_hphp_splfileinfo_getinode(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getinode);
+  return (f_hphp_splfileinfo_getinode(params.rvalAt(0)));
 }
 Variant i_magickgettextdescent(CArrRef params) {
   FUNCTION_INJECTION(magickgettextdescent);
@@ -2192,6 +2276,10 @@ Variant i_preg_replace(CArrRef params) {
   if (count == 4) return (f_preg_replace(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
   return (f_preg_replace(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), ref(const_cast<Array&>(params).lvalAt(4))));
 }
+Variant i_hphp_splfileinfo_getmtime(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getmtime);
+  return (f_hphp_splfileinfo_getmtime(params.rvalAt(0)));
+}
 Variant i_fmod(CArrRef params) {
   FUNCTION_INJECTION(fmod);
   return (f_fmod(params.rvalAt(0), params.rvalAt(1)));
@@ -2224,6 +2312,10 @@ Variant i_mb_strripos(CArrRef params) {
 Variant i_mysql_fetch_row(CArrRef params) {
   FUNCTION_INJECTION(mysql_fetch_row);
   return (f_mysql_fetch_row(params.rvalAt(0)));
+}
+Variant i_hphp_splfileobject_setcsvcontrol(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_setcsvcontrol);
+  return (f_hphp_splfileobject_setcsvcontrol(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)), null);
 }
 Variant i_ob_get_flush(CArrRef params) {
   FUNCTION_INJECTION(ob_get_flush);
@@ -2299,6 +2391,10 @@ Variant i_bindec(CArrRef params) {
 Variant i_fileperms(CArrRef params) {
   FUNCTION_INJECTION(fileperms);
   return (f_fileperms(params.rvalAt(0)));
+}
+Variant i_hphp_splfileobject_fstat(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_fstat);
+  return (f_hphp_splfileobject_fstat(params.rvalAt(0)));
 }
 Variant i_unserialize(CArrRef params) {
   FUNCTION_INJECTION(unserialize);
@@ -2798,6 +2894,10 @@ Variant i_nl2br(CArrRef params) {
   FUNCTION_INJECTION(nl2br);
   return (f_nl2br(params.rvalAt(0)));
 }
+Variant i_hphp_splfileinfo_getperms(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getperms);
+  return (f_hphp_splfileinfo_getperms(params.rvalAt(0)));
+}
 Variant i_drawsetfillopacity(CArrRef params) {
   FUNCTION_INJECTION(drawsetfillopacity);
   return (f_drawsetfillopacity(params.rvalAt(0), params.rvalAt(1)), null);
@@ -3009,6 +3109,10 @@ Variant i_ucfirst(CArrRef params) {
   FUNCTION_INJECTION(ucfirst);
   return (f_ucfirst(params.rvalAt(0)));
 }
+Variant i_hphp_splfileinfo_isreadable(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_isreadable);
+  return (f_hphp_splfileinfo_isreadable(params.rvalAt(0)));
+}
 Variant i_chroot(CArrRef params) {
   FUNCTION_INJECTION(chroot);
   return (f_chroot(params.rvalAt(0)));
@@ -3152,6 +3256,10 @@ Variant i_proc_get_status(CArrRef params) {
 Variant i_log10(CArrRef params) {
   FUNCTION_INJECTION(log10);
   return (f_log10(params.rvalAt(0)));
+}
+Variant i_hphp_directoryiterator_seek(CArrRef params) {
+  FUNCTION_INJECTION(hphp_directoryiterator_seek);
+  return (f_hphp_directoryiterator_seek(params.rvalAt(0), params.rvalAt(1)), null);
 }
 Variant i_ldap_get_values(CArrRef params) {
   FUNCTION_INJECTION(ldap_get_values);
@@ -3297,6 +3405,10 @@ Variant i_gzwrite(CArrRef params) {
   if (count <= 2) return (f_gzwrite(params.rvalAt(0), params.rvalAt(1)));
   return (f_gzwrite(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
 }
+Variant i_hphp_splfileinfo___tostring(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo___tostring);
+  return (f_hphp_splfileinfo___tostring(params.rvalAt(0)));
+}
 Variant i_magickaddimage(CArrRef params) {
   FUNCTION_INJECTION(magickaddimage);
   return (f_magickaddimage(params.rvalAt(0), params.rvalAt(1)));
@@ -3328,6 +3440,10 @@ Variant i_oci_field_type(CArrRef params) {
 Variant i_set_include_path(CArrRef params) {
   FUNCTION_INJECTION(set_include_path);
   return (f_set_include_path(params.rvalAt(0)));
+}
+Variant i_hphp_recursivedirectoryiterator_next(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_next);
+  return (f_hphp_recursivedirectoryiterator_next(params.rvalAt(0)), null);
 }
 Variant i_openssl_x509_export(CArrRef params) {
   FUNCTION_INJECTION(openssl_x509_export);
@@ -3427,6 +3543,10 @@ Variant i_openssl_x509_parse(CArrRef params) {
 Variant i_magickcommentimage(CArrRef params) {
   FUNCTION_INJECTION(magickcommentimage);
   return (f_magickcommentimage(params.rvalAt(0), params.rvalAt(1)));
+}
+Variant i_hphp_splfileinfo_islink(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_islink);
+  return (f_hphp_splfileinfo_islink(params.rvalAt(0)));
 }
 Variant i_magicksetimagedelay(CArrRef params) {
   FUNCTION_INJECTION(magicksetimagedelay);
@@ -3630,6 +3750,10 @@ Variant i_proc_open(CArrRef params) {
   if (count == 5) return (f_proc_open(params.rvalAt(0), params.rvalAt(1), ref(const_cast<Array&>(params).lvalAt(2)), params.rvalAt(3), params.rvalAt(4)));
   return (f_proc_open(params.rvalAt(0), params.rvalAt(1), ref(const_cast<Array&>(params).lvalAt(2)), params.rvalAt(3), params.rvalAt(4), params.rvalAt(5)));
 }
+Variant i_hphp_splfileobject_fgetss(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_fgetss);
+  return (f_hphp_splfileobject_fgetss(params.rvalAt(0), params.rvalAt(1)));
+}
 Variant i_clearpixeliterator(CArrRef params) {
   FUNCTION_INJECTION(clearpixeliterator);
   return (f_clearpixeliterator(params.rvalAt(0)), null);
@@ -3771,6 +3895,10 @@ Variant i_magickgetimagecompose(CArrRef params) {
   FUNCTION_INJECTION(magickgetimagecompose);
   return (f_magickgetimagecompose(params.rvalAt(0)));
 }
+Variant i_hphp_splfileinfo_getpath(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getpath);
+  return (f_hphp_splfileinfo_getpath(params.rvalAt(0)));
+}
 Variant i_magickcropimage(CArrRef params) {
   FUNCTION_INJECTION(magickcropimage);
   return (f_magickcropimage(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
@@ -3854,6 +3982,10 @@ Variant i_mysql_unbuffered_query(CArrRef params) {
   if (count <= 1) return (f_mysql_unbuffered_query(params.rvalAt(0)));
   return (f_mysql_unbuffered_query(params.rvalAt(0), params.rvalAt(1)));
 }
+Variant i_hphp_recursiveiteratoriterator___construct(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursiveiteratoriterator___construct);
+  return (f_hphp_recursiveiteratoriterator___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+}
 Variant i_hash_final(CArrRef params) {
   FUNCTION_INJECTION(hash_final);
   int count = params.size();
@@ -3899,6 +4031,10 @@ Variant i_ldap_count_entries(CArrRef params) {
 Variant i_ereg_replace(CArrRef params) {
   FUNCTION_INJECTION(ereg_replace);
   return (f_ereg_replace(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+}
+Variant i_hphp_recursivedirectoryiterator_getchildren(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_getchildren);
+  return (f_hphp_recursivedirectoryiterator_getchildren(params.rvalAt(0)));
 }
 Variant i_drawrender(CArrRef params) {
   FUNCTION_INJECTION(drawrender);
@@ -4014,6 +4150,10 @@ Variant i_ldap_get_values_len(CArrRef params) {
   FUNCTION_INJECTION(ldap_get_values_len);
   return (f_ldap_get_values_len(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
 }
+Variant i_hphp_splfileinfo_getrealpath(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getrealpath);
+  return (f_hphp_splfileinfo_getrealpath(params.rvalAt(0)));
+}
 Variant i_openssl_pkcs7_verify(CArrRef params) {
   FUNCTION_INJECTION(openssl_pkcs7_verify);
   int count = params.size();
@@ -4022,6 +4162,14 @@ Variant i_openssl_pkcs7_verify(CArrRef params) {
   if (count == 4) return (f_openssl_pkcs7_verify(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
   if (count == 5) return (f_openssl_pkcs7_verify(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
   return (f_openssl_pkcs7_verify(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4), params.rvalAt(5)));
+}
+Variant i_hphp_directoryiterator_current(CArrRef params) {
+  FUNCTION_INJECTION(hphp_directoryiterator_current);
+  return (f_hphp_directoryiterator_current(params.rvalAt(0)));
+}
+Variant i_hphp_splfileobject_fgetcsv(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_fgetcsv);
+  return (f_hphp_splfileobject_fgetcsv(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
 }
 Variant i_stream_socket_recvfrom(CArrRef params) {
   FUNCTION_INJECTION(stream_socket_recvfrom);
@@ -4051,6 +4199,10 @@ Variant i_mcrypt_ofb(CArrRef params) {
 Variant i_imageantialias(CArrRef params) {
   FUNCTION_INJECTION(imageantialias);
   return (f_imageantialias(params.rvalAt(0), params.rvalAt(1)));
+}
+Variant i_hphp_splfileinfo_openfile(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_openfile);
+  return (f_hphp_splfileinfo_openfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
 }
 Variant i_idn_to_ascii(CArrRef params) {
   FUNCTION_INJECTION(idn_to_ascii);
@@ -4137,6 +4289,10 @@ Variant i_fnmatch(CArrRef params) {
   if (count <= 2) return (f_fnmatch(params.rvalAt(0), params.rvalAt(1)));
   return (f_fnmatch(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
 }
+Variant i_hphp_splfileobject_eof(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_eof);
+  return (f_hphp_splfileobject_eof(params.rvalAt(0)));
+}
 Variant i_metaphone(CArrRef params) {
   FUNCTION_INJECTION(metaphone);
   int count = params.size();
@@ -4157,9 +4313,17 @@ Variant i_magickcyclecolormapimage(CArrRef params) {
   FUNCTION_INJECTION(magickcyclecolormapimage);
   return (f_magickcyclecolormapimage(params.rvalAt(0), params.rvalAt(1)));
 }
+Variant i_hphp_recursiveiteratoriterator_current(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursiveiteratoriterator_current);
+  return (f_hphp_recursiveiteratoriterator_current(params.rvalAt(0)));
+}
 Variant i_restore_error_handler(CArrRef params) {
   FUNCTION_INJECTION(restore_error_handler);
   return (f_restore_error_handler());
+}
+Variant i_hphp_recursivedirectoryiterator___construct(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator___construct);
+  return (f_hphp_recursivedirectoryiterator___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
 }
 Variant i_magicksetimagevirtualpixelmethod(CArrRef params) {
   FUNCTION_INJECTION(magicksetimagevirtualpixelmethod);
@@ -4388,6 +4552,10 @@ Variant i_count_chars(CArrRef params) {
   if (count <= 1) return (f_count_chars(params.rvalAt(0)));
   return (f_count_chars(params.rvalAt(0), params.rvalAt(1)));
 }
+Variant i_hphp_splfileobject_getmaxlinelen(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_getmaxlinelen);
+  return (f_hphp_splfileobject_getmaxlinelen(params.rvalAt(0)));
+}
 Variant i_array_uintersect_uassoc(CArrRef params) {
   FUNCTION_INJECTION(array_uintersect_uassoc);
   int count = params.size();
@@ -4450,6 +4618,10 @@ Variant i_mb_decode_numericentity(CArrRef params) {
 Variant i_ldap_next_attribute(CArrRef params) {
   FUNCTION_INJECTION(ldap_next_attribute);
   return (f_ldap_next_attribute(params.rvalAt(0), params.rvalAt(1)));
+}
+Variant i_hphp_splfileobject_fflush(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_fflush);
+  return (f_hphp_splfileobject_fflush(params.rvalAt(0)));
 }
 Variant i_imagejpeg(CArrRef params) {
   FUNCTION_INJECTION(imagejpeg);
@@ -4526,6 +4698,10 @@ Variant i_apd_set_browser_trace(CArrRef params) {
 Variant i_xhprof_sample_enable(CArrRef params) {
   FUNCTION_INJECTION(xhprof_sample_enable);
   return (f_xhprof_sample_enable(), null);
+}
+Variant i_hphp_splfileobject_key(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_key);
+  return (f_hphp_splfileobject_key(params.rvalAt(0)));
 }
 Variant i_mb_http_input(CArrRef params) {
   FUNCTION_INJECTION(mb_http_input);
@@ -4863,6 +5039,10 @@ Variant i_iconv_mime_decode(CArrRef params) {
   if (count == 2) return (f_iconv_mime_decode(params.rvalAt(0), params.rvalAt(1)));
   return (f_iconv_mime_decode(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
 }
+Variant i_hphp_recursiveiteratoriterator_key(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursiveiteratoriterator_key);
+  return (f_hphp_recursiveiteratoriterator_key(params.rvalAt(0)));
+}
 Variant i_mcrypt_module_is_block_algorithm(CArrRef params) {
   FUNCTION_INJECTION(mcrypt_module_is_block_algorithm);
   int count = params.size();
@@ -4898,6 +5078,10 @@ Variant i_pixelsetiteratorrow(CArrRef params) {
   FUNCTION_INJECTION(pixelsetiteratorrow);
   return (f_pixelsetiteratorrow(params.rvalAt(0), params.rvalAt(1)));
 }
+Variant i_hphp_splfileinfo_iswritable(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_iswritable);
+  return (f_hphp_splfileinfo_iswritable(params.rvalAt(0)));
+}
 Variant i_ldap_get_option(CArrRef params) {
   FUNCTION_INJECTION(ldap_get_option);
   return (f_ldap_get_option(params.rvalAt(0), params.rvalAt(1), ref(const_cast<Array&>(params).lvalAt(2))));
@@ -4916,6 +5100,10 @@ Variant i_evhttp_async_post(CArrRef params) {
   if (count <= 2) return (f_evhttp_async_post(params.rvalAt(0), params.rvalAt(1)));
   if (count == 3) return (f_evhttp_async_post(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
   return (f_evhttp_async_post(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+}
+Variant i_hphp_recursivedirectoryiterator_seek(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_seek);
+  return (f_hphp_recursivedirectoryiterator_seek(params.rvalAt(0), params.rvalAt(1)), null);
 }
 Variant i_array_values(CArrRef params) {
   FUNCTION_INJECTION(array_values);
@@ -4950,6 +5138,10 @@ Variant i_openssl_x509_read(CArrRef params) {
 Variant i_magickgetimagecolormapcolor(CArrRef params) {
   FUNCTION_INJECTION(magickgetimagecolormapcolor);
   return (f_magickgetimagecolormapcolor(params.rvalAt(0), params.rvalAt(1)));
+}
+Variant i_hphp_splfileobject_getcvscontrol(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_getcvscontrol);
+  return (f_hphp_splfileobject_getcvscontrol(params.rvalAt(0)));
 }
 Variant i_settype(CArrRef params) {
   FUNCTION_INJECTION(settype);
@@ -5081,6 +5273,10 @@ Variant i_interface_exists(CArrRef params) {
   int count = params.size();
   if (count <= 1) return (f_interface_exists(params.rvalAt(0)));
   return (f_interface_exists(params.rvalAt(0), params.rvalAt(1)));
+}
+Variant i_hphp_directoryiterator___construct(CArrRef params) {
+  FUNCTION_INJECTION(hphp_directoryiterator___construct);
+  return (f_hphp_directoryiterator___construct(params.rvalAt(0), params.rvalAt(1)));
 }
 Variant i_drawpathmovetorelative(CArrRef params) {
   FUNCTION_INJECTION(drawpathmovetorelative);
@@ -5216,9 +5412,17 @@ Variant i_shm_remove(CArrRef params) {
   FUNCTION_INJECTION(shm_remove);
   return (f_shm_remove(params.rvalAt(0)));
 }
+Variant i_hphp_splfileobject_setflags(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_setflags);
+  return (f_hphp_splfileobject_setflags(params.rvalAt(0), params.rvalAt(1)), null);
+}
 Variant i_date_sun_info(CArrRef params) {
   FUNCTION_INJECTION(date_sun_info);
   return (f_date_sun_info(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+}
+Variant i_hphp_directoryiterator_valid(CArrRef params) {
+  FUNCTION_INJECTION(hphp_directoryiterator_valid);
+  return (f_hphp_directoryiterator_valid(params.rvalAt(0)));
 }
 Variant i_magickresizeimage(CArrRef params) {
   FUNCTION_INJECTION(magickresizeimage);
@@ -5279,6 +5483,10 @@ Variant i_zlib_get_coding_type(CArrRef params) {
   FUNCTION_INJECTION(zlib_get_coding_type);
   return (f_zlib_get_coding_type());
 }
+Variant i_hphp_splfileobject_fscanf(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_fscanf);
+  return (f_hphp_splfileobject_fscanf(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+}
 Variant i_mb_ereg_search_getregs(CArrRef params) {
   FUNCTION_INJECTION(mb_ereg_search_getregs);
   return (f_mb_ereg_search_getregs());
@@ -5331,6 +5539,10 @@ Variant i_pixelgetexceptiontype(CArrRef params) {
 Variant i_unpack(CArrRef params) {
   FUNCTION_INJECTION(unpack);
   return (f_unpack(params.rvalAt(0), params.rvalAt(1)));
+}
+Variant i_hphp_splfileinfo_isdir(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_isdir);
+  return (f_hphp_splfileinfo_isdir(params.rvalAt(0)));
 }
 Variant i_magickgetimagepixels(CArrRef params) {
   FUNCTION_INJECTION(magickgetimagepixels);
@@ -5447,6 +5659,10 @@ Variant i_is_resource(CArrRef params) {
   FUNCTION_INJECTION(is_resource);
   return (f_is_resource(params.rvalAt(0)));
 }
+Variant i_hphp_splfileinfo_getsize(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getsize);
+  return (f_hphp_splfileinfo_getsize(params.rvalAt(0)));
+}
 Variant i_posix_seteuid(CArrRef params) {
   FUNCTION_INJECTION(posix_seteuid);
   return (f_posix_seteuid(params.rvalAt(0)));
@@ -5543,6 +5759,10 @@ Variant i_drawroundrectangle(CArrRef params) {
   FUNCTION_INJECTION(drawroundrectangle);
   return (f_drawroundrectangle(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4), params.rvalAt(5), params.rvalAt(6)), null);
 }
+Variant i_hphp_directoryiterator_isdot(CArrRef params) {
+  FUNCTION_INJECTION(hphp_directoryiterator_isdot);
+  return (f_hphp_directoryiterator_isdot(params.rvalAt(0)));
+}
 Variant i_drawgetstrokewidth(CArrRef params) {
   FUNCTION_INJECTION(drawgetstrokewidth);
   return (f_drawgetstrokewidth(params.rvalAt(0)));
@@ -5599,6 +5819,10 @@ Variant i_strtotime(CArrRef params) {
   int count = params.size();
   if (count <= 1) return (f_strtotime(params.rvalAt(0)));
   return (f_strtotime(params.rvalAt(0), params.rvalAt(1)));
+}
+Variant i_hphp_recursivedirectoryiterator_getsubpath(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_getsubpath);
+  return (f_hphp_recursivedirectoryiterator_getsubpath(params.rvalAt(0)));
 }
 Variant i_apc_clear_cache(CArrRef params) {
   FUNCTION_INJECTION(apc_clear_cache);
@@ -5688,6 +5912,10 @@ Variant i_mysql_num_rows(CArrRef params) {
   FUNCTION_INJECTION(mysql_num_rows);
   return (f_mysql_num_rows(params.rvalAt(0)));
 }
+Variant i_hphp_recursiveiteratoriterator_rewind(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursiveiteratoriterator_rewind);
+  return (f_hphp_recursiveiteratoriterator_rewind(params.rvalAt(0)), null);
+}
 Variant i_magickgetimageresolution(CArrRef params) {
   FUNCTION_INJECTION(magickgetimageresolution);
   return (f_magickgetimageresolution(params.rvalAt(0)));
@@ -5732,6 +5960,10 @@ Variant i_gettype(CArrRef params) {
 Variant i_magickgetimagebackgroundcolor(CArrRef params) {
   FUNCTION_INJECTION(magickgetimagebackgroundcolor);
   return (f_magickgetimagebackgroundcolor(params.rvalAt(0)));
+}
+Variant i_hphp_splfileobject_setmaxlinelen(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_setmaxlinelen);
+  return (f_hphp_splfileobject_setmaxlinelen(params.rvalAt(0), params.rvalAt(1)), null);
 }
 Variant i_array_intersect_key(CArrRef params) {
   FUNCTION_INJECTION(array_intersect_key);
@@ -5801,6 +6033,10 @@ Variant i_ctype_cntrl(CArrRef params) {
   FUNCTION_INJECTION(ctype_cntrl);
   return (f_ctype_cntrl(params.rvalAt(0)));
 }
+Variant i_hphp_splfileobject_next(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_next);
+  return (f_hphp_splfileobject_next(params.rvalAt(0)), null);
+}
 Variant i_is_array(CArrRef params) {
   FUNCTION_INJECTION(is_array);
   return (f_is_array(params.rvalAt(0)));
@@ -5814,6 +6050,10 @@ Variant i_rename(CArrRef params) {
 Variant i_date_format(CArrRef params) {
   FUNCTION_INJECTION(date_format);
   return (f_date_format(params.rvalAt(0), params.rvalAt(1)));
+}
+Variant i_hphp_splfileobject_fgetc(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_fgetc);
+  return (f_hphp_splfileobject_fgetc(params.rvalAt(0)));
 }
 Variant i_magickshaveimage(CArrRef params) {
   FUNCTION_INJECTION(magickshaveimage);
@@ -5836,6 +6076,10 @@ Variant i_magickwhitethresholdimage(CArrRef params) {
 Variant i_drawpolyline(CArrRef params) {
   FUNCTION_INJECTION(drawpolyline);
   return (f_drawpolyline(params.rvalAt(0), params.rvalAt(1)), null);
+}
+Variant i_hphp_splfileobject_fgets(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_fgets);
+  return (f_hphp_splfileobject_fgets(params.rvalAt(0)));
 }
 Variant i_hphp_get_function_info(CArrRef params) {
   FUNCTION_INJECTION(hphp_get_function_info);
@@ -5866,6 +6110,10 @@ Variant i_clock_getres(CArrRef params) {
 Variant i_magicktrimimage(CArrRef params) {
   FUNCTION_INJECTION(magicktrimimage);
   return (f_magicktrimimage(params.rvalAt(0), params.rvalAt(1)));
+}
+Variant i_hphp_splfileinfo_getpathinfo(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getpathinfo);
+  return (f_hphp_splfileinfo_getpathinfo(params.rvalAt(0), params.rvalAt(1)));
 }
 Variant i_magickgetimagegamma(CArrRef params) {
   FUNCTION_INJECTION(magickgetimagegamma);
@@ -6161,6 +6409,10 @@ Variant i_compact(CArrRef params) {
   if (count <= 1) return (f_compact(count, params.rvalAt(0)));
   return (f_compact(count,params.rvalAt(0), params.slice(1, count - 1, false)));
 }
+Variant i_hphp_splfileobject_valid(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_valid);
+  return (f_hphp_splfileobject_valid(params.rvalAt(0)));
+}
 Variant i_imagecolorclosest(CArrRef params) {
   FUNCTION_INJECTION(imagecolorclosest);
   return (f_imagecolorclosest(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
@@ -6211,6 +6463,10 @@ Variant i_is_writeable(CArrRef params) {
 Variant i_magickgetwandsize(CArrRef params) {
   FUNCTION_INJECTION(magickgetwandsize);
   return (f_magickgetwandsize(params.rvalAt(0)));
+}
+Variant i_hphp_directoryiterator___tostring(CArrRef params) {
+  FUNCTION_INJECTION(hphp_directoryiterator___tostring);
+  return (f_hphp_directoryiterator___tostring(params.rvalAt(0)));
 }
 Variant i_imageinterlace(CArrRef params) {
   FUNCTION_INJECTION(imageinterlace);
@@ -6393,9 +6649,17 @@ Variant i_magickgetresourcelimit(CArrRef params) {
   FUNCTION_INJECTION(magickgetresourcelimit);
   return (f_magickgetresourcelimit(params.rvalAt(0)));
 }
+Variant i_hphp_splfileinfo_getlinktarget(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getlinktarget);
+  return (f_hphp_splfileinfo_getlinktarget(params.rvalAt(0)));
+}
 Variant i_imagecolorexact(CArrRef params) {
   FUNCTION_INJECTION(imagecolorexact);
   return (f_imagecolorexact(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+}
+Variant i_hphp_recursivedirectoryiterator_current(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_current);
+  return (f_hphp_recursivedirectoryiterator_current(params.rvalAt(0)));
 }
 Variant i_setcookie(CArrRef params) {
   FUNCTION_INJECTION(setcookie);
@@ -6661,6 +6925,10 @@ Variant i_xhprof_enable(CArrRef params) {
   if (count <= 1) return (f_xhprof_enable(params.rvalAt(0)), null);
   return (f_xhprof_enable(params.rvalAt(0), params.rvalAt(1)), null);
 }
+Variant i_hphp_splfileinfo_gettype(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_gettype);
+  return (f_hphp_splfileinfo_gettype(params.rvalAt(0)));
+}
 Variant i_xmlwriter_start_document(CArrRef params) {
   FUNCTION_INJECTION(xmlwriter_start_document);
   int count = params.size();
@@ -6766,6 +7034,10 @@ Variant i_imagepsfreefont(CArrRef params) {
 Variant i_magickgetsamplingfactors(CArrRef params) {
   FUNCTION_INJECTION(magickgetsamplingfactors);
   return (f_magickgetsamplingfactors(params.rvalAt(0)));
+}
+Variant i_hphp_splfileinfo_getpathname(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getpathname);
+  return (f_hphp_splfileinfo_getpathname(params.rvalAt(0)));
 }
 Variant i_mt_rand(CArrRef params) {
   FUNCTION_INJECTION(mt_rand);
@@ -6920,6 +7192,10 @@ Variant i_imagecolorstotal(CArrRef params) {
   FUNCTION_INJECTION(imagecolorstotal);
   return (f_imagecolorstotal(params.rvalAt(0)));
 }
+Variant i_hphp_splfileinfo_getowner(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getowner);
+  return (f_hphp_splfileinfo_getowner(params.rvalAt(0)));
+}
 Variant i_apc_bin_dumpfile(CArrRef params) {
   FUNCTION_INJECTION(apc_bin_dumpfile);
   int count = params.size();
@@ -6943,6 +7219,10 @@ Variant i_mb_eregi_replace(CArrRef params) {
   if (count <= 3) return (f_mb_eregi_replace(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
   return (f_mb_eregi_replace(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
 }
+Variant i_hphp_splfileinfo_getatime(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getatime);
+  return (f_hphp_splfileinfo_getatime(params.rvalAt(0)));
+}
 Variant i_array_unshift(CArrRef params) {
   FUNCTION_INJECTION(array_unshift);
   int count = params.size();
@@ -6958,6 +7238,10 @@ Variant i_oci_error(CArrRef params) {
 Variant i_stat(CArrRef params) {
   FUNCTION_INJECTION(stat);
   return (f_stat(params.rvalAt(0)));
+}
+Variant i_hphp_directoryiterator_key(CArrRef params) {
+  FUNCTION_INJECTION(hphp_directoryiterator_key);
+  return (f_hphp_directoryiterator_key(params.rvalAt(0)));
 }
 Variant i_posix_getpid(CArrRef params) {
   FUNCTION_INJECTION(posix_getpid);
@@ -6988,6 +7272,10 @@ Variant i_ldap_close(CArrRef params) {
 Variant i_mcrypt_enc_get_algorithms_name(CArrRef params) {
   FUNCTION_INJECTION(mcrypt_enc_get_algorithms_name);
   return (f_mcrypt_enc_get_algorithms_name(params.rvalAt(0)));
+}
+Variant i_hphp_splfileobject_rewind(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_rewind);
+  return (f_hphp_splfileobject_rewind(params.rvalAt(0)), null);
 }
 Variant i_extension_loaded(CArrRef params) {
   FUNCTION_INJECTION(extension_loaded);
@@ -7032,6 +7320,10 @@ Variant i_quoted_printable_decode(CArrRef params) {
 Variant i_destroymagickwand(CArrRef params) {
   FUNCTION_INJECTION(destroymagickwand);
   return (f_destroymagickwand(params.rvalAt(0)), null);
+}
+Variant i_hphp_splfileinfo_getfileinfo(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getfileinfo);
+  return (f_hphp_splfileinfo_getfileinfo(params.rvalAt(0), params.rvalAt(1)));
 }
 Variant i_imagerectangle(CArrRef params) {
   FUNCTION_INJECTION(imagerectangle);
@@ -7097,6 +7389,10 @@ Variant i_magickreadimages(CArrRef params) {
   FUNCTION_INJECTION(magickreadimages);
   return (f_magickreadimages(params.rvalAt(0), params.rvalAt(1)));
 }
+Variant i_connection_status(CArrRef params) {
+  FUNCTION_INJECTION(connection_status);
+  return (f_connection_status());
+}
 Variant i_imagecreatefromgd2(CArrRef params) {
   FUNCTION_INJECTION(imagecreatefromgd2);
   return (f_imagecreatefromgd2(params.rvalAt(0)));
@@ -7104,10 +7400,6 @@ Variant i_imagecreatefromgd2(CArrRef params) {
 Variant i_stream_socket_shutdown(CArrRef params) {
   FUNCTION_INJECTION(stream_socket_shutdown);
   return (f_stream_socket_shutdown(params.rvalAt(0), params.rvalAt(1)));
-}
-Variant i_connection_status(CArrRef params) {
-  FUNCTION_INJECTION(connection_status);
-  return (f_connection_status());
 }
 Variant i_pixelresetiterator(CArrRef params) {
   FUNCTION_INJECTION(pixelresetiterator);
@@ -7131,9 +7423,9 @@ Variant i_array_udiff_uassoc(CArrRef params) {
   if (count <= 4) return (f_array_udiff_uassoc(count, params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
   return (f_array_udiff_uassoc(count,params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.slice(4, count - 4, false)));
 }
-Variant i_xml_set_character_data_handler(CArrRef params) {
-  FUNCTION_INJECTION(xml_set_character_data_handler);
-  return (f_xml_set_character_data_handler(params.rvalAt(0), params.rvalAt(1)));
+Variant i_strptime(CArrRef params) {
+  FUNCTION_INJECTION(strptime);
+  return (f_strptime(params.rvalAt(0), params.rvalAt(1)));
 }
 Variant i_array_diff_uassoc(CArrRef params) {
   FUNCTION_INJECTION(array_diff_uassoc);
@@ -7141,9 +7433,9 @@ Variant i_array_diff_uassoc(CArrRef params) {
   if (count <= 3) return (f_array_diff_uassoc(count, params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
   return (f_array_diff_uassoc(count,params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.slice(3, count - 3, false)));
 }
-Variant i_strptime(CArrRef params) {
-  FUNCTION_INJECTION(strptime);
-  return (f_strptime(params.rvalAt(0), params.rvalAt(1)));
+Variant i_xml_set_character_data_handler(CArrRef params) {
+  FUNCTION_INJECTION(xml_set_character_data_handler);
+  return (f_xml_set_character_data_handler(params.rvalAt(0), params.rvalAt(1)));
 }
 Variant i_pcntl_waitpid(CArrRef params) {
   FUNCTION_INJECTION(pcntl_waitpid);
@@ -7163,33 +7455,25 @@ Variant i_drawsetstrokepatternurl(CArrRef params) {
   FUNCTION_INJECTION(drawsetstrokepatternurl);
   return (f_drawsetstrokepatternurl(params.rvalAt(0), params.rvalAt(1)));
 }
-Variant i_drawsetfillrule(CArrRef params) {
-  FUNCTION_INJECTION(drawsetfillrule);
-  return (f_drawsetfillrule(params.rvalAt(0), params.rvalAt(1)), null);
+Variant i_ldap_add(CArrRef params) {
+  FUNCTION_INJECTION(ldap_add);
+  return (f_ldap_add(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
 }
 Variant i_acosh(CArrRef params) {
   FUNCTION_INJECTION(acosh);
   return (f_acosh(params.rvalAt(0)));
 }
-Variant i_ldap_add(CArrRef params) {
-  FUNCTION_INJECTION(ldap_add);
-  return (f_ldap_add(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-}
-Variant i_posix_getsid(CArrRef params) {
-  FUNCTION_INJECTION(posix_getsid);
-  return (f_posix_getsid(params.rvalAt(0)));
+Variant i_drawsetfillrule(CArrRef params) {
+  FUNCTION_INJECTION(drawsetfillrule);
+  return (f_drawsetfillrule(params.rvalAt(0), params.rvalAt(1)), null);
 }
 Variant i_posix_getlogin(CArrRef params) {
   FUNCTION_INJECTION(posix_getlogin);
   return (f_posix_getlogin());
 }
-Variant i_socket_create_pair(CArrRef params) {
-  FUNCTION_INJECTION(socket_create_pair);
-  return (f_socket_create_pair(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), ref(const_cast<Array&>(params).lvalAt(3))));
-}
-Variant i_imagecreate(CArrRef params) {
-  FUNCTION_INJECTION(imagecreate);
-  return (f_imagecreate(params.rvalAt(0), params.rvalAt(1)));
+Variant i_posix_getsid(CArrRef params) {
+  FUNCTION_INJECTION(posix_getsid);
+  return (f_posix_getsid(params.rvalAt(0)));
 }
 Variant i_imagegd2(CArrRef params) {
   FUNCTION_INJECTION(imagegd2);
@@ -7198,6 +7482,14 @@ Variant i_imagegd2(CArrRef params) {
   if (count == 2) return (f_imagegd2(params.rvalAt(0), params.rvalAt(1)));
   if (count == 3) return (f_imagegd2(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
   return (f_imagegd2(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+}
+Variant i_imagecreate(CArrRef params) {
+  FUNCTION_INJECTION(imagecreate);
+  return (f_imagecreate(params.rvalAt(0), params.rvalAt(1)));
+}
+Variant i_socket_create_pair(CArrRef params) {
+  FUNCTION_INJECTION(socket_create_pair);
+  return (f_socket_create_pair(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), ref(const_cast<Array&>(params).lvalAt(3))));
 }
 Variant i_openssl_x509_check_private_key(CArrRef params) {
   FUNCTION_INJECTION(openssl_x509_check_private_key);
@@ -7215,21 +7507,25 @@ Variant i_debug_print_backtrace(CArrRef params) {
   FUNCTION_INJECTION(debug_print_backtrace);
   return (f_debug_print_backtrace(), null);
 }
-Variant i_stream_set_blocking(CArrRef params) {
-  FUNCTION_INJECTION(stream_set_blocking);
-  return (f_stream_set_blocking(params.rvalAt(0), params.rvalAt(1)));
+Variant i_hphp_splfileobject_seek(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_seek);
+  return (f_hphp_splfileobject_seek(params.rvalAt(0), params.rvalAt(1)), null);
 }
 Variant i_fb_get_derived_classes(CArrRef params) {
   FUNCTION_INJECTION(fb_get_derived_classes);
   return (f_fb_get_derived_classes(params.rvalAt(0), params.rvalAt(1)));
 }
-Variant i_xml_parser_get_option(CArrRef params) {
-  FUNCTION_INJECTION(xml_parser_get_option);
-  return (f_xml_parser_get_option(params.rvalAt(0), params.rvalAt(1)));
+Variant i_stream_set_blocking(CArrRef params) {
+  FUNCTION_INJECTION(stream_set_blocking);
+  return (f_stream_set_blocking(params.rvalAt(0), params.rvalAt(1)));
 }
 Variant i_ezmlm_hash(CArrRef params) {
   FUNCTION_INJECTION(ezmlm_hash);
   return (f_ezmlm_hash(params.rvalAt(0)));
+}
+Variant i_xml_parser_get_option(CArrRef params) {
+  FUNCTION_INJECTION(xml_parser_get_option);
+  return (f_xml_parser_get_option(params.rvalAt(0), params.rvalAt(1)));
 }
 Variant i_array_search(CArrRef params) {
   FUNCTION_INJECTION(array_search);
@@ -7267,9 +7563,9 @@ Variant i_trim(CArrRef params) {
   if (count <= 1) return (f_trim(params.rvalAt(0)));
   return (f_trim(params.rvalAt(0), params.rvalAt(1)));
 }
-Variant i_connection_timeout(CArrRef params) {
-  FUNCTION_INJECTION(connection_timeout);
-  return (f_connection_timeout());
+Variant i_drawpathclose(CArrRef params) {
+  FUNCTION_INJECTION(drawpathclose);
+  return (f_drawpathclose(params.rvalAt(0)), null);
 }
 Variant i_magickprofileimage(CArrRef params) {
   FUNCTION_INJECTION(magickprofileimage);
@@ -7277,17 +7573,17 @@ Variant i_magickprofileimage(CArrRef params) {
   if (count <= 2) return (f_magickprofileimage(params.rvalAt(0), params.rvalAt(1)));
   return (f_magickprofileimage(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
 }
-Variant i_drawpathclose(CArrRef params) {
-  FUNCTION_INJECTION(drawpathclose);
-  return (f_drawpathclose(params.rvalAt(0)), null);
-}
-Variant i_pixelgetindex(CArrRef params) {
-  FUNCTION_INJECTION(pixelgetindex);
-  return (f_pixelgetindex(params.rvalAt(0)));
+Variant i_connection_timeout(CArrRef params) {
+  FUNCTION_INJECTION(connection_timeout);
+  return (f_connection_timeout());
 }
 Variant i_mysql_data_seek(CArrRef params) {
   FUNCTION_INJECTION(mysql_data_seek);
   return (f_mysql_data_seek(params.rvalAt(0), params.rvalAt(1)));
+}
+Variant i_pixelgetindex(CArrRef params) {
+  FUNCTION_INJECTION(pixelgetindex);
+  return (f_pixelgetindex(params.rvalAt(0)));
 }
 Variant i_hebrevc(CArrRef params) {
   FUNCTION_INJECTION(hebrevc);
@@ -7305,17 +7601,21 @@ Variant i_magicknextimage(CArrRef params) {
   FUNCTION_INJECTION(magicknextimage);
   return (f_magicknextimage(params.rvalAt(0)));
 }
-Variant i_mysql_stat(CArrRef params) {
-  FUNCTION_INJECTION(mysql_stat);
-  int count = params.size();
-  if (count <= 0) return (f_mysql_stat());
-  return (f_mysql_stat(params.rvalAt(0)));
+Variant i_hphp_recursivedirectoryiterator_key(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_key);
+  return (f_hphp_recursivedirectoryiterator_key(params.rvalAt(0)));
 }
 Variant i_mysql_create_db(CArrRef params) {
   FUNCTION_INJECTION(mysql_create_db);
   int count = params.size();
   if (count <= 1) return (f_mysql_create_db(params.rvalAt(0)));
   return (f_mysql_create_db(params.rvalAt(0), params.rvalAt(1)));
+}
+Variant i_mysql_stat(CArrRef params) {
+  FUNCTION_INJECTION(mysql_stat);
+  int count = params.size();
+  if (count <= 0) return (f_mysql_stat());
+  return (f_mysql_stat(params.rvalAt(0)));
 }
 Variant i_get_object_vars(CArrRef params) {
   FUNCTION_INJECTION(get_object_vars);
@@ -7337,13 +7637,13 @@ Variant i_oci_set_prefetch(CArrRef params) {
   FUNCTION_INJECTION(oci_set_prefetch);
   return (f_oci_set_prefetch(params.rvalAt(0), params.rvalAt(1)));
 }
-Variant i_imagecreatefromgif(CArrRef params) {
-  FUNCTION_INJECTION(imagecreatefromgif);
-  return (f_imagecreatefromgif(params.rvalAt(0)));
-}
 Variant i_posix_getuid(CArrRef params) {
   FUNCTION_INJECTION(posix_getuid);
   return (f_posix_getuid());
+}
+Variant i_imagecreatefromgif(CArrRef params) {
+  FUNCTION_INJECTION(imagecreatefromgif);
+  return (f_imagecreatefromgif(params.rvalAt(0)));
 }
 Variant i_mb_send_mail(CArrRef params) {
   FUNCTION_INJECTION(mb_send_mail);
@@ -7352,21 +7652,25 @@ Variant i_mb_send_mail(CArrRef params) {
   if (count == 4) return (f_mb_send_mail(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
   return (f_mb_send_mail(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
 }
+Variant i_hphp_splfileinfo___construct(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo___construct);
+  return (f_hphp_splfileinfo___construct(params.rvalAt(0), params.rvalAt(1)));
+}
 Variant i_register_postsend_function(CArrRef params) {
   FUNCTION_INJECTION(register_postsend_function);
   int count = params.size();
   if (count <= 1) return (f_register_postsend_function(count, params.rvalAt(0)), null);
   return (f_register_postsend_function(count,params.rvalAt(0), params.slice(1, count - 1, false)), null);
 }
-Variant i_long2ip(CArrRef params) {
-  FUNCTION_INJECTION(long2ip);
-  return (f_long2ip(params.rvalAt(0)));
-}
 Variant i_getrusage(CArrRef params) {
   FUNCTION_INJECTION(getrusage);
   int count = params.size();
   if (count <= 0) return (f_getrusage());
   return (f_getrusage(params.rvalAt(0)));
+}
+Variant i_long2ip(CArrRef params) {
+  FUNCTION_INJECTION(long2ip);
+  return (f_long2ip(params.rvalAt(0)));
 }
 Variant i_evhttp_set_cache(CArrRef params) {
   FUNCTION_INJECTION(evhttp_set_cache);
@@ -7384,13 +7688,13 @@ Variant i_strripos(CArrRef params) {
   if (count <= 2) return (f_strripos(params.rvalAt(0), params.rvalAt(1)));
   return (f_strripos(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
 }
-Variant i_magickgetfilename(CArrRef params) {
-  FUNCTION_INJECTION(magickgetfilename);
-  return (f_magickgetfilename(params.rvalAt(0)));
-}
 Variant i_magicksetimagecolormapcolor(CArrRef params) {
   FUNCTION_INJECTION(magicksetimagecolormapcolor);
   return (f_magicksetimagecolormapcolor(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+}
+Variant i_magickgetfilename(CArrRef params) {
+  FUNCTION_INJECTION(magickgetfilename);
+  return (f_magickgetfilename(params.rvalAt(0)));
 }
 Variant i_magicksetimagegamma(CArrRef params) {
   FUNCTION_INJECTION(magicksetimagegamma);
@@ -7427,6 +7731,10 @@ Variant i_apc_add(CArrRef params) {
   if (count == 3) return (f_apc_add(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
   return (f_apc_add(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
 }
+Variant i_fbml_sanitize_js_11(CArrRef params) {
+  FUNCTION_INJECTION(fbml_sanitize_js_11);
+  return (f_fbml_sanitize_js_11(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+}
 Variant i_iconv_strlen(CArrRef params) {
   FUNCTION_INJECTION(iconv_strlen);
   int count = params.size();
@@ -7437,19 +7745,15 @@ Variant i_vsprintf(CArrRef params) {
   FUNCTION_INJECTION(vsprintf);
   return (f_vsprintf(params.rvalAt(0), params.rvalAt(1)));
 }
-Variant i_fbml_sanitize_js_11(CArrRef params) {
-  FUNCTION_INJECTION(fbml_sanitize_js_11);
-  return (f_fbml_sanitize_js_11(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+Variant i_imageistruecolor(CArrRef params) {
+  FUNCTION_INJECTION(imageistruecolor);
+  return (f_imageistruecolor(params.rvalAt(0)));
 }
 Variant i_mailparse_msg_extract_part_file(CArrRef params) {
   FUNCTION_INJECTION(mailparse_msg_extract_part_file);
   int count = params.size();
   if (count <= 2) return (f_mailparse_msg_extract_part_file(params.rvalAt(0), params.rvalAt(1)));
   return (f_mailparse_msg_extract_part_file(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-}
-Variant i_imageistruecolor(CArrRef params) {
-  FUNCTION_INJECTION(imageistruecolor);
-  return (f_imageistruecolor(params.rvalAt(0)));
 }
 Variant i_is_nan(CArrRef params) {
   FUNCTION_INJECTION(is_nan);
@@ -7778,6 +8082,10 @@ Variant i_magicksetimagetype(CArrRef params) {
   FUNCTION_INJECTION(magicksetimagetype);
   return (f_magicksetimagetype(params.rvalAt(0), params.rvalAt(1)));
 }
+Variant i_hphp_recursiveiteratoriterator_getinneriterator(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursiveiteratoriterator_getinneriterator);
+  return (f_hphp_recursiveiteratoriterator_getinneriterator(params.rvalAt(0)));
+}
 Variant i_date_sunrise(CArrRef params) {
   FUNCTION_INJECTION(date_sunrise);
   int count = params.size();
@@ -7812,6 +8120,10 @@ Variant i_error_reporting(CArrRef params) {
 Variant i_imagepalettecopy(CArrRef params) {
   FUNCTION_INJECTION(imagepalettecopy);
   return (f_imagepalettecopy(params.rvalAt(0), params.rvalAt(1)), null);
+}
+Variant i_hphp_splfileinfo_isexecutable(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_isexecutable);
+  return (f_hphp_splfileinfo_isexecutable(params.rvalAt(0)));
 }
 Variant i_rename_function(CArrRef params) {
   FUNCTION_INJECTION(rename_function);
@@ -7949,6 +8261,10 @@ Variant i_strcmp(CArrRef params) {
   FUNCTION_INJECTION(strcmp);
   return (f_strcmp(params.rvalAt(0), params.rvalAt(1)));
 }
+Variant i_hphp_recursivedirectoryiterator_haschildren(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_haschildren);
+  return (f_hphp_recursivedirectoryiterator_haschildren(params.rvalAt(0)));
+}
 Variant i_hphp_instanceof(CArrRef params) {
   FUNCTION_INJECTION(hphp_instanceof);
   return (f_hphp_instanceof(params.rvalAt(0), params.rvalAt(1)));
@@ -8014,13 +8330,13 @@ Variant i_convert_cyr_string(CArrRef params) {
   FUNCTION_INJECTION(convert_cyr_string);
   return (f_convert_cyr_string(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
 }
-Variant i_libxml_get_last_error(CArrRef params) {
-  FUNCTION_INJECTION(libxml_get_last_error);
-  return (f_libxml_get_last_error());
-}
 Variant i_sys_get_temp_dir(CArrRef params) {
   FUNCTION_INJECTION(sys_get_temp_dir);
   return (f_sys_get_temp_dir());
+}
+Variant i_libxml_get_last_error(CArrRef params) {
+  FUNCTION_INJECTION(libxml_get_last_error);
+  return (f_libxml_get_last_error());
 }
 Variant i_drawline(CArrRef params) {
   FUNCTION_INJECTION(drawline);
@@ -8039,6 +8355,10 @@ Variant i_gzopen(CArrRef params) {
 Variant i_getservbyport(CArrRef params) {
   FUNCTION_INJECTION(getservbyport);
   return (f_getservbyport(params.rvalAt(0), params.rvalAt(1)));
+}
+Variant i_hphp_splfileinfo_getfilename(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getfilename);
+  return (f_hphp_splfileinfo_getfilename(params.rvalAt(0)));
 }
 Variant i_stripcslashes(CArrRef params) {
   FUNCTION_INJECTION(stripcslashes);
@@ -8063,10 +8383,6 @@ Variant i_imagewbmp(CArrRef params) {
   if (count == 2) return (f_imagewbmp(params.rvalAt(0), params.rvalAt(1)));
   return (f_imagewbmp(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
 }
-Variant i_socket_set_nonblock(CArrRef params) {
-  FUNCTION_INJECTION(socket_set_nonblock);
-  return (f_socket_set_nonblock(params.rvalAt(0)));
-}
 Variant i_shm_get_var(CArrRef params) {
   FUNCTION_INJECTION(shm_get_var);
   return (f_shm_get_var(params.rvalAt(0), params.rvalAt(1)));
@@ -8078,6 +8394,10 @@ Variant i_magickgetmimetype(CArrRef params) {
 Variant i_mysql_fetch_assoc(CArrRef params) {
   FUNCTION_INJECTION(mysql_fetch_assoc);
   return (f_mysql_fetch_assoc(params.rvalAt(0)));
+}
+Variant i_socket_set_nonblock(CArrRef params) {
+  FUNCTION_INJECTION(socket_set_nonblock);
+  return (f_socket_set_nonblock(params.rvalAt(0)));
 }
 Variant i_array_filter(CArrRef params) {
   FUNCTION_INJECTION(array_filter);
@@ -8109,6 +8429,10 @@ Variant i_move_uploaded_file(CArrRef params) {
   FUNCTION_INJECTION(move_uploaded_file);
   return (f_move_uploaded_file(params.rvalAt(0), params.rvalAt(1)));
 }
+Variant i_hphp_splfileobject_flock(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileobject_flock);
+  return (f_hphp_splfileobject_flock(params.rvalAt(0), ref(const_cast<Array&>(params).lvalAt(1))));
+}
 Variant i_imagecopyresampled(CArrRef params) {
   FUNCTION_INJECTION(imagecopyresampled);
   return (f_imagecopyresampled(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4), params.rvalAt(5), params.rvalAt(6), params.rvalAt(7), params.rvalAt(8), params.rvalAt(9)));
@@ -8125,6 +8449,10 @@ Variant i_imagesettile(CArrRef params) {
   FUNCTION_INJECTION(imagesettile);
   return (f_imagesettile(params.rvalAt(0), params.rvalAt(1)));
 }
+Variant i_hphp_recursiveiteratoriterator_valid(CArrRef params) {
+  FUNCTION_INJECTION(hphp_recursiveiteratoriterator_valid);
+  return (f_hphp_recursiveiteratoriterator_valid(params.rvalAt(0)));
+}
 Variant i_fgets(CArrRef params) {
   FUNCTION_INJECTION(fgets);
   int count = params.size();
@@ -8140,6 +8468,10 @@ Variant i_bcdiv(CArrRef params) {
   int count = params.size();
   if (count <= 2) return (f_bcdiv(params.rvalAt(0), params.rvalAt(1)));
   return (f_bcdiv(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+}
+Variant i_hphp_splfileinfo_getbasename(CArrRef params) {
+  FUNCTION_INJECTION(hphp_splfileinfo_getbasename);
+  return (f_hphp_splfileinfo_getbasename(params.rvalAt(0), params.rvalAt(1)));
 }
 Variant i_rsort(CArrRef params) {
   FUNCTION_INJECTION(rsort);
@@ -8208,12 +8540,6 @@ Variant i_openssl_get_privatekey(CArrRef params) {
   if (count <= 1) return (f_openssl_get_privatekey(params.rvalAt(0)));
   return (f_openssl_get_privatekey(params.rvalAt(0), params.rvalAt(1)));
 }
-Variant i_socket_bind(CArrRef params) {
-  FUNCTION_INJECTION(socket_bind);
-  int count = params.size();
-  if (count <= 2) return (f_socket_bind(params.rvalAt(0), params.rvalAt(1)));
-  return (f_socket_bind(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-}
 Variant i_imagepng(CArrRef params) {
   FUNCTION_INJECTION(imagepng);
   int count = params.size();
@@ -8221,6 +8547,12 @@ Variant i_imagepng(CArrRef params) {
   if (count == 2) return (f_imagepng(params.rvalAt(0), params.rvalAt(1)));
   if (count == 3) return (f_imagepng(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
   return (f_imagepng(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+}
+Variant i_socket_bind(CArrRef params) {
+  FUNCTION_INJECTION(socket_bind);
+  int count = params.size();
+  if (count <= 2) return (f_socket_bind(params.rvalAt(0), params.rvalAt(1)));
+  return (f_socket_bind(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
 }
 Variant i_getmyuid(CArrRef params) {
   FUNCTION_INJECTION(getmyuid);
@@ -9009,6 +9341,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x64E390E5F2FDC0CELL, ismagickwand);
       break;
     case 210:
+      HASH_INVOKE(0x7D1FAF3322A360D2LL, hphp_splfileobject___construct);
       HASH_INVOKE(0x5365BD7509BE60D2LL, ldap_dn2ufn);
       HASH_INVOKE(0x3E4DAD592CD0A0D2LL, magickdescribeimage);
       break;
@@ -9017,6 +9350,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 217:
       HASH_INVOKE(0x08F6B727D60670D9LL, magicksetimagedepth);
+      break;
+    case 218:
+      HASH_INVOKE(0x6F242340B2E930DALL, hphp_splfileinfo_setfileclass);
       break;
     case 219:
       HASH_INVOKE(0x3801923AD84670DBLL, apc_inc);
@@ -9175,6 +9511,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 372:
       HASH_INVOKE(0x345E070844E3F174LL, create_function);
       break;
+    case 375:
+      HASH_INVOKE(0x174DB93CAF0D1177LL, hphp_splfileinfo___tostring);
+      break;
     case 377:
       HASH_INVOKE(0x6884FAF0D1EF3179LL, posix_mknod);
       break;
@@ -9247,6 +9586,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 431:
       HASH_INVOKE(0x5B1F9C2E9FE111AFLL, fb_utf8ize);
+      break;
+    case 434:
+      HASH_INVOKE(0x4B96F870584541B2LL, hphp_splfileobject_setflags);
       break;
     case 438:
       HASH_INVOKE(0x33BD672B4AC301B6LL, mt_rand);
@@ -9337,6 +9679,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 493:
       HASH_INVOKE(0x1B09A9A533FFA1EDLL, drawgetexceptiontype);
+      HASH_INVOKE(0x19932EEC5CAE01EDLL, hphp_splfileinfo_getfileinfo);
       break;
     case 497:
       HASH_INVOKE(0x02BCE5B0FBED61F1LL, strlen);
@@ -9406,6 +9749,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 546:
       HASH_INVOKE(0x39E4E0175FADC222LL, drawskewx);
       break;
+    case 550:
+      HASH_INVOKE(0x007B6BD94D767226LL, hphp_splfileobject_fpassthru);
+      break;
     case 551:
       HASH_INVOKE(0x5A26F00A81BA5227LL, xmlwriter_start_attribute_ns);
       break;
@@ -9414,6 +9760,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 556:
       HASH_INVOKE(0x4129FFBF3548E22CLL, mb_strpos);
+      break;
+    case 560:
+      HASH_INVOKE(0x036A5935D9936230LL, hphp_splfileinfo_openfile);
       break;
     case 561:
       HASH_INVOKE(0x61A192D10C004231LL, magickconvolveimage);
@@ -9505,6 +9854,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 639:
       HASH_INVOKE(0x5B94A6962F1EC27FLL, magickechoimagesblob);
       HASH_INVOKE(0x57E8781CF111727FLL, fileowner);
+      break;
+    case 640:
+      HASH_INVOKE(0x2E54EF1891172280LL, hphp_splfileinfo_isexecutable);
       break;
     case 641:
       HASH_INVOKE(0x1765A2E5186DE281LL, socket_write);
@@ -9617,6 +9969,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 730:
       HASH_INVOKE(0x5C6A85B448C352DALL, posix_uname);
       break;
+    case 733:
+      HASH_INVOKE(0x5F585DF7CB82E2DDLL, hphp_splfileinfo_iswritable);
+      break;
     case 738:
       HASH_INVOKE(0x4AEC19D75BF652E2LL, magickremoveimage);
       break;
@@ -9668,6 +10023,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 779:
       HASH_INVOKE(0x0C6F751411F5E30BLL, strrev);
       HASH_INVOKE(0x65F586C35A88030BLL, magickresizeimage);
+      break;
+    case 780:
+      HASH_INVOKE(0x553940FCE453330CLL, hphp_splfileobject_getmaxlinelen);
       break;
     case 789:
       HASH_INVOKE(0x4F1E663AE18FD315LL, msg_remove_queue);
@@ -9756,6 +10114,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 863:
       HASH_INVOKE(0x280DE04F84FB235FLL, popdrawingwand);
       break;
+    case 869:
+      HASH_INVOKE(0x68DBF8ABB26A8365LL, hphp_directoryiterator_rewind);
+      break;
     case 870:
       HASH_INVOKE(0x4EF3469306E44366LL, floatval);
       break;
@@ -9777,12 +10138,16 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 889:
       HASH_INVOKE(0x5ED8901DB5D14379LL, magickcharcoalimage);
       break;
+    case 890:
+      HASH_INVOKE(0x69EA8DC005FEC37ALL, hphp_splfileobject_fwrite);
+      break;
     case 900:
       HASH_INVOKE(0x44C1BC500D175384LL, wandgetexception);
       break;
     case 901:
       HASH_INVOKE(0x7C5CA3E2E3C8F385LL, magickflipimage);
       HASH_INVOKE(0x57554E082E0ED385LL, pcntl_exec);
+      HASH_INVOKE(0x0B0B8765A4CDD385LL, hphp_splfileobject_fgets);
       break;
     case 902:
       HASH_INVOKE(0x589E24C7664D5386LL, doubleval);
@@ -9793,6 +10158,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 907:
       HASH_INVOKE(0x73A3F87C0A56238BLL, stat);
       break;
+    case 908:
+      HASH_INVOKE(0x7F18BA1FBD95B38CLL, hphp_directoryiterator_next);
+      break;
     case 909:
       HASH_INVOKE(0x4127DE142CD4A38DLL, xml_get_error_code);
       break;
@@ -9801,6 +10169,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 914:
       HASH_INVOKE(0x2052D8D4822EF392LL, is_subclass_of);
+      HASH_INVOKE(0x2395B0A85E292392LL, hphp_splfileobject_flock);
       break;
     case 916:
       HASH_INVOKE(0x269A220896FD2394LL, deg2rad);
@@ -9815,6 +10184,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 919:
       HASH_INVOKE(0x1D2C305EA5C82397LL, idn_to_utf8);
+      break;
+    case 920:
+      HASH_INVOKE(0x215547858BA7E398LL, hphp_recursiveiteratoriterator___construct);
       break;
     case 921:
       HASH_INVOKE(0x66DA89629BA5D399LL, posix_getgrgid);
@@ -9962,6 +10334,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 1034:
       HASH_INVOKE(0x6DC61C51FA1D340ALL, show_source);
       break;
+    case 1035:
+      HASH_INVOKE(0x6C2CE092B900D40BLL, hphp_splfileinfo___construct);
+      break;
     case 1037:
       HASH_INVOKE(0x2939C5BAE0C4A40DLL, nl2br);
       HASH_INVOKE(0x267529454569840DLL, ob_flush);
@@ -10058,6 +10433,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 1132:
       HASH_INVOKE(0x07D959A8C0CF546CLL, stream_wrapper_unregister);
+      HASH_INVOKE(0x4F39BD300305746CLL, hphp_splfileobject_key);
       break;
     case 1133:
       HASH_INVOKE(0x738D381800CE946DLL, ldap_parse_result);
@@ -10076,6 +10452,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x18666906A8001477LL, array_diff_assoc);
       break;
     case 1144:
+      HASH_INVOKE(0x080594ABE715B478LL, hphp_splfileobject_current);
       HASH_INVOKE(0x6497CC8295DDB478LL, fb_thrift_unserialize);
       break;
     case 1145:
@@ -10098,6 +10475,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 1157:
       HASH_INVOKE(0x250DD3D58EA37485LL, gmstrftime);
+      HASH_INVOKE(0x61499C92F4FBA485LL, hphp_splfileobject_fgetc);
       break;
     case 1161:
       HASH_INVOKE(0x4F7EAF5B37663489LL, magickgetimageredprimary);
@@ -10159,6 +10537,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 1203:
       HASH_INVOKE(0x57034CAD772AF4B3LL, magickgetimagechannelmean);
       break;
+    case 1204:
+      HASH_INVOKE(0x00621C58E54D44B4LL, hphp_recursiveiteratoriterator_key);
+      break;
     case 1206:
       HASH_INVOKE(0x12A9166E68DCF4B6LL, pixelgetgreen);
       break;
@@ -10186,6 +10567,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 1220:
       HASH_INVOKE(0x67EADCF4E81084C4LL, mb_ereg);
+      HASH_INVOKE(0x4A24DB9D6B0334C4LL, hphp_recursivedirectoryiterator_next);
       break;
     case 1221:
       HASH_INVOKE(0x34A38DDF2CD914C5LL, long2ip);
@@ -10259,6 +10641,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 1288:
       HASH_INVOKE(0x63A08D6AD1209508LL, magickgetexception);
       break;
+    case 1291:
+      HASH_INVOKE(0x71DCF11E3640C50BLL, hphp_directoryiterator_valid);
+      break;
     case 1295:
       HASH_INVOKE(0x5A66CCB3D924450FLL, xml_parser_create);
       break;
@@ -10329,6 +10714,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 1347:
       HASH_INVOKE(0x20E2B1D920122543LL, die);
+      HASH_INVOKE(0x0962EACAE0F0B543LL, hphp_splfileinfo_getlinktarget);
       break;
     case 1348:
       HASH_INVOKE(0x4D397FE5D0C0B544LL, magickmedianfilterimage);
@@ -10421,6 +10807,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x5464E148E8A0C592LL, get_extension_funcs);
       HASH_INVOKE(0x7F65501600346592LL, mcrypt_get_block_size);
       break;
+    case 1427:
+      HASH_INVOKE(0x0F5984B8A7FD8593LL, hphp_splfileinfo_getperms);
+      break;
     case 1431:
       HASH_INVOKE(0x513787A813DB0597LL, date_date_set);
       break;
@@ -10478,6 +10867,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 1481:
       HASH_INVOKE(0x75B299F5E35A95C9LL, mb_strwidth);
+      HASH_INVOKE(0x60F8818C0F38D5C9LL, hphp_directoryiterator___tostring);
       break;
     case 1483:
       HASH_INVOKE(0x6751946191FBE5CBLL, override_function);
@@ -10630,6 +11020,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 1617:
       HASH_INVOKE(0x5F3DA61B6506A651LL, oci_error);
       break;
+    case 1618:
+      HASH_INVOKE(0x03066277F647E652LL, hphp_splfileobject_ftell);
+      break;
     case 1621:
       HASH_INVOKE(0x629EDDC1E74ED655LL, array_uintersect_assoc);
       HASH_INVOKE(0x6BE3B1277BBF8655LL, oci_pconnect);
@@ -10648,6 +11041,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 1637:
       HASH_INVOKE(0x08A6AD20C2C5A665LL, hphp_set_static_property);
+      break;
+    case 1639:
+      HASH_INVOKE(0x557A08AC57724667LL, hphp_splfileinfo_getpathinfo);
       break;
     case 1647:
       HASH_INVOKE(0x7D68CADB8069466FLL, magickaverageimages);
@@ -10787,6 +11183,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 1767:
       HASH_INVOKE(0x44201A16F3D876E7LL, trim);
       break;
+    case 1772:
+      HASH_INVOKE(0x0A5EFECAE87EA6ECLL, hphp_splfileobject_eof);
+      break;
     case 1773:
       HASH_INVOKE(0x04BD4B43921956EDLL, ldap_search);
       break;
@@ -10819,6 +11218,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x5EFE15CE970A5704LL, drawpolyline);
       break;
     case 1801:
+      HASH_INVOKE(0x7681C631B34CC709LL, hphp_splfileobject_fflush);
       HASH_INVOKE(0x21972B2BC7A14709LL, imageistruecolor);
       break;
     case 1803:
@@ -10888,6 +11288,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 1863:
       HASH_INVOKE(0x3CD58419E181A747LL, magickstereoimage);
+      HASH_INVOKE(0x13BB9EC5A2D2E747LL, hphp_splfileinfo_isdir);
       break;
     case 1864:
       HASH_INVOKE(0x0D7BBA9608A36748LL, magickcombineimages);
@@ -10916,6 +11317,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 1883:
       HASH_INVOKE(0x05D293F45C15F75BLL, ldap_mod_del);
       break;
+    case 1884:
+      HASH_INVOKE(0x6D5B592E524AF75CLL, hphp_splfileinfo_getbasename);
+      break;
     case 1887:
       HASH_INVOKE(0x3EDB48C5DDD9675FLL, socket_select);
       break;
@@ -10942,6 +11346,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 1901:
       HASH_INVOKE(0x3304663FBC6C976DLL, get_html_translation_table);
       HASH_INVOKE(0x553ADA5A41AE976DLL, mb_ereg_replace);
+      break;
+    case 1902:
+      HASH_INVOKE(0x6DB71D850799D76ELL, hphp_splfileobject_fscanf);
       break;
     case 1904:
       HASH_INVOKE(0x6F6C5B9E3DC64770LL, drawgetstrokemiterlimit);
@@ -11009,6 +11416,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 1961:
       HASH_INVOKE(0x7C251B7DE8DB87A9LL, mcrypt_list_algorithms);
+      HASH_INVOKE(0x7707A7FEA07FB7A9LL, hphp_recursivedirectoryiterator___construct);
       break;
     case 1962:
       HASH_INVOKE(0x45A53A884414A7AALL, pack);
@@ -11197,6 +11605,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 2101:
       HASH_INVOKE(0x1C4A162E6635B835LL, imageftbbox);
+      HASH_INVOKE(0x43A96BA7F58EB835LL, hphp_splfileobject_valid);
       break;
     case 2104:
       HASH_INVOKE(0x63E554E0F11CE838LL, mysql_unbuffered_query);
@@ -11290,11 +11699,18 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x00F8C6758B50B878LL, drawpathcurvetoquadraticbezierabsolute);
       break;
     case 2172:
+      HASH_INVOKE(0x11DFC3C9D916387CLL, hphp_splfileobject_ftruncate);
       HASH_INVOKE(0x6451BCB825D1787CLL, chroot);
       break;
     case 2173:
       HASH_INVOKE(0x54F84DC9A334287DLL, gzencode);
       HASH_INVOKE(0x2B36081E0828487DLL, debug_print_backtrace);
+      break;
+    case 2176:
+      HASH_INVOKE(0x7549612A72BA5880LL, hphp_splfileinfo_getrealpath);
+      break;
+    case 2179:
+      HASH_INVOKE(0x3EBD8F559B4EA883LL, hphp_splfileobject_getflags);
       break;
     case 2180:
       HASH_INVOKE(0x766CD15A7F2A0884LL, array_uintersect);
@@ -11446,6 +11862,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 2339:
       HASH_INVOKE(0x044B276686B77923LL, fscanf);
       break;
+    case 2346:
+      HASH_INVOKE(0x174C510386E6492ALL, hphp_directoryiterator_key);
+      break;
     case 2349:
       HASH_INVOKE(0x27363CE6CBFC392DLL, pcntl_wexitstatus);
       HASH_INVOKE(0x2337F8C3EE17192DLL, sprintf);
@@ -11475,6 +11894,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x5B60C8396C624939LL, mb_substitute_character);
       break;
     case 2366:
+      HASH_INVOKE(0x3946D67A0D16D93ELL, hphp_splfileinfo_isreadable);
       HASH_INVOKE(0x0CADFE289C92893ELL, socket_getpeername);
       break;
     case 2371:
@@ -11505,6 +11925,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x253AC5D4E450A957LL, magickgetreleasedate);
       break;
     case 2394:
+      HASH_INVOKE(0x103C12985527295ALL, hphp_splfileobject_setcsvcontrol);
       HASH_INVOKE(0x7056E766A274895ALL, virtual);
       break;
     case 2397:
@@ -11567,7 +11988,11 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x651A8CBB8D2A398DLL, mysql_stat);
       break;
     case 2446:
+      HASH_INVOKE(0x45CFDEE19995398ELL, hphp_recursiveiteratoriterator_next);
       HASH_INVOKE(0x333D4DFD4927898ELL, magickgetimagewhitepoint);
+      break;
+    case 2448:
+      HASH_INVOKE(0x342D957A86A03990LL, hphp_splfileobject_seek);
       break;
     case 2456:
       HASH_INVOKE(0x501AAD31C8086998LL, posix_getcwd);
@@ -11627,6 +12052,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 2490:
       HASH_INVOKE(0x13B3172E092D99BALL, is_dir);
       break;
+    case 2492:
+      HASH_INVOKE(0x7E7BF1BDA6DB49BCLL, hphp_splfileinfo_getgroup);
+      break;
     case 2493:
       HASH_INVOKE(0x6325F56D49E6F9BDLL, fb_get_derived_classes);
       break;
@@ -11641,6 +12069,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 2500:
       HASH_INVOKE(0x47B7D3745D80B9C4LL, socket_get_option);
+      break;
+    case 2502:
+      HASH_INVOKE(0x080F661DB8BFC9C6LL, hphp_splfileinfo_getmtime);
       break;
     case 2503:
       HASH_INVOKE(0x6ECDF24B29D789C7LL, strtolower);
@@ -11735,6 +12166,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 2588:
       HASH_INVOKE(0x12D49AD562F38A1CLL, date_timezone_get);
       break;
+    case 2591:
+      HASH_INVOKE(0x35C8BD7DFDADEA1FLL, hphp_directoryiterator_current);
+      break;
     case 2592:
       HASH_INVOKE(0x2A420675E6AF0A20LL, basename);
       break;
@@ -11797,6 +12231,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 2631:
       HASH_INVOKE(0x1B45CFF586F85A47LL, utf8_encode);
       break;
+    case 2636:
+      HASH_INVOKE(0x7039B1C3356B8A4CLL, hphp_splfileobject_rewind);
+      break;
     case 2647:
       HASH_INVOKE(0x5088945958DD4A57LL, mktime);
       HASH_INVOKE(0x7E929ED7D9BE6A57LL, ini_get);
@@ -11848,6 +12285,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 2685:
       HASH_INVOKE(0x414C2E31304E9A7DLL, stream_get_filters);
       break;
+    case 2689:
+      HASH_INVOKE(0x09367774F803EA81LL, hphp_recursiveiteratoriterator_valid);
+      break;
     case 2690:
       HASH_INVOKE(0x258205B54DC06A82LL, newpixelwands);
       HASH_INVOKE(0x79786FABC5551A82LL, jpeg2wbmp);
@@ -11869,6 +12309,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x1818A3CFBA357A88LL, magicksetwandsize);
       break;
     case 2699:
+      HASH_INVOKE(0x7588BD0546C8BA8BLL, hphp_recursivedirectoryiterator_valid);
       HASH_INVOKE(0x7ACBCD9CF335AA8BLL, xmlwriter_start_document);
       break;
     case 2700:
@@ -11974,6 +12415,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 2773:
       HASH_INVOKE(0x0D5DAF8034B41AD5LL, get_include_path);
+      HASH_INVOKE(0x5338F971C6DCEAD5LL, hphp_splfileinfo_islink);
       break;
     case 2774:
       HASH_INVOKE(0x231BCE6071220AD6LL, drawcircle);
@@ -11989,6 +12431,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 2781:
       HASH_INVOKE(0x3E319E451A32FADDLL, magicksharpenimage);
+      break;
+    case 2782:
+      HASH_INVOKE(0x31D1C58F7BD89ADELL, hphp_directoryiterator_seek);
       break;
     case 2788:
       HASH_INVOKE(0x47B15A7136E94AE4LL, strnatcasecmp);
@@ -12046,6 +12491,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 2837:
       HASH_INVOKE(0x24D0895FBB7BCB15LL, is_callable);
+      HASH_INVOKE(0x773E3809C4954B15LL, hphp_recursivedirectoryiterator_current);
       break;
     case 2839:
       HASH_INVOKE(0x66F9A476DAB47B17LL, pixelsetcolor);
@@ -12279,6 +12725,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x0B4E7B9180C4ABC9LL, xml_set_end_namespace_decl_handler);
       HASH_INVOKE(0x22BA0903D344CBC9LL, array_rand);
       break;
+    case 3018:
+      HASH_INVOKE(0x4122DFAC25BDFBCALL, hphp_splfileinfo_getowner);
+      break;
     case 3021:
       HASH_INVOKE(0x22251ECF8CD58BCDLL, array_product);
       HASH_INVOKE(0x53A88C8F973CFBCDLL, apc_clear_cache);
@@ -12289,6 +12738,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 3024:
       HASH_INVOKE(0x7046755D8374EBD0LL, ctype_digit);
+      HASH_INVOKE(0x6846CA07A5E21BD0LL, hphp_directoryiterator___construct);
       break;
     case 3026:
       HASH_INVOKE(0x6FE3C5FF5E883BD2LL, round);
@@ -12390,6 +12840,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3112:
       HASH_INVOKE(0x79A4E240F18BAC28LL, rand);
       break;
+    case 3115:
+      HASH_INVOKE(0x09A98E99D51E8C2BLL, hphp_recursivedirectoryiterator_seek);
+      break;
     case 3116:
       HASH_INVOKE(0x116C3EC924B9AC2CLL, imagegd);
       break;
@@ -12401,6 +12854,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 3128:
       HASH_INVOKE(0x21564F9315F3FC38LL, drawsettextdecoration);
+      break;
+    case 3132:
+      HASH_INVOKE(0x69488CC69B897C3CLL, hphp_recursiveiteratoriterator_getinneriterator);
       break;
     case 3134:
       HASH_INVOKE(0x15EC581662651C3ELL, date_parse);
@@ -12431,6 +12887,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 3154:
       HASH_INVOKE(0x1FC294B806F76C52LL, php_sapi_name);
+      break;
+    case 3159:
+      HASH_INVOKE(0x313E8EB28A111C57LL, hphp_splfileinfo_setinfoclass);
       break;
     case 3160:
       HASH_INVOKE(0x1B8C3DA27170DC58LL, dirname);
@@ -12479,6 +12938,12 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3194:
       HASH_INVOKE(0x05D7B804ECDE8C7ALL, checkdnsrr);
       HASH_INVOKE(0x05F3BC04D61CAC7ALL, get_defined_vars);
+      break;
+    case 3195:
+      HASH_INVOKE(0x749E45FBD48BEC7BLL, hphp_recursivedirectoryiterator___tostring);
+      break;
+    case 3198:
+      HASH_INVOKE(0x5F41821072A06C7ELL, hphp_splfileinfo_getctime);
       break;
     case 3201:
       HASH_INVOKE(0x767806D6F1053C81LL, sin);
@@ -12544,6 +13009,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x373B3FADEACB7CB0LL, openssl_private_encrypt);
       break;
     case 3249:
+      HASH_INVOKE(0x40D8DC24FA917CB1LL, hphp_splfileobject_fgetss);
       HASH_INVOKE(0x735555B148E58CB1LL, ldap_read);
       break;
     case 3250:
@@ -12567,6 +13033,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3260:
       HASH_INVOKE(0x19C1872E55A7ECBCLL, is_long);
       HASH_INVOKE(0x3978BE548631ECBCLL, hash_final);
+      HASH_INVOKE(0x733137183026ACBCLL, hphp_splfileobject_next);
       break;
     case 3264:
       HASH_INVOKE(0x3033FE14E114FCC0LL, magicksetimageblueprimary);
@@ -12680,6 +13147,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3345:
       HASH_INVOKE(0x2D484921B5400D11LL, magickradialblurimage);
       break;
+    case 3346:
+      HASH_INVOKE(0x5F165B40AEEE5D12LL, hphp_splfileinfo_getfilename);
+      break;
     case 3348:
       HASH_INVOKE(0x63837ECAF6235D14LL, preg_replace);
       break;
@@ -12688,6 +13158,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 3354:
       HASH_INVOKE(0x75DB75CA9DE56D1ALL, xml_parser_get_option);
+      HASH_INVOKE(0x39994614C6315D1ALL, hphp_recursivedirectoryiterator_key);
       break;
     case 3355:
       HASH_INVOKE(0x70C22A7EEF54CD1BLL, ldap_compare);
@@ -12754,6 +13225,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 3413:
       HASH_INVOKE(0x36D672EF4FBEFD55LL, json_encode);
+      break;
+    case 3416:
+      HASH_INVOKE(0x146109BDD2F97D58LL, hphp_splfileobject_setmaxlinelen);
       break;
     case 3418:
       HASH_INVOKE(0x4ACCF26A7AE80D5ALL, imagefilltoborder);
@@ -12824,6 +13298,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 3464:
       HASH_INVOKE(0x2AFF8525E93D6D88LL, drawsetfillopacity);
+      HASH_INVOKE(0x1F22C82816F9AD88LL, hphp_splfileinfo_getpath);
       break;
     case 3465:
       HASH_INVOKE(0x230E7AD147721D89LL, end);
@@ -12870,10 +13345,14 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x188720048AB37DABLL, magickquantizeimages);
       HASH_INVOKE(0x66764CAABFF4CDABLL, array_keys);
       break;
+    case 3505:
+      HASH_INVOKE(0x67EAC6D7332F3DB1LL, hphp_splfileobject_fgetcsv);
+      break;
     case 3506:
       HASH_INVOKE(0x257371BC40186DB2LL, magickblurimage);
       break;
     case 3507:
+      HASH_INVOKE(0x628069E483F35DB3LL, hphp_splfileobject_fstat);
       HASH_INVOKE(0x53F2C6F5AE244DB3LL, drawpushdefs);
       break;
     case 3512:
@@ -12949,6 +13428,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x73B30E65808A6DF4LL, ctype_xdigit);
       HASH_INVOKE(0x5046A0D9DFDB5DF4LL, strcspn);
       break;
+    case 3575:
+      HASH_INVOKE(0x23E563F1EC919DF7LL, hphp_splfileinfo_getpathname);
+      break;
     case 3576:
       HASH_INVOKE(0x5E43280BC8DD1DF8LL, magicktrimimage);
       break;
@@ -12960,6 +13442,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 3582:
       HASH_INVOKE(0x21F24104004CFDFELL, evhttp_post);
+      HASH_INVOKE(0x072690BF719D7DFELL, hphp_recursivedirectoryiterator_rewind);
       break;
     case 3586:
       HASH_INVOKE(0x7829D2171DFBFE02LL, magickgetimagegamma);
@@ -13013,6 +13496,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3629:
       HASH_INVOKE(0x7817FA38BAAEFE2DLL, fsockopen);
       break;
+    case 3630:
+      HASH_INVOKE(0x3E62C1A48E9EEE2ELL, hphp_splfileinfo_getsize);
+      break;
     case 3634:
       HASH_INVOKE(0x000AAF93F814AE32LL, drawsetvectorgraphics);
       break;
@@ -13049,6 +13535,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 3668:
       HASH_INVOKE(0x6BF155774D546E54LL, define_syslog_variables);
+      HASH_INVOKE(0x7B6BF544EB420E54LL, hphp_recursivedirectoryiterator_haschildren);
       break;
     case 3671:
       HASH_INVOKE(0x2DEF52641933CE57LL, magickgetimagemattecolor);
@@ -13211,10 +13698,14 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3780:
       HASH_INVOKE(0x7052903F1B17AEC4LL, parse_str);
       break;
+    case 3781:
+      HASH_INVOKE(0x7D69B3537C353EC5LL, hphp_splfileinfo_isfile);
+      break;
     case 3785:
       HASH_INVOKE(0x58C8DCAAE5B7CEC9LL, get_cfg_var);
       break;
     case 3786:
+      HASH_INVOKE(0x08E6C1CD3AC64ECALL, hphp_splfileinfo_gettype);
       HASH_INVOKE(0x1AA83A1057BE6ECALL, mysql_field_len);
       break;
     case 3794:
@@ -13241,6 +13732,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 3811:
       HASH_INVOKE(0x28A98134BD97BEE3LL, mb_regex_encoding);
+      HASH_INVOKE(0x0E1368A3BDFE6EE3LL, hphp_recursiveiteratoriterator_rewind);
       break;
     case 3812:
       HASH_INVOKE(0x5B6FF42ACB2FBEE4LL, getmyuid);
@@ -13250,6 +13742,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 3816:
       HASH_INVOKE(0x6CB6650E66CE4EE8LL, magicksetimagebordercolor);
+      HASH_INVOKE(0x32B3951DFD2B9EE8LL, hphp_directoryiterator_isdot);
       break;
     case 3819:
       HASH_INVOKE(0x72882DBF2D49CEEBLL, set_magic_quotes_runtime);
@@ -13316,6 +13809,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3871:
       HASH_INVOKE(0x7C0C145EFE0EBF1FLL, defined);
       break;
+    case 3872:
+      HASH_INVOKE(0x2C4206A0BD904F20LL, hphp_splfileobject_fseek);
+      break;
     case 3873:
       HASH_INVOKE(0x4282496A4BF42F21LL, php_uname);
       HASH_INVOKE(0x77EC28645855AF21LL, magicksetcompressionquality);
@@ -13339,6 +13835,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x2B66EACB77AE9F32LL, print_r);
       break;
     case 3897:
+      HASH_INVOKE(0x0D4446B2DBC8EF39LL, hphp_splfileinfo_getinode);
       HASH_INVOKE(0x3E9146C06AAEFF39LL, magicksetimagecompressionquality);
       HASH_INVOKE(0x496CF4113CEA8F39LL, magicksetimagefilename);
       break;
@@ -13452,6 +13949,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3982:
       HASH_INVOKE(0x7A8F1104B0CCDF8ELL, phpcredits);
       break;
+    case 3983:
+      HASH_INVOKE(0x4A6C46DC7FE29F8FLL, hphp_recursivedirectoryiterator_getchildren);
+      break;
     case 3985:
       HASH_INVOKE(0x78463112BE739F91LL, connection_timeout);
       break;
@@ -13465,6 +13965,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x40D620CBA0D41F95LL, opendir);
       break;
     case 3991:
+      HASH_INVOKE(0x35117886C885DF97LL, hphp_recursivedirectoryiterator_getsubpathname);
       HASH_INVOKE(0x6F9651265C096F97LL, magickreadimages);
       break;
     case 3992:
@@ -13476,6 +13977,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 3997:
       HASH_INVOKE(0x0AD6DE8829773F9DLL, apc_compile_file);
+      break;
+    case 4004:
+      HASH_INVOKE(0x0E7E9AA21AE99FA4LL, hphp_recursiveiteratoriterator_current);
       break;
     case 4006:
       HASH_INVOKE(0x0DEEA8C3E3A47FA6LL, read_exif_data);
@@ -13517,6 +14021,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 4034:
       HASH_INVOKE(0x6CA22E62D4762FC2LL, magickpainttransparentimage);
       break;
+    case 4037:
+      HASH_INVOKE(0x38498DD4C28D0FC5LL, hphp_splfileinfo_getatime);
+      break;
     case 4043:
       HASH_INVOKE(0x38237A4515F42FCBLL, array_pad);
       break;
@@ -13554,6 +14061,12 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 4071:
       HASH_INVOKE(0x217067889854CFE7LL, xmlwriter_start_dtd);
+      break;
+    case 4072:
+      HASH_INVOKE(0x4D7AEC41CFD73FE8LL, hphp_recursivedirectoryiterator_getsubpath);
+      break;
+    case 4075:
+      HASH_INVOKE(0x67D1EE05DFE71FEBLL, hphp_splfileobject_getcvscontrol);
       break;
     case 4079:
       HASH_INVOKE(0x00EEEE9C6CEA5FEFLL, xmlwriter_write_element_ns);
@@ -13596,6 +14109,37 @@ Variant ei_utf8_encode(Eval::VariableEnvironment &env, const Eval::FunctionCallE
   }
   FUNCTION_INJECTION(utf8_encode);
   return (f_utf8_encode(a0));
+}
+Variant ei_hphp_splfileobject___construct(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject___construct);
+  return (f_hphp_splfileobject___construct(a0, a1, a2, a3, a4));
 }
 Variant ei_func_get_args(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -13679,6 +14223,36 @@ Variant ei_mysql_result(Eval::VariableEnvironment &env, const Eval::FunctionCall
   int count = params.size();
   if (count <= 2) return (f_mysql_result(a0, a1));
   return (f_mysql_result(a0, a1, a2));
+}
+Variant ei_hphp_splfileobject_current(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_current);
+  return (f_hphp_splfileobject_current(a0));
+}
+Variant ei_hphp_splfileinfo_getgroup(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getgroup);
+  return (f_hphp_splfileinfo_getgroup(a0));
 }
 Variant ei_register_shutdown_function(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -13975,6 +14549,25 @@ Variant ei_posix_setsid(Eval::VariableEnvironment &env, const Eval::FunctionCall
   }
   FUNCTION_INJECTION(posix_setsid);
   return (f_posix_setsid());
+}
+Variant ei_hphp_splfileinfo_setfileclass(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_setfileclass);
+  return (f_hphp_splfileinfo_setfileclass(a0, a1), null);
 }
 Variant ei_posix_getpwnam(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -14406,6 +14999,21 @@ Variant ei_cos(Eval::VariableEnvironment &env, const Eval::FunctionCallExpressio
   }
   FUNCTION_INJECTION(cos);
   return (f_cos(a0));
+}
+Variant ei_hphp_recursivedirectoryiterator_valid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_valid);
+  return (f_hphp_recursivedirectoryiterator_valid(a0));
 }
 Variant ei_bcmul(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -15006,6 +15614,21 @@ Variant ei_drawgetstrokemiterlimit(Eval::VariableEnvironment &env, const Eval::F
   }
   FUNCTION_INJECTION(drawgetstrokemiterlimit);
   return (f_drawgetstrokemiterlimit(a0));
+}
+Variant ei_hphp_splfileobject_fpassthru(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_fpassthru);
+  return (f_hphp_splfileobject_fpassthru(a0));
 }
 Variant ei_pixelsetquantumcolor(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -16253,6 +16876,25 @@ Variant ei_mcrypt_module_get_algo_block_size(Eval::VariableEnvironment &env, con
   if (count <= 1) return (f_mcrypt_module_get_algo_block_size(a0));
   return (f_mcrypt_module_get_algo_block_size(a0, a1));
 }
+Variant ei_hphp_splfileobject_ftruncate(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_ftruncate);
+  return (f_hphp_splfileobject_ftruncate(a0, a1));
+}
 Variant ei_key(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -16717,6 +17359,21 @@ Variant ei_fbml_render_children_11(Eval::VariableEnvironment &env, const Eval::F
   int count = params.size();
   if (count <= 4) return (f_fbml_render_children_11(a0, a1, a2, a3));
   return (f_fbml_render_children_11(a0, a1, a2, a3, a4));
+}
+Variant ei_hphp_recursivedirectoryiterator_getsubpathname(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_getsubpathname);
+  return (f_hphp_recursivedirectoryiterator_getsubpathname(a0));
 }
 Variant ei_socket_close(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -17215,6 +17872,29 @@ Variant ei_date_timezone_get(Eval::VariableEnvironment &env, const Eval::Functio
   FUNCTION_INJECTION(date_timezone_get);
   return (f_date_timezone_get(a0));
 }
+Variant ei_hphp_splfileobject_fwrite(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_fwrite);
+  return (f_hphp_splfileobject_fwrite(a0, a1, a2));
+}
 Variant ei_apache_get_rewrite_rules(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -17669,6 +18349,36 @@ Variant ei_drawsettextundercolor(Eval::VariableEnvironment &env, const Eval::Fun
   FUNCTION_INJECTION(drawsettextundercolor);
   return (f_drawsettextundercolor(a0, a1), null);
 }
+Variant ei_hphp_splfileobject_getflags(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_getflags);
+  return (f_hphp_splfileobject_getflags(a0));
+}
+Variant ei_hphp_recursivedirectoryiterator_rewind(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_rewind);
+  return (f_hphp_recursivedirectoryiterator_rewind(a0), null);
+}
 Variant ei_magickgetstringwidth(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -17774,6 +18484,21 @@ Variant ei_gmstrftime(Eval::VariableEnvironment &env, const Eval::FunctionCallEx
   int count = params.size();
   if (count <= 1) return (f_gmstrftime(a0));
   return (f_gmstrftime(a0, a1));
+}
+Variant ei_hphp_recursiveiteratoriterator_next(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursiveiteratoriterator_next);
+  return (f_hphp_recursiveiteratoriterator_next(a0), null);
 }
 Variant ei_stream_socket_get_name(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -18799,6 +19524,29 @@ Variant ei_getrandmax(Eval::VariableEnvironment &env, const Eval::FunctionCallEx
   FUNCTION_INJECTION(getrandmax);
   return (f_getrandmax());
 }
+Variant ei_hphp_splfileobject_fseek(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_fseek);
+  return (f_hphp_splfileobject_fseek(a0, a1, a2));
+}
 Variant ei_ctype_alnum(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -18898,6 +19646,21 @@ Variant ei_magickgetimagescene(Eval::VariableEnvironment &env, const Eval::Funct
   }
   FUNCTION_INJECTION(magickgetimagescene);
   return (f_magickgetimagescene(a0));
+}
+Variant ei_hphp_splfileinfo_isfile(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_isfile);
+  return (f_hphp_splfileinfo_isfile(a0));
 }
 Variant ei_openssl_csr_sign(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -20519,6 +21282,25 @@ Variant ei_date_modify(Eval::VariableEnvironment &env, const Eval::FunctionCallE
   FUNCTION_INJECTION(date_modify);
   return (f_date_modify(a0, a1), null);
 }
+Variant ei_hphp_splfileinfo_setinfoclass(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_setinfoclass);
+  return (f_hphp_splfileinfo_setinfoclass(a0, a1), null);
+}
 Variant ei_umask(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -20611,6 +21393,21 @@ Variant ei_flock(Eval::VariableEnvironment &env, const Eval::FunctionCallExpress
   int count = params.size();
   if (count <= 2) return (f_flock(a0, a1));
   return (f_flock(a0, a1, ref(a2)));
+}
+Variant ei_hphp_splfileobject_ftell(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_ftell);
+  return (f_hphp_splfileobject_ftell(a0));
 }
 Variant ei_pcntl_wifexited(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -20894,6 +21691,21 @@ Variant ei_mcrypt_decrypt(Eval::VariableEnvironment &env, const Eval::FunctionCa
   if (count <= 4) return (f_mcrypt_decrypt(a0, a1, a2, a3));
   return (f_mcrypt_decrypt(a0, a1, a2, a3, a4));
 }
+Variant ei_hphp_directoryiterator_next(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_directoryiterator_next);
+  return (f_hphp_directoryiterator_next(a0), null);
+}
 Variant ei_natcasesort(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -21047,6 +21859,21 @@ Variant ei_touch(Eval::VariableEnvironment &env, const Eval::FunctionCallExpress
   if (count == 2) return (f_touch(a0, a1));
   return (f_touch(a0, a1, a2));
 }
+Variant ei_hphp_recursivedirectoryiterator___tostring(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator___tostring);
+  return (f_hphp_recursivedirectoryiterator___tostring(a0));
+}
 Variant ei_magicksetimagebordercolor(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -21065,6 +21892,21 @@ Variant ei_magicksetimagebordercolor(Eval::VariableEnvironment &env, const Eval:
   }
   FUNCTION_INJECTION(magicksetimagebordercolor);
   return (f_magicksetimagebordercolor(a0, a1));
+}
+Variant ei_hphp_directoryiterator_rewind(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_directoryiterator_rewind);
+  return (f_hphp_directoryiterator_rewind(a0), null);
 }
 Variant ei_magickspliceimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -21378,6 +22220,21 @@ Variant ei_sem_release(Eval::VariableEnvironment &env, const Eval::FunctionCallE
   }
   FUNCTION_INJECTION(sem_release);
   return (f_sem_release(a0));
+}
+Variant ei_hphp_splfileinfo_getctime(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getctime);
+  return (f_hphp_splfileinfo_getctime(a0));
 }
 Variant ei_highlight_string(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -21739,6 +22596,21 @@ Variant ei_hotprofiler_disable(Eval::VariableEnvironment &env, const Eval::Funct
   }
   FUNCTION_INJECTION(hotprofiler_disable);
   return (f_hotprofiler_disable());
+}
+Variant ei_hphp_splfileinfo_getinode(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getinode);
+  return (f_hphp_splfileinfo_getinode(a0));
 }
 Variant ei_magickgettextdescent(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -22564,6 +23436,21 @@ Variant ei_preg_replace(Eval::VariableEnvironment &env, const Eval::FunctionCall
   if (count == 4) return (f_preg_replace(a0, a1, a2, a3));
   return (f_preg_replace(a0, a1, a2, a3, ref(a4)));
 }
+Variant ei_hphp_splfileinfo_getmtime(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getmtime);
+  return (f_hphp_splfileinfo_getmtime(a0));
+}
 Variant ei_fmod(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -22694,6 +23581,33 @@ Variant ei_mysql_fetch_row(Eval::VariableEnvironment &env, const Eval::FunctionC
   }
   FUNCTION_INJECTION(mysql_fetch_row);
   return (f_mysql_fetch_row(a0));
+}
+Variant ei_hphp_splfileobject_setcsvcontrol(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_setcsvcontrol);
+  return (f_hphp_splfileobject_setcsvcontrol(a0, a1, a2, a3), null);
 }
 Variant ei_ob_get_flush(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -22989,6 +23903,21 @@ Variant ei_fileperms(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
   }
   FUNCTION_INJECTION(fileperms);
   return (f_fileperms(a0));
+}
+Variant ei_hphp_splfileobject_fstat(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_fstat);
+  return (f_hphp_splfileobject_fstat(a0));
 }
 Variant ei_unserialize(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -25009,6 +25938,21 @@ Variant ei_nl2br(Eval::VariableEnvironment &env, const Eval::FunctionCallExpress
   FUNCTION_INJECTION(nl2br);
   return (f_nl2br(a0));
 }
+Variant ei_hphp_splfileinfo_getperms(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getperms);
+  return (f_hphp_splfileinfo_getperms(a0));
+}
 Variant ei_drawsetfillopacity(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -25841,6 +26785,21 @@ Variant ei_ucfirst(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   FUNCTION_INJECTION(ucfirst);
   return (f_ucfirst(a0));
 }
+Variant ei_hphp_splfileinfo_isreadable(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_isreadable);
+  return (f_hphp_splfileinfo_isreadable(a0));
+}
 Variant ei_chroot(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -26424,6 +27383,25 @@ Variant ei_log10(Eval::VariableEnvironment &env, const Eval::FunctionCallExpress
   }
   FUNCTION_INJECTION(log10);
   return (f_log10(a0));
+}
+Variant ei_hphp_directoryiterator_seek(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_directoryiterator_seek);
+  return (f_hphp_directoryiterator_seek(a0, a1), null);
 }
 Variant ei_ldap_get_values(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -27059,6 +28037,21 @@ Variant ei_gzwrite(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   if (count <= 2) return (f_gzwrite(a0, a1));
   return (f_gzwrite(a0, a1, a2));
 }
+Variant ei_hphp_splfileinfo___tostring(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo___tostring);
+  return (f_hphp_splfileinfo___tostring(a0));
+}
 Variant ei_magickaddimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -27186,6 +28179,21 @@ Variant ei_set_include_path(Eval::VariableEnvironment &env, const Eval::Function
   }
   FUNCTION_INJECTION(set_include_path);
   return (f_set_include_path(a0));
+}
+Variant ei_hphp_recursivedirectoryiterator_next(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_next);
+  return (f_hphp_recursivedirectoryiterator_next(a0), null);
 }
 Variant ei_openssl_x509_export(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -27634,6 +28642,21 @@ Variant ei_magickcommentimage(Eval::VariableEnvironment &env, const Eval::Functi
   }
   FUNCTION_INJECTION(magickcommentimage);
   return (f_magickcommentimage(a0, a1));
+}
+Variant ei_hphp_splfileinfo_islink(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_islink);
+  return (f_hphp_splfileinfo_islink(a0));
 }
 Variant ei_magicksetimagedelay(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -28526,6 +29549,25 @@ Variant ei_proc_open(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
   if (count == 5) return (f_proc_open(a0, a1, ref(a2), a3, a4));
   return (f_proc_open(a0, a1, ref(a2), a3, a4, a5));
 }
+Variant ei_hphp_splfileobject_fgetss(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_fgetss);
+  return (f_hphp_splfileobject_fgetss(a0, a1));
+}
 Variant ei_clearpixeliterator(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -29111,6 +30153,21 @@ Variant ei_magickgetimagecompose(Eval::VariableEnvironment &env, const Eval::Fun
   FUNCTION_INJECTION(magickgetimagecompose);
   return (f_magickgetimagecompose(a0));
 }
+Variant ei_hphp_splfileinfo_getpath(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getpath);
+  return (f_hphp_splfileinfo_getpath(a0));
+}
 Variant ei_magickcropimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -29490,6 +30547,33 @@ Variant ei_mysql_unbuffered_query(Eval::VariableEnvironment &env, const Eval::Fu
   if (count <= 1) return (f_mysql_unbuffered_query(a0));
   return (f_mysql_unbuffered_query(a0, a1));
 }
+Variant ei_hphp_recursiveiteratoriterator___construct(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursiveiteratoriterator___construct);
+  return (f_hphp_recursiveiteratoriterator___construct(a0, a1, a2, a3));
+}
 Variant ei_hash_final(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -29708,6 +30792,21 @@ Variant ei_ereg_replace(Eval::VariableEnvironment &env, const Eval::FunctionCall
   }
   FUNCTION_INJECTION(ereg_replace);
   return (f_ereg_replace(a0, a1, a2));
+}
+Variant ei_hphp_recursivedirectoryiterator_getchildren(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_getchildren);
+  return (f_hphp_recursivedirectoryiterator_getchildren(a0));
 }
 Variant ei_drawrender(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -30168,6 +31267,21 @@ Variant ei_ldap_get_values_len(Eval::VariableEnvironment &env, const Eval::Funct
   FUNCTION_INJECTION(ldap_get_values_len);
   return (f_ldap_get_values_len(a0, a1, a2));
 }
+Variant ei_hphp_splfileinfo_getrealpath(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getrealpath);
+  return (f_hphp_splfileinfo_getrealpath(a0));
+}
 Variant ei_openssl_pkcs7_verify(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -30207,6 +31321,48 @@ Variant ei_openssl_pkcs7_verify(Eval::VariableEnvironment &env, const Eval::Func
   if (count == 4) return (f_openssl_pkcs7_verify(a0, a1, a2, a3));
   if (count == 5) return (f_openssl_pkcs7_verify(a0, a1, a2, a3, a4));
   return (f_openssl_pkcs7_verify(a0, a1, a2, a3, a4, a5));
+}
+Variant ei_hphp_directoryiterator_current(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_directoryiterator_current);
+  return (f_hphp_directoryiterator_current(a0));
+}
+Variant ei_hphp_splfileobject_fgetcsv(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_fgetcsv);
+  return (f_hphp_splfileobject_fgetcsv(a0, a1, a2, a3));
 }
 Variant ei_stream_socket_recvfrom(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -30330,6 +31486,33 @@ Variant ei_imageantialias(Eval::VariableEnvironment &env, const Eval::FunctionCa
   }
   FUNCTION_INJECTION(imageantialias);
   return (f_imageantialias(a0, a1));
+}
+Variant ei_hphp_splfileinfo_openfile(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_openfile);
+  return (f_hphp_splfileinfo_openfile(a0, a1, a2, a3));
 }
 Variant ei_idn_to_ascii(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -30684,6 +31867,21 @@ Variant ei_fnmatch(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   if (count <= 2) return (f_fnmatch(a0, a1));
   return (f_fnmatch(a0, a1, a2));
 }
+Variant ei_hphp_splfileobject_eof(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_eof);
+  return (f_hphp_splfileobject_eof(a0));
+}
 Variant ei_metaphone(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -30756,6 +31954,21 @@ Variant ei_magickcyclecolormapimage(Eval::VariableEnvironment &env, const Eval::
   FUNCTION_INJECTION(magickcyclecolormapimage);
   return (f_magickcyclecolormapimage(a0, a1));
 }
+Variant ei_hphp_recursiveiteratoriterator_current(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursiveiteratoriterator_current);
+  return (f_hphp_recursiveiteratoriterator_current(a0));
+}
 Variant ei_restore_error_handler(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -30766,6 +31979,29 @@ Variant ei_restore_error_handler(Eval::VariableEnvironment &env, const Eval::Fun
   }
   FUNCTION_INJECTION(restore_error_handler);
   return (f_restore_error_handler());
+}
+Variant ei_hphp_recursivedirectoryiterator___construct(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator___construct);
+  return (f_hphp_recursivedirectoryiterator___construct(a0, a1, a2));
 }
 Variant ei_magicksetimagevirtualpixelmethod(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -31648,6 +32884,21 @@ Variant ei_count_chars(Eval::VariableEnvironment &env, const Eval::FunctionCallE
   if (count <= 1) return (f_count_chars(a0));
   return (f_count_chars(a0, a1));
 }
+Variant ei_hphp_splfileobject_getmaxlinelen(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_getmaxlinelen);
+  return (f_hphp_splfileobject_getmaxlinelen(a0));
+}
 Variant ei_array_uintersect_uassoc(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -31922,6 +33173,21 @@ Variant ei_ldap_next_attribute(Eval::VariableEnvironment &env, const Eval::Funct
   }
   FUNCTION_INJECTION(ldap_next_attribute);
   return (f_ldap_next_attribute(a0, a1));
+}
+Variant ei_hphp_splfileobject_fflush(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_fflush);
+  return (f_hphp_splfileobject_fflush(a0));
 }
 Variant ei_imagejpeg(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -32204,6 +33470,21 @@ Variant ei_xhprof_sample_enable(Eval::VariableEnvironment &env, const Eval::Func
   }
   FUNCTION_INJECTION(xhprof_sample_enable);
   return (f_xhprof_sample_enable(), null);
+}
+Variant ei_hphp_splfileobject_key(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_key);
+  return (f_hphp_splfileobject_key(a0));
 }
 Variant ei_mb_http_input(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -33579,6 +34860,21 @@ Variant ei_iconv_mime_decode(Eval::VariableEnvironment &env, const Eval::Functio
   if (count == 2) return (f_iconv_mime_decode(a0, a1));
   return (f_iconv_mime_decode(a0, a1, a2));
 }
+Variant ei_hphp_recursiveiteratoriterator_key(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursiveiteratoriterator_key);
+  return (f_hphp_recursiveiteratoriterator_key(a0));
+}
 Variant ei_mcrypt_module_is_block_algorithm(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -33719,6 +35015,21 @@ Variant ei_pixelsetiteratorrow(Eval::VariableEnvironment &env, const Eval::Funct
   FUNCTION_INJECTION(pixelsetiteratorrow);
   return (f_pixelsetiteratorrow(a0, a1));
 }
+Variant ei_hphp_splfileinfo_iswritable(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_iswritable);
+  return (f_hphp_splfileinfo_iswritable(a0));
+}
 Variant ei_ldap_get_option(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -33809,6 +35120,25 @@ Variant ei_evhttp_async_post(Eval::VariableEnvironment &env, const Eval::Functio
   if (count <= 2) return (f_evhttp_async_post(a0, a1));
   if (count == 3) return (f_evhttp_async_post(a0, a1, a2));
   return (f_evhttp_async_post(a0, a1, a2, a3));
+}
+Variant ei_hphp_recursivedirectoryiterator_seek(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_seek);
+  return (f_hphp_recursivedirectoryiterator_seek(a0, a1), null);
 }
 Variant ei_array_values(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -33940,6 +35270,21 @@ Variant ei_magickgetimagecolormapcolor(Eval::VariableEnvironment &env, const Eva
   }
   FUNCTION_INJECTION(magickgetimagecolormapcolor);
   return (f_magickgetimagecolormapcolor(a0, a1));
+}
+Variant ei_hphp_splfileobject_getcvscontrol(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_getcvscontrol);
+  return (f_hphp_splfileobject_getcvscontrol(a0));
 }
 Variant ei_settype(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -34508,6 +35853,25 @@ Variant ei_interface_exists(Eval::VariableEnvironment &env, const Eval::Function
   int count = params.size();
   if (count <= 1) return (f_interface_exists(a0));
   return (f_interface_exists(a0, a1));
+}
+Variant ei_hphp_directoryiterator___construct(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_directoryiterator___construct);
+  return (f_hphp_directoryiterator___construct(a0, a1));
 }
 Variant ei_drawpathmovetorelative(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -35094,6 +36458,25 @@ Variant ei_shm_remove(Eval::VariableEnvironment &env, const Eval::FunctionCallEx
   FUNCTION_INJECTION(shm_remove);
   return (f_shm_remove(a0));
 }
+Variant ei_hphp_splfileobject_setflags(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_setflags);
+  return (f_hphp_splfileobject_setflags(a0, a1), null);
+}
 Variant ei_date_sun_info(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -35116,6 +36499,21 @@ Variant ei_date_sun_info(Eval::VariableEnvironment &env, const Eval::FunctionCal
   }
   FUNCTION_INJECTION(date_sun_info);
   return (f_date_sun_info(a0, a1, a2));
+}
+Variant ei_hphp_directoryiterator_valid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_directoryiterator_valid);
+  return (f_hphp_directoryiterator_valid(a0));
 }
 Variant ei_magickresizeimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -35375,6 +36773,33 @@ Variant ei_zlib_get_coding_type(Eval::VariableEnvironment &env, const Eval::Func
   FUNCTION_INJECTION(zlib_get_coding_type);
   return (f_zlib_get_coding_type());
 }
+Variant ei_hphp_splfileobject_fscanf(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_fscanf);
+  return (f_hphp_splfileobject_fscanf(a0, a1, a2, a3));
+}
 Variant ei_mb_ereg_search_getregs(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -35584,6 +37009,21 @@ Variant ei_unpack(Eval::VariableEnvironment &env, const Eval::FunctionCallExpres
   }
   FUNCTION_INJECTION(unpack);
   return (f_unpack(a0, a1));
+}
+Variant ei_hphp_splfileinfo_isdir(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_isdir);
+  return (f_hphp_splfileinfo_isdir(a0));
 }
 Variant ei_magickgetimagepixels(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -36093,6 +37533,21 @@ Variant ei_is_resource(Eval::VariableEnvironment &env, const Eval::FunctionCallE
   FUNCTION_INJECTION(is_resource);
   return (f_is_resource(a0));
 }
+Variant ei_hphp_splfileinfo_getsize(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getsize);
+  return (f_hphp_splfileinfo_getsize(a0));
+}
 Variant ei_posix_seteuid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -36481,6 +37936,21 @@ Variant ei_drawroundrectangle(Eval::VariableEnvironment &env, const Eval::Functi
   FUNCTION_INJECTION(drawroundrectangle);
   return (f_drawroundrectangle(a0, a1, a2, a3, a4, a5, a6), null);
 }
+Variant ei_hphp_directoryiterator_isdot(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_directoryiterator_isdot);
+  return (f_hphp_directoryiterator_isdot(a0));
+}
 Variant ei_drawgetstrokewidth(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -36703,6 +38173,21 @@ Variant ei_strtotime(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
   int count = params.size();
   if (count <= 1) return (f_strtotime(a0));
   return (f_strtotime(a0, a1));
+}
+Variant ei_hphp_recursivedirectoryiterator_getsubpath(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_getsubpath);
+  return (f_hphp_recursivedirectoryiterator_getsubpath(a0));
 }
 Variant ei_apc_clear_cache(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -37069,6 +38554,21 @@ Variant ei_mysql_num_rows(Eval::VariableEnvironment &env, const Eval::FunctionCa
   FUNCTION_INJECTION(mysql_num_rows);
   return (f_mysql_num_rows(a0));
 }
+Variant ei_hphp_recursiveiteratoriterator_rewind(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursiveiteratoriterator_rewind);
+  return (f_hphp_recursiveiteratoriterator_rewind(a0), null);
+}
 Variant ei_magickgetimageresolution(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -37253,6 +38753,25 @@ Variant ei_magickgetimagebackgroundcolor(Eval::VariableEnvironment &env, const E
   }
   FUNCTION_INJECTION(magickgetimagebackgroundcolor);
   return (f_magickgetimagebackgroundcolor(a0));
+}
+Variant ei_hphp_splfileobject_setmaxlinelen(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_setmaxlinelen);
+  return (f_hphp_splfileobject_setmaxlinelen(a0, a1), null);
 }
 Variant ei_array_intersect_key(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -37548,6 +39067,21 @@ Variant ei_ctype_cntrl(Eval::VariableEnvironment &env, const Eval::FunctionCallE
   FUNCTION_INJECTION(ctype_cntrl);
   return (f_ctype_cntrl(a0));
 }
+Variant ei_hphp_splfileobject_next(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_next);
+  return (f_hphp_splfileobject_next(a0), null);
+}
 Variant ei_is_array(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -37606,6 +39140,21 @@ Variant ei_date_format(Eval::VariableEnvironment &env, const Eval::FunctionCallE
   }
   FUNCTION_INJECTION(date_format);
   return (f_date_format(a0, a1));
+}
+Variant ei_hphp_splfileobject_fgetc(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_fgetc);
+  return (f_hphp_splfileobject_fgetc(a0));
 }
 Variant ei_magickshaveimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -37699,6 +39248,21 @@ Variant ei_drawpolyline(Eval::VariableEnvironment &env, const Eval::FunctionCall
   }
   FUNCTION_INJECTION(drawpolyline);
   return (f_drawpolyline(a0, a1), null);
+}
+Variant ei_hphp_splfileobject_fgets(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_fgets);
+  return (f_hphp_splfileobject_fgets(a0));
 }
 Variant ei_hphp_get_function_info(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -37834,6 +39398,25 @@ Variant ei_magicktrimimage(Eval::VariableEnvironment &env, const Eval::FunctionC
   }
   FUNCTION_INJECTION(magicktrimimage);
   return (f_magicktrimimage(a0, a1));
+}
+Variant ei_hphp_splfileinfo_getpathinfo(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getpathinfo);
+  return (f_hphp_splfileinfo_getpathinfo(a0, a1));
 }
 Variant ei_magickgetimagegamma(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -39068,6 +40651,21 @@ Variant ei_compact(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   if (count <= 1) return (f_compact(count, a0));
   return (f_compact(count, a0,vargs));
 }
+Variant ei_hphp_splfileobject_valid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_valid);
+  return (f_hphp_splfileobject_valid(a0));
+}
 Variant ei_imagecolorclosest(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -39310,6 +40908,21 @@ Variant ei_magickgetwandsize(Eval::VariableEnvironment &env, const Eval::Functio
   }
   FUNCTION_INJECTION(magickgetwandsize);
   return (f_magickgetwandsize(a0));
+}
+Variant ei_hphp_directoryiterator___tostring(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_directoryiterator___tostring);
+  return (f_hphp_directoryiterator___tostring(a0));
 }
 Variant ei_imageinterlace(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -40080,6 +41693,21 @@ Variant ei_magickgetresourcelimit(Eval::VariableEnvironment &env, const Eval::Fu
   FUNCTION_INJECTION(magickgetresourcelimit);
   return (f_magickgetresourcelimit(a0));
 }
+Variant ei_hphp_splfileinfo_getlinktarget(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getlinktarget);
+  return (f_hphp_splfileinfo_getlinktarget(a0));
+}
 Variant ei_imagecolorexact(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -40106,6 +41734,21 @@ Variant ei_imagecolorexact(Eval::VariableEnvironment &env, const Eval::FunctionC
   }
   FUNCTION_INJECTION(imagecolorexact);
   return (f_imagecolorexact(a0, a1, a2, a3));
+}
+Variant ei_hphp_recursivedirectoryiterator_current(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_current);
+  return (f_hphp_recursivedirectoryiterator_current(a0));
 }
 Variant ei_setcookie(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -41198,6 +42841,21 @@ Variant ei_xhprof_enable(Eval::VariableEnvironment &env, const Eval::FunctionCal
   if (count <= 1) return (f_xhprof_enable(a0), null);
   return (f_xhprof_enable(a0, a1), null);
 }
+Variant ei_hphp_splfileinfo_gettype(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_gettype);
+  return (f_hphp_splfileinfo_gettype(a0));
+}
 Variant ei_xmlwriter_start_document(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -41609,6 +43267,21 @@ Variant ei_magickgetsamplingfactors(Eval::VariableEnvironment &env, const Eval::
   }
   FUNCTION_INJECTION(magickgetsamplingfactors);
   return (f_magickgetsamplingfactors(a0));
+}
+Variant ei_hphp_splfileinfo_getpathname(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getpathname);
+  return (f_hphp_splfileinfo_getpathname(a0));
 }
 Variant ei_mt_rand(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -42234,6 +43907,21 @@ Variant ei_imagecolorstotal(Eval::VariableEnvironment &env, const Eval::Function
   FUNCTION_INJECTION(imagecolorstotal);
   return (f_imagecolorstotal(a0));
 }
+Variant ei_hphp_splfileinfo_getowner(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getowner);
+  return (f_hphp_splfileinfo_getowner(a0));
+}
 Variant ei_apc_bin_dumpfile(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -42345,6 +44033,21 @@ Variant ei_mb_eregi_replace(Eval::VariableEnvironment &env, const Eval::Function
   if (count <= 3) return (f_mb_eregi_replace(a0, a1, a2));
   return (f_mb_eregi_replace(a0, a1, a2, a3));
 }
+Variant ei_hphp_splfileinfo_getatime(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getatime);
+  return (f_hphp_splfileinfo_getatime(a0));
+}
 Variant ei_array_unshift(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -42398,6 +44101,21 @@ Variant ei_stat(Eval::VariableEnvironment &env, const Eval::FunctionCallExpressi
   }
   FUNCTION_INJECTION(stat);
   return (f_stat(a0));
+}
+Variant ei_hphp_directoryiterator_key(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_directoryiterator_key);
+  return (f_hphp_directoryiterator_key(a0));
 }
 Variant ei_posix_getpid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -42501,6 +44219,21 @@ Variant ei_mcrypt_enc_get_algorithms_name(Eval::VariableEnvironment &env, const 
   }
   FUNCTION_INJECTION(mcrypt_enc_get_algorithms_name);
   return (f_mcrypt_enc_get_algorithms_name(a0));
+}
+Variant ei_hphp_splfileobject_rewind(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_rewind);
+  return (f_hphp_splfileobject_rewind(a0), null);
 }
 Variant ei_extension_loaded(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -42676,6 +44409,25 @@ Variant ei_destroymagickwand(Eval::VariableEnvironment &env, const Eval::Functio
   }
   FUNCTION_INJECTION(destroymagickwand);
   return (f_destroymagickwand(a0), null);
+}
+Variant ei_hphp_splfileinfo_getfileinfo(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getfileinfo);
+  return (f_hphp_splfileinfo_getfileinfo(a0, a1));
 }
 Variant ei_imagerectangle(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -43010,6 +44762,17 @@ Variant ei_magickreadimages(Eval::VariableEnvironment &env, const Eval::Function
   FUNCTION_INJECTION(magickreadimages);
   return (f_magickreadimages(a0, a1));
 }
+Variant ei_connection_status(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(connection_status);
+  return (f_connection_status());
+}
 Variant ei_imagecreatefromgd2(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -43043,17 +44806,6 @@ Variant ei_stream_socket_shutdown(Eval::VariableEnvironment &env, const Eval::Fu
   }
   FUNCTION_INJECTION(stream_socket_shutdown);
   return (f_stream_socket_shutdown(a0, a1));
-}
-Variant ei_connection_status(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(connection_status);
-  return (f_connection_status());
 }
 Variant ei_pixelresetiterator(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -43150,7 +44902,7 @@ Variant ei_array_udiff_uassoc(Eval::VariableEnvironment &env, const Eval::Functi
   if (count <= 4) return (f_array_udiff_uassoc(count, a0, a1, a2, a3));
   return (f_array_udiff_uassoc(count, a0, a1, a2, a3,vargs));
 }
-Variant ei_xml_set_character_data_handler(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+Variant ei_strptime(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -43166,8 +44918,8 @@ Variant ei_xml_set_character_data_handler(Eval::VariableEnvironment &env, const 
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  FUNCTION_INJECTION(xml_set_character_data_handler);
-  return (f_xml_set_character_data_handler(a0, a1));
+  FUNCTION_INJECTION(strptime);
+  return (f_strptime(a0, a1));
 }
 Variant ei_array_diff_uassoc(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -43195,7 +44947,7 @@ Variant ei_array_diff_uassoc(Eval::VariableEnvironment &env, const Eval::Functio
   if (count <= 3) return (f_array_diff_uassoc(count, a0, a1, a2));
   return (f_array_diff_uassoc(count, a0, a1, a2,vargs));
 }
-Variant ei_strptime(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+Variant ei_xml_set_character_data_handler(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -43211,8 +44963,8 @@ Variant ei_strptime(Eval::VariableEnvironment &env, const Eval::FunctionCallExpr
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  FUNCTION_INJECTION(strptime);
-  return (f_strptime(a0, a1));
+  FUNCTION_INJECTION(xml_set_character_data_handler);
+  return (f_xml_set_character_data_handler(a0, a1));
 }
 Variant ei_pcntl_waitpid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -43280,40 +45032,6 @@ Variant ei_drawsetstrokepatternurl(Eval::VariableEnvironment &env, const Eval::F
   FUNCTION_INJECTION(drawsetstrokepatternurl);
   return (f_drawsetstrokepatternurl(a0, a1));
 }
-Variant ei_drawsetfillrule(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(drawsetfillrule);
-  return (f_drawsetfillrule(a0, a1), null);
-}
-Variant ei_acosh(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(acosh);
-  return (f_acosh(a0));
-}
 Variant ei_ldap_add(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -43337,6 +45055,51 @@ Variant ei_ldap_add(Eval::VariableEnvironment &env, const Eval::FunctionCallExpr
   FUNCTION_INJECTION(ldap_add);
   return (f_ldap_add(a0, a1, a2));
 }
+Variant ei_acosh(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(acosh);
+  return (f_acosh(a0));
+}
+Variant ei_drawsetfillrule(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(drawsetfillrule);
+  return (f_drawsetfillrule(a0, a1), null);
+}
+Variant ei_posix_getlogin(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(posix_getlogin);
+  return (f_posix_getlogin());
+}
 Variant ei_posix_getsid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -43351,63 +45114,6 @@ Variant ei_posix_getsid(Eval::VariableEnvironment &env, const Eval::FunctionCall
   }
   FUNCTION_INJECTION(posix_getsid);
   return (f_posix_getsid(a0));
-}
-Variant ei_posix_getlogin(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(posix_getlogin);
-  return (f_posix_getlogin());
-}
-Variant ei_socket_create_pair(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  Variant a2;
-  Variant a3;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a2 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a3 = ref((*it)->refval(env));
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(socket_create_pair);
-  return (f_socket_create_pair(a0, a1, a2, ref(a3)));
-}
-Variant ei_imagecreate(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(imagecreate);
-  return (f_imagecreate(a0, a1));
 }
 Variant ei_imagegd2(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -43439,6 +45145,52 @@ Variant ei_imagegd2(Eval::VariableEnvironment &env, const Eval::FunctionCallExpr
   if (count == 2) return (f_imagegd2(a0, a1));
   if (count == 3) return (f_imagegd2(a0, a1, a2));
   return (f_imagegd2(a0, a1, a2, a3));
+}
+Variant ei_imagecreate(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(imagecreate);
+  return (f_imagecreate(a0, a1));
+}
+Variant ei_socket_create_pair(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = ref((*it)->refval(env));
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(socket_create_pair);
+  return (f_socket_create_pair(a0, a1, a2, ref(a3)));
 }
 Variant ei_openssl_x509_check_private_key(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -43508,7 +45260,7 @@ Variant ei_debug_print_backtrace(Eval::VariableEnvironment &env, const Eval::Fun
   FUNCTION_INJECTION(debug_print_backtrace);
   return (f_debug_print_backtrace(), null);
 }
-Variant ei_stream_set_blocking(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+Variant ei_hphp_splfileobject_seek(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -43524,8 +45276,8 @@ Variant ei_stream_set_blocking(Eval::VariableEnvironment &env, const Eval::Funct
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  FUNCTION_INJECTION(stream_set_blocking);
-  return (f_stream_set_blocking(a0, a1));
+  FUNCTION_INJECTION(hphp_splfileobject_seek);
+  return (f_hphp_splfileobject_seek(a0, a1), null);
 }
 Variant ei_fb_get_derived_classes(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -43546,6 +45298,40 @@ Variant ei_fb_get_derived_classes(Eval::VariableEnvironment &env, const Eval::Fu
   FUNCTION_INJECTION(fb_get_derived_classes);
   return (f_fb_get_derived_classes(a0, a1));
 }
+Variant ei_stream_set_blocking(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(stream_set_blocking);
+  return (f_stream_set_blocking(a0, a1));
+}
+Variant ei_ezmlm_hash(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(ezmlm_hash);
+  return (f_ezmlm_hash(a0));
+}
 Variant ei_xml_parser_get_option(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -43564,21 +45350,6 @@ Variant ei_xml_parser_get_option(Eval::VariableEnvironment &env, const Eval::Fun
   }
   FUNCTION_INJECTION(xml_parser_get_option);
   return (f_xml_parser_get_option(a0, a1));
-}
-Variant ei_ezmlm_hash(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(ezmlm_hash);
-  return (f_ezmlm_hash(a0));
 }
 Variant ei_array_search(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -43720,16 +45491,20 @@ Variant ei_trim(Eval::VariableEnvironment &env, const Eval::FunctionCallExpressi
   if (count <= 1) return (f_trim(a0));
   return (f_trim(a0, a1));
 }
-Variant ei_connection_timeout(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+Variant ei_drawpathclose(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
   } while(false);
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  FUNCTION_INJECTION(connection_timeout);
-  return (f_connection_timeout());
+  FUNCTION_INJECTION(drawpathclose);
+  return (f_drawpathclose(a0), null);
 }
 Variant ei_magickprofileimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -43756,35 +45531,16 @@ Variant ei_magickprofileimage(Eval::VariableEnvironment &env, const Eval::Functi
   if (count <= 2) return (f_magickprofileimage(a0, a1));
   return (f_magickprofileimage(a0, a1, a2));
 }
-Variant ei_drawpathclose(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
+Variant ei_connection_timeout(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
   } while(false);
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  FUNCTION_INJECTION(drawpathclose);
-  return (f_drawpathclose(a0), null);
-}
-Variant ei_pixelgetindex(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(pixelgetindex);
-  return (f_pixelgetindex(a0));
+  FUNCTION_INJECTION(connection_timeout);
+  return (f_connection_timeout());
 }
 Variant ei_mysql_data_seek(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -43804,6 +45560,21 @@ Variant ei_mysql_data_seek(Eval::VariableEnvironment &env, const Eval::FunctionC
   }
   FUNCTION_INJECTION(mysql_data_seek);
   return (f_mysql_data_seek(a0, a1));
+}
+Variant ei_pixelgetindex(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(pixelgetindex);
+  return (f_pixelgetindex(a0));
 }
 Variant ei_hebrevc(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -43862,7 +45633,7 @@ Variant ei_magicknextimage(Eval::VariableEnvironment &env, const Eval::FunctionC
   FUNCTION_INJECTION(magicknextimage);
   return (f_magicknextimage(a0));
 }
-Variant ei_mysql_stat(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+Variant ei_hphp_recursivedirectoryiterator_key(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -43874,10 +45645,8 @@ Variant ei_mysql_stat(Eval::VariableEnvironment &env, const Eval::FunctionCallEx
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  FUNCTION_INJECTION(mysql_stat);
-  int count = params.size();
-  if (count <= 0) return (f_mysql_stat());
-  return (f_mysql_stat(a0));
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_key);
+  return (f_hphp_recursivedirectoryiterator_key(a0));
 }
 Variant ei_mysql_create_db(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -43899,6 +45668,23 @@ Variant ei_mysql_create_db(Eval::VariableEnvironment &env, const Eval::FunctionC
   int count = params.size();
   if (count <= 1) return (f_mysql_create_db(a0));
   return (f_mysql_create_db(a0, a1));
+}
+Variant ei_mysql_stat(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(mysql_stat);
+  int count = params.size();
+  if (count <= 0) return (f_mysql_stat());
+  return (f_mysql_stat(a0));
 }
 Variant ei_get_object_vars(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -43996,6 +45782,17 @@ Variant ei_oci_set_prefetch(Eval::VariableEnvironment &env, const Eval::Function
   FUNCTION_INJECTION(oci_set_prefetch);
   return (f_oci_set_prefetch(a0, a1));
 }
+Variant ei_posix_getuid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(posix_getuid);
+  return (f_posix_getuid());
+}
 Variant ei_imagecreatefromgif(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -44010,17 +45807,6 @@ Variant ei_imagecreatefromgif(Eval::VariableEnvironment &env, const Eval::Functi
   }
   FUNCTION_INJECTION(imagecreatefromgif);
   return (f_imagecreatefromgif(a0));
-}
-Variant ei_posix_getuid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(posix_getuid);
-  return (f_posix_getuid());
 }
 Variant ei_mb_send_mail(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -44056,6 +45842,25 @@ Variant ei_mb_send_mail(Eval::VariableEnvironment &env, const Eval::FunctionCall
   if (count == 4) return (f_mb_send_mail(a0, a1, a2, a3));
   return (f_mb_send_mail(a0, a1, a2, a3, a4));
 }
+Variant ei_hphp_splfileinfo___construct(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo___construct);
+  return (f_hphp_splfileinfo___construct(a0, a1));
+}
 Variant ei_register_postsend_function(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -44074,21 +45879,6 @@ Variant ei_register_postsend_function(Eval::VariableEnvironment &env, const Eval
   if (count <= 1) return (f_register_postsend_function(count, a0), null);
   return (f_register_postsend_function(count, a0,vargs), null);
 }
-Variant ei_long2ip(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(long2ip);
-  return (f_long2ip(a0));
-}
 Variant ei_getrusage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -44105,6 +45895,21 @@ Variant ei_getrusage(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
   int count = params.size();
   if (count <= 0) return (f_getrusage());
   return (f_getrusage(a0));
+}
+Variant ei_long2ip(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(long2ip);
+  return (f_long2ip(a0));
 }
 Variant ei_evhttp_set_cache(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -44175,21 +45980,6 @@ Variant ei_strripos(Eval::VariableEnvironment &env, const Eval::FunctionCallExpr
   if (count <= 2) return (f_strripos(a0, a1));
   return (f_strripos(a0, a1, a2));
 }
-Variant ei_magickgetfilename(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(magickgetfilename);
-  return (f_magickgetfilename(a0));
-}
 Variant ei_magicksetimagecolormapcolor(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -44212,6 +46002,21 @@ Variant ei_magicksetimagecolormapcolor(Eval::VariableEnvironment &env, const Eva
   }
   FUNCTION_INJECTION(magicksetimagecolormapcolor);
   return (f_magicksetimagecolormapcolor(a0, a1, a2));
+}
+Variant ei_magickgetfilename(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(magickgetfilename);
+  return (f_magickgetfilename(a0));
 }
 Variant ei_magicksetimagegamma(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -44355,6 +46160,29 @@ Variant ei_apc_add(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   if (count == 3) return (f_apc_add(a0, a1, a2));
   return (f_apc_add(a0, a1, a2, a3));
 }
+Variant ei_fbml_sanitize_js_11(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(fbml_sanitize_js_11);
+  return (f_fbml_sanitize_js_11(a0, a1, a2));
+}
 Variant ei_iconv_strlen(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -44395,28 +46223,20 @@ Variant ei_vsprintf(Eval::VariableEnvironment &env, const Eval::FunctionCallExpr
   FUNCTION_INJECTION(vsprintf);
   return (f_vsprintf(a0, a1));
 }
-Variant ei_fbml_sanitize_js_11(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+Variant ei_imageistruecolor(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
-  Variant a1;
-  Variant a2;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
     a0 = (*it)->eval(env);
     it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a2 = (*it)->eval(env);
-    it++;
   } while(false);
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  FUNCTION_INJECTION(fbml_sanitize_js_11);
-  return (f_fbml_sanitize_js_11(a0, a1, a2));
+  FUNCTION_INJECTION(imageistruecolor);
+  return (f_imageistruecolor(a0));
 }
 Variant ei_mailparse_msg_extract_part_file(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -44442,21 +46262,6 @@ Variant ei_mailparse_msg_extract_part_file(Eval::VariableEnvironment &env, const
   int count = params.size();
   if (count <= 2) return (f_mailparse_msg_extract_part_file(a0, a1));
   return (f_mailparse_msg_extract_part_file(a0, a1, a2));
-}
-Variant ei_imageistruecolor(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(imageistruecolor);
-  return (f_imageistruecolor(a0));
 }
 Variant ei_is_nan(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -45880,6 +47685,21 @@ Variant ei_magicksetimagetype(Eval::VariableEnvironment &env, const Eval::Functi
   FUNCTION_INJECTION(magicksetimagetype);
   return (f_magicksetimagetype(a0, a1));
 }
+Variant ei_hphp_recursiveiteratoriterator_getinneriterator(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursiveiteratoriterator_getinneriterator);
+  return (f_hphp_recursiveiteratoriterator_getinneriterator(a0));
+}
 Variant ei_date_sunrise(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -46008,6 +47828,21 @@ Variant ei_imagepalettecopy(Eval::VariableEnvironment &env, const Eval::Function
   }
   FUNCTION_INJECTION(imagepalettecopy);
   return (f_imagepalettecopy(a0, a1), null);
+}
+Variant ei_hphp_splfileinfo_isexecutable(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_isexecutable);
+  return (f_hphp_splfileinfo_isexecutable(a0));
 }
 Variant ei_rename_function(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -46567,6 +48402,21 @@ Variant ei_strcmp(Eval::VariableEnvironment &env, const Eval::FunctionCallExpres
   FUNCTION_INJECTION(strcmp);
   return (f_strcmp(a0, a1));
 }
+Variant ei_hphp_recursivedirectoryiterator_haschildren(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursivedirectoryiterator_haschildren);
+  return (f_hphp_recursivedirectoryiterator_haschildren(a0));
+}
 Variant ei_hphp_instanceof(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -46826,17 +48676,6 @@ Variant ei_convert_cyr_string(Eval::VariableEnvironment &env, const Eval::Functi
   FUNCTION_INJECTION(convert_cyr_string);
   return (f_convert_cyr_string(a0, a1, a2));
 }
-Variant ei_libxml_get_last_error(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(libxml_get_last_error);
-  return (f_libxml_get_last_error());
-}
 Variant ei_sys_get_temp_dir(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -46847,6 +48686,17 @@ Variant ei_sys_get_temp_dir(Eval::VariableEnvironment &env, const Eval::Function
   }
   FUNCTION_INJECTION(sys_get_temp_dir);
   return (f_sys_get_temp_dir());
+}
+Variant ei_libxml_get_last_error(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(libxml_get_last_error);
+  return (f_libxml_get_last_error());
 }
 Variant ei_drawline(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -46942,6 +48792,21 @@ Variant ei_getservbyport(Eval::VariableEnvironment &env, const Eval::FunctionCal
   FUNCTION_INJECTION(getservbyport);
   return (f_getservbyport(a0, a1));
 }
+Variant ei_hphp_splfileinfo_getfilename(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getfilename);
+  return (f_hphp_splfileinfo_getfilename(a0));
+}
 Variant ei_stripcslashes(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -47032,21 +48897,6 @@ Variant ei_imagewbmp(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
   if (count == 2) return (f_imagewbmp(a0, a1));
   return (f_imagewbmp(a0, a1, a2));
 }
-Variant ei_socket_set_nonblock(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(socket_set_nonblock);
-  return (f_socket_set_nonblock(a0));
-}
 Variant ei_shm_get_var(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -47095,6 +48945,21 @@ Variant ei_mysql_fetch_assoc(Eval::VariableEnvironment &env, const Eval::Functio
   }
   FUNCTION_INJECTION(mysql_fetch_assoc);
   return (f_mysql_fetch_assoc(a0));
+}
+Variant ei_socket_set_nonblock(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(socket_set_nonblock);
+  return (f_socket_set_nonblock(a0));
 }
 Variant ei_array_filter(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -47208,6 +49073,25 @@ Variant ei_move_uploaded_file(Eval::VariableEnvironment &env, const Eval::Functi
   FUNCTION_INJECTION(move_uploaded_file);
   return (f_move_uploaded_file(a0, a1));
 }
+Variant ei_hphp_splfileobject_flock(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = ref((*it)->refval(env));
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileobject_flock);
+  return (f_hphp_splfileobject_flock(a0, ref(a1)));
+}
 Variant ei_imagecopyresampled(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -47308,6 +49192,21 @@ Variant ei_imagesettile(Eval::VariableEnvironment &env, const Eval::FunctionCall
   FUNCTION_INJECTION(imagesettile);
   return (f_imagesettile(a0, a1));
 }
+Variant ei_hphp_recursiveiteratoriterator_valid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_recursiveiteratoriterator_valid);
+  return (f_hphp_recursiveiteratoriterator_valid(a0));
+}
 Variant ei_fgets(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -47372,6 +49271,25 @@ Variant ei_bcdiv(Eval::VariableEnvironment &env, const Eval::FunctionCallExpress
   int count = params.size();
   if (count <= 2) return (f_bcdiv(a0, a1));
   return (f_bcdiv(a0, a1, a2));
+}
+Variant ei_hphp_splfileinfo_getbasename(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(hphp_splfileinfo_getbasename);
+  return (f_hphp_splfileinfo_getbasename(a0, a1));
 }
 Variant ei_rsort(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -47667,31 +49585,6 @@ Variant ei_openssl_get_privatekey(Eval::VariableEnvironment &env, const Eval::Fu
   if (count <= 1) return (f_openssl_get_privatekey(a0));
   return (f_openssl_get_privatekey(a0, a1));
 }
-Variant ei_socket_bind(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  Variant a2;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a2 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  FUNCTION_INJECTION(socket_bind);
-  int count = params.size();
-  if (count <= 2) return (f_socket_bind(a0, a1));
-  return (f_socket_bind(a0, a1, a2));
-}
 Variant ei_imagepng(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -47722,6 +49615,31 @@ Variant ei_imagepng(Eval::VariableEnvironment &env, const Eval::FunctionCallExpr
   if (count == 2) return (f_imagepng(a0, a1));
   if (count == 3) return (f_imagepng(a0, a1, a2));
   return (f_imagepng(a0, a1, a2, a3));
+}
+Variant ei_socket_bind(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  FUNCTION_INJECTION(socket_bind);
+  int count = params.size();
+  if (count <= 2) return (f_socket_bind(a0, a1));
+  return (f_socket_bind(a0, a1, a2));
 }
 Variant ei_getmyuid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -50266,6 +52184,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x64E390E5F2FDC0CELL, ismagickwand);
       break;
     case 210:
+      HASH_INVOKE_FROM_EVAL(0x7D1FAF3322A360D2LL, hphp_splfileobject___construct);
       HASH_INVOKE_FROM_EVAL(0x5365BD7509BE60D2LL, ldap_dn2ufn);
       HASH_INVOKE_FROM_EVAL(0x3E4DAD592CD0A0D2LL, magickdescribeimage);
       break;
@@ -50274,6 +52193,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 217:
       HASH_INVOKE_FROM_EVAL(0x08F6B727D60670D9LL, magicksetimagedepth);
+      break;
+    case 218:
+      HASH_INVOKE_FROM_EVAL(0x6F242340B2E930DALL, hphp_splfileinfo_setfileclass);
       break;
     case 219:
       HASH_INVOKE_FROM_EVAL(0x3801923AD84670DBLL, apc_inc);
@@ -50432,6 +52354,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 372:
       HASH_INVOKE_FROM_EVAL(0x345E070844E3F174LL, create_function);
       break;
+    case 375:
+      HASH_INVOKE_FROM_EVAL(0x174DB93CAF0D1177LL, hphp_splfileinfo___tostring);
+      break;
     case 377:
       HASH_INVOKE_FROM_EVAL(0x6884FAF0D1EF3179LL, posix_mknod);
       break;
@@ -50504,6 +52429,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 431:
       HASH_INVOKE_FROM_EVAL(0x5B1F9C2E9FE111AFLL, fb_utf8ize);
+      break;
+    case 434:
+      HASH_INVOKE_FROM_EVAL(0x4B96F870584541B2LL, hphp_splfileobject_setflags);
       break;
     case 438:
       HASH_INVOKE_FROM_EVAL(0x33BD672B4AC301B6LL, mt_rand);
@@ -50594,6 +52522,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 493:
       HASH_INVOKE_FROM_EVAL(0x1B09A9A533FFA1EDLL, drawgetexceptiontype);
+      HASH_INVOKE_FROM_EVAL(0x19932EEC5CAE01EDLL, hphp_splfileinfo_getfileinfo);
       break;
     case 497:
       HASH_INVOKE_FROM_EVAL(0x02BCE5B0FBED61F1LL, strlen);
@@ -50663,6 +52592,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 546:
       HASH_INVOKE_FROM_EVAL(0x39E4E0175FADC222LL, drawskewx);
       break;
+    case 550:
+      HASH_INVOKE_FROM_EVAL(0x007B6BD94D767226LL, hphp_splfileobject_fpassthru);
+      break;
     case 551:
       HASH_INVOKE_FROM_EVAL(0x5A26F00A81BA5227LL, xmlwriter_start_attribute_ns);
       break;
@@ -50671,6 +52603,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 556:
       HASH_INVOKE_FROM_EVAL(0x4129FFBF3548E22CLL, mb_strpos);
+      break;
+    case 560:
+      HASH_INVOKE_FROM_EVAL(0x036A5935D9936230LL, hphp_splfileinfo_openfile);
       break;
     case 561:
       HASH_INVOKE_FROM_EVAL(0x61A192D10C004231LL, magickconvolveimage);
@@ -50762,6 +52697,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 639:
       HASH_INVOKE_FROM_EVAL(0x5B94A6962F1EC27FLL, magickechoimagesblob);
       HASH_INVOKE_FROM_EVAL(0x57E8781CF111727FLL, fileowner);
+      break;
+    case 640:
+      HASH_INVOKE_FROM_EVAL(0x2E54EF1891172280LL, hphp_splfileinfo_isexecutable);
       break;
     case 641:
       HASH_INVOKE_FROM_EVAL(0x1765A2E5186DE281LL, socket_write);
@@ -50874,6 +52812,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 730:
       HASH_INVOKE_FROM_EVAL(0x5C6A85B448C352DALL, posix_uname);
       break;
+    case 733:
+      HASH_INVOKE_FROM_EVAL(0x5F585DF7CB82E2DDLL, hphp_splfileinfo_iswritable);
+      break;
     case 738:
       HASH_INVOKE_FROM_EVAL(0x4AEC19D75BF652E2LL, magickremoveimage);
       break;
@@ -50925,6 +52866,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 779:
       HASH_INVOKE_FROM_EVAL(0x0C6F751411F5E30BLL, strrev);
       HASH_INVOKE_FROM_EVAL(0x65F586C35A88030BLL, magickresizeimage);
+      break;
+    case 780:
+      HASH_INVOKE_FROM_EVAL(0x553940FCE453330CLL, hphp_splfileobject_getmaxlinelen);
       break;
     case 789:
       HASH_INVOKE_FROM_EVAL(0x4F1E663AE18FD315LL, msg_remove_queue);
@@ -51013,6 +52957,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 863:
       HASH_INVOKE_FROM_EVAL(0x280DE04F84FB235FLL, popdrawingwand);
       break;
+    case 869:
+      HASH_INVOKE_FROM_EVAL(0x68DBF8ABB26A8365LL, hphp_directoryiterator_rewind);
+      break;
     case 870:
       HASH_INVOKE_FROM_EVAL(0x4EF3469306E44366LL, floatval);
       break;
@@ -51034,12 +52981,16 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 889:
       HASH_INVOKE_FROM_EVAL(0x5ED8901DB5D14379LL, magickcharcoalimage);
       break;
+    case 890:
+      HASH_INVOKE_FROM_EVAL(0x69EA8DC005FEC37ALL, hphp_splfileobject_fwrite);
+      break;
     case 900:
       HASH_INVOKE_FROM_EVAL(0x44C1BC500D175384LL, wandgetexception);
       break;
     case 901:
       HASH_INVOKE_FROM_EVAL(0x7C5CA3E2E3C8F385LL, magickflipimage);
       HASH_INVOKE_FROM_EVAL(0x57554E082E0ED385LL, pcntl_exec);
+      HASH_INVOKE_FROM_EVAL(0x0B0B8765A4CDD385LL, hphp_splfileobject_fgets);
       break;
     case 902:
       HASH_INVOKE_FROM_EVAL(0x589E24C7664D5386LL, doubleval);
@@ -51050,6 +53001,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 907:
       HASH_INVOKE_FROM_EVAL(0x73A3F87C0A56238BLL, stat);
       break;
+    case 908:
+      HASH_INVOKE_FROM_EVAL(0x7F18BA1FBD95B38CLL, hphp_directoryiterator_next);
+      break;
     case 909:
       HASH_INVOKE_FROM_EVAL(0x4127DE142CD4A38DLL, xml_get_error_code);
       break;
@@ -51058,6 +53012,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 914:
       HASH_INVOKE_FROM_EVAL(0x2052D8D4822EF392LL, is_subclass_of);
+      HASH_INVOKE_FROM_EVAL(0x2395B0A85E292392LL, hphp_splfileobject_flock);
       break;
     case 916:
       HASH_INVOKE_FROM_EVAL(0x269A220896FD2394LL, deg2rad);
@@ -51072,6 +53027,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 919:
       HASH_INVOKE_FROM_EVAL(0x1D2C305EA5C82397LL, idn_to_utf8);
+      break;
+    case 920:
+      HASH_INVOKE_FROM_EVAL(0x215547858BA7E398LL, hphp_recursiveiteratoriterator___construct);
       break;
     case 921:
       HASH_INVOKE_FROM_EVAL(0x66DA89629BA5D399LL, posix_getgrgid);
@@ -51219,6 +53177,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1034:
       HASH_INVOKE_FROM_EVAL(0x6DC61C51FA1D340ALL, show_source);
       break;
+    case 1035:
+      HASH_INVOKE_FROM_EVAL(0x6C2CE092B900D40BLL, hphp_splfileinfo___construct);
+      break;
     case 1037:
       HASH_INVOKE_FROM_EVAL(0x2939C5BAE0C4A40DLL, nl2br);
       HASH_INVOKE_FROM_EVAL(0x267529454569840DLL, ob_flush);
@@ -51315,6 +53276,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1132:
       HASH_INVOKE_FROM_EVAL(0x07D959A8C0CF546CLL, stream_wrapper_unregister);
+      HASH_INVOKE_FROM_EVAL(0x4F39BD300305746CLL, hphp_splfileobject_key);
       break;
     case 1133:
       HASH_INVOKE_FROM_EVAL(0x738D381800CE946DLL, ldap_parse_result);
@@ -51333,6 +53295,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x18666906A8001477LL, array_diff_assoc);
       break;
     case 1144:
+      HASH_INVOKE_FROM_EVAL(0x080594ABE715B478LL, hphp_splfileobject_current);
       HASH_INVOKE_FROM_EVAL(0x6497CC8295DDB478LL, fb_thrift_unserialize);
       break;
     case 1145:
@@ -51355,6 +53318,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1157:
       HASH_INVOKE_FROM_EVAL(0x250DD3D58EA37485LL, gmstrftime);
+      HASH_INVOKE_FROM_EVAL(0x61499C92F4FBA485LL, hphp_splfileobject_fgetc);
       break;
     case 1161:
       HASH_INVOKE_FROM_EVAL(0x4F7EAF5B37663489LL, magickgetimageredprimary);
@@ -51416,6 +53380,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1203:
       HASH_INVOKE_FROM_EVAL(0x57034CAD772AF4B3LL, magickgetimagechannelmean);
       break;
+    case 1204:
+      HASH_INVOKE_FROM_EVAL(0x00621C58E54D44B4LL, hphp_recursiveiteratoriterator_key);
+      break;
     case 1206:
       HASH_INVOKE_FROM_EVAL(0x12A9166E68DCF4B6LL, pixelgetgreen);
       break;
@@ -51443,6 +53410,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1220:
       HASH_INVOKE_FROM_EVAL(0x67EADCF4E81084C4LL, mb_ereg);
+      HASH_INVOKE_FROM_EVAL(0x4A24DB9D6B0334C4LL, hphp_recursivedirectoryiterator_next);
       break;
     case 1221:
       HASH_INVOKE_FROM_EVAL(0x34A38DDF2CD914C5LL, long2ip);
@@ -51516,6 +53484,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1288:
       HASH_INVOKE_FROM_EVAL(0x63A08D6AD1209508LL, magickgetexception);
       break;
+    case 1291:
+      HASH_INVOKE_FROM_EVAL(0x71DCF11E3640C50BLL, hphp_directoryiterator_valid);
+      break;
     case 1295:
       HASH_INVOKE_FROM_EVAL(0x5A66CCB3D924450FLL, xml_parser_create);
       break;
@@ -51586,6 +53557,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1347:
       HASH_INVOKE_FROM_EVAL(0x20E2B1D920122543LL, die);
+      HASH_INVOKE_FROM_EVAL(0x0962EACAE0F0B543LL, hphp_splfileinfo_getlinktarget);
       break;
     case 1348:
       HASH_INVOKE_FROM_EVAL(0x4D397FE5D0C0B544LL, magickmedianfilterimage);
@@ -51678,6 +53650,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x5464E148E8A0C592LL, get_extension_funcs);
       HASH_INVOKE_FROM_EVAL(0x7F65501600346592LL, mcrypt_get_block_size);
       break;
+    case 1427:
+      HASH_INVOKE_FROM_EVAL(0x0F5984B8A7FD8593LL, hphp_splfileinfo_getperms);
+      break;
     case 1431:
       HASH_INVOKE_FROM_EVAL(0x513787A813DB0597LL, date_date_set);
       break;
@@ -51735,6 +53710,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1481:
       HASH_INVOKE_FROM_EVAL(0x75B299F5E35A95C9LL, mb_strwidth);
+      HASH_INVOKE_FROM_EVAL(0x60F8818C0F38D5C9LL, hphp_directoryiterator___tostring);
       break;
     case 1483:
       HASH_INVOKE_FROM_EVAL(0x6751946191FBE5CBLL, override_function);
@@ -51887,6 +53863,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1617:
       HASH_INVOKE_FROM_EVAL(0x5F3DA61B6506A651LL, oci_error);
       break;
+    case 1618:
+      HASH_INVOKE_FROM_EVAL(0x03066277F647E652LL, hphp_splfileobject_ftell);
+      break;
     case 1621:
       HASH_INVOKE_FROM_EVAL(0x629EDDC1E74ED655LL, array_uintersect_assoc);
       HASH_INVOKE_FROM_EVAL(0x6BE3B1277BBF8655LL, oci_pconnect);
@@ -51905,6 +53884,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1637:
       HASH_INVOKE_FROM_EVAL(0x08A6AD20C2C5A665LL, hphp_set_static_property);
+      break;
+    case 1639:
+      HASH_INVOKE_FROM_EVAL(0x557A08AC57724667LL, hphp_splfileinfo_getpathinfo);
       break;
     case 1647:
       HASH_INVOKE_FROM_EVAL(0x7D68CADB8069466FLL, magickaverageimages);
@@ -52044,6 +54026,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1767:
       HASH_INVOKE_FROM_EVAL(0x44201A16F3D876E7LL, trim);
       break;
+    case 1772:
+      HASH_INVOKE_FROM_EVAL(0x0A5EFECAE87EA6ECLL, hphp_splfileobject_eof);
+      break;
     case 1773:
       HASH_INVOKE_FROM_EVAL(0x04BD4B43921956EDLL, ldap_search);
       break;
@@ -52076,6 +54061,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x5EFE15CE970A5704LL, drawpolyline);
       break;
     case 1801:
+      HASH_INVOKE_FROM_EVAL(0x7681C631B34CC709LL, hphp_splfileobject_fflush);
       HASH_INVOKE_FROM_EVAL(0x21972B2BC7A14709LL, imageistruecolor);
       break;
     case 1803:
@@ -52145,6 +54131,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1863:
       HASH_INVOKE_FROM_EVAL(0x3CD58419E181A747LL, magickstereoimage);
+      HASH_INVOKE_FROM_EVAL(0x13BB9EC5A2D2E747LL, hphp_splfileinfo_isdir);
       break;
     case 1864:
       HASH_INVOKE_FROM_EVAL(0x0D7BBA9608A36748LL, magickcombineimages);
@@ -52173,6 +54160,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1883:
       HASH_INVOKE_FROM_EVAL(0x05D293F45C15F75BLL, ldap_mod_del);
       break;
+    case 1884:
+      HASH_INVOKE_FROM_EVAL(0x6D5B592E524AF75CLL, hphp_splfileinfo_getbasename);
+      break;
     case 1887:
       HASH_INVOKE_FROM_EVAL(0x3EDB48C5DDD9675FLL, socket_select);
       break;
@@ -52199,6 +54189,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1901:
       HASH_INVOKE_FROM_EVAL(0x3304663FBC6C976DLL, get_html_translation_table);
       HASH_INVOKE_FROM_EVAL(0x553ADA5A41AE976DLL, mb_ereg_replace);
+      break;
+    case 1902:
+      HASH_INVOKE_FROM_EVAL(0x6DB71D850799D76ELL, hphp_splfileobject_fscanf);
       break;
     case 1904:
       HASH_INVOKE_FROM_EVAL(0x6F6C5B9E3DC64770LL, drawgetstrokemiterlimit);
@@ -52266,6 +54259,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1961:
       HASH_INVOKE_FROM_EVAL(0x7C251B7DE8DB87A9LL, mcrypt_list_algorithms);
+      HASH_INVOKE_FROM_EVAL(0x7707A7FEA07FB7A9LL, hphp_recursivedirectoryiterator___construct);
       break;
     case 1962:
       HASH_INVOKE_FROM_EVAL(0x45A53A884414A7AALL, pack);
@@ -52454,6 +54448,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2101:
       HASH_INVOKE_FROM_EVAL(0x1C4A162E6635B835LL, imageftbbox);
+      HASH_INVOKE_FROM_EVAL(0x43A96BA7F58EB835LL, hphp_splfileobject_valid);
       break;
     case 2104:
       HASH_INVOKE_FROM_EVAL(0x63E554E0F11CE838LL, mysql_unbuffered_query);
@@ -52547,11 +54542,18 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x00F8C6758B50B878LL, drawpathcurvetoquadraticbezierabsolute);
       break;
     case 2172:
+      HASH_INVOKE_FROM_EVAL(0x11DFC3C9D916387CLL, hphp_splfileobject_ftruncate);
       HASH_INVOKE_FROM_EVAL(0x6451BCB825D1787CLL, chroot);
       break;
     case 2173:
       HASH_INVOKE_FROM_EVAL(0x54F84DC9A334287DLL, gzencode);
       HASH_INVOKE_FROM_EVAL(0x2B36081E0828487DLL, debug_print_backtrace);
+      break;
+    case 2176:
+      HASH_INVOKE_FROM_EVAL(0x7549612A72BA5880LL, hphp_splfileinfo_getrealpath);
+      break;
+    case 2179:
+      HASH_INVOKE_FROM_EVAL(0x3EBD8F559B4EA883LL, hphp_splfileobject_getflags);
       break;
     case 2180:
       HASH_INVOKE_FROM_EVAL(0x766CD15A7F2A0884LL, array_uintersect);
@@ -52703,6 +54705,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2339:
       HASH_INVOKE_FROM_EVAL(0x044B276686B77923LL, fscanf);
       break;
+    case 2346:
+      HASH_INVOKE_FROM_EVAL(0x174C510386E6492ALL, hphp_directoryiterator_key);
+      break;
     case 2349:
       HASH_INVOKE_FROM_EVAL(0x27363CE6CBFC392DLL, pcntl_wexitstatus);
       HASH_INVOKE_FROM_EVAL(0x2337F8C3EE17192DLL, sprintf);
@@ -52732,6 +54737,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x5B60C8396C624939LL, mb_substitute_character);
       break;
     case 2366:
+      HASH_INVOKE_FROM_EVAL(0x3946D67A0D16D93ELL, hphp_splfileinfo_isreadable);
       HASH_INVOKE_FROM_EVAL(0x0CADFE289C92893ELL, socket_getpeername);
       break;
     case 2371:
@@ -52762,6 +54768,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x253AC5D4E450A957LL, magickgetreleasedate);
       break;
     case 2394:
+      HASH_INVOKE_FROM_EVAL(0x103C12985527295ALL, hphp_splfileobject_setcsvcontrol);
       HASH_INVOKE_FROM_EVAL(0x7056E766A274895ALL, virtual);
       break;
     case 2397:
@@ -52824,7 +54831,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x651A8CBB8D2A398DLL, mysql_stat);
       break;
     case 2446:
+      HASH_INVOKE_FROM_EVAL(0x45CFDEE19995398ELL, hphp_recursiveiteratoriterator_next);
       HASH_INVOKE_FROM_EVAL(0x333D4DFD4927898ELL, magickgetimagewhitepoint);
+      break;
+    case 2448:
+      HASH_INVOKE_FROM_EVAL(0x342D957A86A03990LL, hphp_splfileobject_seek);
       break;
     case 2456:
       HASH_INVOKE_FROM_EVAL(0x501AAD31C8086998LL, posix_getcwd);
@@ -52884,6 +54895,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2490:
       HASH_INVOKE_FROM_EVAL(0x13B3172E092D99BALL, is_dir);
       break;
+    case 2492:
+      HASH_INVOKE_FROM_EVAL(0x7E7BF1BDA6DB49BCLL, hphp_splfileinfo_getgroup);
+      break;
     case 2493:
       HASH_INVOKE_FROM_EVAL(0x6325F56D49E6F9BDLL, fb_get_derived_classes);
       break;
@@ -52898,6 +54912,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2500:
       HASH_INVOKE_FROM_EVAL(0x47B7D3745D80B9C4LL, socket_get_option);
+      break;
+    case 2502:
+      HASH_INVOKE_FROM_EVAL(0x080F661DB8BFC9C6LL, hphp_splfileinfo_getmtime);
       break;
     case 2503:
       HASH_INVOKE_FROM_EVAL(0x6ECDF24B29D789C7LL, strtolower);
@@ -52992,6 +55009,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2588:
       HASH_INVOKE_FROM_EVAL(0x12D49AD562F38A1CLL, date_timezone_get);
       break;
+    case 2591:
+      HASH_INVOKE_FROM_EVAL(0x35C8BD7DFDADEA1FLL, hphp_directoryiterator_current);
+      break;
     case 2592:
       HASH_INVOKE_FROM_EVAL(0x2A420675E6AF0A20LL, basename);
       break;
@@ -53054,6 +55074,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2631:
       HASH_INVOKE_FROM_EVAL(0x1B45CFF586F85A47LL, utf8_encode);
       break;
+    case 2636:
+      HASH_INVOKE_FROM_EVAL(0x7039B1C3356B8A4CLL, hphp_splfileobject_rewind);
+      break;
     case 2647:
       HASH_INVOKE_FROM_EVAL(0x5088945958DD4A57LL, mktime);
       HASH_INVOKE_FROM_EVAL(0x7E929ED7D9BE6A57LL, ini_get);
@@ -53105,6 +55128,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2685:
       HASH_INVOKE_FROM_EVAL(0x414C2E31304E9A7DLL, stream_get_filters);
       break;
+    case 2689:
+      HASH_INVOKE_FROM_EVAL(0x09367774F803EA81LL, hphp_recursiveiteratoriterator_valid);
+      break;
     case 2690:
       HASH_INVOKE_FROM_EVAL(0x258205B54DC06A82LL, newpixelwands);
       HASH_INVOKE_FROM_EVAL(0x79786FABC5551A82LL, jpeg2wbmp);
@@ -53126,6 +55152,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x1818A3CFBA357A88LL, magicksetwandsize);
       break;
     case 2699:
+      HASH_INVOKE_FROM_EVAL(0x7588BD0546C8BA8BLL, hphp_recursivedirectoryiterator_valid);
       HASH_INVOKE_FROM_EVAL(0x7ACBCD9CF335AA8BLL, xmlwriter_start_document);
       break;
     case 2700:
@@ -53231,6 +55258,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2773:
       HASH_INVOKE_FROM_EVAL(0x0D5DAF8034B41AD5LL, get_include_path);
+      HASH_INVOKE_FROM_EVAL(0x5338F971C6DCEAD5LL, hphp_splfileinfo_islink);
       break;
     case 2774:
       HASH_INVOKE_FROM_EVAL(0x231BCE6071220AD6LL, drawcircle);
@@ -53246,6 +55274,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2781:
       HASH_INVOKE_FROM_EVAL(0x3E319E451A32FADDLL, magicksharpenimage);
+      break;
+    case 2782:
+      HASH_INVOKE_FROM_EVAL(0x31D1C58F7BD89ADELL, hphp_directoryiterator_seek);
       break;
     case 2788:
       HASH_INVOKE_FROM_EVAL(0x47B15A7136E94AE4LL, strnatcasecmp);
@@ -53303,6 +55334,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2837:
       HASH_INVOKE_FROM_EVAL(0x24D0895FBB7BCB15LL, is_callable);
+      HASH_INVOKE_FROM_EVAL(0x773E3809C4954B15LL, hphp_recursivedirectoryiterator_current);
       break;
     case 2839:
       HASH_INVOKE_FROM_EVAL(0x66F9A476DAB47B17LL, pixelsetcolor);
@@ -53536,6 +55568,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x0B4E7B9180C4ABC9LL, xml_set_end_namespace_decl_handler);
       HASH_INVOKE_FROM_EVAL(0x22BA0903D344CBC9LL, array_rand);
       break;
+    case 3018:
+      HASH_INVOKE_FROM_EVAL(0x4122DFAC25BDFBCALL, hphp_splfileinfo_getowner);
+      break;
     case 3021:
       HASH_INVOKE_FROM_EVAL(0x22251ECF8CD58BCDLL, array_product);
       HASH_INVOKE_FROM_EVAL(0x53A88C8F973CFBCDLL, apc_clear_cache);
@@ -53546,6 +55581,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3024:
       HASH_INVOKE_FROM_EVAL(0x7046755D8374EBD0LL, ctype_digit);
+      HASH_INVOKE_FROM_EVAL(0x6846CA07A5E21BD0LL, hphp_directoryiterator___construct);
       break;
     case 3026:
       HASH_INVOKE_FROM_EVAL(0x6FE3C5FF5E883BD2LL, round);
@@ -53647,6 +55683,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3112:
       HASH_INVOKE_FROM_EVAL(0x79A4E240F18BAC28LL, rand);
       break;
+    case 3115:
+      HASH_INVOKE_FROM_EVAL(0x09A98E99D51E8C2BLL, hphp_recursivedirectoryiterator_seek);
+      break;
     case 3116:
       HASH_INVOKE_FROM_EVAL(0x116C3EC924B9AC2CLL, imagegd);
       break;
@@ -53658,6 +55697,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3128:
       HASH_INVOKE_FROM_EVAL(0x21564F9315F3FC38LL, drawsettextdecoration);
+      break;
+    case 3132:
+      HASH_INVOKE_FROM_EVAL(0x69488CC69B897C3CLL, hphp_recursiveiteratoriterator_getinneriterator);
       break;
     case 3134:
       HASH_INVOKE_FROM_EVAL(0x15EC581662651C3ELL, date_parse);
@@ -53688,6 +55730,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3154:
       HASH_INVOKE_FROM_EVAL(0x1FC294B806F76C52LL, php_sapi_name);
+      break;
+    case 3159:
+      HASH_INVOKE_FROM_EVAL(0x313E8EB28A111C57LL, hphp_splfileinfo_setinfoclass);
       break;
     case 3160:
       HASH_INVOKE_FROM_EVAL(0x1B8C3DA27170DC58LL, dirname);
@@ -53736,6 +55781,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3194:
       HASH_INVOKE_FROM_EVAL(0x05D7B804ECDE8C7ALL, checkdnsrr);
       HASH_INVOKE_FROM_EVAL(0x05F3BC04D61CAC7ALL, get_defined_vars);
+      break;
+    case 3195:
+      HASH_INVOKE_FROM_EVAL(0x749E45FBD48BEC7BLL, hphp_recursivedirectoryiterator___tostring);
+      break;
+    case 3198:
+      HASH_INVOKE_FROM_EVAL(0x5F41821072A06C7ELL, hphp_splfileinfo_getctime);
       break;
     case 3201:
       HASH_INVOKE_FROM_EVAL(0x767806D6F1053C81LL, sin);
@@ -53801,6 +55852,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x373B3FADEACB7CB0LL, openssl_private_encrypt);
       break;
     case 3249:
+      HASH_INVOKE_FROM_EVAL(0x40D8DC24FA917CB1LL, hphp_splfileobject_fgetss);
       HASH_INVOKE_FROM_EVAL(0x735555B148E58CB1LL, ldap_read);
       break;
     case 3250:
@@ -53824,6 +55876,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3260:
       HASH_INVOKE_FROM_EVAL(0x19C1872E55A7ECBCLL, is_long);
       HASH_INVOKE_FROM_EVAL(0x3978BE548631ECBCLL, hash_final);
+      HASH_INVOKE_FROM_EVAL(0x733137183026ACBCLL, hphp_splfileobject_next);
       break;
     case 3264:
       HASH_INVOKE_FROM_EVAL(0x3033FE14E114FCC0LL, magicksetimageblueprimary);
@@ -53937,6 +55990,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3345:
       HASH_INVOKE_FROM_EVAL(0x2D484921B5400D11LL, magickradialblurimage);
       break;
+    case 3346:
+      HASH_INVOKE_FROM_EVAL(0x5F165B40AEEE5D12LL, hphp_splfileinfo_getfilename);
+      break;
     case 3348:
       HASH_INVOKE_FROM_EVAL(0x63837ECAF6235D14LL, preg_replace);
       break;
@@ -53945,6 +56001,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3354:
       HASH_INVOKE_FROM_EVAL(0x75DB75CA9DE56D1ALL, xml_parser_get_option);
+      HASH_INVOKE_FROM_EVAL(0x39994614C6315D1ALL, hphp_recursivedirectoryiterator_key);
       break;
     case 3355:
       HASH_INVOKE_FROM_EVAL(0x70C22A7EEF54CD1BLL, ldap_compare);
@@ -54011,6 +56068,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3413:
       HASH_INVOKE_FROM_EVAL(0x36D672EF4FBEFD55LL, json_encode);
+      break;
+    case 3416:
+      HASH_INVOKE_FROM_EVAL(0x146109BDD2F97D58LL, hphp_splfileobject_setmaxlinelen);
       break;
     case 3418:
       HASH_INVOKE_FROM_EVAL(0x4ACCF26A7AE80D5ALL, imagefilltoborder);
@@ -54081,6 +56141,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3464:
       HASH_INVOKE_FROM_EVAL(0x2AFF8525E93D6D88LL, drawsetfillopacity);
+      HASH_INVOKE_FROM_EVAL(0x1F22C82816F9AD88LL, hphp_splfileinfo_getpath);
       break;
     case 3465:
       HASH_INVOKE_FROM_EVAL(0x230E7AD147721D89LL, end);
@@ -54127,10 +56188,14 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x188720048AB37DABLL, magickquantizeimages);
       HASH_INVOKE_FROM_EVAL(0x66764CAABFF4CDABLL, array_keys);
       break;
+    case 3505:
+      HASH_INVOKE_FROM_EVAL(0x67EAC6D7332F3DB1LL, hphp_splfileobject_fgetcsv);
+      break;
     case 3506:
       HASH_INVOKE_FROM_EVAL(0x257371BC40186DB2LL, magickblurimage);
       break;
     case 3507:
+      HASH_INVOKE_FROM_EVAL(0x628069E483F35DB3LL, hphp_splfileobject_fstat);
       HASH_INVOKE_FROM_EVAL(0x53F2C6F5AE244DB3LL, drawpushdefs);
       break;
     case 3512:
@@ -54206,6 +56271,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x73B30E65808A6DF4LL, ctype_xdigit);
       HASH_INVOKE_FROM_EVAL(0x5046A0D9DFDB5DF4LL, strcspn);
       break;
+    case 3575:
+      HASH_INVOKE_FROM_EVAL(0x23E563F1EC919DF7LL, hphp_splfileinfo_getpathname);
+      break;
     case 3576:
       HASH_INVOKE_FROM_EVAL(0x5E43280BC8DD1DF8LL, magicktrimimage);
       break;
@@ -54217,6 +56285,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3582:
       HASH_INVOKE_FROM_EVAL(0x21F24104004CFDFELL, evhttp_post);
+      HASH_INVOKE_FROM_EVAL(0x072690BF719D7DFELL, hphp_recursivedirectoryiterator_rewind);
       break;
     case 3586:
       HASH_INVOKE_FROM_EVAL(0x7829D2171DFBFE02LL, magickgetimagegamma);
@@ -54270,6 +56339,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3629:
       HASH_INVOKE_FROM_EVAL(0x7817FA38BAAEFE2DLL, fsockopen);
       break;
+    case 3630:
+      HASH_INVOKE_FROM_EVAL(0x3E62C1A48E9EEE2ELL, hphp_splfileinfo_getsize);
+      break;
     case 3634:
       HASH_INVOKE_FROM_EVAL(0x000AAF93F814AE32LL, drawsetvectorgraphics);
       break;
@@ -54306,6 +56378,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3668:
       HASH_INVOKE_FROM_EVAL(0x6BF155774D546E54LL, define_syslog_variables);
+      HASH_INVOKE_FROM_EVAL(0x7B6BF544EB420E54LL, hphp_recursivedirectoryiterator_haschildren);
       break;
     case 3671:
       HASH_INVOKE_FROM_EVAL(0x2DEF52641933CE57LL, magickgetimagemattecolor);
@@ -54468,10 +56541,14 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3780:
       HASH_INVOKE_FROM_EVAL(0x7052903F1B17AEC4LL, parse_str);
       break;
+    case 3781:
+      HASH_INVOKE_FROM_EVAL(0x7D69B3537C353EC5LL, hphp_splfileinfo_isfile);
+      break;
     case 3785:
       HASH_INVOKE_FROM_EVAL(0x58C8DCAAE5B7CEC9LL, get_cfg_var);
       break;
     case 3786:
+      HASH_INVOKE_FROM_EVAL(0x08E6C1CD3AC64ECALL, hphp_splfileinfo_gettype);
       HASH_INVOKE_FROM_EVAL(0x1AA83A1057BE6ECALL, mysql_field_len);
       break;
     case 3794:
@@ -54498,6 +56575,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3811:
       HASH_INVOKE_FROM_EVAL(0x28A98134BD97BEE3LL, mb_regex_encoding);
+      HASH_INVOKE_FROM_EVAL(0x0E1368A3BDFE6EE3LL, hphp_recursiveiteratoriterator_rewind);
       break;
     case 3812:
       HASH_INVOKE_FROM_EVAL(0x5B6FF42ACB2FBEE4LL, getmyuid);
@@ -54507,6 +56585,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3816:
       HASH_INVOKE_FROM_EVAL(0x6CB6650E66CE4EE8LL, magicksetimagebordercolor);
+      HASH_INVOKE_FROM_EVAL(0x32B3951DFD2B9EE8LL, hphp_directoryiterator_isdot);
       break;
     case 3819:
       HASH_INVOKE_FROM_EVAL(0x72882DBF2D49CEEBLL, set_magic_quotes_runtime);
@@ -54573,6 +56652,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3871:
       HASH_INVOKE_FROM_EVAL(0x7C0C145EFE0EBF1FLL, defined);
       break;
+    case 3872:
+      HASH_INVOKE_FROM_EVAL(0x2C4206A0BD904F20LL, hphp_splfileobject_fseek);
+      break;
     case 3873:
       HASH_INVOKE_FROM_EVAL(0x4282496A4BF42F21LL, php_uname);
       HASH_INVOKE_FROM_EVAL(0x77EC28645855AF21LL, magicksetcompressionquality);
@@ -54596,6 +56678,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x2B66EACB77AE9F32LL, print_r);
       break;
     case 3897:
+      HASH_INVOKE_FROM_EVAL(0x0D4446B2DBC8EF39LL, hphp_splfileinfo_getinode);
       HASH_INVOKE_FROM_EVAL(0x3E9146C06AAEFF39LL, magicksetimagecompressionquality);
       HASH_INVOKE_FROM_EVAL(0x496CF4113CEA8F39LL, magicksetimagefilename);
       break;
@@ -54709,6 +56792,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3982:
       HASH_INVOKE_FROM_EVAL(0x7A8F1104B0CCDF8ELL, phpcredits);
       break;
+    case 3983:
+      HASH_INVOKE_FROM_EVAL(0x4A6C46DC7FE29F8FLL, hphp_recursivedirectoryiterator_getchildren);
+      break;
     case 3985:
       HASH_INVOKE_FROM_EVAL(0x78463112BE739F91LL, connection_timeout);
       break;
@@ -54722,6 +56808,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x40D620CBA0D41F95LL, opendir);
       break;
     case 3991:
+      HASH_INVOKE_FROM_EVAL(0x35117886C885DF97LL, hphp_recursivedirectoryiterator_getsubpathname);
       HASH_INVOKE_FROM_EVAL(0x6F9651265C096F97LL, magickreadimages);
       break;
     case 3992:
@@ -54733,6 +56820,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3997:
       HASH_INVOKE_FROM_EVAL(0x0AD6DE8829773F9DLL, apc_compile_file);
+      break;
+    case 4004:
+      HASH_INVOKE_FROM_EVAL(0x0E7E9AA21AE99FA4LL, hphp_recursiveiteratoriterator_current);
       break;
     case 4006:
       HASH_INVOKE_FROM_EVAL(0x0DEEA8C3E3A47FA6LL, read_exif_data);
@@ -54774,6 +56864,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 4034:
       HASH_INVOKE_FROM_EVAL(0x6CA22E62D4762FC2LL, magickpainttransparentimage);
       break;
+    case 4037:
+      HASH_INVOKE_FROM_EVAL(0x38498DD4C28D0FC5LL, hphp_splfileinfo_getatime);
+      break;
     case 4043:
       HASH_INVOKE_FROM_EVAL(0x38237A4515F42FCBLL, array_pad);
       break;
@@ -54811,6 +56904,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 4071:
       HASH_INVOKE_FROM_EVAL(0x217067889854CFE7LL, xmlwriter_start_dtd);
+      break;
+    case 4072:
+      HASH_INVOKE_FROM_EVAL(0x4D7AEC41CFD73FE8LL, hphp_recursivedirectoryiterator_getsubpath);
+      break;
+    case 4075:
+      HASH_INVOKE_FROM_EVAL(0x67D1EE05DFE71FEBLL, hphp_splfileobject_getcvscontrol);
       break;
     case 4079:
       HASH_INVOKE_FROM_EVAL(0x00EEEE9C6CEA5FEFLL, xmlwriter_write_element_ns);

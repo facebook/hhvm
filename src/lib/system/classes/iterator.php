@@ -20,6 +20,43 @@ interface OuterIterator {
   public function getInnerIterator();
 }
 
+interface RecursiveIterator extends Iterator {
+  public function getChildren();
+  public function hasChildren();
+}
+
+class RecursiveIteratorIterator implements OuterIterator, Traversable,
+  Iterator {
+  const LEAVES_ONLY = 0;
+  const SELF_FIRST = 1;
+  const CHILD_FIRST = 2;
+  const CATCH_GET_CHILD = 16;
+
+  public function __construct($iterator,
+                              $mode = RecursiveIteratorIterator::LEAVES_ONLY,
+                              $flags = 0) {
+    hphp_recursiveiteratoriterator___construct($this, $iterator, $mode, $flags);
+  }
+  public function getInnerIterator() {
+    return hphp_recursiveiteratoriterator_getinneriterator($this);
+  }
+  public function current() {
+    return hphp_recursiveiteratoriterator_current($this);
+  }
+  public function key() {
+    return hphp_recursiveiteratoriterator_key($this);
+  }
+  public function next() {
+    return hphp_recursiveiteratoriterator_next($this);
+  }
+  public function rewind() {
+    return hphp_recursiveiteratoriterator_rewind($this);
+  }
+  public function valid() {
+    return hphp_recursiveiteratoriterator_valid($this);
+  }
+}
+
 interface Iterator extends Traversable {
   public function current();
   public function key();
@@ -127,6 +164,104 @@ class ArrayIterator implements Iterator,
 
   public function valid() {
     return current($this->arr) !== false;
+  }
+}
+
+class DirectoryIterator extends SplFileInfo implements Iterator,
+  Traversable, SeekableIterator {
+  public function __construct($path) {
+    hphp_directoryiterator___construct($this, $path);
+  }  
+
+  public function current() {
+    return hphp_directoryiterator_current($this);
+  }
+
+  public function key() {
+    return hphp_directoryiterator_key($this);
+  }
+
+  public function next() {
+    return hphp_directoryiterator_next($this);
+  }
+
+  public function rewind() {
+    return hphp_directoryiterator_rewind($this);
+  }
+
+  public function seek($position) {
+    return hphp_directoryiterator_seek($this, $position);
+  }
+
+  public function __toString() {
+    return hphp_directoryiterator___tostring($this);
+  }
+
+  public function valid() {
+    return hphp_directoryiterator_valid($this);
+  }
+
+  public function isDot() {
+    return hphp_directoryiterator_isdot($this);
+  }
+}
+
+class RecursiveDirectoryIterator extends DirectoryIterator
+  implements RecursiveIterator {
+  const CURRENT_AS_SELF     = 0x0;
+  const CURRENT_AS_FILEINFO = 0x00000010;
+  const CURRENT_AS_PATHNAME = 0x00000020;
+  const KEY_AS_PATHNAME     = 0x0;
+  const KEY_AS_FILENAME     = 0x00000100;
+  const NEW_CURRENT_AND_KEY = 0x00000110;
+
+  function __construct($path,
+    $flags = RecursiveDirectoryIterator::CURRENT_AS_FILEINFO) {
+    hphp_recursivedirectoryiterator___construct($this, $path, $flags);
+  }
+
+  function current() {
+    return hphp_recursivedirectoryiterator_current($this);
+  }
+
+  function key() {
+    return hphp_recursivedirectoryiterator_key($this);
+  }
+
+  public function next() {
+    return hphp_recursivedirectoryiterator_next($this);
+  }
+
+  public function rewind() {
+    return hphp_recursivedirectoryiterator_rewind($this);
+  }
+
+  public function seek($position) {
+    return hphp_recursivedirectoryiterator_seek($this);
+  }
+
+  public function __toString() {
+    return hphp_recursivedirectoryiterator___toString($this);
+  }
+
+  public function valid() {
+    return hphp_recursivedirectoryiterator_valid($this);
+  }
+
+  function hasChildren() {
+    return hphp_recursivedirectoryiterator_haschildren($this);
+  }  
+
+  function getChildren() {
+    return hphp_recursivedirectoryiterator_getchildren($this);
+  }  
+
+  function getSubPath() {
+    return hphp_recursivedirectoryiterator_getsubpath($this);
+  }
+
+  function getSubPathname() {
+    return hphp_recursivedirectoryiterator_getsubpathname($this);
   }
 }
 

@@ -393,6 +393,10 @@ bool AnalysisResult::isConstantDeclared(const std::string &constName) {
   return false;
 }
 
+bool AnalysisResult::isBaseSysRsrcClass(const std::string &className) {
+  return m_baseSysRsrcClasses.find(className) != m_baseSysRsrcClasses.end();
+}
+
 bool AnalysisResult::isConstantRedeclared(const std::string &constName) {
   return m_constRedeclared.find(constName) != m_constRedeclared.end();
 }
@@ -413,6 +417,7 @@ void AnalysisResult::loadBuiltins() {
   BuiltinSymbols::loadClasses(ar, m_systemClasses);
   BuiltinSymbols::loadVariables(ar, m_variables);
   BuiltinSymbols::loadConstants(ar, m_constants);
+  BuiltinSymbols::loadBaseSysRsrcClasses(ar, m_baseSysRsrcClasses);
 }
 
 void AnalysisResult::analyzeProgram() {

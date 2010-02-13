@@ -427,6 +427,12 @@ void ClassStatement::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
         classScope->outputCPPStaticMethodWrappers(cg, ar, done, clsName);
       }
 
+      if (cg.getOutput() == CodeGenerator::SystemCPP &&
+          ar->isBaseSysRsrcClass(clsName) &&
+          !classScope->hasProperty("rsrc")) {
+        cg.printf("public: Variant %srsrc;\n", Option::PropertyPrefix);
+      }
+
       cg.indentEnd("};\n");
 
       if (redeclared) {

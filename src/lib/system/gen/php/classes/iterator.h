@@ -29,9 +29,14 @@
 #include <cls/iterator.h>
 #include <cls/appenditerator.h>
 #include <cls/seekableiterator.h>
+#include <cls/recursiveiterator.h>
+#include <cls/recursivedirectoryiterator.h>
+#include <cls/directoryiterator.h>
 #include <cls/iteratoraggregate.h>
+#include <cls/recursiveiteratoriterator.h>
 #include <cls/filteriterator.h>
 #include <php/classes/arrayaccess.h>
+#include <php/classes/splfile.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,6 +44,9 @@ namespace HPHP {
 Variant pm_php$classes$iterator_php(bool incOnce = false, LVariableTable* variables = NULL);
 Object co_arrayiterator(CArrRef params, bool init = true);
 Object co_appenditerator(CArrRef params, bool init = true);
+Object co_recursivedirectoryiterator(CArrRef params, bool init = true);
+Object co_directoryiterator(CArrRef params, bool init = true);
+Object co_recursiveiteratoriterator(CArrRef params, bool init = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

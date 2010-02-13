@@ -38,6 +38,7 @@
 #include <test/test_ext_idn.h>
 #include <test/test_ext_image.h>
 #include <test/test_ext_ipc.h>
+#include <test/test_ext_iterator.h>
 #include <test/test_ext_json.h>
 #include <test/test_ext_ldap.h>
 #include <test/test_ext_magick.h>
@@ -61,6 +62,7 @@
 #include <test/test_ext_simplexml.h>
 #include <test/test_ext_soap.h>
 #include <test/test_ext_socket.h>
+#include <test/test_ext_splfile.h>
 #include <test/test_ext_sqlite3.h>
 #include <test/test_ext_stream.h>
 #include <test/test_ext_string.h>

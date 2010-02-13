@@ -93,6 +93,13 @@ const char *BuiltinSymbols::SystemClasses[] = {
   "reflection",
   "splobjectstorage",
   "directory",
+  "splfile",
+  NULL
+};
+
+const char *BuiltinSymbols::BaseSysRsrcClasses[] = {
+  "splfileinfo",
+  "recursiveiteratoriterator",
   NULL
 };
 
@@ -392,6 +399,14 @@ void BuiltinSymbols::loadConstants(AnalysisResultPtr ar,
   ASSERT(Loaded);
   if (s_constants) {
     constants->import(s_constants);
+  }
+}
+
+void BuiltinSymbols::loadBaseSysRsrcClasses(AnalysisResultPtr ar,
+                                            set<string> &baseSysRsrcClasses) {
+  ASSERT(Loaded);
+  for (const char **cls = BaseSysRsrcClasses; *cls; cls++) {
+    baseSysRsrcClasses.insert(*cls);
   }
 }
 

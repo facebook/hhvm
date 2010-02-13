@@ -384,8 +384,8 @@ bool Transport::setCookie(CStrRef name, CStrRef value, int expire /* = 0 */,
   len += path.size();
   len += domain.size();
 
-  char *cookie = (char*)calloc(len + 100, 1);
-  String deleter(cookie, 1, AttachString);
+  std::string cookie;
+  cookie.reserve(len + 100);
   if (value.empty()) {
     /*
      * MSIE doesn't delete a cookie when you set it to a null value
@@ -394,15 +394,17 @@ bool Transport::setCookie(CStrRef name, CStrRef value, int expire /* = 0 */,
      */
     String sdt = DateTime(time(NULL) - 31536001, true)
       .toString(DateTime::Cookie);
-    snprintf(cookie, len + 100, "%s=deleted; expires=%s",
-             name.data(), sdt.data());
+    cookie += name.data();
+    cookie += "=deleted; expires=";
+    cookie += sdt.data();
   } else {
-    snprintf(cookie, len + 100, "%s=%s",
-             name.data(), encoded_value ? encoded_value : "");
+    cookie += name.data();
+    cookie += "=";
+    cookie += encoded_value ? encoded_value : "";
     if (expire > 0) {
-      strncat(cookie, "; expires=", len + 100);
+      cookie += "; expires=";
       String sdt = DateTime(expire, true).toString(DateTime::Cookie);
-      strncat(cookie, sdt.data(), len + 100);
+      cookie += sdt.data();
     }
   }
 
@@ -411,18 +413,18 @@ bool Transport::setCookie(CStrRef name, CStrRef value, int expire /* = 0 */,
   }
 
   if (!path.empty()) {
-    strncat(cookie, "; path=", len + 100);
-    strncat(cookie, path.data(), len + 100);
+    cookie += "; path=";
+    cookie += path.data();
   }
   if (!domain.empty()) {
-    strncat(cookie, "; domain=", len + 100);
-    strncat(cookie, domain.data(), len + 100);
+    cookie += "; domain=";
+    cookie += domain.data();
   }
   if (secure) {
-    strncat(cookie, "; secure", len + 100);
+    cookie += "; secure";
   }
   if (httponly) {
-    strncat(cookie, "; httponly", len + 100);
+    cookie += "; httponly";
   }
 
   m_responseCookies[name.data()] = cookie;

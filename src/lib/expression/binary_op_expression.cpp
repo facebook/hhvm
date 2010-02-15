@@ -643,9 +643,14 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       TypePtr act1 = m_exp1->getActualType();
       TypePtr act2 = m_exp2->getActualType();
       bool bothEffect = m_exp1->hasEffect() && m_exp2->hasEffect();
-      if (act1 && act1->isInteger() && act2 && act2->isInteger() &&
-          !bothEffect) {
-        rt = Type::Int64;
+
+      TypePtr combined = Type::combinedPrimType(act1, act2);
+      if (combined &&
+          (combined->isPrimitive() || !rt->isPrimitive())) {
+        if (combined->isPrimitive() && bothEffect) {
+          combined = Type::GetType(Type::KindOfNumeric);
+        }
+        rt = combined;
       }
     }
     break;

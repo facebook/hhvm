@@ -63,15 +63,11 @@ class ObjectOffset {
    * Assignement operator. Almost the whole purpose for having this offset
    * class.
    */
-  ObjectOffset &operator=(CVarRef v) {
+  CVarRef operator=(CVarRef v) {
     if (m_data) {
       m_data->o_set(m_property, m_hash, v, false);
     }
-    return *this;
-  }
-  ObjectOffset &operator=(const ObjectOffset &offset) {
-    operator=((Variant)offset);
-    return *this;
+    return v;
   }
 
   /**

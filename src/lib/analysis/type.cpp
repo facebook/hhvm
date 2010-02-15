@@ -466,6 +466,39 @@ bool Type::isNoObjectInvolved() const {
   return false;
 }
 
+TypePtr Type::combinedPrimType(TypePtr t1, TypePtr t2) {
+  KindOf kind = KindOfAny;
+
+  if (t1 && t1->isPrimitive()) {
+    if (t2 && t2->isPrimitive()) {
+      if (t2->getKindOf() > t1->getKindOf()) {
+        kind = t2->getKindOf();
+      } else {
+        kind = t1->getKindOf();
+      }
+    } else if (t1->is(KindOfDouble)) {
+      kind = KindOfDouble;
+    } else {
+      kind = KindOfNumeric;
+    }
+  } else if (t2 && t2->isPrimitive()) {
+    if (t2->is(KindOfDouble)) {
+      kind = KindOfDouble;
+    } else {
+      kind = KindOfNumeric;
+    }
+  }
+  if (kind < KindOfInt64) {
+    kind = KindOfInt64;
+  }
+
+  if (kind != KindOfAny) {
+    return GetType(kind);
+  }
+
+  return TypePtr();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 string Type::getCPPDecl() {

@@ -134,6 +134,7 @@ public:
   bool isPrimitive() const { return m_kindOf <= KindOfDouble;}
   bool isNoObjectInvolved() const;
   const std::string &getName() const { return m_name;}
+  static TypePtr combinedPrimType(TypePtr t1, TypePtr t2);
 
   /**
    * Generate type specifier in C++.

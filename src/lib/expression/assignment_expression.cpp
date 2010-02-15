@@ -261,7 +261,13 @@ inferTypesImpl(AnalysisResultPtr ar, TypePtr type, bool coerce,
     VariableTablePtr variables = ar->getScope()->getVariables();
     variables->addReferenced(name);
   }
-  return variable->inferAndCheck(ar, ret, true);
+
+  TypePtr vt = variable->inferAndCheck(ar, ret, true);
+  if (!coerce && type->is(Type::KindOfAny)) {
+    ret = vt;
+  }
+
+  return ret;
 }
 
 TypePtr AssignmentExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,

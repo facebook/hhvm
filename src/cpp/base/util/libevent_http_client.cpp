@@ -182,14 +182,6 @@ bool LibEventHttpClient::send(const std::string &url,
   }
   m_request = evhttp_request_new(on_request_completed, this);
 
-  // url
-  evhttp_cmd_type cmd = data ? EVHTTP_REQ_POST : EVHTTP_REQ_GET;
-  int ret = evhttp_make_request(m_conn, m_request, cmd, url.c_str());
-  if (ret != 0) {
-    Logger::Error("evhttp_make_request failed");
-    return false;
-  }
-
   // REVIEW: libevent never sends a Host header (nor does it properly send HTTP
   // 400 for HTTP/1.1 requests without such a header), in blatent violation of
   // RFC2616; this should perhaps be fixed in the library proper.
@@ -226,6 +218,14 @@ bool LibEventHttpClient::send(const std::string &url,
   // post data
   if (data && size) {
     evbuffer_add(m_request->output_buffer, data, size);
+  }
+
+  // url
+  evhttp_cmd_type cmd = data ? EVHTTP_REQ_POST : EVHTTP_REQ_GET;
+  int ret = evhttp_make_request(m_conn, m_request, cmd, url.c_str());
+  if (ret != 0) {
+    Logger::Error("evhttp_make_request failed");
+    return false;
   }
 
   if (timeoutSeconds > 0) {
@@ -270,8 +270,8 @@ void LibEventHttpClient::onRequestCompleted() {
   for (evkeyval *p = ((evkeyvalq_*)m_request->input_headers)->tqh_first; p;
        p = p->next.tqe_next) {
     if (p->key && p->value) {
-      if ((strcasecmp(p->key, "Content-Encoding") == 0) &&
-          (strncmp(p->value, "gzip", 4) == 0) &&
+      if (strcasecmp(p->key, "Content-Encoding") == 0 &&
+          strncmp(p->value, "gzip", 4) == 0 &&
           (!p->value[4] || isspace(p->value[4]))) {
         // in the (illegal) case of multiple Content-Encoding headers, any one
         // with the value 'gzip' means we treat it as gzip.

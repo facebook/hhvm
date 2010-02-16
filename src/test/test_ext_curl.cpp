@@ -309,7 +309,7 @@ bool TestExtCurl::test_curl_multi_close() {
 }
 
 bool TestExtCurl::test_evhttp_set_cache() {
-  f_evhttp_set_cache("localhost", 8080, 4);
+  f_evhttp_set_cache("localhost", 4, 8080);
   for (int i = 0; i < 10; i++) {
     Variant ret = f_evhttp_get(REQUEST_URI, CREATE_VECTOR1("ECHO: foo"));
     VS(ret["code"], 200);

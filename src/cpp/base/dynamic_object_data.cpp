@@ -370,7 +370,14 @@ Variant DynamicObjectData::t___unset(Variant v_name) {
 
 Variant DynamicObjectData::t___sleep() {
   if (!parent.isNull()) {
-    return parent->t___sleep();
+    Variant ret = parent->t___sleep();
+    if (!parent->getAttribute(HasSleep)) {
+      // When the parent also has the default implementation in ObjectData,
+      // the attribute HasSleep should be cleared both in the parent and the
+      // current object.
+      clearAttribute(HasSleep);
+    }
+    return ret;
   } else {
     return ObjectData::t___sleep();
   }

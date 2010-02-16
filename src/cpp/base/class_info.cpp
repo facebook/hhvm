@@ -284,6 +284,9 @@ void ClassInfo::GetClassProperties(PropertyVec &props, const char *classname) {
 
 bool ClassInfo::isDeclared() const {
   if (m_attribute & IsVolatile) {
+    if (m_attribute & IsInterface) {
+      return get_globals()->interface_exists(m_name);
+    }
     return get_globals()->class_exists(m_name);
   }
   return true;

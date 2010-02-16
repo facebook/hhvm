@@ -28,7 +28,7 @@ AssignmentOpExpression::AssignmentOpExpression(EXPRESSION_ARGS, int op,
   : Expression(EXPRESSION_PASS), m_op(op), m_lhs(lhs), m_rhs(rhs) {}
 
 Variant AssignmentOpExpression::eval(VariableEnvironment &env) const {
-  Variant rhs = m_rhs->eval(env);
+  Variant rhs(m_rhs->eval(env));
   if (m_op == '=') return m_lhs->set(env, rhs);
   return m_lhs->setOp(env, m_op, rhs);
 }

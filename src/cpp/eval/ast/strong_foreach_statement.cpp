@@ -32,7 +32,7 @@ StrongForEachStatement(STATEMENT_ARGS, LvalExpressionPtr source,
 
 void StrongForEachStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
-  Variant source = ref(m_source->lval(env));
+  Variant source(ref(m_source->lval(env)));
   source.escalate();
   Variant &v = m_value->lval(env);
   Variant *k = NULL;

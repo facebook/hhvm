@@ -30,7 +30,7 @@ ForEachStatement::ForEachStatement(STATEMENT_ARGS, ExpressionPtr source,
 
 void ForEachStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
-  Variant map = m_source->eval(env);
+  Variant map(m_source->eval(env));
   Variant &v = m_value->lval(env);
   Variant *k = NULL;
   if (m_key) {

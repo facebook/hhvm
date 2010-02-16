@@ -27,9 +27,7 @@ ConstantExpression::ConstantExpression(EXPRESSION_ARGS,
   : Expression(EXPRESSION_PASS), m_constant(constant) {}
 
 Variant ConstantExpression::eval(VariableEnvironment &env) const {
-  //cerr << "Getting constant " << m_constant << endl;
-  Variant r = get_constant(m_constant);
-  return r;
+  return get_constant(m_constant);
 }
 
 void ConstantExpression::dump() const {

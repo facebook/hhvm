@@ -36,7 +36,7 @@ IncludeExpression::IncludeExpression(EXPRESSION_ARGS, bool include, bool once,
 }
 
 Variant IncludeExpression::eval(VariableEnvironment &env) const {
-  String file = m_file->eval(env).toString();
+  String file(m_file->eval(env).toString());
   if (m_include) {
     return HPHP::include(file, m_once, &env, m_localDir.c_str());
   } else {

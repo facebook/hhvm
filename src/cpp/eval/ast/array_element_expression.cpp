@@ -35,8 +35,8 @@ Variant ArrayElementExpression::eval(VariableEnvironment &env) const {
   if (!m_idx) {
     throw InvalidOperandException("Cannot use [] in read context");
   }
-  Variant arr = m_arr->eval(env);
-  Variant idx = m_idx->eval(env);
+  Variant arr(m_arr->eval(env));
+  Variant idx(m_idx->eval(env));
   return arr.rvalAt(idx);
 }
 
@@ -44,8 +44,8 @@ bool ArrayElementExpression::exist(VariableEnvironment &env, int op) const {
   if (!m_idx) {
     throw InvalidOperandException("Cannot use [] in read context");
   }
-  Variant arr = m_arr->eval(env);
-  Variant idx = m_idx->eval(env);
+  Variant arr(m_arr->eval(env));
+  Variant idx(m_idx->eval(env));
 
   if (op == T_ISSET) {
     return HPHP::isset(arr, idx);
@@ -57,7 +57,7 @@ bool ArrayElementExpression::exist(VariableEnvironment &env, int op) const {
 Variant &ArrayElementExpression::lval(VariableEnvironment &env) const {
   Variant &arr = m_arr->lval(env);
   if (m_idx) {
-    Variant idx = m_idx->eval(env);
+    Variant idx(m_idx->eval(env));
     return arr.lvalAt(idx);
   } else {
     return arr.lvalAt();
@@ -71,7 +71,7 @@ bool ArrayElementExpression::weakLval(VariableEnvironment &env,
   }
   Variant *arr;
   if (m_arr->weakLval(env, arr)) {
-    Variant idx = m_idx->eval(env);
+    Variant idx(m_idx->eval(env));
     if (!arr->is(KindOfArray)) {
       return false;
     }
@@ -85,8 +85,8 @@ bool ArrayElementExpression::weakLval(VariableEnvironment &env,
 
 Variant ArrayElementExpression::refval(VariableEnvironment &env) const {
   if (m_idx) {
-    Variant arr = m_arr->refval(env);
-    Variant idx = m_idx->eval(env);
+    Variant arr(m_arr->refval(env));
+    Variant idx(m_idx->eval(env));
     return ref(arr.refvalAt(idx));
   } else {
     return ref(lval(env));
@@ -97,7 +97,7 @@ Variant ArrayElementExpression::set(VariableEnvironment &env, CVarRef val)
   const {
   Variant &arr = m_arr->lval(env);
   if (m_idx) {
-    Variant idx = m_idx->eval(env);
+    Variant idx(m_idx->eval(env));
     return arr.set(idx, val);
   } else {
     return arr.append(val);
@@ -110,7 +110,7 @@ void ArrayElementExpression::unset(VariableEnvironment &env) const {
   }
   Variant *arr;
   if (m_arr->weakLval(env, arr)) {
-    Variant idx = m_idx->eval(env);
+    Variant idx(m_idx->eval(env));
     arr->weakRemove(idx);
   }
 }

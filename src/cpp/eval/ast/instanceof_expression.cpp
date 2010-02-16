@@ -26,8 +26,8 @@ InstanceOfExpression::InstanceOfExpression(EXPRESSION_ARGS, ExpressionPtr obj,
   : Expression(EXPRESSION_PASS), m_obj(obj), m_name(name) {}
 
 Variant InstanceOfExpression::eval(VariableEnvironment &env) const {
-  Variant obj = m_obj->eval(env);
-  String name = m_name->get(env);
+  Variant obj(m_obj->eval(env));
+  String name(m_name->get(env));
   return instanceOf(obj, name);
 }
 

@@ -31,9 +31,9 @@ ObjectMethodExpression::ObjectMethodExpression(EXPRESSION_ARGS,
   : SimpleFunctionCallExpression(EXPRESSION_PASS, name, param), m_obj(obj) {}
 
 Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
-  String name = m_name->get(env);
-  Object obj = toObject(m_obj->eval(env));
-  Variant cobj = env.currentObject();
+  String name(m_name->get(env));
+  Object obj(toObject(m_obj->eval(env)));
+  Variant cobj(env.currentObject());
   const MethodStatement *ms = NULL;
   if (cobj.is(KindOfObject) && obj.get() == cobj.getObjectData()) {
     // Have to try current class first for private method

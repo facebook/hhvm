@@ -34,7 +34,7 @@ SimpleFunctionCallExpression::SimpleFunctionCallExpression
 
 Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   SET_LINE;
-  String name = m_name->get(env);
+  String name(m_name->get(env));
   bool renamed = false;
   {
     // so hacky, gotta do this properly by overriding rename_function.

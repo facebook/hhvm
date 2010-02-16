@@ -25,7 +25,7 @@ QOpExpression::QOpExpression(EXPRESSION_ARGS, ExpressionPtr cond,
   : Expression(EXPRESSION_PASS), m_cond(cond), m_true(t), m_false(f) {}
 
 Variant QOpExpression::eval(VariableEnvironment &env) const {
-  Variant cond = m_cond->eval(env);
+  Variant cond(m_cond->eval(env));
   if (cond) {
     return m_true->eval(env);
   } else {

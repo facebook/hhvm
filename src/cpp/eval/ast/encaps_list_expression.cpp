@@ -30,7 +30,7 @@ Variant EncapsListExpression::eval(VariableEnvironment &env) const {
   String result = "";
   for (std::vector<ExpressionPtr>::const_iterator it = m_encaps.begin();
        it != m_encaps.end(); ++it) {
-    Variant e = (*it)->eval(env);
+    Variant e((*it)->eval(env));
     concat_assign(result, e.toString());
   }
   if (m_shell) {

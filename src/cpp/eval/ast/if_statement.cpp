@@ -28,7 +28,7 @@ IfBranch::IfBranch(CONSTRUCT_ARGS, ExpressionPtr cond, StatementPtr body)
   : Construct(CONSTRUCT_PASS), m_cond(cond), m_body(body) {}
 
 bool IfBranch::proc(VariableEnvironment &env) const {
-  Variant cond = m_cond->eval(env);
+  Variant cond(m_cond->eval(env));
   if (cond) {
     if (m_body) m_body->eval(env);
     return true;

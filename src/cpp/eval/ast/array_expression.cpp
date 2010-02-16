@@ -92,7 +92,7 @@ ArrayExpression::ArrayExpression(EXPRESSION_ARGS,
 
 
 Variant ArrayExpression::eval(VariableEnvironment &env) const {
-  Array arr = Array::Create();
+  Array arr(Array::Create());
   for (std::vector<ArrayPairPtr>::const_iterator it = m_elems.begin();
        it != m_elems.end(); ++it) {
     (*it)->set(env, arr);

@@ -27,11 +27,19 @@ class VariantStack {
 public:
   VariantStack();
   ~VariantStack();
-  void push(CVarRef v) {
+
+  template<class T>
+  void push(T v) {
     if (m_ptr == m_cap) {
       grow();
     }
     m_stack[m_ptr++] = v;
+  }
+  void pushSwap(Variant &v) {
+    if (m_ptr == m_cap) {
+      grow();
+    }
+    m_stack[m_ptr++].swap(v);
   }
   void pop(uint n);
   void pop() {

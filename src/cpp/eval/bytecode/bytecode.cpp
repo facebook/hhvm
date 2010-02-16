@@ -31,6 +31,7 @@ void ByteCode::toString(ostringstream &res) const {
 
 void ByteCodeProgram::execute(VariantStack &stack, VariableEnvironment &env) {
 #define PUSH stack.push
+#define PUSHTMP stack.pushSwap
 #define POP stack.topPop
   for (uint pc = 0; pc < size(); ++pc) {
     const ByteCode &bc = operator[](pc);
@@ -48,7 +49,7 @@ void ByteCodeProgram::execute(VariantStack &stack, VariableEnvironment &env) {
       {
         Variant val(POP());
         env.getIdx(bc.intArg()) = val;
-        PUSH(val);
+        PUSHTMP(val);
       }
       break;
     case ByteCode::SetVarInd:
@@ -59,7 +60,12 @@ void ByteCodeProgram::execute(VariantStack &stack, VariableEnvironment &env) {
       }
       break;
     case ByteCode::Int: PUSH(bc.intArg()); break;
-    case ByteCode::String: PUSH(stringArg(bc)); break;
+    case ByteCode::String:
+      {
+        Variant s(stringArg(bc));
+        PUSHTMP(s);
+      }
+      break;
     case ByteCode::Double: PUSH(bc.dblArg()); break;
     case ByteCode::Bool: PUSH((bool)bc.intArg()); break;
     case ByteCode::Null: PUSH(null_variant); break;
@@ -102,7 +108,7 @@ void ByteCodeProgram::execute(VariantStack &stack, VariableEnvironment &env) {
         case ByteCode::Mod:      r = modulo(v1, v2); break;
         case ByteCode::Sl:       r = v1.toInt64() << v2.toInt64(); break;
         case ByteCode::Sr:       r = v1.toInt64() >> v2.toInt64(); break;
-        case ByteCode::Same:     r = same(v1 ,v2); break;
+        case ByteCode::Same:     r = same(v1, v2); break;
         case ByteCode::NotSame:  r = !same(v1, v2); break;
         case ByteCode::Equal:    r = equal(v1, v2); break;
         case ByteCode::NotEqual: r = !equal(v1, v2); break;
@@ -115,7 +121,7 @@ void ByteCodeProgram::execute(VariantStack &stack, VariableEnvironment &env) {
         }
         stack.pop();
         stack.pop();
-        stack.push(r);
+        PUSHTMP(r);
       }
       break;
     case ByteCode::Jmp: pc = bc.intArg() - 1; break;

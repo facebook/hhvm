@@ -91,12 +91,12 @@ Variant &VariableExpression::lval(VariableEnvironment &env) const {
   if (m_idx != -1) {
     return env.getIdx(m_idx);
   }
-  String name = m_name->get(env);
+  String name(m_name->get(env));
   return env.get(name, m_name->hash());
 }
 
 void VariableExpression::unset(VariableEnvironment &env) const {
-  String name = m_name->get(env);
+  String name(m_name->get(env));
   env.unset(name, m_name->hash());
 }
 

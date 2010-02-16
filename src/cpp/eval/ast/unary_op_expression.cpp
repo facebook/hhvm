@@ -36,8 +36,7 @@ Variant UnaryOpExpression::eval(VariableEnvironment &env) const {
     return m_exp->exist(env, m_op);
   }
 
-  Variant exp;
-  if (m_exp) exp = m_exp->eval(env);
+  Variant exp(m_exp ? m_exp->eval(env) : null_variant);
   switch (m_op) {
   case T_CLONE:       return f_clone(exp);
   case '+':           return +exp;

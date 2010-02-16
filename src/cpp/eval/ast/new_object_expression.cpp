@@ -28,8 +28,8 @@ NewObjectExpression::NewObjectExpression(EXPRESSION_ARGS, NamePtr name,
 
 Variant NewObjectExpression::eval(VariableEnvironment &env) const {
   SET_LINE;
-  String name = m_name->get(env);
-  Array params = getParams(env);
+  String name(m_name->get(env));
+  Array params(getParams(env));
   return create_object(name.data(), params);
 }
 

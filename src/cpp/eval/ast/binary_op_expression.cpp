@@ -36,8 +36,8 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
       m_exp2->eval(env);
   default:
     {
-      Variant v1 = m_exp1->eval(env);
-      Variant v2 = m_exp2->eval(env);
+      Variant v1(m_exp1->eval(env));
+      Variant v2(m_exp2->eval(env));
       switch (m_op) {
       case T_LOGICAL_XOR:         return logical_xor(v1, v2);
       case '|':                   return bitwise_or(v1, v2);

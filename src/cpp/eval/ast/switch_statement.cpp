@@ -30,7 +30,7 @@ CaseStatement::CaseStatement(STATEMENT_ARGS, ExpressionPtr match,
 
 bool CaseStatement::match(VariableEnvironment &env, CVarRef value) const {
   ASSERT(m_match);
-  Variant match = m_match->eval(env);
+  Variant match(m_match->eval(env));
   return equal(match, value);
 }
 
@@ -59,7 +59,7 @@ SwitchStatement::SwitchStatement(STATEMENT_ARGS, ExpressionPtr source,
 
 void SwitchStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
-  Variant source = m_source->eval(env);
+  Variant source(m_source->eval(env));
   bool matched = false;
   vector<CaseStatementPtr>::const_iterator defaultPos = m_cases.end();
   for (vector<CaseStatementPtr>::const_iterator iter = m_cases.begin();

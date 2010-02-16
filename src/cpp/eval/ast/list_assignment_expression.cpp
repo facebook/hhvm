@@ -56,12 +56,8 @@ ListAssignmentExpression::ListAssignmentExpression(EXPRESSION_ARGS,
   : Expression(EXPRESSION_PASS), m_lhs(lhs), m_rhs(rhs) {}
 
 Variant ListAssignmentExpression::eval(VariableEnvironment &env) const {
-  Variant rhs = m_rhs->eval(env);
-  Variant val;
-  if (rhs.is(KindOfArray)) {
-    val = rhs;
-  }
-  m_lhs->set(env, val);
+  Variant rhs(m_rhs->eval(env));
+  m_lhs->set(env, rhs.is(KindOfArray) ? rhs : null_variant);
   return rhs;
 }
 

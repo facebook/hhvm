@@ -190,6 +190,16 @@ public:
   }
 
   /**
+   * Can just swap the data between variants sometimes to avoid inc and decref
+   */
+  void swap(Variant &other) {
+    char tmp[sizeof(Variant)];
+    memcpy(tmp, &other, sizeof(Variant));
+    memcpy((char*)&other, (char*)this, sizeof(Variant));
+    memcpy((char*)this, tmp, sizeof(Variant));
+  }
+
+  /**
    * Operators
    */
   Variant &assign(CVarRef v, bool deep);

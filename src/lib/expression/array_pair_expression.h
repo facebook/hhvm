@@ -41,6 +41,8 @@ public:
 
   void outputCPPControlledEval(CodeGenerator &cg, AnalysisResultPtr ar,
                                int temp);
+
+  bool isRef() const { return m_ref; }
 private:
   ExpressionPtr m_name;
   ExpressionPtr m_value;

@@ -605,7 +605,9 @@ int AnalysisResult::registerScalarArray(ExpressionPtr pairs) {
 
   string text;
   if (pairs) {
-    text = pairs->getText();
+    // Normal picked PHP wouldn't work here, because predefined constants,
+    // e.g., __CLASS__, need to be translated.
+    text = pairs->getText(false, true);
   }
   std::map<std::string, int>::const_iterator iter = m_scalarArrays.find(text);
   if (iter != m_scalarArrays.end()) return iter->second;

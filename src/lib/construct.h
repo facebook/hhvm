@@ -79,7 +79,7 @@ public:
    * set the nth child construct
    */
   virtual int setNthKid(int n, ConstructPtr cp) = 0;
-  
+
   /**
    * get the kid count
    */
@@ -101,7 +101,7 @@ public:
   /**
    * Get canonicalized PHP source code for this construct.
    */
-  std::string getText(bool useCache = false);
+  std::string getText(bool useCache = false, bool translate = false);
 
   void addHphpNote(const std::string &s);
   bool hasHphpNote(const std::string &s) const {

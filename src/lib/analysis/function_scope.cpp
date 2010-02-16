@@ -510,19 +510,18 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
   }
   for (int i = 0; i < m_maxParam; i++) {
     if (i > 0) cg.printf(aggregateParams ? "." : ", ");
-    if (aggregateParams) {
-      cg.printf("set(%d, ", i);
-    }
     bool isRef;
     if (userFunc) {
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*params)[i]);
       isRef = param->isRef();
+      if (aggregateParams) cg.printf("set%s(%d, ", isRef ? "Ref" : "", i);
       cg.printf("%sv_%s%s",
                 isRef ? "ref(" : "", param->getName().c_str(),
                 isRef ? ")" : "");
     } else {
       isRef = isRefParam(i);
+      if (aggregateParams) cg.printf("set%s(%d, ", isRef ? "Ref" : "", i);
       cg.printf("%sa%d%s",
                 isRef ? "ref(" : "", i, isRef ? ")" : "");
     }

@@ -35,11 +35,13 @@ Construct::Construct(LocationPtr loc)
  : m_extra(NULL), m_loc(loc), m_fileLevel(false), m_topLevel(false) {
 }
 
-std::string Construct::getText(bool useCache /* = false */) {
+std::string Construct::getText(bool useCache /* = false */,
+                               bool translate /* = false */) {
   std::string &text = m_text;
   if (useCache && !text.empty()) return text;
   ostringstream o;
   CodeGenerator cg(&o, CodeGenerator::PickledPHP);
+  cg.translatePredefined(translate);
   outputPHP(cg, AnalysisResultPtr()); // we knew PickledPHP won't use ar
   text = o.str();
   return text;
@@ -123,85 +125,85 @@ void Construct::dump(int spc, AnalysisResultPtr ar) {
   if (Statement *s = dynamic_cast<Statement*>(this)) {
     Statement::KindOf stype = s->getKindOf();
     switch (stype) {
-    case Statement::KindOfFunctionStatement:  
+    case Statement::KindOfFunctionStatement:
       name="FunctionStatement";
       break;
-    case Statement::KindOfClassStatement:     
+    case Statement::KindOfClassStatement:
       name="ClassStatement";
       break;
-    case Statement::KindOfInterfaceStatement: 
+    case Statement::KindOfInterfaceStatement:
       name="InterfaceStatement";
       break;
-    case Statement::KindOfClassVariable:      
+    case Statement::KindOfClassVariable:
       name="ClassVariable";
       break;
-    case Statement::KindOfClassConstant:      
+    case Statement::KindOfClassConstant:
       name="ClassConstant";
       break;
-    case Statement::KindOfMethodStatement:    
+    case Statement::KindOfMethodStatement:
       name="MethodStatement";
       break;
-    case Statement::KindOfStatementList:      
+    case Statement::KindOfStatementList:
       name="StatementList";
       break;
-    case Statement::KindOfBlockStatement:     
+    case Statement::KindOfBlockStatement:
       name="BlockStatement";
       break;
-    case Statement::KindOfIfBranchStatement:  
+    case Statement::KindOfIfBranchStatement:
       name="IfBranchStatement";
       break;
-    case Statement::KindOfIfStatement:        
+    case Statement::KindOfIfStatement:
       name="IfStatement";
       break;
-    case Statement::KindOfWhileStatement:     
+    case Statement::KindOfWhileStatement:
       name="WhileStatement";
       break;
-    case Statement::KindOfDoStatement:        
+    case Statement::KindOfDoStatement:
       name="DoStatement";
       break;
-    case Statement::KindOfForStatement:       
+    case Statement::KindOfForStatement:
       name="ForStatement";
       break;
-    case Statement::KindOfSwitchStatement:    
+    case Statement::KindOfSwitchStatement:
       name="SwitchStatement";
       break;
-    case Statement::KindOfCaseStatement:      
+    case Statement::KindOfCaseStatement:
       name="CaseStatement";
       break;
-    case Statement::KindOfBreakStatement:     
+    case Statement::KindOfBreakStatement:
       name="BreakStatement";
       break;
-    case Statement::KindOfContinueStatement:  
+    case Statement::KindOfContinueStatement:
       name="ContinueStatement";
       break;
-    case Statement::KindOfReturnStatement:    
+    case Statement::KindOfReturnStatement:
       name="ReturnStatement";
       break;
-    case Statement::KindOfGlobalStatement:    
+    case Statement::KindOfGlobalStatement:
       name="GlobalStatement";
       break;
-    case Statement::KindOfStaticStatement:    
+    case Statement::KindOfStaticStatement:
       name="StaticStatement";
       break;
-    case Statement::KindOfEchoStatement:      
+    case Statement::KindOfEchoStatement:
       name="EchoStatement";
       break;
-    case Statement::KindOfUnsetStatement:     
+    case Statement::KindOfUnsetStatement:
       name="UnsetStatement";
       break;
-    case Statement::KindOfExpStatement:       
+    case Statement::KindOfExpStatement:
       name="ExpStatement";
       break;
-    case Statement::KindOfForEachStatement:   
+    case Statement::KindOfForEachStatement:
       name="ForEachStatement";
       break;
-    case Statement::KindOfCatchStatement:     
+    case Statement::KindOfCatchStatement:
       name="CatchStatement";
       break;
-    case Statement::KindOfTryStatement:       
+    case Statement::KindOfTryStatement:
       name="TryStatement";
       break;
-    case Statement::KindOfThrowStatement:     
+    case Statement::KindOfThrowStatement:
       name="ThrowStatement";
       break;
     }
@@ -225,61 +227,61 @@ void Construct::dump(int spc, AnalysisResultPtr ar) {
       name="ScalarExpression";
       value = e->getText();
       break;
-    case Expression::KindOfExpressionList:           
+    case Expression::KindOfExpressionList:
       name="ExpressionList";
       break;
-    case Expression::KindOfAssignmentExpression:     
+    case Expression::KindOfAssignmentExpression:
       name="AssignmentExpression";
       break;
-    case Expression::KindOfDynamicVariable:          
+    case Expression::KindOfDynamicVariable:
       name="DynamicVariable";
       break;
-    case Expression::KindOfStaticMemberExpression:   
+    case Expression::KindOfStaticMemberExpression:
       name="StaticMemberExpression";
       break;
-    case Expression::KindOfArrayElementExpression:   
+    case Expression::KindOfArrayElementExpression:
       name="ArrayElementExpression";
       break;
-    case Expression::KindOfDynamicFunctionCall:      
+    case Expression::KindOfDynamicFunctionCall:
       name="DynamicFunctionCall";
       break;
-    case Expression::KindOfObjectPropertyExpression: 
+    case Expression::KindOfObjectPropertyExpression:
       name="ObjectPropertyExpression";
       break;
-    case Expression::KindOfObjectMethodExpression:   
+    case Expression::KindOfObjectMethodExpression:
       name="ObjectMethodExpression";
       break;
-    case Expression::KindOfListAssignment:           
+    case Expression::KindOfListAssignment:
       name="ListAssignment";
       break;
-    case Expression::KindOfNewObjectExpression:      
+    case Expression::KindOfNewObjectExpression:
       name="NewObjectExpression";
       break;
-    case Expression::KindOfUnaryOpExpression:        
+    case Expression::KindOfUnaryOpExpression:
       name="UnaryOpExpression";
       break;
-    case Expression::KindOfIncludeExpression:        
+    case Expression::KindOfIncludeExpression:
       name="IncludeExpression";
       break;
-    case Expression::KindOfBinaryOpExpression:       
+    case Expression::KindOfBinaryOpExpression:
       name="BinaryOpExpression";
       break;
-    case Expression::KindOfQOpExpression:            
+    case Expression::KindOfQOpExpression:
       name="QOpExpression";
       break;
-    case Expression::KindOfArrayPairExpression:      
+    case Expression::KindOfArrayPairExpression:
       name="ArrayPairExpression";
       break;
-    case Expression::KindOfClassConstantExpression:  
+    case Expression::KindOfClassConstantExpression:
       name="ClassConstantExpression";
       break;
-    case Expression::KindOfParameterExpression:      
+    case Expression::KindOfParameterExpression:
       name="ParameterExpression";
       break;
-    case Expression::KindOfModifierExpression:       
+    case Expression::KindOfModifierExpression:
       name="ModifierExpression";
       break;
-    case Expression::KindOfEncapsListExpression:     
+    case Expression::KindOfEncapsListExpression:
       name="EncapsListExpression";
       break;
     }

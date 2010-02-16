@@ -37,6 +37,18 @@ public:
     return *this;
   }
 
+  ArrayInit &setRef(int p, CVarRef v) {
+    if (m_data) {
+      v.setContagious();
+      Variant value = v;
+      value.setContagious();
+      m_data->append(value, false);
+    } else {
+      (*m_elements)[p] = NEW(ArrayElement)(v);
+    }
+    return *this;
+  }
+
   template<typename T>
   ArrayInit &set(int p, CVarRef name, const T &value, int64 prehash = -1) {
     if (m_data) {
@@ -56,6 +68,19 @@ public:
     }
     return *this;
   }
+
+  ArrayInit &setRef(int p, CVarRef name, CVarRef v, int64 prehash = -1) {
+    if (m_data) {
+      v.setContagious();
+      Variant value = v;
+      value.setContagious();
+      m_data->set(getName(name), value, false, prehash);
+    } else {
+      (*m_elements)[p] = NEW(ArrayElement)(v);
+    }
+    return *this;
+  }
+
 
   ArrayData *create() {
     if (m_data) return m_data;

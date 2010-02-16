@@ -209,27 +209,7 @@ Variant ZendArray::each() {
 ///////////////////////////////////////////////////////////////////////////////
 // lookups
 
-static int total_f_int = 0;
-static int static_f_int = 0;
-static int total_f_string = 0;
-static int static_f_string = 0;
-
-static Mutex report_mutex;
-
-void request_end_report() {
-  Lock l(report_mutex);
-  FILE *f = fopen("./find_report.txt", "a");
-  fprintf(f, "%d %d %d %d\n", total_f_int, static_f_int, total_f_string, static_f_string);
-  fclose(f);
-  total_f_int = 0;
-  static_f_int = 0;
-  total_f_string = 0;
-  static_f_string = 0;
-}
-
 ZendArray::Bucket *ZendArray::find(int64 h) const {
-  total_f_int++;
-  if (_count > (1 << 28)) static_f_int++;
   for (Bucket *p = m_arBuckets[h & m_nTableMask]; p; p = p->pNext) {
     if (p->key == NULL && p->h == h) {
       return p;
@@ -241,8 +221,6 @@ ZendArray::Bucket *ZendArray::find(int64 h) const {
 ZendArray::Bucket *ZendArray::find(const char *k, int len,
                                    int64 prehash /* = -1 */,
                                    int64 *h /* = NULL */) const {
-  total_f_string++;
-  if (_count > (1 << 28)) static_f_string++;
   if (prehash < 0) {
     prehash = hash_string(k, len);
     if (h) {

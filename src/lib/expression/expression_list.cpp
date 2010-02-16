@@ -278,7 +278,11 @@ void ExpressionList::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (m_arrayElements) {
         ArrayPairExpressionPtr ap =
           dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
-        cg.printf("set(%d, ", i);
+        if (ap->isRef()) {
+          cg.printf("setRef(%d, ", i);
+        } else {
+          cg.printf("set(%d, ", i);
+        }
         if (effectArr) {
           ap->outputCPPControlledEval(cg, ar, tempstart + i);
         } else {

@@ -62,6 +62,7 @@ CodeGenerator::CodeGenerator(std::ostream *primary,
   useStream(PrimaryStream);
 
   if (filename) m_filename = *filename;
+  m_translatePredefined = false;
 }
 
 void CodeGenerator::useStream(Stream stream) {

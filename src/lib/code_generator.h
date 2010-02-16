@@ -189,6 +189,9 @@ public:
   bool insideArrayInit() { return m_insideArrayInit; }
   void setInsideArrayInit(bool flag) { m_insideArrayInit = flag; }
 
+  bool translatePredefined() { return m_translatePredefined; }
+  void translatePredefined(bool flag) { m_translatePredefined = flag; }
+
 private:
   std::string m_filename;
   Stream m_curStream;
@@ -213,6 +216,8 @@ private:
   int m_phpLineNo;
 
   bool m_insideArrayInit; // skips ArrayElement construction
+
+  bool m_translatePredefined; // translate predefined constants in PHP output
 
   void print(const char *fmt, va_list ap);
   void print(const std::string &msg);

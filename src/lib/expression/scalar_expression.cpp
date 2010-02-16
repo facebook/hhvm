@@ -342,11 +342,14 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_NUM_STRING:
   case T_LNUMBER:
   case T_DNUMBER:
+    cg.printf("%s", m_value.c_str());
+    break;
   case T_LINE:
   case T_CLASS_C:
   case T_METHOD_C:
   case T_FUNC_C:
-    cg.printf("%s", m_value.c_str());
+    cg.printf("%s",
+              (cg.translatePredefined() ? m_translated : m_value).c_str());
     break;
   default:
     ASSERT(false);

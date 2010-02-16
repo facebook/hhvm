@@ -427,7 +427,7 @@ Variant &unsetLval(Array &v, const T &key, int64 prehash = -1) {
  * ref() sets contagious flag, so that next assignment will make both sides
  * strongly bind to the same underlying variant data. For example,
  *
- *   a = ref(b); // string binding: now both a and b point to the same data
+ *   a = ref(b); // strong binding: now both a and b point to the same data
  *   a = b;      // weak binding: a will copy or copy-on-write
  */
 inline CVarRef ref(CVarRef v) { v.setContagious(); return v;}

@@ -211,6 +211,8 @@ protected:
   int o_id;                      // a numeric identifier of this object
   mutable Array *o_properties;   // dynamic properties
 
+  virtual bool php_sleep(Variant &ret);
+
 private:
   mutable int16  o_attribute;    // vairous flags
   mutable int16  o_inCall;       // counter for __call() recursion checking

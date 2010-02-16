@@ -25,6 +25,7 @@
 #include <cpp/base/server/http_server.h>
 #include <cpp/base/server/replay_transport.h>
 #include <cpp/base/server/http_request_handler.h>
+#include <cpp/base/server/admin_request_handler.h>
 #include <cpp/base/server/server_stats.h>
 #include <cpp/base/server/server_note.h>
 #include <cpp/base/memory/memory_manager.h>
@@ -361,6 +362,10 @@ static int start_server(const std::string &popenLog,
     Logger::Output = popen(popenLog.c_str(), "w");
   }
   RuntimeOption::ExecutionMode = "srv";
+  HttpRequestHandler::GetAccessLog().init
+    (RuntimeOption::AccessLogDefaultFormat, RuntimeOption::AccessLogs);
+  AdminRequestHandler::GetAccessLog().init
+    (RuntimeOption::AdminLogFormat, RuntimeOption::AdminLogFile);
 
   if (!username.empty()) {
     Capability::ChangeUnixUser(username);

@@ -27,24 +27,29 @@ namespace HPHP {
 
 typedef boost::interprocess::interprocess_mutex ProcessSharedVariantLock;
 
-template<class T>
-class ptrless
-{
+/**
+ * We could directly use boost::interprocess::offset_ptr<SharedVariant> as
+ * SharedVariantOffPtr, but we ran into a compilation error with boost-1.41+.
+ * This one level of indirection helped.
+ */
+class SharedVariantOffPtr {
 public:
-  bool operator()(const T& x, const T& y) const {
-    if (x && y) {
-      return *x < *y;
+  SharedVariantOffPtr(SharedVariant *sv) : p(sv) {}
+  boost::interprocess::offset_ptr<SharedVariant> p;
+};
+class SharedVariantOffPtrLess {
+public:
+  bool operator()(const SharedVariantOffPtr &x,
+                  const SharedVariantOffPtr &y) const {
+    if (x.p && y.p) {
+      return *x.p < *y.p;
     }
-    return x < y;
+    return x.p < y.p;
   }
 };
 
-class ProcessSharedVariant;
-
-typedef boost::interprocess::offset_ptr<SharedVariant> SharedVariantOffPtr;
-
 typedef SharedMemoryMapWithComp
-<SharedVariantOffPtr, int, ptrless<SharedVariantOffPtr> >
+<SharedVariantOffPtr, int, SharedVariantOffPtrLess>
 ProcessSharedVariantToIntMap;
 
 class ProcessSharedVariantMapData {

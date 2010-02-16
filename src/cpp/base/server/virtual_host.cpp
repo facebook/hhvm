@@ -139,7 +139,14 @@ void VirtualHost::init(Hdf vh) {
   }
 
   vh["ServerVariables"].get(m_serverVars);
-  m_serverName = vh["ServerName"].getString(RuntimeOption::Host);
+  m_serverName = vh["ServerName"].getString();
+  if (m_serverName.empty() && !m_prefix.empty() &&
+      !RuntimeOption::DefaultServerNameSuffix.empty()) {
+    m_serverName = m_prefix + RuntimeOption::DefaultServerNameSuffix;
+  }
+  if (m_serverName.empty()) {
+    m_serverName = RuntimeOption::Host;
+  }
 }
 
 bool VirtualHost::match(const string &host) const {

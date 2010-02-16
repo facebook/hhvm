@@ -48,8 +48,6 @@ namespace HPHP {
 AccessLog AdminRequestHandler::s_accessLog;
 
 AdminRequestHandler::AdminRequestHandler() {
-  GetAccessLog().init(RuntimeOption::AdminLogFormat,
-                      RuntimeOption::AdminLogFile);
 }
 
 void AdminRequestHandler::handleRequest(Transport *transport) {

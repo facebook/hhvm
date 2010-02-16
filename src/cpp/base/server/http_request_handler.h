@@ -30,6 +30,9 @@ class RequestURI;
 
 class HttpRequestHandler : public RequestHandler {
 public:
+  static AccessLog &GetAccessLog() { return s_accessLog; }
+
+public:
   HttpRequestHandler();
 
   // implementing RequestHandler
@@ -37,7 +40,7 @@ public:
 
   // for internal invoke of a special URL
   void disablePathTranslation() { m_pathTranslation = false;}
-  static AccessLog &GetAccessLog() { return s_accessLog; }
+
 private:
   bool m_pathTranslation;
 

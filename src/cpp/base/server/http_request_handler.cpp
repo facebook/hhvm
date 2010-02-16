@@ -40,8 +40,6 @@ AccessLog HttpRequestHandler::s_accessLog;
 
 HttpRequestHandler::HttpRequestHandler()
   : m_pathTranslation(true) {
-  GetAccessLog().init(RuntimeOption::AccessLogDefaultFormat,
-                      RuntimeOption::AccessLogs);
 }
 
 void HttpRequestHandler::sendStaticContent(Transport *transport,

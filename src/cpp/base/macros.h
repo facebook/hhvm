@@ -249,8 +249,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // code instrumentation or injections
 
-#define DECLARE_THREAD_INFO \
-  ThreadInfo *info = ThreadInfo::s_threadInfo.get();
+#define DECLARE_THREAD_INFO                      \
+  ThreadInfo *info __attribute__((__unused__)) = \
+    ThreadInfo::s_threadInfo.get();
 
 #ifdef INFINITE_LOOP_DETECTION
 #define LOOP_COUNTER(n) int lc##n = 0;

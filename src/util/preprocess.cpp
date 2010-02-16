@@ -17,13 +17,9 @@
 #include "preprocess.h"
 #include "base.h"
 #include "exception.h"
+#include <xhp_preprocess.hpp>
 
 using namespace std;
-
-/* The following code is only used if XHP is available */
-#if defined(HAVE_XHP)
-
-#include <xhp_preprocess.hpp>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,18 +44,6 @@ istream *preprocessXHP(istream &input, iostream &output,
   is->seekg(0, ios::beg);
   return is;
 }
-
-/* This code is for the case that XHP isn't available */
-#else
-
-namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-
-istream *preprocessXHP(istream &input, iostream &output,
-                       const std::string &fullPath) {
-  throw NotSupportedException("XHP");
-}
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 }

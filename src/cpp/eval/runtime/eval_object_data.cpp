@@ -258,7 +258,8 @@ Variant EvalObjectData::doCall(Variant v_name, Variant v_arguments,
                                bool fatal) {
   const MethodStatement *ms = getMethodStatement("__call");
   if (ms) {
-    return ms->invokeInstance(Object(root), CREATE_VECTOR2(v_name, v_arguments));
+    return ms->invokeInstance(Object(root),
+                              CREATE_VECTOR2(v_name, v_arguments));
   } else {
     return DynamicObjectData::doCall(v_name, v_arguments, fatal);
   }
@@ -292,7 +293,7 @@ Variant EvalObjectData::t___get(Variant v_name) {
   }
 }
 bool EvalObjectData::t___isset(Variant v_name) {
-  const MethodStatement *ms = getMethodStatement("__name");
+  const MethodStatement *ms = getMethodStatement("__isset");
   if (ms) {
     return ms->invokeInstance(Object(root), CREATE_VECTOR1(v_name));
   } else {
@@ -307,8 +308,14 @@ Variant EvalObjectData::t___unset(Variant v_name) {
     return DynamicObjectData::t___unset(v_name);
   }
 }
+
+bool EvalObjectData::php_sleep(Variant &ret) {
+  ret = t___sleep();
+  return getMethodStatement("__sleep");
+}
+
 Variant EvalObjectData::t___sleep() {
-  const MethodStatement *ms = getMethodStatement("__unset");
+  const MethodStatement *ms = getMethodStatement("__sleep");
   if (ms) {
     return ms->invokeInstance(Object(root), Array());
   } else {

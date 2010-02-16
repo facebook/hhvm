@@ -92,6 +92,9 @@ public:
 
 protected:
   virtual ObjectData* cloneImpl();
+
+  virtual bool php_sleep(Variant &ret);
+
 private:
   ClassEvalState &m_cls;
 };

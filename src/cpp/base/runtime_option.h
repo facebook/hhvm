@@ -58,6 +58,7 @@ public:
 
   static std::string Tier;
   static std::string Host;
+  static std::string DefaultServerNameSuffix;
   static std::string ServerIP;
   static std::string ServerPrimaryIP;
   static int ServerPort;

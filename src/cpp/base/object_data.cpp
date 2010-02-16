@@ -396,20 +396,26 @@ Variant ObjectData::o_throw_fatal(const char *msg) {
   return null;
 }
 
+bool ObjectData::php_sleep(Variant &ret) {
+  setAttribute(HasSleep);
+  ret = t___sleep();
+  return getAttribute(HasSleep);
+}
+
 void ObjectData::serialize(VariableSerializer *serializer) const {
   if (serializer->incNestedLevel((void*)this, true)) {
     serializer->writeOverflow((void*)this, true);
   } else {
-    setAttribute(HasSleep);
-    Variant ret = const_cast<ObjectData*>(this)->t___sleep();
-    if (getAttribute(HasSleep)) {
+    Variant ret;
+    if (const_cast<ObjectData*>(this)->php_sleep(ret)) {
       if (ret.isArray()) {
         Array wanted = Array::Create();
         Array props = ret.toArray();
         for (ArrayIter iter(props); iter; ++iter) {
           String name = iter.second().toString();
           if (o_exists(name, -1)) {
-            wanted.set(name, const_cast<ObjectData*>(this)->o_get(name, -1));
+            wanted.set(name, const_cast<ObjectData*>(this)->
+                       o_getUnchecked(name, -1));
           } else {
             Logger::Warning("\"%s\" returned as member variable from "
                             "__sleep() but does not exist", name.data());

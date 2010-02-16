@@ -25,6 +25,9 @@ namespace HPHP {
 
 class AdminRequestHandler : public RequestHandler {
 public:
+  static AccessLog &GetAccessLog() { return s_accessLog; }
+
+public:
     AdminRequestHandler();
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport);
@@ -44,7 +47,6 @@ private:
 #endif
 
   static AccessLog s_accessLog;
-  static AccessLog &GetAccessLog() { return s_accessLog; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

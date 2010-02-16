@@ -59,6 +59,7 @@ std::string RuntimeOption::AdminLogFile;
 
 std::string RuntimeOption::Tier;
 std::string RuntimeOption::Host;
+std::string RuntimeOption::DefaultServerNameSuffix;
 std::string RuntimeOption::ServerIP;
 std::string RuntimeOption::ServerPrimaryIP;
 int RuntimeOption::ServerPort;
@@ -242,7 +243,7 @@ DefaultRuntimeOptionLoader DefaultRuntimeOptionLoader::Loader;
 ///////////////////////////////////////////////////////////////////////////////
 
 static void setResourceLimit(int resource, Hdf rlimit, const char *nodeName) {
-  if (!rlimit[nodeName].getString("").empty()) {
+  if (!rlimit[nodeName].getString().empty()) {
     struct rlimit rl;
     getrlimit(resource, &rl);
     rl.rlim_cur = rlimit[nodeName].getInt64();
@@ -276,7 +277,7 @@ void RuntimeOption::Load(Hdf &config) {
     Hdf tiers = config["Tiers"];
     string hostname = Process::GetHostName();
     for (Hdf hdf = tiers.firstChild(); hdf.exists(); hdf = hdf.next()) {
-      string pattern = hdf["machine"].getString("");
+      string pattern = hdf["machine"].getString();
       if (!pattern.empty()) {
         Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
                                         AttachLiteral),
@@ -310,13 +311,13 @@ void RuntimeOption::Load(Hdf &config) {
 
     Logger::UseLogFile = logger["UseLogFile"].getBool(true);
     if (Logger::UseLogFile) {
-      LogFile = logger["File"].getString("");
+      LogFile = logger["File"].getString();
     }
 
     Hdf aggregator = logger["Aggregator"];
     Logger::UseLogAggregator = aggregator.getBool();
-    LogAggregatorFile = aggregator["File"].getString("");
-    LogAggregatorDatabase = aggregator["Database"].getString("");
+    LogAggregatorFile = aggregator["File"].getString();
+    LogAggregatorDatabase = aggregator["Database"].getString();
     LogAggregatorSleepSeconds = aggregator["SleepSeconds"].getInt16(10);
 
     AlwaysLogUnhandledExceptions =
@@ -330,7 +331,7 @@ void RuntimeOption::Load(Hdf &config) {
       Hdf access = logger["Access"];
       for (Hdf hdf = access.firstChild(); hdf.exists();
            hdf = hdf.next()) {
-        string fname = hdf["File"].getString("");
+        string fname = hdf["File"].getString();
         if (fname.empty()) {
           continue;
         }
@@ -341,7 +342,7 @@ void RuntimeOption::Load(Hdf &config) {
     }
 
     AdminLogFormat = logger["AdminLogFormat"].getString("%h %t %s %U");
-    AdminLogFile = logger["AdminLogFile"].getString("");
+    AdminLogFile = logger["AdminLogFile"].getString();
   }
   {
     Hdf error = config["ErrorHandling"];
@@ -362,7 +363,8 @@ void RuntimeOption::Load(Hdf &config) {
   }
   {
     Hdf server = config["Server"];
-    Host = server["Host"].getString("");
+    Host = server["Host"].getString();
+    DefaultServerNameSuffix = server["DefaultServerNameSuffix"].getString();
     ServerIP = server["IP"].getString("0.0.0.0");
     ServerPrimaryIP = Util::GetPrimaryIP();
     ServerPort = server["Port"].getInt16(80);
@@ -390,13 +392,13 @@ void RuntimeOption::Load(Hdf &config) {
     UploadMaxFileSize = (server["MaxPostSize"].getInt32(10)) * (1 << 20);
     EnableFileUploads = server["EnableFileUploads"].getBool(true);
     LibEventSyncSend = server["LibEventSyncSend"].getBool(true);
-    TakeoverFilename = server["TakeoverFilename"].getString("");
+    TakeoverFilename = server["TakeoverFilename"].getString();
     ExpiresActive = server["ExpiresActive"].getBool(true);
     ExpiresDefault = server["ExpiresDefault"].getInt32(2592000);
     if (ExpiresDefault < 0) ExpiresDefault = 2592000;
     DefaultCharsetName = server["DefaultCharsetName"].getString("UTF-8");
 
-    SourceRoot = server["SourceRoot"].getString("");
+    SourceRoot = server["SourceRoot"].getString();
     if (!SourceRoot.empty() && SourceRoot[SourceRoot.length() - 1] != '/') {
       SourceRoot += '/';
     }
@@ -414,12 +416,12 @@ void RuntimeOption::Load(Hdf &config) {
     }
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), "./");
 
-    FileCache = server["FileCache"].getString("");
-    DefaultDocument = server["DefaultDocument"].getString("");
-    ErrorDocument404 = server["ErrorDocument404"].getString("");
+    FileCache = server["FileCache"].getString();
+    DefaultDocument = server["DefaultDocument"].getString();
+    ErrorDocument404 = server["ErrorDocument404"].getString();
     normalizePath(ErrorDocument404);
-    FatalErrorMessage = server["FatalErrorMessage"].getString("");
-    FontPath = server["FontPath"].getString("");
+    FatalErrorMessage = server["FatalErrorMessage"].getString();
+    FontPath = server["FontPath"].getString();
     if (!FontPath.empty() && FontPath[FontPath.length() - 1] != '/') {
       FontPath += "/";
     }
@@ -435,10 +437,10 @@ void RuntimeOption::Load(Hdf &config) {
     }
     EnableCliRTTI = server["EnableCliRTTI"].getBool();
 
-    StartupDocument = server["StartupDocument"].getString("");
+    StartupDocument = server["StartupDocument"].getString();
     normalizePath(StartupDocument);
-    WarmupDocument = server["WarmupDocument"].getString("");
-    RequestInitFunction = server["RequestInitFunction"].getString("");
+    WarmupDocument = server["WarmupDocument"].getString();
+    RequestInitFunction = server["RequestInitFunction"].getString();
     server["ThreadDocuments"].get(ThreadDocuments);
     for (unsigned int i = 0; i < ThreadDocuments.size(); i++) {
       normalizePath(ThreadDocuments[i]);
@@ -464,7 +466,7 @@ void RuntimeOption::Load(Hdf &config) {
     EnableApc = apc["EnableApc"].getBool(true);
     ApcUseSharedMemory = apc["UseSharedMemory"].getBool();
     ApcSharedMemorySize = apc["SharedMemorySize"].getInt32(1024 /* 1GB */);
-    ApcPrimeLibrary = apc["PrimeLibrary"].getString("");
+    ApcPrimeLibrary = apc["PrimeLibrary"].getString();
     ApcLoadThread = apc["LoadThread"].getInt16(2);
     apc["CompletionKeys"].get(ApcCompletionKeys);
 
@@ -576,11 +578,11 @@ void RuntimeOption::Load(Hdf &config) {
     Hdf admin = config["AdminServer"];
     AdminServerPort = admin["Port"].getInt16(8088);
     AdminThreadCount = admin["ThreadCount"].getInt32(1);
-    AdminPassword = admin["Password"].getString("");
+    AdminPassword = admin["Password"].getString();
   }
   {
     Hdf proxy = config["Proxy"];
-    ProxyOrigin = proxy["Origin"].getString("");
+    ProxyOrigin = proxy["Origin"].getString();
     ProxyRetry = proxy["Retry"].getInt16(3);
     UseServeURLs = proxy["ServeURLs"].getBool();
     proxy["ServeURLs"].get(ServeURLs);
@@ -617,7 +619,7 @@ void RuntimeOption::Load(Hdf &config) {
     RecordInput = debug["RecordInput"].getBool();
     ClearInputOnSuccess = debug["ClearInputOnSuccess"].getBool(true);
     ProfilerOutputDir = debug["ProfilerOutputDir"].getString("/tmp");
-    CoreDumpEmail = debug["CoreDumpEmail"].getString("");
+    CoreDumpEmail = debug["CoreDumpEmail"].getString();
     if (!CoreDumpEmail.empty()) {
       StackTrace::ReportEmail = CoreDumpEmail;
     }
@@ -642,8 +644,8 @@ void RuntimeOption::Load(Hdf &config) {
       LeakDetectable::EnableMallocStats(true);
     }
 
-    StatsXSL = stats["XSL"].getString("");
-    StatsXSLProxy = stats["XSLProxy"].getString("");
+    StatsXSL = stats["XSL"].getString();
+    StatsXSLProxy = stats["XSLProxy"].getString();
 
     StatsSlotDuration = stats["SlotDuration"].getInt32(10 * 60); // 10 minutes
     StatsMaxSlot = stats["MaxSlot"].getInt32(12 * 6); // 12 hours
@@ -664,15 +666,15 @@ void RuntimeOption::Load(Hdf &config) {
   {
     Hdf sandbox = config["Sandbox"];
     SandboxMode = sandbox["SandboxMode"].getBool();
-    SandboxPattern = format_pattern(sandbox["Pattern"].getString(""));
-    SandboxHome = sandbox["Home"].getString("");
-    SandboxConfFile = sandbox["ConfFile"].getString("");
+    SandboxPattern = format_pattern(sandbox["Pattern"].getString());
+    SandboxHome = sandbox["Home"].getString();
+    SandboxConfFile = sandbox["ConfFile"].getString();
     sandbox["ServerVariables"].get(SandboxServerVariables);
   }
   {
     Hdf mail = config["Mail"];
     SendmailPath = mail["SendmailPath"].getString("sendmail -t -i");
-    MailForceExtraParameters = mail["ForceExtraParameters"].getString("");
+    MailForceExtraParameters = mail["ForceExtraParameters"].getString();
   }
 }
 

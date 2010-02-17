@@ -712,6 +712,20 @@ void BinaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_exp2->outputPHP(cg, ar);
 }
 
+static bool castIfNeeded(TypePtr top, TypePtr arg, 
+                         CodeGenerator &cg, AnalysisResultPtr ar)
+{
+  if (top && top->isPrimitive()) {
+    if (!arg || !arg->isPrimitive()) {
+      top->outputCPPCast(cg, ar);
+      cg.printf("(");
+      return true;
+    }
+  }
+
+  return false;
+}
+
 void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
   bool bothEffect = m_exp1->hasEffect() && m_exp2->hasEffect();
@@ -803,7 +817,11 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       first->outputCPP(cg, ar);
       cg.printf(")");
     } else {
+      bool flag = castIfNeeded(getActualType(), actualType, cg, ar);
       first->outputCPP(cg, ar);
+      if (flag) {
+        cg.printf(")");
+      }
     }
     break;
   }
@@ -865,7 +883,11 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       second->outputCPP(cg, ar);
       cg.printf(")");
     } else {
+      bool flag = castIfNeeded(getActualType(), actualType, cg, ar);
       second->outputCPP(cg, ar);
+      if (flag) {
+        cg.printf(")");
+      }
     }
     break;
   }

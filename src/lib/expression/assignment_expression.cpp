@@ -362,8 +362,8 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
     if (setNull) {
       cg.printf("setNull(");
       m_variable->outputCPP(cg, ar);
-      cg.printf(")");
     } else {
+      cg.printf("(");
       m_variable->outputCPP(cg, ar);
       cg.printf(" = ");
 
@@ -376,5 +376,6 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
       if (ref && m_value->isRefable()) cg.printf(")");
       if (type_cast) cg.printf(")");
     }
+    cg.printf(")");
   }
 }

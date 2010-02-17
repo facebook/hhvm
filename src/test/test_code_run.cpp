@@ -2797,7 +2797,7 @@ bool TestCodeRun::TestDynamicFunctions() {
 
   Option::DynamicInvokeFunctions.insert("test1");
   Option::DynamicInvokeFunctions.insert("test2");
-  MVCR("<?php "
+  VCR("<?php "
       "function test1() { print __FUNCTION__;} "
       "function test2() { print __FUNCTION__;} "
       "fb_rename_function('test2', 'test3');"

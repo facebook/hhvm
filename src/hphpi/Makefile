@@ -8,9 +8,9 @@ all: hphpi
 
 hphpi: $(HPHP) $(PHP_FILES) hphpi_build.hdf
 	@echo "Compiling hphpi..."
-	@$(HPHP) -t cpp -f exe --input-dir . -i $(PHP_FILES) -o gen \
+	$(V)$(HPHP) -t cpp -f exe --input-dir . -i $(PHP_FILES) -o gen \
 		--config hphpi_build.hdf --log=1
-	@mv gen/program hphpi
+	$(V)mv gen/program hphpi
 
 clobber:
-	@rm -rf gen hphpi
+	$(V)rm -rf gen hphpi

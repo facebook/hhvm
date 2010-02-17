@@ -46,13 +46,13 @@ install:
 
 .PHONY: list-targets
 list-targets:
-	$(V)echo $(TARGETS) | tr ' ' '\n'
+	@echo $(TARGETS) | tr ' ' '\n'
 	$(V)for mdir in $(SUB_PROGRAMS); do $(MAKE) -C $$mdir list-targets; done
 	$(V)for mdir in $(SUB_LIB_TARGETS); do $(MAKE) -C $$mdir list-targets; done
 
 .PHONY: list-sources
 list-sources:
-	$(V)echo $(SOURCES) | tr ' ' '\n'
+	@echo $(SOURCES) | tr ' ' '\n'
 	$(V)for mdir in $(SUB_PROGRAMS); do $(MAKE) -C $$mdir list-sources; done
 	$(V)for mdir in $(SUB_LIB_TARGETS); do $(MAKE) -C $$mdir list-sources; done
 

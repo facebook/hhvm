@@ -26,12 +26,12 @@ JAVA_PATH = /usr/local/jdk-6u7-64
 CPPFLAGS += -I $(JAVA_PATH)/include -I $(JAVA_PATH)/include/linux \
 
 $(CLS) : $(SRC)
-	@mkdir -p classes
-	@$(JAVA_PATH)/bin/javac -sourcepath . -d classes $^
+	$(V)mkdir -p classes
+	$(V)$(JAVA_PATH)/bin/javac -sourcepath . -d classes $^
 
 ${HEADER} : ${CLS}
-	@$(JAVA_PATH)/bin/javah -classpath classes -o ${HEADER} \
+	$(V)$(JAVA_PATH)/bin/javah -classpath classes -o ${HEADER} \
   `echo ${CLS} | sed -e 's/classes\///g' -e 's/\.class//g' -e 's/\//\./g'`
 
 clobber : clean
-	@rm -rf $(SHARED_LIB) classes $(HEADER)
+	$(V)rm -rf $(SHARED_LIB) classes $(HEADER)

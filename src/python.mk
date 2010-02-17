@@ -17,9 +17,9 @@ SHARED_LIB = ffi/python/_$(NAME).so
 all : $(SHARED_LIB)
 
 $(WRAP_FILE) : $(SWIG_FILE)
-	@mkdir -p ffi/python
-	@swig -python -outdir ffi/python -I$(HPHP_HOME)/src/ffi/swig $(SWIG_FILE)
+	$(V)mkdir -p ffi/python
+	$(V)swig -python -outdir ffi/python -I$(HPHP_HOME)/src/ffi/swig $(SWIG_FILE)
 
 $(SHARED_LIB) : $(WRAP_FILE)
-	@$(CXX) -shared -fPIC $(CPPFLAGS) $(CXXFLAGS) $(DEBUG_SYMBOL) -Wall -Werror \
+	$(V)$(CXX) -shared -fPIC $(CPPFLAGS) $(CXXFLAGS) $(DEBUG_SYMBOL) -Wall -Werror \
     -Wl,-soname,_$(NAME).so -o ffi/python/_$(NAME).so $^ $(EXTERNAL)

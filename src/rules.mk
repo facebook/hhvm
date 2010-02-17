@@ -557,7 +557,7 @@ $(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@)  $<
 endef
 else
 define COMPILE_CXX
-$(V)echo 'Compiling $<...'
+@echo 'Compiling $<...'
 $(V)$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 endef
 endif
@@ -568,7 +568,7 @@ $(LD) $@ $(LDFLAGS) $(filter %.o,$^) $(LIBS)
 endef
 else
 define LINK_OBJECTS
-$(V)echo 'Linking $@...'
+@echo 'Linking $@...'
 $(V)$(LD) $@ $(LDFLAGS) $(filter %.o,$^) $(LIBS)
 endef
 endif
@@ -599,23 +599,23 @@ $(GENERATED_CPP_SOURCES:%.c=%.o): %.o:%.c
 else
 
 $(CXX_NOOPT_SOURCES:%.cpp=%.o) $(GENERATED_CXX_NOOPT_SOURCES:%.cpp=%.o): %.o:%.cpp
-	$(V)echo 'Compiling $<...'
+	@echo 'Compiling $<...'
 	$(V)$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 
 $(CXX_SOURCES:%.cpp=%.o) $(GENERATED_CXX_SOURCES:%.cpp=%.o): %.o:%.cpp
-	$(V)echo 'Compiling $<...'
+	@echo 'Compiling $<...'
 	$(V)$(CXX) -c $(CPPFLAGS) $(OPT) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 
 $(C_SOURCES:%.c=%.o) $(GENERATED_C_SOURCES:%.c=%.o): %.o:%.c
-	$(V)echo 'Compiling $<...'
+	@echo 'Compiling $<...'
 	$(V)$(CC) -c $(CPPFLAGS) $(OPT) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 
 $(GENERATED_CPP_SOURCES:%.c=%.o): %.o:%.c
-	$(V)echo 'Compiling $<...'
+	@echo 'Compiling $<...'
 	$(V)$(CXX) -c $(CPPFLAGS) $(OPT) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 
 %.o:%.cpp
-	$(V)echo 'Compiling $<...'
+	@echo 'Compiling $<...'
 	$(V)$(CXX) -c $(CPPFLAGS) $(OPT) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 
 endif
@@ -653,15 +653,15 @@ $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 else
 
 $(SHARED_LIB): $(OBJECTS)
-	$(V)echo 'Linking $@...'
+	@echo 'Linking $@...'
 	$(V)$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wl,-soname,lib$(PROJECT_NAME).so -o $@ $(OBJECTS) $(EXTERNAL)
 
 $(STATIC_LIB): $(OBJECTS)
-	$(V)echo 'Linking $@...'
+	@echo 'Linking $@...'
 	$(V)$(AR) $@ $(OBJECTS)
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
-	$(V)echo 'Linking $@...'
+	@echo 'Linking $@...'
 	$(V)$(LD) $@ $(LDFLAGS) $< $(LIBS)
 
 endif
@@ -679,8 +679,8 @@ $(PROGRAMS): $(LIB_TARGETS)
 
 .PHONY: report
 report:
-	$(V)echo "Time    PID  Source File"
-	$(V)echo "---------------------------------------------"
+	@echo "Time    PID  Source File"
+	@echo "---------------------------------------------"
 	$(V)ps wwaxo pid,etime,command k start | grep distcc | grep -v grep | \
 	sed 's/^\( *[0-9]\+\) \+\([0-9:]\+\) .* \([^ ]\+\)$$/\2 \1  \3/' | \
 	head -`tput lines`

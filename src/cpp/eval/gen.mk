@@ -8,9 +8,9 @@ INTERMEDIATE_FILES += \
 overall: all
 
 $(EVAL_DIR)/parser/lex.eval_.cpp: $(EVAL_DIR)/parser/hphp.x $(EVAL_DIR)/parser/hphp.tab.cpp
-	$(V)echo "Generating scanner code..."
+	@echo "Generating scanner code..."
 	$(V)cd $(EVAL_DIR)/parser && flex -w -i -olex.eval_.cpp -Peval_ hphp.x
 
 $(EVAL_DIR)/parser/hphp.tab.cpp: $(EVAL_DIR)/parser/hphp.y
-	$(V)echo "Generating parser code..."
+	@echo "Generating parser code..."
 	$(V)cd $(EVAL_DIR)/parser && bison -v -d -o hphp.tab.cpp -p eval_ hphp.y

@@ -23,13 +23,13 @@ ifneq ($(strip $(HOOK_RULE_FILE)),)
 endif
 
 $(PROJECT_ROOT)/src/test/test_suite.inc:: $(TEST_SUITE_INC)
-	@cat $^ > $@
+	$(V)cat $^ > $@
 
 $(PROJECT_ROOT)/src/test/test_fast.inc: $(TEST_FAST_INC)
-	@cat $^ > $@
+	$(V)cat $^ > $@
 
 $(PROJECT_ROOT)/src/test/test_mysql_info.inc: $(TEST_MYSQL_INFO_INC)
-	@cat $^ > $@
+	$(V)cat $^ > $@
 
 test.o:	$(PROJECT_ROOT)/src/test/test_suite.inc \
         $(PROJECT_ROOT)/src/test/test_fast.inc
@@ -38,7 +38,7 @@ test_ext_mysql.o:	$(PROJECT_ROOT)/src/test/test_mysql_info.inc
 all: $(TARGETS)
 
 clobber::
-	@rm -f test_suite.inc test_fast.inc test_mysql_info.inc
-	@$(MAKE) --no-print-directory -f $(PROJECT_ROOT)/src/default.mk $@
-	@rm -fR test_hphp/*/output
-	@rm -f test_hphp/*~ test_hphp/*/*~ test_hphp/*/*/*~
+	$(V)rm -f test_suite.inc test_fast.inc test_mysql_info.inc
+	$(V)$(MAKE) --no-print-directory -f $(PROJECT_ROOT)/src/default.mk $@
+	$(V)rm -fR test_hphp/*/output
+	$(V)rm -f test_hphp/*~ test_hphp/*/*~ test_hphp/*/*/*~

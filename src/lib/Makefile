@@ -16,11 +16,11 @@ all: $(TARGETS)
 
 parser/lex.yy.cpp: parser/hphp.x parser/hphp.tab.cpp
 	@echo "Generating scanner code..."
-	@cd parser && flex -w -i -olex.yy.cpp hphp.x
+	$(V)cd parser && flex -w -i -olex.yy.cpp hphp.x
 
 parser/hphp.tab.cpp: parser/hphp.y
 	@echo "Generating parser code..."
-	@cd parser && bison -d -o hphp.tab.cpp hphp.y
+	$(V)cd parser && bison -d -o hphp.tab.cpp hphp.y
 
 parser/ylmm/basic_scanner.hh: \
 	parser/ylmm/basic_buffer.hh \
@@ -39,15 +39,15 @@ ifneq ($(strip $(HOOK_RULE_FILE)),)
 endif
 
 $(PROJECT_ROOT)/src/lib/analysis/code_error.inc: $(ERROR_INC)
-	@cat $^ > $@
+	$(V)cat $^ > $@
 
 $(PROJECT_ROOT)/src/lib/analysis/dependency.inc: $(DEPENDENCY_INC)
-	@cat $^ > $@
+	$(V)cat $^ > $@
 
 $(OBJECTS): $(PROJECT_ROOT)/src/lib/analysis/code_error.inc
 $(OBJECTS): $(PROJECT_ROOT)/src/lib/analysis/dependency.inc
 
 clobber:
-	@rm -f analysis/code_error.inc
-	@rm -f analysis/dependency.inc
-	@rm -f $(INTERMEDIATE_FILES)
+	$(V)rm -f analysis/code_error.inc
+	$(V)rm -f analysis/dependency.inc
+	$(V)rm -f $(INTERMEDIATE_FILES)

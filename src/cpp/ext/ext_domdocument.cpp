@@ -1147,11 +1147,12 @@ void c_domnode::t___construct() {
 }
 
 Variant c_domnode::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
-Variant c_domnode::t_appendchild(CObjRef newnode)
-{
+Variant c_domnode::t_appendchild(CObjRef newnode) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   if (!dom_node_children_valid(nodep)) {
     return false;
@@ -1227,6 +1228,7 @@ Variant c_domnode::t_appendchild(CObjRef newnode)
 }
 
 Variant c_domnode::t_clonenode(bool deep /* = false */) {
+  throw NotImplementedException(__func__);
   xmlNodePtr n = m_node;
   xmlNode * node = xmlDocCopyNode(n, n->doc, deep);
   if (!node)
@@ -1263,11 +1265,13 @@ Variant c_domnode::t_clonenode(bool deep /* = false */) {
 }
 
 int64 c_domnode::t_getlineno() {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   return xmlGetLineNo(nodep);
 }
 
 bool c_domnode::t_hasattributes() {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   if (nodep->type != XML_ELEMENT_NODE)
     return false;
@@ -1279,6 +1283,7 @@ bool c_domnode::t_hasattributes() {
 }
 
 bool c_domnode::t_haschildnodes() {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   if (!dom_node_children_valid(nodep)) {
     return false;
@@ -1291,6 +1296,7 @@ bool c_domnode::t_haschildnodes() {
 }
 
 Variant c_domnode::t_insertbefore(CObjRef newnode, CObjRef refnode /* = null */) {
+  throw NotImplementedException(__func__);
   xmlNodePtr parentp = m_node;
   if (!dom_node_children_valid(parentp)) {
     return false;
@@ -1423,6 +1429,7 @@ Variant c_domnode::t_insertbefore(CObjRef newnode, CObjRef refnode /* = null */)
 }
 
 bool c_domnode::t_isdefaultnamespace(CStrRef namespaceuri) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   xmlNsPtr nsptr;
   if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
@@ -1438,6 +1445,7 @@ bool c_domnode::t_isdefaultnamespace(CStrRef namespaceuri) {
 }
 
 bool c_domnode::t_issamenode(CObjRef node) {
+  throw NotImplementedException(__func__);
   SmartObject<c_domnode> otherdomnode = node.getTyped<c_domnode>();
   if (m_node == otherdomnode->m_node)
     return true;
@@ -1445,6 +1453,7 @@ bool c_domnode::t_issamenode(CObjRef node) {
 }
 
 bool c_domnode::t_issupported(CStrRef feature, CStrRef version) {
+  throw NotImplementedException(__func__);
   // dom_has_feature makes a bunch of calls to strcmp, we should
   // look into making it use string_strcmp instead
   if (dom_has_feature((char*)feature.data(), (char*)version.data()))
@@ -1453,6 +1462,7 @@ bool c_domnode::t_issupported(CStrRef feature, CStrRef version) {
 }
 
 Variant c_domnode::t_lookupnamespaceuri(CStrRef namespaceuri) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   xmlNsPtr nsptr;
   if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
@@ -1469,6 +1479,7 @@ Variant c_domnode::t_lookupnamespaceuri(CStrRef namespaceuri) {
 }
 
 Variant c_domnode::t_lookupprefix(CStrRef prefix) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   xmlNodePtr lookupp;
   xmlNsPtr nsptr;
@@ -1501,11 +1512,13 @@ Variant c_domnode::t_lookupprefix(CStrRef prefix) {
 }
 
 void c_domnode::t_normalize() {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   dom_normalize(nodep);
 }
 
 Variant c_domnode::t_removechild(CObjRef node) {
+  throw NotImplementedException(__func__);
   xmlNodePtr children;
   xmlNodePtr nodep = m_node;
   if (!dom_node_children_valid(nodep)) {
@@ -1538,6 +1551,7 @@ Variant c_domnode::t_removechild(CObjRef node) {
 }
 
 Variant c_domnode::t_replacechild(CObjRef newchildobj, CObjRef oldchildobj) {
+  throw NotImplementedException(__func__);
   int foundoldchild = 0;
   xmlNodePtr nodep = m_node;
   if (!dom_node_children_valid(nodep)) {
@@ -1603,16 +1617,19 @@ Variant c_domnode::t_replacechild(CObjRef newchildobj, CObjRef oldchildobj) {
 }
 
 Variant c_domnode::t_c14n(bool exclusive /* = false */, bool with_comments /* = false */, CVarRef xpath /* = null */, CVarRef ns_prefixes /* = null */) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   return dom_canonicalization(nodep, "", exclusive, with_comments, xpath, ns_prefixes, 0);
 }
 
 Variant c_domnode::t_c14nfile(CStrRef uri, bool exclusive /* = false */, bool with_comments /* = false */, CVarRef xpath /* = null */, CVarRef ns_prefixes /* = null */) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   return dom_canonicalization(nodep, uri, exclusive, with_comments, xpath, ns_prefixes, 1);
 }
 
 Variant c_domnode::t_getnodepath() {
+  throw NotImplementedException(__func__);
   xmlNodePtr n = m_node;
   char *value = (char*)xmlGetNodePath(n);
   if (value == NULL) {
@@ -1635,10 +1652,12 @@ void c_domattr::t___construct(CVarRef name, CVarRef value) {
 }
 
 Variant c_domattr::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
 bool c_domattr::t_isid() {
+  throw NotImplementedException(__func__);
   xmlAttrPtr attrp = (xmlAttrPtr)m_node;
   if (attrp->atype == XML_ATTRIBUTE_ID) {
     return true;
@@ -1658,10 +1677,12 @@ void c_domcharacterdata::t___construct(CVarRef value) {
 }
 
 Variant c_domcharacterdata::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
 bool c_domcharacterdata::t_appenddata(CStrRef arg) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   // Implement logic from libxml xmlTextConcat to add suport for comments and PI
   if ((nodep->content == (xmlChar *) &(nodep->properties)) ||
@@ -1676,6 +1697,7 @@ bool c_domcharacterdata::t_appenddata(CStrRef arg) {
 }
 
 bool c_domcharacterdata::t_deletedata(int64 offset, int64 count) {
+  throw NotImplementedException(__func__);
   xmlNodePtr node = m_node;
   xmlChar    *cur, *substring, *second;
   int         length;
@@ -1707,6 +1729,7 @@ bool c_domcharacterdata::t_deletedata(int64 offset, int64 count) {
 }
 
 bool c_domcharacterdata::t_insertdata(int64 offset, CStrRef data) {
+  throw NotImplementedException(__func__);
   xmlNodePtr node = m_node;
   xmlChar  *cur, *first, *second;
   int      length;
@@ -1732,6 +1755,7 @@ bool c_domcharacterdata::t_insertdata(int64 offset, CStrRef data) {
 }
 
 bool c_domcharacterdata::t_replacedata(int64 offset, int64 count, CStrRef data) {
+  throw NotImplementedException(__func__);
   xmlNodePtr node = m_node;
   xmlChar *cur, *substring, *second = NULL;
   int         length;
@@ -1768,6 +1792,7 @@ bool c_domcharacterdata::t_replacedata(int64 offset, int64 count, CStrRef data) 
 }
 
 String c_domcharacterdata::t_substringdata(int64 offset, int64 count) {
+  throw NotImplementedException(__func__);
   xmlNodePtr node = m_node;
   xmlChar    *cur;
   xmlChar    *substring;
@@ -1808,6 +1833,7 @@ void c_domcomment::t___construct(CVarRef value) {
 }
 
 Variant c_domcomment::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
@@ -1822,10 +1848,12 @@ void c_domtext::t___construct(CVarRef value) {
 }
 
 Variant c_domtext::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
 bool c_domtext::t_iswhitespaceinelementcontent() {
+  throw NotImplementedException(__func__);
   xmlNodePtr node = m_node;
   if (xmlIsBlankNode(node)) {
     return true;
@@ -1835,6 +1863,7 @@ bool c_domtext::t_iswhitespaceinelementcontent() {
 }
 
 Variant c_domtext::t_splittext(int64 offset) {
+  throw NotImplementedException(__func__);
   xmlNodePtr node = m_node;
   xmlChar    *cur;
   xmlChar    *first;
@@ -1884,6 +1913,7 @@ void c_domcdatasection::t___construct(CVarRef value) {
 }
 
 Variant c_domcdatasection::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
@@ -1894,6 +1924,7 @@ c_domdocument::~c_domdocument() {
 }
 
 void c_domdocument::t___construct(CStrRef version, CStrRef encoding) {
+  throw NotImplementedException(__func__);
   xmlDoc *docp = xmlNewDoc((xmlChar*)version.data());
   if (!docp) {
     //php_dom_throw_error(INVALID_STATE_ERR, 1 TSRMLS_CC);
@@ -1907,10 +1938,12 @@ void c_domdocument::t___construct(CStrRef version, CStrRef encoding) {
 }
 
 Variant c_domdocument::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
 Variant c_domdocument::t_createattribute(CStrRef name) {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlAttrPtr node;
   if (xmlValidateName((xmlChar*)name.data(), 0) != 0) {
@@ -1927,6 +1960,7 @@ Variant c_domdocument::t_createattribute(CStrRef name) {
 }
 
 Variant c_domdocument::t_createattributens(CStrRef namespaceuri, CStrRef qualifiedname) {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNodePtr nodep = NULL, root;
   xmlNsPtr nsptr;
@@ -1973,6 +2007,7 @@ Variant c_domdocument::t_createattributens(CStrRef namespaceuri, CStrRef qualifi
 }
 
 Variant c_domdocument::t_createcdatasection(CStrRef data) {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNode *node;
   node = xmlNewCDataBlock(docp, (xmlChar*)data.data(), data.size());
@@ -1985,6 +2020,7 @@ Variant c_domdocument::t_createcdatasection(CStrRef data) {
 }
 
 Variant c_domdocument::t_createcomment(CStrRef data) {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNode *node;
   node = xmlNewCDataBlock(docp, (xmlChar*)data.data(), data.size());
@@ -1997,6 +2033,7 @@ Variant c_domdocument::t_createcomment(CStrRef data) {
 }
 
 Variant c_domdocument::t_createdocumentfragment() {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNode *node;
   node = xmlNewDocFragment(docp);
@@ -2009,6 +2046,7 @@ Variant c_domdocument::t_createdocumentfragment() {
 }
 
 Variant c_domdocument::t_createelement(CStrRef name, CStrRef value /* = null_string */) {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNode *node;
   if (xmlValidateName((xmlChar*)name.data(), 0) != 0) {
@@ -2025,6 +2063,7 @@ Variant c_domdocument::t_createelement(CStrRef name, CStrRef value /* = null_str
 }
 
 Variant c_domdocument::t_createelementns(CStrRef namespaceuri, CStrRef qualifiedname, CStrRef value /* = null_string */) {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNodePtr nodep = NULL;
   xmlNsPtr nsptr = NULL;
@@ -2066,6 +2105,7 @@ Variant c_domdocument::t_createelementns(CStrRef namespaceuri, CStrRef qualified
 }
 
 Variant c_domdocument::t_createentityreference(CStrRef name) {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNode *node;
   if (xmlValidateName((xmlChar*)name.data(), 0) != 0) {
@@ -2082,6 +2122,7 @@ Variant c_domdocument::t_createentityreference(CStrRef name) {
 }
 
 Variant c_domdocument::t_createprocessinginstruction(CStrRef target, CStrRef data /* = null_string */) {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNode *node;
   if (xmlValidateName((xmlChar*)target.data(), 0) != 0) {
@@ -2099,6 +2140,7 @@ Variant c_domdocument::t_createprocessinginstruction(CStrRef target, CStrRef dat
 }
 
 Variant c_domdocument::t_createtextnode(CStrRef data) {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNode *node;
   node = xmlNewDocText(docp, (xmlChar*)data.data());
@@ -2111,6 +2153,7 @@ Variant c_domdocument::t_createtextnode(CStrRef data) {
 }
 
 Variant c_domdocument::t_getelementbyid(CStrRef elementid) {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlAttrPtr attrp;
   attrp = xmlGetID(docp, (xmlChar*)elementid.data());
@@ -2131,6 +2174,7 @@ Variant c_domdocument::t_getelementsbytagnamens(CStrRef namespaceuri, CStrRef lo
 }
 
 Variant c_domdocument::t_importnode(CObjRef importednode, bool deep /* = false */) {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   SmartObject<c_domnode> domnode = importednode.getTyped<c_domnode>();
   xmlNodePtr nodep = domnode->m_node;
@@ -2158,84 +2202,48 @@ Variant c_domdocument::t_importnode(CObjRef importednode, bool deep /* = false *
 }
 
 Variant c_domdocument::t_load(CStrRef filename, int64 options /* = 0 */) {
+  throw NotImplementedException(__func__);
   return dom_parse_document(this, filename, options, DOM_LOAD_FILE);
 }
 
 Variant c_domdocument::t_loadhtml(CStrRef source) {
+  throw NotImplementedException(__func__);
   return dom_load_html(this, source, DOM_LOAD_STRING);
 }
 
 Variant c_domdocument::t_loadhtmlfile(CStrRef filename) {
+  throw NotImplementedException(__func__);
   return dom_load_html(this, filename, DOM_LOAD_FILE);
 }
 
 Variant c_domdocument::t_loadxml(CStrRef source, int64 options /* = 0 */) {
+  throw NotImplementedException(__func__);
   return dom_parse_document(this, source, options, DOM_LOAD_STRING);
 }
 
 void c_domdocument::t_normalizedocument() {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   dom_normalize((xmlNodePtr)docp);
 }
 
 bool c_domdocument::t_registernodeclass(CStrRef baseclass, CStrRef extendedclass) {
-  // This look really trick.. for now just return false
-  /*
-  xmlDoc *docp;
-  char *baseclass = NULL, *extendedclass = NULL;
-  int baseclass_len = 0, extendedclass_len = 0;
-  zend_class_entry *basece = NULL, *ce = NULL;
-
-  if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss!", &id, dom_document_class_entry, &baseclass, &baseclass_len, &extendedclass, &extendedclass_len) == FAILURE) {
-    return;
-  }
-
-  if (baseclass_len) {
-    zend_class_entry **pce;
-    if (zend_lookup_class(baseclass, baseclass_len, &pce TSRMLS_CC) == FAILURE) {
-      //php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s does not exist", baseclass);
-      return;
-    }
-    basece = *pce;
-  }
-
-  if (basece == NULL || ! instanceof_function(basece, dom_node_class_entry TSRMLS_CC)) {
-    //php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s is not derived from DOMNode.", baseclass);
-    return;
-  }
-
-  if (extendedclass_len) {
-    zend_class_entry **pce;
-    if (zend_lookup_class(extendedclass, extendedclass_len, &pce TSRMLS_CC) == FAILURE) {
-      //php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s does not exist", extendedclass);
-    }
-    ce = *pce;
-  }
-
-  if (ce == NULL || instanceof_function(ce, basece TSRMLS_CC)) {
-
-    DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
-
-    if (dom_set_doc_classmap(intern->document, basece, ce TSRMLS_CC) == FAILURE) {
-      //php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s could not be registered.", extendedclass);
-    }
-    return true;
-  } else {
-    //php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s is not derived from %s.", extendedclass, baseclass);
-  }
-  */
+  throw NotImplementedException(__func__);
   return false;
 }
 
 bool c_domdocument::t_relaxngvalidate(CStrRef filename) {
+  throw NotImplementedException(__func__);
   return _dom_document_relaxNG_validate(this, filename, DOM_LOAD_FILE);
 }
 
 bool c_domdocument::t_relaxngvalidatesource(CStrRef source) {
+  throw NotImplementedException(__func__);
   return _dom_document_relaxNG_validate(this, source, DOM_LOAD_STRING);
 }
 
 Variant c_domdocument::t_save(CStrRef file, int64 options /* = 0 */) {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0, saveempty = 0;
   //dom_doc_propsptr doc_props;
@@ -2246,7 +2254,6 @@ Variant c_domdocument::t_save(CStrRef file, int64 options /* = 0 */) {
   }
 
   /* encoding handled by property on doc */
-
   //doc_props = dom_get_doc_props(intern->document);
   //format = doc_props->formatoutput;
   if (options & LIBXML_SAVE_NOEMPTYTAG) {
@@ -2264,6 +2271,7 @@ Variant c_domdocument::t_save(CStrRef file, int64 options /* = 0 */) {
 }
 
 Variant c_domdocument::t_savehtml() {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlChar *mem;
   int size;
@@ -2279,6 +2287,7 @@ Variant c_domdocument::t_savehtml() {
 }
 
 Variant c_domdocument::t_savehtmlfile(CStrRef file) {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0;
   //dom_doc_propsptr doc_props;
@@ -2297,6 +2306,7 @@ Variant c_domdocument::t_savehtmlfile(CStrRef file) {
 }
 
 Variant c_domdocument::t_savexml(CObjRef node /* = null_object */, int64 options /* = 0 */) {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlBufferPtr buf;
   xmlChar *mem;
@@ -2355,14 +2365,17 @@ Variant c_domdocument::t_savexml(CObjRef node /* = null_object */, int64 options
 }
 
 bool c_domdocument::t_schemavalidate(CStrRef filename) {
+  throw NotImplementedException(__func__);
   return _dom_document_schema_validate(this, filename, DOM_LOAD_FILE);
 }
 
 bool c_domdocument::t_schemavalidatesource(CStrRef source) {
+  throw NotImplementedException(__func__);
   return _dom_document_schema_validate(this, source, DOM_LOAD_STRING);
 }
 
 bool c_domdocument::t_validate() {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlValidCtxt *cvp;
   if (docp->intSubset == NULL) {
@@ -2383,6 +2396,7 @@ bool c_domdocument::t_validate() {
 }
 
 Variant c_domdocument::t_xinclude(int64 options /* = 0 */) {
+  throw NotImplementedException(__func__);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNodePtr root;
   int err;
@@ -2412,9 +2426,11 @@ c_domdocumentfragment::~c_domdocumentfragment() {
 }
 
 void c_domdocumentfragment::t___construct() {
+  throw NotImplementedException(__func__);
 }
 
 Variant c_domdocumentfragment::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
@@ -2425,13 +2441,16 @@ c_domdocumenttype::~c_domdocumenttype() {
 }
 
 void c_domdocumenttype::t___construct() {
+  throw NotImplementedException(__func__);
 }
 
 Variant c_domdocumenttype::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
 bool c_domdocumentfragment::t_appendxml(CStrRef data) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   int err;
   xmlNodePtr lst;
@@ -2464,10 +2483,12 @@ void c_domelement::t___construct(CVarRef name, CVarRef value, CVarRef namespaceu
 }
 
 Variant c_domelement::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
 String c_domelement::t_getattribute(CStrRef name) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   xmlChar *value = NULL;
   xmlNodePtr attr;
@@ -2494,6 +2515,7 @@ String c_domelement::t_getattribute(CStrRef name) {
 }
 
 Variant c_domelement::t_getattributenode(CStrRef name) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   xmlNodePtr attrp;
   attrp = dom_get_dom1_attribute(nodep, (xmlChar*)name.data());
@@ -2523,6 +2545,7 @@ Variant c_domelement::t_getattributenode(CStrRef name) {
 }
 
 Object c_domelement::t_getattributenodens(CStrRef namespaceuri, CStrRef localname) {
+  throw NotImplementedException(__func__);
   xmlNodePtr elemp = m_node;
   xmlAttrPtr attrp;
   attrp = xmlHasNsProp(elemp, (xmlChar*)localname.data(), (xmlChar*)namespaceuri.data());
@@ -2535,6 +2558,7 @@ Object c_domelement::t_getattributenodens(CStrRef namespaceuri, CStrRef localnam
 }
 
 String c_domelement::t_getattributens(CStrRef namespaceuri, CStrRef localname) {
+  throw NotImplementedException(__func__);
   xmlNodePtr elemp = m_node;
   xmlNsPtr nsptr;
   xmlChar *strattr;
@@ -2563,6 +2587,7 @@ Object c_domelement::t_getelementsbytagnamens(CStrRef namespaceuri, CStrRef loca
 }
 
 bool c_domelement::t_hasattribute(CStrRef name) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   xmlNodePtr attr;
   attr = dom_get_dom1_attribute(nodep, (xmlChar*)name.data());
@@ -2574,6 +2599,7 @@ bool c_domelement::t_hasattribute(CStrRef name) {
 }
 
 bool c_domelement::t_hasattributens(CStrRef namespaceuri, CStrRef localname) {
+  throw NotImplementedException(__func__);
   xmlNodePtr elemp = m_node;
   xmlNs *nsp;
   xmlChar *value;
@@ -2593,6 +2619,7 @@ bool c_domelement::t_hasattributens(CStrRef namespaceuri, CStrRef localname) {
 }
 
 bool c_domelement::t_removeattribute(CStrRef name) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   xmlNodePtr attrp;
   if (dom_node_is_read_only(nodep)) {
@@ -2622,6 +2649,7 @@ bool c_domelement::t_removeattribute(CStrRef name) {
 }
 
 Variant c_domelement::t_removeattributenode(CObjRef oldattr) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   SmartObject<c_domattr> attr = oldattr.getTyped<c_domattr>();
   xmlAttrPtr attrp = (xmlAttrPtr)attr->m_node;
@@ -2640,6 +2668,7 @@ Variant c_domelement::t_removeattributenode(CObjRef oldattr) {
 }
 
 Variant c_domelement::t_removeattributens(CStrRef namespaceuri, CStrRef localname) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   xmlAttr *attrp;
   xmlNsPtr nsptr;
@@ -2676,6 +2705,7 @@ Variant c_domelement::t_removeattributens(CStrRef namespaceuri, CStrRef localnam
 }
 
 Variant c_domelement::t_setattribute(CStrRef name, CStrRef value) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   xmlNodePtr attr = NULL;
   int name_valid;
@@ -2721,6 +2751,7 @@ Variant c_domelement::t_setattribute(CStrRef name, CStrRef value) {
 }
 
 Variant c_domelement::t_setattributenode(CObjRef newattr) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   SmartObject<c_domattr> domattr = newattr.getTyped<c_domattr>();
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->m_node;
@@ -2765,6 +2796,7 @@ Variant c_domelement::t_setattributenode(CObjRef newattr) {
 }
 
 Variant c_domelement::t_setattributenodens(CObjRef newattr) {
+  throw NotImplementedException(__func__);
   xmlNs *nsp;
   xmlAttr *existattrp = NULL;
   xmlNodePtr nodep = m_node;
@@ -2815,6 +2847,7 @@ Variant c_domelement::t_setattributenodens(CObjRef newattr) {
 }
 
 Variant c_domelement::t_setattributens(CStrRef namespaceuri, CStrRef name, CStrRef value) {
+  throw NotImplementedException(__func__);
   xmlNodePtr elemp = m_node;
   xmlNsPtr nsptr;
   xmlNode *nodep;
@@ -2907,6 +2940,7 @@ Variant c_domelement::t_setattributens(CStrRef namespaceuri, CStrRef name, CStrR
 }
 
 Variant c_domelement::t_setidattribute(CStrRef name, bool isid) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   xmlAttrPtr attrp;
   if (dom_node_is_read_only(nodep)) {
@@ -2923,6 +2957,7 @@ Variant c_domelement::t_setidattribute(CStrRef name, bool isid) {
 }
 
 Variant c_domelement::t_setidattributenode(CObjRef idattr, bool isid) {
+  throw NotImplementedException(__func__);
   xmlNodePtr nodep = m_node;
   SmartObject<c_domattr> domattr = idattr.getTyped<c_domattr>();
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->m_node;
@@ -2939,6 +2974,7 @@ Variant c_domelement::t_setidattributenode(CObjRef idattr, bool isid) {
 }
 
 Variant c_domelement::t_setidattributens(CStrRef namespaceuri, CStrRef localname, bool isid) {
+  throw NotImplementedException(__func__);
   xmlNodePtr elemp = m_node;
   xmlAttrPtr attrp;
   if (dom_node_is_read_only(elemp)) {
@@ -2965,6 +3001,7 @@ void c_domentity::t___construct() {
 }
 
 Variant c_domentity::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
@@ -2979,6 +3016,7 @@ void c_domentityreference::t___construct(CVarRef name) {
 }
 
 Variant c_domentityreference::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
@@ -2993,6 +3031,7 @@ void c_domnotation::t___construct() {
 }
 
 Variant c_domnotation::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
@@ -3007,6 +3046,7 @@ void c_domprocessinginstruction::t___construct(CVarRef name, CVarRef value /*= n
 }
 
 Variant c_domprocessinginstruction::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
@@ -3021,6 +3061,7 @@ void c_domnamednodemap::t___construct() {
 }
 
 Variant c_domnamednodemap::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
@@ -3047,6 +3088,7 @@ void c_domnodelist::t___construct() {
 }
 
 Variant c_domnodelist::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
@@ -3065,6 +3107,7 @@ void c_domexception::t___construct() {
 }
 
 Variant c_domexception::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
@@ -3079,10 +3122,12 @@ void c_domimplementation::t___construct() {
 }
 
 Variant c_domimplementation::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
 Variant c_domimplementation::t_createdocument(CStrRef namespaceuri /* = null_string */, CStrRef qualifiedname /* = null_string */, CObjRef doctypeobj /* = null_object */) {
+  throw NotImplementedException(__func__);
   xmlDoc *docp;
   xmlNode *nodep;
   xmlNsPtr nsptr = NULL;
@@ -3164,6 +3209,7 @@ Variant c_domimplementation::t_createdocument(CStrRef namespaceuri /* = null_str
 }
 
 Variant c_domimplementation::t_createdocumenttype(CStrRef qualifiedname /* = null_string */, CStrRef publicid /* = null_string */, CStrRef systemid /* = null_string */) {
+  throw NotImplementedException(__func__);
   xmlDtd *doctype;
   xmlChar *pch1 = NULL, *pch2 = NULL, *localname = NULL;
   xmlURIPtr uri;
@@ -3202,6 +3248,7 @@ Variant c_domimplementation::t_createdocumenttype(CStrRef qualifiedname /* = nul
 }
 
 bool c_domimplementation::t_hasfeature(CStrRef feature, CStrRef version) {
+  throw NotImplementedException(__func__);
   if (dom_has_feature((char*)feature.data(), (char*)version.data())) {
     return true;
   } else {
@@ -3220,18 +3267,22 @@ void c_domxpath::t___construct(CVarRef doc) {
 }
 
 Variant c_domxpath::t___destruct() {
+  throw NotImplementedException(__func__);
   return null;
 }
 
 Variant c_domxpath::t_evaluate(CStrRef expr, CObjRef context /* = null_object */) {
+  throw NotImplementedException(__func__);
   return php_xpath_eval(this, expr, context, PHP_DOM_XPATH_EVALUATE);
 }
 
 Variant c_domxpath::t_query(CStrRef expr, CObjRef context /* = null_object */) {
+  throw NotImplementedException(__func__);
   return php_xpath_eval(this, expr, context, PHP_DOM_XPATH_QUERY);
 }
 
 bool c_domxpath::t_registernamespace(CStrRef prefix, CStrRef uri) {
+  throw NotImplementedException(__func__);
   xmlXPathContextPtr ctxp = (xmlXPathContextPtr)m_node;
   if (ctxp == NULL) {
     //php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid XPath Context");
@@ -3244,7 +3295,6 @@ bool c_domxpath::t_registernamespace(CStrRef prefix, CStrRef uri) {
 }
 
 Variant c_domxpath::t_registerphpfunctions(CVarRef funcs /* = null */) {
-  // This one looks tricky...
   throw NotImplementedException(__func__);
 }
 

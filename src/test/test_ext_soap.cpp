@@ -32,7 +32,7 @@ bool TestExtSoap::RunTests(const std::string &which) {
   return ret;
 }
 
-bool TestExtSoap::onTest() {
+bool TestExtSoap::preTest() {
   m_server = p_soapserver(NEW(c_soapserver)());
   m_server->create(null, CREATE_MAP1("uri", "http://testuri.org"));
   return true;

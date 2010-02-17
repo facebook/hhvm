@@ -31,8 +31,9 @@ class TestBase {
   TestBase();
   virtual ~TestBase() {}
 
-  virtual bool onTest() { return true;}
+  virtual bool preTest() { return true; }
   virtual bool RunTests(const std::string &which) = 0;
+  virtual bool postTest() { return true; }
 
  protected:
   bool Count(bool result);
@@ -48,7 +49,7 @@ class TestBase {
 
 #define RUN_TEST(test)                                                  \
   if (!which.empty() && which != #test) {                               \
-  } else if (onTest() && test()) {                                      \
+  } else if (preTest() && test() && postTest()) {                       \
     if (!Test::s_quiet) {                                               \
       printf(#test " passed\n");                                        \
     }                                                                   \

@@ -24,7 +24,7 @@
 
 class TestExtSoap : public TestCppExt {
 public:
-  virtual bool onTest();
+  virtual bool preTest();
   virtual bool RunTests(const std::string &which);
 
   bool test_SoapServerSanity();

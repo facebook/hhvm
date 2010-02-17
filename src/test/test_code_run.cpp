@@ -37,9 +37,19 @@ TestCodeRun::TestCodeRun() : m_perfMode(false) {
   Option::StaticMethodAutoFix = true;
 }
 
+bool TestCodeRun::preTest() {
+  m_infos.clear();
+  return true;
+}
+
+bool TestCodeRun::postTest() {
+  if (!MultiVerifyCodeRun()) return false;
+  return true;
+}
+
 bool TestCodeRun::CleanUp() {
-  const char *argv[] = {"", NULL};
   string out, err;
+  const char *argv[] = {"", NULL};
   Process::Exec("cpp/tmp/cleanup.sh", argv, NULL, out, &err);
   if (!err.empty()) {
     printf("Failed to clean up cpp/tmp: %s\n", err.c_str());
@@ -48,9 +58,12 @@ bool TestCodeRun::CleanUp() {
   return true;
 }
 
-bool TestCodeRun::GenerateFiles(const char *input) {
+bool TestCodeRun::GenerateFiles(const char *input,
+                                const char *subdir) {
+  ASSERT(subdir && subdir[0]);
   AnalysisResultPtr ar(new AnalysisResult());
-  ar->setOutputPath("cpp/tmp");
+  string path = string("cpp/tmp/") + subdir;
+  ar->setOutputPath(path.c_str());
   Parser::parseString(input, ar);
   BuiltinSymbols::load(ar);
   ar->loadBuiltins();
@@ -60,10 +73,20 @@ bool TestCodeRun::GenerateFiles(const char *input) {
   ar->postOptimize();
   ar->analyzeProgramFinal();
   ar->outputAllCPP(CodeGenerator::ClusterCPP, 0, NULL);
+
+  string target = path + "/Makefile";
+  const char *argv[] = {"", "cpp/tmp/single.mk", target.c_str(), NULL};
+  string out, err;
+  Process::Exec("cp", argv, NULL, out, &err);
+  if (!err.empty()) {
+    printf("Failed to copy cpp/tmp/single.mk: %s\n", err.c_str());
+    return false;
+  }
+
   return true;
 }
 
-string filter_distcc(string &msg) {
+static string filter_distcc(string &msg) {
   istringstream is(msg);
   ostringstream os;
   string line;
@@ -75,38 +98,30 @@ string filter_distcc(string &msg) {
   return os.str();
 }
 
-bool TestCodeRun::CompileFiles(const char *input, const char *file, int line) {
-  const char *argv[] = {"", NULL};
+bool TestCodeRun::CompileFiles() {
   string out, err;
+  const char *argv[] = {"", NULL};
   Process::Exec("cpp/makeall.sh", argv, NULL, out, &err);
   err = filter_distcc(err);
   if (!err.empty()) {
-    printf("%s:%d\nParsing: [%s]\nFailed to compile files: %s\n",
-           file, line, input, err.c_str());
+    printf("Failed to compile files: %s\n", err.c_str());
     return false;
   }
   return true;
 }
 
-bool TestCodeRun::VerifyCodeRun(const char *input, const char *output,
-                                const char *file /* = "" */,
-                                int line /* = 0 */,
-                                bool nowarnings /* = false */) {
-  ASSERT(input);
-  if (!CleanUp()) return false;
-  if (Option::EnableEval < Option::FullEval) {
-    if (!GenerateFiles(input) ||
-        !CompileFiles(input, file, line)) {
-      return false;
-    }
-  }
-
+static bool verify_result(const char *input, const char *output, bool perfMode,
+                          const char *file = "", int line = 0,
+                          bool nowarnings = false, const char *subdir = "") {
   // generate main.php and get PHP's output
   string expected;
   if (output) {
     expected = output;
   } else {
-    string fullPath = "cpp/tmp/main.php";
+    string fullPath = "cpp/tmp";
+    if (subdir && subdir[0]) fullPath = fullPath + "/" + subdir;
+    fullPath += "/main.php";
+    Util::mkdir(fullPath.c_str());
     ofstream f(fullPath.c_str());
     if (!f) {
       printf("Unable to open %s for write. Run this test from src/.\n",
@@ -117,13 +132,13 @@ bool TestCodeRun::VerifyCodeRun(const char *input, const char *output,
     f << input;
     f.close();
 
-    const char *argv1[] = {"", "cpp/tmp/main.php", NULL};
-    const char *argv2[] = {"", "-n", "cpp/tmp/main.php", NULL};
+    const char *argv1[] = {"", fullPath.c_str(), NULL};
+    const char *argv2[] = {"", "-n", fullPath.c_str(), NULL};
     string err;
     Process::Exec("php", nowarnings ? argv2 : argv1, NULL, expected, &err);
     if (!err.empty() && nowarnings) {
-      printf("%s:%d\nParsing: [%s]\nFailed to run cpp/tmp/main.php: %s\n",
-             file, line, input, err.c_str());
+      printf("%s:%d\nParsing: [%s]\nFailed to run %s: %s\n",
+             file, line, input, fullPath.c_str(), err.c_str());
       return false;
     }
   }
@@ -134,14 +149,20 @@ bool TestCodeRun::VerifyCodeRun(const char *input, const char *output,
     if (Option::EnableEval < Option::FullEval) {
       const char *argv[] = {"", "--file=string", "--config=test/config.hdf",
                             NULL};
-      Process::Exec("cpp/tmp/test", argv, NULL, actual, &err);
+      string path = "cpp/tmp/";
+      if (subdir) path = path + subdir + "/";
+      path += "test";
+      Process::Exec(path.c_str(), argv, NULL, actual, &err);
     } else {
-      const char *argv[] = {"", "--file=cpp/tmp/main.php",
+      string filearg = "--file=cpp/tmp/";
+      if (subdir) filearg = filearg + subdir + "/";
+      filearg += "main.php";
+      const char *argv[] = {"", filearg.c_str(),
                             "--config=test/config.hdf", NULL};
       Process::Exec("hphpi/hphpi", argv, NULL, actual, &err);
     }
 
-    if (m_perfMode) {
+    if (perfMode) {
       string sinput = input;
       const char *marker = "/* INPUT */";
       int pos1 = sinput.find(marker);
@@ -198,6 +219,49 @@ bool TestCodeRun::VerifyCodeRun(const char *input, const char *output,
   }
 
   return true;
+}
+
+bool TestCodeRun::MultiVerifyCodeRun() {
+  if (!CleanUp()) return false;
+
+  if (Option::EnableEval < Option::FullEval) {
+    for (unsigned i = 0; i < m_infos.size(); i++) {
+      ASSERT(m_infos[i].input);
+      ostringstream os;
+      os << "Test" << i;
+      if (!GenerateFiles(m_infos[i].input, os.str().c_str())) return false;
+    }
+
+    if (!CompileFiles()) return false;
+  }
+
+  for (unsigned i = 0; i < m_infos.size(); i++) {
+    ASSERT(m_infos[i].input);
+    ostringstream os;
+    os << "Test" << i;
+    if (!Count(verify_result(m_infos[i].input, m_infos[i].output, m_perfMode,
+                             m_infos[i].file, m_infos[i].line,
+                             m_infos[i].nowarnings, os.str().c_str()))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool TestCodeRun::VerifyCodeRun(const char *input, const char *output,
+                                const char *file /* = "" */,
+                                int line /* = 0 */,
+                                bool nowarnings /* = false */) {
+  ASSERT(input);
+  if (!CleanUp()) return false;
+  if (Option::EnableEval < Option::FullEval) {
+    if (!GenerateFiles(input, "Test0") || !CompileFiles()) {
+      return false;
+    }
+  }
+
+  return verify_result(input, output, m_perfMode,
+                       file, line, nowarnings, "Test0");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -309,9 +373,9 @@ bool TestCodeRun::RunTests(const std::string &which) {
 // code generation
 
 bool TestCodeRun::TestSanity() {
-  VCR("<?php print 'Hello, World!';");
-  VCR("Hello, World!");
-  VCR("#!/usr/bin/env <?php\n"
+  MVCR("<?php print 'Hello, World!';");
+  MVCR("Hello, World!");
+  MVCR("#!/usr/bin/env <?php\n"
       "#!/usr/bin/env php\n"
       "a /* show or not */ b\n"
       "Hello, World! # comments\n"
@@ -321,58 +385,58 @@ bool TestCodeRun::TestSanity() {
 }
 
 bool TestCodeRun::TestInnerFunction() {
-  VCR("<?php function test() { print 'test';} test();");
-  VCR("<?php function test() { function inner() { print 'test';} inner();} "
+  MVCR("<?php function test() { print 'test';} test();");
+  MVCR("<?php function test() { function inner() { print 'test';} inner();} "
       "test();");
   return true;
 }
 
 bool TestCodeRun::TestInnerClass() {
-  VCR("<?php class test { function p() { print 'test';} } "
+  MVCR("<?php class test { function p() { print 'test';} } "
       "$obj = new Test(); $obj->p();");
-  VCR("<?php class test { function p() { function inner() { print 'test';} "
+  MVCR("<?php class test { function p() { function inner() { print 'test';} "
       "inner();} } $obj = new Test(); $obj->p();");
-  VCR("<?php function test() { class test { function p() { print 'test';} }} "
+  MVCR("<?php function test() { class test { function p() { print 'test';} }} "
       "test(); $obj = new Test(); $obj->p();");
   return true;
 }
 
 bool TestCodeRun::TestVariableArgument() {
-  VCR("<?php function test() { "
+  MVCR("<?php function test() { "
       "  $n = func_num_args(); "
       "  var_dump($n);"
       "  $args = func_get_args();"
       "  var_dump($args);"
       "} "
       "test(); test(1); test(1, 2);");
-  VCR("<?php function test() { "
+  MVCR("<?php function test() { "
       "  var_dump(func_get_arg(0));"
       "  var_dump(func_get_arg(1));"
       "} "
       "test(2, 'ok');");
 
-  VCR("<?php function test($a) { "
+  MVCR("<?php function test($a) { "
       "  $n = func_num_args(); "
       "  var_dump($n);"
       "  $args = func_get_args();"
       "  var_dump($args);"
       "} "
       "test(1); test(1, 2); test(1, 2, 3);");
-  VCR("<?php function test($a) { "
+  MVCR("<?php function test($a) { "
       "  var_dump(func_get_arg(0));"
       "  var_dump(func_get_arg(1));"
       "  var_dump(func_get_arg(2));"
       "} "
       "test(2, 'ok', array(1));");
 
-  VCR("<?php function test($a, $b) { "
+  MVCR("<?php function test($a, $b) { "
       "  $n = func_num_args(); "
       "  var_dump($n);"
       "  $args = func_get_args();"
       "  var_dump($args);"
       "} "
       "test(1, 2); test(1, 2, 3); test(1, 2, 3, 4);");
-  VCR("<?php function test() { "
+  MVCR("<?php function test() { "
       "  var_dump(func_get_arg(0));"
       "  var_dump(func_get_arg(1));"
       "  var_dump(func_get_arg(2));"
@@ -380,7 +444,7 @@ bool TestCodeRun::TestVariableArgument() {
       "} "
       "test(2, 'ok', 0, 'test');");
 
-  VCR("<?php function test($a) { "
+  MVCR("<?php function test($a) { "
       "  $n = func_num_args(); "
       "  var_dump($n);"
       "  $args = func_get_args();"
@@ -388,23 +452,23 @@ bool TestCodeRun::TestVariableArgument() {
       "} "
       "test('test'); test(1, 2); test(1, 2, 3);");
 
-  VCR("<?php class A { public function test($a) {"
+  MVCR("<?php class A { public function test($a) {"
       "  var_dump(func_num_args());"
       "  var_dump(func_get_args());"
       "}} $obj = new A(); $obj->test('test'); $obj->test(1, 2, 3);");
 
-  VCR("<?php class A { public function __construct($a) {"
+  MVCR("<?php class A { public function __construct($a) {"
       "  var_dump(func_num_args());"
       "  var_dump(func_get_args());"
       "}} $obj = new A(1, 2, 3); $obj = new A('test');");
 
-  VCR("<?php function test($a = 10) { "
+  MVCR("<?php function test($a = 10) { "
       "  var_dump($a);"
       "  var_dump(func_get_args());"
       "} "
       "test(); test(1); test(1, 2);");
 
-  VCR("<?php function test($a, $b = 10) { "
+  MVCR("<?php function test($a, $b = 10) { "
       "  var_dump($a);"
       "  var_dump($b);"
       "  var_dump(func_get_args());"
@@ -412,49 +476,49 @@ bool TestCodeRun::TestVariableArgument() {
       "test(1); test(1, 2); test(1, 2, 3);");
 
   // testing variable argument + reference parameter
-  VCR("<?php $ar1 = array(10, 100, 100, 0); $ar2 = array(1, 3, 2, 4);"
+  MVCR("<?php $ar1 = array(10, 100, 100, 0); $ar2 = array(1, 3, 2, 4);"
       "array_multisort($ar1, $ar2); var_dump($ar1, $ar2);");
 
   return true;
 }
 
 bool TestCodeRun::TestListAssignment() {
-  VCR("<?php $a = 'old'; var_dump(list($a) = false); var_dump($a);");
-  VCR("<?php $a = 'old'; var_dump(list($a) = 'test'); var_dump($a);");
-  VCR("<?php $a = 'old'; var_dump(list($a) = 123); var_dump($a);");
-  VCR("<?php list() = array(1,2,3);");
-  VCR("<?php list(,) = array(1,2,3);");
-  VCR("<?php var_dump(list($a,) = array(1,2,3)); var_dump($a);");
-  VCR("<?php var_dump(list(,$b) = array(1,2,3)); var_dump($b);");
-  VCR("<?php var_dump(list($b) = array(1,2,3)); var_dump($b);");
-  VCR("<?php var_dump(list($a,$b) = array(1,2,3)); "
+  MVCR("<?php $a = 'old'; var_dump(list($a) = false); var_dump($a);");
+  MVCR("<?php $a = 'old'; var_dump(list($a) = 'test'); var_dump($a);");
+  MVCR("<?php $a = 'old'; var_dump(list($a) = 123); var_dump($a);");
+  MVCR("<?php list() = array(1,2,3);");
+  MVCR("<?php list(,) = array(1,2,3);");
+  MVCR("<?php var_dump(list($a,) = array(1,2,3)); var_dump($a);");
+  MVCR("<?php var_dump(list(,$b) = array(1,2,3)); var_dump($b);");
+  MVCR("<?php var_dump(list($b) = array(1,2,3)); var_dump($b);");
+  MVCR("<?php var_dump(list($a,$b) = array(1,2,3)); "
       "var_dump($a); var_dump($b);");
-  VCR("<?php var_dump(list($a,list($c),$b) = array(1,array(2),3));"
+  MVCR("<?php var_dump(list($a,list($c),$b) = array(1,array(2),3));"
       "var_dump($a); var_dump($b); var_dump($c);");
-  VCR("<?php $c = 'old'; var_dump(list($a,list($c),$b) = array(1,'test',3));"
+  MVCR("<?php $c = 'old'; var_dump(list($a,list($c),$b) = array(1,'test',3));"
       "var_dump($a); var_dump($b); var_dump($c);");
-  VCR("<?php var_dump(list($a,list(),$b) = array(1,array(2),3));"
+  MVCR("<?php var_dump(list($a,list(),$b) = array(1,array(2),3));"
       "var_dump($a); var_dump($b);");
-  VCR("<?php $info = array('coffee', 'brown', 'caffeine');"
+  MVCR("<?php $info = array('coffee', 'brown', 'caffeine');"
       "list($a[0], $a[1], $a[2]) = $info;"
       "var_dump($a);");
   return true;
 }
 
 bool TestCodeRun::TestExceptions() {
-  VCR("<?php try { throw new Exception('test');} "
+  MVCR("<?php try { throw new Exception('test');} "
       "catch (Exception $e) {}");
-  VCR("<?php try { try { throw new Exception('test');} "
+  MVCR("<?php try { try { throw new Exception('test');} "
       "catch (InvalidArgumentException $e) {} } "
       "catch (Exception $e) { print 'ok';}");
-  VCR("<?php class E extends Exception {} "
+  MVCR("<?php class E extends Exception {} "
       "try { throw new E(); } catch (E $e) { print 'ok';}");
-  VCR("<?php class E extends Exception {} class F extends E {}"
+  MVCR("<?php class E extends Exception {} class F extends E {}"
       "try { throw new F(); } catch (E $e) { print 'ok';}");
-  VCR("<?php class E extends Exception { function __toString(){ return 'E';}} "
+  MVCR("<?php class E extends Exception { function __toString(){ return 'E';}} "
       "class F extends E { function __toString() { return 'F';}}"
       "try { throw new F(); } catch (E $e) { print $e;}");
-  VCR("<?php "
+  MVCR("<?php "
       "class a extends Exception {"
       "  function __destruct() {"
       "    var_dump('__destruct');"
@@ -474,10 +538,10 @@ bool TestCodeRun::TestExceptions() {
 }
 
 bool TestCodeRun::TestPredefined() {
-  VCR("<?php \n\n\nvar_dump(/*__FILE__, */__LINE__);");
-  VCR("<?php function Test() { var_dump(__FUNCTION__);} "
+  MVCR("<?php \n\n\nvar_dump(/*__FILE__, */__LINE__);");
+  MVCR("<?php function Test() { var_dump(__FUNCTION__);} "
       "var_dump(__FUNCTION__); test();");
-  VCR("<?php class A { "
+  MVCR("<?php class A { "
       "function TestR() { var_dump(__CLASS__, __METHOD__);} "
       "static function Testm() { var_dump(__CLASS__, __METHOD__);}} "
       "function Testf() { var_dump(__CLASS__, __METHOD__);} "
@@ -489,40 +553,40 @@ bool TestCodeRun::TestPredefined() {
 // type system
 
 bool TestCodeRun::TestBoolean() {
-  VCR("<?php var_dump(true);");
-  VCR("<?php var_dump(false);");
-  VCR("<?php $a = 1; $b = ($a == 1); var_dump($b);");
+  MVCR("<?php var_dump(true);");
+  MVCR("<?php var_dump(false);");
+  MVCR("<?php $a = 1; $b = ($a == 1); var_dump($b);");
   return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestCodeRun::TestInteger() {
-  VCR("<?php var_dump(1);");
-  VCR("<?php var_dump(0);");
-  VCR("<?php var_dump(-1);");
-  VCR("<?php var_dump(8589934592);");
-  VCR("<?php var_dump(-8589934592);");
-  VCR("<?php $a = 1;           var_dump($a);");
-  VCR("<?php $a = 0;           var_dump($a);");
-  VCR("<?php $a = -1;          var_dump($a);");
-  VCR("<?php $a = 8589934592;  var_dump($a);");
-  VCR("<?php $a = -8589934592; var_dump($a);");
+  MVCR("<?php var_dump(1);");
+  MVCR("<?php var_dump(0);");
+  MVCR("<?php var_dump(-1);");
+  MVCR("<?php var_dump(8589934592);");
+  MVCR("<?php var_dump(-8589934592);");
+  MVCR("<?php $a = 1;           var_dump($a);");
+  MVCR("<?php $a = 0;           var_dump($a);");
+  MVCR("<?php $a = -1;          var_dump($a);");
+  MVCR("<?php $a = 8589934592;  var_dump($a);");
+  MVCR("<?php $a = -8589934592; var_dump($a);");
 
-  VCR("<?php $a = 10; var_dump(~$a);");
-  VCR("<?php $a = 10; $b = 9; var_dump($a & $b);");
-  VCR("<?php $a = 10; $b = 9; var_dump($a | $b);");
-  VCR("<?php $a = 10; $b = 9; var_dump($a ^ $b);");
-  VCR("<?php $a = 10; var_dump($a << 2);");
-  VCR("<?php $a = 10; var_dump($a >> 2);");
+  MVCR("<?php $a = 10; var_dump(~$a);");
+  MVCR("<?php $a = 10; $b = 9; var_dump($a & $b);");
+  MVCR("<?php $a = 10; $b = 9; var_dump($a | $b);");
+  MVCR("<?php $a = 10; $b = 9; var_dump($a ^ $b);");
+  MVCR("<?php $a = 10; var_dump($a << 2);");
+  MVCR("<?php $a = 10; var_dump($a >> 2);");
 
-  VCR("<?php $a = 10; $b = 9; $a &= $b; var_dump($a);");
-  VCR("<?php $a = 10; $b = 9; $a |= $b; var_dump($a);");
-  VCR("<?php $a = 10; $b = 9; $a ^= $b; var_dump($a);");
-  VCR("<?php $a = 10; $b = 9; $a <<= 2; var_dump($a);");
-  VCR("<?php $a = 10; $b = 9; $a >>= 2; var_dump($a);");
+  MVCR("<?php $a = 10; $b = 9; $a &= $b; var_dump($a);");
+  MVCR("<?php $a = 10; $b = 9; $a |= $b; var_dump($a);");
+  MVCR("<?php $a = 10; $b = 9; $a ^= $b; var_dump($a);");
+  MVCR("<?php $a = 10; $b = 9; $a <<= 2; var_dump($a);");
+  MVCR("<?php $a = 10; $b = 9; $a >>= 2; var_dump($a);");
 
-  VCR("<?php "
+  MVCR("<?php "
       "var_dump((integer)'10');"
       "var_dump((integer)'0x10');"
       "var_dump((integer)'010');"
@@ -535,14 +599,14 @@ bool TestCodeRun::TestInteger() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestCodeRun::TestDouble() {
-  VCR("<?php var_dump(1.0);");
-  VCR("<?php var_dump(0.0);");
-  VCR("<?php var_dump(-1.0);");
-  VCR("<?php var_dump(1/3);");
-  VCR("<?php $a = 1/3; var_dump($a);");
-  VCR("<?php $a = 1/3; $b = $a; var_dump($b);");
+  MVCR("<?php var_dump(1.0);");
+  MVCR("<?php var_dump(0.0);");
+  MVCR("<?php var_dump(-1.0);");
+  MVCR("<?php var_dump(1/3);");
+  MVCR("<?php $a = 1/3; var_dump($a);");
+  MVCR("<?php $a = 1/3; $b = $a; var_dump($b);");
 
-  VCR("<?php "
+  MVCR("<?php "
       "$a = 1.234;"
       "echo $a;"
       "$b = 1.2e3;"
@@ -557,7 +621,7 @@ bool TestCodeRun::TestDouble() {
       "echo round(64.1-floor(64.1));"
       "echo round(3.1415927,2);"
       "echo round(1092,-2);");
-  VCR("<?php "
+  MVCR("<?php "
       "$foo = 1 + \"10.5\";"
       "print(\"$foo \");"
       "$foo = 1 + \"-1.3e3\";"
@@ -574,7 +638,7 @@ bool TestCodeRun::TestDouble() {
       "print(\"$foo \");"
       "$foo = \"10.0 pigs \" + 1.0;"
       "print(\"$foo \");");
-  VCR("<?php "
+  MVCR("<?php "
       "var_dump(1E1);"
       "var_dump(1E2);"
       "var_dump(1E3);"
@@ -595,7 +659,7 @@ bool TestCodeRun::TestDouble() {
       "var_dump(1E18);"
       "var_dump(1E19);"
       "var_dump(1E20);");
-  VCR("<?php "
+  MVCR("<?php "
       "var_dump((double)'10');"
       "var_dump((double)'0x10');"
       "var_dump((double)'010');"
@@ -608,61 +672,61 @@ bool TestCodeRun::TestDouble() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestCodeRun::TestString() {
-  VCR("<?php print '\\'\\\\\"';");
-  VCR("<?php print 'test\nok';");
-  VCR("<?php print \"test\nok\";");
-  VCR("<?php print \"test\\n\\r\\t\\v\\f\\\\\\$\\\"\";");
-  VCR("<?php print \"\\1\\12\\123\\1234\\xA\\xAB\";");
-  VCR("<?php print 'test\\n';");
+  MVCR("<?php print '\\'\\\\\"';");
+  MVCR("<?php print 'test\nok';");
+  MVCR("<?php print \"test\nok\";");
+  MVCR("<?php print \"test\\n\\r\\t\\v\\f\\\\\\$\\\"\";");
+  MVCR("<?php print \"\\1\\12\\123\\1234\\xA\\xAB\";");
+  MVCR("<?php print 'test\\n';");
 
-  VCR("<?php $a = 'test'; $b = $a; print $b;");
-  VCR("<?php $a = 'test'; $b = $a; $a = 'changed'; print $b;");
-  VCR("<?php $a = 'test'; $b = $a; $a = 'changed'; print $a;");
-  VCR("<?php $a = 'test'; $b = $a; $b = 'changed'; print $a;");
+  MVCR("<?php $a = 'test'; $b = $a; print $b;");
+  MVCR("<?php $a = 'test'; $b = $a; $a = 'changed'; print $b;");
+  MVCR("<?php $a = 'test'; $b = $a; $a = 'changed'; print $a;");
+  MVCR("<?php $a = 'test'; $b = $a; $b = 'changed'; print $a;");
 
-  VCR("<?php $a = 'a'; $b = 'b'; $c = 'a' . 'b'; print $c;");
-  VCR("<?php $a = 'a'; $b = 'b'; $c = $a  . 'b'; print $c;");
-  VCR("<?php $a = 'a'; $b = 'b'; $c = 'a' . $b ; print $c;");
-  VCR("<?php $a = 'a'; $b = 'b'; $b .= $a;       print $b;");
+  MVCR("<?php $a = 'a'; $b = 'b'; $c = 'a' . 'b'; print $c;");
+  MVCR("<?php $a = 'a'; $b = 'b'; $c = $a  . 'b'; print $c;");
+  MVCR("<?php $a = 'a'; $b = 'b'; $c = 'a' . $b ; print $c;");
+  MVCR("<?php $a = 'a'; $b = 'b'; $b .= $a;       print $b;");
 
-  VCR("<?php $a = 'test'; print $a{0};");
-  VCR("<?php $a = 'test'; print '['.$a{-1}.']';");
-  VCR("<?php $a = 'test'; print '['.$a{100}.']';");
+  MVCR("<?php $a = 'test'; print $a{0};");
+  MVCR("<?php $a = 'test'; print '['.$a{-1}.']';");
+  MVCR("<?php $a = 'test'; print '['.$a{100}.']';");
 
-  VCR("<?php $a = 'test'; print $a[0];");
-  VCR("<?php $a = 'test'; print $a['junk'];");
-  VCR("<?php $a = 'test'; print '['.$a[-1].']';");
-  VCR("<?php $a = 'test'; print '['.$a[100].']';");
+  MVCR("<?php $a = 'test'; print $a[0];");
+  MVCR("<?php $a = 'test'; print $a['junk'];");
+  MVCR("<?php $a = 'test'; print '['.$a[-1].']';");
+  MVCR("<?php $a = 'test'; print '['.$a[100].']';");
 
-  VCR("<?php $a = 'test'; $a[0] = 'ABC'; var_dump($a);")
-  VCR("<?php $a = 'test'; $a[10] = 'ABC'; var_dump($a);")
-  VCR("<?php $a = 'test'; $b = $a; $a[0] = 'ABC'; var_dump($a); var_dump($b);")
-  VCR("<?php $a = 'test'; $b = $a; $a[10] = 'ABC'; var_dump($a);var_dump($b);")
-  VCR("<?php $a = 'test'; $b = $a; $b[0] = 'ABC'; var_dump($a); var_dump($b);")
-  VCR("<?php $a = 'test'; $b = $a; $b[10] = 'ABC'; var_dump($a);var_dump($b);")
+  MVCR("<?php $a = 'test'; $a[0] = 'ABC'; var_dump($a);")
+  MVCR("<?php $a = 'test'; $a[10] = 'ABC'; var_dump($a);")
+  MVCR("<?php $a = 'test'; $b = $a; $a[0] = 'ABC'; var_dump($a); var_dump($b);")
+  MVCR("<?php $a = 'test'; $b = $a; $a[10] = 'ABC'; var_dump($a);var_dump($b);")
+  MVCR("<?php $a = 'test'; $b = $a; $b[0] = 'ABC'; var_dump($a); var_dump($b);")
+  MVCR("<?php $a = 'test'; $b = $a; $b[10] = 'ABC'; var_dump($a);var_dump($b);")
 
-  VCR("<?php $a = 'test'; var_dump(~$a);");
-  VCR("<?php $a = 'test'; $b = 'zzz'; var_dump($a & $b);");
-  VCR("<?php $a = 'test'; $b = 'zzz'; var_dump($a | $b);");
-  VCR("<?php $a = 'test'; $b = 'zzz'; var_dump($a ^ $b);");
-  VCR("<?php $a = 'test'; $b = 'zzz'; $a &= $b; var_dump($a);");
-  VCR("<?php $a = 'test'; $b = 'zzz'; $a |= $b; var_dump($a);");
-  VCR("<?php $a = 'test'; $b = 'zzz'; $a ^= $b; var_dump($a);");
-  VCR("<?php $a = 'zzz'; $b = 'test'; var_dump($a & $b);");
-  VCR("<?php $a = 'zzz'; $b = 'test'; var_dump($a | $b);");
-  VCR("<?php $a = 'zzz'; $b = 'test'; var_dump($a ^ $b);");
-  VCR("<?php $a = 'zzz'; $b = 'test'; $a &= $b; var_dump($a);");
-  VCR("<?php $a = 'zzz'; $b = 'test'; $a |= $b; var_dump($a);");
-  VCR("<?php $a = 'zzz'; $b = 'test'; $a ^= $b; var_dump($a);");
-  VCR("<?php $a = 'zzz'; $a++; var_dump($a);");
-  VCR("<?php $a = 'zzz'; ++$a; var_dump($a);");
-  VCR("<?php $a = 'zzz'; $a--; var_dump($a);");
-  VCR("<?php $a = 'zzz'; --$a; var_dump($a);");
+  MVCR("<?php $a = 'test'; var_dump(~$a);");
+  MVCR("<?php $a = 'test'; $b = 'zzz'; var_dump($a & $b);");
+  MVCR("<?php $a = 'test'; $b = 'zzz'; var_dump($a | $b);");
+  MVCR("<?php $a = 'test'; $b = 'zzz'; var_dump($a ^ $b);");
+  MVCR("<?php $a = 'test'; $b = 'zzz'; $a &= $b; var_dump($a);");
+  MVCR("<?php $a = 'test'; $b = 'zzz'; $a |= $b; var_dump($a);");
+  MVCR("<?php $a = 'test'; $b = 'zzz'; $a ^= $b; var_dump($a);");
+  MVCR("<?php $a = 'zzz'; $b = 'test'; var_dump($a & $b);");
+  MVCR("<?php $a = 'zzz'; $b = 'test'; var_dump($a | $b);");
+  MVCR("<?php $a = 'zzz'; $b = 'test'; var_dump($a ^ $b);");
+  MVCR("<?php $a = 'zzz'; $b = 'test'; $a &= $b; var_dump($a);");
+  MVCR("<?php $a = 'zzz'; $b = 'test'; $a |= $b; var_dump($a);");
+  MVCR("<?php $a = 'zzz'; $b = 'test'; $a ^= $b; var_dump($a);");
+  MVCR("<?php $a = 'zzz'; $a++; var_dump($a);");
+  MVCR("<?php $a = 'zzz'; ++$a; var_dump($a);");
+  MVCR("<?php $a = 'zzz'; $a--; var_dump($a);");
+  MVCR("<?php $a = 'zzz'; --$a; var_dump($a);");
 
-  VCR("<?php $a = 'abc'; var_dump(isset($a[1], $a[2], $a[3]));");
+  MVCR("<?php $a = 'abc'; var_dump(isset($a[1], $a[2], $a[3]));");
 
   // serialization of binary string
-  VCR("<?php var_dump(bin2hex(serialize(\"a\\x00b\")));");
+  MVCR("<?php var_dump(bin2hex(serialize(\"a\\x00b\")));");
 
   return true;
 }
@@ -670,60 +734,60 @@ bool TestCodeRun::TestString() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestCodeRun::TestArray() {
-  VCR("<?php var_dump(array('b' => '2', 'a' => '1'));");
-  VCR("<?php var_dump(array(1 => 'a', 0 => 'b'));");
+  MVCR("<?php var_dump(array('b' => '2', 'a' => '1'));");
+  MVCR("<?php var_dump(array(1 => 'a', 0 => 'b'));");
 
-  VCR("<?php $a = array();                       var_dump($a);");
-  VCR("<?php $a = array(1);                      var_dump($a);");
-  VCR("<?php $a = array(2, 1);                   var_dump($a);");
-  VCR("<?php $a = array('1');                    var_dump($a);");
-  VCR("<?php $a = array('2', '1');               var_dump($a);");
-  VCR("<?php $a = array('a' => 1);               var_dump($a);");
-  VCR("<?php $a = array('b' => 2, 'a' => 1);     var_dump($a);");
-  VCR("<?php $a = array('a' => '1');             var_dump($a);");
-  VCR("<?php $a = array('b' => '2', 'a' => '1'); var_dump($a);");
+  MVCR("<?php $a = array();                       var_dump($a);");
+  MVCR("<?php $a = array(1);                      var_dump($a);");
+  MVCR("<?php $a = array(2, 1);                   var_dump($a);");
+  MVCR("<?php $a = array('1');                    var_dump($a);");
+  MVCR("<?php $a = array('2', '1');               var_dump($a);");
+  MVCR("<?php $a = array('a' => 1);               var_dump($a);");
+  MVCR("<?php $a = array('b' => 2, 'a' => 1);     var_dump($a);");
+  MVCR("<?php $a = array('a' => '1');             var_dump($a);");
+  MVCR("<?php $a = array('b' => '2', 'a' => '1'); var_dump($a);");
 
-  VCR("<?php $a = array('a' => 1, 'a' => 2); var_dump($a);");
-  VCR("<?php $a = array('a' => 1, 'b' => 2, 'a' => 3); var_dump($a);");
+  MVCR("<?php $a = array('a' => 1, 'a' => 2); var_dump($a);");
+  MVCR("<?php $a = array('a' => 1, 'b' => 2, 'a' => 3); var_dump($a);");
 
-  VCR("<?php $a = array(1); $b = $a;                var_dump($b);");
-  VCR("<?php $a = array(1); $b = $a; $a = array(2); var_dump($b);");
-  VCR("<?php $a = array(1); $b = $a; $a = array(2); var_dump($a);");
-  VCR("<?php $a = array(1); $b = $a; $b = array(2); var_dump($a);");
+  MVCR("<?php $a = array(1); $b = $a;                var_dump($b);");
+  MVCR("<?php $a = array(1); $b = $a; $a = array(2); var_dump($b);");
+  MVCR("<?php $a = array(1); $b = $a; $a = array(2); var_dump($a);");
+  MVCR("<?php $a = array(1); $b = $a; $b = array(2); var_dump($a);");
 
-  VCR("<?php $a = array(); foreach ($a as $item) print '['.$item.']';");
-  VCR("<?php $a = array(1); foreach ($a as $item) print '['.$item.']';");
-  VCR("<?php $a = array(2,1); foreach ($a as $item) print '['.$item.']';");
-  VCR("<?php $a = array('b' => 2, 'a' => 1); "
+  MVCR("<?php $a = array(); foreach ($a as $item) print '['.$item.']';");
+  MVCR("<?php $a = array(1); foreach ($a as $item) print '['.$item.']';");
+  MVCR("<?php $a = array(2,1); foreach ($a as $item) print '['.$item.']';");
+  MVCR("<?php $a = array('b' => 2, 'a' => 1); "
       "foreach ($a as $item) print '['.$item.']';");
-  VCR("<?php $a = array('b' => 2, 'a' => 1); "
+  MVCR("<?php $a = array('b' => 2, 'a' => 1); "
       "foreach ($a as $name => $item) print '['.$name.'=>'.$item.']';");
 
-  VCR("<?php $a = array(2,1); var_dump($a[0]);");
-  VCR("<?php $a = array(2,1); var_dump($a[-1]);");
-  VCR("<?php $a = array(2,1); var_dump($a[3]);");
-  VCR("<?php $a = array('b' => 2, 'a' => 1); var_dump($a['b']);");
-  VCR("<?php $a = array('b' => 2, 'a' => 1); var_dump($a['bogus']);");
-  VCR("<?php $a = array(2, 'test' => 1); var_dump($a);");
-  VCR("<?php $a = array(1.2 => 'test'); var_dump($a[1]);");
+  MVCR("<?php $a = array(2,1); var_dump($a[0]);");
+  MVCR("<?php $a = array(2,1); var_dump($a[-1]);");
+  MVCR("<?php $a = array(2,1); var_dump($a[3]);");
+  MVCR("<?php $a = array('b' => 2, 'a' => 1); var_dump($a['b']);");
+  MVCR("<?php $a = array('b' => 2, 'a' => 1); var_dump($a['bogus']);");
+  MVCR("<?php $a = array(2, 'test' => 1); var_dump($a);");
+  MVCR("<?php $a = array(1.2 => 'test'); var_dump($a[1]);");
 
-  VCR("<?php $a = array(1, 'test'); var_dump($a);");
-  VCR("<?php $a = array(); $a[] = 3; $a[] = 'test'; var_dump($a);");
+  MVCR("<?php $a = array(1, 'test'); var_dump($a);");
+  MVCR("<?php $a = array(); $a[] = 3; $a[] = 'test'; var_dump($a);");
 
-  VCR("<?php $a = array();     $a['test'] = 3; var_dump($a);");
-  VCR("<?php $a = array(1);    $a['test'] = 3; var_dump($a);");
-  VCR("<?php $a = array(1, 2); $a[10] = 3;     var_dump($a);");
-  VCR("<?php $a = array(1, 2); $a['10'] = 3;   var_dump($a);");
-  VCR("<?php $a = array(1, 2); $b = $a; $a['10'] = 3; var_dump($b);");
-  VCR("<?php $a = array(1, 2); $b = $a; $a['10'] = 3; var_dump($a);");
+  MVCR("<?php $a = array();     $a['test'] = 3; var_dump($a);");
+  MVCR("<?php $a = array(1);    $a['test'] = 3; var_dump($a);");
+  MVCR("<?php $a = array(1, 2); $a[10] = 3;     var_dump($a);");
+  MVCR("<?php $a = array(1, 2); $a['10'] = 3;   var_dump($a);");
+  MVCR("<?php $a = array(1, 2); $b = $a; $a['10'] = 3; var_dump($b);");
+  MVCR("<?php $a = array(1, 2); $b = $a; $a['10'] = 3; var_dump($a);");
 
-  VCR("<?php $a[] = 3; var_dump($a);");
-  VCR("<?php $a = array(); $a[] = 3; var_dump($a);");
-  VCR("<?php $a = array(1); $a[] = 3; var_dump($a);");
-  VCR("<?php $a = array(1,2); $a[] = 3; var_dump($a);");
-  VCR("<?php $a = ''; $a[] = 'test'; var_dump($a);");
+  MVCR("<?php $a[] = 3; var_dump($a);");
+  MVCR("<?php $a = array(); $a[] = 3; var_dump($a);");
+  MVCR("<?php $a = array(1); $a[] = 3; var_dump($a);");
+  MVCR("<?php $a = array(1,2); $a[] = 3; var_dump($a);");
+  MVCR("<?php $a = ''; $a[] = 'test'; var_dump($a);");
 
-  VCR("<?php $a = array(1, 2); "
+  MVCR("<?php $a = array(1, 2); "
       "foreach ($a as $item) { "
       "  print 'A['.$item.']'; "
       "  if ($item == 1) $a[] = 'new item'; "
@@ -733,12 +797,12 @@ bool TestCodeRun::TestArray() {
       "}"
       "var_dump($a);");
 
-  VCR("<?php $a = array(1); $b = array(2); $c = $a + $b; var_dump($c);");
-  VCR("<?php $a = array(1,2); $b = array(2,3); $c = $a + $b; var_dump($c);");
-  VCR("<?php $a = array(1,2); $b = array(2); $c = $a + $b; var_dump($c);");
-  VCR("<?php $a = array(1); $b = array(2,3); $c = $a + $b; var_dump($c);");
+  MVCR("<?php $a = array(1); $b = array(2); $c = $a + $b; var_dump($c);");
+  MVCR("<?php $a = array(1,2); $b = array(2,3); $c = $a + $b; var_dump($c);");
+  MVCR("<?php $a = array(1,2); $b = array(2); $c = $a + $b; var_dump($c);");
+  MVCR("<?php $a = array(1); $b = array(2,3); $c = $a + $b; var_dump($c);");
 
-  VCR("<?php "
+  MVCR("<?php "
       "$array_variables = array("
       "  array(),"
       "  array(NULL),"
@@ -751,19 +815,19 @@ bool TestCodeRun::TestArray() {
       "  }"
       "}");
 
-  VCR("$a = array('a' => 1, 'b' => 2);"
+  MVCR("$a = array('a' => 1, 'b' => 2);"
       "foreach ($a as $b => $c) {"
       "  var_dump($b);"
       "  unset($a['b']);"
       "}");
 
-  VCR("$a = array('a' => 1, 'b' => 2);"
+  MVCR("$a = array('a' => 1, 'b' => 2);"
       "foreach ($a as $b => &$c) {"
       "  var_dump($b);"
       "  unset($a['b']);"
       "}");
 
-  VCR("<?php "
+  MVCR("<?php "
       "$foo = array(1,2,3,4);"
       "foreach ($foo as $key => $val) {"
       "  if($val == 2) {"
@@ -776,7 +840,7 @@ bool TestCodeRun::TestArray() {
       "}"
       "var_dump($foo);");
 
-  VCR("<?php "
+  MVCR("<?php "
       "$foo = array(1,2,3,4);"
       "foreach ($foo as $key => &$val) {"
       "  if($val == 2) {"
@@ -789,7 +853,7 @@ bool TestCodeRun::TestArray() {
       "}"
       "var_dump($foo);");
 
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array('a' => 'apple', 'b' => 'banana', 'c' => 'citrus');"
       "foreach ($a as $k1 => &$v1) {"
       "  foreach ($a as $k2 => &$v2) {"
@@ -799,7 +863,7 @@ bool TestCodeRun::TestArray() {
       "    var_dump($v1, $v2);"
       "  }"
       "}");
-  VCR("<?php "
+  MVCR("<?php "
       "$stack = array();"
       "function push_stack()"
       "{"
@@ -829,7 +893,7 @@ bool TestCodeRun::TestArray() {
 }
 
 bool TestCodeRun::TestScalarArray() {
-  VCR("<?php "
+  MVCR("<?php "
       "$a1 = array();"
       "$a2 = array(null);"
       "$a3 = array(true);"
@@ -881,12 +945,16 @@ bool TestCodeRun::TestScalarArray() {
       "var_dump($a14);"
       "var_dump($a15);"
       "var_dump($a16);");
+  MVCR("<?php\n"
+      "function test1() { $a = array(__FUNCTION__, __LINE__); return $a; }\n"
+      "function test2() { $a = array(__FUNCTION__, __LINE__); return $a; }\n"
+      "var_dump(test1()); var_dump(test2());");
 
   return true;
 }
 
 bool TestCodeRun::TestRange() {
-  VCR("<?php "
+  MVCR("<?php "
       "foreach (range(\"0 xxx\", \"12 yyy\") as $number) {"
       "  echo $number . \"\n\";"
       "}"
@@ -910,30 +978,30 @@ bool TestCodeRun::TestRange() {
 }
 
 #define TEST_ARRAY_CONVERT(exp)                                         \
-  VCR("<?php $a = " exp "; $a[] = 1;              var_dump($a);");      \
-  VCR("<?php $a = " exp "; $a[] = 'test';         var_dump($a);");      \
-  VCR("<?php $a = " exp "; $a[] = array(0);       var_dump($a);");      \
-  VCR("<?php $a = " exp "; $a[0] = 1;             var_dump($a);");      \
-  VCR("<?php $a = " exp "; $a[0] = 'test';        var_dump($a);");      \
-  VCR("<?php $a = " exp "; $a[0] = array(0);      var_dump($a);");      \
-  VCR("<?php $a = " exp "; $a[1] = 1;             var_dump($a);");      \
-  VCR("<?php $a = " exp "; $a[1] = 'test';        var_dump($a);");      \
-  VCR("<?php $a = " exp "; $a[1] = array(0);      var_dump($a);");      \
-  VCR("<?php $a = " exp "; $a[2] = 1;             var_dump($a);");      \
-  VCR("<?php $a = " exp "; $a[2] = 'test';        var_dump($a);");      \
-  VCR("<?php $a = " exp "; $a[2] = array(0);      var_dump($a);");      \
-  VCR("<?php $a = " exp "; $a['test'] = 1;        var_dump($a);");      \
-  VCR("<?php $a = " exp "; $a['test'] = 'test';   var_dump($a);");      \
-  VCR("<?php $a = " exp "; $a['test'] = array(0); var_dump($a);");      \
+  MVCR("<?php $a = " exp "; $a[] = 1;              var_dump($a);");      \
+  MVCR("<?php $a = " exp "; $a[] = 'test';         var_dump($a);");      \
+  MVCR("<?php $a = " exp "; $a[] = array(0);       var_dump($a);");      \
+  MVCR("<?php $a = " exp "; $a[0] = 1;             var_dump($a);");      \
+  MVCR("<?php $a = " exp "; $a[0] = 'test';        var_dump($a);");      \
+  MVCR("<?php $a = " exp "; $a[0] = array(0);      var_dump($a);");      \
+  MVCR("<?php $a = " exp "; $a[1] = 1;             var_dump($a);");      \
+  MVCR("<?php $a = " exp "; $a[1] = 'test';        var_dump($a);");      \
+  MVCR("<?php $a = " exp "; $a[1] = array(0);      var_dump($a);");      \
+  MVCR("<?php $a = " exp "; $a[2] = 1;             var_dump($a);");      \
+  MVCR("<?php $a = " exp "; $a[2] = 'test';        var_dump($a);");      \
+  MVCR("<?php $a = " exp "; $a[2] = array(0);      var_dump($a);");      \
+  MVCR("<?php $a = " exp "; $a['test'] = 1;        var_dump($a);");      \
+  MVCR("<?php $a = " exp "; $a['test'] = 'test';   var_dump($a);");      \
+  MVCR("<?php $a = " exp "; $a['test'] = array(0); var_dump($a);");      \
 
 #define TEST_ARRAY_PLUS(exp)                                            \
-  VCR("<?php $a = " exp "; $a += array();                var_dump($a);"); \
-  VCR("<?php $a = " exp "; $a += array(20);              var_dump($a);"); \
-  VCR("<?php $a = " exp "; $a += array('b');             var_dump($a);"); \
-  VCR("<?php $a = " exp "; $a += array(array(3));        var_dump($a);"); \
-  VCR("<?php $a = " exp "; $a += array('c' => 20);       var_dump($a);"); \
-  VCR("<?php $a = " exp "; $a += array('c' => 'b');      var_dump($a);"); \
-  VCR("<?php $a = " exp "; $a += array('c' => array(3)); var_dump($a);"); \
+  MVCR("<?php $a = " exp "; $a += array();                var_dump($a);"); \
+  MVCR("<?php $a = " exp "; $a += array(20);              var_dump($a);"); \
+  MVCR("<?php $a = " exp "; $a += array('b');             var_dump($a);"); \
+  MVCR("<?php $a = " exp "; $a += array(array(3));        var_dump($a);"); \
+  MVCR("<?php $a = " exp "; $a += array('c' => 20);       var_dump($a);"); \
+  MVCR("<?php $a = " exp "; $a += array('c' => 'b');      var_dump($a);"); \
+  MVCR("<?php $a = " exp "; $a += array('c' => array(3)); var_dump($a);"); \
 
 bool TestCodeRun::TestArrayEscalation() {
   TEST_ARRAY_CONVERT("array()");
@@ -955,21 +1023,21 @@ bool TestCodeRun::TestArrayEscalation() {
 }
 
 bool TestCodeRun::TestArrayOffset() {
-  VCR("<?php $a['test_cache_2'] = 10; print $a['test_cache_26'];");
-  VCR("<?php $a = array(10); $b = $a[0]; var_dump($b);");
-  VCR("<?php $a = array(10); $b = $a[0] + 15; var_dump($b);");
-  VCR("<?php $a = 1; $a = array($a); $a = array($a); var_dump($a);");
-  VCR("<?php $a['A'] = array(1, 2); foreach ($a['A'] as $item) print $item;");
-  VCR("<?php $a['A']['B'] = 1; var_dump($a);");
-  VCR("<?php $a['A'] = 10; $a['A']++; var_dump($a);");
-  VCR("<?php $a['A'] = 10; ++$a['A']; var_dump($a);");
-  VCR("<?php $a['A'] = 10; $a['A'] .= 'test'; var_dump($a);");
-  VCR("<?php $a['A'] = 10; $a['A'] += 25; var_dump($a);");
-  VCR("<?php $a[null] = 10;"
+  MVCR("<?php $a['test_cache_2'] = 10; print $a['test_cache_26'];");
+  MVCR("<?php $a = array(10); $b = $a[0]; var_dump($b);");
+  MVCR("<?php $a = array(10); $b = $a[0] + 15; var_dump($b);");
+  MVCR("<?php $a = 1; $a = array($a); $a = array($a); var_dump($a);");
+  MVCR("<?php $a['A'] = array(1, 2); foreach ($a['A'] as $item) print $item;");
+  MVCR("<?php $a['A']['B'] = 1; var_dump($a);");
+  MVCR("<?php $a['A'] = 10; $a['A']++; var_dump($a);");
+  MVCR("<?php $a['A'] = 10; ++$a['A']; var_dump($a);");
+  MVCR("<?php $a['A'] = 10; $a['A'] .= 'test'; var_dump($a);");
+  MVCR("<?php $a['A'] = 10; $a['A'] += 25; var_dump($a);");
+  MVCR("<?php $a[null] = 10;"
       "var_dump($a[null]);"
       "var_dump($a[\"\"]);"
       "var_dump($a['']);");
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array();"
       "$a[0] = 1;"
       "$a[01] = 2;"
@@ -990,7 +1058,7 @@ bool TestCodeRun::TestArrayOffset() {
 }
 
 bool TestCodeRun::TestArrayAccess() {
-  VCR("<?php "
+  MVCR("<?php "
       "class A implements ArrayAccess {"
       "  public $a;"
       "  public function offsetExists($offset) {"
@@ -1016,7 +1084,7 @@ bool TestCodeRun::TestArrayAccess() {
       "var_dump($obj['a']);"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "function offsetGet($index) {"
       "  echo (\"GET0: $index\\n\");"
       "}"
@@ -1126,7 +1194,7 @@ bool TestCodeRun::TestArrayAccess() {
 }
 
 bool TestCodeRun::TestArrayIterator() {
-  VCR("<?php "
+  MVCR("<?php "
       "class MyIterator implements Iterator"
       "{"
       "  private $var = array();"
@@ -1184,7 +1252,7 @@ bool TestCodeRun::TestArrayIterator() {
 }
 
 bool TestCodeRun::TestArrayAssignment() {
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array(1, 2, 3);"
       "$b = $a;"
       "$b[4] = 4;"
@@ -1193,7 +1261,7 @@ bool TestCodeRun::TestArrayAssignment() {
       "$b = 3;"
       "var_dump($a);"
       "var_dump($b);");
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array('1', '2', '3');"
       "$b = $a;"
       "$b[4] = '4';"
@@ -1202,7 +1270,7 @@ bool TestCodeRun::TestArrayAssignment() {
       "$b = '3';"
       "var_dump($a);"
       "var_dump($b);");
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array(1.5, 2.5, 3.5);"
       "$b = $a;"
       "$b[4] = 4.5;"
@@ -1211,13 +1279,13 @@ bool TestCodeRun::TestArrayAssignment() {
       "$b = 3.5;"
       "var_dump($a);"
       "var_dump($b);");
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array(1, 'hello', 3.5);"
       "$b = $a;"
       "$b[4] = 'world';"
       "var_dump($a);"
       "var_dump($b);");
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array(1, 'hello', 3.5);"
       "$b = $a;"
       "$b[4] = 'world';"
@@ -1226,27 +1294,27 @@ bool TestCodeRun::TestArrayAssignment() {
       "$b = 3;"
       "var_dump($a);"
       "var_dump($b);");
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array('a' => '1', 2 => 2, 'c' => '3');"
       "var_dump($a);"
       "$a = array('a' => '1', 2 => 2, 'c' => '3',"
       "           'd' => array('a' => '1', 2 => 2, 'c' => '3'));"
       "var_dump($a);");
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array(1=>'main', 2=>'sub');"
       "$b = $a;"
       "var_dump(array_pop($b));"
       "print_r($a);"
       "var_dump(array_shift($b));"
       "print_r($a);");
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array(1, 2, 3);"
       "var_dump($a);"
       "array_pop($a);"
       "var_dump($a);"
       "array_shift($a);"
       "var_dump($a);");
-  VCR("<?php "
+  MVCR("<?php "
       "function foo() {"
       "  $p = 1;"
       "  $q = 2;"
@@ -1261,39 +1329,39 @@ bool TestCodeRun::TestArrayAssignment() {
       "}"
       "foo();");
 
-  VCR("<?php $a = false; $a['a'] = 10;");
-  VCR("<?php $a = false; $a['a']['b'] = 10;");
+  MVCR("<?php $a = false; $a['a'] = 10;");
+  MVCR("<?php $a = false; $a['a']['b'] = 10;");
 
   return true;
 }
 
 bool TestCodeRun::TestArrayMerge() {
-  VCR("<?php $a = array(1 => 1, 3 => 3); "
+  MVCR("<?php $a = array(1 => 1, 3 => 3); "
       "var_dump(array_merge($a, array(2)));");
-  VCR("<?php $a = array(1 => 1, 3 => 3); "
+  MVCR("<?php $a = array(1 => 1, 3 => 3); "
       "var_dump(array_merge($a, array()));");
-  VCR("<?php $a = array('a' => 1, 3 => 3); "
+  MVCR("<?php $a = array('a' => 1, 3 => 3); "
       "var_dump(array_merge($a, array(2)));");
-  VCR("<?php $a = array('a' => 1, 'b' => 3); "
+  MVCR("<?php $a = array('a' => 1, 'b' => 3); "
       "var_dump(array_merge($a, array(2)));");
-  VCR("<?php $a = array('a' => 1, 3 => 3); "
+  MVCR("<?php $a = array('a' => 1, 3 => 3); "
       "var_dump(array_merge($a, array('a' => 2)));");
-  VCR("<?php $a = array('a' => 1, 3 => 3); "
+  MVCR("<?php $a = array('a' => 1, 3 => 3); "
       "var_dump(array_merge($a, array('b' => 2)));");
-  VCR("<?php $a = array('a' => 1, 'b' => 3); "
+  MVCR("<?php $a = array('a' => 1, 'b' => 3); "
       "var_dump(array_merge($a, array('c' => 2)));");
   return true;
 }
 
 bool TestCodeRun::TestArrayUnique() {
-  VCR("<?php "
+  MVCR("<?php "
       "var_dump(array_unique(array(array(1,2), array(1,2), array(3,4),)));");
-  VCR("<?php "
+  MVCR("<?php "
       "$input = array(\"a\" => \"green\","
       "               \"red\", \"b\" => \"green\", \"blue\", \"red\");"
       "$result = array_unique($input);"
       "print_r($result);");
-  VCR("<?php "
+  MVCR("<?php "
       "$input = array(4, \"4\", \"3\", 4, 3, \"3\");"
       "$result = array_unique($input);"
       "var_dump($result);");
@@ -1303,122 +1371,122 @@ bool TestCodeRun::TestArrayUnique() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestCodeRun::TestVariant() {
-  VCR("<?php $a = 1; $a = 'test'; print $a;");
-  VCR("<?php $a = 1; $a = 'test'; $a .= 'b'; print $a;");
+  MVCR("<?php $a = 1; $a = 'test'; print $a;");
+  MVCR("<?php $a = 1; $a = 'test'; $a .= 'b'; print $a;");
 
-  VCR("<?php $a = array(); $a[] = 3; $a = 'test'; var_dump($a);");
-  VCR("<?php $a = array(); $a['test'] = 3; var_dump($a);");
-  VCR("<?php $a['test'] = 3; var_dump($a);");
+  MVCR("<?php $a = array(); $a[] = 3; $a = 'test'; var_dump($a);");
+  MVCR("<?php $a = array(); $a['test'] = 3; var_dump($a);");
+  MVCR("<?php $a['test'] = 3; var_dump($a);");
 
-  VCR("<?php $a = 1; $a = 'test'; print $a{0};");
-  VCR("<?php $a=1;$a='t'; $a[0]  = 'AB'; var_dump($a);");
-  VCR("<?php $a=1;$a='';  $a[0]  = 'AB'; var_dump($a);");
-  VCR("<?php $a=1;$a='t'; $a[10] = 'AB'; var_dump($a);");
-  VCR("<?php $a=1;$a='t'; $b = $a; $a[0] = 'AB'; var_dump($a); var_dump($b);");
-  VCR("<?php $a=1;$a='t'; $b = $a; $a[10]= 'AB'; var_dump($a); var_dump($b);");
-  VCR("<?php $a=1;$a='t'; $b = $a; $b[0] = 'AB'; var_dump($a); var_dump($b);");
-  VCR("<?php $a=1;$a='t'; $b = $a; $b[10]= 'AB'; var_dump($a); var_dump($b);");
+  MVCR("<?php $a = 1; $a = 'test'; print $a{0};");
+  MVCR("<?php $a=1;$a='t'; $a[0]  = 'AB'; var_dump($a);");
+  MVCR("<?php $a=1;$a='';  $a[0]  = 'AB'; var_dump($a);");
+  MVCR("<?php $a=1;$a='t'; $a[10] = 'AB'; var_dump($a);");
+  MVCR("<?php $a=1;$a='t'; $b = $a; $a[0] = 'AB'; var_dump($a); var_dump($b);");
+  MVCR("<?php $a=1;$a='t'; $b = $a; $a[10]= 'AB'; var_dump($a); var_dump($b);");
+  MVCR("<?php $a=1;$a='t'; $b = $a; $b[0] = 'AB'; var_dump($a); var_dump($b);");
+  MVCR("<?php $a=1;$a='t'; $b = $a; $b[10]= 'AB'; var_dump($a); var_dump($b);");
 
-  VCR("<?php $a = 't'; $a = 1; print $a + 2;");
-  VCR("<?php $a = 't'; $a = 1; print 2 + $a;");
-  VCR("<?php $a = 't'; $a = 1; $b = 'a'; $b = 2; print $a + $b;");
-  VCR("<?php $a = 't'; $a = 1; $a += 2; print $a;");
-  VCR("<?php $a = 't'; $a = 1; $a += 'n'; print $a;");
-  VCR("<?php $a = 't'; $a = 1; $a += '5'; print $a;");
-  VCR("<?php $b = 'test'; $b = 1; $a += $b; print $a;");
+  MVCR("<?php $a = 't'; $a = 1; print $a + 2;");
+  MVCR("<?php $a = 't'; $a = 1; print 2 + $a;");
+  MVCR("<?php $a = 't'; $a = 1; $b = 'a'; $b = 2; print $a + $b;");
+  MVCR("<?php $a = 't'; $a = 1; $a += 2; print $a;");
+  MVCR("<?php $a = 't'; $a = 1; $a += 'n'; print $a;");
+  MVCR("<?php $a = 't'; $a = 1; $a += '5'; print $a;");
+  MVCR("<?php $b = 'test'; $b = 1; $a += $b; print $a;");
 
-  VCR("<?php $a = 't'; $a = 1; print -$a;");
-  VCR("<?php $a = 't'; $a = -$a; print $a;");
-  VCR("<?php $a = 't'; $a = 1; print $a - 2;");
-  VCR("<?php $a = 't'; $a = 1; print 2 - $a;");
-  VCR("<?php $a = 't'; $a = 1; $b = 'a'; $b = 2; print $a - $b;");
-  VCR("<?php $a = 't'; $a = 1; $a -= 2; print $a;");
-  VCR("<?php $a = 't'; $a = 1; $a -= 'n'; print $a;");
-  VCR("<?php $a = 't'; $a = 1; $a -= '5'; print $a;");
+  MVCR("<?php $a = 't'; $a = 1; print -$a;");
+  MVCR("<?php $a = 't'; $a = -$a; print $a;");
+  MVCR("<?php $a = 't'; $a = 1; print $a - 2;");
+  MVCR("<?php $a = 't'; $a = 1; print 2 - $a;");
+  MVCR("<?php $a = 't'; $a = 1; $b = 'a'; $b = 2; print $a - $b;");
+  MVCR("<?php $a = 't'; $a = 1; $a -= 2; print $a;");
+  MVCR("<?php $a = 't'; $a = 1; $a -= 'n'; print $a;");
+  MVCR("<?php $a = 't'; $a = 1; $a -= '5'; print $a;");
 
-  VCR("<?php $a = 't'; $a = 10; print $a * 2;");
-  VCR("<?php $a = 't'; $a = 10; print 2 * $a;");
-  VCR("<?php $a = 't'; $a = 10; $b = 'a'; $b = 2; print $a * $b;");
-  VCR("<?php $a = 't'; $a = 10; $a *= 2; print $a;");
-  VCR("<?php $a = 't'; $a = 10; $a *= 'n'; print $a;");
-  VCR("<?php $a = 't'; $a = 10; $a *= '5'; print $a;");
+  MVCR("<?php $a = 't'; $a = 10; print $a * 2;");
+  MVCR("<?php $a = 't'; $a = 10; print 2 * $a;");
+  MVCR("<?php $a = 't'; $a = 10; $b = 'a'; $b = 2; print $a * $b;");
+  MVCR("<?php $a = 't'; $a = 10; $a *= 2; print $a;");
+  MVCR("<?php $a = 't'; $a = 10; $a *= 'n'; print $a;");
+  MVCR("<?php $a = 't'; $a = 10; $a *= '5'; print $a;");
 
-  VCR("<?php $a = 't'; $a = 10; print $a / 2;");
-  VCR("<?php $a = 't'; $a = 10; print 2 / $a;");
-  VCR("<?php $a = 't'; $a = 10; $b = 'a'; $b = 2; print $a / $b;");
-  VCR("<?php $a = 't'; $a = 10; $a /= 2; print $a;");
-  VCR("<?php $a = 't'; $a = 10; $a /= '5'; print $a;");
+  MVCR("<?php $a = 't'; $a = 10; print $a / 2;");
+  MVCR("<?php $a = 't'; $a = 10; print 2 / $a;");
+  MVCR("<?php $a = 't'; $a = 10; $b = 'a'; $b = 2; print $a / $b;");
+  MVCR("<?php $a = 't'; $a = 10; $a /= 2; print $a;");
+  MVCR("<?php $a = 't'; $a = 10; $a /= '5'; print $a;");
 
-  VCR("<?php $a = 't'; $a = 10; print $a % 2;");
-  VCR("<?php $a = 't'; $a = 10; print 2 % $a;");
-  VCR("<?php $a = 't'; $a = 10; $b = 'a'; $b = 2; print $a % $b;");
-  VCR("<?php $a = 't'; $a = 10; $a %= 2; print $a;");
-  VCR("<?php $a = 't'; $a = 10; $a %= '5'; print $a;");
+  MVCR("<?php $a = 't'; $a = 10; print $a % 2;");
+  MVCR("<?php $a = 't'; $a = 10; print 2 % $a;");
+  MVCR("<?php $a = 't'; $a = 10; $b = 'a'; $b = 2; print $a % $b;");
+  MVCR("<?php $a = 't'; $a = 10; $a %= 2; print $a;");
+  MVCR("<?php $a = 't'; $a = 10; $a %= '5'; print $a;");
 
-  VCR("<?php $a = 't'; $a = 10; var_dump(~$a);");
+  MVCR("<?php $a = 't'; $a = 10; var_dump(~$a);");
 
-  VCR("<?php $a = 't'; $a = 10; $b = 9; var_dump($a & $b);");
-  VCR("<?php $a = 't'; $a = 10; $b = 9; var_dump($a | $b);");
-  VCR("<?php $a = 't'; $a = 10; $b = 9; var_dump($a ^ $b);");
-  VCR("<?php $a = 't'; $a = 10; $b = 9; var_dump($a << 2);");
-  VCR("<?php $a = 't'; $a = 10; $b = 9; var_dump($a >> 2);");
+  MVCR("<?php $a = 't'; $a = 10; $b = 9; var_dump($a & $b);");
+  MVCR("<?php $a = 't'; $a = 10; $b = 9; var_dump($a | $b);");
+  MVCR("<?php $a = 't'; $a = 10; $b = 9; var_dump($a ^ $b);");
+  MVCR("<?php $a = 't'; $a = 10; $b = 9; var_dump($a << 2);");
+  MVCR("<?php $a = 't'; $a = 10; $b = 9; var_dump($a >> 2);");
 
-  VCR("<?php $b = 't'; $a = 10; $b = 9; var_dump($a & $b);");
-  VCR("<?php $b = 't'; $a = 10; $b = 9; var_dump($a | $b);");
-  VCR("<?php $b = 't'; $a = 10; $b = 9; var_dump($a ^ $b);");
-  VCR("<?php $b = 't'; $a = 10; $b = 2; var_dump($a << $b);");
-  VCR("<?php $b = 't'; $a = 10; $b = 2; var_dump($a >> $b);");
+  MVCR("<?php $b = 't'; $a = 10; $b = 9; var_dump($a & $b);");
+  MVCR("<?php $b = 't'; $a = 10; $b = 9; var_dump($a | $b);");
+  MVCR("<?php $b = 't'; $a = 10; $b = 9; var_dump($a ^ $b);");
+  MVCR("<?php $b = 't'; $a = 10; $b = 2; var_dump($a << $b);");
+  MVCR("<?php $b = 't'; $a = 10; $b = 2; var_dump($a >> $b);");
 
-  VCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a & $b);");
-  VCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a | $b);");
-  VCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a ^ $b);");
-  VCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 2; var_dump($a << $b);");
-  VCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 2; var_dump($a >> $b);");
+  MVCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a & $b);");
+  MVCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a | $b);");
+  MVCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a ^ $b);");
+  MVCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 2; var_dump($a << $b);");
+  MVCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 2; var_dump($a >> $b);");
 
-  VCR("<?php $a = 't'; $a = 10; $b = 9; $a &= $b; var_dump($a);");
-  VCR("<?php $a = 't'; $a = 10; $b = 9; $a |= $b; var_dump($a);");
-  VCR("<?php $a = 't'; $a = 10; $b = 9; $a ^= $b; var_dump($a);");
-  VCR("<?php $a = 't'; $a = 10; $b = 9; $a <<= 2; var_dump($a);");
-  VCR("<?php $a = 't'; $a = 10; $b = 9; $a >>= 2; var_dump($a);");
+  MVCR("<?php $a = 't'; $a = 10; $b = 9; $a &= $b; var_dump($a);");
+  MVCR("<?php $a = 't'; $a = 10; $b = 9; $a |= $b; var_dump($a);");
+  MVCR("<?php $a = 't'; $a = 10; $b = 9; $a ^= $b; var_dump($a);");
+  MVCR("<?php $a = 't'; $a = 10; $b = 9; $a <<= 2; var_dump($a);");
+  MVCR("<?php $a = 't'; $a = 10; $b = 9; $a >>= 2; var_dump($a);");
 
-  VCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a and $b);");
-  VCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a or $b);");
-  VCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a xor $b);");
-  VCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump(!$a);");
-  VCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a && $b);");
-  VCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a || $b);");
+  MVCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a and $b);");
+  MVCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a or $b);");
+  MVCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a xor $b);");
+  MVCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump(!$a);");
+  MVCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a && $b);");
+  MVCR("<?php $a = 't'; $b = 't'; $a = 10; $b = 9; var_dump($a || $b);");
 
-  VCR("<?php $a = 10; ++$a; var_dump($a);");
-  VCR("<?php $a = 10; $a++; var_dump($a);");
-  VCR("<?php $a = 10; --$a; var_dump($a);");
-  VCR("<?php $a = 10; $a--; var_dump($a);");
+  MVCR("<?php $a = 10; ++$a; var_dump($a);");
+  MVCR("<?php $a = 10; $a++; var_dump($a);");
+  MVCR("<?php $a = 10; --$a; var_dump($a);");
+  MVCR("<?php $a = 10; $a--; var_dump($a);");
 
-  VCR("<?php $a = 't'; $a = 10; ++$a; var_dump($a);");
-  VCR("<?php $a = 't'; $a = 10; $a++; var_dump($a);");
-  VCR("<?php $a = 't'; $a = 10; --$a; var_dump($a);");
-  VCR("<?php $a = 't'; $a = 10; $a--; var_dump($a);");
+  MVCR("<?php $a = 't'; $a = 10; ++$a; var_dump($a);");
+  MVCR("<?php $a = 't'; $a = 10; $a++; var_dump($a);");
+  MVCR("<?php $a = 't'; $a = 10; --$a; var_dump($a);");
+  MVCR("<?php $a = 't'; $a = 10; $a--; var_dump($a);");
 
-  VCR("<?php $a = 'test'; ++$a; var_dump($a);");
-  VCR("<?php $a = 'test'; $a++; var_dump($a);");
-  VCR("<?php $a = 'test'; --$a; var_dump($a);");
-  VCR("<?php $a = 'test'; $a--; var_dump($a);");
+  MVCR("<?php $a = 'test'; ++$a; var_dump($a);");
+  MVCR("<?php $a = 'test'; $a++; var_dump($a);");
+  MVCR("<?php $a = 'test'; --$a; var_dump($a);");
+  MVCR("<?php $a = 'test'; $a--; var_dump($a);");
 
-  VCR("<?php $a = 1; $a = 'test'; var_dump(~$a);");
-  VCR("<?php $a = 1; $a = 'test'; $b = 'zzz'; var_dump($a & $b);");
-  VCR("<?php $a = 1; $a = 'test'; $b = 'zzz'; var_dump($a | $b);");
-  VCR("<?php $a = 1; $a = 'test'; $b = 'zzz'; var_dump($a ^ $b);");
-  VCR("<?php $a = 1; $a = 'test'; $b = 'zzz'; $a &= $b; var_dump($a);");
-  VCR("<?php $a = 1; $a = 'test'; $b = 'zzz'; $a |= $b; var_dump($a);");
-  VCR("<?php $a = 1; $a = 'test'; $b = 'zzz'; $a ^= $b; var_dump($a);");
-  VCR("<? class a { public $var2 = 1; public $var1; }"
+  MVCR("<?php $a = 1; $a = 'test'; var_dump(~$a);");
+  MVCR("<?php $a = 1; $a = 'test'; $b = 'zzz'; var_dump($a & $b);");
+  MVCR("<?php $a = 1; $a = 'test'; $b = 'zzz'; var_dump($a | $b);");
+  MVCR("<?php $a = 1; $a = 'test'; $b = 'zzz'; var_dump($a ^ $b);");
+  MVCR("<?php $a = 1; $a = 'test'; $b = 'zzz'; $a &= $b; var_dump($a);");
+  MVCR("<?php $a = 1; $a = 'test'; $b = 'zzz'; $a |= $b; var_dump($a);");
+  MVCR("<?php $a = 1; $a = 'test'; $b = 'zzz'; $a ^= $b; var_dump($a);");
+  MVCR("<? class a { public $var2 = 1; public $var1; }"
       "class b extends a { public $var2; }"
       "function f() { $obj1 = new b(); var_dump($obj1); $obj1->var1 = 1; }"
       "f();"); //#147156
-      return true;
+  return true;
 }
 
 bool TestCodeRun::TestObject() {
-  VCR("<?php "
+  MVCR("<?php "
       "var_dump((object)NULL);"
       "var_dump((object)true);"
       "var_dump((object)10);"
@@ -1426,7 +1494,7 @@ bool TestCodeRun::TestObject() {
       "var_dump((object)array(10, 20));"
       );
 
-  VCR("<?php class A {} $obj = new A(); "
+  MVCR("<?php class A {} $obj = new A(); "
       "var_dump($obj);"
       "var_dump((bool)$obj);"
       "var_dump((int)$obj);"
@@ -1434,7 +1502,7 @@ bool TestCodeRun::TestObject() {
       "var_dump((object)$obj);"
       );
 
-  VCR("<?php class A { public $test = 'ok';} $obj = new A(); "
+  MVCR("<?php class A { public $test = 'ok';} $obj = new A(); "
       "var_dump($obj);"
       "var_dump((bool)$obj);"
       "var_dump((int)$obj);"
@@ -1442,7 +1510,7 @@ bool TestCodeRun::TestObject() {
       "var_dump((object)$obj);"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "var_dump((object)NULL);"
       "var_dump((object)true);"
       "var_dump((object)10);"
@@ -1450,7 +1518,7 @@ bool TestCodeRun::TestObject() {
       "var_dump((object)array(10, 20));"
       );
 
-  VCR("<?php class A { public $a = 0;} class B extends A {}"
+  MVCR("<?php class A { public $a = 0;} class B extends A {}"
       "$obj1 = new A(); $obj2 = new A(); $obj2->a++; "
       "$obj3 = new B(); $obj3->a = 10;"
       "var_dump($obj1->a);"
@@ -1464,7 +1532,7 @@ bool TestCodeRun::TestObject() {
       "var_dump($obj3 instanceof B);"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "class A {"
       "  public $a = 3;"
       "  public function __construct($a) {"
@@ -1489,7 +1557,7 @@ bool TestCodeRun::TestObject() {
       "$obj = new C(1); var_dump($obj->a);"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "class A {"
       "  public $b = 3;"
       "  public $a = 2;"
@@ -1497,7 +1565,7 @@ bool TestCodeRun::TestObject() {
       "$obj = new A(); var_dump($obj); var_dump($obj->c);"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "class A {"
       "  public $a = 2;"
       "}"
@@ -1508,7 +1576,7 @@ bool TestCodeRun::TestObject() {
       "$obj = new B(); var_dump($obj); var_dump($obj->b);"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "class A {"
       "  public $a = 2;"
       "}"
@@ -1519,7 +1587,7 @@ bool TestCodeRun::TestObject() {
       "$obj = new B(); var_dump($obj); var_dump($obj->b);"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "class A {"
       "  public $a = 2;"
       "}"
@@ -1530,7 +1598,7 @@ bool TestCodeRun::TestObject() {
       "$obj = new B(); var_dump($obj); var_dump($obj->b);"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "class A {"
       "  public $a = 2;"
       "  public $b = 1;"
@@ -1542,13 +1610,13 @@ bool TestCodeRun::TestObject() {
       "$obj = new B(); var_dump($obj); var_dump($obj->b);"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "interface I { public function test($a);}"
       "class A implements I { public function test($a) { print $a;}}"
       "$obj = new A(); var_dump($obj instanceof I); $obj->test('cool');"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "interface I { public function test($a);} "
       "class A { public function test($a) { print 'A';}} "
       "class B extends A implements I { "
@@ -1559,13 +1627,13 @@ bool TestCodeRun::TestObject() {
       );
 
   // circular references
-  VCR("<?php class A { public $a;} "
+  MVCR("<?php class A { public $a;} "
       "$obj1 = new A(); $obj2 = new A(); $obj1->a = $obj2; $obj2->a = $obj1;"
       "var_dump($obj1);");
 
-  VCR("<?php $a = 1; class A { public function t() { global $a; $b = 'a'; var_dump($$b);}} $obj = new A(); $obj->t();");
+  MVCR("<?php $a = 1; class A { public function t() { global $a; $b = 'a'; var_dump($$b);}} $obj = new A(); $obj->t();");
 
-  VCR("<?php "
+  MVCR("<?php "
       "class g {"
       "  public $v;"
       "  function set($v) {"
@@ -1587,7 +1655,7 @@ bool TestCodeRun::TestObject() {
       "  return new g;"
       "}"
       "foo();");
-  VCR("<?php "
+  MVCR("<?php "
       "class EE extends Exception {"
       "}"
       "class E extends EE {"
@@ -1605,17 +1673,17 @@ bool TestCodeRun::TestObject() {
 
 bool TestCodeRun::TestObjectProperty() {
 
-  VCR("<?php "
+  MVCR("<?php "
       "class A { public $a = 10; public function foo() { $this->a = 20;} } "
       "class B extends A { public $a = 'test';} "
       "$obj = new B(); $obj->foo(); var_dump($obj->a);");
 
-  VCR("<?php "
+  MVCR("<?php "
       "class A { public $a = null; }"
       "class B extends A { public function foo() { var_dump($this->a);} } "
       "class C extends B { public $a = 'test';} "
       "$obj = new C(); $obj->foo();");
-  VCR("<?php "
+  MVCR("<?php "
       "$y = true;"
       "define('foo', $y ? 1 : 0);"
       "if (false) {"
@@ -1659,7 +1727,7 @@ bool TestCodeRun::TestObjectProperty() {
       "  var_dump(normal::$xx);"
       "}"
       "test();");
-  VCR("<?php "
+  MVCR("<?php "
       "class c {"
       "  public $d = 'd';"
       "  private $e = 'e';"
@@ -1701,7 +1769,7 @@ bool TestCodeRun::TestObjectProperty() {
       "  var_dump($v);"
       "}");
 
-  VCR("<?php "
+  MVCR("<?php "
       "$one = array('cluster'=> 1, 'version'=>2);"
       "var_dump(isset($one->cluster));"
       "var_dump(empty($one->cluster));");
@@ -1710,20 +1778,20 @@ bool TestCodeRun::TestObjectProperty() {
 }
 
 bool TestCodeRun::TestObjectMethod() {
-  VCR("<?php class A { function test() {}} "
+  MVCR("<?php class A { function test() {}} "
       "$obj = new A(); $obj->test(); $obj = 1;");
 
   // calling a function that's implemented in a derived class
-  VCR("<?php abstract class T { function foo() { $this->test();} }"
+  MVCR("<?php abstract class T { function foo() { $this->test();} }"
       "class R extends T { function test() { var_dump('test'); }} "
       "$obj = new R(); $obj->test(); $obj->foo();");
 
-  VCR("<?php class A { function test() { print 'A';} "
+  MVCR("<?php class A { function test() { print 'A';} "
       "function foo() { $this->test();}} "
       "class B extends A { function test() { print 'B';}} "
       "$obj = new A(); $obj = new B(); $obj->foo();");
 
-  VCR("<?php "
+  MVCR("<?php "
       "class A {} "
       "class AA extends A { function test() { print 'AA ok';} }"
       "class B { function foo(A $obj) { $obj->test();}}"
@@ -1731,17 +1799,17 @@ bool TestCodeRun::TestObjectMethod() {
       );
 
   // calling a virtual function
-  VCR("<?php abstract class T { abstract function test(); "
+  MVCR("<?php abstract class T { abstract function test(); "
       "function foo() { $this->test();} }"
       "class R extends T { function test() { var_dump('test'); }} "
       "$obj = new R(); $obj->test(); $obj->foo();");
 
   // calling a virtual function
-  VCR("<?php abstract class T { abstract function test(); } "
+  MVCR("<?php abstract class T { abstract function test(); } "
       "class R extends T { function test() { var_dump('test'); }} "
       "$obj = 1; $obj = new R(); $obj->test();");
 
-  VCR("<?php "
+  MVCR("<?php "
       "class foo {"
       "  public function test1() {"
       "    echo 'in test1';"
@@ -1767,7 +1835,7 @@ bool TestCodeRun::TestObjectMethod() {
       "$obj->test4();");
 
   // calling instance method statically
-  VCR("<?php "
+  MVCR("<?php "
       "class A1 {"
       "  function a1f($a) {"
       "    var_dump('a1f:0');"
@@ -1799,7 +1867,7 @@ bool TestCodeRun::TestObjectMethod() {
       "call_user_func_array(array('B1', 'b1f'), 1);");
 
   // calling instance method through self
-  VCR("<?php "
+  MVCR("<?php "
       "class A {"
       "  var $a;"
       "  function f() {"
@@ -1811,7 +1879,7 @@ bool TestCodeRun::TestObjectMethod() {
       "  }"
       "}");
 
-  VCR("<?php "
+  MVCR("<?php "
       "class c {"
       "function foo() { echo \"called\n\"; }"
       "}"
@@ -1826,7 +1894,7 @@ bool TestCodeRun::TestObjectMethod() {
 }
 
 bool TestCodeRun::TestClassMethod() {
-  VCR("<?php "
+  MVCR("<?php "
       "$error = 'fatal error';"
       "echo AdsConsoleRenderer::getInstance()->writeMsg('error', $error);"
       "class AdsConsoleRenderer {"
@@ -1843,21 +1911,21 @@ bool TestCodeRun::TestClassMethod() {
 }
 
 bool TestCodeRun::TestObjectMagicMethod() {
-  VCR("<?php class A {"
+  MVCR("<?php class A {"
       "  private $foo, $bar; "
       "  function __construct() { $this->foo = 1; $this->bar = 2;} "
       "  public function __sleep() { $this->foo = 3; return array('foo');} "
       "}"
       " $a = new A(); var_dump(serialize($a));");
 
-  VCR("<?php class A { "
+  MVCR("<?php class A { "
       "  public $a = array(); "
       "  function __set($name, $value) { $this->a[$name] = $value.'set';} "
       "  function __get($name) { return $this->a[$name].'get';} "
       "} "
       "$obj = new A(); $obj->test = 'test'; var_dump($obj->test);");
 
-  VCR("<?php "
+  MVCR("<?php "
       "class A {"
       "  public $a = 'aaa';"
       "  public function __get($name) { return 'getA';}"
@@ -1872,28 +1940,28 @@ bool TestCodeRun::TestObjectMagicMethod() {
       "var_dump($obj->a);"
       "var_dump($obj->b);");
 
-  VCR("<?php class A { "
+  MVCR("<?php class A { "
       "  public $a = array(); "
       "  function __set($name, $value) { $this->a[$name] = $value;} "
       "  function __get($name) { return $this->a[$name];} "
       "} "
       "$obj = new A(); $obj->test = 'test'; var_dump($obj->test);");
 
-  VCR("<?php class A {} "
+  MVCR("<?php class A {} "
       "$obj = new A(); $obj->test = 'test'; var_dump($obj->test);");
 
-  VCR("<?php class A { "
+  MVCR("<?php class A { "
       "function __call($a, $b) { var_dump($a, $b[0], $b[1]);}} "
       "$obj = new A(); $a = 1; $obj->test($a, 'ss');");
   /*
-  VCR("<?php class A { "
+  MVCR("<?php class A { "
       "  function __set($name, $value) { $this->a[$name] = $value;} "
       "  function __get($name) { return $this->a[$name];} "
       "} "
       "$obj = new A(); $obj->test = 'test'; var_dump($obj->test);");
   */
 
-  VCR("<?php "
+  MVCR("<?php "
       "class foo"
       "{"
       "  public $public = 'public';"
@@ -1903,7 +1971,7 @@ bool TestCodeRun::TestObjectMagicMethod() {
       "$foo = new foo();"
       "$data = serialize($foo);"
       "var_dump($data);");
-  VCR("<?php "
+  MVCR("<?php "
       "class MemberTest {"
       "  private $data = array();"
       "  public function __set($name, $value) {"
@@ -1926,7 +1994,7 @@ bool TestCodeRun::TestObjectMagicMethod() {
       "$obj = new MemberTest;"
       "$obj->a = 1;"
       "echo $obj->a;");
-  VCR("<?php "
+  MVCR("<?php "
       "class foo"
       "{"
       "  public $public = 'public';"
@@ -1940,7 +2008,7 @@ bool TestCodeRun::TestObjectMagicMethod() {
 }
 
 bool TestCodeRun::TestObjectAssignment() {
-  VCR("<?php "
+  MVCR("<?php "
       "class foo {"
       "  public function __construct() {"
       "    $this->val = 1;"
@@ -1977,7 +2045,7 @@ bool TestCodeRun::TestObjectAssignment() {
 }
 
 bool TestCodeRun::TestNewObjectExpression() {
-  VCR("<?php "
+  MVCR("<?php "
       "class A { var $num; }"
       "function foo() { return new A(); }"
       "foreach(($a=(object)new A()) as $v);"
@@ -1990,7 +2058,7 @@ bool TestCodeRun::TestNewObjectExpression() {
 }
 
 bool TestCodeRun::TestObjectPropertyExpression() {
-  VCR("<?php "
+  MVCR("<?php "
       "class test {"
       "  function foo() {"
       "    $var = $this->blah->prop->foo->bar = \"string\";"
@@ -1999,7 +2067,7 @@ bool TestCodeRun::TestObjectPropertyExpression() {
       "}"
       "$t = new test;"
       "$t->foo();");
-  VCR("<?php "
+  MVCR("<?php "
       "class C1 {"
       "  public function __get( $what ) {"
       "    echo \"get\n\";"
@@ -2015,7 +2083,7 @@ bool TestCodeRun::TestObjectPropertyExpression() {
       "$c->a = 1;"
       "$c->a .= 1;"
       "print $c->a;");
-  VCR("<?php "
+  MVCR("<?php "
       "class C1 {"
       "  public function __get( $what ) {"
       "    echo \"get\n\";"
@@ -2035,7 +2103,7 @@ bool TestCodeRun::TestObjectPropertyExpression() {
       "$c2->p->a = 1;"
       "$c2->p->a .= 1;"
       "print $c2->p->a;");
-  VCR("<?php "
+  MVCR("<?php "
       "class C1 {"
       "  public function __get( $what ) {"
       "    echo \"get\n\";"
@@ -2059,7 +2127,7 @@ bool TestCodeRun::TestObjectPropertyExpression() {
       "$c3->p3->p2->a = 1;"
       "$c3->p3->p2->a .= 1;"
       "print $c3->p3->p2->a;");
-  VCR("<?php "
+  MVCR("<?php "
       "class C1 {"
       "  public function __get( $what ) {"
       "    echo \"get C1\n\";"
@@ -2099,7 +2167,7 @@ bool TestCodeRun::TestObjectPropertyExpression() {
       "$c3->p3->p2->a = 1;"
       "$c3->p3->p2->a .= 1;"
       "print $c3->p3->p2->a;");
-  VCR("<?php "
+  MVCR("<?php "
       "class C1 {"
       "  protected function __get( $what ) {"
       "    echo \"get C1\n\";"
@@ -2139,7 +2207,7 @@ bool TestCodeRun::TestObjectPropertyExpression() {
       "$c3->p3->p2->a = 1;"
       "$c3->p3->p2->a .= 1;"
       "print $c3->p3->p2->a;");
-  VCR("<?php "
+  MVCR("<?php "
       "class C1 {"
       "  private function __get( $what ) {"
       "    echo \"get C1\n\";"
@@ -2179,7 +2247,7 @@ bool TestCodeRun::TestObjectPropertyExpression() {
       "$c3->p3->p2->a = 1;"
       "$c3->p3->p2->a .= 1;"
       "print $c3->p3->p2->a;");
-  VCR("<?php "
+  MVCR("<?php "
       "class C1 {"
       "  public function __get( $what ) {"
       "    echo \"get\n\";"
@@ -2214,7 +2282,7 @@ bool TestCodeRun::TestObjectPropertyExpression() {
       "print $c->a;"
       "$c->a |= 7;"
       "print $c->a;");
-  VCR("<?php "
+  MVCR("<?php "
       "class C1 {"
       "}"
       "class C2 {"
@@ -2250,7 +2318,7 @@ bool TestCodeRun::TestObjectPropertyExpression() {
       "print $c3->p3->p2->a;"
       "assign_ref($c3->p3->p2->a);"
       "print $c3->p3->p2->a;");
-  VCR("<?php "
+  MVCR("<?php "
       "class C1 {"
       "  private function __get( $what ) {"
       "    echo \"get C1\n\";"
@@ -2295,7 +2363,7 @@ bool TestCodeRun::TestObjectPropertyExpression() {
       "print $c3->p3->p2->a;"
       "assign_ref($c3->p3->p2->a);"
       "print $c3->p3->p2->a;");
-  VCR("<?php "
+  MVCR("<?php "
       "$b = 10;"
       "class C1 {"
       "  public function __get( $what ) {"
@@ -2309,7 +2377,7 @@ bool TestCodeRun::TestObjectPropertyExpression() {
       "}"
       "assign_ref($c1->a);"
       "var_dump($b);");
-  VCR("<?php "
+  MVCR("<?php "
       "class C1 {"
       "  public function __get( $what ) {"
       "    echo \"get C1\n\";"
@@ -2328,7 +2396,7 @@ bool TestCodeRun::TestObjectPropertyExpression() {
       "var_dump($c1->a->b->c);"
       "$c1->a->b->c .= 10;"
       "var_dump($c1->a->b->c);");
-  VCR("<?php "
+  MVCR("<?php "
       "class C1 {"
       "  public function __get( $what ) {"
       "    echo \"get C1\n\";"
@@ -2389,36 +2457,36 @@ bool TestCodeRun::TestObjectPropertyExpression() {
     COMPARE(a, op, '')                          \
 
 #define COMPARE_OP(op)                                                  \
-  VCR("<?php $i = 0; " COMPARE_ALL('1.2', op));                         \
-  VCR("<?php $i = 0; " COMPARE_ALL(true, op));                          \
-  VCR("<?php $i = 0; " COMPARE_ALL(false, op));                         \
-  VCR("<?php $i = 0; " COMPARE_ALL(1, op));                             \
-  VCR("<?php $i = 0; " COMPARE_ALL(0, op));                             \
-  VCR("<?php $i = 0; " COMPARE_ALL(-1, op));                            \
-  VCR("<?php $i = 0; " COMPARE_ALL('1', op));                           \
-  VCR("<?php $i = 0; " COMPARE_ALL('0', op));                           \
-  VCR("<?php $i = 0; " COMPARE_ALL('-1', op));                          \
-  VCR("<?php $i = 0; " COMPARE_ALL(null, op));                          \
-  VCR("<?php $i = 0; " COMPARE_ALL(array(), op));                       \
-  VCR("<?php $i = 0; " COMPARE_ALL(array(1), op));                      \
-  VCR("<?php $i = 0; " COMPARE_ALL(array(2), op));                      \
-  VCR("<?php $i = 0; " COMPARE_ALL(array('1'), op));                    \
-  VCR("<?php $i = 0; " COMPARE_ALL(array('0' => '1'), op));             \
-  VCR("<?php $i = 0; " COMPARE_ALL(array('a'), op));                    \
-  VCR("<?php $i = 0; " COMPARE_ALL(array('a' => 1), op));               \
-  VCR("<?php $i = 0; " COMPARE_ALL(array('b' => 1), op));               \
-  VCR("<?php $i = 0; " COMPARE_ALL(array('a' => 1, 'b' => 2), op));     \
-  VCR("<?php $i = 0; " COMPARE_ALL('php', op));                         \
-  VCR("<?php $i = 0; " COMPARE_ALL('', op));                            \
+  MVCR("<?php $i = 0; " COMPARE_ALL('1.2', op));                         \
+  MVCR("<?php $i = 0; " COMPARE_ALL(true, op));                          \
+  MVCR("<?php $i = 0; " COMPARE_ALL(false, op));                         \
+  MVCR("<?php $i = 0; " COMPARE_ALL(1, op));                             \
+  MVCR("<?php $i = 0; " COMPARE_ALL(0, op));                             \
+  MVCR("<?php $i = 0; " COMPARE_ALL(-1, op));                            \
+  MVCR("<?php $i = 0; " COMPARE_ALL('1', op));                           \
+  MVCR("<?php $i = 0; " COMPARE_ALL('0', op));                           \
+  MVCR("<?php $i = 0; " COMPARE_ALL('-1', op));                          \
+  MVCR("<?php $i = 0; " COMPARE_ALL(null, op));                          \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array(), op));                       \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array(1), op));                      \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array(2), op));                      \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array('1'), op));                    \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array('0' => '1'), op));             \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array('a'), op));                    \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array('a' => 1), op));               \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array('b' => 1), op));               \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array('a' => 1, 'b' => 2), op));     \
+  MVCR("<?php $i = 0; " COMPARE_ALL('php', op));                         \
+  MVCR("<?php $i = 0; " COMPARE_ALL('', op));                            \
 
 bool TestCodeRun::TestComparisons() {
-  VCR("<?php var_dump(array(1 => 1, 2 => 1) ==  array(2 => 1, 1 => 1));");
-  VCR("<?php var_dump(array(1 => 1, 2 => 1) === array(2 => 1, 1 => 1));");
-  VCR("<?php var_dump(array('a'=>1,'b'=> 1) ==  array('b'=>1,'a'=> 1));");
-  VCR("<?php var_dump(array('a'=>1,'b'=> 1) === array('b'=>1,'a'=> 1));");
+  MVCR("<?php var_dump(array(1 => 1, 2 => 1) ==  array(2 => 1, 1 => 1));");
+  MVCR("<?php var_dump(array(1 => 1, 2 => 1) === array(2 => 1, 1 => 1));");
+  MVCR("<?php var_dump(array('a'=>1,'b'=> 1) ==  array('b'=>1,'a'=> 1));");
+  MVCR("<?php var_dump(array('a'=>1,'b'=> 1) === array('b'=>1,'a'=> 1));");
 
-  VCR("<?php $a = '05/17'; $b = '05/18'; var_dump($a == $b);");
-  VCR("<?php var_dump('05/17' == '05/18');");
+  MVCR("<?php $a = '05/17'; $b = '05/18'; var_dump($a == $b);");
+  MVCR("<?php var_dump('05/17' == '05/18');");
 
   COMPARE_OP(==);
   COMPARE_OP(===);
@@ -2436,12 +2504,12 @@ bool TestCodeRun::TestComparisons() {
 // semantics
 
 bool TestCodeRun::TestUnset() {
-  VCR("<?php $a = 10; unset($a); var_dump($a);");
-  VCR("<?php $a = array(10); "
+  MVCR("<?php $a = 10; unset($a); var_dump($a);");
+  MVCR("<?php $a = array(10); "
       "function test() { global $a; unset($a[0]); var_dump($a);}"
       "var_dump($a); test(); var_dump($a);");
-  VCR("<?php $a = 10; unset($GLOBALS); var_dump($a);");
-  VCR("<?php "
+  MVCR("<?php $a = 10; unset($GLOBALS); var_dump($a);");
+  MVCR("<?php "
       "function f1() {"
       "  $x = array(1,2,3);"
       "  unset($x[0]);"
@@ -2466,71 +2534,71 @@ bool TestCodeRun::TestUnset() {
       "f2();"
       "f3();"
       "f4();");
-  VCR("<?php class A { public $arr;} $obj = new A; $obj->arr[] = 'test';"
+  MVCR("<?php class A { public $arr;} $obj = new A; $obj->arr[] = 'test';"
       "var_dump($obj->arr); unset($obj->arr); var_dump($obj->arr);");
   return true;
 }
 
 bool TestCodeRun::TestReference() {
-  VCR("<?php $idxa = array('a' => 1240430476);"
+  MVCR("<?php $idxa = array('a' => 1240430476);"
       "$idxa = &$idxa['a'];");
 
-  VCR("<?php $a = array(1, 'a'); $b = $a; "
+  MVCR("<?php $a = array(1, 'a'); $b = $a; "
       "foreach ($b as $k => &$v) { $v = 'ok';} var_dump($a, $b);");
 
-  VCR("<?php $a = array(1, 'test'); $b = $a; $c = &$b[0]; "
+  MVCR("<?php $a = array(1, 'test'); $b = $a; $c = &$b[0]; "
       "$c = 10; var_dump($a, $b);");
 
   // reference expressions
-  VCR("<?php $a = &$b; $a = 10; var_dump($b);");
-  VCR("<?php $a = 1; $b = $a;  $a = 2; var_dump($b);");
-  VCR("<?php $a = 1; $b = &$a; $c = $b; $a = 2; var_dump($b); var_dump($c);");
-  VCR("<?php $a = 1; $b = &$a; $b = 2; var_dump($a);");
-  VCR("<?php $a = 1; $b = &$a; $c = $b; $b = 2; var_dump($a); var_dump($c);");
-  VCR("<?php $a = 1; $c = $b = &$a; $b = 2; var_dump($a); var_dump($c);");
-  VCR("<?php $a = 1; $b = &$a; $c = 2; $b = $c; $c = 5; "
+  MVCR("<?php $a = &$b; $a = 10; var_dump($b);");
+  MVCR("<?php $a = 1; $b = $a;  $a = 2; var_dump($b);");
+  MVCR("<?php $a = 1; $b = &$a; $c = $b; $a = 2; var_dump($b); var_dump($c);");
+  MVCR("<?php $a = 1; $b = &$a; $b = 2; var_dump($a);");
+  MVCR("<?php $a = 1; $b = &$a; $c = $b; $b = 2; var_dump($a); var_dump($c);");
+  MVCR("<?php $a = 1; $c = $b = &$a; $b = 2; var_dump($a); var_dump($c);");
+  MVCR("<?php $a = 1; $b = &$a; $c = 2; $b = $c; $c = 5; "
       "var_dump($a); var_dump($b); var_dump($c);");
-  VCR("<?php $a = 1; $b = &$a; $c = 2; $d = &$c; $b = $d; "
+  MVCR("<?php $a = 1; $b = &$a; $c = 2; $d = &$c; $b = $d; "
       "var_dump($a); var_dump($b); var_dump($c); var_dump($d);");
-  VCR("<?php $a = 1; $b = &$a; $c = 2; $d = &$c; $b = &$d; "
+  MVCR("<?php $a = 1; $b = &$a; $c = 2; $d = &$c; $b = &$d; "
       "var_dump($a); var_dump($b); var_dump($c); var_dump($d);");
-  VCR("<?php $a = 10; $b = array(&$a); var_dump($b); "
+  MVCR("<?php $a = 10; $b = array(&$a); var_dump($b); "
       "$a = 20; var_dump($b);");
-  VCR("<?php $a = array(); $b = 10; $a[] = &$b; $b = 20; var_dump($a);");
-  VCR("<?php $a = 10; $b = array('test' => &$a); var_dump($b); "
+  MVCR("<?php $a = array(); $b = 10; $a[] = &$b; $b = 20; var_dump($a);");
+  MVCR("<?php $a = 10; $b = array('test' => &$a); var_dump($b); "
       "$a = 20; var_dump($b);");
-  VCR("<?php $a = array(); $b = 1; $a['t'] = &$b; $b = 2; var_dump($a);");
-  VCR("<?php $a = array(1, 2); foreach ($a as $b) { $b++;} var_dump($a);");
-  VCR("<?php $a = array(1, 2); foreach ($a as &$b) { $b++;} var_dump($a);");
-  VCR("<?php $a = array(1, array(2,3)); "
+  MVCR("<?php $a = array(); $b = 1; $a['t'] = &$b; $b = 2; var_dump($a);");
+  MVCR("<?php $a = array(1, 2); foreach ($a as $b) { $b++;} var_dump($a);");
+  MVCR("<?php $a = array(1, 2); foreach ($a as &$b) { $b++;} var_dump($a);");
+  MVCR("<?php $a = array(1, array(2,3)); "
       "foreach ($a[1] as &$b) { $b++;} var_dump($a);");
 
   // reference parameters
-  VCR("<?php function f(&$a) { $a = 'ok';} "
+  MVCR("<?php function f(&$a) { $a = 'ok';} "
       "$a = 10; f($a); var_dump($a);");
-  VCR("<?php function f(&$a) { $a = 'ok';} "
+  MVCR("<?php function f(&$a) { $a = 'ok';} "
       "$a = array(); $c = &$a['b']; $c = 'ok'; var_dump($a);");
-  VCR("<?php function f(&$a) { $a = 'ok';} "
+  MVCR("<?php function f(&$a) { $a = 'ok';} "
       "$a = array(); $c = &$a['b']; f($c); var_dump($a);");
-  VCR("<?php function f(&$a) { $a = 'ok';} "
+  MVCR("<?php function f(&$a) { $a = 'ok';} "
       "$a = array(); f($a['b']); var_dump($a);");
-  VCR("<?php function f(&$a) { $a = 'ok';} class T { public $b = 10;} "
+  MVCR("<?php function f(&$a) { $a = 'ok';} class T { public $b = 10;} "
       "$a = new T(); $a->b = 10; f($a->b); var_dump($a);");
-  VCR("<?php function f(&$a) { $a = 'ok';} class T {} "
+  MVCR("<?php function f(&$a) { $a = 'ok';} class T {} "
       "$a = new T(); $a->b = 10; f($a->b); var_dump($a);");
-  VCR("<?php function f(&$a) {} "
+  MVCR("<?php function f(&$a) {} "
       "$a = array(); f($a['b']); var_dump($a);");
-  VCR("<?php function f(&$a) {} class T {} "
+  MVCR("<?php function f(&$a) {} class T {} "
       "$a = new T(); $a->b = 10; f($a->b); var_dump($a);");
 
   // reference returns
-  VCR("<?php $a = 10; function &f() { global $a; return $a;} "
+  MVCR("<?php $a = 10; function &f() { global $a; return $a;} "
       "$b = &f(); $b = 20; var_dump($a);");
-  VCR("<?php function &f() { $a = 10; return $a;} "
+  MVCR("<?php function &f() { $a = 10; return $a;} "
       "$b = &f(); $b = 20; var_dump($b);");
-  VCR("<?php $a = array(); function &f() { global $a; return $a['b'];} "
+  MVCR("<?php $a = array(); function &f() { global $a; return $a['b'];} "
       "$b = &f(); $b = 20; var_dump($a);");
-  VCR("<?php function &f() { $a = array(); return $a['b'];} "
+  MVCR("<?php function &f() { $a = array(); return $a['b'];} "
       "$b = &f(); $b = 20; var_dump($b);");
 
   // circular references
@@ -2538,10 +2606,10 @@ bool TestCodeRun::TestReference() {
   //VCR("<?php $a = array('a' => &$a); $b = array($a); var_dump($b);");
 
   // shallow copy of members (either of arrays or objects)
-  VCR("function test($a) { $a[1] = 10; $a['r'] = 20;} "
+  MVCR("function test($a) { $a[1] = 10; $a['r'] = 20;} "
       "$b = 5; $a = array('r' => &$b); $a['r'] = 6; test($a); var_dump($a);");
 
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array('a'=>0);"
       "$ref = &$a['a'];"
       "var_dump($a);"
@@ -2559,7 +2627,7 @@ bool TestCodeRun::TestReference() {
       );
 
   // reference argument
-  VCRNW("<?php "
+  MVCRNW("<?php "
         "function foo($u, $v, $w) {"
         "  $u = 10;"
         "  $v = 20;"
@@ -2575,64 +2643,64 @@ bool TestCodeRun::TestReference() {
 }
 
 bool TestCodeRun::TestDynamicConstants() {
-  VCR("<?php function foo($a) { return $a + 10;} define('TEST', foo(10)); "
+  MVCR("<?php function foo($a) { return $a + 10;} define('TEST', foo(10)); "
       "var_dump(TEST);");
-  VCR("<?php function foo() { return 15;} "
+  MVCR("<?php function foo() { return 15;} "
       "var_dump(TEST); define('TEST', foo()); var_dump(TEST);");
-  VCR("<?php if (true) define('TEST', 1); else define('TEST', 2); "
+  MVCR("<?php if (true) define('TEST', 1); else define('TEST', 2); "
       "var_dump(TEST);");
-  VCR("<?php var_dump(TEST); define('TEST', 1); var_dump(TEST); "
+  MVCR("<?php var_dump(TEST); define('TEST', 1); var_dump(TEST); "
       "define('TEST', 2); var_dump(TEST);");
-  VCR("<?php if (false) define('TEST', 1); else define('TEST', 2); "
+  MVCR("<?php if (false) define('TEST', 1); else define('TEST', 2); "
       "var_dump(TEST);");
-  VCR("<?php var_dump(defined('TEST')); var_dump(TEST);"
+  MVCR("<?php var_dump(defined('TEST')); var_dump(TEST);"
       "define('TEST', 13);"
       "var_dump(defined('TEST')); var_dump(TEST);");
-  VCR("<?php define('FOO', BAR); define('BAR', FOO); echo FOO; echo BAR;");
-  VCR("<?php define('A', 10); class T { static $a = array(A); } "
+  MVCR("<?php define('FOO', BAR); define('BAR', FOO); echo FOO; echo BAR;");
+  MVCR("<?php define('A', 10); class T { static $a = array(A); } "
       "define('A', 20); var_dump(T::$a);");
   return true;
 }
 
 bool TestCodeRun::TestDynamicVariables() {
   // r-value
-  VCR("<?php $a = 1; function t() { global $a;$b = 'a'; var_dump($$b);} t();");
-  VCR("<?php $a = 1; function t() { $b = 'a'; var_dump($$b);} t();");
-  VCR("<?php function t() { $a = 'test'; $b = 'a'; var_dump($$b);} t();");
-  VCR("<?php $a = 'test'; $b = 'a'; var_dump($$b);");
-  VCR("<?php $a = 1; class A { public function t() { global $a; $b = 'a'; var_dump($$b);}} $obj = new A(); $obj->t();");
+  MVCR("<?php $a = 1; function t() { global $a;$b = 'a'; var_dump($$b);} t();");
+  MVCR("<?php $a = 1; function t() { $b = 'a'; var_dump($$b);} t();");
+  MVCR("<?php function t() { $a = 'test'; $b = 'a'; var_dump($$b);} t();");
+  MVCR("<?php $a = 'test'; $b = 'a'; var_dump($$b);");
+  MVCR("<?php $a = 1; class A { public function t() { global $a; $b = 'a'; var_dump($$b);}} $obj = new A(); $obj->t();");
 
   // l-value
-  VCR("<?php $a = 'test'; $b = 'a'; $$b = 'ok'; var_dump($a);");
-  VCR("<?php $a = 'test'; $b = 'a'; $$b = 10; var_dump($a);");
-  VCR("<?php $a = 'd'; var_dump($$a); $$a = 10; var_dump($$a); var_dump($d);");
+  MVCR("<?php $a = 'test'; $b = 'a'; $$b = 'ok'; var_dump($a);");
+  MVCR("<?php $a = 'test'; $b = 'a'; $$b = 10; var_dump($a);");
+  MVCR("<?php $a = 'd'; var_dump($$a); $$a = 10; var_dump($$a); var_dump($d);");
 
   // ref-value
-  VCR("<?php $a = 'test'; $b = 'a'; $c = &$$b; $c = 10; var_dump($a);");
+  MVCR("<?php $a = 'test'; $b = 'a'; $c = &$$b; $c = 10; var_dump($a);");
 
   // extract
-  VCR("<?php extract(array('a' => 'aval')); var_dump($a);");
-  VCR("<?php extract(array('a' => 'ok')); $a = 1; var_dump($a);");
-  VCR("<?php $a = 1; extract(array('a' => 'ok'), EXTR_SKIP); var_dump($a);");
-  VCR("<?php $a = 1; extract(array('a' => 'ok'), EXTR_PREFIX_SAME, 'p');"
+  MVCR("<?php extract(array('a' => 'aval')); var_dump($a);");
+  MVCR("<?php extract(array('a' => 'ok')); $a = 1; var_dump($a);");
+  MVCR("<?php $a = 1; extract(array('a' => 'ok'), EXTR_SKIP); var_dump($a);");
+  MVCR("<?php $a = 1; extract(array('a' => 'ok'), EXTR_PREFIX_SAME, 'p');"
       " var_dump($p_a);");
-  VCR("<?php extract(array('a' => 'ok'), EXTR_PREFIX_ALL, 'p');"
+  MVCR("<?php extract(array('a' => 'ok'), EXTR_PREFIX_ALL, 'p');"
       " var_dump($p_a);");
-  VCR("<?php extract(array('ok'), EXTR_PREFIX_INVALID, 'p'); var_dump($p_0);");
-  VCR("<?php $a = null; extract(array('a' => 'ok'), EXTR_IF_EXISTS); var_dump($a);");
-  VCR("<?php $a = null; extract(array('a' => 'ok', 'b' => 'no'), EXTR_PREFIX_IF_EXISTS, 'p'); var_dump($p_a); var_dump($b); var_dump($p_b);");
-  VCR("<?php $a = 'ok'; extract(array('b' => &$a), EXTR_REFS); $b = 'no'; var_dump($a);");
-  VCR("<?php $a = 'ok'; $arr = array('b' => &$a); extract($arr, EXTR_REFS); $b = 'no'; var_dump($a);");
+  MVCR("<?php extract(array('ok'), EXTR_PREFIX_INVALID, 'p'); var_dump($p_0);");
+  MVCR("<?php $a = null; extract(array('a' => 'ok'), EXTR_IF_EXISTS); var_dump($a);");
+  MVCR("<?php $a = null; extract(array('a' => 'ok', 'b' => 'no'), EXTR_PREFIX_IF_EXISTS, 'p'); var_dump($p_a); var_dump($b); var_dump($p_b);");
+  MVCR("<?php $a = 'ok'; extract(array('b' => &$a), EXTR_REFS); $b = 'no'; var_dump($a);");
+  MVCR("<?php $a = 'ok'; $arr = array('b' => &$a); extract($arr, EXTR_REFS); $b = 'no'; var_dump($a);");
 
   // compact
-  VCR("<?php function test() { $a = 10; $b = 'test'; "
+  MVCR("<?php function test() { $a = 10; $b = 'test'; "
       "  var_dump(compact('ab')); "
       "  var_dump(compact('a', 'ab', 'b')); "
       "  var_dump(compact('a', array('ab', 'b')));"
       "} test(); ");
 
   // get_defined_vars
-  VCR("<?php "
+  MVCR("<?php "
       "function foo() {"
       "  static $b = 20;"
       "  global $d;"
@@ -2660,7 +2728,7 @@ bool TestCodeRun::TestDynamicVariables() {
 }
 
 bool TestCodeRun::TestDynamicProperties() {
-  VCR("<?php class A { public $a = 1;} "
+  MVCR("<?php class A { public $a = 1;} "
       "class B extends A { "
       "  public $m = 10;"
       "  public function test() { "
@@ -2670,50 +2738,50 @@ bool TestCodeRun::TestDynamicProperties() {
       "  }"
       "} $obj = new B(); $obj->test();");
 
-  VCR("<?php class A { public $a = 1;} class B { public $a = 2;} "
+  MVCR("<?php class A { public $a = 1;} class B { public $a = 2;} "
       "$obj = 1; $obj = new A(); var_dump($obj->a);");
   return true;
 }
 
 bool TestCodeRun::TestDynamicFunctions() {
-  VCR("<?php function test() { print 'ok';} $a = 'Test'; $a();");
-  VCR("<?php function test($a) { print $a;} $a = 'Test'; $a('ok');");
-  VCR("<?php function test($a, $b) { print $a.$b;} $a = 'Test'; $a('o','k');");
+  MVCR("<?php function test() { print 'ok';} $a = 'Test'; $a();");
+  MVCR("<?php function test($a) { print $a;} $a = 'Test'; $a('ok');");
+  MVCR("<?php function test($a, $b) { print $a.$b;} $a = 'Test'; $a('o','k');");
 
-  VCR("<?php function t($a = 'k') { print $a;} "
+  MVCR("<?php function t($a = 'k') { print $a;} "
       "$a = 'T'; $a(); $a('o');");
-  VCR("<?php function t($a, $b = 'k') { print $a.$b;} "
+  MVCR("<?php function t($a, $b = 'k') { print $a.$b;} "
       "$a = 'T'; $a('o'); $a('o', 'p');");
-  VCR("<?php function t($a, $b = 'k', $c = 'm') { print $a.$b.$c;} "
+  MVCR("<?php function t($a, $b = 'k', $c = 'm') { print $a.$b.$c;} "
       "$a = 'T'; $a('o'); $a('o', 'p'); $a('o', 'p', 'q');");
 
-  VCR("<?php function test() { var_dump(func_get_args());} "
+  MVCR("<?php function test() { var_dump(func_get_args());} "
       "$a = 'Test'; $a();");
-  VCR("<?php function test($a) { var_dump(func_get_args());} "
+  MVCR("<?php function test($a) { var_dump(func_get_args());} "
       "$a = 'Test'; $a(1); $a(1, 2);");
-  VCR("<?php function test($a, $b) { var_dump(func_get_args());} "
+  MVCR("<?php function test($a, $b) { var_dump(func_get_args());} "
       "$a = 'Test'; $a(1, 2); $a(1, 2, 3); $a(1, 2, 3, 4);");
 
-  VCR("<?php function t($a = 'k') { var_dump(func_get_args());} "
+  MVCR("<?php function t($a = 'k') { var_dump(func_get_args());} "
       "$a = 'T'; $a(); $a('o'); $a('o', 'p'); $a('o', 'p', 'q');");
-  VCR("<?php function t($a, $b = 'k') { var_dump(func_get_args());} "
+  MVCR("<?php function t($a, $b = 'k') { var_dump(func_get_args());} "
       "$a = 'T'; $a('o'); $a('o', 'p'); $a('o', 'p', 'q');");
-  VCR("<?php function t($a, $b = 'k', $c = 'q') { var_dump(func_get_args());} "
+  MVCR("<?php function t($a, $b = 'k', $c = 'q') { var_dump(func_get_args());} "
       "$a = 'T'; $a('o'); $a('o', 'p'); $a('o', 'p', 'q');");
 
-  VCR("<?php function test(&$a, $b) { $a = 'ok';} $a = 'Test'; "
+  MVCR("<?php function test(&$a, $b) { $a = 'ok';} $a = 'Test'; "
       "$a($a, 10); print $a;");
 
-  VCR("<?php $a = 'test'; function &test() { global $a; return $a;} "
+  MVCR("<?php $a = 'test'; function &test() { global $a; return $a;} "
       " $b = $a(); $b = 'ok'; var_dump($a); "
       " $b = &$a(); $b = 'ok'; var_dump($a);");
 
-  VCR("<?php function test($a, $b) { print $a.$b;} $a = 'Test'; $y = 'kqq'; "
+  MVCR("<?php function test($a, $b) { print $a.$b;} $a = 'Test'; $y = 'kqq'; "
       "$a('o',$y[0]);");
-  VCR("<?php function test($a, $b) { print $a.$b;} $a = 'Test'; "
+  MVCR("<?php function test($a, $b) { print $a.$b;} $a = 'Test'; "
       "$y = array('k','q','q'); $a('o',$y[0]);");
 
-  VCR("<?php "
+  MVCR("<?php "
       "$a = 'test';"
       "if ($a) {"
       "  function bar() {}"
@@ -2729,7 +2797,7 @@ bool TestCodeRun::TestDynamicFunctions() {
 
   Option::DynamicInvokeFunctions.insert("test1");
   Option::DynamicInvokeFunctions.insert("test2");
-  VCR("<?php "
+  MVCR("<?php "
       "function test1() { print __FUNCTION__;} "
       "function test2() { print __FUNCTION__;} "
       "fb_rename_function('test2', 'test3');"
@@ -2742,39 +2810,39 @@ bool TestCodeRun::TestDynamicFunctions() {
 
 bool TestCodeRun::TestDynamicMethods() {
   Option::AllDynamic = true;
-  VCR("<?php "
+  MVCR("<?php "
       "class A { public function test() { print 'in A';} } "
       "class B extends A { public function test() { print 'in B';} } "
       "$obj = new B(); "
       "call_user_func_array(array($obj, 'A::test'), array());");
 
-  VCR("<?php $i = 'gi'; $s = 'gs'; class A { "
+  MVCR("<?php $i = 'gi'; $s = 'gs'; class A { "
       "public function &dyn_test(&$a) { global $i; $a = $i; return $i;}} "
       "$obj = new A(); $f = 'dyn_test'; "
       "$c = &$obj->$f($b); var_dump($b); var_dump($c);");
-  VCR("<?php $i = 'gi'; $s = 'gs'; class A { "
+  MVCR("<?php $i = 'gi'; $s = 'gs'; class A { "
       "public static function &dyn_test(&$a) "
       "{ global $s; $a = $s; return $s;}} "
       "$f = 'dyn_test'; $e = A::$f($d); var_dump($d); var_dump($e);");
-  VCR("<?php class dyn_A{} class B{} $cls = 'dyn_a'; $a = new $cls();");
+  MVCR("<?php class dyn_A{} class B{} $cls = 'dyn_a'; $a = new $cls();");
 
-  VCR("<?php class A { function _test() { print 'ok';} "
+  MVCR("<?php class A { function _test() { print 'ok';} "
       "function __call($name, $args) { $name = '_'.$name; $this->$name();} } "
       "$obj = new A(); $obj->test();");
 
-  VCR("<?php class A { function test($a, $b) { var_dump($a, $b);} } "
+  MVCR("<?php class A { function test($a, $b) { var_dump($a, $b);} } "
       "$m = 'test'; $o = new A();"
       "$ar = array(0,1); $st = 'abc';"
       "$o->$m($ar[0], $st[0]); A::$m($ar[1], $st[1]);");
 
   vector<string> backup = Option::DynamicMethodPrefixes;
   Option::DynamicMethodPrefixes.push_back("_");
-  VCR("<?php class A { function _test() { print 'ok';} "
+  MVCR("<?php class A { function _test() { print 'ok';} "
       "function __call($name, $args) { $name = '_'.$name; $this->$name();} } "
       "$obj = new A(); $obj->test();");
   Option::DynamicMethodPrefixes = backup;
 
-  VCR("<?php "
+  MVCR("<?php "
       "class z {"
       "  function minArgTest($a1, $a2, $a3, $a4, $a5, $a6, $a7, $a8, $a9, $a10,"
       "                      $a11=true, $a12 = true) {"
@@ -2827,14 +2895,14 @@ bool TestCodeRun::TestDynamicMethods() {
       "$q->$f('one',2,3.333,4,5,6,7,8,9,10);"
       "$q->$f('one',2,3.333,4,5,6,7,8,9,10,11,12);");
 
-  VCR("<?php "
+  MVCR("<?php "
       "class z {"
       "  function __construct() { echo 'construct'; }"
       "  function z() { echo 'method'; }"
       "}"
       "$z = new z;"
       "$z->z();");
-  VCR("<?php "
+  MVCR("<?php "
       "function bar() {"
       "  echo 'bar called';"
       "}"
@@ -2849,7 +2917,7 @@ bool TestCodeRun::TestDynamicMethods() {
       "  }"
       "}"
       "$a = new foo ();");
-  VCR("<?php "
+  MVCR("<?php "
       "function t($x) {"
       "  var_dump($x);"
       "}"
@@ -2871,7 +2939,7 @@ bool TestCodeRun::TestDynamicMethods() {
 }
 
 bool TestCodeRun::TestVolatile() {
-  VCR("<?php "
+  MVCR("<?php "
       "for ($i = 0; $i < 4; $i++) {"
       "  if ($i > 1 && !defined('CON')) {"
       "    define(/*|Dynamic|*/'CON', 1);"
@@ -2906,7 +2974,7 @@ bool TestCodeRun::TestVolatile() {
       "    echo \"bar does not exists\\n\";"
       "  }"
       "}");
-  VCR("<?php "
+  MVCR("<?php "
       "function bar() {"
       "  for ($i = 0; $i < 4; $i++) {"
       "    if ($i > 1 && !function_exists('foo')) {"
@@ -2975,7 +3043,7 @@ bool TestCodeRun::TestVolatile() {
       "if (class_exists('exception')) {"
       "  echo \"yes\\n\";"
       "}");
-  VCR("<?php "
+  MVCR("<?php "
       "function foo() {"
       "  if (!defined('Auth_OpenID_NO_MATH_SUPPORT')) {"
       "    define('Auth_OpenID_NO_MATH_SUPPORT', true);"
@@ -2989,7 +3057,7 @@ bool TestCodeRun::TestVolatile() {
       "  foo();"
       "  var_dump(bar());"
       "}");
-  VCR("<?php "
+  MVCR("<?php "
       "function foo() {"
       "  if (!interface_exists('MyInterface')) {"
       "    interface MyInterface{};"
@@ -3000,7 +3068,7 @@ bool TestCodeRun::TestVolatile() {
       "}"
       "foo();"
       "foo();");
-  VCR("<?php "
+  MVCR("<?php "
       "function foo() {"
       "  if (function_exists('bar')) {"
       "    echo \"yes\\n\";"
@@ -3017,7 +3085,7 @@ bool TestCodeRun::TestVolatile() {
       "  }"
       "}"
       "foo();");
-  VCR("<?php "
+  MVCR("<?php "
       "function foo() {"
       "  if (class_exists('bar')) {"
       "    echo \"yes\\n\";"
@@ -3034,7 +3102,7 @@ bool TestCodeRun::TestVolatile() {
       "}"
       "foo();");
 #ifdef HPHP_NOTE
-  VCR("<?php "
+  MVCR("<?php "
       "function foo($a) {"
       "  if (!interface_exists($a)) {"
       "    /*|Volatile|*/interface MyInterface{};"
@@ -3051,128 +3119,128 @@ bool TestCodeRun::TestVolatile() {
 
 bool TestCodeRun::TestProgramFunctions() {
   //VCR("<?php var_dump($_SERVER);");
-  VCR("<?php var_dump($argc, count($argv));");
+  MVCR("<?php var_dump($argc, count($argv));");
   //VCR("<?php var_dump($_ENV);");
 
-  VCR("<?php function p($a) { print $a;} "
+  MVCR("<?php function p($a) { print $a;} "
       "register_shutdown_function('p', 'shutdown');");
   return true;
 }
 
 bool TestCodeRun::TestCompilation() {
   // overlapped interface
-  VCR("<?php interface A {} class B implements A {} "
+  MVCR("<?php interface A {} class B implements A {} "
       "class C extends B implements A {} $obj = new C();");
 
   // trigraph
-  VCR("<?php print '\?\?/';");
+  MVCR("<?php print '\?\?/';");
 
   // testing type inference on a re-declared constant
-  VCR("<?php if (false) define('a', 'test'); define('a', 5); print $b % a;");
+  MVCR("<?php if (false) define('a', 'test'); define('a', 5); print $b % a;");
 
   // testing type inference on a special type casting: PlusOperand -> Double
-  VCR("<?php function d() { return '2009';} $y = (d()) + 6;");
+  MVCR("<?php function d() { return '2009';} $y = (d()) + 6;");
 
-  VCR("<?php class A { public static $a = array('a', 'b'); public static function test() { self::$a[] = 'c'; var_dump(self::$a);} } A::test();");
+  MVCR("<?php class A { public static $a = array('a', 'b'); public static function test() { self::$a[] = 'c'; var_dump(self::$a);} } A::test();");
 
   // \x65D is invalid in C++
-  VCR("<?php var_dump(\"[\\x][\\xA][\\x65][\\x65D]\");");
-  VCR("\\x65D");
+  MVCR("<?php var_dump(\"[\\x][\\xA][\\x65][\\x65D]\");");
+  MVCR("\\x65D");
 
   // float vs. double
-  VCR("<?php $a = 1; $a = 'test'; var_dump($a + 2.5);");
+  MVCR("<?php $a = 1; $a = 'test'; var_dump($a + 2.5);");
 
   // +/- String
-  VCR("<?php $a = -date('w');");
+  MVCR("<?php $a = -date('w');");
 
   // ObjectOffset.at()
-  VCR("<?php class A { public $a = array('t' => 't');} class B { public $a;} "
+  MVCR("<?php class A { public $a = array('t' => 't');} class B { public $a;} "
       "$a = 1; $a = new A(); $a->a['t'] = true; var_dump($a->a['t']);");
 
   // Variant % operator
-  VCR("<?php $a = date('d') % 10;");
-  VCR("<?php $a = 'test'; $a = 1; print $a % 10;");
+  MVCR("<?php $a = date('d') % 10;");
+  MVCR("<?php $a = 'test'; $a = 1; print $a % 10;");
 
   // defining a constant after it's used
-  VCR("<?php $a = MAX_LATITUDE + 5;"
+  MVCR("<?php $a = MAX_LATITUDE + 5;"
       "if (12 > -MAX_LATITUDE) define('MAX_LATITUDE', 90); ");
 
   // toInt64() wrapper
-  VCR("<?php print 1 << 32;");
+  MVCR("<?php print 1 << 32;");
 
   // !$a is closer in C++
-  VCR("<?php if (!$a = true) {}");
+  MVCR("<?php if (!$a = true) {}");
 
   // integer as array element
-  VCR("<?php function test($a = 0) { $b = $a; $c = $b[$a];}");
+  MVCR("<?php function test($a = 0) { $b = $a; $c = $b[$a];}");
 
   // String/Array operators
-  VCR("<?php function str() { return 'test';} "
+  MVCR("<?php function str() { return 'test';} "
       "function test() { var_dump(str() - $a);}");
 
   // unused variable warning
-  VCR("<?php function test() {} function foo() { test($a = 1);}");
+  MVCR("<?php function test() {} function foo() { test($a = 1);}");
 
   // void return functions
-  VCR("<?php function test() {} true ? test() : 1;");
+  MVCR("<?php function test() {} true ? test() : 1;");
 
   // uninitialized variables need to be Variant
-  VCR("<?php function test() { $a = 0; $a += $b;} test();");
+  MVCR("<?php function test() { $a = 0; $a += $b;} test();");
 
   // VariantOffset = VariantOffset
-  VCR("<?php class A {} $a = new A(); $a->a = $a->b = 'test'; var_dump($a);");
-  VCR("<?php $a = 1; $a = array(); $a['a'] = $a['b'] = 'test'; var_dump($a);");
+  MVCR("<?php class A {} $a = new A(); $a->a = $a->b = 'test'; var_dump($a);");
+  MVCR("<?php $a = 1; $a = array(); $a['a'] = $a['b'] = 'test'; var_dump($a);");
 
   // lval on Variant
-  VCR("<?php function test() { return array();} reset(test());");
+  MVCR("<?php function test() { return array();} reset(test());");
 
   // variant.o_lval() needs lval() wrapper
-  VCR("<?php class A { public $prop = 1;} class B { public $prop = 5;} "
+  MVCR("<?php class A { public $prop = 1;} class B { public $prop = 5;} "
       "$a = 1; $a = new A(); $a->prop++; var_dump($a->prop);");
 
   // obj->prop doesn't need lval() wrapper
-  VCR("<?php class A { public $prop = 1;} "
+  MVCR("<?php class A { public $prop = 1;} "
       "$a = new A(); $a->prop++; var_dump($a->prop);");
 
   // ((p_obj)variant)->prop
-  VCR("<?php class A { public $prop = 1;} "
+  MVCR("<?php class A { public $prop = 1;} "
       "$a = 1; $a = new A(); $a->prop++; var_dump($a->prop);");
 
   // unsigned int should never be seen
-  VCR("<?php $a = 0xC0000000 & $b;");
+  MVCR("<?php $a = 0xC0000000 & $b;");
 
   // redefine properties
-  VCR("<?php class E extends exception { public $message; public $code;}");
+  MVCR("<?php class E extends exception { public $message; public $code;}");
 
   // redefine static members
-  VCR("<?php class A { static $a = 1;} "
+  MVCR("<?php class A { static $a = 1;} "
       "class B extends A { static $a = 2;} var_dump(B::$a);");
 
   // overriding function with assignment on parameters
-  VCR("<?php class A { "
+  MVCR("<?php class A { "
       "function __call($a, $b) { $b = 'a'; $b = 1; "
       "var_dump($a, $b[0], $b[1]);}} "
       "$obj = new A(); $a = 1; $b = 'a'; $b = 2; $obj->test($a, $b);");
 
   // method->method
-  VCR("<?php class A { public function getA() { return $this;} "
+  MVCR("<?php class A { public function getA() { return $this;} "
       "public function test() { var_dump('test');}} "
       "class B { public function getA() {} public function test(){}}"
       "$obj = new A(); $obj->getA()->test();"
       );
 
   // constructor fallback
-  VCR("<?php class A { function __construct($a) { var_dump($a);} } "
+  MVCR("<?php class A { function __construct($a) { var_dump($a);} } "
       "class B extends A {} "
       "$a = new B('test');");
 
   // prop->method
-  VCR("<?php class A { function test() {}} class B { public $b;} "
+  MVCR("<?php class A { function test() {}} class B { public $b;} "
       "class C { function test() {}} "
       "$a = 'test'; $a = new B(); $a->b = new A(); $a->b->test();");
 
   // testing code generation order
-  VCR("<?php "
+  MVCR("<?php "
       "$global = B::CLASS_CONSTANT; "
       "$another = test2($global); "
       "define('CONSTANT', test2('defining')); "
@@ -3183,42 +3251,42 @@ bool TestCodeRun::TestCompilation() {
       "class B { const CLASS_CONSTANT = 1;} ");
 
   // $_SERVER is already defined
-  VCR("<?php $_SERVER = array('test' => 1); var_dump($_SERVER);");
-  VCR("<?php $GLOBALS['_SERVER'] = array('test' => 1); var_dump($_SERVER);");
+  MVCR("<?php $_SERVER = array('test' => 1); var_dump($_SERVER);");
+  MVCR("<?php $GLOBALS['_SERVER'] = array('test' => 1); var_dump($_SERVER);");
 
   // class constant as default
-  VCR("<?php "
+  MVCR("<?php "
       "class A { const C = 123; static function t($a = B::C) {} } A::t();"
       "class B { const C = 456; static function t($a = A::C) {} } B::t();");
 
   // base virtual function prototype
-  VCR("<?php class T { function __toString() { return 123;}} "
+  MVCR("<?php class T { function __toString() { return 123;}} "
       "$obj = new T(); var_dump($obj);");
 
   // void wrapper
-  VCR("<?php function test() {} var_dump(test()); $a = test();");
+  MVCR("<?php function test() {} var_dump(test()); $a = test();");
 
   // ambiguous overload
-  VCR("<?php $a = 'test'; $a = 123; switch ($a) { case -1: var_dump($a);}");
+  MVCR("<?php $a = 'test'; $a = 123; switch ($a) { case -1: var_dump($a);}");
 
   // [][]
-  VCR("<?php $a['a']['b'] = 'test'; var_dump($a['a']['b']);");
+  MVCR("<?php $a['a']['b'] = 'test'; var_dump($a['a']['b']);");
 
   // testing Variant -> p_class conversion
-  VCR("<?php class A { function test(A $a) { $a->foo();} "
+  MVCR("<?php class A { function test(A $a) { $a->foo();} "
       "function foo() { print 'foo';}}");
 
-  VCR("<?php "
+  MVCR("<?php "
       "class A { function f($a) {} }"
       "$obj = new A;"
       "$obj->f(date('m/d/y H:i:s', 123456789));"
       "$v = date(\"m\",123456789)+1;");
 
   // no side effect optimization met if() short
-  VCR("<?php if ($a) $a == 0;");
+  MVCR("<?php if ($a) $a == 0;");
 
   // */ and // in default argument
-  VCR("<?php "
+  MVCR("<?php "
       "function foo($p1=\"/.*/\", $p2=\"//\") {"
       "  var_dump($p1, $p2);"
       "}"
@@ -3227,18 +3295,18 @@ bool TestCodeRun::TestCompilation() {
 }
 
 bool TestCodeRun::TestReflection() {
-  VCR("<?php class A { public static function test() { print 'ok';}}"
+  MVCR("<?php class A { public static function test() { print 'ok';}}"
       "var_dump(is_callable('A::test'));"
       "var_dump(function_exists('A::test'));");
 
-  VCR("<?php function test($a) { return 'ok'.$a;}"
+  MVCR("<?php function test($a) { return 'ok'.$a;}"
       "var_dump(function_exists('TEst')); "
       "var_dump(is_callable('teSt'));"
       "var_dump(call_user_func('teST', 'blah')); "
       "var_dump(call_user_func_array('teST', array('blah'))); "
       );
 
-  VCR("<?php class B { public function f($a) { return 'ok'.$a;}} "
+  MVCR("<?php class B { public function f($a) { return 'ok'.$a;}} "
       "class A extends B { public $p = 'g';} "
       "$obj = new A(); "
       "var_dump(get_class($obj)); "
@@ -3254,7 +3322,7 @@ bool TestCodeRun::TestReflection() {
       "var_dump(call_user_method_array('f', $obj, array('blah')));"
       );
 
-  VCR("<?php class A { public static function f($a) { return 'ok'.$a;}} "
+  MVCR("<?php class A { public static function f($a) { return 'ok'.$a;}} "
       "$obj = new A(); "
       "var_dump(method_exists($obj, 'f'));"
       "var_dump(method_exists('A', 'f'));"
@@ -3266,17 +3334,17 @@ bool TestCodeRun::TestReflection() {
       "var_dump(call_user_func_array(array('A','f'), array('blah')));"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "class A { function foo() {} }"
       "class B extends A { function bar() {}}"
       "var_dump(get_class_methods(new B()));");
 
-  VCR("<?php "
+  MVCR("<?php "
       "interface A { function foo(); }"
       "abstract class B implements A { function bar() {}}"
       "var_dump(get_class_methods('B'));");
 
-  VCR("<?php "
+  MVCR("<?php "
       "interface I1 { function ifoo2(); function ifoo1(); }"
       "interface I2 { function ifoo4(); function ifoo3(); }"
       "class A { function foo() {} function foo2() {} }"
@@ -3286,14 +3354,14 @@ bool TestCodeRun::TestReflection() {
       "var_dump(get_class_methods('C'));"
       );
 
-  VCR("<?php class A { static $a = 10; public $b = 20;}"
+  MVCR("<?php class A { static $a = 10; public $b = 20;}"
       "$obj = new A(); var_dump(get_object_vars($obj));");
 
   return true;
 }
 
 bool TestCodeRun::TestReflectionClasses() {
-  VCR("<?php "
+  MVCR("<?php "
       // declarations
       "interface i1 {} interface i2 {}"
       "class cls1 implements i1, i2 { "
@@ -3434,7 +3502,7 @@ bool TestCodeRun::TestReflectionClasses() {
       "$obj = $cls->newInstance(); "
       "dump_class($cls, $obj);"
       "");
-  VCR("<?php "
+  MVCR("<?php "
       "abstract class c {"
       "  public static $arr = array();"
       "  function g() {"
@@ -3454,7 +3522,7 @@ bool TestCodeRun::TestReflectionClasses() {
       "}"
       "$x = new a;"
       "var_dump($x->g());");
-  VCR("<?php "
+  MVCR("<?php "
       "$z=true;"
       "if ($z) {"
       "  class AaaA {"
@@ -3472,7 +3540,7 @@ bool TestCodeRun::TestReflectionClasses() {
       "var_dump($r->getName());"
       "$a = new aaaa;"
       "$a->f();");
-  VCR("<?php "
+  MVCR("<?php "
       "class z {"
       "  const foo = 10;"
       "}"
@@ -3482,7 +3550,7 @@ bool TestCodeRun::TestReflectionClasses() {
       "var_dump(c::bar);"
       "$r = new ReflectionClass('c');"
       "var_dump($r->getConstant(\"bar\"));");
-  VCR("<?php "
+  MVCR("<?php "
       "class fOo {}"
       "interface ioO {}"
       "$c = new ReflectionClass('Foo');"
@@ -3494,7 +3562,7 @@ bool TestCodeRun::TestReflectionClasses() {
 }
 
 bool TestCodeRun::TestErrorHandler() {
-  VCR("<?php function handler($code, $msg) { "
+  MVCR("<?php function handler($code, $msg) { "
       "  var_dump(strpos($msg, 'system error') !== false); return true;"
       "} "
       "set_error_handler('handler');"
@@ -3502,14 +3570,14 @@ bool TestCodeRun::TestErrorHandler() {
       "trigger_error('system error'); "
       );
 
-  VCR("<?php function handler($code, $msg) { "
+  MVCR("<?php function handler($code, $msg) { "
       "  var_dump(strpos($msg, 'system error') !== false); return true;"
       "} "
       "set_error_handler('handler');"
       "user_error('system error'); "
       );
 
-  VCR("<?php function handler($e) { "
+  MVCR("<?php function handler($e) { "
       "  var_dump(strpos((string)$e, 'bomb') !== false); return true;"
       "} "
       "set_exception_handler('handler');"
@@ -3517,7 +3585,7 @@ bool TestCodeRun::TestErrorHandler() {
       "throw new Exception('bomb'); "
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "ob_start();"
       "set_exception_handler('user_exception_handler');"
       "echo 'Hello World';"
@@ -3533,7 +3601,7 @@ bool TestCodeRun::TestErrorHandler() {
 }
 
 bool TestCodeRun::TestAssertOptions() {
-  VCR("<?php "
+  MVCR("<?php "
       "assert_options(ASSERT_ACTIVE, 0);"
       "assert_options(ASSERT_WARNING, 0);"
       "var_dump(assert(false));"
@@ -3554,14 +3622,14 @@ bool TestCodeRun::TestAssertOptions() {
 }
 
 bool TestCodeRun::TestExtMisc() {
-  VCR("<?php var_dump(pack('nvc*', 0x1234, 0x5678, 65, 66));");
-  VCR("<?php var_dump(unpack('nfrist/vsecond/c2chars', "
+  MVCR("<?php var_dump(pack('nvc*', 0x1234, 0x5678, 65, 66));");
+  MVCR("<?php var_dump(unpack('nfrist/vsecond/c2chars', "
       "pack('nvc*', 0x1234, 0x5678, 65, 66)));");
   return true;
 }
 
 bool TestCodeRun::TestSuperGlobals() {
-  VCR("<?php function foo() { "
+  MVCR("<?php function foo() { "
       "file_get_contents('http://example.com');"
       "var_dump(empty($http_response_header));"
       "} foo();");
@@ -3569,7 +3637,7 @@ bool TestCodeRun::TestSuperGlobals() {
 }
 
 bool TestCodeRun::TestGlobalStatement() {
-  VCR("<?php "
+  MVCR("<?php "
       "$global_var = 10;"
       "function test_unset() {"
       "  global $global_var;"
@@ -3583,7 +3651,7 @@ bool TestCodeRun::TestGlobalStatement() {
       "var_dump($global_var);"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "$a = 0;"
       "function test() {"
       "  $a = 1;"
@@ -3594,7 +3662,7 @@ bool TestCodeRun::TestGlobalStatement() {
       "print \"$a\\n\";"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "$a = 1;"
       "function test() {"
       "  $b = 1;"
@@ -3607,7 +3675,7 @@ bool TestCodeRun::TestGlobalStatement() {
       "  return true;"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "function test() {"
       "  if (true) {"
       "    global $a;"
@@ -3622,7 +3690,7 @@ bool TestCodeRun::TestGlobalStatement() {
 }
 
 bool TestCodeRun::TestStaticStatement() {
-  VCR("<?php "
+  MVCR("<?php "
       "function test_unset_static() {"
       "  static $static_var;"
       "  $static_var ++;"
@@ -3641,7 +3709,7 @@ bool TestCodeRun::TestStaticStatement() {
       "test_unset_static();"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "function test() {"
       "  $static_var = 3;"
       "  echo $static_var;"
@@ -3652,7 +3720,7 @@ bool TestCodeRun::TestStaticStatement() {
       "test();"
      )
 
-  VCR("<?php "
+  MVCR("<?php "
       "class A { static function test() {"
       "  $static_var = 3;"
       "  echo $static_var;"
@@ -3663,7 +3731,7 @@ bool TestCodeRun::TestStaticStatement() {
       "A::test();"
      )
 
-  VCR("<?php "
+  MVCR("<?php "
       "  $static_var = 1;"
       "  echo $static_var . \"\\n\";"
       "  static $static_var;"
@@ -3672,7 +3740,7 @@ bool TestCodeRun::TestStaticStatement() {
       "  echo $static_var . \"\\n\";"
      )
 
-  VCR("<?php "
+  MVCR("<?php "
       "  $static_var = 1;"
       "  global $static_var;"
       "  echo $static_var . \"\\n\";"
@@ -3680,7 +3748,7 @@ bool TestCodeRun::TestStaticStatement() {
       "  echo $static_var . \"\\n\";"
      )
 
-  VCR("<?php "
+  MVCR("<?php "
       "  $static_var = 1;"
       "  echo $static_var . \"\\n\";"
       "  static $static_var;"
@@ -3693,7 +3761,7 @@ bool TestCodeRun::TestStaticStatement() {
       "  echo $static_var . \"\\n\";"
      )
 
-  VCR("<?php "
+  MVCR("<?php "
       "static $static_var = 1;"
       "echo $static_var . \"\\n\";"
       "function test()"
@@ -3709,14 +3777,14 @@ bool TestCodeRun::TestStaticStatement() {
       "test();"
      )
 
-  VCR("<?php "
+  MVCR("<?php "
       "static $static_var;"
       "echo $static_var . \"\\n\";"
       "$static_var = 1;"
       "echo $static_var . \"\\n\";"
      )
 
-  VCR("<?php "
+  MVCR("<?php "
       "function test() {"
       "  if (false) {"
       "    static $static_var = +3;"
@@ -3728,7 +3796,7 @@ bool TestCodeRun::TestStaticStatement() {
       "test();"
      )
 
-  VCR("<?php "
+  MVCR("<?php "
       "if (false) {"
       "  static $static_var = +3;"
       "}"
@@ -3737,20 +3805,20 @@ bool TestCodeRun::TestStaticStatement() {
       "echo $static_var . \"\\n\";"
      )
 
-  VCR("<?php "
+  MVCR("<?php "
       "echo $static_var . \"\\n\";"
       "static $static_var = 4;"
       "echo $static_var . \"\\n\";"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "static $a = 5;"
       "echo $a . \"\\n\";"
       "global $a;"
       "echo $a . \"\\n\";"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "function test() {"
       "  static $commenced = false;"
       "  if ($commenced === false) {"
@@ -3762,7 +3830,7 @@ bool TestCodeRun::TestStaticStatement() {
       "echo test();"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "static $a = 1, $b = 2;"
       "static $c = 1;"
       "static $d = 1;"
@@ -3877,7 +3945,7 @@ bool TestCodeRun::TestStaticStatement() {
       "$v = new foo;"
       "$v->bar();");
 
-  VCR("<?php "
+  MVCR("<?php "
       "define('FOO', 1);"
       "class a {"
       "  static $b = FOO;"
@@ -3890,7 +3958,7 @@ bool TestCodeRun::TestStaticStatement() {
       "foo();"
       "echo a::$b;");
 
-  VCR("<?php "
+  MVCR("<?php "
       "class c {"
       "  public $q = 20;"
       "  function x() {"
@@ -3935,7 +4003,7 @@ bool TestCodeRun::TestStaticStatement() {
 }
 
 bool TestCodeRun::TestIfStatement() {
-  VCR("<?php "
+  MVCR("<?php "
       "if (false) {"
       "  echo \"case 1\\n\";"
       "}"
@@ -4032,14 +4100,14 @@ bool TestCodeRun::TestIfStatement() {
       "  }"
       "}");
 
-  VCR("<?php "
+  MVCR("<?php "
       "if (true) {"
       "  function foo() { echo \"foo\\n\"; }"
       "} else if (false) {"
       "  function bar() { echo \"bar\\n\"; }"
       "}");
 
-  VCR("<?php "
+  MVCR("<?php "
       "if (true) {"
       "  function foo() { echo \"foo\\n\"; }"
       "} elseif (false) {"
@@ -4050,7 +4118,7 @@ bool TestCodeRun::TestIfStatement() {
 }
 
 bool TestCodeRun::TestBreakStatement() {
-  VCR("<?php "
+  MVCR("<?php "
       "$arr = array('one', 'two', 'three', 'four', 'stop', 'five');"
       "while (list(, $val) = each($arr)) {"
       "    if ($val == 'stop') {"
@@ -4077,7 +4145,7 @@ bool TestCodeRun::TestBreakStatement() {
 }
 
 bool TestCodeRun::TestContinueStatement() {
-  VCR("<?php "
+  MVCR("<?php "
       "for ($i = 0;$i<3;$i++) {"
       "  echo \"Start Of I loop\\n\";"
       "  for ($j=0;;$j++) {"
@@ -4095,7 +4163,7 @@ bool TestCodeRun::TestContinueStatement() {
       "  echo $i . \"\\n\";"
       "}");
 
-  VCR("<?php "
+  MVCR("<?php "
       "for ($i1 = 0; $i1 < 2; $i1++) {"
       "  for ($i2 = 0; $i2 < 2; $i2++) {"
       "    switch ($i2 % 2) {"
@@ -4112,7 +4180,7 @@ bool TestCodeRun::TestContinueStatement() {
 }
 
 bool TestCodeRun::TestReturnStatement() {
-  VCR("<?php "
+  MVCR("<?php "
       "function foo1($a) {"
       "  if ($a) return \"ok\";"
       "}"
@@ -4138,14 +4206,14 @@ bool TestCodeRun::TestReturnStatement() {
 }
 
 bool TestCodeRun::TestAdd() {
-  VCR("<?php "
+  MVCR("<?php "
       "printf(\"%s\\n\", 30 + 30);"
       "printf(\"%s\\n\", \"30\" + 30);"
       "printf(\"%s\\n\", 30 + \"30\");"
       "printf(\"%s\\n\", \"30\" + \"30\");"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "$a = \"123.456\" + 123;"
       "var_dump($a);"
       "$a = \"123.456\" + 456.123;"
@@ -4168,20 +4236,20 @@ bool TestCodeRun::TestAdd() {
       "var_dump($a);"
       );
 
-  VCR("<?php "
+  MVCR("<?php "
       "var_dump(1.7976931348623157e+308 + 1.7976931348623157e+308);"
       );
   return true;
 }
 
 bool TestCodeRun::TestMinus() {
-  VCR("<?php "
+  MVCR("<?php "
       "printf(\"%s\\n\", 30 - 30);"
       "printf(\"%s\\n\", \"30\" - 30);"
       "printf(\"%s\\n\", 30 - \"30\");"
       "printf(\"%s\\n\", \"30\" - \"30\");"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "$a = \"123.456\" - 123;"
       "var_dump($a);"
       "$a = \"123.456\" - 456.123;"
@@ -4208,13 +4276,13 @@ bool TestCodeRun::TestMinus() {
 }
 
 bool TestCodeRun::TestMultiply() {
-  VCR("<?php "
+  MVCR("<?php "
       "printf(\"%s\\n\", 30 * 30);"
       "printf(\"%s\\n\", \"30\" * 30);"
       "printf(\"%s\\n\", 30 * \"30\");"
       "printf(\"%s\\n\", \"30\" * \"30\");"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "$a = \"123.456\" * 123;"
       "var_dump($a);"
       "$a = \"123.456\" * 456.123;"
@@ -4241,13 +4309,13 @@ bool TestCodeRun::TestMultiply() {
 }
 
 bool TestCodeRun::TestDivide() {
-  VCR("<?php "
+  MVCR("<?php "
       "printf(\"%s\\n\", 30 / 30);"
       "printf(\"%s\\n\", \"30\" / 30);"
       "printf(\"%s\\n\", 30 / \"30\");"
       "printf(\"%s\\n\", \"30\" / \"30\");"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "$a = \"123.456\" / 123;"
       "var_dump($a);"
       "$a = \"123.456\" / 456.123;"
@@ -4282,13 +4350,13 @@ bool TestCodeRun::TestDivide() {
 }
 
 bool TestCodeRun::TestModulus() {
-  VCR("<?php "
+  MVCR("<?php "
       "printf(\"%s\\n\", 30 % 30);"
       "printf(\"%s\\n\", \"30\" % 30);"
       "printf(\"%s\\n\", 30 % \"30\");"
       "printf(\"%s\\n\", \"30\" % \"30\");"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "$a = \"123.456\" % 123;"
       "var_dump($a);"
       "$a = \"123.456\" % 456.123;"
@@ -4318,7 +4386,7 @@ bool TestCodeRun::TestModulus() {
       "$a = \"321\" % 123.456;"
       "var_dump($a);"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "$a = 1 % 9223372036854775807;"
       "var_dump($a);");
 
@@ -4326,7 +4394,7 @@ bool TestCodeRun::TestModulus() {
 }
 
 bool TestCodeRun::TestOperationTypes() {
-  VCR("<?php "
+  MVCR("<?php "
       "$a = null; var_dump(+$a);"
       "$a = null; var_dump(-$a);"
       ""
@@ -4533,14 +4601,14 @@ bool TestCodeRun::TestOperationTypes() {
       "$a = true; $b = null; $b = 1; $a /= $b; var_dump($a);"
       "$a = true; $b = null; $b = 1.0; $a /= $b; var_dump($a);"
       "$a = true; $b = null; $b = '1.0'; $a /= $b; var_dump($a);");
-  VCR("<?php "
+  MVCR("<?php "
       "var_dump(1 / 1.7976931348623157e+308 || false);");
 /*
   Fails under release build due to g++ optimization
-  VCR("<?php "
+  MVCR("<?php "
       "var_dump((1.7976931348623157e+308 + 1.7976931348623157e+308) << 0);");
 */
-  VCR("<?php "
+  MVCR("<?php "
       "function foo() {"
       "  return '1';"
       "}"
@@ -4558,7 +4626,7 @@ bool TestCodeRun::TestOperationTypes() {
 }
 
 #define UNARY_OP(op) \
-  VCR("<?php " \
+  MVCR("<?php " \
   #op"(!null);" \
   #op"(!true);" \
   #op"(!false);" \
@@ -4903,7 +4971,7 @@ bool TestCodeRun::TestUnaryOperators() {
 }
 
 bool TestCodeRun::TestSilenceOperator() {
-  VCR("<?php "
+  MVCR("<?php "
       "@define( 'MARKDOWN_EMPTY_ELEMENT_SUFFIX',  \" />\");");
   return true;
 }
@@ -4918,7 +4986,7 @@ bool TestCodeRun::TestPrint() {
 }
 
 bool TestCodeRun::TestLocale() {
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array(\"a bc\", \"\\xc1 bc\", \"d ef\");"
       "asort($a);"
       "print_r($a);"
@@ -4937,7 +5005,7 @@ bool TestCodeRun::TestLocale() {
 }
 
 bool TestCodeRun::TestLogicalOperators() {
-  VCR("<?php "
+  MVCR("<?php "
       "function foo() { echo \"foo\"; }"
       "$a = (false && foo());"
       "$b = (true  || foo());"
@@ -4953,7 +5021,7 @@ bool TestCodeRun::TestLogicalOperators() {
 }
 
 bool TestCodeRun::TestGetClass() {
-  VCR("<?php "
+  MVCR("<?php "
       "class foo {"
       "  function bar () {"
       "    var_dump(get_class());"
@@ -4971,7 +5039,7 @@ bool TestCodeRun::TestGetClass() {
       "var_dump(get_class($f1));"
       "var_dump(get_class($f2));"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "abstract class bar {"
       "  public function __construct()"
       "  {"
@@ -4988,7 +5056,7 @@ bool TestCodeRun::TestGetClass() {
 }
 
 bool TestCodeRun::TestGetParentClass() {
-  VCR("<?php "
+  MVCR("<?php "
       "class dad {"
       "  function dad()"
       "  {}"
@@ -5008,7 +5076,7 @@ bool TestCodeRun::TestGetParentClass() {
       "$foo = new child();"
       "$bar = new child2();"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "interface i {"
       "  function test();"
       "}"
@@ -5055,7 +5123,7 @@ bool TestCodeRun::TestGetParentClass() {
 }
 
 bool TestCodeRun::TestRedeclaredFunctions() {
-  VCR("<?php "
+  MVCR("<?php "
       "if (true) {"
       "  function test() {"
       "    echo('a');"
@@ -5072,7 +5140,7 @@ bool TestCodeRun::TestRedeclaredFunctions() {
 }
 
 bool TestCodeRun::TestRedeclaredClasses() {
-  VCR("<?php "
+  MVCR("<?php "
       "class base1 {}"
       "class base2 {}"
       "if (true) {"
@@ -5113,7 +5181,7 @@ bool TestCodeRun::TestRedeclaredClasses() {
       "var_dump(is_subclass_of(\"a\", \"base2\"));"
       "var_dump(get_object_vars($y));"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "if (true) {"
       "  class base {"
       "    public $baseVal =  'base';"
@@ -5246,7 +5314,7 @@ bool TestCodeRun::TestRedeclaredClasses() {
       "}"
       "run();"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "$i = 1;"
       "if ($i == 1) {"
       "  class foo {"
@@ -5270,7 +5338,7 @@ bool TestCodeRun::TestRedeclaredClasses() {
       "$t = new foo();"
       "$t->foo();"
       "$t->bar();");
-  VCR("<?php "
+  MVCR("<?php "
       "$i = 2;"
       "if ($i == 1) {"
       "  class foo {"
@@ -5294,7 +5362,7 @@ bool TestCodeRun::TestRedeclaredClasses() {
       "$t = new foo();"
       "$t->foo();"
       "$t->bar();");
-  VCR("<?php "
+  MVCR("<?php "
       "class a {"
       "  public static function x() {"
       "    echo 'x';"
@@ -5311,7 +5379,7 @@ bool TestCodeRun::TestRedeclaredClasses() {
       "}"
       "b::x();");
 
-  VCR("<?php "
+  MVCR("<?php "
       "function f($i) {"
       "  $j = 1;"
       "  var_dump($j);"
@@ -5345,7 +5413,7 @@ bool TestCodeRun::TestRedeclaredClasses() {
       "$obj = new c();"
       "var_dump($obj);"
       "r();");
-  VCR("<?php "
+  MVCR("<?php "
       "class A {"
       "  protected static function foo() {}"
       "}"
@@ -5362,7 +5430,7 @@ bool TestCodeRun::TestRedeclaredClasses() {
       "  }"
       "}");
 
-  VCR("<?php "
+  MVCR("<?php "
       "class A {"
       "  static function foo() {"
       "    static $z = 0;"
@@ -5383,7 +5451,7 @@ bool TestCodeRun::TestRedeclaredClasses() {
 }
 
 bool TestCodeRun::TestClone() {
-  VCR("<?php "
+  MVCR("<?php "
       "class A {"
       "  public $foo = 0;"
       "  public $fooref = 1;"
@@ -5411,7 +5479,7 @@ bool TestCodeRun::TestClone() {
       "var_dump($a2);"
       "var_dump($p);"
       "var_dump($q);");
-  VCR("<?php "
+  MVCR("<?php "
       "class c {"
       "  protected $cm = 'get';"
       "  function x() {"
@@ -5427,7 +5495,7 @@ bool TestCodeRun::TestClone() {
       "$y->x();"
       "$z = clone $y;"
       "$z->x();");
-  VCR("<?php "
+  MVCR("<?php "
       "class b {"
       "  function z() {"
       "    $this->x();"
@@ -5447,7 +5515,7 @@ bool TestCodeRun::TestClone() {
       "}"
       "$x = new c();"
       "$x->z();");
-  VCR("<?php "
+  MVCR("<?php "
       "class A {}"
       "class B extends A {"
       "  function meh() {"
@@ -5474,7 +5542,7 @@ bool TestCodeRun::TestClone() {
 }
 
 bool TestCodeRun::TestEvalOrder() {
-  VCR("<?php "
+  MVCR("<?php "
       "class A {"
       "  public $foo;"
       "  public $bar;"
@@ -5511,7 +5579,7 @@ bool TestCodeRun::TestEvalOrder() {
       "var_dump($a->q('1')->foo < $a->q('2')->bar);"
       "var_dump($a->q('1')->foo <= $a->q('2')->bar);"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "function x($a, $b, $c, $d) {}"
       "function p($x) { echo $x . \"\n\"; return $x; }"
       "class c {"
@@ -5553,7 +5621,7 @@ bool TestCodeRun::TestEvalOrder() {
       "$q = 1;"
       "$z = array(1, 2, $q);"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "function id($x,$y) { return $x; }"
       "function id1($x) { return $x; }"
       "function pid($x) { var_dump($x); return $x; }"
@@ -5577,7 +5645,7 @@ bool TestCodeRun::TestEvalOrder() {
       "  ->f(pid('arg2'), pid('argex2'))"
       "  ->f(pid('arg3'), pid('argex3'));"
       "$d->ttest();");
-  VCR("<?php "
+  MVCR("<?php "
       "class a {"
       "  function r(&$x) {"
       "    $x = 20;"
@@ -5588,7 +5656,7 @@ bool TestCodeRun::TestEvalOrder() {
       "id($a)->r($x);"
       "var_dump($x);");
 
-  VCR("<?php "
+  MVCR("<?php "
       "class c {"
       "  function x($y) {"
       "    echo $y . \"\n\";"
@@ -5601,7 +5669,7 @@ bool TestCodeRun::TestEvalOrder() {
       "}"
       "$x = new c;"
       "$x->x(3, p(1), p(2))->x(6, p(4), p(5));");
-  VCR("<?php "
+  MVCR("<?php "
       "class Q {"
       "  public $val;"
       "  function __construct($v) {"
@@ -5628,7 +5696,7 @@ bool TestCodeRun::TestEvalOrder() {
 }
 
 bool TestCodeRun::TestGetObjectVars() {
-  VCR("<?php "
+  MVCR("<?php "
       "class Base"
       "{"
       "  public    $aaa = 1;"
@@ -5642,7 +5710,7 @@ bool TestCodeRun::TestGetObjectVars() {
       "var_dump(get_object_vars(new Base()));"
       "var_dump(get_object_vars(new Child()));"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "class Base"
       "{"
       "  public    $aaa = 1;"
@@ -5665,7 +5733,7 @@ bool TestCodeRun::TestGetObjectVars() {
       "$unrelated_obj->foo($child_obj);"
       "$unrelated_obj->foo($base_obj);"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "class Base"
       "{"
       "  public    $aaa = 1;"
@@ -5687,7 +5755,7 @@ bool TestCodeRun::TestGetObjectVars() {
       "$child_obj = new Child();"
       "$base_obj->foo($child_obj);"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "class Base"
       "{"
       "  public    $aaa = 1;"
@@ -5707,7 +5775,7 @@ bool TestCodeRun::TestGetObjectVars() {
       "$base_obj = new Base();"
       "$base_obj->foo($base_obj);"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "class Base"
       "{"
       "  public    $aaa = 1;"
@@ -5733,7 +5801,7 @@ bool TestCodeRun::TestGetObjectVars() {
 }
 
 bool TestCodeRun::TestSerialization() {
-  VCR("<?php "
+  MVCR("<?php "
       "class Small {"
       "  private static $nc = 0;"
       "  public $name;"
@@ -5783,7 +5851,7 @@ bool TestCodeRun::TestSerialization() {
       "}"
       "t();"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "class t {"
       "  public $foo = 10;"
       "  protected $bar = 20;"
@@ -5807,18 +5875,18 @@ bool TestCodeRun::TestSerialization() {
 }
 
 bool TestCodeRun::TestJson() {
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array();"
       "$a[] = &$a;"
       "var_dump($a);"
       "var_dump(json_encode($a));");
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array(1.23456789e+34, 1E666, 1E666/1E666);"
       "$e = json_encode($a);"
       "var_dump($a);");
-  VCR("<?php "
+  MVCR("<?php "
       "var_dump(json_decode(\"[\\\"a\\\",1,true,false,null]\", true));");
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array(1);"
       "$a[] = $a;"
       "var_dump($a);"
@@ -6063,7 +6131,7 @@ bool TestCodeRun::TestJson() {
 }
 
 bool TestCodeRun::TestThrift() {
-  VCR(
+  MVCR(
       "<?php "
       "class TType {"
       "  const STOP   = 0;"
@@ -6188,10 +6256,10 @@ bool TestCodeRun::TestThrift() {
 }
 
 bool TestCodeRun::TestExit() {
-  VCR("<?php "
+  MVCR("<?php "
       "function foo() { return false; }"
       "foo() or die(\"foobar\");");
-  VCR("<?php "
+  MVCR("<?php "
       "function foo() { return false; }"
       "foo() or exit(\"foobar\");");
 
@@ -6199,15 +6267,15 @@ bool TestCodeRun::TestExit() {
 }
 
 bool TestCodeRun::TestCreateFunction() {
-  VCR("<?php var_dump(array_filter(array(1, 1003, 34, 5006), "
+  MVCR("<?php var_dump(array_filter(array(1, 1003, 34, 5006), "
       "create_function('$x', 'return $x > 1000;')));");
-  VCR("<?php var_dump(array_filter(array(1, 1003, 34, 5006), "
+  MVCR("<?php var_dump(array_filter(array(1, 1003, 34, 5006), "
       "create_function('$x', 'return '.'$x > 1000;')));");
   return true;
 }
 
 bool TestCodeRun::TestConstructorDestructor() {
-  VCR("<?php "
+  MVCR("<?php "
       "class parent_c {"
       "  public function __construct() {"
       "    echo \"parent__construct\";"
@@ -6225,7 +6293,7 @@ bool TestCodeRun::TestConstructorDestructor() {
       "  }"
       "}"
       "$v = new child_c;");
-  VCR("<?php "
+  MVCR("<?php "
       "class parent_c {"
       "  public function __construct() {"
       "    echo \"parent__construct\";"
@@ -6250,7 +6318,7 @@ bool TestCodeRun::TestConstructorDestructor() {
 }
 
 bool TestCodeRun::TestConcat() {
-  VCR("<?php "
+  MVCR("<?php "
       "function foo($where_clause)"
       "{"
       "  $sql ="
@@ -6265,7 +6333,7 @@ bool TestCodeRun::TestConcat() {
       "  echo $sql . \"\\n\";"
       "}"
       "foo(\"where 1 = 1\");");
-  VCR("<?php "
+  MVCR("<?php "
       "echo \"a\" . \"b\" . \"c\" . \"d\" . \"e\";"
       "echo 'a' . 'b' . 'c' . 'd' . 'e';"
       "echo 'a' . \"b\" . \"c\" . \"d\" . 'e';"
@@ -6273,11 +6341,11 @@ bool TestCodeRun::TestConcat() {
       "echo 1 . 2 . 3 . 4 . 5;"
       "echo 1 . '2' . '3' . 4 . 5;"
       "echo 1 . \"2\" . \"3\" . 4 . 5;");
-  VCR("<?php "
+  MVCR("<?php "
       "$v = \"c\";"
       "echo \"a\" . \"b\" . $v . \"d\" . \"e\";"
       "echo \"a\" . \"b\" . $v . \"d\" . \"e\" . $v . \"f\" . \"g\";");
-  VCR("<?php "
+  MVCR("<?php "
       "echo '\\\\' . \"\\n\";"
       "echo '\\'' . \"\\n\";"
       "echo '\\\\' . '\\'' . \"\\n\";"
@@ -6311,7 +6379,7 @@ bool TestCodeRun::TestConcat() {
       "echo \"\\0077\\v7777\" . \"7\" . \"\\n\";"
       "echo \"\\0077\\07777\" . \"7\" . \"\\n\";"
       "echo \"\\0077\\'7777\" . \"7\" . \"\\n\";");
-  VCR("<?php "
+  MVCR("<?php "
       "echo '\\\\';"
       "echo '\\'';"
       "echo '\\\\';"
@@ -6345,7 +6413,7 @@ bool TestCodeRun::TestConcat() {
       "echo \"\\0077\\v7777\";"
       "echo \"\\0077\\07777\";"
       "echo \"\\0077\\'7777\";");
-  VCR("<?php "
+  MVCR("<?php "
       "echo <<<EOT\n"
       "\\t\n"
       "\\r\n"
@@ -6389,11 +6457,11 @@ bool TestCodeRun::TestConcat() {
       "\\`\\0077\\07777\\` . \\`7\\` . \\`\\n\\`;\n"
       "\\`\\0077\\'7777\\` . \\`7\\` . \\`\\n\\`;\n"
       "EOT;\n");
-  VCR("<?php "
+  MVCR("<?php "
       "$v = 1;"
       "echo $v . b'a' . b\"b\" . `ls \\055\\144 \\x2ftmp`;"
       "echo b'a' . b\"b\" . `ls \\055\\144 \\x2ftmp` . $v;");
-  VCR("<?php "
+  MVCR("<?php "
       "function foo() {"
       "  $u = \"abc\";"
       "  $v = \"\\0\";"
@@ -6410,17 +6478,17 @@ bool TestCodeRun::TestConcat() {
       "echo $x;"
       "echo \"abc\" . \"\\0\" . \"def\\n\";"
       "echo \"ab\\0c\\n\";");
-  VCR("<?php "
+  MVCR("<?php "
       "function foo() { return \"hello\" . \"\\0\" . \"world\n\"; }"
       "function bar() {"
       "  $s = foo();"
       "  echo $s;"
       "}"
       "bar();");
-  VCR("<?php "
+  MVCR("<?php "
       "define('FOO'.'BAR', 1);"
       "echo FOOBAR;");
-  VCR("<?php "
+  MVCR("<?php "
       "$a = \"1\";"
       "$a .= \"2\";"
       "$a .= \"3\";"
@@ -6431,7 +6499,7 @@ bool TestCodeRun::TestConcat() {
       "$a .= \"3\";"
       "$a .= \"4\";"
       "var_dump($a);");
-  VCR("<?php "
+  MVCR("<?php "
       "$a = array(1, array(1, array(1)));"
       "$a[1][1][1] = 3;"
       "var_dump($a);"
@@ -6446,7 +6514,7 @@ bool TestCodeRun::TestConcat() {
       "'<div id=\"beacon_accepted_pane\" class=\"beacon_status_pane\" "
       "style=\"display: none\">';"
       "$payload['pane_html'] .= '<div class=\"beacon_status_message\">';");
-  VCR("<?php "
+  MVCR("<?php "
       "$a1 = a;"
       "$a2 = b;"
       "$a3 = c;"
@@ -6469,7 +6537,7 @@ bool TestCodeRun::TestConcat() {
       "echo $a1.$a2.$a3.$a4.$a5.$a6.$a7.$a8.$a9.$a10.$a11.$a12;"
       "echo $a1.$a2.$a3.$a4.$a5.$a6.$a7.$a8.$a9.$a10.$a11.$a12.$a13;");
 
-  VCR("<?php "
+  MVCR("<?php "
       "function n_() {"
       "  return \"\n\" ."
       "  str_repeat($GLOBALS['n_indent_tab'], $GLOBALS['n_indent_level']);"
@@ -6492,7 +6560,7 @@ bool TestCodeRun::TestConcat() {
       "}"
       "$GLOBALS['n_indent_level'] = 0;"
       "var_dump(render(\"foo\", \"bar\"));");
-  VCR("<?php "
+  MVCR("<?php "
       "$s = \" \";"
       "$a = \"hello\";"
       "$a .= $s;"
@@ -6509,7 +6577,7 @@ bool TestCodeRun::TestConcat() {
 }
 
 bool TestCodeRun::TestConstant() {
-  VCR("<?php "
+  MVCR("<?php "
       "define('AAA', true);"
       "define('BBB', false);"
       "define('CCC', null);"
@@ -6532,7 +6600,7 @@ bool TestCodeRun::TestConstant() {
       "$b = BBB ? \"BBB\" : \"!BBB\";"
       "$c = CCC ? \"CCC\" : \"!CCC\";"
       "echo \"$a$b$c\\n\";");
-  VCR("<?php "
+  MVCR("<?php "
       "echo strlen(\"he\\0llo\");"
       "echo php_uname();"
       "echo md5('1f3870be274f6c49b3e31a0c6728957f');"
@@ -6627,7 +6695,7 @@ bool TestCodeRun::TestConstant() {
       "echo long2ip(pow(2,32) + 1024);"
       "echo rad2deg(M_PI_4);"
       "echo deg2rad(45);");
-  VCR("<?php "
+  MVCR("<?php "
       "var_dump(067);"
       "var_dump(077);"
       "var_dump(078);"
@@ -6640,7 +6708,7 @@ bool TestCodeRun::TestConstant() {
       "var_dump(-0x78);"
       "var_dump(-0x78f);"
       "var_dump(-0xef);");
-  VCR("<?php "
+  MVCR("<?php "
       "define('FOO', \"\\n\");"
       "define('BAR', \"\\r\");"
       "var_dump(PHP_EOL);"
@@ -6651,7 +6719,7 @@ bool TestCodeRun::TestConstant() {
 }
 
 bool TestCodeRun::TestClassConstant() {
-  VCR("<?php "
+  MVCR("<?php "
       "class parent_c {"
       "  const ZERO   = 0;"
       "  const TWENTY = 20;"
@@ -6669,7 +6737,7 @@ bool TestCodeRun::TestClassConstant() {
       "}"
       "foo();"
       "print parent_c::ZERO;");
-  VCR("<?php "
+  MVCR("<?php "
       "class FooConstants {"
       "  const ZERO        = 0;"
       "  const TWENTY_FOUR3 = FooConstants::TWENTY_FOUR2;"
@@ -6694,7 +6762,7 @@ bool TestCodeRun::TestClassConstant() {
       "print GooConstants::ZERO;"
       "print FooConstants::TWENTY_FOUR2;"
       "print FooConstants::TWENTY_FOUR3;");
-  VCR("<?php "
+  MVCR("<?php "
       "define('FOO', 3);"
       "define('BAR', true);"
       "define('GOO', FOO + 4);"
@@ -6717,13 +6785,13 @@ bool TestCodeRun::TestClassConstant() {
       "var_dump(a::C4);"
       "var_dump(a::C5);"
       "var_dump(a::C6);");
-  VCR("<?php "
+  MVCR("<?php "
       "define('FOO', 3);"
       "function foo($a = FOO) {"
       "  echo $a;"
       "}"
       "foo();");
-  VCR("<?php "
+  MVCR("<?php "
       "class c {"
       "  function foo($x = self::BLAH) {}"
       "}");
@@ -6732,7 +6800,7 @@ bool TestCodeRun::TestClassConstant() {
 }
 
 bool TestCodeRun::TestConstantFunction() {
-  VCR("<?php "
+  MVCR("<?php "
       "class JavaScriptPacker {"
       "  public function foo() {"
       "    $encode10 = $this->_getJSFunction('_encode10');"
@@ -6754,7 +6822,7 @@ bool TestCodeRun::TestConstantFunction() {
       "}"
       "$obj = new JavaScriptPacker;"
       "$obj->foo(); ");
-  VCR("<?php "
+  MVCR("<?php "
       "var_dump(constant('M_PI'));"
       "$a = 'M_PI';"
       "var_dump(constant($a));"
@@ -6775,16 +6843,16 @@ bool TestCodeRun::TestConstantFunction() {
 }
 
 bool TestCodeRun::TestDefined() {
-  VCR("<?php "
+  MVCR("<?php "
       "if (defined('FOO')) echo 'defined'; else echo 'undefined';");
-  VCR("<?php "
+  MVCR("<?php "
       "define('FOO', 1);"
       "if (defined('FOO')) echo 'defined'; else echo 'undefined';");
-  VCR("<?php "
+  MVCR("<?php "
       "echo FOO;"
       "if (defined('FOO')) echo 'defined'; else echo 'undefined';");
 #ifdef HPHP_NOTE
-  VCR("<?php "
+  MVCR("<?php "
       "$a = 'M_PI';"
       "if (defined($a)) {"
       "  var_dump(M_PI);"
@@ -6830,7 +6898,7 @@ bool TestCodeRun::TestDefined() {
       "  var_dump(DYNAMIC);"
       "}");
 #endif
-  VCR("<?php "
+  MVCR("<?php "
       "define('THIRTEEN', 13);"
       "define('ONE', 1);"
       "class Foo {"
@@ -6889,7 +6957,7 @@ bool TestCodeRun::TestDefined() {
 }
 
 bool TestCodeRun::TestAssignment() {
-  VCR("<?php "
+  MVCR("<?php "
       "function f($a) {"
       "  var_dump($a);"
       "}"
@@ -6914,7 +6982,7 @@ bool TestCodeRun::TestAssignment() {
       "$obj->goo();"
       "var_dump($obj);"
       "$obj->zoo();");
-  VCR("<?php "
+  MVCR("<?php "
       "function f($a) {"
       "  var_dump($a);"
       "}"
@@ -6939,13 +7007,13 @@ bool TestCodeRun::TestAssignment() {
 }
 
 bool TestCodeRun::TestEvaluationOrder() {
-  VCR("<?php var_dump($v++, $v++);");
-  VCR("<?php var_dump($v, $v = 0);");
+  MVCR("<?php var_dump($v++, $v++);");
+  MVCR("<?php var_dump($v, $v = 0);");
   return true;
 }
 
 bool TestCodeRun::TestSimpleXML() {
-  VCR("<?php $doc = simplexml_load_string('<?xml version=\"1.0\"?><root xmlns:foo=\"http://example.com\"><foo:b1>c1</foo:b1><foo:b2>c2</foo:b2><foo:b2>c3</foo:b2></root>'); $foo_ns_bar = $doc->children('http://example.com');"
+  MVCR("<?php $doc = simplexml_load_string('<?xml version=\"1.0\"?><root xmlns:foo=\"http://example.com\"><foo:b1>c1</foo:b1><foo:b2>c2</foo:b2><foo:b2>c3</foo:b2></root>'); $foo_ns_bar = $doc->children('http://example.com');"
       "var_dump($doc->getName());"
       "foreach ($foo_ns_bar as $v) var_dump((string)$v);"
       "var_dump($foo_ns_bar->getName());"
@@ -6959,7 +7027,7 @@ bool TestCodeRun::TestSimpleXML() {
       "foreach ($foo_ns_bar->b2 as $v) var_dump((string)$v);"
       );
 
-  VCR("<?php function printElement($el, $indent='') {"
+  MVCR("<?php function printElement($el, $indent='') {"
       "  if (strlen($indent) > 10) {"
       "    var_dump('Recursed to deep, backing out');"
       "    return;"
@@ -6976,7 +7044,7 @@ bool TestCodeRun::TestSimpleXML() {
       "printElement($a);"
       );
 
-  VCR("<?php $a = simplexml_load_string('<?xml version=\"1.0\" encoding=\"utf-8\"?><node a=\"b\"><subnode attr1=\"value1\" attr2=\"value2\">test</subnode><subnode><subsubnode>test</subsubnode></subnode><test>v</test></node>');"
+  MVCR("<?php $a = simplexml_load_string('<?xml version=\"1.0\" encoding=\"utf-8\"?><node a=\"b\"><subnode attr1=\"value1\" attr2=\"value2\">test</subnode><subnode><subsubnode>test</subsubnode></subnode><test>v</test></node>');"
       "var_dump((array)$a->attributes());"
       "var_dump((string)$a->subnode[0]);"
       "var_dump((string)$a->subnode[0]['attr1']);"
@@ -6999,31 +7067,31 @@ bool TestCodeRun::TestSimpleXML() {
       "var_dump((string)$nodes[0]);"
       );
 
-  VCR("<?php $a = new SimpleXMLElement('<?xml version=\"1.0\" encoding=\"utf-8\"?><node><subnode><subsubnode>test</subsubnode></subnode></node>');"
+  MVCR("<?php $a = new SimpleXMLElement('<?xml version=\"1.0\" encoding=\"utf-8\"?><node><subnode><subsubnode>test</subsubnode></subnode></node>');"
       "var_dump((array)($a->subnode->subsubnode));"
       "var_dump((string)($a->subnode->subsubnode));"
       );
 
-  VCR("<?php $a = simplexml_load_string('<?xml version=\"1.0\" encoding=\"utf-8\"?><node><subnode><subsubnode>test</subsubnode></subnode></node>');"
+  MVCR("<?php $a = simplexml_load_string('<?xml version=\"1.0\" encoding=\"utf-8\"?><node><subnode><subsubnode>test</subsubnode></subnode></node>');"
       "var_dump((array)($a->subnode->subsubnode));"
       "var_dump((string)($a->subnode->subsubnode));"
       );
-  VCR("<?php $a = simplexml_load_string('<?xml version=\"1.0\" encoding=\"utf-8\"?><node><subnode><subsubnode>test</subsubnode></subnode></node>');"
+  MVCR("<?php $a = simplexml_load_string('<?xml version=\"1.0\" encoding=\"utf-8\"?><node><subnode><subsubnode>test</subsubnode></subnode></node>');"
       "var_dump((string)($a->subnode->subsubnode['0']));"
       "var_dump((string)($a->subnode->subsubnode[0]));"
       );
 
-  VCR("<?php $a = simplexml_load_string('<?xml version=\"1.0\" encoding=\"utf-8\"?><node><subnode attr1=\"value1\">test</subnode></node>');"
+  MVCR("<?php $a = simplexml_load_string('<?xml version=\"1.0\" encoding=\"utf-8\"?><node><subnode attr1=\"value1\">test</subnode></node>');"
       "var_dump((string)($a->subnode['attr1']));"
       );
-  VCR("<?php $a = simplexml_load_string('<?xml version=\"1.0\" encoding=\"utf-8\"?><node><subnode><subsubnode attr1=\"value1\">test</subsubnode></subnode></node>');"
+  MVCR("<?php $a = simplexml_load_string('<?xml version=\"1.0\" encoding=\"utf-8\"?><node><subnode><subsubnode attr1=\"value1\">test</subsubnode></subnode></node>');"
       "var_dump((string)($a->subnode->subsubnode['attr1']));"
       );
 
-  VCR("<?php $a = new SimpleXMLElement('<?xml version=\"1.0\" encoding=\"utf-8\"?><node><subnode><subsubnode><sssnode>test</sssnode></subsubnode></subnode></node>');"
+  MVCR("<?php $a = new SimpleXMLElement('<?xml version=\"1.0\" encoding=\"utf-8\"?><node><subnode><subsubnode><sssnode>test</sssnode></subsubnode></subnode></node>');"
       "var_dump((string)($a->subnode->subsubnode->sssnode));"
       );
-  VCR("<?php "
+  MVCR("<?php "
       "$post_xml = '<?xml version=\"1.0\" encoding=\"utf-16\"?><ScanResults version=\"1.0\"><scannedItem itemType=\"5\" itemSize=\"1079856\" "
       "itemName=\"C:\\\\Program Files\\\\VMware\\\\VMware Tools\\\\VMwareUser.exe\" "
       "IsScanned=\"1\" IsInfected=\"0\" ObjectSummary=\"0\" "
@@ -7037,11 +7105,11 @@ bool TestCodeRun::TestSimpleXML() {
 }
 
 bool TestCodeRun::TestFile() {
-  VCR("<?php "
+  MVCR("<?php "
       "$gif = imagecreatefromgif('http://www.php.net/images/php.gif');"
       "imagegif($gif);"
       "imagedestroy($gif);");
-  VCR("<?php "
+  MVCR("<?php "
       "file_put_contents(\"/tmp/temp.txt\","
       "                  \"put this in the txt file\\n\");"
       "$txt = file_get_contents(\"/tmp/temp.txt\");"
@@ -7050,7 +7118,7 @@ bool TestCodeRun::TestFile() {
       "                  \"put this in the zip file\\n\");"
       "$zip = file_get_contents(\"compress.zlib:///tmp/temp.zip\");"
       "echo $zip;");
-  VCR("<?php "
+  MVCR("<?php "
       "$fh = fopen('php://output', 'w');"
       "if (!$fh) {"
       "  throw new Exception('foo');"
@@ -7072,7 +7140,7 @@ bool TestCodeRun::TestFile() {
       "fprintf($fh, \"hello\\n\");"
       "var_dump(fflush($fh));"
       "var_dump(fclose($fh));");
-  VCR("<?php "
+  MVCR("<?php "
       "var_dump(filetype('test/test_ext_file2.tmp'));"
       "var_dump(is_link('test/test_ext_file2.tmp'));"
       "$a = lstat('test/test_ext_file2.tmp');"
@@ -7081,7 +7149,7 @@ bool TestCodeRun::TestFile() {
 }
 
 bool TestCodeRun::TestDirectory() {
-  VCR("<?php "
+  MVCR("<?php "
       "$d = dir(\"/tmp/\");"
       "echo \"Path: \" . $d->path . \"\\n\";"
       "while (false !== ($entry = $d->read())) {"
@@ -7097,17 +7165,17 @@ bool TestCodeRun::TestDirectory() {
 
 bool TestCodeRun::TestBadFunctionCalls() {
   // make sure no error
-  VCR("<?php class A { function __construct() {}} $obj = new A(10);");
+  MVCR("<?php class A { function __construct() {}} $obj = new A(10);");
 
   // make sure foo() is still called
-  VCR("<?php function foo($a) { print $a;} "
+  MVCR("<?php function foo($a) { print $a;} "
       "class A { function __construct() {}} $obj = new A(foo(10));");
 
   // make sure 1st parameter is corrected passed in
-  VCR("<?php function foo($a) { print $a;} function bar($a) { return $a;}"
+  MVCR("<?php function foo($a) { print $a;} function bar($a) { return $a;}"
       " foo('ok', bar('bad'));");
   // Too many args
-  VCR("<?php "
+  MVCR("<?php "
       "function foo($x) {}"
       "function z() {"
       "  $yay = 1;"
@@ -7121,18 +7189,18 @@ bool TestCodeRun::TestBadFunctionCalls() {
 
 bool TestCodeRun::TestConstructor() {
   // class-name constructors should not be renamed
-  VCR("<?php class A { function a() { echo \"A\n\"; }}"
+  MVCR("<?php class A { function a() { echo \"A\n\"; }}"
       "function test() { $obj = new A(); $obj->a(); }"
       "test();");
   // __construct takes priority
-  VCR("<?php "
+  MVCR("<?php "
       "class A {"
       "  function a() { echo \"A\n\"; }"
       "  function __construct() { echo \"cons\n\"; }"
       "} "
       "function test() { $obj = new A(); $obj->a(); } "
       "test();");
-  VCR("<?php "
+  MVCR("<?php "
       "class A {"
       "  public function A() {"
       "    echo \"In A\\n\";"
@@ -7193,10 +7261,10 @@ bool TestCodeRun::TestConstructor() {
 }
 
 bool TestCodeRun::TestTernary() {
-  VCR("<?php $t = true; $a = $t ? \"hello\" : \"world\"; var_dump($a);");
-  VCR("<?php $f = false; $a = $f ? 5 : \"hello\"; var_dump($a);");
-  VCR("<?php $t = true; $a = $t ? \"hello\" : null; var_dump($a);");
-  VCR("<?php "
+  MVCR("<?php $t = true; $a = $t ? \"hello\" : \"world\"; var_dump($a);");
+  MVCR("<?php $f = false; $a = $f ? 5 : \"hello\"; var_dump($a);");
+  MVCR("<?php $t = true; $a = $t ? \"hello\" : null; var_dump($a);");
+  MVCR("<?php "
       "function memcache_init_split_vars() {"
       "  global $_SERVER;"
       "  global $MEMCACHED_SPLIT_HASH;"
@@ -7204,29 +7272,29 @@ bool TestCodeRun::TestTernary() {
       "    crc32(empty($_SERVER['SERVER_ADDR']) ? php_uname('n')"
       "                                         : $_SERVER['SERVER_ADDR']);"
       "}");
-  VCR("<?php "
+  MVCR("<?php "
       "function f() {} function g() {} "
       "$t = true;"
       "$a = $t ? f() : g();"
       "var_dump($a);");
-  VCR("<?php function test($a) { $b = $a + 1 == 5 ? 5 : 7; } test(4);");
-  VCR("<?php $t = true; $f = false;"
+  MVCR("<?php function test($a) { $b = $a + 1 == 5 ? 5 : 7; } test(4);");
+  MVCR("<?php $t = true; $f = false;"
       "$a = $t ? null : ($f ? \"hello\" : \"world\");");
-  VCR("<?php $t = true; $a = $t ? \"\" : \"a\" . $t . \"b\";");
-  VCR("<?php "
+  MVCR("<?php $t = true; $a = $t ? \"\" : \"a\" . $t . \"b\";");
+  MVCR("<?php "
       "function add_cssclass($add, $class) {"
       "  $class = empty($class) ? $add : $class .= ' ' . $add;"
       "  return $class;"
       "}"
       "add_cssclass('test', $a);");
-  VCR("<?php "
+  MVCR("<?php "
       "$a = 123;"
       "echo $a ? @mysql_data_seek(null, null) : false;");
   return true;
 }
 
 bool TestCodeRun::TestUselessAssignment() {
-  VCR("<?php "
+  MVCR("<?php "
       "class MyDestructableClass {"
       "   function __construct() {"
       "       print \"In constructor\\n\";"
@@ -7250,7 +7318,7 @@ bool TestCodeRun::TestUselessAssignment() {
       "  var_dump(1);"
       "}"
       "bar(1);");
-  VCR("<?php "
+  MVCR("<?php "
       "class MyDestructableClass {"
       "   function __construct() {"
       "       print \"In constructor\\n\";"
@@ -7279,14 +7347,14 @@ bool TestCodeRun::TestUselessAssignment() {
 }
 
 bool TestCodeRun::TestTypes() {
-  VCR("<?php "
+  MVCR("<?php "
       "function foo($m, $n) {"
       "  $offset_change = 10;"
       "  $offset_change -= strlen($m) - strlen($n);"
       "  var_dump($offset_change);"
       "}"
       "foo('abc', 'efg');");
-  VCR("<?php "
+  MVCR("<?php "
       "function p(array $i = null) {"
       "  var_dump($i);"
       "  $i = array();"
@@ -7300,7 +7368,7 @@ bool TestCodeRun::TestTypes() {
 }
 
 bool TestCodeRun::TestSwitchStatement() {
-  VCR("<?php class A {} $a = new A();"
+  MVCR("<?php class A {} $a = new A();"
       "switch ($a) { "
       "case 'foo': "
       "default:"
@@ -7309,7 +7377,7 @@ bool TestCodeRun::TestSwitchStatement() {
 }
 
 bool TestCodeRun::TestExtImage() {
-  VCR("<?php "
+  MVCR("<?php "
       "$data = 'iVBORw0KGgoAAAANSUhEUgAAABwAAAASCAMAAAB/2U7WAAAABl'"
       "       . 'BMVEUAAAD///+l2Z/dAAAASUlEQVR4XqWQUQoAIAxC2/0vXZDr'"
       "       . 'EX4IJTRkb7lobNUStXsB0jIXIAMSsQnWlsV+wULF4Avk9fLq2r'"
@@ -7325,14 +7393,14 @@ bool TestCodeRun::TestExtImage() {
       "else {"
       "    echo 'An error occurred.';"
       "}");
-  VCR("<?php "
+  MVCR("<?php "
       "header ('Content-type: image/png');"
       "$im = imagecreatetruecolor(120, 20);"
       "$text_color = imagecolorallocate($im, 233, 14, 91);"
       "imagestring($im, 1, 5, 5,  'A Simple Text String', $text_color);"
       "imagepng($im);"
       "imagedestroy($im);");
-  VCR("<?php "
+  MVCR("<?php "
       "// Create a 55x30 image"
       "$im = imagecreatetruecolor(55, 30);"
       "$red = imagecolorallocate($im, 255, 0, 0);"
@@ -7347,7 +7415,7 @@ bool TestCodeRun::TestExtImage() {
       "// Save the image"
       "imagepng($im, './imagecolortransparent.png');"
       "imagedestroy($im);");
-  VCR("<?php "
+  MVCR("<?php "
       "$image = imagecreatefromgif('test/images/php.gif');"
       ""
       "$emboss = array(array(2, 0, 0), array(0, -1, 0), array(0, 0, -1));"
@@ -7355,7 +7423,7 @@ bool TestCodeRun::TestExtImage() {
       ""
       "header('Content-Type: image/png');"
       "imagepng($image, null, 9);");
-  VCR("<?php "
+  MVCR("<?php "
       "$image = imagecreatetruecolor(180,40);"
       ""
       "// Writes the text and apply a gaussian blur on the image"
@@ -7370,7 +7438,7 @@ bool TestCodeRun::TestExtImage() {
       ""
       "header('Content-Type: image/png');"
       "imagepng($image, null, 9);");
-  VCR("<?php "
+  MVCR("<?php "
       "// File and new size"
       "$filename = 'test/images/simpletext.jpg';"
       "$percent = 0.5;"
@@ -7388,7 +7456,7 @@ bool TestCodeRun::TestExtImage() {
       "                 $newwidth, $newheight, $width, $height);"
       "// Output"
       "imagejpeg($thumb);");
-  VCR("<?php "
+  MVCR("<?php "
       "// create image"
       "$image = imagecreatetruecolor(100, 100);"
       ""
@@ -7420,7 +7488,7 @@ bool TestCodeRun::TestExtImage() {
       "header('Content-type: image/png');"
       "imagepng($image);"
       "imagedestroy($image);");
-  VCR("<?php "
+  MVCR("<?php "
       "// Create a new image instance"
       "$im = imagecreatetruecolor(100, 100);"
       ""
@@ -7435,7 +7503,7 @@ bool TestCodeRun::TestExtImage() {
       ""
       "imagegif($im);"
       "imagedestroy($im);");
-  VCR("<?php "
+  MVCR("<?php "
       "$png = imagecreatefrompng('test/images/smile.happy.png');"
       ""
       "// Save the image as a GIF"
@@ -7443,7 +7511,7 @@ bool TestCodeRun::TestExtImage() {
       ""
       "// Free from memory"
       "imagedestroy($png);");
-  VCR("<?php "
+  MVCR("<?php "
       "// Create an image instance"
       "$im = imagecreatefromgif('test/images/php.gif');"
       ""
@@ -7453,7 +7521,7 @@ bool TestCodeRun::TestExtImage() {
       "// Save the interfaced image"
       "imagegif($im, './php_interlaced.gif');"
       "imagedestroy($im);");
-  VCR("<?php "
+  MVCR("<?php "
       "// Create a blank image and add some text"
       "$im = imagecreatetruecolor(120, 20);"
       "$text_color = imagecolorallocate($im, 233, 14, 91);"
@@ -7464,7 +7532,7 @@ bool TestCodeRun::TestExtImage() {
       ""
       "// Free up memory"
       "imagedestroy($im);");
-  VCR("<?php "
+  MVCR("<?php "
       "// Create a blank image and add some text"
       "$im = imagecreatetruecolor(120, 20);"
       "$text_color = imagecolorallocate($im, 233, 14, 91);"
@@ -7478,7 +7546,7 @@ bool TestCodeRun::TestExtImage() {
       ""
       "// Free up memory"
       "imagedestroy($im);");
-  VCR("<?php "
+  MVCR("<?php "
       "// Create a blank image and add some text"
       "$im = imagecreatetruecolor(120, 20);"
       "$text_color = imagecolorallocate($im, 233, 14, 91);"
@@ -7492,7 +7560,7 @@ bool TestCodeRun::TestExtImage() {
       ""
       "// Free up memory"
       "imagedestroy($im);");
-  VCR("<?php "
+  MVCR("<?php "
       "// Create a 100*30 image"
       "$im = imagecreate(100, 30);"
       ""
@@ -7508,7 +7576,7 @@ bool TestCodeRun::TestExtImage() {
       ""
       "imagepng($im);"
       "imagedestroy($im);");
-  VCR("<?php "
+  MVCR("<?php "
       "var_dump(image_type_to_mime_type(IMAGETYPE_GIF));"
       "var_dump(image_type_to_mime_type(IMAGETYPE_JPEG));"
       "var_dump(image_type_to_mime_type(IMAGETYPE_PNG));"
@@ -7526,7 +7594,7 @@ bool TestCodeRun::TestExtImage() {
       "var_dump(image_type_to_mime_type(IMAGETYPE_WBMP));"
       "var_dump(image_type_to_mime_type(IMAGETYPE_XBM));"
       "var_dump(image_type_to_mime_type(IMAGETYPE_ICO));");
-  VCR("<?php "
+  MVCR("<?php "
       "function foo($text, $fsize) {"
       ""
       "  $font = 'test/tahoma.ttf';"
@@ -7570,14 +7638,14 @@ bool TestCodeRun::TestExtImage() {
       "$text = 'foobar@yahoo.com';"
       "$fsize = '9.8';"
       "foo($text, $fsize, false);");
-  VCR("<?php "
+  MVCR("<?php "
       "for ($i = 0; $i < 100000; $i++) {"
       "  $str =  exif_tagname($i);"
       "  if ($str) {"
       "    echo \"$i: $str\\n\";"
       "  }"
       "}");
-  VCR("<?php "
+  MVCR("<?php "
       "$filename = 'test/images/test1pix.jpg';"
       "$image = exif_thumbnail($filename, $width, $height, $type);"
       "if ($image!==false) {"
@@ -7590,7 +7658,7 @@ bool TestCodeRun::TestExtImage() {
 }
 
 bool TestCodeRun::TestSplFile() {
-  VCR("<?php "
+  MVCR("<?php "
       "$info = new SplFileInfo('test');"
       "if (!$info->isFile()) {"
       "    echo $info->getRealPath();"
@@ -7615,7 +7683,7 @@ bool TestCodeRun::TestSplFile() {
 }
 
 bool TestCodeRun::TestIterator() {
-  VCR("<?php "
+  MVCR("<?php "
       "$files = array();"
       "foreach (new DirectoryIterator('test/') as $file) {"
       "  $files[] = $file;"
@@ -7672,7 +7740,7 @@ bool TestCodeRun::TestIterator() {
       "    echo $fileinfo->isWritable() . \"\\n\";"
       "  }"
       "}");
-  VCR("<?php "
+  MVCR("<?php "
       "$dir = new DirectoryIterator('test');"
       "while($dir->valid()) {"
       "  if(!$dir->isDot()) {"
@@ -7680,7 +7748,7 @@ bool TestCodeRun::TestIterator() {
       "  }"
       "  $dir->next();"
       "}");
-  VCR("<?php "
+  MVCR("<?php "
       "$ite=new RecursiveDirectoryIterator('test/');"
       "$bytestotal=0;"
       "$nbfiles=0;"
@@ -7692,7 +7760,7 @@ bool TestCodeRun::TestIterator() {
       "}"
       "$bytestotal=number_format($bytestotal);"
       "echo \"Total: $nbfiles files, $bytestotal bytes\\n\";");
-  VCR("<?php "
+  MVCR("<?php "
       "$ite=new RecursiveDirectoryIterator('test/');"
       ""
       "$bytestotal=0;"
@@ -7706,7 +7774,7 @@ bool TestCodeRun::TestIterator() {
       ""
       "$bytestotal=number_format($bytestotal);"
       "echo \"Total: $nbfiles files, $bytestotal bytes\\n\";");
-  VCR("<?php "
+  MVCR("<?php "
       "$path = \"test/\";"
       "foreach (new RecursiveIteratorIterator("
       "  new RecursiveDirectoryIterator($path,"
@@ -7716,7 +7784,7 @@ bool TestCodeRun::TestIterator() {
       "    echo $file.\"\\n\";"
       "  }"
       "}");
-  VCR("<?php "
+  MVCR("<?php "
       "$directory = \"test\";"
       "$fileSPLObjects =  new RecursiveIteratorIterator("
       "  new RecursiveDirectoryIterator($directory),"
@@ -7736,7 +7804,7 @@ bool TestCodeRun::TestIterator() {
       "foreach( $fileSPLObjects as $fullFileName => $fileSPLObject ) {"
       "  print $fullFileName . \" \" .$fileSPLObject->getFilename(). \"\\n\";"
       "}");
-  VCR("<?php "
+  MVCR("<?php "
       "function getFiles(&$rdi,$depth=0) {"
       "  if (!is_object($rdi)) return;"
       "  for ($rdi->rewind();$rdi->valid();$rdi->next()) {"

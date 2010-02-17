@@ -48,8 +48,7 @@ bool TestServer::VerifyServerResponse(const char *input, const char *output,
 
   if (!CleanUp()) return false;
   if (Option::EnableEval < Option::FullEval) {
-    if (!GenerateFiles(input) ||
-        !CompileFiles(input, file, line)) {
+    if (!GenerateFiles(input, "TestServer") || !CompileFiles()) {
       return false;
     }
   } else {
@@ -125,7 +124,7 @@ void TestServer::RunServer() {
   if (Option::EnableEval < Option::FullEval) {
     const char *argv[] = {"", "--mode=server",
                           "--config=test/config-server.hdf", NULL};
-    Process::Exec("cpp/tmp/test", argv, NULL, out, &err);
+    Process::Exec("cpp/tmp/TestServer/test", argv, NULL, out, &err);
   } else {
     const char *argv[] = {"", "--file=/unittest/rootdoc/string", "--mode=server",
                           "--config=test/config-eval.hdf", NULL};

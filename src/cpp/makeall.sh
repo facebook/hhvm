@@ -1,3 +1,3 @@
 #/bin/sh
 # called by src/
-make -j -C cpp/tmp
+make -j40 -C cpp/tmp

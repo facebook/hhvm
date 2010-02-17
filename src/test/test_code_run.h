@@ -21,6 +21,21 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class VCRInfo {
+public:
+  VCRInfo(const char *i, const char *o, const char *f = "", int l = 0,
+          bool nw = false)
+  : input(i), output(o), file(f), line(l), nowarnings(nw) { }
+
+  const char *input;
+  const char *output;
+  const char *file;
+  int line;
+  bool nowarnings;
+};
+
+typedef std::vector<VCRInfo> VCRInfoVec;
+
 /**
  * Testing PHP -> C++ -> execution.
  */
@@ -28,6 +43,8 @@ class TestCodeRun : public TestBase {
  public:
   TestCodeRun();
 
+  virtual bool preTest();
+  virtual bool postTest();
   virtual bool RunTests(const std::string &which);
 
   // test test harness
@@ -141,24 +158,30 @@ class TestCodeRun : public TestBase {
 
  protected:
   bool CleanUp();
-  bool GenerateFiles(const char *input);
-  bool CompileFiles(const char *input, const char *file, int line);
+  bool GenerateFiles(const char *input, const char *subdir = "");
+  bool CompileFiles();
 
+  bool MultiVerifyCodeRun();
   bool VerifyCodeRun(const char *input, const char *output,
                      const char *file = "", int line = 0,
                      bool nowarnings = false);
 
   bool m_perfMode;
+  VCRInfoVec m_infos;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // macros
 
 #define VCR(a) \
-  if (!Count(VerifyCodeRun(a,NULL,__FILE__,__LINE__))) return false;
+  if (!Count(VerifyCodeRun(a,NULL,__FILE__,__LINE__,false))) return false;
 
 #define VCRNW(a) \
   if (!Count(VerifyCodeRun(a,NULL,__FILE__,__LINE__,true))) return false;
+
+// Multi VCR
+#define MVCR(a) m_infos.push_back(VCRInfo(a,NULL,__FILE__,__LINE__,false));
+#define MVCRNW(a) m_infos.push_back(VCRInfo(a,NULL,__FILE__,__LINE__,true));
 
 ///////////////////////////////////////////////////////////////////////////////
 

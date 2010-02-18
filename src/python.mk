@@ -6,7 +6,7 @@ NAME = $(patsubst ffi/%.i,%,$(SWIG_FILE))
 WRAP_FILE = $(patsubst %.i,%_wrap.c,$(SWIG_FILE))
 
 CPPFLAGS += -I. -I/usr/local/include/python2.6
-LIBS = $(HPHP_LIB)/libhphp_cpp_eval.a $(HPHP_LIB)/libhphp_runtime.a $(ALL_LIBS)
+LIBS = $(HPHP_LIB)/libhphp_runtime.a $(ALL_LIBS)
 
 include $(HPHP_HOME)/src/rules.mk
 

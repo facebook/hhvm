@@ -84,7 +84,8 @@ bool AccessLog::openFiles() {
 
 void AccessLog::log(Transport *transport) {
   ASSERT(transport);
-  ASSERT(m_initialized);
+  if (!m_initialized) return;
+
   FILE *threadLog = m_threadData->log;
   if (threadLog) {
     writeLog(transport, threadLog,
@@ -273,7 +274,7 @@ bool AccessLog::genField(ostringstream &out, const char* &format,
 }
 
 void AccessLog::onNewRequest() {
-  ASSERT(m_initialized);
+  if (!m_initialized) return;
   ThreadData *threadData = m_threadData.get();
   threadData->startTime = TimeStamp::Current();
 }

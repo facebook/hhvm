@@ -750,6 +750,22 @@ void f_header(CStrRef str, bool replace /* = true */,
   Transport *transport = g_context->getTransport();
   if (transport) {
     const char *header_line = str->data();
+
+    // handle single line of status code
+    if (str->size() >= 5 && strncasecmp(header_line, "HTTP/", 5) == 0) {
+      int code = 200;
+      for (const char *ptr = header_line; *ptr; ptr++) {
+        if (*ptr == ' ' && *(ptr + 1) != ' ') {
+          code = atoi(ptr + 1);
+          break;
+        }
+      }
+      if (code) {
+        transport->setResponse(code);
+      }
+      return;
+    }
+
     char *colon_offset = strchr(header_line, ':');
     String newHeader;
     if (colon_offset) {

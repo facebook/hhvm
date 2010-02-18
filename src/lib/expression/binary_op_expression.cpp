@@ -831,6 +831,12 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     first->outputCPP(cg, ar);
     cg.printf(")");
     break;
+  case T_LOGICAL_AND:
+  case T_LOGICAL_OR:
+    cg.printf("(");
+    first->outputCPP(cg, ar);
+    cg.printf(")");
+    break;
   default:
     first->outputCPP(cg, ar);
     break;
@@ -918,6 +924,12 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       }
       break;
     }
+  case T_LOGICAL_AND:
+  case T_LOGICAL_OR:
+    cg.printf("(");
+    second->outputCPP(cg, ar);
+    cg.printf(")");
+    break;
   default:
     second->outputCPP(cg, ar);
   }

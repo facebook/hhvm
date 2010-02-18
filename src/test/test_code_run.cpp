@@ -5016,6 +5016,18 @@ bool TestCodeRun::TestLogicalOperators() {
       "$g = ($g && false);"
       "$h = ($h and false);"
       "var_dump($a, $b, $c, $d, $e, $f, $g, $h);");
+  MVCR("<?php "
+       "function foo($a) { echo \"foo\"; return $a; }"
+       "$x = true;"
+       "$x = $x and foo(false);"
+       "var_dump($x);"
+       "$x = $x && foo(false);"
+       "var_dump($x);"
+       "$x = false;"
+       "$x = $x or foo(true);"
+       "var_dump($x);"
+       "$x = $x || foo(true);"
+       "var_dump($x);");
 
   return true;
 }

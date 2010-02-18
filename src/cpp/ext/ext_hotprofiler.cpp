@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <cpp/ext/ext_facebook.h>
+#include <cpp/ext/ext_fb.h>
 #include <cpp/base/memory/memory_manager.h>
 #include <cpp/base/util/request_local.h>
 

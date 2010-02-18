@@ -17,7 +17,7 @@
 
 #include <cpp/ext/ext_apc.h>
 #include <cpp/ext/ext_variable.h>
-#include <cpp/ext/ext_facebook.h>
+#include <cpp/ext/ext_fb.h>
 #include <cpp/base/runtime_option.h>
 #include <util/async_job.h>
 #include <util/timer.h>

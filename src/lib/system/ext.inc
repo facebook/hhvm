@@ -12,7 +12,7 @@
 #include "datetime.inc"
 #include "domdocument.inc"
 #include "error.inc"
-#include "facebook.inc"
+#include "fb.inc"
 #include "fbintern.inc"
 #include "fbml.inc"
 #include "file.inc"

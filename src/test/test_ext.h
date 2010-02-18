@@ -27,7 +27,7 @@
 #include <test/test_ext_datetime.h>
 #include <test/test_ext_domdocument.h>
 #include <test/test_ext_error.h>
-#include <test/test_ext_facebook.h>
+#include <test/test_ext_fb.h>
 #include <test/test_ext_fbintern.h>
 #include <test/test_ext_fbml.h>
 #include <test/test_ext_file.h>

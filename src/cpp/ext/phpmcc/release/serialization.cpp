@@ -16,7 +16,7 @@
 */
 #include <cpp/base/base_includes.h>
 #include <cpp/base/variable_unserializer.h>
-#include <cpp/ext/ext_facebook.h>
+#include <cpp/ext/ext_fb.h>
 
 #include "ext_php_mcc.h"
 #include "types.h"

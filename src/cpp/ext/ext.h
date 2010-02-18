@@ -29,7 +29,7 @@
 #include <cpp/ext/profile/extprofile_datetime.h>
 #include <cpp/ext/profile/extprofile_domdocument.h>
 #include <cpp/ext/profile/extprofile_error.h>
-#include <cpp/ext/profile/extprofile_facebook.h>
+#include <cpp/ext/profile/extprofile_fb.h>
 #include <cpp/ext/profile/extprofile_fbintern.h>
 #include <cpp/ext/profile/extprofile_fbml.h>
 #include <cpp/ext/profile/extprofile_file.h>

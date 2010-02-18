@@ -120,9 +120,11 @@ void *SmartAllocatorImpl::alloc() {
   if (m_stats) {
     m_stats->usage += m_itemSize;
     if (m_stats->usage > m_stats->peakUsage) {
+      int64 prevPeakUsage = m_stats->peakUsage;
       m_stats->peakUsage = m_stats->usage;
       if (RuntimeOption::RequestMemoryMaxBytes > 0 &&
-          m_stats->peakUsage > RuntimeOption::RequestMemoryMaxBytes) {
+          m_stats->peakUsage > RuntimeOption::RequestMemoryMaxBytes &&
+          prevPeakUsage <= RuntimeOption::RequestMemoryMaxBytes) {
         throw FatalErrorException("request has exceeded memory limit");
       }
     }

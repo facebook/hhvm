@@ -1,0 +1,32 @@
+function(auto_sources RETURN_VALUE PATTERN SOURCE_SUBDIRS)
+
+	if ("${SOURCE_SUBDIRS}" STREQUAL "RECURSE")
+		SET(PATH ".")
+		if (${ARGC} EQUAL 4)
+			list(GET ARGV 3 PATH)
+		endif (${ARGC} EQUAL 4)
+	endif("${SOURCE_SUBDIRS}" STREQUAL "RECURSE")
+
+	if ("${SOURCE_SUBDIRS}" STREQUAL "RECURSE")
+
+		file(GLOB_RECURSE ${RETURN_VALUE} "${PATH}/${PATTERN}")
+
+	else ("${SOURCE_SUBDIRS}" STREQUAL "RECURSE")
+
+		file(GLOB ${RETURN_VALUE} "${PATTERN}")
+
+		foreach (PATH ${SOURCE_SUBDIRS})
+			file(GLOB SUBDIR_FILES "${PATH}/${PATTERN}")
+			list(APPEND ${RETURN_VALUE} ${SUBDIR_FILES})
+		endforeach(PATH ${SOURCE_SUBDIRS})
+
+	endif ("${SOURCE_SUBDIRS}" STREQUAL "RECURSE")
+
+	if (${FILTER_OUT})
+		list(REMOVE_ITEM ${RETURN_VALUE} ${FILTER_OUT})
+	endif(${FILTER_OUT})
+
+	set(${RETURN_VALUE} ${${RETURN_VALUE}} PARENT_SCOPE)
+  
+endfunction(auto_sources)
+

@@ -29,9 +29,7 @@
 #include <cpp/ext/profile/extprofile_datetime.h>
 #include <cpp/ext/profile/extprofile_domdocument.h>
 #include <cpp/ext/profile/extprofile_error.h>
-#include <cpp/ext/profile/extprofile_facebook.h>
 #include <cpp/ext/profile/extprofile_fb.h>
-#include <cpp/ext/profile/extprofile_fbml.h>
 #include <cpp/ext/profile/extprofile_file.h>
 #include <cpp/ext/profile/extprofile_function.h>
 #include <cpp/ext/profile/extprofile_hash.h>
@@ -55,7 +53,6 @@
 #include <cpp/ext/profile/extprofile_options.h>
 #include <cpp/ext/profile/extprofile_oracle.h>
 #include <cpp/ext/profile/extprofile_output.h>
-#include <cpp/ext/profile/extprofile_php_mcc.h>
 #include <cpp/ext/profile/extprofile_posix.h>
 #include <cpp/ext/profile/extprofile_preg.h>
 #include <cpp/ext/profile/extprofile_process.h>

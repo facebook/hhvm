@@ -27,9 +27,7 @@
 #include <test/test_ext_datetime.h>
 #include <test/test_ext_domdocument.h>
 #include <test/test_ext_error.h>
-#include <test/test_ext_facebook.h>
 #include <test/test_ext_fb.h>
-#include <test/test_ext_fbml.h>
 #include <test/test_ext_file.h>
 #include <test/test_ext_function.h>
 #include <test/test_ext_hash.h>
@@ -53,7 +51,6 @@
 #include <test/test_ext_options.h>
 #include <test/test_ext_oracle.h>
 #include <test/test_ext_output.h>
-#include <test/test_ext_php_mcc.h>
 #include <test/test_ext_posix.h>
 #include <test/test_ext_preg.h>
 #include <test/test_ext_process.h>

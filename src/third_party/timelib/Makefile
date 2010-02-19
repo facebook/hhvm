@@ -1,0 +1,10 @@
+
+PROJECT_ROOT = ..
+PROJECT_NAME = timelib
+
+AUTO_SOURCES = 1
+
+include $(PROJECT_ROOT)/rules.mk
+
+TARGETS = $(STATIC_LIB) $(SHARED_LIB)
+all: $(TARGETS)

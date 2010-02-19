@@ -1,0 +1,60 @@
+#
+#   +----------------------------------------------------------------------+
+#   | HipHop for PHP                                                       |
+#   +----------------------------------------------------------------------+
+#   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+#   | Copyright (c) 1997-2010 The PHP Group                                |
+#   +----------------------------------------------------------------------+
+#   | This source file is subject to version 3.01 of the PHP license,      |
+#   | that is bundled with this package in the file LICENSE, and is        |
+#   | available through the world-wide-web at the following url:           |
+#   | http://www.php.net/license/3_01.txt                                  |
+#   | If you did not receive a copy of the PHP license and are unable to   |
+#   | obtain it through the world-wide-web, please send a note to          |
+#   | license@php.net so we can mail you a copy immediately.               |
+#   +----------------------------------------------------------------------+
+#
+
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
+PROJECT(hphp C CXX)
+
+IF("$ENV{HPHP_HOME}" STREQUAL "")
+        message(FATAL_ERROR "You should set the HPHP_HOME environmental")
+ENDIF()
+
+file(TO_CMAKE_PATH "$ENV{HPHP_HOME}" HPHP_HOME)
+
+SET(CMAKE_MODULE_PATH "${HPHP_HOME}/CMake" ${CMAKE_MODULE_PATH})
+
+include(HPHPFunctions)
+include(CheckFunctionExists)
+include(HPHPSetup)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+auto_sources(SOURCES "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/php")
+auto_sources(SOURCES2 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/sys")
+add_executable(program ${SOURCES} ${SOURCES2})
+
+add_library(libhphp_runtime STATIC IMPORTED)
+SET_PROPERTY(TARGET libhphp_runtime PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libhphp_runtime.a")
+
+add_library(timelib STATIC IMPORTED)
+SET_PROPERTY(TARGET timelib PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libtimelib.a")
+
+add_library(sqlite3 STATIC IMPORTED)
+SET_PROPERTY(TARGET sqlite3 PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libsqlite3.a")
+
+add_library(xhp STATIC IMPORTED)
+SET_PROPERTY(TARGET xhp PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libxhp.a")
+
+add_library(afdt STATIC IMPORTED)
+SET_PROPERTY(TARGET afdt PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libafdt.a")
+
+add_library(mbfl STATIC IMPORTED)
+SET_PROPERTY(TARGET mbfl PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libmbfl.a")
+
+
+target_link_libraries(program libhphp_runtime)
+
+hphp_link(program)

@@ -25,6 +25,18 @@
 # TBB_DEBUG_LIBRARIES, the libraries to link against to use TBB with debug symbols.
 # TBB_FOUND, If false, don't try to use TBB.
 
+# lets try in the obvious places first
+find_path(TEST_TBB_INCLUDE_DIR
+    tbb/task_scheduler_init.h
+)
+find_library(TEST_TBB_LIBRARY tbb)
+
+if (TEST_TBB_INCLUDE_DIR)
+	if(TEST_TBB_LIBRARY)
+		set(TBB_OBVIOUS_PLACE "YES")
+	endif()
+endif()
+
 
 if (WIN32)
     # has em64t/vc8   em64t/vc9
@@ -110,9 +122,16 @@ if (NOT _TBB_INSTALL_DIR)
     endif (_TBB_DEFAULT_INSTALL_DIR)
 endif (NOT _TBB_INSTALL_DIR)
 # sanity check
-if (NOT _TBB_INSTALL_DIR)
+
+if (TBB_OBVIOUS_PLACE)
+    set (TBB_FOUND "YES")
+    set (TBB_LIBRARIES ${TEST_TBB_LIBRARY} ${TBB_LIBRARIES})
+    set (TBB_INCLUDE_DIRS ${TEST_TBB_INCLUDE_DIR} CACHE PATH "TBB include directory" FORCE)
+    mark_as_advanced(TBB_INCLUDE_DIRS TBB_LIBRARIES)
+    message(STATUS "Found Intel TBB")
+elseif (NOT _TBB_INSTALL_DIR)
     message ("ERROR: Unable to find Intel TBB install directory. ${_TBB_INSTALL_DIR}")
-else (NOT _TBB_INSTALL_DIR)
+else (TBB_OBVIOUS_PLACE)
 # finally: set the cached CMake variable TBB_INSTALL_DIR
 if (NOT TBB_INSTALL_DIR)
     set (TBB_INSTALL_DIR ${_TBB_INSTALL_DIR} CACHE PATH "Intel TBB install directory")
@@ -155,15 +174,11 @@ endif (NOT $ENV{TBB_ARCH_PLATFORM} STREQUAL "")
 
 find_library(TBB_LIBRARY        ${_TBB_LIB_NAME}        ${TBB_LIBRARY_DIR} NO_DEFAULT_PATH)
 find_library(TBB_MALLOC_LIBRARY ${_TBB_LIB_MALLOC_NAME} ${TBB_LIBRARY_DIR} NO_DEFAULT_PATH)
-#TBB_CORRECT_LIB_DIR(TBB_LIBRARY)
-#TBB_CORRECT_LIB_DIR(TBB_MALLOC_LIBRARY)
 mark_as_advanced(TBB_LIBRARY TBB_MALLOC_LIBRARY)
 
 #-- Look for debug libraries
 find_library(TBB_LIBRARY_DEBUG        ${_TBB_LIB_DEBUG_NAME}        ${TBB_LIBRARY_DIR} NO_DEFAULT_PATH)
 find_library(TBB_MALLOC_LIBRARY_DEBUG ${_TBB_LIB_MALLOC_DEBUG_NAME} ${TBB_LIBRARY_DIR} NO_DEFAULT_PATH)
-#TBB_CORRECT_LIB_DIR(TBB_LIBRARY_DEBUG)
-#TBB_CORRECT_LIB_DIR(TBB_MALLOC_LIBRARY_DEBUG)
 mark_as_advanced(TBB_LIBRARY_DEBUG TBB_MALLOC_LIBRARY_DEBUG)
 
 
@@ -188,5 +203,5 @@ if (NOT TBB_FOUND)
     endif (TBB_FIND_REQUIRED)
 endif (NOT TBB_FOUND)
 
-endif (NOT _TBB_INSTALL_DIR)
+endif (TBB_OBVIOUS_PLACE)
 

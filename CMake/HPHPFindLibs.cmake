@@ -84,8 +84,9 @@ include_directories("${HPHP_HOME}/src/third_party/libsqlite3")
 include_directories("${HPHP_HOME}/src/third_party/timelib")
 include_directories("${HPHP_HOME}/src/third_party/xhp/xhp")
 include_directories("${HPHP_HOME}/src/third_party/libafdt/src")
-include_directories("${HPHP_HOME}/src/third_party/mbfl/mbfl")
-include_directories("${HPHP_HOME}/src/third_party/mbfl/filter")
+include_directories("${HPHP_HOME}/src/third_party/libmbfl")
+include_directories("${HPHP_HOME}/src/third_party/libmbfl/mbfl")
+include_directories("${HPHP_HOME}/src/third_party/libmbfl/filter")
 
 # ICU
 

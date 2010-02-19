@@ -1,7 +1,6 @@
-Only in libevent-1.4.13-stable-fb-fresh/: CMakeLists.txt
 diff -wbBdu -ur libevent-1.4.13-stable/event.c libevent-1.4.13-stable-fb-fresh/event.c
---- libevent-1.4.13-stable/event.c	2009-11-17 19:39:08.000000000 -0800
-+++ libevent-1.4.13-stable-fb-fresh/event.c	2010-01-28 14:52:34.687528000 -0800
+--- event.c	2009-11-17 19:39:08.000000000 -0800
++++ event.c	2010-01-28 14:52:34.687528000 -0800
 @@ -134,10 +134,12 @@
  static int
  gettime(struct event_base *base, struct timeval *tp)
@@ -50,8 +49,8 @@ diff -wbBdu -ur libevent-1.4.13-stable/event.c libevent-1.4.13-stable-fb-fresh/e
  	event_debug(("%s: asked to terminate loop.", __func__));
  	return (0);
 diff -wbBdu -ur libevent-1.4.13-stable/evhttp.h libevent-1.4.13-stable-fb-fresh/evhttp.h
---- libevent-1.4.13-stable/evhttp.h	2009-04-12 15:59:30.000000000 -0700
-+++ libevent-1.4.13-stable-fb-fresh/evhttp.h	2010-01-28 14:52:34.815520000 -0800
+--- evhttp.h	2009-04-12 15:59:30.000000000 -0700
++++ evhttp.h	2010-01-28 14:52:34.815520000 -0800
 @@ -87,6 +87,17 @@
  int evhttp_bind_socket(struct evhttp *http, const char *address, u_short port);
  
@@ -130,8 +129,8 @@ diff -wbBdu -ur libevent-1.4.13-stable/evhttp.h libevent-1.4.13-stable-fb-fresh/
  
 Only in libevent-1.4.13-stable-fb-fresh/: fb_libevent.patch.txt
 diff -wbBdu -ur libevent-1.4.13-stable/http.c libevent-1.4.13-stable-fb-fresh/http.c
---- libevent-1.4.13-stable/http.c	2009-07-01 23:05:28.000000000 -0700
-+++ libevent-1.4.13-stable-fb-fresh/http.c	2010-01-28 14:52:35.154415000 -0800
+--- http.c	2009-07-01 23:05:28.000000000 -0700
++++ http.c	2010-01-28 14:52:35.154415000 -0800
 @@ -478,7 +478,6 @@
  			evhttp_add_header(req->output_headers,
  			    "Connection", "keep-alive");
@@ -364,5 +363,3 @@ diff -wbBdu -ur libevent-1.4.13-stable/http.c libevent-1.4.13-stable-fb-fresh/ht
  	if (req->remote_host != NULL)
  		free(req->remote_host);
  	if (req->uri != NULL)
-Only in libevent-1.4.13-stable-fb-fresh/sample: CMakeLists.txt
-Only in libevent-1.4.13-stable-fb-fresh/test: CMakeLists.txt

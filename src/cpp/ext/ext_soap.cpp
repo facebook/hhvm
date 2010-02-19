@@ -1594,7 +1594,7 @@ static void type_to_string(sdlType *type, StringBuffer &buf, int level) {
              (WSDL_NAMESPACE":arrayType"))
             != iter->second->extraAttributes.end()) {
           sdlExtraAttributePtr ext = iterExtra->second;
-          char *end = strchr(ext->val.c_str(), '[');
+          const char *end = strchr(ext->val.c_str(), '[');
           int len;
           if (end == NULL) {
             len = ext->val.size();

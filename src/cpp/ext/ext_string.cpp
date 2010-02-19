@@ -367,7 +367,7 @@ Variant f_strpbrk(CStrRef haystack, CStrRef char_list) {
   if (char_list.empty()) {
     throw InvalidArgumentException("char_list", "(empty)");
   }
-  char *p = strpbrk(haystack, char_list);
+  const char *p = strpbrk(haystack, char_list);
   if (p) {
     return String(p, CopyString);
   }

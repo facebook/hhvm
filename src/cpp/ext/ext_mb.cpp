@@ -3922,7 +3922,7 @@ bool f_mb_send_mail(CStrRef to, CStrRef subject, CStrRef message,
     char *param_name;
     char *charset = NULL;
 
-    char *p = strchr(s.data(), ';');
+    char *p = const_cast<char*>(strchr(s.data(), ';'));
     if (p != NULL) {
       /* skipping the padded spaces */
       do {

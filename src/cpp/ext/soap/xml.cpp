@@ -68,7 +68,7 @@ static void soap_Comment(void *ctx, const xmlChar *value) {
 }
 
 xmlDocPtr soap_xmlParseFile(const char *filename) {
-  char *url = strstr(filename, "://");
+  const char *url = strstr(filename, "://");
   if (url) {
     xmlDocPtr ret;
     xmlParserCtxtPtr ctxt = xmlCreateFileParserCtxt(filename);

@@ -956,7 +956,7 @@ Variant f_mysql_result(CVarRef result, int row,
   if (!field.isNull()) {
     if (field.isString()) {
       String sfield = field.toString();
-      char *tmp = strchr(sfield.data(), '.');
+      const char *tmp = strchr(sfield.data(), '.');
       String table_name, field_name;
       if (tmp) {
         int pos = tmp - sfield.data();

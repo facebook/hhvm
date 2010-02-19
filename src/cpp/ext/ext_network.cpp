@@ -766,12 +766,12 @@ void f_header(CStrRef str, bool replace /* = true */,
       return;
     }
 
-    char *colon_offset = strchr(header_line, ':');
+    const char *colon_offset = strchr(header_line, ':');
     String newHeader;
     if (colon_offset) {
       if (!strncasecmp(header_line, "Content-Type",
                        colon_offset - header_line)) {
-        char *ptr = colon_offset+1, *mimetype = NULL;
+        const char *ptr = colon_offset+1, *mimetype = NULL;
         while (*ptr == ' ') ptr++;
         mimetype = ptr;
         if (strncmp(mimetype, "text/", 5) == 0 &&

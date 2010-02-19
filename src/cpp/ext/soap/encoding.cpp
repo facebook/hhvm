@@ -2115,7 +2115,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, CVarRef data_, int style,
                                     SOAP_1_1_ENC_NAMESPACE":arrayType",
                                     WSDL_NAMESPACE":arrayType"))) {
       String value(ext->val);
-      char *end = strrchr(value.data(), '[');
+      char *end = const_cast<char*>(strrchr(value.data(), '['));
       if (end) {
         *end = '\0';
         end++;
@@ -2301,14 +2301,15 @@ static Variant to_zval_array(encodeTypePtr type, xmlNodePtr data) {
     parse_namespace(attr->children->content, type, ns);
     nsptr = xmlSearchNs(attr->doc, attr->parent, BAD_CAST(ns.data()));
 
-    char *end = strrchr(type.data(), '[');
+    String stype(type);
+    char *end = const_cast<char*>(strrchr(stype.data(), '['));
     if (end) {
       *end = '\0';
       dimension = calc_dimension(end+1);
       dims = get_position(dimension, end+1);
     }
     if (nsptr != NULL) {
-      enc = get_encoder(SOAP_GLOBAL(sdl), (char*)nsptr->href, type.data());
+      enc = get_encoder(SOAP_GLOBAL(sdl), (char*)nsptr->href, stype.data());
     }
 
   } else if ((attr = get_attribute(data->properties,"itemType")) &&
@@ -2342,7 +2343,7 @@ static Variant to_zval_array(encodeTypePtr type, xmlNodePtr data) {
                SOAP_1_1_ENC_NAMESPACE":arrayType",
                WSDL_NAMESPACE":arrayType"))) {
     String type(ext->val);
-    char *end = strrchr(type.data(), '[');
+    char *end = const_cast<char*>(strrchr(type.data(), '['));
     if (end) {
       *end = '\0';
     }

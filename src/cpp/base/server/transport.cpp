@@ -75,7 +75,7 @@ string Transport::getCommand() {
   if (*url == '/') {
     ++url;
   }
-  char *v = strchr(url, '?');
+  const char *v = strchr(url, '?');
   if (v) {
     return string(url, v - url);
   }

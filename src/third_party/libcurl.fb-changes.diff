@@ -1,0 +1,123 @@
+Index: include/curl/multi.h
+===================================================================
+RCS file: /cvsroot/curl/curl/include/curl/multi.h,v
+retrieving revision 1.45
+diff -u -r1.45 multi.h
+--- include/curl/multi.h	20 May 2008 10:21:50 -0000	1.45
++++ include/curl/multi.h	29 Jan 2010 23:45:18 -0000
+@@ -135,6 +135,19 @@
+                                        int *max_fd);
+ 
+  /*
++  * Name:    curl_multi_select()
++  *
++  * Desc:    Calls select() or poll() internally so app can call
++  *          curl_multi_perform() as soon as one of them is ready. This is to
++  *          fix FD_SETSIZE problem curl_multi_fdset() has.
++  *
++  * Returns: CURLMcode type, general multi error code.
++  */
++CURL_EXTERN CURLMcode curl_multi_select(CURLM *multi_handle,
++                                        int timeout_ms,
++                                        int *ret);
++
++ /*
+   * Name:    curl_multi_perform()
+   *
+   * Desc:    When the app thinks there's data available for curl it calls this
+Index: lib/multi.c
+===================================================================
+RCS file: /cvsroot/curl/curl/lib/multi.c,v
+retrieving revision 1.210
+diff -u -r1.210 multi.c
+--- lib/multi.c	28 Jan 2010 15:34:18 -0000	1.210
++++ lib/multi.c	29 Jan 2010 23:45:19 -0000
+@@ -42,6 +42,7 @@
+ #include "sendf.h"
+ #include "timeval.h"
+ #include "http.h"
++#include "select.h"
+ 
+ #define _MPRINTF_REPLACE /* use our functions only */
+ #include <curl/mprintf.h>
+@@ -900,6 +901,80 @@
+   return CURLM_OK;
+ }
+ 
++CURLMcode curl_multi_select(CURLM *multi_handle, int timeout_ms, int *ret) {
++  struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
++  struct Curl_one_easy *easy;
++  curl_socket_t sockbunch[MAX_SOCKSPEREASYHANDLE];
++  int bitmap;
++  int i;
++  unsigned int nfds = 0;
++  struct pollfd *ufds;
++  int nret = -1;
++
++  if(!GOOD_MULTI_HANDLE(multi))
++    return CURLM_BAD_HANDLE;
++
++  easy=multi->easy.next;
++  while(easy != &multi->easy) {
++    bitmap = multi_getsock(easy, sockbunch, MAX_SOCKSPEREASYHANDLE);
++
++    for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++) {
++      curl_socket_t s = CURL_SOCKET_BAD;
++
++      if(bitmap & GETSOCK_READSOCK(i)) {
++        ++nfds;
++        s = sockbunch[i];
++      }
++      if(bitmap & GETSOCK_WRITESOCK(i)) {
++        ++nfds;
++        s = sockbunch[i];
++      }
++      if(s == CURL_SOCKET_BAD) {
++        break;
++      }
++    }
++
++    easy = easy->next; /* check next handle */
++  }
++
++  ufds = (struct pollfd *)malloc(nfds * sizeof(struct pollfd));
++  nfds = 0;
++
++  easy=multi->easy.next;
++  while(easy != &multi->easy) {
++    bitmap = multi_getsock(easy, sockbunch, MAX_SOCKSPEREASYHANDLE);
++
++    for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++) {
++      curl_socket_t s = CURL_SOCKET_BAD;
++
++      if(bitmap & GETSOCK_READSOCK(i)) {
++        ufds[nfds].fd = sockbunch[i];
++        ufds[nfds].events = POLLIN;
++        ++nfds;
++        s = sockbunch[i];
++      }
++      if(bitmap & GETSOCK_WRITESOCK(i)) {
++        ufds[nfds].fd = sockbunch[i];
++        ufds[nfds].events = POLLOUT;
++        ++nfds;
++        s = sockbunch[i];
++      }
++      if(s == CURL_SOCKET_BAD) {
++        break;
++      }
++    }
++
++    easy = easy->next; /* check next handle */
++  }
++
++  nret = Curl_poll(ufds, nfds, timeout_ms);
++  free(ufds);
++  if (ret) {
++    *ret = nret;
++  }
++  return CURLM_OK;
++}
++
+ static CURLMcode multi_runsingle(struct Curl_multi *multi,
+                                  struct Curl_one_easy *easy)
+ {

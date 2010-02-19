@@ -1,0 +1,368 @@
+Only in libevent-1.4.13-stable-fb-fresh/: CMakeLists.txt
+diff -wbBdu -ur libevent-1.4.13-stable/event.c libevent-1.4.13-stable-fb-fresh/event.c
+--- libevent-1.4.13-stable/event.c	2009-11-17 19:39:08.000000000 -0800
++++ libevent-1.4.13-stable-fb-fresh/event.c	2010-01-28 14:52:34.687528000 -0800
+@@ -134,10 +134,12 @@
+ static int
+ gettime(struct event_base *base, struct timeval *tp)
+ {
++/*
+ 	if (base->tv_cache.tv_sec) {
+ 		*tp = base->tv_cache;
+ 		return (0);
+ 	}
++*/
+ 
+ #if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
+ 	if (use_monotonic) {
+@@ -471,7 +473,7 @@
+ 	int res, done;
+ 
+ 	/* clear time cache */
+-	base->tv_cache.tv_sec = 0;
++	/* base->tv_cache.tv_sec = 0; */
+ 
+ 	if (base->sig.ev_signal_added)
+ 		evsignal_base = base;
+@@ -511,13 +513,13 @@
+ 		gettime(base, &base->event_tv);
+ 
+ 		/* clear time cache */
+-		base->tv_cache.tv_sec = 0;
++		/* base->tv_cache.tv_sec = 0; */
+ 
+ 		res = evsel->dispatch(base, evbase, tv_p);
+ 
+ 		if (res == -1)
+ 			return (-1);
+-		gettime(base, &base->tv_cache);
++		/* gettime(base, &base->tv_cache); */
+ 
+ 		timeout_process(base);
+ 
+@@ -530,7 +532,7 @@
+ 	}
+ 
+ 	/* clear time cache */
+-	base->tv_cache.tv_sec = 0;
++	/* base->tv_cache.tv_sec = 0; */
+ 
+ 	event_debug(("%s: asked to terminate loop.", __func__));
+ 	return (0);
+diff -wbBdu -ur libevent-1.4.13-stable/evhttp.h libevent-1.4.13-stable-fb-fresh/evhttp.h
+--- libevent-1.4.13-stable/evhttp.h	2009-04-12 15:59:30.000000000 -0700
++++ libevent-1.4.13-stable-fb-fresh/evhttp.h	2010-01-28 14:52:34.815520000 -0800
+@@ -87,6 +87,17 @@
+ int evhttp_bind_socket(struct evhttp *http, const char *address, u_short port);
+ 
+ /**
++ * Like evhttp_bind_socket(), but returns the socket file descriptor.
++ *
++ * @param http a pointer to an evhttp object
++ * @param address a string containing the IP address to listen(2) on
++ * @param port the port number to listen on
++ * @return Socket file descriptor on success, -1 on failure
++ * @see evhttp_bind_socket()
++ */
++int evhttp_bind_socket_with_fd(struct evhttp *http, const char *address, u_short port);
++
++/**
+  * Makes an HTTP server accept connections on the specified socket
+  *
+  * This may be useful to create a socket and then fork multiple instances
+@@ -105,6 +116,21 @@
+ int evhttp_accept_socket(struct evhttp *http, int fd);
+ 
+ /**
++ * Makes an HTTP server stop accepting connections on the specified socket
++ *
++ * This may be useful when a socket has been sent via file descriptor passing
++ * and is no longer needed by the current process.
++ *
++ * This function does not close the socket.
++ *
++ * @param http a pointer to an evhttp object
++ * @param fd a socket fd that is currently accepting connections
++ * @return 0 on success, -1 on failure.
++ * @see evhttp_accept_socket()
++ */
++int evhttp_del_accept_socket(struct evhttp *http, int fd);
++
++/**
+  * Free the previously created HTTP server.
+  *
+  * Works only if no requests are currently being served.
+@@ -157,6 +183,19 @@
+ void evhttp_send_reply(struct evhttp_request *req, int code,
+     const char *reason, struct evbuffer *databuf);
+ 
++/**
++ * Send an HTML reply synchronously as much as possible by calling _begin().
++ * Great for a worker thread to send the reply immediately without queuing up
++ * events back to the loop. Call _end() to send the rest of the packet from
++ * event loop.
++ *
++ * When _begin() returns needs to be fed into _end() as the 1st parameter
++ * "nwritten".
++ */
++int evhttp_send_reply_sync_begin(struct evhttp_request *req, int code,
++                                 const char *reason, struct evbuffer *databuf);
++void evhttp_send_reply_sync_end(int nwritten, struct evhttp_request *req);
++
+ /* Low-level response interface, for streaming/chunked replies */
+ void evhttp_send_reply_start(struct evhttp_request *, int, const char *);
+ void evhttp_send_reply_chunk(struct evhttp_request *, struct evbuffer *);
+@@ -210,6 +249,7 @@
+ 
+ 	enum evhttp_request_kind kind;
+ 	enum evhttp_cmd_type type;
++	char *ext_method; /* webdav methods, for example */
+ 
+ 	char *uri;			/* uri after HTTP request was parsed */
+ 
+@@ -222,6 +262,7 @@
+ 	struct evbuffer *input_buffer;	/* read data */
+ 	ev_int64_t ntoread;
+ 	int chunked;
++	int referenced;
+ 
+ 	struct evbuffer *output_buffer;	/* outgoing post or data */
+ 
+Only in libevent-1.4.13-stable-fb-fresh/: fb_libevent.patch.txt
+diff -wbBdu -ur libevent-1.4.13-stable/http.c libevent-1.4.13-stable-fb-fresh/http.c
+--- libevent-1.4.13-stable/http.c	2009-07-01 23:05:28.000000000 -0700
++++ libevent-1.4.13-stable-fb-fresh/http.c	2010-01-28 14:52:35.154415000 -0800
+@@ -478,7 +478,6 @@
+ 			evhttp_add_header(req->output_headers,
+ 			    "Connection", "keep-alive");
+ 
+-		if (req->minor == 1 || is_keepalive) {
+ 			/* 
+ 			 * we need to add the content length if the
+ 			 * user did not give it, this is required for
+@@ -488,7 +487,6 @@
+ 				req->output_headers,
+ 				(long)EVBUFFER_LENGTH(req->output_buffer));
+ 		}
+-	}
+ 
+ 	/* Potentially add headers for unidentified content. */
+ 	if (EVBUFFER_LENGTH(req->output_buffer)) {
+@@ -675,14 +673,14 @@
+ evhttp_write(int fd, short what, void *arg)
+ {
+ 	struct evhttp_connection *evcon = arg;
+-	int n;
+ 
+ 	if (what == EV_TIMEOUT) {
+ 		evhttp_connection_fail(evcon, EVCON_HTTP_TIMEOUT);
+ 		return;
+ 	}
+ 
+-	n = evbuffer_write(evcon->output_buffer, fd);
++	if (EVBUFFER_LENGTH(evcon->output_buffer) != 0) {
++		int n = evbuffer_write(evcon->output_buffer, fd);
+ 	if (n == -1) {
+ 		event_debug(("%s: evbuffer_write", __func__));
+ 		evhttp_connection_fail(evcon, EVCON_HTTP_EOF);
+@@ -694,6 +692,7 @@
+ 		evhttp_connection_fail(evcon, EVCON_HTTP_EOF);
+ 		return;
+ 	}
++	}
+ 
+ 	if (EVBUFFER_LENGTH(evcon->output_buffer) != 0) {
+ 		evhttp_add_event(&evcon->ev, 
+@@ -1262,19 +1261,52 @@
+ 	if (line == NULL)
+ 		return (-1);
+ 	uri = strsep(&line, " ");
+-	if (line == NULL)
+-		return (-1);
++	if (line == NULL) {
++		version = "HTTP/1.0";
++	} else {
+ 	version = strsep(&line, " ");
+ 	if (line != NULL)
+ 		return (-1);
++	}
+ 
+ 	/* First line */
++	req->ext_method = NULL;
+ 	if (strcmp(method, "GET") == 0) {
+ 		req->type = EVHTTP_REQ_GET;
+ 	} else if (strcmp(method, "POST") == 0) {
+ 		req->type = EVHTTP_REQ_POST;
+ 	} else if (strcmp(method, "HEAD") == 0) {
+ 		req->type = EVHTTP_REQ_HEAD;
++	} else if (strcmp(method, "OPTIONS") == 0) {
++		req->type = EVHTTP_REQ_POST;
++		req->ext_method = "OPTIONS";
++	} else if (strcmp(method, "REPORT") == 0) {
++		req->type = EVHTTP_REQ_POST;
++		req->ext_method = "REPORT";
++	} else if (strcmp(method, "PROPFIND") == 0) {
++		req->type = EVHTTP_REQ_POST;
++		req->ext_method = "PROPFIND";
++	} else if (strcmp(method, "PROPPATH") == 0) {
++		req->type = EVHTTP_REQ_POST;
++		req->ext_method = "PROPPATH";
++	} else if (strcmp(method, "MKCOL") == 0) {
++		req->type = EVHTTP_REQ_POST;
++		req->ext_method = "MKCOL";
++	} else if (strcmp(method, "MKCALENDAR") == 0) {
++		req->type = EVHTTP_REQ_POST;
++		req->ext_method = "MKCALENDAR";
++	} else if (strcmp(method, "PUT") == 0) {
++		req->type = EVHTTP_REQ_POST;
++		req->ext_method = "PUT";
++	} else if (strcmp(method, "DELETE") == 0) {
++		req->type = EVHTTP_REQ_POST;
++		req->ext_method = "DELETE";
++	} else if (strcmp(method, "LOCK") == 0) {
++		req->type = EVHTTP_REQ_POST;
++		req->ext_method = "LOCK";
++	} else if (strcmp(method, "UNLOCK") == 0) {
++		req->type = EVHTTP_REQ_POST;
++		req->ext_method = "UNLOCK";
+ 	} else {
+ 		event_debug(("%s: bad method %s on request %p from %s",
+ 			__func__, method, req, req->remote_host));
+@@ -1939,10 +1971,44 @@
+ 	evhttp_send(req, databuf);
+ }
+ 
++int
++evhttp_send_reply_sync_begin(struct evhttp_request *req, int code,
++                             const char *reason, struct evbuffer *databuf) {
++  evhttp_response_code(req, code, reason);
++	struct evhttp_connection *evcon = req->evcon;
++
++	assert(TAILQ_FIRST(&evcon->requests) == req);
++
++	/* xxx: not sure if we really should expose the data buffer this way */
++	if (databuf != NULL)
++		evbuffer_add_buffer(req->output_buffer, databuf);
++
++	/* Adds headers to the response */
++	evhttp_make_header(evcon, req);
++
++	return evbuffer_write(evcon->output_buffer, evcon->fd);
++}
++
++void
++evhttp_send_reply_sync_end(int nwritten, struct evhttp_request *req) {
++  struct evhttp_connection *evcon = req->evcon;
++
++	if (nwritten <= 0) {
++		evhttp_connection_fail(evcon, EVCON_HTTP_EOF);
++	} else if (EVBUFFER_LENGTH(evcon->output_buffer) == 0) {
++		evhttp_send_done(evcon, NULL);
++	} else {
++		evhttp_write_buffer(evcon, evhttp_send_done, NULL);
++	}
++}
++
++
+ void
+ evhttp_send_reply_start(struct evhttp_request *req, int code,
+     const char *reason)
+ {
++	req->referenced = 1;
++
+ 	evhttp_response_code(req, code, reason);
+ 	if (req->major == 1 && req->minor == 1) {
+ 		/* use chunked encoding for HTTP/1.1 */
+@@ -1957,6 +2023,8 @@
+ void
+ evhttp_send_reply_chunk(struct evhttp_request *req, struct evbuffer *databuf)
+ {
++	if (req->referenced < 0) return;
++
+ 	if (req->chunked) {
+ 		evbuffer_add_printf(req->evcon->output_buffer, "%x\r\n",
+ 				    (unsigned)EVBUFFER_LENGTH(databuf));
+@@ -1973,6 +2041,13 @@
+ {
+ 	struct evhttp_connection *evcon = req->evcon;
+ 
++	if (req->referenced < 0) {
++		req->referenced = 0;
++		evhttp_request_free(req);
++		return;
++	}
++	req->referenced = 0;
++
+ 	if (req->chunked) {
+ 		evbuffer_add(req->evcon->output_buffer, "0\r\n\r\n", 5);
+ 		evhttp_write_buffer(req->evcon, evhttp_send_done, NULL);
+@@ -2251,6 +2326,16 @@
+ int
+ evhttp_bind_socket(struct evhttp *http, const char *address, u_short port)
+ {
++	int res = evhttp_bind_socket_with_fd(http, address, port);
++	if (res < 0) {
++		return (res);
++	}
++	return (0);
++}
++
++int
++evhttp_bind_socket_with_fd(struct evhttp *http, const char *address, u_short port)
++{
+ 	int fd;
+ 	int res;
+ 
+@@ -2265,9 +2350,11 @@
+ 
+ 	res = evhttp_accept_socket(http, fd);
+ 	
+-	if (res != -1)
++	if (res != -1) {
+ 		event_debug(("Bound to port %d - Awaiting connections ... ",
+ 			port));
++		return (fd);
++	}
+ 
+ 	return (res);
+ }
+@@ -2301,6 +2388,25 @@
+ 	return (0);
+ }
+ 
++int
++evhttp_del_accept_socket(struct evhttp *http, int fd)
++{
++	struct evhttp_bound_socket *bound;
++	TAILQ_FOREACH(bound, &http->sockets, next) {
++		if (bound->bind_ev.ev_fd == fd)
++			break;
++	}
++
++	if (bound == NULL)
++		return (-1);
++
++	TAILQ_REMOVE(&http->sockets, bound, next);
++	event_del(&bound->bind_ev);
++	free(bound);
++
++	return (0);
++}
++
+ static struct evhttp*
+ evhttp_new_object(void)
+ {
+@@ -2483,6 +2589,11 @@
+ void
+ evhttp_request_free(struct evhttp_request *req)
+ {
++	if (req->referenced) {
++		req->referenced = -1;
++		return;
++	}
++
+ 	if (req->remote_host != NULL)
+ 		free(req->remote_host);
+ 	if (req->uri != NULL)
+Only in libevent-1.4.13-stable-fb-fresh/sample: CMakeLists.txt
+Only in libevent-1.4.13-stable-fb-fresh/test: CMakeLists.txt

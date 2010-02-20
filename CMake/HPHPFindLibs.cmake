@@ -132,10 +132,22 @@ FIND_LIBRARY(ONIG_LIB onig)
 
 FIND_LIBRARY (CAP_LIB cap)
 
-# potentially make it look in a different directory for the google apps
+if (CAP_LIB STREQUAL "CAP_LIB-NOTFOUND")
+  message(FATAL_ERROR "You need to install libcap")
+endif()
+
+# potentially make it look in a different directory for the google tools
 FIND_LIBRARY (BFD_LIB bfd)
 FIND_LIBRARY (BINUTIL_LIB iberty)
 FIND_LIBRARY (DL_LIB dl)
+
+if (BFD_LIB STREQUAL "BFD_LIB-NOTFOUND")
+  message(FATAL_ERROR "You need to install binutils")
+endif()
+
+if (BINUTIL_LIB STREQUAL "BINUTIL_LIB-NOTFOUND")
+  message(FATAL_ERROR "You need to install binutils")
+endif()
 
 
 include_directories(${HPHP_HOME}/src)

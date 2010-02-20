@@ -43,6 +43,8 @@ To build HipHop use the following
 cd /home/user/dev
 git clone git://github.com/facebook/hiphop-php.git
 cd hiphop-php
+git submodule init
+git submodule update
 export HPHP_HOME=`pwd`
 export HPHP_LIB=`pwd`/bin
 cmake .

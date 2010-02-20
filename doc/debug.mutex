@@ -1,0 +1,26 @@
+
+<h2>Debugging Excessive Mutex</h2>
+
+1. Trun on mutex stats
+
+Hit admin port with /stats-mutex to turn on mutex stats:
+
+   GET http://localhost:9999/stats-mutex
+
+2. Query mutex stats
+
+Get mutex stats like this,
+
+   GET "http://localhost:9999/stats.kvp?agg=*&keys=:mutex.*:"
+
+3. Pre-written script
+
+Or, run bin/ report stats,
+
+   php ../bin/report_mutex.php localhost 10 1
+
+4. Turn off mutex stats
+
+Hit admin port with /stats-mutex to turn off mutex stats:
+
+   GET http://localhost:9999/stats-mutex

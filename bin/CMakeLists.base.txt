@@ -34,7 +34,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 auto_sources(SOURCES "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/php")
 auto_sources(SOURCES2 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/sys")
-add_executable(program ${SOURCES} ${SOURCES2})
+auto_sources(SOURCES3 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/cls")
+auto_sources(SOURCES4 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/cpp")
+add_executable(program ${SOURCES} ${SOURCES2} ${SOURCES3} ${SOURCES4})
 
 add_library(libhphp_runtime STATIC IMPORTED)
 SET_PROPERTY(TARGET libhphp_runtime PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libhphp_runtime.a")

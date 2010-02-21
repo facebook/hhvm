@@ -30,3 +30,7 @@ src/cpp/eval/parser/lex.eval_.cpp
 
 src/hphpi/gen
 src/hphpi/hphpi
+
+*.cmake
+CMakeFiles
+CMakeCache.txt

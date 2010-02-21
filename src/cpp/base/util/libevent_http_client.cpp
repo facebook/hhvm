@@ -146,7 +146,6 @@ void LibEventHttpClient::clear() {
     m_thread = NULL;
   }
   if (m_request) {
-    evhttp_request_free(m_request);
     m_request = NULL;
   }
   m_url.clear();

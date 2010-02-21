@@ -157,13 +157,19 @@ FIND_LIBRARY (BINUTIL_LIB iberty)
 FIND_LIBRARY (DL_LIB dl)
 
 if (BFD_LIB STREQUAL "BFD_LIB-NOTFOUND")
-  message(FATAL_ERROR "You need to install binutils")
+	message(FATAL_ERROR "You need to install binutils")
 endif()
 
 if (BINUTIL_LIB STREQUAL "BINUTIL_LIB-NOTFOUND")
-  message(FATAL_ERROR "You need to install binutils")
+	message(FATAL_ERROR "You need to install binutils")
 endif()
 
+find_package(BISON REQUIRED)
+find_package(FLEX REQUIRED)
+
+if (${FLEX_VERSION} VERSION_LESS 2.5.33)
+	message(FATAL_ERROR "Flex is too old, found ${FLEX_VERSION} and we need 2.5.33")
+endif()
 
 include_directories(${HPHP_HOME}/src)
 include_directories(${HPHP_HOME}/src/lib/system/gen)

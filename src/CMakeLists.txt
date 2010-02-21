@@ -73,9 +73,6 @@ endforeach(t ${HPHP_EXCLUDE_FILES})
 
 #list(REMOVE_ITEM CXX_SOURCES "${CXX_NOOPT_SOURCES}")
 
-find_package(BISON REQUIRED)
-find_package(FLEX REQUIRED)
-
 FLEX_TARGET(HphpScanner ${CMAKE_CURRENT_SOURCE_DIR}/cpp/eval/parser/hphp.x ${CMAKE_CURRENT_SOURCE_DIR}/cpp/eval/parser/lex.eval_.cpp COMPILE_FLAGS " -w -i -Peval_")
 BISON_TARGET(HphpParser ${CMAKE_CURRENT_SOURCE_DIR}/cpp/eval/parser/hphp.y ${CMAKE_CURRENT_SOURCE_DIR}/cpp/eval/parser/hphp.tab.cpp  COMPILE_FLAGS " -v -d -p eval_")
 ADD_FLEX_BISON_DEPENDENCY(HphpScanner HphpParser)

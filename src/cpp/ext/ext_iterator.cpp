@@ -177,7 +177,7 @@ void f_hphp_recursiveiteratoriterator_next(CObjRef obj) {
       RecursiveDirectoryIterator *ii =
         NEW(RecursiveDirectoryIterator)(pathName, rdi->m_flags);
       rii->m_iterators.push_back(std::pair<Object, bool>(ii, 0));
-      ii->next();
+      if (ii->isdot()) ii->next();
     } else {
       rdi->next();
       rii->m_iterators[size-1].second = 0;
@@ -297,7 +297,7 @@ void f_hphp_directoryiterator_seek(CObjRef obj, int64 position) {
 }
 
 Variant f_hphp_directoryiterator_current(CObjRef obj) {
-  return obj; 
+  return obj;
 }
 
 String f_hphp_directoryiterator___tostring(CObjRef obj) {

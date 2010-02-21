@@ -139,7 +139,9 @@ include_directories(${ZLIB_INCLUDE_DIR})
 
 #oniguruma
 FIND_LIBRARY(ONIG_LIB onig)
-#FIND_LIBRARY(MBFL_LIB mbfl)
+if (ONIG_LIB STREQUAL "ONIG_LIB-NOTFOUND")
+  message(FATAL_ERROR "You need to install libonig")
+endif()
 
 #LINK_LIBS = -lpthread $(BFD_LIBS) -lrt -lstdc++ -lresolv
 #-lcrypto -lcrypt
@@ -201,5 +203,4 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${ONIG_LIB})
 	target_link_libraries(${target} ${Mcrypt_LIB})
 	target_link_libraries(${target} ${GD_LIBRARY})
-	#target_link_libraries(${target} ${MBFL_LIB})
 endmacro()

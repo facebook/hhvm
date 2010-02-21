@@ -76,7 +76,10 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   reset();
   ConstructPtr self = shared_from_this();
   if (!m_name.empty()) {
-    ClassScopePtr cls = ar->findClass(m_name);
+    ClassScopePtr cls = ar->resolveClass(m_name);
+    if (cls) {
+      m_name = cls->getName();
+    }
     if (!cls || cls->isRedeclaring()) {
       if (cls) {
         m_redeclared = true;

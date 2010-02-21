@@ -448,6 +448,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
       VariableUnserializer vu(in);
       try {
         staticVariable->value = vu.unserialize();
+        staticVariable->value.setStatic();
       } catch (Exception &e) {
         ASSERT(false);
       }
@@ -483,6 +484,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
       VariableUnserializer vu(in);
       try {
         constant->value = vu.unserialize();
+        constant->value.setStatic();
       } catch (Exception &e) {
         ASSERT(false);
       }

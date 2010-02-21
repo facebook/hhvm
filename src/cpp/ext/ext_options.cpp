@@ -282,6 +282,16 @@ void f_ini_restore(CStrRef varname) {
 }
 
 String f_ini_set(CStrRef varname, CStrRef newvalue) {
+  if (varname == "memory_limit") {
+    int64 oldvalue = RuntimeOption::RequestMemoryMaxBytes;
+    RuntimeOption::RequestMemoryMaxBytes = newvalue.toInt64();
+    return oldvalue;
+  }
+  if (varname == "max_execution_time") {
+    int64 oldvalue = RuntimeOption::RequestTimeoutSeconds;
+    RuntimeOption::RequestTimeoutSeconds = newvalue.toInt64();
+    return oldvalue;
+  }
   return "";
 }
 

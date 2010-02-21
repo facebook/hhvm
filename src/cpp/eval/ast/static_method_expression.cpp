@@ -38,7 +38,9 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
   // of a method when an object is available and the object's class inherits.
   // Super slow.
   String name(m_name->get(env));
-  Object co(env.currentObject());
+  Variant &vco = env.currentObject();
+  Object co;
+  if (!vco.isNull()) co = vco.toObject();
   bool withinClass = !co.isNull() && co->o_instanceof(m_cname.data());
   bool foundClass;
   const MethodStatement *ms = RequestEvalState::findMethod(m_cname.data(),

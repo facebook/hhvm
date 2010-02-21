@@ -599,7 +599,15 @@ void Parser::onAssignNew(Token &out, Token &var, Token &name, Token &args) {
 
 void Parser::onNewObject(Token &out, Token &name, Token &args) {
   out.reset();
-  out->exp() = NEW_EXP(NewObject, name->name(), args->exprs());
+  NamePtr n = name->name();
+  if (haveClass()) {
+    if (n->getStatic() == "self") {
+      n = Name::fromString(this, peekClass()->name());
+    } else if (n->getStatic() == "parent") {
+      n = Name::fromString(this, peekClass()->parent());
+    }
+  }
+  out->exp() = NEW_EXP(NewObject, n, args->exprs());
 }
 
 void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {

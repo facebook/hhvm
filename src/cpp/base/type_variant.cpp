@@ -520,7 +520,9 @@ Variant &Variant::assign(CVarRef v, bool deep) {
     bind(v.m_data.pvar);
 
   } else if (isReferenced()) {
-    m_data.pvar->assign(v, deep);
+    if (!v.isReferenced() || v.getVariantData() != getVariantData()) {
+      m_data.pvar->assign(v, deep);
+    }
   } else {
     if (this != &v) {
       bind(v);

@@ -88,6 +88,9 @@ find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 add_definitions(${LIBXML2_DEFINITIONS})
 
+find_package(EXPAT REQUIRED)
+include_directories(${EXPAT_INCLUDE_DIRS})
+
 # SQLite3 + timelib are bundled in HPHP sources
 include_directories("${HPHP_HOME}/src/third_party/libsqlite3")
 include_directories("${HPHP_HOME}/src/third_party/timelib")
@@ -188,6 +191,7 @@ macro(hphp_link target)
 	target_link_libraries(${target} afdt)
 	target_link_libraries(${target} mbfl)
 	target_link_libraries(${target} ${LIBXML2_LIBRARIES})
+	target_link_libraries(${target} ${EXPAT_LIBRARY})
 	target_link_libraries(${target} ${ONIG_LIB})
 	target_link_libraries(${target} ${Mcrypt_LIB})
 	target_link_libraries(${target} ${GD_LIBRARY})

@@ -670,7 +670,7 @@ static_class_constant:
 scalar:
     T_STRING                           { _p->onConstant(&$$, &$1);}
   | T_STRING_VARNAME                   { _p->onConstant(&$$, &$1);}
-  | class_constant                     { $$ = $1}
+  | class_constant                     { $$ = $1;}
   | common_scalar                      { $$ = $1;}
   | '"' encaps_list '"'                { _p->onEncapsList(&$$,'"',&$2);}
   | '\'' encaps_list '\''              { _p->onEncapsList(&$$,'\'',&$2);}

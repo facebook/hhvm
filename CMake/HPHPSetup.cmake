@@ -7,14 +7,12 @@ OPTION(REQUEST_TIMEOUT_DETECTION "Enable Timeout Detection" ON)
 
 add_definitions(-D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1)
 
-set(CMAKE_C_FLAGS "-w -fPIC")
-set(CMAKE_CXX_FLAGS "-fPIC -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings ")
+#should wrap this in an if
+add_definitions(-DRELEASE=1)
+set(HPHP_OPT "-O3")
 
-IF(0)
-	set(HPHP_OPT "-O3")
-	add_definitions(-DRELEASE=1)
-ENDIF()
-
+set(CMAKE_C_FLAGS "${HPHP_OPT} -w -fPIC")
+set(CMAKE_CXX_FLAGS "${HPHP_OPT} -fPIC -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings ")
 
 include_directories(${HPHP_HOME}/src)
 include_directories(${HPHP_HOME}/src/lib/system/gen)

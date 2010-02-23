@@ -44,5 +44,15 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../")
 
 set(CMAKE_CURRENT_BINARY_DIR "${CMAKE_SOURCE_DIR}/bin")
 
+foreach (CXX_FILE ${CXX_SOURCES})
+	if(${CXX_FILE} MATCHES ".no.cpp$")
+		SET_SOURCE_FILES_PROPERTIES(
+			${CXX_FILE}
+			PROPERTIES
+			COMPILE_FLAGS -O0
+		)
+	endif()
+endforeach()
+
 ADD_LIBRARY(hphp_analysis STATIC ${CXX_SOURCES} ${C_SOURCES})
 target_link_libraries(hphp_analysis ${Boost_LIBRARIES})

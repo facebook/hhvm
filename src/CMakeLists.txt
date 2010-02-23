@@ -71,8 +71,6 @@ foreach (t ${HPHP_EXCLUDE_FILES})
 	endif ()
 endforeach(t ${HPHP_EXCLUDE_FILES})
 
-#list(REMOVE_ITEM CXX_SOURCES "${CXX_NOOPT_SOURCES}")
-
 FLEX_TARGET(HphpScanner ${CMAKE_CURRENT_SOURCE_DIR}/cpp/eval/parser/hphp.x ${CMAKE_CURRENT_SOURCE_DIR}/cpp/eval/parser/lex.eval_.cpp COMPILE_FLAGS " -w -i -Peval_")
 BISON_TARGET(HphpParser ${CMAKE_CURRENT_SOURCE_DIR}/cpp/eval/parser/hphp.y ${CMAKE_CURRENT_SOURCE_DIR}/cpp/eval/parser/hphp.tab.cpp  COMPILE_FLAGS " -v -d -p eval_")
 ADD_FLEX_BISON_DEPENDENCY(HphpScanner HphpParser)
@@ -80,8 +78,6 @@ ADD_FLEX_BISON_DEPENDENCY(HphpScanner HphpParser)
 # required to remove warning when a file is there twice
 list(REMOVE_ITEM CXX_SOURCES ${FLEX_HphpScanner_OUTPUTS} ${BISON_HphpParser_OUTPUTS})
 list(APPEND CXX_SOURCES ${FLEX_HphpScanner_OUTPUTS} ${BISON_HphpParser_OUTPUTS})
-
-#list(APPEND C_SOURCES ${TIMELIB_SOURCES})
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
@@ -94,6 +90,16 @@ add_library(timelib STATIC ${TIMELIB_SOURCES})
 add_subdirectory(third_party/xhp/xhp)
 add_subdirectory(third_party/libafdt)
 add_subdirectory(third_party/libmbfl)
+
+foreach (CXX_FILE ${CXX_SOURCES})
+	if(${CXX_FILE} MATCHES ".no.cpp$")
+		SET_SOURCE_FILES_PROPERTIES(
+			${CXX_FILE}
+			PROPERTIES
+			COMPILE_FLAGS -O0
+		)
+	endif()
+endforeach()
 
 ADD_LIBRARY(hphp_runtime_static STATIC ${C_SOURCES} ${CXX_SOURCES})
 #ADD_LIBRARY(hphp_runtime SHARED ${C_SOURCES} ${CXX_SOURCES})

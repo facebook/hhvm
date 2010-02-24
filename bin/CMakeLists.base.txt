@@ -56,7 +56,10 @@ SET_PROPERTY(TARGET afdt PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libafdt.a"
 add_library(mbfl STATIC IMPORTED)
 SET_PROPERTY(TARGET mbfl PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libmbfl.a")
 
+if (NOT ${PROJECT_NAME})
+	set(PROJECT_NAME program)
+endif()
 
-target_link_libraries(program libhphp_runtime)
+target_link_libraries(${PROJECT_NAME} libhphp_runtime)
 
-hphp_link(program)
+hphp_link(${PROJECT_NAME})

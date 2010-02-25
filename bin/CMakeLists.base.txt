@@ -15,7 +15,7 @@
 #   +----------------------------------------------------------------------+
 #
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4 FATAL_ERROR)
 PROJECT(hphp C CXX)
 
 IF("$ENV{HPHP_HOME}" STREQUAL "")
@@ -32,11 +32,15 @@ include(HPHPSetup)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+if ("${PROGRAM_NAME}" STREQUAL "")
+	set(PROGRAM_NAME program)
+endif()
+
 auto_sources(SOURCES "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/php")
 auto_sources(SOURCES2 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/sys")
 auto_sources(SOURCES3 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/cls")
 auto_sources(SOURCES4 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/cpp")
-add_executable(program ${SOURCES} ${SOURCES2} ${SOURCES3} ${SOURCES4})
+add_executable(${PROGRAM_NAME} ${SOURCES} ${SOURCES2} ${SOURCES3} ${SOURCES4})
 
 add_library(libhphp_runtime STATIC IMPORTED)
 SET_PROPERTY(TARGET libhphp_runtime PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libhphp_runtime.a")
@@ -56,10 +60,6 @@ SET_PROPERTY(TARGET afdt PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libafdt.a"
 add_library(mbfl STATIC IMPORTED)
 SET_PROPERTY(TARGET mbfl PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libmbfl.a")
 
-if (NOT ${PROJECT_NAME})
-	set(PROJECT_NAME program)
-endif()
+target_link_libraries(${PROGRAM_NAME} libhphp_runtime)
 
-target_link_libraries(${PROJECT_NAME} libhphp_runtime)
-
-hphp_link(${PROJECT_NAME})
+hphp_link(${PROGRAM_NAME})

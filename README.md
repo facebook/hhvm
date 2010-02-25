@@ -25,7 +25,7 @@ HipHop is a source code transformer which transforms PHP source code into highly
 * tbb *Intel's Thread Building Blocks*
 * [Oniguruma](http://www.geocities.jp/kosako3/oniguruma/)
 
-The following packages have had slight modifications added to them, patches are provided and should be made against the current source copies.
+The following packages have had slight modifications added to them. Patches are provided and should be made against the current source copies.
 
 * [libcurl](http://curl.haxx.se/download.html)
 * src/third_party/libcurl.fb-changes.diff
@@ -34,25 +34,25 @@ The following packages have had slight modifications added to them, patches are 
 
 ## Installation
 
-You may need to point CMake to the location of your custom libcurl and libevent or any other libraries which needed to be installed. The *CMAKE_PREFIX_PATH* variable is used to hint to the location.
+You may need to point CMake to the location of your custom libcurl and libevent, or to any other libraries which needed to be installed. The *CMAKE_PREFIX_PATH* variable is used to hint to the location.
 
-export CMAKE_PREFIX_PATH=/home/user
+    export CMAKE_PREFIX_PATH=/home/user
 
-To build HipHop use the following
+To build HipHop, use the following:
 
-cd /home/user/dev
-git clone git://github.com/facebook/hiphop-php.git
-cd hiphop-php
-git submodule init
-git submodule update
-export HPHP_HOME=`pwd`
-export HPHP_LIB=`pwd`/bin
-cmake .
+    cd /home/user/dev
+    git clone git://github.com/facebook/hiphop-php.git
+    cd hiphop-php
+    git submodule init
+    git submodule update
+    export HPHP_HOME=`pwd`
+    export HPHP_LIB=`pwd`/bin
+    cmake .
 
-Once this is done you can generate the build file and this will return you to the shell, finally to build run make, if any errors occur it may be required to remove the CMakeCache.txt directory in the checkout.
+Once this is done you can generate the build file. This will return you to the shell. Finally, to build, run `make`. If any errors occur, it may be required to remove the CMakeCache.txt directory in the checkout.
 
-make
+    make
 
 ## Running HipHop
 
-Please see (http://wiki.github.com/facebook/hiphop-php/running-hiphop)
+Please see [the wiki page](http://wiki.github.com/facebook/hiphop-php/running-hiphop)

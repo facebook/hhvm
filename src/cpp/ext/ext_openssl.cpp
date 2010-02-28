@@ -37,7 +37,9 @@ namespace HPHP {
 #define OPENSSL_ALGO_SHA1       1
 #define OPENSSL_ALGO_MD5        2
 #define OPENSSL_ALGO_MD4        3
+#ifdef HAVE_OPENSSL_MD2_H
 #define OPENSSL_ALGO_MD2        4
+#endif
 
 enum php_openssl_key_type {
   OPENSSL_KEYTYPE_RSA,
@@ -337,8 +339,13 @@ public:
 
 class php_x509_request {
 public:
-  LHASH *global_config;  /* Global SSL config */
-  LHASH *req_config;     /* SSL config for this request */
+#if OPENSSL_VERSION_NUMBER >= 0x10000002L
+  LHASH_OF(CONF_VALUE) * global_config;	/* Global SSL config */
+  LHASH_OF(CONF_VALUE) * req_config;    /* SSL config for this request */
+#else
+  LHASH * global_config;  /* Global SSL config */
+  LHASH * req_config;     /* SSL config for this request */
+#endif
   const EVP_MD *md_alg;
   const EVP_MD *digest;
   const char *section_name;
@@ -545,9 +552,16 @@ static bool add_oid_section(struct php_x509_request *req) {
   return true;
 }
 
+#if OPENSSL_VERSION_NUMBER >= 0x10000002L
+static inline bool php_openssl_config_check_syntax
+(const char *section_label, const char *config_filename, const char *section,
+ LHASH_OF(CONF_VALUE) *config) {
+#else
 static inline bool php_openssl_config_check_syntax
 (const char *section_label, const char *config_filename, const char *section,
  LHASH *config) {
+#endif
+
   X509V3_CTX ctx;
   X509V3_set_ctx_test(&ctx);
   X509V3_set_conf_lhash(&ctx, config);
@@ -1952,7 +1966,9 @@ static const EVP_MD *php_openssl_get_evp_md_from_algo(long algo) {
   case OPENSSL_ALGO_SHA1: return EVP_sha1();
   case OPENSSL_ALGO_MD5:  return EVP_md5();
   case OPENSSL_ALGO_MD4:  return EVP_md4();
+#ifdef HAVE_OPENSSL_MD2_H
   case OPENSSL_ALGO_MD2:  return EVP_md2();
+#endif
   }
   return NULL;
 }

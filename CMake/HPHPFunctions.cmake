@@ -30,3 +30,25 @@ function(auto_sources RETURN_VALUE PATTERN SOURCE_SUBDIRS)
   
 endfunction(auto_sources)
 
+macro(MYSQL_SOCKET_SEARCH)
+	foreach (i
+		/var/run/mysqld/mysqld.sock
+		/var/tmp/mysql.sock
+		/var/run/mysql/mysql.sock
+		/var/lib/mysql/mysql.sock
+		/var/mysql/mysql.sock
+		/usr/local/mysql/var/mysql.sock
+		/Private/tmp/mysql.sock
+		/private/tmp/mysql.sock
+		/tmp/mysql.sock
+		)
+		if (EXISTS ${i})
+			set(MYSQL_SOCK ${i})
+			break()
+		endif()
+	endforeach()
+
+	if (MYSQL_SOCK)
+		set(MYSQL_UNIX_SOCK_ADDR ${MYSQL_SOCK} CACHE STRING "Path to MySQL Socket")	
+	endif()
+endmacro()

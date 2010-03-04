@@ -114,11 +114,12 @@ if (ICU_FOUND)
 endif (ICU_FOUND)
 
 # (google heap OR cpu profiler) AND libunwind 
+FIND_LIBRARY(UNWIND_LIB unwind)
 
 # Google tmalloc
-
-# xhplibs
-
+FIND_LIBRARY(GOOGLE_TCMALLOC_LIB tcmalloc)
+FIND_LIBRARY(GOOGLE_TCMALLOC_MINIMAL_LIB tcmalloc_minimal)
+FIND_LIBRARY(GOOGLE_PROFILER_LIB profiler)
 
 # tbb libs
 find_package(TBB REQUIRED)
@@ -144,10 +145,8 @@ find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIR})
 
 #oniguruma
-FIND_LIBRARY(ONIG_LIB onig)
-if (ONIG_LIB STREQUAL "ONIG_LIB-NOTFOUND")
-  message(FATAL_ERROR "You need to install libonig")
-endif()
+find_package(ONIGURUMA REQUIRED)
+include_directories(${ONIGURUMA_INCLUDE_DIRS})
 
 #LINK_LIBS = -lpthread $(BFD_LIBS) -lrt -lstdc++ -lresolv
 #-lcrypto -lcrypt
@@ -199,14 +198,15 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${OPENSSL_LIBRARIES})
 	target_link_libraries(${target} ${ZLIB_LIBRARIES})
 
+	target_link_libraries(${target} ${LIBXML2_LIBRARIES})
+	target_link_libraries(${target} ${EXPAT_LIBRARY})
+	target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
+	target_link_libraries(${target} ${Mcrypt_LIB})
+	target_link_libraries(${target} ${GD_LIBRARY})
+	
 	target_link_libraries(${target} timelib)
 	target_link_libraries(${target} sqlite3)
 	target_link_libraries(${target} xhp)
 	target_link_libraries(${target} afdt)
 	target_link_libraries(${target} mbfl)
-	target_link_libraries(${target} ${LIBXML2_LIBRARIES})
-	target_link_libraries(${target} ${EXPAT_LIBRARY})
-	target_link_libraries(${target} ${ONIG_LIB})
-	target_link_libraries(${target} ${Mcrypt_LIB})
-	target_link_libraries(${target} ${GD_LIBRARY})
 endmacro()

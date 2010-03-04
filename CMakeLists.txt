@@ -1,6 +1,15 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4 FATAL_ERROR)
 PROJECT(hphp C CXX)
 
+INCLUDE(CheckTypeSize)
+CHECK_TYPE_SIZE(long SIZE_LONG)
+
+IF(${SIZE_LONG} LESS 8)
+	IF("$ENV{HPHP_FORCE_32BIT}" STREQUAL "")
+		message(FATAL_EROR "HipHop currently only supports 64-bit machines")
+	ENDIF()
+ENDIF()
+
 IF("$ENV{HPHP_HOME}" STREQUAL "")
 	message(FATAL_ERROR "You should set the HPHP_HOME environmental")
 ENDIF()

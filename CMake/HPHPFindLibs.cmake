@@ -122,6 +122,12 @@ endif (ICU_FOUND)
 
 # tbb libs
 find_package(TBB REQUIRED)
+if (${TBB_INTERFACE_VERSION} LESS 3016)
+	message(SEND_ERROR "TBB is too old, please install a newer version")
+	unset(TBB_FOUND CACHE)
+	unset(TBB_INCLUDE_DIRS CACHE)
+	unset(TBB_LIBRARIES CACHE)
+endif()
 include_directories(${TBB_INCLUDE_DIRS})
 link_directories(${TBB_LIBRARY_DIRS})
 

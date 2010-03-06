@@ -6,5 +6,4 @@
 cp $HPHP_HOME/bin/CMakeLists.base.txt $1/CMakeLists.txt
 cd $1
 cmake -D PROGRAM_NAME:string=$2 .
-make
-
+make -j

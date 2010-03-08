@@ -5,5 +5,5 @@
    #echo make -j $3 PROJECT_NAME=$2 TIME_LINK=1 -C $1
 cp $HPHP_HOME/bin/CMakeLists.base.txt $1/CMakeLists.txt
 cd $1
-cmake -D PROGRAM_NAME:string=$2 .
-make -j
+cmake -D PROGRAM_NAME:string=$2 . || exit $?
+make $HPHP_MAKE || exit $?

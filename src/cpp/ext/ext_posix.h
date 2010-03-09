@@ -40,7 +40,10 @@ inline int f_posix_get_last_error() {
 
 inline String f_posix_getcwd() {
   char *buffer = (char *)malloc(PATH_MAX);
-  getcwd(buffer, PATH_MAX);
+  if (getcwd(buffer, PATH_MAX) == NULL) {
+    free(buffer);
+    return "/";
+  }
   return String(buffer, AttachString);
 }
 

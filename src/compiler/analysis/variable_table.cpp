@@ -1007,7 +1007,7 @@ void VariableTable::outputCPPGlobalVariablesGetImpl(CodeGenerator &cg,
   cg.printDeclareGlobals();
   cg.printf("const char *s __attribute__((__unused__)) = str.data();\n");
   outputCPPJumpTable(cg, ar, NULL, false, true, EitherStatic);
-  cg.printf("return lvalAt(str, hash);\n");
+  cg.printf("return LVariableTable::getImpl(str, hash);\n");
   cg.indentEnd("}\n");
 }
 
@@ -1131,8 +1131,11 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       prefix = "&";
       init = " __attribute__((__unused__)) = ";
       if (cg.getOutput() != CodeGenerator::SystemCPP) {
+        int64 hash = hash_string(name.c_str(), name.length());
+        char hbuf[25];
+        sprintf(hbuf, "0x%016llXLL", hash);
         init += string("(variables != gVariables) ? "
-                       "variables->get(\"") + name + "\") : ";
+                       "variables->get(\"") + name + "\", " + hbuf + ") : ";
       }
       init += "g->";
       if (cg.getOutput() != CodeGenerator::SystemCPP) {
@@ -1232,7 +1235,7 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
     cg.indentBegin("virtual Variant &getImpl(CStrRef str, int64 hash) {\n");
     cg.printf("const char *s __attribute__((__unused__)) = str.data();\n");
     outputCPPJumpTable(cg, ar, NULL, false, true, EitherStatic);
-    cg.printf("return lvalAt(str, hash);\n");
+    cg.printf("return LVariableTable::getImpl(str, hash);\n");
     cg.indentEnd("}\n");
 
     if (getAttribute(ContainsExtract)) {

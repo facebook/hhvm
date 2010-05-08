@@ -491,7 +491,8 @@ class Variant {
    * Memory allocator methods.
    */
   DECLARE_SMART_ALLOCATION_NOCALLBACKS(Variant);
-  void dump();
+
+  void dump() const;
 
   /**
    * Offset functions

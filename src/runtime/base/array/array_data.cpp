@@ -33,34 +33,20 @@ namespace HPHP {
 // constructors/destructors
 
 ArrayData *ArrayData::Create() {
-  if (RuntimeOption::UseZendArray) {
-    return StaticEmptyZendArray::Get();
-  }
-  return StaticEmptyArray::Get();
+  return ArrayInit(0).create();
 }
 
 ArrayData *ArrayData::Create(CVarRef value) {
-  if (RuntimeOption::UseZendArray) {
-    ArrayData *ret = NEW(ZendArray)(1);
-    ret->append(value, false);
-    return ret;
-  }
-  return NEW(VectorVariant)(value);
+  ArrayInit init(1, true);
+  init.set(0, value);
+  return init.create();
 }
 
 ArrayData *ArrayData::Create(CVarRef name, CVarRef value) {
-  if (RuntimeOption::UseZendArray) {
-    ArrayData *ret = NEW(ZendArray)(1);
-    ret->set(name, value, false);
-    return ret;
-  }
-  if (!value.isContagious()) {
-    bool isZero = name.isInteger() && name.toInt64() == 0;
-    if (isZero) {
-      return NEW(VectorVariant)(value);
-    }
-  }
-  return NEW(MapVariant)(name, value);
+  ArrayInit init(1, false);
+  // There is no toKey() call on name.
+  init.set(0, name, value, -1, true);
+  return init.create();
 }
 
 ArrayData::~ArrayData() {

@@ -728,9 +728,13 @@ void Array::unserialize(VariableUnserializer *unserializer) {
   if (sep != '{') {
     throw Exception("Expected '{' but got '%c'", sep);
   }
+
   if (size == 0) {
     operator=(Create());
   } else {
+    // Pre-allocate an ArrayData of the given size, to avoid escalation in
+    // the middle, which breaks references.
+    operator=(ArrayInit(size).create());
     for (int64 i = 0; i < size; i++) {
       Variant key(unserializer->unserializeKey());
       Variant &value = lvalAt(key);

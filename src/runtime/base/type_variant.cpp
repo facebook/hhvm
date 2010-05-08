@@ -2915,7 +2915,7 @@ std::string Variant::getDebugDump() const {
   return buf;
 }
 
-void Variant::dump() {
+void Variant::dump() const {
   VariableSerializer vs(VariableSerializer::VarDump);
   Variant ret(vs.serialize(*this, true));
   printf("Variant: %s", ret.toString().data());

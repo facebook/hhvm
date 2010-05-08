@@ -189,6 +189,15 @@ void SmartAllocatorImpl::dealloc(void *obj) {
 
 bool SmartAllocatorImpl::isValid(void *obj) const {
   if (obj) {
+#ifdef DETECT_DOUBLE_FREE
+    FreeList *fl = const_cast<FreeList *>(&m_freelist);
+    for (FreeList::iterator it = fl->begin(); it != fl->end(); ++it) {
+      void *p = *it;
+      if (p == obj) return false;
+    }
+#endif
+
+    // Check obj is indeed from a slab.
     unsigned int size = m_blocks.size();
     for (unsigned int i = 0; i < size; i++) {
       char *block = m_blocks[i];

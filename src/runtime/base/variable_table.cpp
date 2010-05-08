@@ -15,12 +15,19 @@
 */
 
 #include <runtime/base/variable_table.h>
+#include <runtime/base/array/array_init.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant &LVariableTable::getImpl(CStrRef s, int64 hash) {
-  return lvalAt(s, hash);
+  // LVariableTable may have references to its values leaked, and therefore
+  // cannot support escalation from SmallArray.
+  if (!m_px) {
+    m_px = ArrayInit(0, false, true).create();
+    m_px->incRefCount();
+  }
+  return lvalAt(s, hash, false, true);
 }
 
 Array RVariableTable::getDefinedVars() const {

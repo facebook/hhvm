@@ -199,6 +199,7 @@ public:
   static bool EnableMemoryManager;
   static bool CheckMemory;
   static bool UseZendArray;
+  static bool UseSmallArray;
   static bool EnableApc;
   static bool ApcUseSharedMemory;
   static int ApcSharedMemorySize;

@@ -24,7 +24,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // macros for creating vectors or maps
 
-#define CREATE_VECTOR1(e) Array::Create(e)
+#define CREATE_VECTOR1(e) Array(ArrayInit(1, true).set(0, e).create())
 #define CREATE_VECTOR2(e1, e2)                                          \
   Array(ArrayInit(2, true).set(0, e1).set(1, e2).create())
 #define CREATE_VECTOR3(e1, e2, e3)                                      \
@@ -39,7 +39,7 @@ namespace HPHP {
   Array(ArrayInit(6, true).set(0, e1).set(1, e2).set(2, e3).set(3, e4). \
                            set(4, e5).set(5, e6).create())
 
-#define CREATE_MAP1(n, e) Array::Create(n, e)
+#define CREATE_MAP1(n, e) Array(ArrayInit(1, false).set(0, n, e).create())
 #define CREATE_MAP2(n1, e1, n2, e2)                                       \
   Array(ArrayInit(2, false).set(0, n1, e1).set(1, n2, e2).create())
 #define CREATE_MAP3(n1, e1, n2, e2, n3, e3)                               \
@@ -63,24 +63,16 @@ namespace HPHP {
  * When an Array is created, ArrayInit completely skips the use of
  * ArrayElement, (the set methods mimic the constructors of ArrayElement).
  * The setRef method handles the case where the value needs to be a reference.
+ *
+ * For arrays that need to have C++ references/pointers to their elements for
+ * an extended period of time, set keepRef to true, so that there will not
+ * be reference-breaking escalation.
  */
 class ArrayInit {
 public:
-  enum KindOf {
-    KindOfVectorVariant,
-    KindOfMapVariant,
-    KindOfZendArray
-  };
-
-  ArrayInit(ssize_t n, bool isVector = false);
+  ArrayInit(ssize_t n, bool isVector = false, bool keepRef = false);
   ~ArrayInit() {
     ASSERT(m_data == NULL);
-  }
-
-  template<typename T>
-  ArrayInit &set(int p, const T &value) {
-    m_data->append(value, false);
-    return *this;
   }
 
   ArrayInit &set(int p, CVarRef v) {
@@ -90,31 +82,38 @@ public:
 
   ArrayInit &setRef(int p, CVarRef v) {
     v.setContagious();
-    Variant value = v;
-    value.setContagious();
-    m_data->append(value, false);
+    m_data->append(v, false);
     return *this;
   }
 
-  template<typename T>
-  ArrayInit &set(int p, CVarRef name, const T &value, int64 prehash = -1,
+  ArrayInit &set(int p, int64 name, CVarRef v, int64 prehash = -1,
                  bool keyConverted = false) {
-    ASSERT(m_kind != KindOfVectorVariant);
-    Variant v(value);
+    m_data->set(name, v, false, prehash);
+    return *this;
+  }
+
+  ArrayInit &set(int p, litstr name, CVarRef v, int64 prehash = -1,
+                 bool keyConverted = false) {
     if (keyConverted) {
       m_data->set(name, v, false, prehash);
     } else {
-      Variant k(name.toKey());
-      if (!k.isNull()) {
-        m_data->set(k, v, false, prehash);
-      }
+      m_data->set(String(name).toKey(), v, false, prehash);
+    }
+    return *this;
+  }
+
+  ArrayInit &set(int p, CStrRef name, CVarRef v, int64 prehash = -1,
+                 bool keyConverted = false) {
+    if (keyConverted) {
+      m_data->set(name, v, false, prehash);
+    } else if (!name.isNull()) {
+      m_data->set(name.toKey(), v, false, prehash);
     }
     return *this;
   }
 
   ArrayInit &set(int p, CVarRef name, CVarRef v, int64 prehash = -1,
                  bool keyConverted = false) {
-    ASSERT(m_kind != KindOfVectorVariant);
     if (keyConverted) {
       m_data->set(name, v, false, prehash);
     } else {
@@ -126,18 +125,79 @@ public:
     return *this;
   }
 
+  template<typename T>
+  ArrayInit &set(int p, const T &name, CVarRef v, int64 prehash = -1,
+                 bool keyConverted = false) {
+    if (keyConverted) {
+      m_data->set(name, v, false, prehash);
+    } else {
+      Variant k(Variant(name).toKey());
+      if (!k.isNull()) {
+        m_data->set(k, v, false, prehash);
+      }
+    }
+    return *this;
+  }
+
+  ArrayInit &setRef(int p, int64 name, CVarRef v, int64 prehash = -1,
+                    bool keyConverted = false) {
+    v.setContagious();
+    m_data->set(name, v, false, prehash);
+    return *this;
+  }
+
+  ArrayInit &setRef(int p, litstr name, CVarRef v, int64 prehash = -1,
+                    bool keyConverted = false) {
+    v.setContagious();
+    if (keyConverted) {
+      m_data->set(name, v, false, prehash);
+    } else {
+      m_data->set(String(name).toKey(), v, false, prehash);
+    }
+    return *this;
+  }
+
+  ArrayInit &setRef(int p, CStrRef name, CVarRef v, int64 prehash = -1,
+                    bool keyConverted = false) {
+    v.setContagious();
+    if (keyConverted) {
+      m_data->set(name, v, false, prehash);
+    } else {
+      m_data->set(name.toKey(), v, false, prehash);
+    }
+    return *this;
+  }
+
   ArrayInit &setRef(int p, CVarRef name, CVarRef v, int64 prehash = -1,
                     bool keyConverted = false) {
-    ASSERT(m_kind != KindOfVectorVariant);
-    v.setContagious();
-    Variant value = v;
-    value.setContagious();
     if (keyConverted) {
-      m_data->set(name, value, false, prehash);
+      v.setContagious();
+      m_data->set(name, v, false, prehash);
     } else {
-      Variant k(name.toKey());
-      if (!k.isNull()) {
-        m_data->set(k, value, false, prehash);
+      Variant key(name.toKey());
+      if (!key.isNull()) {
+        v.setContagious();
+        m_data->set(key, v, false, prehash);
+      } else {
+        v.clearContagious();
+      }
+    }
+    return *this;
+  }
+
+  template<typename T>
+  ArrayInit &setRef(int p, const T &name, CVarRef v, int64 prehash = -1,
+                    bool keyConverted = false) {
+    if (keyConverted) {
+      v.setContagious();
+      m_data->set(name, v, false, prehash);
+    } else {
+      Variant key(Variant(name).toKey());
+      if (!key.isNull()) {
+        v.setContagious();
+        m_data->set(key, v, false, prehash);
+      } else {
+        v.clearContagious();
       }
     }
     return *this;
@@ -151,7 +211,6 @@ public:
   operator ArrayData *() { return create(); }
 private:
   ArrayData *m_data;
-  KindOf m_kind;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

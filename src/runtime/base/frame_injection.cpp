@@ -90,8 +90,8 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
     // add it to the trace
     if (filename != "") {
       Array frame = Array::Create();
-      frame.set("file", filename);
-      frame.set("line", t->line);
+      frame.set("file", filename, -1, true);
+      frame.set("line", t->line, -1, true);
       bt.append(frame);
     }
   }
@@ -101,37 +101,37 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
     if (t->m_prev) {
       String file = t->m_prev->getFileName();
       if (!file.empty()) {
-        frame.set("file", file);
+        frame.set("file", file, -1, true);
       }
-      frame.set("line", t->m_prev->line);
+      frame.set("line", t->m_prev->line, -1, true);
     } else if (t->flags & PseudoMain) {
       // Stop at top, don't include top file
       break;
     }
 
     if (t->flags & PseudoMain) {
-      frame.set("function", "include");
-      frame.set("args", Array::Create(t->getFileName()));
+      frame.set("function", "include", -1, true);
+      frame.set("args", Array::Create(t->getFileName()), -1, true);
     } else {
       const char *c = strstr(t->m_name, "::");
       if (c) {
-        frame.set("function", String(c + 2));
-        frame.set("class", String(t->m_class));
+        frame.set("function", String(c + 2), -1, true);
+        frame.set("class", String(t->m_class), -1, true);
         if (!t->m_object.isNull()) {
-          frame.set("object", t->m_object);
-          frame.set("type", "->");
+          frame.set("object", t->m_object, -1, true);
+          frame.set("type", "->", -1, true);
         } else {
-          frame.set("type", "::");
+          frame.set("type", "::", -1, true);
         }
       } else {
-        frame.set("function", t->m_name);
+        frame.set("function", t->m_name, -1, true);
       }
 
       Array args = t->getArgs();
       if (!args.isNull()) {
-        frame.set("args", args);
+        frame.set("args", args, -1, true);
       } else {
-        frame.set("args", Array::Create());
+        frame.set("args", Array::Create(), -1, true);
       }
     }
 

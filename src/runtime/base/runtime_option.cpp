@@ -202,6 +202,7 @@ int RuntimeOption::SocketDefaultTimeout = 5;
 bool RuntimeOption::EnableMemoryManager = true;
 bool RuntimeOption::CheckMemory = false;
 bool RuntimeOption::UseZendArray = true;
+bool RuntimeOption::UseSmallArray = true;
 bool RuntimeOption::EnableApc = true;
 bool RuntimeOption::ApcUseSharedMemory = false;
 int RuntimeOption::ApcSharedMemorySize = 1024; // 1GB
@@ -521,6 +522,7 @@ void RuntimeOption::Load(Hdf &config) {
     EnableMemoryManager = server["EnableMemoryManager"].getBool(true);
     CheckMemory = server["CheckMemory"].getBool();
     UseZendArray = server["UseZendArray"].getBool(true);
+    UseSmallArray = server["UseSmallArray"].getBool(true);
 
     Hdf apc = server["APC"];
     EnableApc = apc["EnableApc"].getBool(true);

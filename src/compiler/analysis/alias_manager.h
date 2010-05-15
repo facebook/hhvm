@@ -88,8 +88,10 @@ class AliasManager {
 
   static bool doLocalCopyProp() { return s_localCopyProp; }
   static bool doDeadCodeElim() { return s_deadCodeElim; }
+  static bool doStringOpts() { return s_stringOpts; }
   static void setLocalCopyProp(bool f) { s_localCopyProp = f; }
   static void setDeadCodeElim(bool f) { s_deadCodeElim = f; }
+  static void setStringOpts(bool f) { s_stringOpts = f; }
 
   static bool parseOptimizations(const std::string &optimizations,
                                  std::string &errs);
@@ -103,9 +105,23 @@ class AliasManager {
     ExpressionPtrList   m_exprs;
   };
 
+  typedef std::set<std::string> StringSet;
+
+  class LoopInfo {
+  public:
+    LoopInfo(StatementPtr s);
+
+    StatementPtr m_stmt;
+    StatementPtrVec m_inner;
+    bool m_valid;
+    StringSet m_candidates;
+    StringSet m_excluded;
+  };
+
   typedef std::map<unsigned, BucketMapEntry> BucketMap;
   typedef std::map<std::string, AliasInfo> AliasInfoMap;
   typedef std::vector<CondStackElem> CondStack;
+  typedef std::vector<LoopInfo> LoopInfoVec;
 
   void mergeScope();
 
@@ -127,6 +143,10 @@ class AliasManager {
   int canonicalizeRecur(StatementPtr e);
 
   void collectAliasInfoRecur(ConstructPtr cs);
+  void pushStringScope(StatementPtr s);
+  void popStringScope(StatementPtr s);
+  void stringOptsRecur(StatementPtr s);
+  void stringOptsRecur(ExpressionPtr s, bool ok);
 
   BucketMap             m_bucketMap;
   CondStack             m_stack;
@@ -140,8 +160,11 @@ class AliasManager {
   AnalysisResultPtr     m_arp;
   VariableTablePtr      m_variables;
 
+  LoopInfoVec           m_loopInfo;
+
   static bool           s_deadCodeElim;
   static bool           s_localCopyProp;
+  static bool           s_stringOpts;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -23,6 +23,8 @@
 #include <runtime/base/comparisons.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/simple_function_call.h>
+#include <compiler/expression/simple_variable.h>
+#include <compiler/statement/loop_statement.h>
 
 using namespace HPHP;
 using namespace boost;
@@ -311,99 +313,10 @@ ExpressionPtr BinaryOpExpression::simplifyArithmetic(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr BinaryOpExpression::makeConcatCall(AnalysisResultPtr ar,
-                                                 int count,
-                                                 ExpressionListPtr expList) {
-  if (count <= MAX_CONCAT_ARGS) {
-    if (count > 2) {
-      char fname[20];
-      snprintf(fname, sizeof(fname), "concat%d", count);
-      SimpleFunctionCallPtr call
-        (new SimpleFunctionCall
-         (getLocation(), Expression::KindOfSimpleFunctionCall, fname, expList,
-          ExpressionPtr()));
-      call->setValid();
-      call->setNoPrefix();
-      call->setActualType(Type::String);
-      return call;
-    } else if (count == 2) {
-      BinaryOpExpressionPtr result =
-        BinaryOpExpressionPtr(new BinaryOpExpression(getLocation(),
-          Expression::KindOfBinaryOpExpression,
-          (*expList)[0], (*expList)[1], '.'));
-      result->setActualType(Type::String);
-      return result;
-    } else {
-      return (*expList)[0];
-    }
-  } else {
-    ExpressionListPtr segList =
-      ExpressionListPtr(new ExpressionList(getLocation(),
-        Expression::KindOfExpressionList));
-    for (int i = 0; i < MAX_CONCAT_ARGS; i++) {
-      segList->addElement((*expList)[count - MAX_CONCAT_ARGS + i]);
-    }
-    for (int i = 0; i < MAX_CONCAT_ARGS; i++) {
-      expList->removeElement(count - MAX_CONCAT_ARGS);
-    }
-    ExpressionPtr call2 = makeConcatCall(ar, MAX_CONCAT_ARGS, segList);
-    ExpressionPtr call1 = makeConcatCall(ar, count - MAX_CONCAT_ARGS, expList);
-    BinaryOpExpressionPtr result =
-      BinaryOpExpressionPtr(new BinaryOpExpression(getLocation(),
-        Expression::KindOfBinaryOpExpression,
-        call1, call2, '.'));
-    call1->setExpectedType(Type::String);
-    call2->setExpectedType(Type::String);
-    result->setActualType(Type::String);
-    return result;
-  }
-}
-
-ExpressionPtr BinaryOpExpression::mergeConcat(AnalysisResultPtr ar) {
-  ExpressionPtr exp1 = m_exp1;
-  ExpressionListPtr expList =
-    ExpressionListPtr(new ExpressionList(getLocation(),
-      Expression::KindOfExpressionList));
-  expList->insertElement(m_exp2);
-  do {
-    if (!exp1->is(Expression::KindOfBinaryOpExpression)) break;
-    BinaryOpExpressionPtr binOpExp =
-      dynamic_pointer_cast<BinaryOpExpression>(exp1);
-    if (binOpExp->m_op == '.') {
-      expList->insertElement(binOpExp->m_exp2);
-    } else {
-      break;
-    }
-    exp1 = binOpExp->m_exp1;
-  } while (true);
-  expList->insertElement(exp1);
-  int count = expList->getCount();
-  ASSERT(count >= 2);
-  if (count == 2) return ExpressionPtr();
-  // work around g++ function arguments evaluation order (right to left),
-  // cannot have two arguments with side effect.
-  bool seenEffect = false;
-  for (int i = 0; i < count; i++) {
-    if ((*expList)[i]->hasEffect()) {
-      if (seenEffect) return ExpressionPtr();
-      seenEffect = true;
-    }
-  }
-  ExpressionPtr result = makeConcatCall(ar, count, expList);
-  result->setActualType(getActualType());
-  result->setExpectedType(getExpectedType());
-  return result;
-}
-
 ExpressionPtr BinaryOpExpression::postOptimize(AnalysisResultPtr ar) {
-  ExpressionPtr optExp;
-  if (m_op == '.') {
-    optExp = mergeConcat(ar);
-    if (optExp) return optExp;
-  }
   ar->postOptimize(m_exp1);
   ar->postOptimize(m_exp2);
-  optExp = simplifyArithmetic(ar);
+  ExpressionPtr optExp = simplifyArithmetic(ar);
   if (optExp) return optExp;
   if (isShortCircuitOperator()) return simplifyLogical(ar);
   return ExpressionPtr();
@@ -788,13 +701,133 @@ static bool castIfNeeded(TypePtr top, TypePtr arg,
   return false;
 }
 
+void BinaryOpExpression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
+                                        int state) {
+  if (m_op == '.' && (state & FixOrder)) {
+    if (m_exp1) m_exp1->preOutputStash(cg, ar, state);
+    if (m_exp2) m_exp2->preOutputStash(cg, ar, state);
+  } else {
+    Expression::preOutputStash(cg, ar, state);
+  }
+}
+
+static const char *stringBufferPrefix(AnalysisResultPtr ar, ExpressionPtr var) {
+  if (var->is(Expression::KindOfSimpleVariable)) {
+    if (LoopStatementPtr loop = ar->getLoopStatement()) {
+      SimpleVariablePtr sv = static_pointer_cast<SimpleVariable>(var);
+      if (loop->checkStringBuf(sv->getName())) {
+        return ar->getScope()->getVariables()->
+          getVariablePrefix(ar, sv->getName());
+      }
+    }
+  }
+  return 0;
+}
+
+static void outputStringBufExprs(const char *temp, const char *prefix,
+                                 const char *name, ExpressionPtr exp,
+                                 CodeGenerator &cg, AnalysisResultPtr ar,
+                                 int depth, const char *sep) {
+  if (!exp->hasCPPTemp() && exp->is(Expression::KindOfBinaryOpExpression)) {
+    BinaryOpExpressionPtr b = static_pointer_cast<BinaryOpExpression>(exp);
+    if (b->getOp() == '.') {
+      if (!depth) cg.printf("(");
+      outputStringBufExprs(temp, prefix, name, b->getExp1(),
+                           cg, ar, depth + 1, sep);
+      cg.printf(sep);
+      outputStringBufExprs(temp, prefix, name, b->getExp2(),
+                           cg, ar, depth + 1, sep);
+      if (!depth) cg.printf(")");
+      return;
+    }
+  }
+  if (sep[0] != ',') exp->preOutputCPP(cg, ar, 0);
+  if (exp->getActualType()) {
+    cg.printf("StringBufferAppend(%s,%s%s,", temp, prefix, name);
+  } else {
+    cg.printf("(");
+  }
+  exp->outputCPP(cg, ar);
+  cg.printf(")");
+}
+
+static int outputConcatExprs(CodeGenerator *cg, AnalysisResultPtr ar,
+                             ExpressionPtr exp,
+                             const char *sep = ", ", const char *buf = 0) {
+  int count = 0;
+  if (!exp->hasCPPTemp() && exp->is(Expression::KindOfBinaryOpExpression)) {
+    BinaryOpExpressionPtr b = static_pointer_cast<BinaryOpExpression>(exp);
+    if (b->getOp() == '.') {
+      count = outputConcatExprs(cg, ar,  b->getExp1(), sep, buf);
+      if (cg) cg->printf(sep);
+      count += outputConcatExprs(cg, ar, b->getExp2(), sep, buf);
+      return count;
+    }
+  }
+  if (cg) {
+    bool is_void = !exp->getActualType();
+    if (buf) {
+      exp->preOutputCPP(*cg, ar, 0);
+      if (!is_void) {
+        cg->printf("%s_buf += ", buf);
+      }
+      is_void = false;
+    } else if (is_void) {
+      if (exp->hasCPPTemp() || !exp->hasEffect()) {
+        cg->printf("\"\"");
+        return 1;
+      }
+      cg->printf("(");
+    }
+    exp->outputCPP(*cg, ar);
+    if (is_void) {
+      cg->printf(",\"\")");
+    }
+  }
+  return 1;
+}
+
 bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                       int state) {
+  bool effect2 = m_exp2->hasEffect();
+  const char *prefix = 0;
+  int num = 0;
+  if (effect2 || m_exp1->hasEffect()) {
+    ExpressionPtr self = static_pointer_cast<Expression>(shared_from_this());
+    if (m_op == '.') {
+      num = outputConcatExprs(0, ar, self);
+    } else if (effect2 && m_op == T_CONCAT_EQUAL) {
+      prefix = stringBufferPrefix(ar, m_exp1);
+    }
+    if (num > MAX_CONCAT_ARGS || prefix) {
+      if (!ar->inExpression()) return true;
+
+      ar->wrapExpressionBegin(cg);
+      if (prefix) {
+        SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(m_exp1));
+        outputStringBufExprs(Option::TempPrefix, prefix,
+                             sv->getName().c_str(), m_exp2, cg, ar, 1, ";\n");
+        m_cppTemp = "/**/";
+      } else {
+        std::string tmp = genCPPTemp(cg, ar);
+        cg.printf("StringBuffer %s_buf;\n", tmp.c_str());
+        outputConcatExprs(&cg, ar, self, ";\n", tmp.c_str());
+        cg.printf(";\n");
+        cg.printf("CStrRef %s(%s_buf.detach())",
+                  tmp.c_str(), tmp.c_str());
+        m_cppTemp = tmp;
+      }
+
+      cg.printf(";\n");
+      return true;
+    }
+  }
+
   if (!isShortCircuitOperator()) {
     return Expression::preOutputCPP(cg, ar, state);
   }
 
-  if (!m_exp2->hasEffect()) {
+  if (!effect2) {
     return m_exp1->preOutputCPP(cg, ar, state);
   }
 
@@ -835,12 +868,42 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
 
   bool wrapped = true;
   switch (m_op) {
-  case T_CONCAT_EQUAL:        cg.printf("concat_assign"); break;
+  case T_CONCAT_EQUAL:
+    if (const char *prefix = stringBufferPrefix(ar, m_exp1)) {
+      SimpleVariablePtr sv = static_pointer_cast<SimpleVariable>(m_exp1);
+      outputStringBufExprs(Option::TempPrefix, prefix,
+                           sv->getName().c_str(), m_exp2, cg, ar, 0, ", ");
+      return;
+    }
+    cg.printf("concat_assign");
+    break;
+  case '.':
+    {
+      ExpressionPtr self = static_pointer_cast<Expression>(shared_from_this());
+      int num = outputConcatExprs(0, ar, self);
+      assert(num >= 2);
+      if (num <= MAX_CONCAT_ARGS) {
+        if (num == 2) {
+          cg.printf("concat(");
+        } else {
+          cg.printf("concat%d(", num);
+        }
+        outputConcatExprs(&cg, ar, self);
+        cg.printf(")");
+      } else {
+        while (num--) {
+          cg.printf("(");
+        }
+        cg.printf("StringBuffer() += ");
+        outputConcatExprs(&cg, ar, self, ") += ");
+        cg.printf(").detach()");
+      }
+    }
+    return;
   case T_LOGICAL_XOR:         cg.printf("logical_xor");   break;
   case '|':                   cg.printf("bitwise_or");    break;
   case '&':                   cg.printf("bitwise_and");   break;
   case '^':                   cg.printf("bitwise_xor");   break;
-  case '.':                   cg.printf("concat");        break;
   case T_IS_IDENTICAL:        cg.printf("same");          break;
   case T_IS_NOT_IDENTICAL:    cg.printf("!same");         break;
   case T_IS_EQUAL:            cg.printf("equal");         break;

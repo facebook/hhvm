@@ -17,14 +17,14 @@
 #ifndef __FOREACH_STATEMENT_H__
 #define __FOREACH_STATEMENT_H__
 
-#include <compiler/statement/statement.h>
+#include <compiler/statement/loop_statement.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(ForEachStatement);
 
-class ForEachStatement : public Statement {
+class ForEachStatement : public LoopStatement {
 public:
   ForEachStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                    ExpressionPtr array, ExpressionPtr name, bool nameRef,

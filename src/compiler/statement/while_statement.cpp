@@ -28,7 +28,7 @@ using namespace boost;
 WhileStatement::WhileStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr condition, StatementPtr stmt)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
     m_condition(condition), m_stmt(stmt) {
 }
 
@@ -131,6 +131,7 @@ void WhileStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   bool e_order = m_condition->preOutputCPP(cg, ar, 0);
 
+  cppDeclareBufs(cg, ar);
   cg.printf("while (");
   if (e_order) {
     cg.printf("true");
@@ -156,6 +157,7 @@ void WhileStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (cg.findLabelId("break", labelId)) {
     cg.printf("break%d:;\n", labelId);
   }
+  cppEndBufs(cg, ar);
   cg.indentEnd("}\n");
   cg.popBreakScope();
 }

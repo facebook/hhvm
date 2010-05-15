@@ -17,14 +17,14 @@
 #ifndef __FOR_STATEMENT_H__
 #define __FOR_STATEMENT_H__
 
-#include <compiler/statement/statement.h>
+#include <compiler/statement/loop_statement.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(ForStatement);
 
-class ForStatement : public Statement {
+class ForStatement : public LoopStatement {
 public:
   ForStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                ExpressionPtr exp1, ExpressionPtr exp2, ExpressionPtr exp3,

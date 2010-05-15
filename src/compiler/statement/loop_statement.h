@@ -14,33 +14,31 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __DO_STATEMENT_H__
-#define __DO_STATEMENT_H__
+#ifndef __LOOP_STATEMENT_H__
+#define __LOOP_STATEMENT_H__
 
-#include <compiler/statement/loop_statement.h>
+#include <compiler/statement/statement.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(DoStatement);
+DECLARE_BOOST_TYPES(LoopStatement);
 
-class DoStatement : public LoopStatement {
-public:
-  DoStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
-              StatementPtr stmt, ExpressionPtr condition);
-
-  DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  virtual bool hasDecl() const { return m_stmt && m_stmt->hasDecl(); }
-  virtual bool hasRetExp() const { return m_stmt && m_stmt->hasRetExp(); }
-  virtual int getRecursiveCount() const {
-    return 1 + (m_stmt ? m_stmt->getRecursiveCount() : 0);
-  }
-
-private:
-  StatementPtr m_stmt;
-  ExpressionPtr m_condition;
+class LoopStatement : public Statement {
+ public:
+  LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETERS);
+  void clearStringBufs();
+  void addStringBuf(const std::string &name);
+  void removeStringBuf(const std::string &name);
+  int numStringBufs() const { return m_string_bufs.size(); }
+  void cppDeclareBufs(CodeGenerator &cg, AnalysisResultPtr ar);
+  void cppEndBufs(CodeGenerator &cg, AnalysisResultPtr ar);
+  bool checkStringBuf(const std::string &name);
+ private:
+  std::set<std::string>  m_string_bufs;
+  boost::weak_ptr<LoopStatement> m_outer;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __DO_STATEMENT_H__
+#endif // __LOOP_STATEMENT_H__

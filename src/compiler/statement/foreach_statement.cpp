@@ -33,7 +33,7 @@ ForEachStatement::ForEachStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr array, ExpressionPtr name, bool nameRef,
  ExpressionPtr value, bool valueRef, StatementPtr stmt)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
     m_array(array), m_name(name), m_value(value), m_ref(valueRef),
     m_stmt(stmt) {
   if (!m_value) {
@@ -223,6 +223,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     passTemp = false;
   }
 
+  cppDeclareBufs(cg, ar);
   int iterId = cg.createNewId(ar);
   cg.printf("for (");
   if (m_ref) {
@@ -303,6 +304,6 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg.printf("break%d:;\n", labelId);
   }
   cg.popBreakScope();
-
+  cppEndBufs(cg, ar);
   cg.indentEnd("}\n");
 }

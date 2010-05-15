@@ -37,6 +37,7 @@ DECLARE_BOOST_TYPES(CodeError);
 DECLARE_BOOST_TYPES(Location);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(ScalarExpression);
+DECLARE_BOOST_TYPES(LoopStatement);
 
 class AnalysisResult : public BlockScope, public FunctionContainer {
 public:
@@ -205,6 +206,10 @@ public:
   void setInExpression(bool in) { m_inExpression = in; }
   bool wrapExpressionBegin(CodeGenerator &);
   bool wrapExpressionEnd(CodeGenerator &);
+  LoopStatementPtr getLoopStatement() const { return m_loopStatement; }
+  void setLoopStatement(LoopStatementPtr loop) {
+    m_loopStatement = loop;
+  }
 
   /**
    * Parser creates a FileScope upon parsing a new file.
@@ -382,6 +387,8 @@ private:
   bool m_insideScalarArray;
   bool m_inExpression;
   bool m_wrappedExpression;
+
+  LoopStatementPtr m_loopStatement;
 public:
   struct ScalarArrayExp {
     int id;

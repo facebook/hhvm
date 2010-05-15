@@ -41,6 +41,7 @@ public:
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
   void setListKind(ListKind kind) { m_kind = kind; }
+  ListKind getListKind() const { return m_kind; }
   virtual void addElement(ExpressionPtr exp);
   virtual void insertElement(ExpressionPtr exp, int index = 0);
   virtual bool isScalar() const;

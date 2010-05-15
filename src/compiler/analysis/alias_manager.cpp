@@ -31,6 +31,9 @@
 #include <compiler/statement/statement_list.h>
 #include <compiler/statement/catch_statement.h>
 #include <compiler/statement/method_statement.h>
+#include <compiler/statement/break_statement.h>
+#include <compiler/statement/loop_statement.h>
+#include <compiler/statement/exp_statement.h>
 #include <compiler/analysis/alias_manager.h>
 #include <compiler/analysis/variable_table.h>
 #include <runtime/eval/parser/hphp.tab.hpp>
@@ -44,6 +47,7 @@ using std::string;
 
 bool AliasManager::s_deadCodeElim = true;
 bool AliasManager::s_localCopyProp = true;
+bool AliasManager::s_stringOpts = true;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -65,10 +69,13 @@ bool AliasManager::parseOptimizations(const std::string &optimizations,
       setDeadCodeElim(val);
     } else if (opt == "localcopy") {
       setLocalCopyProp(val);
+    } else if (opt == "string") {
+      setStringOpts(val);
     } else if (val && (opt == "all" || opt == "none")) {
       val = opt == "all";
       setDeadCodeElim(val);
       setLocalCopyProp(val);
+      setStringOpts(val);
     } else {
       errs = "Unknown optimization: " + opt;
       return false;
@@ -553,7 +560,9 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
         }
       case Expression::KindOfUnaryOpExpression:
       case Expression::KindOfBinaryOpExpression:
-        rep->setContext(Expression::DeadStore);
+        if (doDeadCodeElim()) {
+          rep->setContext(Expression::DeadStore);
+        }
         break;
       }
     }
@@ -1023,7 +1032,228 @@ bool AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
     }
   }
 
-  canonicalizeRecur(m->getStmts());
+  if (doLocalCopyProp() || doDeadCodeElim()) {
+    canonicalizeRecur(m->getStmts());
+  }
+
+  if (!m_changed && doStringOpts() &&
+      ar->getPhase() == AnalysisResult::PostOptimize &&
+      !m_wildRefs) {
+    stringOptsRecur(m->getStmts());
+  }
+
   return m_changed;
 }
 
+AliasManager::LoopInfo::LoopInfo(StatementPtr s) :
+  m_stmt(s), m_valid(!s->is(Statement::KindOfSwitchStatement)) {
+}
+
+void AliasManager::pushStringScope(StatementPtr s) {
+  m_loopInfo.push_back(LoopInfo(s));
+  if (LoopStatementPtr cur = dpc(LoopStatement,s)) {
+    cur->clearStringBufs();
+  }
+}
+
+void AliasManager::popStringScope(StatementPtr s) {
+  size_t sz = m_loopInfo.size();
+  assert(sz);
+  LoopInfo &li1 = m_loopInfo.back();
+  assert(li1.m_stmt == s);
+  if (li1.m_candidates.size() && li1.m_valid) {
+    for (unsigned i = li1.m_inner.size(); i--; ) {
+      if (LoopStatementPtr inner = dpc(LoopStatement, li1.m_inner[i])) {
+        for (StringSet::iterator it = li1.m_candidates.begin(),
+               end = li1.m_candidates.end(); it != end; ++it) {
+          inner->removeStringBuf(*it);
+        }
+      }
+    }
+
+    if (LoopStatementPtr cur = dpc(LoopStatement, li1.m_stmt)) {
+      for (StringSet::iterator it = li1.m_candidates.begin(),
+             end = li1.m_candidates.end(); it != end; ++it) {
+        cur->addStringBuf(*it);
+      }
+    }
+  }
+
+  if (sz > 1) {
+    LoopInfo &li2 = m_loopInfo[sz-2];
+    if (li1.m_candidates.size()) {
+      for (StringSet::iterator it = li1.m_candidates.begin(),
+             end = li1.m_candidates.end(); it != end; ++it) {
+        if (li2.m_excluded.find(*it) == li2.m_excluded.end()) {
+          li2.m_candidates.insert(*it);
+        }
+      }
+      li2.m_inner.push_back(s);
+    }
+    for (StringSet::iterator it = li1.m_excluded.begin(),
+           end = li1.m_excluded.end(); it != end; ++it) {
+      li2.m_excluded.insert(*it);
+      li2.m_candidates.erase(*it);
+    }
+    for (unsigned i = li1.m_inner.size(); i--; ) {
+      if (LoopStatementPtr inner = dpc(LoopStatement, li1.m_inner[i])) {
+        if (inner->numStringBufs()) {
+          li2.m_inner.push_back(s);
+        }
+      }
+    }
+  }
+
+  m_loopInfo.pop_back();
+}
+
+void AliasManager::stringOptsRecur(ExpressionPtr e, bool ok) {
+  if (!e) return;
+  if (!m_loopInfo.size()) return;
+  Expression::KindOf etype = e->getKindOf();
+  switch (etype) {
+  case Expression::KindOfBinaryOpExpression:
+    {
+      BinaryOpExpressionPtr b(spc(BinaryOpExpression,e));
+      stringOptsRecur(b->getExp2(), false);
+      if (ok && b->getOp() == T_CONCAT_EQUAL) {
+        ExpressionPtr var = b->getExp1();
+        if (var->is(Expression::KindOfSimpleVariable)) {
+          SimpleVariablePtr s(spc(SimpleVariable,var));
+          AliasInfo &ai = m_aliasInfo[s->getName()];
+          if (!ai.getIsGlobal() &&
+              !ai.getIsParam() &&
+              !ai.getRefLevels() &&
+              !ai.getIsRefTo()) {
+            LoopInfo &li = m_loopInfo.back();
+            if (li.m_excluded.find(s->getName()) ==
+                li.m_excluded.end()) {
+              li.m_candidates.insert(s->getName());
+              return;
+            }
+          }
+        }
+      }
+      stringOptsRecur(b->getExp1(), false);
+    }
+    return;
+  case Expression::KindOfExpressionList:
+    {
+      ExpressionListPtr el(spc(ExpressionList,e));
+      if (el->getListKind() != ExpressionList::ListKindParam) {
+        for (int i = 0, n = el->getCount(); i < n; i++) {
+          stringOptsRecur((*el)[i], i < n - 1 || ok);
+        }
+        return;
+      }
+      break;
+    }
+  case Expression::KindOfSimpleVariable:
+    {
+      SimpleVariablePtr s(spc(SimpleVariable,e));
+      LoopInfo &li = m_loopInfo.back();
+      li.m_excluded.insert(s->getName());
+      li.m_candidates.erase(s->getName());
+      return;
+    }
+  default:
+    break;
+  }
+
+  for (int i = 0, n = e->getKidCount(); i < n; i++) {
+    stringOptsRecur(e->getNthExpr(i), false);
+  }
+}
+
+void AliasManager::stringOptsRecur(StatementPtr s) {
+  if (!s) return;
+
+  bool pop = false;
+  Statement::KindOf stype = s->getKindOf();
+  switch (stype) {
+  case Statement::KindOfFunctionStatement:
+  case Statement::KindOfMethodStatement:
+  case Statement::KindOfClassStatement:
+  case Statement::KindOfInterfaceStatement:
+    // Dont handle nested functions
+    // they will be dealt with by another
+    // top level call
+    return;
+
+  case Statement::KindOfSwitchStatement:
+    if (m_loopInfo.size()) {
+      pushStringScope(s);
+      pop = true;
+    }
+    break;
+
+  case Statement::KindOfForStatement:
+    stringOptsRecur(spc(Expression,s->getNthKid(0)), true);
+    pushStringScope(s);
+    stringOptsRecur(spc(Expression,s->getNthKid(1)), false);
+    stringOptsRecur(spc(Statement, s->getNthKid(2)));
+    stringOptsRecur(spc(Expression,s->getNthKid(3)), true);
+    popStringScope(s);
+    return;
+
+  case Statement::KindOfWhileStatement:
+    pushStringScope(s);
+    stringOptsRecur(spc(Expression,s->getNthKid(0)), false);
+    stringOptsRecur(spc(Statement, s->getNthKid(1)));
+    popStringScope(s);
+    return;
+
+  case Statement::KindOfDoStatement:
+    pushStringScope(s);
+    stringOptsRecur(spc(Statement, s->getNthKid(0)));
+    stringOptsRecur(spc(Expression,s->getNthKid(1)), false);
+    popStringScope(s);
+    return;
+
+  case Statement::KindOfForEachStatement:
+    stringOptsRecur(spc(Expression,s->getNthKid(0)), false);
+    stringOptsRecur(spc(Expression,s->getNthKid(1)), false);
+    stringOptsRecur(spc(Expression,s->getNthKid(2)), false);
+    pushStringScope(s);
+    stringOptsRecur(spc(Statement, s->getNthKid(3)));
+    popStringScope(s);
+    return;
+
+  case Statement::KindOfExpStatement:
+    stringOptsRecur(spc(ExpStatement,s)->getExpression(), true);
+    return;
+
+  case Statement::KindOfBreakStatement:
+    {
+      BreakStatementPtr b = spc(BreakStatement, s);
+      int64 depth = b->getDepth();
+      if (depth != 1) {
+        int64 s = m_loopInfo.size();
+        if (!depth || depth > s) depth = s;
+        while (depth--) {
+          m_loopInfo[s - depth].m_valid = false;
+        }
+      }
+    }
+    break;
+
+  default:
+    break;
+  }
+
+  int nkid = s->getKidCount();
+  for (int i = 0; i < nkid; i++) {
+    ConstructPtr cp = s->getNthKid(i);
+    if (!cp) {
+      continue;
+    }
+    if (StatementPtr skid = dpc(Statement, cp)) {
+      stringOptsRecur(skid);
+    } else {
+      stringOptsRecur(spc(Expression, cp), false);
+    }
+  }
+  if (pop) {
+    popStringScope(s);
+  }
+}

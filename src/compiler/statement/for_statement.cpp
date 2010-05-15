@@ -38,7 +38,7 @@ static void setListKind(ExpressionPtr e)
 ForStatement::ForStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr exp1, ExpressionPtr exp2, ExpressionPtr exp3, StatementPtr stmt)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
     m_exp1(exp1), m_exp2(exp2), m_exp3(exp3), m_stmt(stmt) {
 
   setListKind(m_exp1);
@@ -167,7 +167,14 @@ void ForStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void ForStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg.indentBegin("{\n");
 
-  bool e1_order = m_exp1 && m_exp1->preOutputCPP(cg, ar, 0);
+  int e1_order = 0;
+  if (m_exp1) {
+    if (m_exp1->preOutputCPP(cg, ar, 0)) {
+      e1_order = 1;
+    } else if (numStringBufs()) {
+      e1_order = -1;
+    }
+  }
   bool e2_order = m_exp2 && m_exp2->preOutputCPP(cg, ar, 0);
   bool e3_order = m_exp3 && m_exp3->preOutputCPP(cg, ar, 0);
 
@@ -177,7 +184,9 @@ void ForStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (e1_order) {
     m_exp1->outputCPPUnneeded(cg, ar);
+    if (e1_order < 0) cg.printf(";\n");
   }
+  cppDeclareBufs(cg, ar);
   cg.printf("for (");
   if (m_exp1 && !e1_order && m_exp1->hasEffect()) {
     m_exp1->outputCPPUnneeded(cg, ar);
@@ -210,6 +219,7 @@ void ForStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (cg.findLabelId("break", labelId)) {
     cg.printf("break%d:;\n", labelId);
   }
+  cppEndBufs(cg, ar);
   cg.indentEnd("}\n");
   cg.popBreakScope();
 }

@@ -45,15 +45,14 @@ public:
   virtual ExpressionPtr unneededHelper(AnalysisResultPtr ar);
   virtual bool canonCompare(ExpressionPtr e) const;
 
+  void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
+                      int state);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                     int state);
 
 private:
   ExpressionPtr simplifyLogical(AnalysisResultPtr ar);
   ExpressionPtr simplifyArithmetic(AnalysisResultPtr ar);
-  ExpressionPtr mergeConcat(AnalysisResultPtr ar);
-  ExpressionPtr makeConcatCall(AnalysisResultPtr ar, int count,
-                               ExpressionListPtr expList);
 
   ExpressionPtr m_exp1;
   ExpressionPtr m_exp2;

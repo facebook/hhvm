@@ -28,7 +28,7 @@ using namespace boost;
 DoStatement::DoStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  StatementPtr stmt, ExpressionPtr condition)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
+  : LoopStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
     m_stmt(stmt), m_condition(condition) {
 }
 
@@ -53,9 +53,9 @@ void DoStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
 ConstructPtr DoStatement::getNthKid(int n) const {
   switch (n) {
     case 0:
-      return m_condition;
-    case 1:
       return m_stmt;
+    case 1:
+      return m_condition;
     default:
       ASSERT(false);
       break;
@@ -70,10 +70,10 @@ int DoStatement::getKidCount() const {
 void DoStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
+      m_condition = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_condition = boost::dynamic_pointer_cast<Expression>(cp);
+      m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
       break;
     default:
       ASSERT(false);
@@ -126,6 +126,7 @@ void DoStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   int labelId = cg.createNewId(ar);
   cg.pushBreakScope(e_order ? labelId | CodeGenerator::InsideSwitch : labelId);
 
+  cppDeclareBufs(cg, ar);
   cg.indentBegin("do {\n");
   cg.printf("LOOP_COUNTER_CHECK(%d);\n", labelId);
   if (m_stmt) {
@@ -151,6 +152,7 @@ void DoStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (cg.findLabelId("break", labelId)) {
     cg.printf("break%d:;\n", labelId);
   }
+  cppEndBufs(cg, ar);
   cg.indentEnd("}\n");
   cg.popBreakScope();
 }

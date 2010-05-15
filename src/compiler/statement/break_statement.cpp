@@ -105,6 +105,17 @@ void BreakStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
+int64 BreakStatement::getDepth() {
+  if (!m_exp) return 1;
+  Variant v;
+  if (m_exp->getScalarValue(v) &&
+      v.isInteger()) {
+    int64 depth = v.toInt64();
+    return depth >= 1 ? depth : 1;
+  }
+  return 0;
+}
+
 void BreakStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   const std::vector<int> &labelIds = cg.getBreakScopes();
   if (labelIds.empty()) {
@@ -112,60 +123,54 @@ void BreakStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     return;
   }
 
-  int64 depth = 1;
+  int64 depth = getDepth();
 
-  if (m_exp) {
-    Variant v;
-    if (m_exp->getScalarValue(v) &&
-        v.isInteger()) {
-      depth = v.toInt64();
-    } else {
-      unsigned size = labelIds.size();
-      int labelId;
+  if (!depth) {
+    unsigned size = labelIds.size();
+    int labelId;
 
-      int varId = cg.createNewId(ar);
-      cg.printf("int64 %s%d;\n", Option::TempPrefix, varId);
+    int varId = cg.createNewId(ar);
+    cg.printf("int64 %s%d;\n", Option::TempPrefix, varId);
 
-      m_exp->outputCPPBegin(cg, ar);
-      cg.printf("%s%d = (", Option::TempPrefix, varId);
-      m_exp->outputCPP(cg, ar);
-      cg.printf(");\n");
-      m_exp->outputCPPEnd(cg, ar);
+    m_exp->outputCPPBegin(cg, ar);
+    cg.printf("%s%d = (", Option::TempPrefix, varId);
+    m_exp->outputCPP(cg, ar);
+    cg.printf(");\n");
+    m_exp->outputCPPEnd(cg, ar);
 
-      if (size > 1) {
-        cg.printf("switch (");
-        cg.printf("%s%d", Option::TempPrefix, varId);
-        cg.printf(") {\n");
-        for (unsigned int i = 0; i < size; i++) {
-          labelId = labelIds[i];
-          labelId &= ~CodeGenerator::BreakScopeBitMask;
-          cg.printf("case %d: goto %s%d;\n",
-                    labelIds.size() - i, m_name, labelId);
-          cg.addLabelId(m_name, labelId);
-        }
-        cg.printf("default:\n");
-      } else {
-        labelId = labelIds.back();
+    if (size > 1) {
+      cg.printf("switch (");
+      cg.printf("%s%d", Option::TempPrefix, varId);
+      cg.printf(") {\n");
+      for (unsigned int i = 0; i < size; i++) {
+        labelId = labelIds[i];
         labelId &= ~CodeGenerator::BreakScopeBitMask;
+        cg.printf("case %d: goto %s%d;\n",
+                  labelIds.size() - i, m_name, labelId);
         cg.addLabelId(m_name, labelId);
       }
-      cg.printf("if (");
-      cg.printf("%s%d", Option::TempPrefix, varId);
-      cg.printf("<2) {\n");
-      cg.printf("goto %s%d;\n", m_name, labelId);
-      cg.printf("} else {\n");
-      cg.printf("throw_fatal(\"bad %s\");\n", m_name);
-      cg.printf("}\n");
-      if (size > 1) {
-        cg.printf("}\n");
-      }
-      return;
+      cg.printf("default:\n");
+    } else {
+      labelId = labelIds.back();
+      labelId &= ~CodeGenerator::BreakScopeBitMask;
+      cg.addLabelId(m_name, labelId);
     }
+    cg.printf("if (");
+    cg.printf("%s%d", Option::TempPrefix, varId);
+    cg.printf("<2) {\n");
+    cg.printf("goto %s%d;\n", m_name, labelId);
+    cg.printf("} else {\n");
+    cg.printf("throw_fatal(\"bad %s\");\n", m_name);
+    cg.printf("}\n");
+    if (size > 1) {
+      cg.printf("}\n");
+    }
+    return;
   }
 
-  if (depth < 1) {
-    depth = 1;
-  } else if (depth > (int64)labelIds.size()) {
+  ASSERT(depth >= 1);
+
+  if (depth > (int64)labelIds.size()) {
     cg.printf("throw_fatal(\"bad %s\");\n", m_name);
     return;
   }

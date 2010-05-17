@@ -924,7 +924,7 @@ ArrayData *ZendArray::remove(CStrRef k, bool copy, int64 prehash /* = -1 */) {
     return a;
   }
   prepareBucketHeadsForWrite();
-  erase(findForErase(k.data(), k.size(), -1));
+  erase(findForErase(k.data(), k.size(), prehash));
   return NULL;
 }
 
@@ -936,7 +936,7 @@ ArrayData *ZendArray::remove(litstr k, bool copy, int64 prehash /* = -1 */) {
     return a;
   }
   prepareBucketHeadsForWrite();
-  erase(findForErase(k, strlen(k), -1));
+  erase(findForErase(k, strlen(k), prehash));
   return NULL;
 }
 

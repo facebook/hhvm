@@ -597,7 +597,7 @@ int execute_program(int argc, char **argv) {
 
     int new_argc = po.args.size() + 1;
     char **new_argv = (char **)malloc((new_argc + 1) * sizeof(char*));
-    new_argv[0] = argv[0];
+    new_argv[0] = (char*)po.file.c_str();
     for (int i = 1; i < new_argc; i++) {
       new_argv[i] = (char*)po.args[i-1].c_str();
     }

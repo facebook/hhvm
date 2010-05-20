@@ -157,6 +157,11 @@ public:
   static std::set<std::string> DynamicInvokeFunctions;
   static std::set<std::string> VolatileClasses;
 
+  /**
+   * Names of hot and cold functions to be marked in sources.
+   */
+  static std::set<std::string> HotFunctions;
+  static std::set<std::string> ColdFunctions;
 
   /**
    * A somewhat unique prefix for system identifiers.

@@ -447,6 +447,7 @@ void MethodStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   FunctionScopePtr funcScope = m_funcScope.lock();
   ClassScopePtr scope = ar->getClassScope();
+  string origFuncName;
   ar->pushScope(funcScope);
 
   if (outputFFI(cg, ar)) return;
@@ -507,6 +508,15 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         type->outputCPPDecl(cg, ar);
       } else {
         cg.printf("void");
+      }
+      origFuncName = std::string(scope->getOriginalName()) +
+                     "::" + m_originalName;
+      if (Option::HotFunctions.find(origFuncName) !=
+          Option::HotFunctions.end()) {
+        cg.printf(" __attribute((__section__(\".text.hot\")))");
+      } else if (Option::ColdFunctions.find(origFuncName) !=
+                 Option::ColdFunctions.end()) {
+        cg.printf(" __attribute((__section__(\".text.cold\")))");
       }
       if (m_name == "__lval") {
         cg.printf(" &%s%s::___lval(",

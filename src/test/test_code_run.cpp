@@ -2881,6 +2881,12 @@ bool TestCodeRun::TestNewObjectExpression() {
        "static function foo() { return new parent();} } "
        "var_dump(B::foo());");
 
+  MVCR("<?php "
+       "function g() {}"
+       "function h() {}"
+       "class C {}"
+       "new C(g(), h());");
+
   return true;
 }
 

@@ -108,7 +108,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
           }
           m_params->setOutputCount(0);
         }
-        m_params->inferAndCheck(ar, NEW_TYPE(Any), false);
+        m_params->inferAndCheck(ar, NEW_TYPE(Some), false);
       }
     } else {
       m_extraArg = func->inferParamTypes(ar, self, m_params,

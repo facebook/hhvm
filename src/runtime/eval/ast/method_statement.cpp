@@ -148,8 +148,9 @@ void MethodStatement::getInfo(ClassInfo::MethodInfo &info) const {
   if (m_modifiers & ClassStatement::Protected) attr |= ClassInfo::IsProtected;
   if (m_modifiers & ClassStatement::Private) attr |= ClassInfo::IsPrivate;
   if (m_modifiers & ClassStatement::Static) attr |= ClassInfo::IsStatic;
-  if (!(attr & ClassInfo::IsProtected || attr & ClassInfo::IsPrivate))
+  if (!(attr & ClassInfo::IsProtected || attr & ClassInfo::IsPrivate)) {
     attr |= ClassInfo::IsPublic;
+  }
   info.attribute = (ClassInfo::Attribute)attr;
 }
 

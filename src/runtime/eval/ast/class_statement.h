@@ -62,6 +62,7 @@ public:
     Public = 1,
     Protected = 2,
     Private = 4,
+    AccessMask = Public|Protected|Private,
     Static = 8,
     Abstract = 16,
     Final = 32,

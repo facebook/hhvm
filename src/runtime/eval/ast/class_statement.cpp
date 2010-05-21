@@ -290,6 +290,35 @@ void ClassStatement::addMethod(MethodStatementPtr m) {
                 m_name.c_str(), m->name().c_str(),
                 m->loc()->file, m->loc()->line1);
   }
+  if (m->getModifiers() & Abstract) {
+    if (m->getModifiers() & Private) {
+      raise_error("Cannot declare abstract %s::%s() private in %s on line %d",
+                  m_name.c_str(), m->name().c_str(),
+                  m->loc()->file, m->loc()->line1);
+    }
+    if (m->getModifiers() & Static) {
+      raise_error("Cannot declare abstract %s::%s() static in %s on line %d",
+                  m_name.c_str(), m->name().c_str(),
+                  m->loc()->file, m->loc()->line1);
+    }
+    if (m->getModifiers() & Final) {
+      raise_error("Cannot declare abstract %s::%s() final in %s on line %d",
+                  m_name.c_str(), m->name().c_str(),
+                  m->loc()->file, m->loc()->line1);
+    }
+    if (m->hasBody()) {
+      raise_error("Abstract %s::%s() cannot contain body in %s on line %d",
+                  m_name.c_str(), m->name().c_str(),
+                  m->loc()->file, m->loc()->line1);
+    }
+  } else {
+    //if (!m->hasBody()) {
+    //  raise_error("Non-abstract %s::%s() must contain body in %s on line %d",
+    //              m_name.c_str(), m->name().c_str(),
+    //              m->loc()->file, m->loc()->line1);
+    //}
+  }
+
   m_methods[m->lname().c_str()] = m;
   m_methodsVec.push_back(m);
 }
@@ -610,6 +639,52 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
                                 name().c_str(), parent->name().c_str());
     }
     if (getModifiers() & (Interface|Abstract)) return;
+
+    // checking against parent methods
+    if (parent) {
+      for (vector<MethodStatementPtr>::const_iterator it =
+             m_methodsVec.begin(); it != m_methodsVec.end(); ++it) {
+        const MethodStatement *m =
+          parent->findMethod((*it)->name().c_str(), true);
+        if (m == NULL) continue;
+
+        int tmod = (*it)->getModifiers();
+        int pmod = m->getModifiers();
+
+        if ((tmod & Static) && !(pmod & Static)) {
+          raise_error("Cannot make non static method %s::%s() static in "
+                      "class %s in %s on line %d",
+                      parent->name().c_str(), m->name().c_str(),
+                      m_name.c_str(), (*it)->loc()->file, (*it)->loc()->line1);
+        }
+
+        if (!(tmod & Static) && (pmod & Static)) {
+          raise_error("Cannot make static method %s::%s() non static in "
+                      "class %s in %s on line %d",
+                      parent->name().c_str(), m->name().c_str(),
+                      m_name.c_str(), (*it)->loc()->file, (*it)->loc()->line1);
+        }
+
+        if (tmod & Abstract) {
+          if (!(pmod & Abstract)) {
+            raise_error("Cannot make non abstract method %s::%s() abstract in "
+                        "class %s in %s on line %d",
+                        parent->name().c_str(), m->name().c_str(),
+                        m_name.c_str(), (*it)->loc()->file,
+                        (*it)->loc()->line1);
+          }
+
+          if (pmod & Abstract) {
+            raise_error("Cannot re-declare abstract method %s::%s() abstract "
+                        "in class %s in %s on line %d",
+                        parent->name().c_str(), m->name().c_str(),
+                        m_name.c_str(), (*it)->loc()->file,
+                        (*it)->loc()->line1);
+          }
+        }
+      }
+    }
+
     cls = this;
   }
 

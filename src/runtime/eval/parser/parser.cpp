@@ -837,14 +837,42 @@ void Parser::onMemberModifier(Token &out, Token *modifiers, Token &modifier) {
   if (modifiers) {
     out.num = modifiers->num;
   }
+
+  int mod = 0;
   switch (modifier.num) {
-  case T_PUBLIC:    out.num |= ClassStatement::Public;    break;
-  case T_PROTECTED: out.num |= ClassStatement::Protected; break;
-  case T_PRIVATE:   out.num |= ClassStatement::Private;   break;
-  case T_STATIC:    out.num |= ClassStatement::Static;    break;
-  case T_ABSTRACT:  out.num |= ClassStatement::Abstract;  break;
-  case T_FINAL:     out.num |= ClassStatement::Final;     break;
+  case T_PUBLIC:    mod = ClassStatement::Public;    break;
+  case T_PROTECTED: mod = ClassStatement::Protected; break;
+  case T_PRIVATE:   mod = ClassStatement::Private;   break;
+  case T_STATIC:    mod = ClassStatement::Static;    break;
+  case T_ABSTRACT:  mod = ClassStatement::Abstract;  break;
+  case T_FINAL:     mod = ClassStatement::Final;     break;
   }
+
+  if ((out.num & ClassStatement::AccessMask) &&
+      (mod & ClassStatement::AccessMask)) {
+    raise_error("Multiple access type modifiers are not allowed "
+                "in %s on line %d", file(), line1());
+  }
+  if ((out.num & ClassStatement::Static) && (mod & ClassStatement::Static)) {
+    raise_error("Multiple static modifiers are not allowed "
+                "in %s on line %d", file(), line1());
+  }
+  if ((out.num & ClassStatement::Abstract) &&
+      (mod & ClassStatement::Abstract)) {
+    raise_error("Multiple abstract modifiers are not allowed "
+                "in %s on line %d", file(), line1());
+  }
+  if ((out.num & ClassStatement::Final) && (mod & ClassStatement::Final)) {
+    raise_error("Multiple final modifiers are not allowed "
+                "in %s on line %d", file(), line1());
+  }
+  if (((out.num|mod) & (ClassStatement::Abstract|ClassStatement::Final)) ==
+      (ClassStatement::Abstract|ClassStatement::Final)) {
+    raise_error("Cannot use the final modifier on an abstract class member "
+                "in %s on line %d", file(), line1());
+  }
+
+  out.num |= mod;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

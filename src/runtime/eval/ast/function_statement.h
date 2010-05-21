@@ -83,6 +83,8 @@ public:
   void getInfo(ClassInfo::MethodInfo &info) const;
   bool refReturn() const { return m_ref; }
   const std::vector<ParameterPtr>& getParams() const { return m_params; }
+  bool hasBody() const { return m_body;}
+
 protected:
   bool m_ref;
   std::string m_name;

@@ -10187,7 +10187,7 @@ bool TestCodeRun::TestExtSplFile() {
       "var_dump($info->getRealPath());"
       "var_dump($info->getPath());"
       "var_dump($info->getPathName());"
-      "$info = new SplFileInfo('test/../../external');"
+      "$info = new SplFileInfo('test/../../external-centos');"
       "var_dump($info->getLinkTarget());"
       "var_dump($info->getRealPath());"
       "var_dump($info->getPath());"

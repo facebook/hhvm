@@ -115,6 +115,7 @@ public:
   bool m_last_error_set;
   int m_last_errno;
   std::string m_last_error;
+  bool m_in_transaction;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

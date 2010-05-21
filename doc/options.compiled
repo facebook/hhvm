@@ -204,7 +204,7 @@ How long to wait for dangling server to respond.
 
 To further control idle connections, set
     ConnectionTimeoutSeconds = <some value>
-This parameter controls how long libevent will timeout a connection after 
+This parameter controls how long libevent will timeout a connection after
 idle on read or write. It takes effect when EnableKeepAlive is enabled.
 
 - EnableEarlyFlush, ForceChunkedEncoding
@@ -524,6 +524,7 @@ next requests.
     Memcache = false
     MemcacheKey = false
     SQL = false
+    SQLTable = false
 
     XSL = xsl filename
     XSLProxy = url to get the xsl file

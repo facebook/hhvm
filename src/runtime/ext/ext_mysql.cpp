@@ -18,6 +18,7 @@
 #include <runtime/ext/ext_mysql.h>
 #include <runtime/ext/ext_preg.h>
 #include <runtime/ext/ext_network.h>
+#include <runtime/ext/mysql_stats.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/util/request_local.h>
@@ -224,7 +225,8 @@ static MYSQL *create_new_conn() {
 
 MySQL::MySQL(const char *host, int port, const char *username,
              const char *password)
-  : m_port(port), m_last_error_set(false), m_last_errno(0) {
+    : m_port(port), m_last_error_set(false), m_last_errno(0),
+      m_in_transaction(false) {
   if (host) m_host = host;
   if (username) m_username = username;
   if (password) m_password = password;
@@ -249,6 +251,7 @@ void MySQL::close() {
   if (m_conn) {
     m_last_error_set = false;
     m_last_errno = 0;
+    m_in_transaction = false;
     m_last_error.clear();
     mysql_close(m_conn);
     m_conn = NULL;
@@ -268,6 +271,7 @@ bool MySQL::connect(CStrRef host, int port, CStrRef socket, CStrRef username,
     ServerStats::Log("sql.conn", 1);
   }
   IOStatusHelper io("mysql::connect", host.data(), port);
+  m_in_transaction = false;
   return mysql_real_connect(m_conn, host.data(), username.data(),
                             password.data(), NULL, port,
                             socket.empty() ? NULL : socket.data(),
@@ -307,6 +311,7 @@ bool MySQL::reconnect(CStrRef host, int port, CStrRef socket, CStrRef username,
     ServerStats::Log("sql.reconn_old", 1);
   }
   IOStatusHelper io("mysql::connect", host.data(), port);
+  m_in_transaction = false;
   return mysql_real_connect(m_conn, host.data(), username.data(),
                             password.data(), NULL, port, socket.data(),
                             client_flags);
@@ -762,6 +767,9 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
         table = table.substr(1, table.length() - 2);
       }
       ServerStats::Log(string("sql.query.") + table + "." + verb, 1);
+      if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {
+        MySqlStats::Record(verb, rconn->m_in_transaction, table);
+      }
     } else {
       f_preg_match("/^(?:(?:\\/\\*.*?\\*\\/)|\\(|\\s)*"
                    "(begin|commit|rollback)/is",
@@ -769,7 +777,11 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
       size = matches.toArray().size();
       if (size == 2) {
         string verb = Util::toLower(matches[1].toString().data());
+        rconn->m_in_transaction = (verb == "begin");
         ServerStats::Log(string("sql.query.") + verb, 1);
+        if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {
+          MySqlStats::Record(verb);
+        }
       } else {
         raise_warning("Unable to record MySQL stats with: %s", query.data());
         ServerStats::Log("sql.query.unknown", 1);

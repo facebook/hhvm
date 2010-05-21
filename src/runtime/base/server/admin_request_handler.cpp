@@ -28,6 +28,7 @@
 #include <runtime/base/program_functions.h>
 #include <runtime/base/shared/shared_store.h>
 #include <runtime/base/memory/leak_detectable.h>
+#include <runtime/ext/mysql_stats.h>
 
 #ifdef GOOGLE_CPU_PROFILER
 #include <google/profiler.h>
@@ -85,6 +86,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/check-load:      how many threads are actively handling requests\n"
         "/check-mem:       report memory quick statistics in log file\n"
         "/check-apc:       report APC quick statistics\n"
+        "/check-sql:       report SQL table statistics\n"
 
         "/status.xml:      show server status in XML\n"
         "/status.json:     show server status in JSON\n"
@@ -378,6 +380,14 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     stats += "<APC>\n";
     stats += SharedStores::ReportStats(1);
     stats += "</APC>\n";
+    transport->sendString(stats);
+    return true;
+  }
+  if (cmd == "check-sql") {
+    string stats = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+    stats += "<SQL>\n";
+    stats += MySqlStats::ReportStats();
+    stats += "</SQL>\n";
     transport->sendString(stats);
     return true;
   }

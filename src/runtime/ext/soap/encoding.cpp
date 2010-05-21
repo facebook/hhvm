@@ -3236,6 +3236,9 @@ static encodePtr get_array_type(xmlNodePtr node, CVarRef array,
       cur_ns = NULL;
     } else {
       cur_type = tmp.getType();
+      if (cur_type == LiteralString) {
+        cur_type = KindOfString;
+      }
       cur_stype = NULL;
       cur_ns = NULL;
     }

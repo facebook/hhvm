@@ -24,6 +24,7 @@
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/array/zend_array.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/macros.h>
 
 using namespace std;
 
@@ -97,6 +98,9 @@ int ArrayData::compare(const ArrayData *v2, bool strict) const {
   if (count1 < count2) return -1;
   if (count1 > count2) return 1;
   if (count1 == 0) return 0;
+
+  // prevent circular referenced objects/arrays or deep ones
+  DECLARE_THREAD_INFO; RECURSION_INJECTION;
 
   if (strict) {
     for (ArrayIter iter1(this), iter2(v2); iter1 && iter2; ++iter1, ++iter2) {

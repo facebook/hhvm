@@ -143,23 +143,33 @@ class TestCodeRun : public TestBase {
   bool TestErrorHandler();
   bool TestAssertOptions();
   bool TestExtMisc();
+  bool TestInvalidArgument();
   bool TestThrift();
   bool TestCreateFunction();
   bool TestSimpleXML();
+  bool TestDOMDocument();
   bool TestDirectory();
   bool TestFile();
   bool TestUselessAssignment();
+  bool TestExtString();
+  bool TestExtArray();
+  bool TestExtFile();
+  bool TestExtDate();
   bool TestExtImage();
-  bool TestSplFile();
-  bool TestIterator();
+  bool TestExtSplFile();
+  bool TestExtIterator();
+  bool TestExtSoap();
 
   // debugging purpose
   bool TestAdHoc();
+
+  static bool FastMode;
 
  protected:
   bool CleanUp();
   bool GenerateFiles(const char *input, const char *subdir = "");
   bool CompileFiles();
+  bool RecordMulti(const char *input, const char *file, int line, bool flag);
 
   bool MultiVerifyCodeRun();
   bool VerifyCodeRun(const char *input, const char *output,
@@ -180,8 +190,8 @@ class TestCodeRun : public TestBase {
   if (!Count(VerifyCodeRun(a,NULL,__FILE__,__LINE__,true))) return false;
 
 // Multi VCR
-#define MVCR(a) m_infos.push_back(VCRInfo(a,NULL,__FILE__,__LINE__,false));
-#define MVCRNW(a) m_infos.push_back(VCRInfo(a,NULL,__FILE__,__LINE__,true));
+#define MVCR(a) if (!RecordMulti(a,__FILE__,__LINE__,false)) return false;
+#define MVCRNW(a) if (!RecordMulti(a,__FILE__,__LINE__,true)) return false;
 
 ///////////////////////////////////////////////////////////////////////////////
 

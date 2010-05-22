@@ -15,11 +15,11 @@
 */
 
 #include <test/test_base.h>
-#include <lib/option.h>
+#include <compiler/option.h>
 #include <test/test.h>
-#include <cpp/base/type_variant.h>
-#include <cpp/ext/ext_variable.h>
-#include <cpp/ext/ext_array.h>
+#include <runtime/base/complex_types.h>
+#include <runtime/ext/ext_variable.h>
+#include <runtime/ext/ext_array.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -33,6 +33,12 @@ bool TestBase::Count(bool result) {
   if (result) Test::s_passed++;
   Test::s_total++;
   return result;
+}
+
+bool TestBase::CountSkip() {
+  Test::s_skipped++;
+  Test::s_total++;
+  return true;
 }
 
 bool TestBase::VerifySame(const char *exp1, const char *exp2,

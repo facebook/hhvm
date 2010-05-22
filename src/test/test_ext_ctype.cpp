@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_ctype.h>
-#include <cpp/ext/ext_ctype.h>
+#include <runtime/ext/ext_ctype.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

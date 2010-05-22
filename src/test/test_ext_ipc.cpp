@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_ipc.h>
-#include <cpp/ext/ext_ipc.h>
+#include <runtime/ext/ext_ipc.h>
 #include <sys/wait.h>
 
 ///////////////////////////////////////////////////////////////////////////////

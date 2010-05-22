@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_soap.h>
-#include <cpp/ext/ext_output.h>
+#include <runtime/ext/ext_output.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +33,7 @@ bool TestExtSoap::RunTests(const std::string &which) {
 }
 
 bool TestExtSoap::preTest() {
-  m_server = p_soapserver(NEW(c_soapserver)());
+  m_server = sp_soapserver(NEW(c_soapserver)());
   m_server->create(null, CREATE_MAP1("uri", "http://testuri.org"));
   return true;
 }
@@ -106,7 +106,7 @@ bool TestExtSoap::test_SoapServerArrayParam() {
 }
 
 bool TestExtSoap::test_SoapServerWSDL() {
-  m_server = p_soapserver(NEW(c_soapserver)());
+  m_server = sp_soapserver(NEW(c_soapserver)());
   m_server->create("test/test.wsdl", CREATE_MAP1("uri", "http://testuri.org"));
   m_server->t_addfunction("Add");
 

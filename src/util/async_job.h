@@ -44,11 +44,13 @@ public:
   }
 
   void doJob() {
+    m_worker.onThreadEnter();
     while (true) {
       boost::shared_ptr<TJob> job = m_dispatcher.getNextJob();
       if (!job) break;
       m_worker.doJob(job);
     }
+    m_worker.onThreadExit();
   }
 
 private:

@@ -235,6 +235,7 @@ void FileCache::load(const char *filename) {
         if (uncompressed == NULL) {
           throw Exception("Bad compressed data in archive %s", filename);
         }
+
         buffer.clen = buffer.len;
         buffer.cdata = buffer.data;
         buffer.len = new_len;

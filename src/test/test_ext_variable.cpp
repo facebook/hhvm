@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_variable.h>
-#include <cpp/ext/ext_variable.h>
+#include <runtime/ext/ext_variable.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -15,9 +15,9 @@
 */
 
 #include <test/test_ext_zlib.h>
-#include <cpp/ext/ext_zlib.h>
-#include <cpp/ext/ext_file.h>
-#include <cpp/ext/ext_output.h>
+#include <runtime/ext/ext_zlib.h>
+#include <runtime/ext/ext_file.h>
+#include <runtime/ext/ext_output.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

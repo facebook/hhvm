@@ -22,6 +22,14 @@
 #include <errno.h>
 
 namespace HPHP {
+
+///////////////////////////////////////////////////////////////////////////////
+// Only gcc >= 4.3.0 supports the '__thread' keyword for thread locals
+
+#if !defined(NO_TLS) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 3))
+#define USE_GCC_FAST_TLS
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // helper
 
@@ -59,10 +67,223 @@ inline void ThreadLocalCreateKey(pthread_key_t *key, void (*del)(void*)) {
  * So, syntax-wise it's similar to pointers. T can be primitive types, and if
  * it's a class, there has to be a default constructor.
  */
+
+///////////////////////////////////////////////////////////////////////////////
+#if defined(USE_GCC_FAST_TLS)
+
 template<typename T>
 class ThreadLocalBase {
 public:
+  /**
+   * Constructor that has to be called from a thread-neutral place.
+   */
+  ThreadLocalBase() : m_key(0) {
+    ThreadLocalCreateKey(&m_key, OnThreadExit);
+  }
 
+  virtual ~ThreadLocalBase() { }
+
+  virtual void reset() = 0;
+
+public:
+  static void OnThreadExit(void *obj) {
+    ((ThreadLocalBase<T> *)obj)->reset();
+  }
+
+  pthread_key_t m_key;
+};
+
+template<typename T, int CNT>
+static T *&_tls_get() {
+  static __attribute__ ((tls_model ("initial-exec"))) __thread T *p = NULL;
+  return p;
+}
+
+template<typename T>
+class ThreadLocal : public ThreadLocalBase<T> {
+public:
+  ThreadLocal(T *&(*f)(void)) : m_get(f) {}
+
+  T *get() const {
+    T *&p = m_get();
+    if (p == NULL) {
+      return createKey();
+    }
+    return p;
+  }
+
+  T* createKey() const __attribute__((noinline));
+
+  virtual void reset() {
+    T *&p = m_get();
+    delete p;
+    p = NULL;
+    pthread_setspecific(ThreadLocalBase<T>::m_key, NULL);
+  }
+
+  T *operator->() const {
+    return get();
+  }
+
+  T &operator*() const {
+    return *get();
+  }
+
+private:
+  T *&(*m_get)(void);
+};
+
+template<typename T>
+T* ThreadLocal<T>::createKey() const {
+  T *&p = m_get();
+  if (p == NULL) {
+    p = new T();
+    pthread_setspecific(ThreadLocalBase<T>::m_key,
+                        (ThreadLocalBase<T> *)this);
+  }
+
+  return p;
+}
+
+template<typename T>
+class ThreadLocalCreate : public ThreadLocalBase<T> {
+public:
+  ThreadLocalCreate(T *&(*f)(void)) { m_get = f; }
+
+  T *get() const {
+    T *&p = m_get();
+    if (p == NULL) {
+      p = T::Create(m_createInfo);
+      pthread_setspecific(ThreadLocalBase<T>::m_key,
+                          (ThreadLocalBase<T> *)this);
+    }
+    return p;
+  }
+
+  virtual void reset() {
+    T *&p = m_get();
+    delete p;
+    p = NULL;
+    pthread_setspecific(ThreadLocalBase<T>::m_key, NULL);
+  }
+
+  T *operator->() const {
+    return get();
+  }
+
+  T &operator*() const {
+    return *get();
+  }
+
+  void *m_createInfo;
+
+private:
+  T *&(*m_get)(void);
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// Singleton thread-local storage for T
+
+template<typename T>
+class ThreadLocalSingleton {
+public:
+  T *get() const {
+    T *&p = get_loc();
+    if (p == NULL) {
+      p = T::Create();
+    }
+    return p;
+  }
+
+  void reset() {
+    T *&p = get_loc();
+    T::Delete(p);
+    p = NULL;
+  }
+
+  T *operator->() const {
+    return get();
+  }
+
+  T &operator*() const {
+    return *get();
+  }
+
+private:
+  static T *&get_loc() {
+    static __attribute__ ((tls_model ("initial-exec"))) __thread T *p = NULL;
+    return p;
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// some classes don't need new/delete at all
+
+template<typename T, bool throwOnNull = true>
+class ThreadLocalProxy {
+public:
+  ThreadLocalProxy(T *&(*f)(void)) : m_get(f) {}
+
+  T *get() const {
+    T *obj = m_get();
+    if (obj == NULL && throwOnNull) {
+      throw Exception("ThreadLocalProxy::get() called before set()");
+    }
+    return obj;
+  }
+
+  void set(T* obj) {
+    T *&p = m_get();
+    p = obj;
+  }
+
+  void reset() {
+    T *&p = m_get();
+    p = NULL;
+  }
+
+  T *operator->() const {
+    return get();
+  }
+
+  T &operator*() const {
+    return *get();
+  }
+
+private:
+  T *&(*m_get)(void);
+};
+
+/*
+ * How to use the thread-local macros:
+ *
+ * Use DECLARE_THREAD_LOCAL to declare a *static* class field as thread local:
+ *   class SomeClass {
+ *     static DECLARE_THREAD_LOCAL(SomeFieldType, f);
+ *   }
+ *
+ * Use IMPLEMENT_THREAD_LOCAL in the cpp file to implement the field:
+ *   IMPLEMENT_THREAD_LOCAL(SomeFieldType, SomeClass::f);
+ *
+ * Remember: *Never* write IMPLEMENT_THREAD_LOCAL in a header file.
+ */
+
+#define DECLARE_THREAD_LOCAL(T, f) ThreadLocal<T> f
+#define IMPLEMENT_THREAD_LOCAL(T, f) \
+  ThreadLocal<T> f(_tls_get<T, __COUNTER__>)
+
+#define DECLARE_THREAD_LOCAL_CREATE(T, f) ThreadLocalCreate<T> f
+#define IMPLEMENT_THREAD_LOCAL_CREATE(T, f) \
+  ThreadLocalCreate<T> f(_tls_get<T, __COUNTER__>)
+
+#define DECLARE_THREAD_LOCAL_PROXY(T, N, f) ThreadLocalProxy<T, N> f
+#define IMPLEMENT_THREAD_LOCAL_PROXY(T, N, f) \
+  ThreadLocalProxy<T, N> f(_tls_get<T, __COUNTER__>)
+
+#else /* USE_GCC_FAST_TLS */
+
+template<typename T>
+class ThreadLocalBase {
 public:
   /**
    * Constructor that has to be called from a thread-neutral place.
@@ -73,7 +294,7 @@ public:
 
 public:
   static void OnThreadExit(void *obj) {
-    delete (T*)obj;
+    delete (T *)obj;
   }
 
   pthread_key_t m_key;
@@ -146,6 +367,53 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// Singleton thread-local storage for T
+
+template<typename T>
+class ThreadLocalSingleton {
+public:
+  ThreadLocalSingleton() : key_(0) {
+    key_ = getKey();
+  }
+
+  T *get() const {
+    T *obj = (T*)pthread_getspecific(key_);
+    if (obj == NULL) {
+      obj = T::Create();
+      pthread_setspecific(key_, obj);
+    }
+    return obj;
+  }
+
+  void reset() {
+    T::Delete((T*)pthread_getspecific(key_));
+    pthread_setspecific(key_, NULL);
+  }
+
+  /**
+   * Access object's member or method through this operator overload.
+   */
+  T *operator->() const {
+    return get();
+  }
+
+  T &operator*() const {
+    return *get();
+  }
+
+private:
+  pthread_key_t key_;
+
+  static pthread_key_t getKey() {
+    static pthread_key_t key = 0;
+    if (key == 0) {
+      ThreadLocalCreateKey(&key, NULL);
+    }
+    return key;
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////
 // some classes don't need new/delete at all
 
 template<typename T, bool throwOnNull = true>
@@ -193,196 +461,16 @@ public:
   pthread_key_t m_key;
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// Only gcc >= 4.3.0 will work
-#if defined(USE_TLS) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 3))
-
-template<typename T, int CNT>
-static T *&_tls_get() {
-  static __attribute__ ((tls_model ("initial-exec"))) __thread T *p = NULL;
-  return p;
-}
-
-template<typename T>
-class TLS : public ThreadLocalBase<T> {
-public:
-  TLS(T *&(*f)(void)) { m_get = f; }
-
-  T *get() const {
-    T *&p = m_get();
-    if (p == NULL) {
-      p = new T();
-      pthread_setspecific(ThreadLocalBase<T>::m_key, p);
-    }
-    return p;
-  }
-
-  void reset() {
-    T *&p = m_get();
-    delete p;
-    p = NULL;
-    pthread_setspecific(ThreadLocalBase<T>::m_key, NULL);
-  }
-
-  T *operator->() const {
-    return get();
-  }
-
-  T &operator*() const {
-    return *get();
-  }
-
-private:
-  T *&(*m_get)(void);
-};
-
-template<typename T>
-class TLSCreate : public ThreadLocalBase<T> {
-public:
-  TLSCreate(T *&(*f)(void)) { m_get = f; }
-
-  T *get() const {
-    T *&p = m_get();
-    if (p == NULL) {
-      p = T::Create(m_createInfo);
-      pthread_setspecific(ThreadLocalBase<T>::m_key, p);
-    }
-    return p;
-  }
-
-  void reset() {
-    T *&p = m_get();
-    delete p;
-    p = NULL;
-    pthread_setspecific(ThreadLocalBase<T>::m_key, NULL);
-  }
-
-  T *operator->() const {
-    return get();
-  }
-
-  T &operator*() const {
-    return *get();
-  }
-
-  void *m_createInfo;
-
-private:
-  T *&(*m_get)(void);
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// Singleton thread-local storage for T
-
-template<typename T>
-class ThreadLocalSingleton {
-public:
-  T *get() const {
-    T *&p = get_loc();
-    if (p == NULL) {
-      p = T::Create();
-    }
-    return p;
-  }
-
-  void reset() {
-    T *&p = get_loc();
-    T::Delete(p);
-    p = NULL;
-  }
-
-  T *operator->() const {
-    return get();
-  }
-
-  T &operator*() const {
-    return *get();
-  }
-
-private:
-  static T *&get_loc() {
-    static __attribute__ ((tls_model ("initial-exec"))) __thread T *p = NULL;
-    return p;
-  }
-};
-
-/*
- * How to use the thread-local macros:
- *
- * Use DECLARE_THREAD_LOCAL to declare a *static* class field as thread local:
- *   class SomeClass {
- *     static DECLARE_THREAD_LOCAL(SomeFieldType, f);
- *   }
- *
- * Use IMPLEMENT_THREAD_LOCAL in the cpp file to implement the field:
- *   IMPLEMENT_THREAD_LOCAL(SomeFieldType, SomeClass::f);
- *
- * Remember: *Never* write IMPLEMENT_THREAD_LOCAL in a header file.
- */
-
-#define DECLARE_THREAD_LOCAL(T, f) TLS<T> f
-#define IMPLEMENT_THREAD_LOCAL(T, f) TLS<T> f(_tls_get<T, __COUNTER__>)
-
-#define DECLARE_THREAD_LOCAL_CREATE(T, f) TLSCreate<T> f
-#define IMPLEMENT_THREAD_LOCAL_CREATE(T, f) \
-  TLSCreate<T> f(_tls_get<T, __COUNTER__>)
-
-#else /* USE_TLS */
-
-///////////////////////////////////////////////////////////////////////////////
-// Singleton thread-local storage for T
-
-template<typename T>
-class ThreadLocalSingleton {
-public:
-  ThreadLocalSingleton() : key_(0) {
-    key_ = getKey();
-  }
-
-  T *get() const {
-    T *obj = (T*)pthread_getspecific(key_);
-    if (obj == NULL) {
-      obj = T::Create();
-      pthread_setspecific(key_, obj);
-    }
-    return obj;
-  }
-
-  void reset() {
-    T::Delete((T*)pthread_getspecific(key_));
-    pthread_setspecific(key_, NULL);
-  }
-
-  /**
-   * Access object's member or method through this operator overload.
-   */
-  T *operator->() const {
-    return get();
-  }
-
-  T &operator*() const {
-    return *get();
-  }
-
-private:
-  pthread_key_t key_;
-
-  static pthread_key_t getKey() {
-    static pthread_key_t key = 0;
-    if (key == 0) {
-      ThreadLocalCreateKey(&key, NULL);
-    }
-    return key;
-  }
-};
-
 #define DECLARE_THREAD_LOCAL(T, f) ThreadLocal<T> f
 #define IMPLEMENT_THREAD_LOCAL(T, f) ThreadLocal<T> f
 
 #define DECLARE_THREAD_LOCAL_CREATE(T, f) ThreadLocalCreate<T> f
 #define IMPLEMENT_THREAD_LOCAL_CREATE(T, f) ThreadLocalCreate<T> f
 
-#endif /* USE_TLS */
+#define DECLARE_THREAD_LOCAL_PROXY(T, N, f) ThreadLocalProxy<T, N> f
+#define IMPLEMENT_THREAD_LOCAL_PROXY(T, N, f) ThreadLocalProxy<T, N> f
+
+#endif /* USE_GCC_FAST_TLS */
 
 ///////////////////////////////////////////////////////////////////////////////
 }

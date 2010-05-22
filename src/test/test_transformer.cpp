@@ -15,13 +15,13 @@
 */
 
 #include <test/test_transformer.h>
-#include <lib/parser/parser.h>
-#include <lib/code_generator.h>
-#include <lib/statement/statement_list.h>
-#include <lib/analysis/analysis_result.h>
-#include <lib/system/builtin_symbols.h>
+#include <compiler/parser/parser.h>
+#include <compiler/code_generator.h>
+#include <compiler/statement/statement_list.h>
+#include <compiler/analysis/analysis_result.h>
+#include <compiler/builtin_symbols.h>
 #include <util/util.h>
-#include <lib/option.h>
+#include <compiler/option.h>
 
 using namespace std;
 
@@ -37,8 +37,8 @@ bool TestTransformer::VerifyTransformer(const char *input, const char *output,
   ASSERT(output);
 
   AnalysisResultPtr ar(new AnalysisResult());
-  BuiltinSymbols::load(ar);
-  Parser::parseString(input, ar);
+  BuiltinSymbols::Load(ar);
+  Parser::ParseString(input, ar);
   ar->analyzeProgram();
   ar->inferTypes();
   ostringstream code;

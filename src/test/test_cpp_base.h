@@ -24,7 +24,7 @@
 
 /**
  * Testing CPP core library coding. Main goal of this set of unit tests is to
- * make sure cpp/base library has no memory problems while doing the right
+ * make sure runtime/base library has no memory problems while doing the right
  * things. TestCppRun is good at making sure semantically correctness of these
  * classes, but it's hard to run it under valgrind. This set of unit tests,
  * in fact including all extension tests, are written in C++ code directly
@@ -40,6 +40,7 @@ class TestCppBase : public TestBase {
   // building blocks
   bool TestSmartAllocator();
   bool TestMemoryManager();
+  bool TestIpBlockMap();
 
   /**
    * Date types. This in turn tests StringData, ArrayData, StringOffset,

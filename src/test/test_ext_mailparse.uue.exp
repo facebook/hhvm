@@ -1,0 +1,12 @@
+Message: uue
+
+Part 1
+body-line-count => int(10)
+charset => string(8) "us-ascii"
+content-base => string(1) "/"
+content-type => string(10) "text/plain"
+ending-pos => int(972)
+line-count => int(27)
+starting-pos => int(0)
+starting-pos-body => int(760)
+transfer-encoding => string(4) "8bit"

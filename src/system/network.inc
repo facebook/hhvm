@@ -1,0 +1,37 @@
+#if EXT_TYPE == 0
+"gethostbyaddr", T(Variant), S(0), "ip_address", T(String), NULL, S(0), NULL, S(0), 
+"gethostbyname", T(String), S(0), "hostname", T(String), NULL, S(0), NULL, S(0), 
+"gethostbynamel", T(Variant), S(0), "hostname", T(String), NULL, S(0), NULL, S(0), 
+"getprotobyname", T(Variant), S(0), "name", T(String), NULL, S(0), NULL, S(0), 
+"getprotobynumber", T(Variant), S(0), "number", T(Int32), NULL, S(0), NULL, S(0), 
+"getservbyname", T(Variant), S(0), "service", T(String), NULL, S(0), "protocol", T(String), NULL, S(0), NULL, S(0), 
+"getservbyport", T(Variant), S(0), "port", T(Int32), NULL, S(0), "protocol", T(String), NULL, S(0), NULL, S(0), 
+"inet_ntop", T(Variant), S(0), "in_addr", T(String), NULL, S(0), NULL, S(0), 
+"inet_pton", T(Variant), S(0), "address", T(String), NULL, S(0), NULL, S(0), 
+"ip2long", T(Variant), S(0), "ip_address", T(String), NULL, S(0), NULL, S(0), 
+"long2ip", T(String), S(0), "proper_address", T(Int32), NULL, S(0), NULL, S(0), 
+"dns_check_record", T(Boolean), S(0), "host", T(String), NULL, S(0), "type", T(String), "null_string", S(0), NULL, S(0), 
+"checkdnsrr", T(Boolean), S(0), "host", T(String), NULL, S(0), "type", T(String), "null_string", S(0), NULL, S(0), 
+"dns_get_record", T(Variant), S(0), "hostname", T(String), NULL, S(0), "type", T(Int32), "-1", S(0), "authns", T(Variant), "null", S(1), "addtl", T(Variant), "null", S(1), NULL, S(0), 
+"dns_get_mx", T(Boolean), S(0), "hostname", T(String), NULL, S(0), "mxhosts", T(Variant), NULL, S(1), "weights", T(Variant), "null", S(1), NULL, S(0), 
+"getmxrr", T(Boolean), S(0), "hostname", T(String), NULL, S(0), "mxhosts", T(Variant), NULL, S(1), "weight", T(Variant), "null", S(1), NULL, S(0), 
+"fsockopen", T(Variant), S(0), "hostname", T(String), NULL, S(0), "port", T(Int32), "-1", S(0), "errnum", T(Variant), "null", S(1), "errstr", T(Variant), "null", S(1), "timeout", T(Double), "0.0", S(0), NULL, S(0), 
+"pfsockopen", T(Variant), S(0), "hostname", T(String), NULL, S(0), "port", T(Int32), "-1", S(0), "errnum", T(Variant), "null", S(1), "errstr", T(Variant), "null", S(1), "timeout", T(Double), "0.0", S(0), NULL, S(0), 
+"socket_get_status", T(Array), S(0), "stream", T(Object), NULL, S(0), NULL, S(0), 
+"socket_set_blocking", T(Boolean), S(0), "stream", T(Object), NULL, S(0), "mode", T(Int32), NULL, S(0), NULL, S(0), 
+"socket_set_timeout", T(Boolean), S(0), "stream", T(Object), NULL, S(0), "seconds", T(Int32), NULL, S(0), "microseconds", T(Int32), "0", S(0), NULL, S(0), 
+"header", T(Void), S(0), "str", T(String), NULL, S(0), "replace", T(Boolean), "true", S(0), "http_response_code", T(Int32), "0", S(0), NULL, S(0), 
+"headers_list", T(Array), S(0), NULL, S(0), 
+"headers_sent", T(Boolean), S(0), "file", T(Variant), "null", S(1), "line", T(Variant), "null", S(1), NULL, S(0), 
+"header_remove", T(Void), S(0), "name", T(String), "null_string", S(0), NULL, S(0), 
+"setcookie", T(Boolean), S(0), "name", T(String), NULL, S(0), "value", T(String), "null_string", S(0), "expire", T(Int32), "0", S(0), "path", T(String), "null_string", S(0), "domain", T(String), "null_string", S(0), "secure", T(Boolean), "false", S(0), "httponly", T(Boolean), "false", S(0), NULL, S(0), 
+"setrawcookie", T(Boolean), S(0), "name", T(String), NULL, S(0), "value", T(String), "null_string", S(0), "expire", T(Int32), "0", S(0), "path", T(String), "null_string", S(0), "domain", T(String), "null_string", S(0), "secure", T(Boolean), "false", S(0), "httponly", T(Boolean), "false", S(0), NULL, S(0), 
+"define_syslog_variables", T(Void), S(0), NULL, S(0), 
+"openlog", T(Void), S(0), "ident", T(String), NULL, S(0), "option", T(Int32), NULL, S(0), "facility", T(Int32), NULL, S(0), NULL, S(0), 
+"closelog", T(Void), S(0), NULL, S(0), 
+"syslog", T(Void), S(0), "priority", T(Int32), NULL, S(0), "message", T(String), NULL, S(0), NULL, S(0), 
+#elif EXT_TYPE == 1
+#elif EXT_TYPE == 2
+#elif EXT_TYPE == 3
+
+#endif

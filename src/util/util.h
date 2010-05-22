@@ -81,7 +81,7 @@ int ssystem(const char *command);
  * Canonicalize path to remove "..", "." and "\/", etc..
  */
 std::string canonicalize(const std::string &path);
-
+const char *canonicalize(const char *path, size_t len);
 /**
  * Thread-safe strerror().
  */

@@ -79,8 +79,8 @@ public:
 
   void acquireRead() { pthread_rwlock_rdlock(&m_rwlock); }
   void acquireWrite() { pthread_rwlock_wrlock(&m_rwlock); }
-  bool attemptRead() { return pthread_rwlock_tryrdlock(&m_rwlock); }
-  bool attemptWrite() { return pthread_rwlock_trywrlock(&m_rwlock); }
+  bool attemptRead() { return !pthread_rwlock_tryrdlock(&m_rwlock); }
+  bool attemptWrite() { return !pthread_rwlock_trywrlock(&m_rwlock); }
   void release() { pthread_rwlock_unlock(&m_rwlock); }
 
 private:

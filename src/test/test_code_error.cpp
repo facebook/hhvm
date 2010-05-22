@@ -15,12 +15,12 @@
 */
 
 #include <test/test_code_error.h>
-#include <lib/parser/parser.h>
-#include <lib/system/builtin_symbols.h>
-#include <lib/analysis/analysis_result.h>
-#include <lib/code_generator.h>
-#include <lib/analysis/dependency_graph.h>
-#include <lib/option.h>
+#include <compiler/parser/parser.h>
+#include <compiler/builtin_symbols.h>
+#include <compiler/analysis/analysis_result.h>
+#include <compiler/code_generator.h>
+#include <compiler/analysis/dependency_graph.h>
+#include <compiler/option.h>
 
 using namespace std;
 
@@ -33,7 +33,7 @@ TestCodeError::TestCodeError() {
 bool TestCodeError::RunTests(const std::string &which) {
   bool ret = true;
 #define CODE_ERROR_ENTRY(x) RUN_TEST(Test ## x);
-#include "../lib/analysis/core_code_error.inc"
+#include "../compiler/analysis/core_code_error.inc"
 #undef CODE_ERROR_ENTRY
   return ret;
 }
@@ -41,9 +41,9 @@ bool TestCodeError::RunTests(const std::string &which) {
 bool TestCodeError::Verify(CodeError::ErrorType type, const char *src,
                            const char *file, int line, bool exists) {
   AnalysisResultPtr ar(new AnalysisResult());
-  Parser::parseString("<?php ", ar, "f2"); // for TestPHPIncludeFileNotInLib
-  Parser::parseString(src, ar, "f1");
-  BuiltinSymbols::load(ar);
+  Parser::ParseString("<?php ", ar, "f2"); // for TestPHPIncludeFileNotInLib
+  Parser::ParseString(src, ar, "f1");
+  BuiltinSymbols::Load(ar);
   ar->analyzeProgram();
   ar->inferTypes();
   CodeErrorPtr ce = ar->getCodeError();
@@ -352,7 +352,6 @@ bool TestCodeError::TestComplexForEach() {
 
 bool TestCodeError::TestStatementHasNoEffect() {
   VE(StatementHasNoEffect, "<?php $a;");
-  VE(StatementHasNoEffect, "<?php $a[$b + $c];");
   VE(StatementHasNoEffect, "<?php $a + $b;");
   VE(StatementHasNoEffect, "<?php 'test';");
   VE(StatementHasNoEffect, "<?php -$a;");
@@ -463,6 +462,15 @@ bool TestCodeError::TestInvalidDerivation() {
      "interface a extends b {}"
      "class B extends A {}");
   VE(InvalidDerivation, "<?php interface A {} class T implements A, A {}");
+  VE(InvalidDerivation, "<?php class A {} class B implements A {}");
+  VE(InvalidDerivation, "<?php class A {} interface B extends A {}");
+  VEN(InvalidDerivation,
+      "<?php "
+      "class A {} "
+      "interface B {} "
+      "class C extends A  implements B {}");
+  VE(InvalidDerivation, "<?php interface I {} class C extends I {}");
+
   return true;
 }
 
@@ -522,5 +530,72 @@ bool TestCodeError::TestMissingAbstractMethodImpl() {
       "class D extends B implements C {}"
       "class E extends D { }");
 
+  return true;
+}
+
+bool TestCodeError::TestBadPassByReference() {
+  VE(BadPassByReference,
+     "<?php "
+     "function set_to_null(&$i) { $i = null; }"
+     "set_to_null(1);");
+  VE(BadPassByReference,
+     "<?php "
+     "function set_to_null(&$i) { $i = null; }"
+     "class A { const C  = 1; }"
+     "set_to_null(A::C);");
+  VE(BadPassByReference,
+     "<?php "
+     "function set_to_null(&$i) { $i = null; }"
+     "set_to_null($a + $b);");
+  VE(BadPassByReference,
+     "<?php "
+     "function set_to_null(&$i) { $i = null; }"
+     "set_to_null(foo() + foo());");
+  VE(BadPassByReference,
+     "<?php "
+     "function set_to_null(&$i) { $i = null; }"
+     "set_to_null(array(1));");
+  VE(BadPassByReference,
+     "<?php "
+     "function set_to_null(&$i) { $i = null; }"
+     "define('A', 1);"
+     "set_to_null(A);");
+  VE(BadPassByReference,
+     "<?php "
+     "function set_to_null(&$i) { $i = null; }"
+     "set_to_null($a ? $b : $c);");
+  VE(BadPassByReference,
+     "<?php "
+     "class A { function foo(&$a) { echo $a;} }"
+     "class B { function bar() { $obj = new A; $obj->foo(1);  } }");
+
+  VEN(BadPassByReference,
+      "<?php "
+      "function set_to_null(&$i) { $i = null; }"
+      "function foo() { return 1; }"
+      "class A { var $m; static $n; function f() { return 1;} }"
+      "set_to_null($a);"
+      "set_to_null($a = 1);"
+      "set_to_null(($a = 1));"
+      "set_to_null(new A);"
+      "set_to_null(foo());"
+      "$a = 'foo';"
+      "$b = 'a';"
+      "set_to_null($a());"
+      "set_to_null($$b);"
+      "$i = 1;"
+      "set_to_null(++$i); set_to_null($i--);"
+      "set_to_null(--$i); set_to_null($i--);"
+      "$obj = new A;"
+      "set_to_null($obj->f());"
+      "set_to_null($obj->m);"
+      "set_to_null(A::$n);");
+  VEN(BadPassByReference,
+      "$ar = array("
+      "       array('10', 11, 100, 100, 'a'),"
+      "       array(   1,  2, '2',   3,   1)"
+      "      );"
+      "array_multisort($ar[0], SORT_ASC, SORT_STRING,"
+      "                $ar[1], SORT_NUMERIC, SORT_DESC);");
   return true;
 }

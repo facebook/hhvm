@@ -203,7 +203,7 @@ This sets the level of logging output to standard out. The Levels are:
 3: The same as 2 plus extra information.
 4: All log messages.
 
-= --force=BOOL (default: false)
+= --force=BOOL (default: true)
 
 Forces the compiler to generate output even if there are code errors
 encountered.

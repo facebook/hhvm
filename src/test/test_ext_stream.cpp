@@ -15,9 +15,9 @@
 */
 
 #include <test/test_ext_stream.h>
-#include <cpp/ext/ext_stream.h>
-#include <cpp/ext/ext_socket.h>
-#include <cpp/ext/ext_file.h>
+#include <runtime/ext/ext_stream.h>
+#include <runtime/ext/ext_socket.h>
+#include <runtime/ext/ext_file.h>
 
 using namespace std;
 

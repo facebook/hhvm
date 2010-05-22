@@ -18,7 +18,7 @@
 #define __TEST_CODE_ERROR_H__
 
 #include <test/test_base.h>
-#include <lib/analysis/code_error.h>
+#include <compiler/analysis/code_error.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +29,7 @@ class TestCodeError : public TestBase {
   virtual bool RunTests(const std::string &which);
 
 #define CODE_ERROR_ENTRY(x) bool Test ## x();
-#include "../lib/analysis/core_code_error.inc"
+#include "../compiler/analysis/core_code_error.inc"
 #undef CODE_ERROR_ENTRY
 
  private:

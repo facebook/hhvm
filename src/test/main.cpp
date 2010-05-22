@@ -16,7 +16,7 @@
 
 #include <test/test.h>
 #include <util/logger.h>
-#include <cpp/base/program_functions.h>
+#include <runtime/base/program_functions.h>
 #include <dlfcn.h>
 
 using namespace HPHP;
@@ -27,10 +27,10 @@ using namespace std;
 
 int main(int argc, char **argv) {
   string suite, which, set;
-  void (*lib_hook_initialize)();
-  lib_hook_initialize =
-    (void (*)())dlsym(NULL, "lib_hook_initialize");
-  if (lib_hook_initialize) lib_hook_initialize();
+  void (*compiler_hook_initialize)();
+  compiler_hook_initialize =
+    (void (*)())dlsym(NULL, "compiler_hook_initialize");
+  if (compiler_hook_initialize) compiler_hook_initialize();
   if (argc >= 2) suite = argv[1];
   if (argc >= 3) which = argv[2];
   if (argc >= 4) set   = argv[3];
@@ -43,6 +43,5 @@ int main(int argc, char **argv) {
   }
   hphp_process_init();
   Test test;
-  test.RunTests(suite, which, set);
-  return 0;
+  return test.RunTests(suite, which, set) ? 0 : -1;
 }

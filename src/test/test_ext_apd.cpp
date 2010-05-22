@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_apd.h>
-#include <cpp/ext/ext_apd.h>
+#include <runtime/ext/ext_apd.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

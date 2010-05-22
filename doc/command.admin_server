@@ -6,6 +6,10 @@ to perform certain actions. To list all possible commands,
 
   GET http://localhost:9999
 
+A particular command is like:
+
+  GET http://localhost:9999/<command-URL>?auth=<password>
+
 This is a list of available URLs:
 
 
@@ -66,3 +70,16 @@ If program was compiled with GOOGLE_TCMALLOC, these commands will become availab
 
 /free-mem:        ask tcmalloc to release memory to system
 /tcmalloc-stats:  get internal tcmalloc stats
+
+If program was compiled with USE_JEMALLOC, these commands will become available,
+
+/jemalloc-stats:  get internal jemalloc stats
+/jemalloc-stats-print:
+                  get comprehensive jemalloc stats in human-readable form
+/jemalloc-prof-activate:
+                  activate heap profiling
+/jemalloc-prof-deactivate:
+                  deactivate heap profiling
+/jemalloc-prof-dump:
+                  dump heap profile
+    file          optional, filesystem path

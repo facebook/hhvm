@@ -227,16 +227,16 @@ bool TestTypeInference::TestClassVariable() {
      "  m_a = 0;\n"
      "}\n"
      "void f_t() {\n"
-     "  p_t v_b;\n"
+     "  sp_t v_b;\n"
      "  int64 v_c = 0;\n"
      "  \n"
-     "  v_b = p_t(p_t(new c_t())->create());\n"
+     "  v_b = sp_t(sp_t(NEW(c_t)())->create());\n"
      "  v_c = v_b->m_a;\n"
      "}\n"
      "void f_t2() {\n"
-     "  p_t v_b;\n"
+     "  sp_t v_b;\n"
      "  \n"
-     "  v_b = p_t(p_t(new c_t())->create());\n"
+     "  v_b = sp_t(sp_t(NEW(c_t)())->create());\n"
      "  v_b->m_a = 1;\n"
      "}\n"
      );
@@ -422,8 +422,8 @@ bool TestTypeInference::TestMethodParameter() {
      "int64 c_a::t_test(int64 v_x) {\n"
      "  return v_x;\n"
      "}\n"
-     "gv_z = p_a(p_a(new c_a())->create());\n"
-     "p_a(gv_z)->t_test(1);\n"
+     "gv_z = sp_a(sp_a(NEW(c_a)())->create());\n"
+     "sp_a(gv_z)->t_test(1);\n"
      );
 
   VT("<?php class a { function test($x) { return $x; }} $z = new a(); $z->test(1); $y='test'; $z->$y(\'m\');",
@@ -441,8 +441,8 @@ bool TestTypeInference::TestMethodParameter() {
      "Variant c_a::t_test(CVarRef v_x) {\n"
      "  return v_x;\n"
      "}\n"
-     "gv_z = p_a(p_a(new c_a())->create());\n"
-     "p_a(gv_z)->t_test(1);\n"
+     "gv_z = sp_a(sp_a(NEW(c_a)())->create());\n"
+     "sp_a(gv_z)->t_test(1);\n"
      "gv_y = \"test\";\n"
      "toObject(gv_z)->o_invoke((toString(gv_y)), Array(NEW(ArrayElement)(ref(\"m\")), NULL), -1LL);\n"
      );

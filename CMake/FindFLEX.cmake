@@ -77,7 +77,7 @@ IF(FLEX_EXECUTABLE)
   IF(NOT ${FLEX_version_result} EQUAL 0)
     MESSAGE(SEND_ERROR "Command \"${FLEX_EXECUTABLE} --version\" failed with output:\n${FLEX_version_error}")
   ELSE(NOT ${FLEX_version_result} EQUAL 0)
-    STRING(REGEX REPLACE "^flex (.*)$" "\\1"
+    STRING(REGEX REPLACE "^flex(35)? (.*)$" "\\2"
       FLEX_VERSION "${FLEX_version_output}")
   ENDIF(NOT ${FLEX_version_result} EQUAL 0)
 

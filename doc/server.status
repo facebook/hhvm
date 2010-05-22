@@ -1,0 +1,51 @@
+
+<h2>Server Status</h2>
+
+Server status displays current running status of server process and each worker
+thread. To query status, hit admin port with a URL like this,
+
+  http://[server]:9999/status.[xml|json|html]
+
+The format is,
+
+  [process]
+     [id]
+     [build]
+     ...
+  [threads]
+     [thread]
+        [id]
+        [req]
+        ...
+     [thread]
+     ...
+
+1. Process Status
+
+- id: process ID
+- build: current binary's build ID
+- debug: DEBUG build or not
+- hotprofiler: whether hotprofiler was turned on or not
+- now: current datetime
+- start: when server was started
+- up: server up time so far
+
+2. Thread Status
+
+- id: thread ID
+- req: number of requests it has processed so far
+- bytes: number of bytes it has written to response
+- start: thread start time
+- duration: how long this thread has been running
+- mode: what this thread is doing
+
+  <b>idle</b> the thread is not processing any requests
+  <b>process</b> the thread is processing requests
+  <b>writing</b> the thread is sending response
+  <b>psp</b> the thread is doing post-sending processing
+
+- iostatus: which I/O operation this thread is doing
+- ioduration: how long this thread has been waiting for the I/O operation
+- url: which URL this thread is serving
+- client: client IP address
+- vhost: virtual host the URL matched

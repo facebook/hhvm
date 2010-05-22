@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_fb.h>
-#include <cpp/ext/ext_fb.h>
+#include <runtime/ext/ext_fb.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

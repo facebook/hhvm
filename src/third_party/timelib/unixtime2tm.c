@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2007 The PHP Group                                |
+   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id: unixtime2tm.c,v 1.12.2.4.2.3 2007/07/12 18:58:00 derick Exp $ */
+/* $Id: unixtime2tm.c 293036 2010-01-03 09:23:27Z sebastian $ */
 
 #include "timelib.h"
 
@@ -51,7 +51,7 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 		days++;
 		remainder -= SECS_PER_DAY;
 	}
-	DEBUG_INLINE(printf("days=%lld, rem=%lld\n", days, remainder););
+	DEBUG(printf("days=%lld, rem=%lld\n", days, remainder););
 
 	if (ts >= 0) {
 		tmp_days = days + 1;
@@ -76,17 +76,23 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 		*/
 
 		while (tmp_days <= 0) {
-			cur_year--;
-			DEBUG_INLINE(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
-			if (timelib_is_leap(cur_year)) {
-				tmp_days += DAYS_PER_LYEAR;
+			if (tmp_days < -1460970) {
+				cur_year -= 4000;
+				DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
+				tmp_days += 1460970;
 			} else {
-				tmp_days += DAYS_PER_YEAR;
+				cur_year--;
+				DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
+				if (timelib_is_leap(cur_year)) {
+					tmp_days += DAYS_PER_LYEAR;
+				} else {
+					tmp_days += DAYS_PER_YEAR;
+				}
 			}
 		}
 		remainder += SECS_PER_DAY;
 	}
-	DEBUG_INLINE(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
+	DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
 
 	months = timelib_is_leap(cur_year) ? month_tab_leap : month_tab;
 	if (timelib_is_leap(cur_year) && cur_year < 1970) {
@@ -94,19 +100,19 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 	}
 	i = 11;
 	while (i > 0) {
-		DEBUG_INLINE(printf("month=%lld (%d)\n", i, months[i]););
+		DEBUG(printf("month=%lld (%d)\n", i, months[i]););
 		if (tmp_days > months[i]) {
 			break;
 		}
 		i--;
 	}
-	DEBUG_INLINE(printf("A: ts=%lld, year=%lld, month=%lld, day=%lld,", ts, cur_year, i + 1, tmp_days - months[i]););
+	DEBUG(printf("A: ts=%lld, year=%lld, month=%lld, day=%lld,", ts, cur_year, i + 1, tmp_days - months[i]););
 
 	/* That was the date, now we do the tiiiime */
 	hours = remainder / 3600;
 	minutes = (remainder - hours * 3600) / 60;
 	seconds = remainder % 60;
-	DEBUG_INLINE(printf(" hour=%lld, minute=%lld, second=%lld\n", hours, minutes, seconds););
+	DEBUG(printf(" hour=%lld, minute=%lld, second=%lld\n", hours, minutes, seconds););
 
 	tm->y = cur_year;
 	tm->m = i + 1;
@@ -127,13 +133,13 @@ void timelib_update_from_sse(timelib_time *tm)
 	timelib_sll sse;
 
 	sse = tm->sse;
-
+	
 	switch (tm->zone_type) {
 		case TIMELIB_ZONETYPE_ABBR:
 		case TIMELIB_ZONETYPE_OFFSET: {
 			int z = tm->z;
 			signed int dst = tm->dst;
-
+			
 			timelib_unixtime2gmt(tm, tm->sse - (tm->z * 60));
 
 			tm->z = z;
@@ -143,11 +149,11 @@ void timelib_update_from_sse(timelib_time *tm)
 
 		case TIMELIB_ZONETYPE_ID: {
 			timelib_time_offset *gmt_offset;
-
+			
 			gmt_offset = timelib_get_time_zone_info(tm->sse, tm->tz_info);
 			timelib_unixtime2gmt(tm, tm->sse + gmt_offset->offset);
 			timelib_time_offset_dtor(gmt_offset);
-
+			
 			goto cleanup;
 		}
 
@@ -171,7 +177,7 @@ void timelib_unixtime2local(timelib_time *tm, timelib_sll ts)
 		case TIMELIB_ZONETYPE_OFFSET: {
 			int z = tm->z;
 			signed int dst = tm->dst;
-
+			
 			timelib_unixtime2gmt(tm, ts - (tm->z * 60));
 
 			tm->z = z;
@@ -184,7 +190,7 @@ void timelib_unixtime2local(timelib_time *tm, timelib_sll ts)
 			timelib_unixtime2gmt(tm, ts + gmt_offset->offset);
 
 			/* we need to reset the sse here as unixtime2gmt modifies it */
-			tm->sse = ts;
+			tm->sse = ts; 
 			tm->dst = gmt_offset->is_dst;
 			tm->z = gmt_offset->offset;
 			tm->tz_info = tz;
@@ -234,18 +240,18 @@ int timelib_apply_localtime(timelib_time *t, unsigned int localtime)
 {
 	if (localtime) {
 		/* Converting from GMT time to local time */
-		DEBUG_INLINE(printf("Converting from GMT time to local time\n"););
+		DEBUG(printf("Converting from GMT time to local time\n"););
 
 		/* Check if TZ is set */
 		if (!t->tz_info) {
-			DEBUG_INLINE(printf("E: No timezone configured, can't switch to local time\n"););
+			DEBUG(printf("E: No timezone configured, can't switch to local time\n"););
 			return -1;
 		}
 
 		timelib_unixtime2local(t, t->sse);
 	} else {
 		/* Converting from local time to GMT time */
-		DEBUG_INLINE(printf("Converting from local time to GMT time\n"););
+		DEBUG(printf("Converting from local time to GMT time\n"););
 
 		timelib_unixtime2gmt(t, t->sse);
 	}

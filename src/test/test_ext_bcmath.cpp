@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_bcmath.h>
-#include <cpp/ext/ext_bcmath.h>
+#include <runtime/ext/ext_bcmath.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

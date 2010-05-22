@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id: parse_date.re,v 1.26.2.27.2.12 2007/07/12 18:58:00 derick Exp $ */
+/* $Id: parse_date.re 296837 2010-03-26 10:12:43Z aharvey $ */
 
 #include "timelib.h"
 
@@ -234,6 +234,7 @@ static timelib_lookup_table const timelib_reltext_lookup[] = {
 	{ "sixth",    0,  6 },
 	{ "seventh",  0,  7 },
 	{ "eight",    0,  8 },
+	{ "eighth",   0,  8 },
 	{ "ninth",    0,  9 },
 	{ "tenth",    0, 10 },
 	{ "eleventh", 0, 11 },
@@ -466,7 +467,7 @@ static long timelib_parse_tz_cor(char **ptr)
 	char *begin = *ptr, *end;
 	long  tmp;
 
-	while (**ptr != '\0') {
+	while (isdigit(**ptr) || **ptr == ':') {
 		++*ptr;
 	}
 	end = *ptr;
@@ -667,7 +668,7 @@ static long timelib_lookup_zone(char **ptr, int *dst, char **tz_abbr, int *found
 	long  value = 0;
 	const timelib_tz_lookup_table *tp;
 
-	while (**ptr != '\0' && **ptr != ')') {
+	while (**ptr != '\0' && **ptr != ')' && **ptr != ' ') {
 		++*ptr;
 	}
 	end = *ptr;
@@ -732,7 +733,7 @@ static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_
 		}
 #endif
 		/* If we have a TimeZone identifier to start with, use it */
-		if (strstr(tz_abbr, "/")) {
+		if (strstr(tz_abbr, "/") || strcmp(tz_abbr, "UTC") == 0) {
 			if ((res = timelib_parse_tzfile(tz_abbr, tzdb)) != NULL) {
 				t->tz_info = res;
 				t->zone_type = TIMELIB_ZONETYPE_ID;
@@ -786,13 +787,13 @@ minutelz = [0-5][0-9];
 second = minute | "60";
 secondlz = minutelz | "60";
 meridian = ([AaPp] "."? [Mm] "."?) [\000\t ];
-tz = "("? [A-Za-z]{1,6} ")"? | [A-Z][a-z]+([_/][A-Z][a-z]+)+;
+tz = "("? [A-Za-z]{1,6} ")"? | [A-Z][a-z]+([_/-][A-Za-z]+)+;
 tzcorrection = [+-] hour24 ":"? minute?;
 
 daysuf = "st" | "nd" | "rd" | "th";
 
 month = "0"? [0-9] | "1"[0-2];
-day   = ([0-2]?[0-9] | "3"[01]) daysuf?;
+day   = (([0-2]?[0-9]) | ("3"[01])) daysuf?;
 year  = [0-9]{1,4};
 year2 = [0-9]{2};
 year4 = [0-9]{4};
@@ -842,11 +843,11 @@ iso8601date2     = year2 "-" monthlz "-" daylz;
 gnudateshorter   = year4 "-" month;
 gnudateshort     = year "-" month "-" day;
 pointeddate4     = day [.\t-] month [.-] year4;
-pointeddate2     = day [.\t-] month [.-] year2;
+pointeddate2     = day [.\t] month "." year2;
 datefull         = day ([ \t.-])* monthtext ([ \t.-])* year;
 datenoday        = monthtext ([ .\t-])* year4;
 datenodayrev     = year4 ([ .\t-])* monthtext;
-datetextual      = monthtext ([ .\t-])* day [,.stndrh\t ]* year;
+datetextual      = monthtext ([ .\t-])* day [,.stndrh\t ]+ year;
 datenoyear       = monthtext ([ .\t-])* day [,.stndrh\t ]*;
 datenoyearrev    = day ([ .\t-])* monthtext;
 datenocolon      = year4 monthlz daylz;
@@ -879,7 +880,7 @@ dateshortwithtimelongtz = datenoyear iso8601normtz;
 /*
  * Relative regexps
  */
-reltextnumber = 'first'|'next'|'second'|'third'|'fourth'|'fifth'|'sixth'|'seventh'|'eight'|'ninth'|'tenth'|'eleventh'|'twelfth'|'last'|'previous'|'this';
+reltextnumber = 'first'|'next'|'second'|'third'|'fourth'|'fifth'|'sixth'|'seventh'|'eight'|'eighth'|'ninth'|'tenth'|'eleventh'|'twelfth'|'last'|'previous'|'this';
 reltextunit = (('sec'|'second'|'min'|'minute'|'hour'|'day'|'week'|'fortnight'|'forthnight'|'month'|'year') 's'?) | daytext;
 
 relnumber = ([+-]*[ \t]*[0-9]+);
@@ -1125,6 +1126,7 @@ relativetext = reltextnumber space reltextunit;
 		TIMELIB_HAVE_DATE();
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
 		s->time->m = timelib_get_nr((char **) &ptr, 2);
+		s->time->d = 1;
 		TIMELIB_PROCESS_YEAR(s->time->y);
 		TIMELIB_DEINIT;
 		return TIMELIB_ISO_DATE;
@@ -1406,7 +1408,9 @@ relativetext = reltextnumber space reltextunit;
 		TIMELIB_UNHAVE_TIME();
 		relunit = timelib_lookup_relunit((char**) &ptr);
 		s->time->relative.weekday = relunit->multiplier;
-		s->time->relative.weekday_behavior = 1;
+		if (s->time->relative.weekday_behavior != 2) {
+			s->time->relative.weekday_behavior = 1;
+		}
 		
 		TIMELIB_DEINIT;
 		return TIMELIB_WEEKDAY;
@@ -1517,7 +1521,7 @@ relativetext = reltextnumber space reltextunit;
 		while(*ptr) {
 			i = timelib_get_unsigned_nr((char **) &ptr, 24);
 			timelib_eat_spaces((char **) &ptr);
-			timelib_set_relative((char **) &ptr, i, 0, s);
+			timelib_set_relative((char **) &ptr, i, 1, s);
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_RELATIVE;
@@ -1616,7 +1620,7 @@ timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container
 
 void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 {
-	if (!(options && TIMELIB_OVERRIDE_TIME) && parsed->have_date && !parsed->have_time) {
+	if (!(options & TIMELIB_OVERRIDE_TIME) && parsed->have_date && !parsed->have_time) {
 		parsed->h = 0;
 		parsed->i = 0;
 		parsed->s = 0;
@@ -1636,7 +1640,7 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 		parsed->tz_abbr = now->tz_abbr ? strdup(now->tz_abbr) : NULL;
 	}
 	if (!parsed->tz_info) {
-		parsed->tz_info = now->tz_info ? timelib_tzinfo_clone(now->tz_info) : NULL;
+		parsed->tz_info = now->tz_info ? (!(options & TIMELIB_NO_CLONE) ? timelib_tzinfo_clone(now->tz_info) : now->tz_info) : NULL;
 	}
 	if (parsed->zone_type == 0 && now->zone_type != 0) {
 		parsed->zone_type = now->zone_type;

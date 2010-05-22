@@ -116,6 +116,12 @@ struct pointer_hash {
   }
 };
 
+struct int64_hash {
+  size_t operator() (const int64 v) const {
+    return (size_t)v;
+  }
+};
+
 template<typename T>
 class hphp_const_char_map :
     public hphp_hash_map<const char *, T, hphp_hash<const char *>, eqstr> {
@@ -128,6 +134,9 @@ class hphp_string_map :
 
 typedef hphp_hash_set<const char *, hphp_hash<const char *>,
                       eqstr> hphp_const_char_set;
+
+typedef hphp_hash_map<void*, int, pointer_hash<void> > PointerCounterMap;
+typedef hphp_hash_set<void*, pointer_hash<void> > PointerSet;
 
 ///////////////////////////////////////////////////////////////////////////////
 // boost

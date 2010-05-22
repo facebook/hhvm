@@ -2,29 +2,31 @@
 PROJECT_ROOT = ..
 PROJECT_NAME = hphp_runtime
 
-EVAL_DIR=cpp/eval
+EVAL_DIR=runtime/eval
 
-RECURSIVE_SOURCE_SUBDIRS = cpp/base cpp/ext lib/system/gen util $(EVAL_DIR)
-CXX_NOOPT_SOURCES = $(shell find $(RECURSIVE_SOURCE_SUBDIRS) -name "*.no.cpp")
-CXX_SOURCES = $(filter-out $(CXX_NOOPT_SOURCES), \
-	$(shell find $(RECURSIVE_SOURCE_SUBDIRS) -name "*.cpp"))
-C_SOURCES = $(shell find $(RECURSIVE_SOURCE_SUBDIRS) -name "*.c")
+EXCLUDED_CXX_SOURCES := runtime/ext/sep/%.cpp
+RECURSIVE_SOURCE_SUBDIRS := runtime/base runtime/ext system/gen util $(EVAL_DIR)
+REC_SOURCES := $(filter-out $(EXCLUDED_CXX_SOURCES), \
+	$(shell find $(RECURSIVE_SOURCE_SUBDIRS) -name "*.cpp" -o -name "*.c"))
+CXX_NOOPT_SOURCES := $(filter %.no.cpp, $(REC_SOURCES))
 
-PROGRAMS = test hphp hphpi lib
-SUB_CLEAN_DIRS = idl hphp cpp
+PROGRAMS = test hphp hphpi compiler
+SUB_CLEAN_DIRS = idl hphp runtime ../facebook/extensions
 
-# Include gen files here
-include $(EVAL_DIR)/gen.mk
 C_SOURCES := $(filter-out $(GENERATED_CPP_SOURCES) $(GENERATED_C_SOURCES),\
-	$(C_SOURCES))
-CXX_SOURCES := $(filter-out $(GENERATED_CXX_SOURCES), $(CXX_SOURCES))
+	$(filter %.c, $(REC_SOURCES)))
+CXX_SOURCES := $(filter-out $(GENERATED_CXX_SOURCES) $(CXX_NOOPT_SOURCES),\
+	$(filter %.cpp,$(REC_SOURCES)))
 
 include $(PROJECT_ROOT)/src/rules.mk
 
-EXCEPTIONS = $(shell find $(EXT_DIR)/mozilla -name "*.a")
+# embed the git sha1 and branch information
+GIT_SHA1 := $(shell git describe --all --long --abbrev=40 --always)
+CPPFLAGS += -DCOMPILER_ID=\"$(GIT_SHA1)\"
 
-STATIC_LIBS = $(shell echo $(filter-out $(EXCEPTIONS), $(ALL_LIBS)) \
-                | sed -e "s/libsicu/libicu/g")
+EXCEPTIONS := $(EXT_DIR)/mozilla/%.a #$(EXT_DIR)/libfbml/lib/libfbml.a
+
+STATIC_LIBS := $(subst libsicu,libicu,$(filter-out $(EXCEPTIONS), $(ALL_LIBS)))
 
 SHARED_LIBS = $(EXT_DIR)/icu/lib/libicuuc.so \
               $(EXT_DIR)/binutils/libbinutils.so \
@@ -39,6 +41,6 @@ TARGETS = $(PROGRAMS) $(SHARED_LIB) $(STATIC_LIB)
 all: $(TARGETS)
 
 $(PROGRAMS) : $(STATIC_LIB)
-hphp: lib
+hphp: compiler
 hphpi : hphp
-test: lib
+test: compiler

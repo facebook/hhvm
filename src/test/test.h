@@ -17,21 +17,54 @@
 #ifndef __TEST_H__
 #define __TEST_H__
 
-#include <lib/hphp.h>
+#include <compiler/hphp.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
 class Test {
- public:
+public:
   static int s_total;
   static int s_passed;
+  static int s_skipped;
   static bool s_quiet; // less printf, good for nightly unit test runs
 
- public:
+public:
   Test() {}
 
-  void RunTests(std::string &suite, std::string &which, std::string &set);
+  bool RunTests(std::string &suite, std::string &which, std::string &set);
+
+private:
+  void RunTestsImpl(bool &allPassed, std::string &suite, std::string &which,
+                    std::string &set);
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+#define RUN_TESTSUITE(name)                                             \
+  if (suite.empty() || suite == #name) {                                \
+    if (!s_quiet) {                                                     \
+      printf(#name "......\n\n");                                       \
+    }                                                                   \
+    name test;                                                          \
+    if (test.RunTests(which)) {                                         \
+      if (!s_quiet) {                                                   \
+        printf("\n" #name " OK\n\n");                                   \
+      }                                                                 \
+    } else {                                                            \
+      printf("\n" #name " #####>>> FAILED <<< #####\n\n");              \
+      allPassed = false;                                                \
+    }                                                                   \
+  }                                                                     \
+
+#ifdef SEP_EXTENSION
+#define IMPLEMENT_SEP_EXTENSION_TEST(name)                              \
+  void Test::RunTestsImpl(bool &allPassed, std::string &suite,          \
+                          std::string &which, std::string &set) {       \
+    RUN_TESTSUITE(TestExt ## name);                                     \
+  }
+#else
+#define IMPLEMENT_SEP_EXTENSION_TEST(name)
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -55,10 +55,11 @@
 ###############################################################################
 # Machine specific information
 
-OS = $(shell echo `cat /etc/issue | head -1 | cut -d' ' -f1`)
+OS := $(shell head -1 /etc/issue | cut -d' ' -f1)
+
 ifeq ($(OS), CentOS)
 
-ifdef HPHP_DEV
+ifndef HPHP_DEV
 OS = centos
 else
 OS = centos-dev
@@ -68,71 +69,12 @@ else
 OS = fedora
 endif
 
-GCC_VERSION = $(shell echo `gcc --version | head -1 | cut -d ' ' -f3`)
+GCC_VERSION := $(shell gcc --version | head -1 | cut -d ' ' -f3)
 
 ###############################################################################
-# Command line switches. For example, "make RELEASE=1".
+# Directories an command line switches
 
-V = @
-NO_PRINT = $(if $(V),--no-print-directory,)
-INFINITE_LOOP_DETECTION = 1
-INFINITE_RECURSION_DETECTION = 1
-REQUEST_TIMEOUT_DETECTION = 1
-
-#MYSQL_MILLISECOND_TIMEOUT = 1;
-
--include $(wildcard $(PROJECT_ROOT)/local/*.mk)
-
-# This normally generates debug symbols, but you may also use this in your
-# code to output extra debugging information.
-#DEBUG = 1
-#DEBUG_MEMORY_LEAK = 1
-#DEBUG_APC_LEAK = 1
-#DEBUG_RACE_CONDITION = 1
-
-#USE_JEMALLOC = 1
-USE_TLS = 1
-
-ifndef DEBUG_MEMORY_LEAK
-ifndef DEBUG_RACE_CONDITION
-
-# This normally adds -O3 tag to generate the most optimized code targeted for
-# production build.
-ifndef DEBUG
-RELEASE = 1
-endif
-
-# For hotprofiler instrumentation
-HOTPROFILER = 1
-
-ifndef USE_JEMALLOC
-# For google profilers
-#GOOGLE_CPU_PROFILER = 1
-#GOOGLE_HEAP_PROFILER = 1
-
-ifndef NO_TCMALLOC
-# Whether to link with tcmalloc.a
-GOOGLE_TCMALLOC = 1
-endif
-
-endif
-
-# For GNU profiler - gprof.
-#PROFILE = 1
-
-# For GNU coverage - gcov.
-#COVERAGE = 1
-
-endif
-endif
-
-###############################################################################
-# Directories
-
-MKDIR = mkdir -p
-RMDIR = rm -fR
-LIB_DIR = $(PROJECT_ROOT)/bin
-EXT_DIR = $(PROJECT_ROOT)/external-$(OS)
+include $(PROJECT_ROOT)/src/dirs.mk
 
 ###############################################################################
 # Source Files
@@ -160,15 +102,15 @@ ifdef AUTO_SOURCES_RECURSIVE
 
 CXX_NOOPT_SOURCES += \
   $(filter-out $(GENERATED_CXX_NOOPT_SOURCES), \
-	$(shell echo `find . -name "*.no.cpp"`))
+	$(shell find . -name "*.no.cpp"))
 
 CXX_SOURCES += \
   $(filter-out $(GENERATED_CXX_SOURCES) $(CXX_NOOPT_SOURCES), \
-	$(shell echo `find . -name "*.cpp"`))
+	$(shell find . -name "*.cpp"))
 
 C_SOURCES += \
   $(filter-out $(GENERATED_C_SOURCES) $(GENERATED_CPP_SOURCES), \
-	$(shell echo `find . -name "*.c"`))
+	$(shell find . -name "*.c"))
 
 endif
 
@@ -186,12 +128,19 @@ ALL_SOURCES += \
 
 INTERMEDIATE_FILES += $(GENERATED_SOURCES) time_build.out
 SOURCES += $(filter-out $(EXCLUDES), $(ALL_SOURCES))
-OBJECTS += $(patsubst %.cpp, %.o, $(SOURCES:.c=.o))
+OBJECTS += $(addprefix $(OUT_DIR),$(patsubst %.cpp, %.o, $(SOURCES:.c=.o)))
+OBJECT_DIR_DEPS := $(if $(OUT_DIR),$(addsuffix .mkdir, \
+	$(sort $(dir $(OBJECTS)))))
+OBJECT_DIRS_REQUIRED := $(filter-out $(wildcard $(OBJECT_DIR_DEPS)), \
+	$(OBJECT_DIR_DEPS))
+ifneq ($(OBJECT_DIRS_REQUIRED),)
+$(shell $(MKDIR) $(OBJECT_DIRS_REQUIRED))
+endif
 
 STATIC_LIB = $(LIB_DIR)/lib$(PROJECT_NAME).a
 SHARED_LIB = $(LIB_DIR)/lib$(PROJECT_NAME).so
-APP_TARGET = $(PROJECT_NAME)
-MONO_TARGETS = $(filter-out $(APP_TARGET), $(patsubst %.cpp, %, $(wildcard *.cpp)))
+APP_TARGET = $(OUT_TOP)$(PROJECT_NAME)
+MONO_TARGETS = $(filter-out $(PROJECT_NAME), $(patsubst %.cpp, %, $(wildcard *.cpp)))
 
 # external shared libraries
 EXTERNAL =
@@ -200,7 +149,7 @@ EXTERNAL =
 # Compilation
 
 ifneq ($(USE_CCACHE),)
-USE_CCACHE := $(wildcard /usr/bin/ccache)
+override USE_CCACHE := $(wildcard /usr/bin/ccache)
 endif
 
 # To time compilation time and link time, run "TIME_BUILD=1 make -j1", and it
@@ -214,11 +163,11 @@ TIMECMD =
 endif
 ifneq ($(USE_CCACHE),)
 ifndef NO_DISTCC
-NO_DISTCC=1
+export CCACHE_PREFIX=distcc
 endif
 endif
 
-PREFIX := $(TIMECMD)$(if $(NO_DISTCC),, distcc)$(if $(USE_CCACHE), ccache)
+PREFIX := $(TIMECMD)$(if $(USE_CCACHE), ccache,$(if $(NO_DISTCC),, distcc))
 
 CC = $(PREFIX) gcc
 CXX = $(PREFIX) g++
@@ -258,6 +207,7 @@ CPPFLAGS += \
   -isystem $(EXT_DIR)/libfbml/include \
   -isystem $(EXT_DIR)/libmbfl/include \
   -isystem $(EXT_DIR)/oniguruma/include \
+  -isystem $(EXT_DIR)/oracle/include \
   -isystem $(EXT_DIR)/icu/include \
   -isystem $(EXT_DIR)/xhp/include \
   -isystem $(EXT_DIR)/libmcc/include \
@@ -267,7 +217,11 @@ CPPFLAGS += \
   -isystem $(EXT_DIR)/libmcrypt/include \
   -isystem $(EXT_DIR)/libfbi/include \
   -I $(PROJECT_ROOT)/src \
-  -I $(PROJECT_ROOT)/src/lib/system/gen \
+  -I $(PROJECT_ROOT)/src/system/gen \
+
+ifdef USE_JEMALLOC
+CPPFLAGS += -isystem $(EXT_DIR)/jemalloc/include
+endif
 
 ifdef GOOGLE_CPU_PROFILER
 GOOGLE_TOOLS = 1
@@ -288,7 +242,7 @@ CXXFLAGS += -ftemplate-depth-60
 endif
 
 ifndef NO_WALL
-CXXFLAGS += -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings
+CXXFLAGS += -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof
 endif
 
 ifndef NO_WERROR
@@ -378,8 +332,8 @@ JAVA_PATH = /usr/local/jdk-6u7-64
 CPPFLAGS += -I $(JAVA_PATH)/include -I $(JAVA_PATH)/include/linux
 endif
 
-ifdef USE_TLS
-CPPFLAGS += -DUSE_TLS
+ifdef NO_TLS
+CPPFLAGS += -DNO_TLS
 endif
 
 # facebook specific stuff
@@ -396,6 +350,10 @@ LD = $(TIMECMD) g++ -B$(EXT_DIR)/binutils/ -o
 LDFLAGS += -Xlinker --export-dynamic -Xlinker --no-warn-search-mismatch
 else
 LDFLAGS += -rdynamic
+endif
+
+ifndef NO_RPATH
+LDFLAGS += -Wl,-rpath -Wl,/usr/local/hphp/lib
 endif
 
 # Add library search paths here.
@@ -452,6 +410,8 @@ else
 
 MYSQL_LIBS = $(EXT_DIR)/mysql/lib/mysql/libmysqlclient_r.a \
 	-lssl -lcrypto -lcrypt
+ORACLE_LIBS = $(EXT_DIR)/oracle/lib/libclntsh.so.11.1
+
 SQLITE_LIBS = $(EXT_DIR)/sqlite/lib/libsqlite3.a
 
 PCRE_LIBS = $(EXT_DIR)/pcre/lib/libpcre.a
@@ -496,6 +456,10 @@ MBFL_LIBS = $(EXT_DIR)/libmbfl/lib/libmbfl.a \
 
 LIB_UNWIND = $(EXT_DIR)/libunwind/lib/libunwind.a
 
+ifdef USE_JEMALLOC
+JEMALLOC_LIBS = $(EXT_DIR)/jemalloc/lib/libjemalloc.a
+endif
+
 ifdef GOOGLE_HEAP_PROFILER
 GOOGLE_LIBS = $(EXT_DIR)/google-perftools/lib/libprofiler.a \
 	$(EXT_DIR)/google-perftools/lib/libtcmalloc.a $(LIB_UNWIND)
@@ -505,7 +469,8 @@ ifdef GOOGLE_CPU_PROFILER
 GOOGLE_LIBS = $(EXT_DIR)/google-perftools/lib/libprofiler.a $(LIB_UNWIND)
 endif
 ifdef GOOGLE_TCMALLOC
-GOOGLE_LIBS += $(EXT_DIR)/google-perftools/lib/libtcmalloc_minimal.a
+GOOGLE_LIBS += $(EXT_DIR)/google-perftools/lib/libtcmalloc_minimal.a \
+	$(LIB_UNWIND)
 endif
 endif
 
@@ -524,11 +489,39 @@ MCRYPT_LIBS = $(EXT_DIR)/libmcrypt/lib/libmcrypt.a
 
 FBI_LIBS = $(EXT_DIR)/libfbi/lib/libfbi.a
 
+LDAP_LIBS = -lldap -llber
+
 ALL_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \
-	$(MYSQL_LIBS) $(SQLITE_LIBS) $(MCC_LIBS) \
+	$(MYSQL_LIBS) $(ORACLE_LIBS) $(SQLITE_LIBS) $(MCC_LIBS) \
 	$(GD_LIBS) $(LIBXML_LIBS) $(FBML_LIBS) $(MBFL_LIBS) \
-        $(MCRYPT_LIBS) $(GOOGLE_LIBS) $(ICU_LIBS) $(HTTP_LIBS) $(XHP_LIBS) \
-        $(TIME_LIBS) $(TBB_LIBS) $(FBI_LIBS)
+	$(MCRYPT_LIBS) $(JEMALLOC_LIBS) $(GOOGLE_LIBS) $(ICU_LIBS) \
+	$(HTTP_LIBS) $(XHP_LIBS) $(TIME_LIBS) $(TBB_LIBS) $(FBI_LIBS) \
+	$(LDAP_LIBS)
+
+LIB_PATHS = $(HPHP_LIB) \
+  $(EXT_DIR)/libcurl/lib \
+  $(EXT_DIR)/mysql/lib/mysql \
+  $(EXT_DIR)/boost/lib \
+  $(EXT_DIR)/libmcc/lib \
+  $(EXT_DIR)/gd/lib \
+  $(EXT_DIR)/iconv/lib \
+  $(EXT_DIR)/libevent/lib \
+  $(EXT_DIR)/libmbfl/lib \
+  $(EXT_DIR)/oniguruma/lib \
+  $(EXT_DIR)/google-perftools/lib \
+  $(EXT_DIR)/libunwind/lib \
+  $(EXT_DIR)/icu/lib \
+  $(EXT_DIR)/libch/lib \
+  $(EXT_DIR)/libafdt/lib \
+  $(EXT_DIR)/xhp/lib \
+  $(EXT_DIR)/binutils \
+  $(EXT_DIR)/libfbml/lib \
+  $(EXT_DIR)/mozilla \
+  $(EXT_DIR)/timelib/lib \
+  $(EXT_DIR)/sqlite/lib \
+  $(EXT_DIR)/tbb/lib \
+  $(EXT_DIR)/libfbi/lib \
+  $(EXT_DIR)/jemalloc/lib
 
 ###############################################################################
 # Dependencies
@@ -537,10 +530,14 @@ ALL_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \
 overall: all
 
 # Suppressing no rule errors
-%.d:;
+%.d:
+	@true
 
-DEPEND_FILES := $(patsubst %.cpp, %.d, $(ALL_SOURCES:.c=.d))
+DEPEND_FILES := $(OBJECTS:.o=.d)
+
 ifneq ($(DEPEND_FILES),)
+$(OBJECTS) : %.o : %.d
+
 -include $(DEPEND_FILES)
 endif
 
@@ -551,74 +548,56 @@ DEP_LIBS += $(call dep_libs, $(LIBS))
 ###############################################################################
 # Predefined Targets
 
-ifdef SHOW_COMPILE
-define COMPILE_CXX
-$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@)  $<
-endef
+ifndef SHOW_COMPILE
+ECHO_COMPILE = @echo 'Compiling $< ...'
+CV = $(V)
 else
-define COMPILE_CXX
-@echo 'Compiling $<...'
-$(V)$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
-endef
+ECHO_COMPILE =
+CV =
 endif
 
-ifdef SHOW_LINK
-define LINK_OBJECTS
-$(LD) $@ $(LDFLAGS) $(filter %.o,$^) $(LIBS)
-endef
+ifndef SHOW_LINK
+ECHO_LINK = @echo 'Linking $@ ...'
+LV = $(V)
 else
-define LINK_OBJECTS
-@echo 'Linking $@...'
-$(V)$(LD) $@ $(LDFLAGS) $(filter %.o,$^) $(LIBS)
-endef
+ECHO_LINK =
+LV =
 endif
 
+define COMPILE_IT
+$(ECHO_COMPILE)
+$(CV)$(1) -c $(if $(OUT_TOP),-I$(OUT_TOP)src) $(CPPFLAGS) $(2) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
+endef
+
+define LINK_OBJECTS
+$(ECHO_LINK)
+$(LV)$(LD) $@ $(LDFLAGS) $(filter %.o,$^) $(LIBS)
+endef
+
+OBJECT_FILES = $(addprefix $(OUT_DIR),$(patsubst %.$(2),%.o,$(1)))
+
+ifdef NOT_NOW
 %:%.o
 
 %:%.c
 
 %:%.cpp
-
-ifdef SHOW_COMPILE
-
-$(CXX_NOOPT_SOURCES:%.cpp=%.o) $(GENERATED_CXX_NOOPT_SOURCES:%.cpp=%.o): %.o:%.cpp
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
-
-$(CXX_SOURCES:%.cpp=%.o) $(GENERATED_CXX_SOURCES:%.cpp=%.o): %.o:%.cpp
-	$(CXX) -c $(CPPFLAGS) $(OPT) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
-
-$(C_SOURCES:%.c=%.o) $(GENERATED_C_SOURCES:%.c=%.o): %.o:%.c
-	$(CC) -c $(CPPFLAGS) $(OPT) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
-
-$(GENERATED_CPP_SOURCES:%.c=%.o): %.o:%.c
-	$(CXX) -c $(CPPFLAGS) $(OPT) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
-
-%.o:%.cpp
-	$(CXX) -c $(CPPFLAGS) $(OPT) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
-
-else
-
-$(CXX_NOOPT_SOURCES:%.cpp=%.o) $(GENERATED_CXX_NOOPT_SOURCES:%.cpp=%.o): %.o:%.cpp
-	@echo 'Compiling $<...'
-	$(V)$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
-
-$(CXX_SOURCES:%.cpp=%.o) $(GENERATED_CXX_SOURCES:%.cpp=%.o): %.o:%.cpp
-	@echo 'Compiling $<...'
-	$(V)$(CXX) -c $(CPPFLAGS) $(OPT) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
-
-$(C_SOURCES:%.c=%.o) $(GENERATED_C_SOURCES:%.c=%.o): %.o:%.c
-	@echo 'Compiling $<...'
-	$(V)$(CC) -c $(CPPFLAGS) $(OPT) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
-
-$(GENERATED_CPP_SOURCES:%.c=%.o): %.o:%.c
-	@echo 'Compiling $<...'
-	$(V)$(CXX) -c $(CPPFLAGS) $(OPT) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
-
-%.o:%.cpp
-	@echo 'Compiling $<...'
-	$(V)$(CXX) -c $(CPPFLAGS) $(OPT) $(CXXFLAGS) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
-
 endif
+
+$(call OBJECT_FILES,$(CXX_NOOPT_SOURCES) $(GENERATED_CXX_NOOPT_SOURCES),cpp): $(OUT_DIR)%.o:%.cpp
+	$(call COMPILE_IT,$(CXX),$(CXXFLAGS))
+
+$(call OBJECT_FILES,$(CXX_SOURCES) $(GENERATED_CXX_SOURCES),cpp): $(OUT_DIR)%.o:%.cpp
+	$(call COMPILE_IT,$(CXX),$(OPT) $(CXXFLAGS))
+
+$(call OBJECT_FILES,$(C_SOURCES) $(GENERATED_C_SOURCES),c): $(OUT_DIR)%.o:%.c
+	$(call COMPILE_IT,$(CC),$(OPT))
+
+$(call OBJECT_FILES,$(GENERATED_CPP_SOURCES),c): $(OUT_DIR)%.o:%.c
+	$(call COMPILE_IT,$(CXX),$(OPT) $(CXXFLAGS))
+
+$(OUT_DIR)%.o:$(OUT_DIR)%.cpp
+	$(call COMPILE_IT,$(CXX),$(OPT) $(CXXFLAGS))
 
 .EXPORT_ALL_VARIABLES:;
 unexport CXX_NOOPT_SOURCES CXX_SOURCES C_SOURCES GENERATED_CXX_NOOPT_SOURCES GENERATED_CXX_SOURCES GENERATED_C_SOURCES GENERATED_CPP_SOURCES ALL_SOURCES SOURCES OBJECTS DEPEND_FILES CPPFLAGS CXXFLAGS LDFLAGS PROGRAMS LIB_TARGETS DEP_LIBS
@@ -639,13 +618,19 @@ SUB_INTERMEDIATE_FILES = $(INTERMEDIATE_FILES)
 
 $(OBJECTS): $(GENERATED_SOURCES)
 
+STRIP_ROOT = $(if $(OUT_TOP), $(patsubst -L$(PROJECT_ROOT)/%,-L%,$(patsubst $(PROJECT_ROOT)/%,%,$(patsubst $(ABS_PROJECT_ROOT)/%,%, $(1)))), $(1))
+
 ifdef SHOW_LINK
 
 $(SHARED_LIB): $(OBJECTS)
-	$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wl,-soname,lib$(PROJECT_NAME).so -o $@ $(OBJECTS) $(EXTERNAL)
+	$(if $(OUT_TOP),cd $(PROJECT_ROOT) &&) \
+		$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,lib$(PROJECT_NAME).so \
+			-o $(call STRIP_ROOT,$@ $(OBJECTS) $(EXTERNAL))
 
 $(STATIC_LIB): $(OBJECTS)
-	$(AR) $@ $(OBJECTS)
+	@echo $(words $(OBJECTS))
+	$(if $(OUT_TOP),cd $(PROJECT_ROOT) &&) \
+		$(AR) $(call STRIP_ROOT,$@ $(OBJECTS))
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 	$(LD) $@ $(LDFLAGS) $< $(LIBS)
@@ -653,20 +638,24 @@ $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 else
 
 $(SHARED_LIB): $(OBJECTS)
-	@echo 'Linking $@...'
-	$(V)$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wl,-soname,lib$(PROJECT_NAME).so -o $@ $(OBJECTS) $(EXTERNAL)
+	@echo 'Linking $@ ...'
+	$(V)$(if $(OUT_TOP),cd $(PROJECT_ROOT) &&) \
+		$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,lib$(PROJECT_NAME).so \
+			-o $(call STRIP_ROOT,$@ $(OBJECTS) $(EXTERNAL))
 
 $(STATIC_LIB): $(OBJECTS)
-	@echo 'Linking $@...'
-	$(V)$(AR) $@ $(OBJECTS)
+	@echo 'Linking $@ ...'
+	$(V)$(if $(OUT_TOP),cd $(PROJECT_ROOT) &&) \
+		$(AR) $(call STRIP_ROOT,$@ $(OBJECTS))
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
-	@echo 'Linking $@...'
+	@echo 'Linking $@ ...'
 	$(V)$(LD) $@ $(LDFLAGS) $< $(LIBS)
 
 endif
 
-$(APP_TARGET): $(OBJECTS) $(DEP_LIBS)
+.PHONY:out-of-date
+$(APP_TARGET): $(OBJECTS) $(DEP_LIBS) $(FORCE_RELINK)
 	$(LINK_OBJECTS) $(LINK_LIBS)
 
 .PHONY: $(LIB_TARGETS)

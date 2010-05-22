@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2007 The PHP Group                                |
+   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id: astro.c,v 1.1.2.4.2.1 2007/01/01 09:35:48 sebastian Exp $ */
+/* $Id: astro.c 293036 2010-01-03 09:23:27Z sebastian $ */
 
 #include <stdio.h>
 #include <math.h>

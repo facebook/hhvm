@@ -1,36 +1,41 @@
 *.[oad]
-bin/*.so
-src/cpp/tmp/*
-src/lib/analysis/code_error.inc
-src/lib/analysis/dependency.inc
+/bin-g
+/bin-O
+/bin/*.so
 
-src/lib/parser/*.tab.[ch]pp
-src/lib/parser/lex.yy.cpp
+/src/compiler/analysis/code_error.inc
+/src/compiler/analysis/dependency.inc
 
-src/test/fb_lib_hooks.cpp
-src/test/fb_lib_hooks.h
-src/test/test
-src/test/test_fast.inc
-src/test/test_fbcode_error.cpp
-src/test/test_fbcode_error.h
-src/test/test_fbdepend_graph.cpp
-src/test/test_fbdepend_graph.h
-src/test/test_mysql_info.inc
-src/test/test_suite.inc
-src/test/*.tmp
+/src/test/fb_compiler_hooks.cpp
+/src/test/fb_compiler_hooks.h
+/src/test/test
+/src/test/test_fast.inc
+/src/test/test_fbcode_error.cpp
+/src/test/test_fbcode_error.h
+/src/test/test_fbdepend_graph.cpp
+/src/test/test_fbdepend_graph.h
+/src/test/test_mysql_info.inc
+/src/test/test_suite.inc
+/src/test/*.tmp
 
-src/hphp/hphp
-src/hphp/fb_lib_hooks.cpp
-src/hphp/fb_lib_hooks.h
+/src/hphp/hphp
+/src/hphp/fb_compiler_hooks.cpp
+/src/hphp/fb_compiler_hooks.h
 
-src/cpp/eval/parser/hphp.output
-src/cpp/eval/parser/hphp.tab.cpp
-src/cpp/eval/parser/hphp.tab.hpp
-src/cpp/eval/parser/lex.eval_.cpp
+/src/runtime/tmp/Test*
+/src/runtime/tmp/run
+/src/runtime/tmp/run.sh
 
-src/hphpi/gen
-src/hphpi/hphpi
+/src/hphpi/gen
+/src/hphpi/hphpi
 
-*.cmake
+/facebook/output_*
+/facebook/push/install
+/facebook/autoload_files
+/facebook/volatile.hdf
+
+/local/*.mk
+
 CMakeFiles
 CMakeCache.txt
+cmake_install.cmake

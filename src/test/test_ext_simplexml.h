@@ -34,6 +34,7 @@ class TestExtSimplexml : public TestCppExt {
   bool test_libxml_clear_errors();
   bool test_libxml_use_internal_errors();
   bool test_libxml_set_streams_context();
+  bool test_libxml_disable_entity_loader();
   bool test_SimpleXMLElement();
   bool test_LibXMLError();
 };

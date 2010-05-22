@@ -1,14 +1,17 @@
+CXX_SOURCES += $(OUT_DIR)fb_compiler_hooks.cpp
+INTERMEDIATE_FILES += $(OUT_DIR)fb_compiler_hooks.cpp \
+	$(OUT_DIR)fb_compiler_hooks.h
 
-CXX_SOURCES += fb_lib_hooks.cpp
-INTERMEDIATE_FILES += fb_lib_hooks.cpp fb_lib_hooks.h
-
-fb_lib_hooks.cpp: \
-  ../../facebook/src/lib/fb_lib_hooks.cpp \
-  fb_lib_hooks.h
+$(OUT_DIR)fb_compiler_hooks.cpp: \
+  ../../facebook/src/compiler/fb_compiler_hooks.cpp \
+  $(OUT_DIR)fb_compiler_hooks.h
 	$(V)cp $< $@
 
-fb_lib_hooks.h: \
-  ../../facebook/src/lib/fb_lib_hooks.h
+$(OUT_DIR)fb_compiler_hooks.h: \
+  ../../facebook/src/compiler/fb_compiler_hooks.h
 	$(V)cp $< $@
 
-hphp: fb_lib_hooks.o
+$(OUT_TOP)hphp: $(OUT_DIR)fb_compiler_hooks.o
+
+$(OUT_DIR)fb_compiler_hooks.o : $(OUT_DIR)fb_compiler_hooks.d
+-include $(OUT_DIR)fb_compiler_hooks.d

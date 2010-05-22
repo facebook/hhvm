@@ -15,8 +15,8 @@
 */
 
 #include <test/test_ext_openssl.h>
-#include <cpp/ext/ext_openssl.h>
-#include <cpp/ext/ext_file.h>
+#include <runtime/ext/ext_openssl.h>
+#include <runtime/ext/ext_file.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -109,14 +109,15 @@ bool TestExtOpenssl::test_openssl_csr_new() {
 }
 
 bool TestExtOpenssl::test_openssl_csr_sign() {
-  Array dn(NEW(ArrayElement)("countryName", "XX"),
-           NEW(ArrayElement)("stateOrProvinceName", "State"),
-           NEW(ArrayElement)("localityName", "SomewhereCity"),
-           NEW(ArrayElement)("organizationName", "MySelf"),
-           NEW(ArrayElement)("organizationalUnitName", "Whatever"),
-           NEW(ArrayElement)("commonName", "mySelf"),
-           NEW(ArrayElement)("emailAddress", "user@domain.com"),
-           NULL);
+  Array dn(ArrayInit(7, false).
+           set(0, "countryName", "XX").
+           set(1, "stateOrProvinceName", "State").
+           set(2, "localityName", "SomewhereCity").
+           set(3, "organizationName", "MySelf").
+           set(4, "organizationalUnitName", "Whatever").
+           set(5, "commonName", "mySelf").
+           set(6, "emailAddress", "user@domain.com").
+           create());
   String privkeypass = "1234";
   int numberofdays = 365;
 

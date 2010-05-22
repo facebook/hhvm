@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_options.h>
-#include <cpp/ext/ext_options.h>
+#include <runtime/ext/ext_options.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -98,17 +98,18 @@ bool TestExtOptions::test_dl() {
 }
 
 bool TestExtOptions::test_extension_loaded() {
-  f_extension_loaded("");
+  VERIFY(f_extension_loaded("phpmcc"));
+  VERIFY(f_extension_loaded("bcmath"));
+  VERIFY(f_extension_loaded("spl"));
+  VERIFY(f_extension_loaded("curl"));
+  VERIFY(f_extension_loaded("simplexml"));
+  VERIFY(f_extension_loaded("mysql"));
   return Count(true);
 }
 
 bool TestExtOptions::test_get_loaded_extensions() {
-  try {
-    f_get_loaded_extensions();
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  VERIFY(!f_get_loaded_extensions().empty());
+  return Count(true);
 }
 
 bool TestExtOptions::test_get_extension_funcs() {
@@ -203,7 +204,7 @@ bool TestExtOptions::test_getlastmod() {
 }
 
 bool TestExtOptions::test_getmygid() {
-  VERIFY(f_getmygid());
+  f_getmygid();
   return Count(true);
 }
 
@@ -222,17 +223,13 @@ bool TestExtOptions::test_getmypid() {
 }
 
 bool TestExtOptions::test_getmyuid() {
-  VERIFY(f_getmyuid());
+  f_getmyuid();
   return Count(true);
 }
 
 bool TestExtOptions::test_getopt() {
-  try {
-    f_getopt("");
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  f_getopt("");
+  return Count(true);
 }
 
 bool TestExtOptions::test_getrusage() {
@@ -279,6 +276,12 @@ bool TestExtOptions::test_ini_get_all() {
 
 bool TestExtOptions::test_ini_get() {
   VS(f_ini_get(""), "");
+  f_ini_set("memory_limit", 50000000);
+  VS(f_ini_get("memory_limit"), "50000000");
+  f_set_time_limit(30);
+  VS(f_ini_get("max_execution_time"), "30");
+  f_ini_set("max_execution_time", 40);
+  VS(f_ini_get("max_execution_time"), "40");
   return Count(true);
 }
 
@@ -350,12 +353,9 @@ bool TestExtOptions::test_phpversion() {
 }
 
 bool TestExtOptions::test_putenv() {
-  try {
-    f_putenv("");
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  VERIFY(f_putenv("FOO=bar"));
+  VERIFY(!f_putenv("FOO"));
+  return Count(true);
 }
 
 bool TestExtOptions::test_set_magic_quotes_runtime() {

@@ -5,7 +5,7 @@ PROJECT_ROOT = $(HPHP_ROOT)/
 
 AUTO_SOURCES = 1
 
-SYSTEM=$(PROJECT_ROOT)/src/lib/system/
+SYSTEM=$(PROJECT_ROOT)/src/system/
 CXXFLAGS += -I../../util -I../../zend -I../base -I../ext -I$(SYSTEM)
 
 LIBS = \

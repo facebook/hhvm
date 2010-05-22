@@ -2,29 +2,12 @@
 
 include_once 'base.php';
 
-p("#include <libxml/parser.h>");
-p("#include <libxml/parserInternals.h>");
-p("#include <libxml/relaxng.h>");
-p("#include <libxml/tree.h>");
-p("#include <libxml/uri.h>");
-p("#include <libxml/xmlerror.h>");
-p("#include <libxml/xmlschemas.h>");
-p("#include <libxml/xmlwriter.h>");
-p("#include <libxml/xinclude.h>");
-p("#include <libxml/hash.h>");
-p("#include <libxml/c14n.h>");
-p("#include <libxml/HTMLparser.h>");
-p("#include <libxml/HTMLtree.h>");
-p("#include <libxml/xpath.h>");
-p("#include <libxml/xpathInternals.h>");
-p("#include <libxml/xpointer.h>");
-
+p("#include <runtime/ext/ext_domdocument_includes.h>");
 
 ///////////////////////////////////////////////////////////////////////////////
 // object methods
 
-c('DOMNode', null, array(),
-  // Methods
+c('DOMNode', null, array('Sweepable' => 'internal'),
   array(
     m(PublicMethod, '__construct', null,
       array()),
@@ -66,35 +49,40 @@ c('DOMNode', null, array(),
             'with_comments' => array(Boolean, 'false'),
             'xpath' => array(Variant, 'null'),
             'ns_prefixes' => array(Variant, 'null'))),
-    m(PublicMethod, 'getNodePath', Variant)
+    m(PublicMethod, 'getNodePath', Variant),
+    m(PublicMethod, "__get", Variant,
+      array('name' => Variant)),
+    m(PublicMethod, "__set", Variant,
+      array('name' => Variant,
+            'value' => Variant)),
     ),
   // Constants
   array(),
   // Internal fields
   "\n".
-  " public:\n".
-  "  xmlNodePtr m_node;"
-  );
+  "public:\n".
+  "  sp_domdocument m_doc;\n".
+  "  xmlNodePtr m_node;\n".
+  "  bool m_owner;"
+ );
 
 c('DOMAttr', 'DOMNode', array(),
-  // Methods
   array(
     m(PublicMethod, '__construct', null,
+      array('name' => String,
+            'value' => array(String, 'null_string'))),
+    m(PublicMethod, 'isId', Boolean),
+    m(PublicMethod, "__get", Variant,
+      array('name' => Variant)),
+    m(PublicMethod, "__set", Variant,
       array('name' => Variant,
             'value' => Variant)),
-    m(PublicMethod, 'isId', Boolean),
-    ),
-  // Constants
-  array(),
-  // Internal fields
-  ""
-  );
+  )
+ );
 
 c('DOMCharacterData', 'DOMNode', array(),
-  // Methods
   array(
-    m(PublicMethod, '__construct', null,
-      array('value' => Variant)),
+    m(PublicMethod, '__construct', null),
     m(PublicMethod, 'appendData', Boolean,
       array('arg' => String)),
     m(PublicMethod, 'deleteData', Boolean,
@@ -109,59 +97,49 @@ c('DOMCharacterData', 'DOMNode', array(),
             'data' => String)),
     m(PublicMethod, 'substringData', String,
       array('offset' => Int64,
-            'count' => Int64))
-    ),
-  // Constants
-  array(),
-  // Internal fields
-  ""
-  );
+            'count' => Int64)),
+    m(PublicMethod, "__get", Variant,
+      array('name' => Variant)),
+    m(PublicMethod, "__set", Variant,
+      array('name' => Variant,
+            'value' => Variant)),
+  )
+ );
 
 c('DOMComment', 'DOMCharacterData', array(),
-  // Methods
   array(
     m(PublicMethod, '__construct', null,
-      array('value' => Variant))
-    ),
-  // Constants
-  array(),
-  // Internal fields
-  ""
-  );
+      array('value' => array(String, 'null_string'))),
+  )
+ );
 
 c('DOMText', 'DOMCharacterData', array(),
-  // Methods
   array(
     m(PublicMethod, '__construct', null,
-      array('value' => Variant)),
+      array('value' => array(String, 'null_string'))),
     m(PublicMethod, 'isWhitespaceInElementContent', Boolean),
     m(PublicMethod, 'splitText', Variant,
-      array('offset' => Int64))
-    ),
-  // Constants
-  array(),
-  // Internal fields
-  ""
-  );
+      array('offset' => Int64)),
+    m(PublicMethod, "__get", Variant,
+      array('name' => Variant)),
+    m(PublicMethod, "__set", Variant,
+      array('name' => Variant,
+            'value' => Variant)),
+  )
+ );
 
 c('DOMCdataSection', 'DOMText', array(),
-  // Methods
   array(
     m(PublicMethod, '__construct', null,
-      array('value' => Variant))
-    ),
-  // Constants
-  array(),
-  // Internal fields
-  ""
-  );
+      array('value' => String))
+  )
+ );
 
 c('DOMDocument', 'DOMNode', array(),
-  // Methods
   array(
     m(PublicMethod, '__construct', null,
-      array('version' => String,
-            'encoding' => String)),
+      array('version' => array(String, 'null_string'),
+            'encoding' => array(String, 'null_string'))),
     m(PublicMethod, 'createAttribute', Variant,
       array('name' => String)),
     m(PublicMethod, 'createAttributeNS', Variant,
@@ -229,45 +207,53 @@ c('DOMDocument', 'DOMNode', array(),
       array('source' => String)),
     m(PublicMethod, 'validate', Boolean),
     m(PublicMethod, 'xinclude', Variant,
-      array('options' => array(Int64, '0')))
+      array('options' => array(Int64, '0'))),
+    m(PublicMethod, "__get", Variant,
+      array('name' => Variant)),
+    m(PublicMethod, "__set", Variant,
+      array('name' => Variant,
+            'value' => Variant)),
     ),
   // Constants
   array(),
   // Internal fields
-  ""
-  );
+  "\n".
+  "public:\n".
+  "  bool m_formatoutput;\n".
+  "  bool m_validateonparse;\n".
+  "  bool m_resolveexternals;\n".
+  "  bool m_preservewhitespace;\n".
+  "  bool m_substituteentities;\n".
+  "  bool m_stricterror;\n".
+  "  bool m_recover;\n".
+  "  Array m_classmap;"
+ );
 
 c('DOMDocumentFragment', 'DOMNode', array(),
-  // Methods
   array(
     m(PublicMethod, '__construct', null),
     m(PublicMethod, 'appendXML', Boolean,
       array('data' => String))
-    ),
-  // Constants
-  array(),
-  // Internal fields
-  ""
-  );
+  )
+ );
 
 c('DOMDocumentType', 'DOMNode', array(),
-  // Methods
   array(
-    m(PublicMethod, '__construct', null)
-    ),
-  // Constants
-  array(),
-  // Internal fields
-  ""
-  );
+    m(PublicMethod, '__construct', null),
+    m(PublicMethod, "__get", Variant,
+      array('name' => Variant)),
+    m(PublicMethod, "__set", Variant,
+      array('name' => Variant,
+            'value' => Variant)),
+  )
+ );
 
 c('DOMElement', 'DOMNode', array(),
-  // Methods
   array(
     m(PublicMethod, '__construct', null,
-      array('name' => Variant,
-            'value' => Variant,
-            'namespaceURI' => Variant)),
+      array('name' => String,
+            'value' => array(String, 'null_string'),
+            'namespaceURI' => array(String, 'null_string'))),
     m(PublicMethod, 'getAttribute', String,
       array('name' => String)),
     m(PublicMethod, 'getAttributeNode', Variant,
@@ -315,63 +301,81 @@ c('DOMElement', 'DOMNode', array(),
     m(PublicMethod, 'setIdAttributeNS', Variant,
       array('namespaceURI' => String,
             'localName' => String,
-            'isId' => Boolean))
-    ),
-  // Constants
-  array(),
-  // Internal fields
-  ""
-  );
+            'isId' => Boolean)),
+    m(PublicMethod, "__get", Variant,
+      array('name' => Variant)),
+    m(PublicMethod, "__set", Variant,
+      array('name' => Variant,
+            'value' => Variant)),
+  )
+ );
 
 c('DOMEntity', 'DOMNode', array(),
-  // Methods
   array(
-    m(PublicMethod, '__construct', null)
-    ),
-  // Constants
-  array(),
-  // Internal fields
-  ""
-  );
+    m(PublicMethod, '__construct', null),
+    m(PublicMethod, "__get", Variant,
+      array('name' => Variant)),
+    m(PublicMethod, "__set", Variant,
+      array('name' => Variant,
+            'value' => Variant)),
+  )
+ );
 
 c('DOMEntityReference', 'DOMNode', array(),
-  // Methods
   array(
     m(PublicMethod, '__construct', null,
-      array('name' => Variant))
-    ),
-  // Constants
-  array(),
-  // Internal fields
-  ""
-  );
+      array('name' => String))
+  )
+ );
 
 c('DOMNotation', 'DOMNode', array(),
-  // Methods
   array(
-    m(PublicMethod, '__construct', null)
-    ),
-  // Constants
-  array(),
-  // Internal fields
-  ""
-  );
+    m(PublicMethod, '__construct', null),
+    m(PublicMethod, "__get", Variant,
+      array('name' => Variant)),
+    m(PublicMethod, "__set", Variant,
+      array('name' => Variant,
+            'value' => Variant)),
+  )
+ );
 
 c('DOMProcessingInstruction', 'DOMNode', array(),
-  // Methods
   array(
     m(PublicMethod, '__construct', null,
+      array('name' => String,
+            'value' => array(String, 'null_string'))),
+    m(PublicMethod, "__get", Variant,
+      array('name' => Variant)),
+    m(PublicMethod, "__set", Variant,
       array('name' => Variant,
-            'value' => array(Variant, 'null_variant')))
-    ),
+            'value' => Variant)),
+  )
+ );
+
+c('DOMNodeIterator', null, array('Iterator', 'Sweepable' => 'internal'),
+  array(
+    m(PublicMethod, '__construct', null),
+    m(PublicMethod, 'current', Variant),
+    m(PublicMethod, 'key',     Variant),
+    m(PublicMethod, 'next',    Variant),
+    m(PublicMethod, 'rewind',  Variant),
+    m(PublicMethod, 'valid',   Variant),
+  ),
   // Constants
   array(),
   // Internal fields
-  ""
-  );
+  "\n".
+  "public:\n".
+  "  void reset_iterator(dom_iterable *objmap);\n".
+  "\n".
+  "  dom_iterable *m_objmap;\n".
+  "  ArrayIter *m_iter;\n".
+  "  int m_index;\n".
+  "  Object m_curobj;"
+ );
 
-c('DOMNamedNodeMap', null, array(),
-  // Methods
+c('DOMNamedNodeMap', null, array('IteratorAggregate',
+                                 'dom_iterable' => 'internal'),
   array(
     m(PublicMethod, '__construct', null),
     m(PublicMethod, 'getNamedItem', Variant,
@@ -379,41 +383,41 @@ c('DOMNamedNodeMap', null, array(),
     m(PublicMethod, 'getNamedItemNS', Variant,
       array('namespaceURI' => String,
             'localName' => String)),
-    m(PublicMethod, 'item', Object,
-      array('index' => Int64))
-    ),
-  // Constants
-  array(),
-  // Internal fields
-  ""
-  );
+    m(PublicMethod, 'item', Variant,
+      array('index' => Int64)),
+    m(PublicMethod, "__get", Variant,
+      array('name' => Variant)),
+    m(PublicMethod, "__set", Variant,
+      array('name' => Variant,
+            'value' => Variant)),
+    m(PublicMethod, "getiterator", Variant),
+  )
+ );
 
-c('DOMNodeList', null, array(),
-  // Methods
+c('DOMNodeList', null, array('IteratorAggregate',
+                             'dom_iterable' => 'internal'),
   array(
     m(PublicMethod, '__construct', null),
-    m(PublicMethod, 'item', Object,
-      array('index' => Int64))
-    ),
-  // Constants
-  array(),
-  // Internal fields
-  ""
-  );
+    m(PublicMethod, 'item', Variant,
+      array('index' => Int64)),
+    m(PublicMethod, "__get", Variant,
+      array('name' => Variant)),
+    m(PublicMethod, "__set", Variant,
+      array('name' => Variant,
+            'value' => Variant)),
+    m(PublicMethod, "getiterator", Variant),
+  )
+ );
 
 c('DOMException', 'Exception', array(),
-  // Methods
   array(
-    m(PublicMethod, '__construct', null)
-    ),
-  // Constants
-  array(),
-  // Internal fields
-  ""
-  );
+    m(PublicMethod, '__construct', null,
+      array('message' => array(String, '""'),
+            'code' => array(Int64, '0'))),
+  )
+ );
 
 c('DOMImplementation', null, array(),
-  // Methods
   array(
     m(PublicMethod, '__construct', null),
     m(PublicMethod, 'createDocument', Variant,
@@ -427,15 +431,10 @@ c('DOMImplementation', null, array(),
     m(PublicMethod, 'hasFeature', Boolean,
       array('feature' => String,
             'version' => String))
-    ),
-  // Constants
-  array(),
-  // Internal fields
-  ""
-  );
+  )
+ );
 
-c('DOMXPath', null, array(),
-  // Methods
+c('DOMXPath', null, array('Sweepable' => 'internal'),
   array(
     m(PublicMethod, '__construct', null,
       array('doc' => Variant)),
@@ -449,13 +448,282 @@ c('DOMXPath', null, array(),
       array('prefix' => String,
             'uri' => String)),
     m(PublicMethod, 'registerPhpFunctions', Variant,
-      array('funcs' => array(Variant, 'null')))
+      array('funcs' => array(Variant, 'null'))),
+    m(PublicMethod, "__get", Variant,
+      array('name' => Variant)),
+    m(PublicMethod, "__set", Variant,
+      array('name' => Variant,
+            'value' => Variant)),
     ),
   // Constants
   array(),
   // Internal fields
   "\n".
   " public:\n".
-  "  xmlNodePtr m_node;"
-  );
+  "  xmlNodePtr m_node;\n".
+  "  sp_domdocument m_doc;\n".
+  "  Array m_node_list;\n".
+  "  int m_registerPhpFunctions;\n".
+  "  Array m_registered_phpfunctions;"
+ );
 
+///////////////////////////////////////////////////////////////////////////////
+// functions
+
+/* domdocument methods */
+f('dom_document_create_element', Variant,
+  array('obj' => Variant,
+        'name' => String,
+        'value' => array(String, 'null_string')));
+f('dom_document_create_document_fragment', Variant,
+  array('obj' => Variant));
+f('dom_document_create_text_node', Variant,
+  array('obj' => Variant,
+        'data' => String));
+f('dom_document_create_comment', Variant,
+  array('obj' => Variant,
+        'data' => String));
+f('dom_document_create_cdatasection', Variant,
+  array('obj' => Variant,
+        'data' => String));
+f('dom_document_create_processing_instruction', Variant,
+  array('obj' => Variant,
+        'target' => String,
+        'data' => array(String, 'null_string')));
+f('dom_document_create_attribute', Variant,
+  array('obj' => Variant,
+        'name' => String));
+f('dom_document_create_entity_reference', Variant,
+  array('obj' => Variant,
+        'name' => String));
+f('dom_document_get_elements_by_tag_name', Variant,
+  array('obj' => Variant,
+        'name' => String));
+f('dom_document_import_node', Variant,
+  array('obj' => Variant,
+        'importedNode' => Object,
+        'deep' => array(Boolean, 'false')));
+f('dom_document_create_element_ns', Variant,
+  array('obj' => Variant,
+        'namespaceURI' => String,
+        'qualifiedName' => String,
+        'value' => array(String, 'null_string')));
+f('dom_document_create_attribute_ns', Variant,
+  array('obj' => Variant,
+        'namespaceURI' => String,
+        'qualifiedName' => String));
+f('dom_document_get_elements_by_tag_name_ns', Variant,
+  array('obj' => Variant,
+        'namespaceURI' => String,
+        'localName' => String));
+f('dom_document_get_element_by_id', Variant,
+  array('obj' => Variant,
+        'elementId' => String));
+f('dom_document_normalize_document', Variant,
+  array('obj' => Variant));
+f('dom_document_save', Variant,
+  array('obj' => Variant,
+        'file' => String,
+        'options' => array(Int64, '0')));
+f('dom_document_savexml', Variant,
+  array('obj' => Variant,
+        'node' => array(Object, 'null_object'),
+        'options' => array(Int64, '0')));
+f('dom_document_validate', Variant,
+  array('obj' => Variant));
+f('dom_document_xinclude', Variant,
+  array('obj' => Variant,
+        'options' => array(Int64, '0')));
+f('dom_document_save_html', Variant,
+  array('obj' => Variant));
+f('dom_document_save_html_file', Variant,
+  array('obj' => Variant,
+        'file' => String));
+f('dom_document_schema_validate_file', Variant,
+  array('obj' => Variant,
+        'filename' => String));
+f('dom_document_schema_validate_xml', Variant,
+  array('obj' => Variant,
+        'source' => String));
+f('dom_document_relaxNG_validate_file', Variant,
+  array('obj' => Variant,
+        'filename' => String));
+f('dom_document_relaxNG_validate_xml', Variant,
+  array('obj' => Variant,
+        'source' => String));
+
+/* domnode methods */
+f('dom_node_insert_before', Variant,
+  array('obj' => Variant,
+        'newnode' => Object,
+        'refnode' => array(Object, 'null')));
+f('dom_node_replace_child', Variant,
+  array('obj' => Variant,
+        'newChildObj' => Object,
+        'oldChildObj' => Object));
+f('dom_node_remove_child', Variant,
+  array('obj' => Variant,
+        'node' => Object));
+f('dom_node_append_child', Variant,
+  array('obj' => Variant,
+        'newnode' => Object));
+f('dom_node_has_child_nodes', Variant,
+  array('obj' => Variant));
+f('dom_node_clone_node', Variant,
+  array('obj' => Variant,
+        'deep' => array(Boolean, 'false')));
+f('dom_node_normalize', Variant,
+  array('obj' => Variant));
+f('dom_node_is_supported', Variant,
+  array('obj' => Variant,
+        'feature' => String,
+        'version' => String));
+f('dom_node_has_attributes', Variant,
+  array('obj' => Variant));
+f('dom_node_is_same_node', Variant,
+  array('obj' => Variant,
+        'node' => Object));
+f('dom_node_lookup_prefix', Variant,
+  array('obj' => Variant,
+        'prefix' => String));
+f('dom_node_is_default_namespace', Variant,
+  array('obj' => Variant,
+        'namespaceURI' => String));
+f('dom_node_lookup_namespace_uri', Variant,
+  array('obj' => Variant,
+        'namespaceURI' => String));
+
+/* domnodelist methods */
+f('dom_nodelist_item', Variant,
+  array('obj' => Variant,
+        'index' => Int64));
+
+/* domnamednodemap methods */
+f('dom_namednodemap_get_named_item', Variant,
+  array('obj' => Variant,
+        'name' => String));
+f('dom_namednodemap_item', Variant,
+  array('obj' => Variant,
+        'index' => Int64));
+f('dom_namednodemap_get_named_item_ns', Variant,
+  array('obj' => Variant,
+        'namespaceURI' => String,
+        'localName' => String));
+
+/* domcharacterdata methods */
+f('dom_characterdata_substring_data', Variant,
+  array('obj' => Variant,
+        'offset' => Int64,
+        'count' => Int64));
+f('dom_characterdata_append_data', Variant,
+  array('obj' => Variant,
+        'arg' => String));
+f('dom_characterdata_insert_data', Variant,
+  array('obj' => Variant,
+        'offset' => Int64,
+        'data' => String));
+f('dom_characterdata_delete_data', Variant,
+  array('obj' => Variant,
+        'offset' => Int64,
+        'count' => Int64));
+f('dom_characterdata_replace_data', Variant,
+  array('obj' => Variant,
+        'offset' => Int64,
+        'count' => Int64,
+        'data' => String));
+
+/* domattr methods */
+f('dom_attr_is_id', Variant,
+  array('obj' => Variant));
+
+/* domelement methods */
+f('dom_element_get_attribute', Variant,
+  array('obj' => Variant,
+        'name' => String));
+f('dom_element_set_attribute', Variant,
+  array('obj' => Variant,
+        'name' => String,
+        'value' => String));
+f('dom_element_remove_attribute', Variant,
+  array('obj' => Variant,
+        'name' => String));
+f('dom_element_get_attribute_node', Variant,
+  array('obj' => Variant,
+        'name' => String));
+f('dom_element_set_attribute_node', Variant,
+  array('obj' => Variant,
+        'newAttr' => Object));
+f('dom_element_remove_attribute_node', Variant,
+  array('obj' => Variant,
+        'oldAttr' => Object));
+f('dom_element_get_elements_by_tag_name', Variant,
+  array('obj' => Variant,
+        'name' => String));
+f('dom_element_get_attribute_ns', Variant,
+  array('obj' => Variant,
+        'namespaceURI' => String,
+        'localName' => String));
+f('dom_element_set_attribute_ns', Variant,
+  array('obj' => Variant,
+        'namespaceURI' => String,
+        'name' => String,
+        'value' => String));
+f('dom_element_remove_attribute_ns', Variant,
+  array('obj' => Variant,
+        'namespaceURI' => String,
+        'localName' => String));
+f('dom_element_get_attribute_node_ns', Variant,
+  array('obj' => Variant,
+        'namespaceURI' => String,
+        'localName' => String));
+f('dom_element_set_attribute_node_ns', Variant,
+  array('obj' => Variant,
+        'newAttr' => Object));
+f('dom_element_get_elements_by_tag_name_ns', Variant,
+  array('obj' => Variant,
+        'namespaceURI' => String,
+        'localName' => String));
+f('dom_element_has_attribute', Variant,
+  array('obj' => Variant,
+        'name' => String));
+f('dom_element_has_attribute_ns', Variant,
+  array('obj' => Variant,
+        'namespaceURI' => String,
+        'localName' => String));
+f('dom_element_set_id_attribute', Variant,
+  array('obj' => Variant,
+        'name' => String,
+        'isId' => Boolean));
+f('dom_element_set_id_attribute_ns', Variant,
+  array('obj' => Variant,
+        'namespaceURI' => String,
+        'localName' => String,
+        'isId' => Boolean));
+f('dom_element_set_id_attribute_node', Variant,
+  array('obj' => Variant,
+        'idAttr' => Object,
+        'isId' => Boolean));
+
+/* domtext methods */
+f('dom_text_split_text', Variant,
+  array('obj' => Variant,
+        'offset' => Int64));
+f('dom_text_is_whitespace_in_element_content', Variant,
+  array('obj' => Variant));
+
+/* xpath methods */
+f('dom_xpath_register_ns', Variant,
+  array('obj' => Variant,
+        'prefix' => String,
+        'uri' => String));
+f('dom_xpath_query', Variant,
+  array('obj' => Variant,
+        'expr' => String,
+        'context' => array(Object, 'null_object')));
+f('dom_xpath_evaluate', Variant,
+  array('obj' => Variant,
+        'expr' => String,
+        'context' => array(Object, 'null_object')));
+f('dom_xpath_register_php_functions', Variant,
+  array('obj' => Variant,
+        'funcs' => array(Variant, 'null')));

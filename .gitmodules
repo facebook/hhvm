@@ -1,3 +1,0 @@
-[submodule "libmbfl"]
-        path = src/third_party/libmbfl
-        url = git://github.com/scottmac/libmbfl.git

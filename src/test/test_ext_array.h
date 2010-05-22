@@ -40,6 +40,8 @@ class TestExtArray : public TestCppExt {
   bool test_array_map();
   bool test_array_merge_recursive();
   bool test_array_merge();
+  bool test_array_replace_recursive();
+  bool test_array_replace();
   bool test_array_multisort();
   bool test_array_pad();
   bool test_array_pop();

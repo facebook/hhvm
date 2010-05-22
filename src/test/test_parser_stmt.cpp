@@ -15,10 +15,10 @@
 */
 
 #include <test/test_parser_stmt.h>
-#include <lib/parser/parser.h>
-#include <lib/code_generator.h>
-#include <lib/statement/statement_list.h>
-#include <lib/analysis/analysis_result.h>
+#include <compiler/parser/parser.h>
+#include <compiler/code_generator.h>
+#include <compiler/statement/statement_list.h>
+#include <compiler/analysis/analysis_result.h>
 
 using namespace std;
 

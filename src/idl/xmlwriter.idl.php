@@ -5,7 +5,7 @@ include_once 'base.php';
 p("#include <libxml/tree.h>");
 p("#include <libxml/xmlwriter.h>");
 p("#include <libxml/uri.h>");
-p("#include <cpp/base/file/file.h>");
+p("#include <runtime/base/file/file.h>");
 
 ///////////////////////////////////////////////////////////////////////////////
 // function style

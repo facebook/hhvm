@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_simplexml.h>
-#include <cpp/ext/ext_simplexml.h>
+#include <runtime/ext/ext_simplexml.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -29,6 +29,7 @@ bool TestExtSimplexml::RunTests(const std::string &which) {
   RUN_TEST(test_libxml_clear_errors);
   RUN_TEST(test_libxml_use_internal_errors);
   RUN_TEST(test_libxml_set_streams_context);
+  RUN_TEST(test_libxml_disable_entity_loader);
   RUN_TEST(test_SimpleXMLElement);
   RUN_TEST(test_LibXMLError);
 
@@ -70,6 +71,15 @@ bool TestExtSimplexml::test_libxml_use_internal_errors() {
 bool TestExtSimplexml::test_libxml_set_streams_context() {
   try {
     f_libxml_set_streams_context(Object());
+  } catch (NotImplementedException e) {
+    return Count(true);
+  }
+  return Count(false);
+}
+
+bool TestExtSimplexml::test_libxml_disable_entity_loader() {
+  try {
+    f_libxml_disable_entity_loader(true);
   } catch (NotImplementedException e) {
     return Count(true);
   }

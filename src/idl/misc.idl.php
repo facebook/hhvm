@@ -49,7 +49,7 @@ f('highlight_string', Variant,
 f('ignore_user_abort', Int32,
   array('setting' => array(Boolean, 'false')));
 
-f('pack', String,
+f('pack', Variant,
   array('format' => String),
   VariableArguments);
 
@@ -77,7 +77,7 @@ f('uniqid', String,
   array('prefix' => array(String, 'null_string'),
         'more_entropy' => array(Boolean, 'false')));
 
-f('unpack', VariantMap,
+f('unpack', Variant,
   array('format' => String,
         'data' => String));
 

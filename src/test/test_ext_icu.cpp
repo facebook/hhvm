@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_icu.h>
-#include <cpp/ext/ext_icu.h>
+#include <runtime/ext/ext_icu.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

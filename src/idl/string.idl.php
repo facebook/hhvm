@@ -39,7 +39,7 @@ f('chop', String,
   array('str' => String,
         'charlist' => array(String, 'k_HPHP_TRIM_CHARLIST')));
 
-f('explode', StringVec,
+f('explode', Variant,
   array('delimiter' => String,
         'str' => String,
         'limit' => array(Int32, '0x7FFFFFFF')));
@@ -52,11 +52,11 @@ f('join', String,
   array('glue' => Variant,
         'pieces' => array(Variant, 'null_variant')));
 
-f('str_split', StringVec,
+f('str_split', Variant,
   array('str' => String,
         'split_length' => array(Int32, '1')));
 
-f('chunk_split', String,
+f('chunk_split', Variant,
   array('body' => String,
         'chunklen' => array(Int32, '76'),
         'end' => array(String, '"\r\n"')));
@@ -98,7 +98,7 @@ f('str_repeat', String,
   array('input' => String,
         'multiplier' => Int32));
 
-f('wordwrap', String,
+f('wordwrap', Variant,
   array('str' => String,
         'width' => array(Int32, '75'),
         'wordbreak' => array(String, '"\n"'),
@@ -158,7 +158,7 @@ f('sha1', String,
   array('str' => String,
         'raw_output' => array(Boolean, 'false')));
 
-f('strtr', String,
+f('strtr', Variant,
   array('str' => String,
         'from' => Variant,
         'to' => array(Variant, 'null_variant')));
@@ -199,17 +199,17 @@ f('echo', NULL,
 f('print', Int32,
   array('arg' => String));
 
-f('printf', Int32,
+f('printf', Variant,
   array('format' => String), VariableArguments);
 
-f('vprintf', Int32,
+f('vprintf', Variant,
   array('format' => String,
         'args' => VariantVec));
 
-f('sprintf', String,
+f('sprintf', Variant,
   array('format' => String), VariableArguments);
 
-f('vsprintf', String,
+f('vsprintf', Variant,
   array('format' => String,
         'args' => VariantVec));
 
@@ -221,7 +221,7 @@ f('sscanf', Variant,
 f('chr', String, array('ascii' => Int64));
 f('ord', Int64,   array('str' => String));
 
-f('money_format', String,
+f('money_format', Variant,
   array('format' => String,
         'number' => Double));
 

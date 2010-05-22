@@ -71,7 +71,7 @@ $REFNAMES = array('String'      => 'CStrRef',
                   'Sequence'    => 'CVarRef',
                   );
 
-// Flags for functions (used in "lib/system/builtin_symbols.cpp")
+// Flags for functions (used in "system/builtin_symbols.cpp")
 define('DefaultFlags', 0);
 define('VariableArguments', 1);
 define('ReferenceVariableArguments', 2);
@@ -213,9 +213,22 @@ function c($name, $parent = null, $interfaces = array(),
     $methods[] = m(PublicMethod, '__destruct', Variant);
   }
 
+  $internal_bases = array();
+  $interface_bases = array();
+  if ($interfaces) {
+    foreach ($interfaces as $clsname => $attr) {
+      if (empty($clsname)) {
+        $interface_bases[] = $attr;
+      } else if ($attr == 'internal') {
+        $internal_bases[] = $clsname;
+      }
+    }
+  }
+
   $classes[] = array('name'       => $name,
                      'parent'     => $parent,
-                     'interfaces' => $interfaces,
+                     'interfaces' => $interface_bases,
+                     'extrabases' => $internal_bases,
                      'consts'     => $consts,
                      'methods'    => $methods,
                      'footer'     => $footer);
@@ -322,14 +335,18 @@ function generateMethodCPPInclude($method, $f) {
           intval($method['static'] == StaticMethod));
 }
 
-function generateFuncArgsCPPHeader($func, $f, $forceRef = false) {
+function generateFuncArgsCPPHeader($func, $f, $forceRef = false,
+                                   $static = false) {
   $var_arg = ($func['flags'] & VarArgsMask);
   $args = $func['args'];
   fprintf($f, "(");
+  if ($static) {
+    fprintf($f, "const char* cls ");
+  }
   if ($var_arg) fprintf($f, 'int _argc, ');
   for ($i = 0; $i < count($args); $i++) {
     $arg = $args[$i];
-    if ($i > 0) fprintf($f, ', ');
+    if ($static || $i > 0) fprintf($f, ', ');
     fprintf($f, '%s %s', param_typename($arg['type'],
                                         idx($arg, 'ref') || $forceRef),
             $arg['name']);
@@ -343,10 +360,12 @@ function generateFuncArgsCPPHeader($func, $f, $forceRef = false) {
   fprintf($f, ")");
 }
 
-function generateFuncCPPHeader($func, $f, $method = false, $forceref = false) {
-  fprintf($f, '%s %s_%s', typename($func['return']), $method ? "t" : "f",
+function generateFuncCPPHeader($func, $f, $method = false, $forceref = false,
+                               $static = false) {
+  fprintf($f, '%s%s %s_%s', $static ? 'static ' : '',
+          typename($func['return']), $method ? ($static ? "ti" : "t") : "f",
           $func['name']);
-  generateFuncArgsCPPHeader($func, $f, $forceref);
+  generateFuncArgsCPPHeader($func, $f, $forceref, $static);
   fprintf($f, ";\n");
 }
 
@@ -354,14 +373,12 @@ function generateFuncProfileHeader($func, $f) {
   $var_arg = ($func['flags'] & VarArgsMask);
   $args = $func['args'];
 
-  fprintf($f, "#ifndef PROFILE_BUILTIN\n#define x_%s f_%s\n#else\n",
-          $func['name'], $func['name']);
   fprintf($f, 'inline %s x_%s', typename($func['return']), $func['name']);
   generateFuncArgsCPPHeader($func, $f, false);
   fprintf($f, " {\n");
 
   if (!($func['flags'] & NoInjection)) {
-    fprintf($f, "  FUNCTION_INJECTION(%s);\n", $func['name']);
+    fprintf($f, "  FUNCTION_INJECTION_BUILTIN(%s);\n", $func['name']);
   }
   fprintf($f, "  ");
 
@@ -381,7 +398,7 @@ function generateFuncProfileHeader($func, $f) {
   }
   fprintf($f, ");\n");
 
-  fprintf($f, "}\n#endif\n\n");
+  fprintf($f, "}\n\n");
 }
 
 function generateConstCPPHeader($const, $f) {
@@ -393,15 +410,14 @@ function generateConstCPPHeader($const, $f) {
 }
 
 function generateClassCPPHeader($class, $f) {
+  $lowername = strtolower($class['name']);
   foreach ($class['consts'] as $k) {
     $name = typename($k['type']);
     if ($name == 'String') {
       $name = 'StaticString';
     }
-    fprintf($f, "extern const %s q_%s_%s;\n", $name, $class['name'],
-            $k['name']);
+    fprintf($f, "extern const %s q_%s_%s;\n", $name, $lowername, $k['name']);
   }
-  $lowername = strtolower($class['name']);
 
   fprintf($f,
           <<<EOT
@@ -414,24 +430,29 @@ EOT
           );
 
   fprintf($f, "FORWARD_DECLARE_CLASS(%s);\n", $lowername);
-  $parents = array();
-  if ($class['parent']) $parents[] = $class['parent'];
-  if ($class['interfaces']) $parents += $class['interfaces'];
   fprintf($f, "class c_%s", $lowername);
-  if (!$parents) {
-    fprintf($f, " : public ObjectData");
+  if ($class['parent']) {
+    fprintf($f, " : public c_" . strtolower($class['parent']));
   } else {
-    $started = false;
-    foreach ($parents as $p) {
-      fprintf($f, $started ? ',' : ':');
-      $started = true;
-      fprintf($f, " public %s", 'c_' . strtolower($p));
-    }
+    fprintf($f, " : public ExtObjectData");
   }
+  foreach ($class['extrabases'] as $p) {
+    fprintf($f, ", public $p");
+  }
+  $parents = array();
   fprintf($f, " {\n public:\n");
   fprintf($f, "  BEGIN_CLASS_MAP(%s)\n", $lowername);
+  if ($class['parent']) {
+    $p = $class['parent'];
+    fprintf($f, "  RECURSIVE_PARENT_CLASS(%s)\n", strtolower($p));
+  }
+  if ($class['interfaces']) {
+    foreach ($class['interfaces'] as $p) {
+      fprintf($f, "  PARENT_CLASS(%s)\n", strtolower($p));
+    }
+  }
   foreach ($parents as $p) {
-    fprintf($f, "  PARENT_CLASS(%s)\n", strtolower($p));
+    fprintf($f, "  RECURSIVE_PARENT_CLASS(%s)\n", strtolower($p));
   }
   fprintf($f, "  END_CLASS_MAP(%s)\n", $lowername);
   fprintf($f, "  DECLARE_CLASS(%s, %s, %s)\n", $lowername, $class['name'],
@@ -470,29 +491,33 @@ function generateMethodCPPHeader($method, $class, $f) {
   fprintf($f, "  %s: ", $vis);
   generateFuncCPPHeader($method, $f, true,
                         $method['name'] != "__construct" &&
-                        strpos($method['name'], "__") === 0);
+                        strpos($method['name'], "__") === 0,
+                        $method['static']);
   if ($method['name'] == "__call") {
     fprintf($f, "  public: Variant doCall(Variant v_name, Variant v_arguments,".
             " bool fatal);\n");
+  } else if ($method['name'] == "__get") {
+    fprintf($f, "  public: Variant doGet(Variant v_name, bool error);\n");
   }
-
 }
 
 function generatePreImplemented($method, $class, $f) {
   if ($method['name'] == '__construct') {
-    fprintf($f, "  public: ObjectData *create");
-    generateFuncArgsCPPHeader($method, $f, true, true);
+    fprintf($f, "  public: c_%s *create", strtolower($class['name']));
+    generateFuncArgsCPPHeader($method, $f, true);
     fprintf($f, ";\n");
     fprintf($f, "  public: void dynConstruct(CArrRef Params);\n");
+    fprintf($f, "  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);\n");
   } else if ($method['name'] == '__destruct') {
     fprintf($f, "  public: virtual void destruct();\n", $class['name']);
   }
 }
 
 function generateFuncCPPImplementation($func, $f) {
-  $schema = 'Array _schema(';
+  $schema = "";
+  $schema_no = 0;
   if ($func['return'] == Object || $func['return'] == Resource) {
-    $schema .= 'NEW(ArrayElement)(-1, "OO"), ';
+    $schema .= '.set(' . ($schema_no++) . ', -1, "OO")';
   }
   $output = '';
   $need_ret = false;
@@ -500,7 +525,8 @@ function generateFuncCPPImplementation($func, $f) {
   fprintf($f, '%s f_%s(', typename($func['return']), $func['name']);
   $var_arg = ($func['flags'] & VarArgsMask);
   if ($var_arg) fprintf($f, 'int _argc, ');
-  $params = 'Array _params(';
+  $params = "";
+  $params_no = 0;
   for ($i = 0; $i < count($func['args']); $i++) {
     $arg = $func['args'][$i];
     if ($i > 0) fprintf($f, ', ');
@@ -511,20 +537,20 @@ function generateFuncCPPImplementation($func, $f) {
     }
 
     if ($arg['type'] == Object || $arg['type'] == Resource) {
-      $params .= 'NEW(ArrayElement)(OpaqueObject::GetIndex('.$arg['name'].
-        ')), ';
+      $params .= '.set(' . ($params_no++) .
+                 ', (OpaqueObject::GetIndex(' . $arg['name'] . '))';
     } else {
-      $params .= 'NEW(ArrayElement)('.$arg['name'].'), ';
+      $params .= '.set(' . ($params_no++) . ', ' . $arg['name'] . ')';
     }
 
     if ($arg['type'] == Object || $arg['type'] == Resource) {
       if (idx($arg, 'ref')) {
-        $schema .= 'NEW(ArrayElement)('.$i.', "OO"), ';
+        $schema .= '.set(' . ($schema_no++) . ', ' . $i . ', "OO")';
       } else {
-        $schema .= 'NEW(ArrayElement)('.$i.', "O"), ';
+        $schema .= '.set(' . ($schema_no++) . ', ' . $i . ', "O")';
       }
     } else if (idx($arg, 'ref')) {
-      $schema .= 'NEW(ArrayElement)('.$i.', "R"), ';
+      $schema .= '.set(' . ($schema_no++) . ', ' . $i . ', "R")';
     }
 
     if (idx($arg, 'ref')) {
@@ -538,8 +564,18 @@ function generateFuncCPPImplementation($func, $f) {
   fprintf($f, ") {\n");
 
   /** commenting out Crutch code generation
-  fprintf($f, "  %s(ArrayElement*)NULL);\n", $schema);
-  fprintf($f, "  %s(ArrayElement*)NULL);\n", $params);
+  if ($schema_no == 0) {
+    fprintf($f, "  Array _schema(ArrayData::Create());\n");
+  } else {
+    fprintf($f, "  Array _schema(ArrayInit(%d, false)%s.create());\n",
+            $schema_no, $schema);
+  }
+  if ($params_no == 0) {
+    fprintf($f, "  Array _params(ArrayData::Create());\n");
+  } else {
+    fprintf($f, "  Array _params(ArrayInit(%d, true)%s.create());\n",
+            $params_no, $params);
+  }
 
   fprintf($f, "  ");
   if ($func['return'] !== null || $need_ret) {

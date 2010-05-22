@@ -52,7 +52,7 @@ f('array_fill_keys', Variant,
   array('keys' => Variant,
         'value' => Variant));
 
-f('array_fill', VariantMap,
+f('array_fill', Variant,
   array('start_index' => Int32,
         'num' => Int32,
         'value' => Variant));
@@ -83,6 +83,14 @@ f('array_merge_recursive', Variant,
   VariableArguments);
 
 f('array_merge', Variant,
+  array('array1' => Variant),
+  VariableArguments);
+
+f('array_replace_recursive', Variant,
+  array('array1' => Variant),
+  VariableArguments);
+
+f('array_replace', Variant,
   array('array1' => Variant),
   VariableArguments);
 
@@ -207,7 +215,7 @@ f('in_array', Boolean,
 f('key', Variant,
   array('array' => VariantMap | Reference));
 
-f('range', VariantMap,
+f('range', Variant,
   array('low' => Variant,
         'high' => Variant,
         'step' => array(Variant, '1')));

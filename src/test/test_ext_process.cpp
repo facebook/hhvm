@@ -15,11 +15,12 @@
 */
 
 #include <test/test_ext_process.h>
-#include <cpp/ext/ext_process.h>
-#include <cpp/ext/ext_file.h>
-#include <cpp/base/file/file.h>
-#include <cpp/base/util/string_buffer.h>
-#include <cpp/base/util/light_process.h>
+#include <runtime/ext/ext_process.h>
+#include <runtime/ext/ext_file.h>
+#include <runtime/base/file/file.h>
+#include <runtime/base/util/string_buffer.h>
+#include <runtime/base/runtime_option.h>
+#include <util/light_process.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -53,7 +54,8 @@ bool TestExtProcess::RunTests(const std::string &which) {
   RUN_TEST(test_escapeshellarg);
   RUN_TEST(test_escapeshellcmd);
 
-  LightProcess::initialize();
+  LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
+                           RuntimeOption::LightProcessCount);
   RUN_TEST(test_pcntl_alarm);
   //RUN_TEST(test_pcntl_exec); // this has to run manually
   RUN_TEST(test_pcntl_fork);
@@ -78,7 +80,7 @@ bool TestExtProcess::RunTests(const std::string &which) {
   RUN_TEST(test_proc_close);
   RUN_TEST(test_proc_get_status);
   RUN_TEST(test_proc_nice);
-  LightProcess::close();
+  LightProcess::Close();
 
   return ret;
 }
@@ -147,11 +149,11 @@ bool TestExtProcess::test_pcntl_waitpid() {
 bool TestExtProcess::test_pcntl_wexitstatus() {
   int pid = f_pcntl_fork();
   if (pid == 0) {
-    exit(0x12);
+    exit(0x80);
   }
   Variant status;
   f_pcntl_waitpid(0, ref(status));
-  VS(f_pcntl_wexitstatus(status), 0x12);
+  VS(f_pcntl_wexitstatus(status), 0x80);
   return Count(true);
 }
 

@@ -15,8 +15,8 @@
 */
 
 #include <test/test_ext_datetime.h>
-#include <cpp/ext/ext_datetime.h>
-#include <cpp/ext/ext_string.h>
+#include <runtime/ext/ext_datetime.h>
+#include <runtime/ext/ext_string.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -262,10 +262,12 @@ bool TestExtDatetime::test_date() {
   VS(f_date("H:m:s \\m \\i\\s\\ \\m\\o\\n\\t\\h", d), "05:03:18 m is month");
   VS(f_date("H:i:s", d), "05:16:18");
 
- d = f_strtotime("1955-03-10 05:16:18");
- VS(f_date("Ymd", d), "19550310");
+  d = f_strtotime("1955-03-10 05:16:18");
+  VS(f_date("Ymd", d), "19550310");
 
- VS(f_date("r", -5000000000), "Tue, 23 Jul 1811 07:06:40 -0800");
+  VS(f_date("r", -5000000000), "Tue, 23 Jul 1811 07:06:40 -0800");
+
+  VS(f_mktime(0, 0, 0, 2, 26 - 91, 2010), 1259308800);
 
   return Count(true);
 }
@@ -317,7 +319,7 @@ bool TestExtDatetime::test_gmmktime() {
 }
 
 bool TestExtDatetime::test_gmstrftime() {
-  f_setlocale(2, k_LC_TIME, "en_US");
+  f_setlocale(2, k_LC_TIME, "en_US.utf8");
   int d = f_mktime(20, 0, 0, 12, 31, 98);
   VS(f_strftime("%b %d %Y %H:%M:%S", d),   "Dec 31 1998 20:00:00");
   VS(f_gmstrftime("%b %d %Y %H:%M:%S", d), "Jan 01 1999 04:00:00");
@@ -411,14 +413,23 @@ bool TestExtDatetime::test_strftime() {
   f_setlocale(2, k_LC_TIME, "C");
   VS(f_strftime("%A", ts), "Wednesday");
 
-  f_setlocale(2, k_LC_TIME, "fi_FI");
-  VS(f_strftime(" in Finnish is %A,", ts), " in Finnish is keskiviikko,");
+  if (f_setlocale(2, k_LC_TIME, "fi_FI")) {
+    VS(f_strftime(" in Finnish is %A,", ts), " in Finnish is keskiviikko,");
+  } else {
+    SKIP("setlocale() failed");
+  }
 
-  f_setlocale(2, k_LC_TIME, "fr_FR");
-  VS(f_strftime(" in French %A and", ts), " in French mercredi and");
+  if (f_setlocale(2, k_LC_TIME, "fr_FR")) {
+    VS(f_strftime(" in French %A and", ts), " in French mercredi and");
+  } else {
+    SKIP("setlocale() failed");
+  }
 
-  f_setlocale(2, k_LC_TIME, "de_DE");
-  VS(f_strftime(" in German %A.", ts), " in German Mittwoch.");
+  if (f_setlocale(2, k_LC_TIME, "de_DE")) {
+    VS(f_strftime(" in German %A.", ts), " in German Mittwoch.");
+  } else {
+    SKIP("setlocale() failed");
+  }
 
   f_setlocale(2, k_LC_TIME, "C");
 

@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_output.h>
-#include <cpp/ext/ext_output.h>
+#include <runtime/ext/ext_output.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

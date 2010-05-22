@@ -2,7 +2,7 @@
 
 include_once 'base.php';
 
-p("#include <cpp/ext/ext_simplexml_include.h>");
+p("#include <runtime/ext/ext_simplexml_include.h>");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -27,6 +27,8 @@ f('libxml_use_internal_errors', Boolean,
   array('use_errors' => array(Variant, 'null_variant')));
 f('libxml_set_streams_context', NULL,
   array('streams_context' => Resource));
+f('libxml_disable_entity_loader', Boolean,
+  array('disable' => array(Boolean, 'true')));
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -53,7 +55,7 @@ c('SimpleXMLElement', null, array('ArrayAccess'),
       array('prefix' => String,
             'ns' => String)),
     m(PublicMethod, 'asXML', Variant,
-      array('filename' => String)),
+      array('filename' => array(String, '""'))),
     m(PublicMethod, 'getNamespaces', StringMap,
       array('recursive' => array(Boolean, 'false'))),
     m(PublicMethod, 'getDocNamespaces', StringMap,
@@ -74,6 +76,13 @@ c('SimpleXMLElement', null, array('ArrayAccess'),
             'value' => array(String, 'null_string'),
             'ns' => array(String, 'null_string'))),
     m(PublicMethod, '__toString', String),
+    m(PublicMethod, "__get", Variant,
+      array('name' => Variant)),
+    m(PublicMethod, "__set", Variant,
+      array('name' => Variant,
+            'value' => Variant)),
+    m(PublicMethod, "__unset", Variant,
+      array('name' => Variant)),
     ),
 
   array(), // constants
@@ -81,8 +90,12 @@ c('SimpleXMLElement', null, array('ArrayAccess'),
   " public:\n".
   "  Object m_doc;\n".
   "  xmlNodePtr m_node;\n".
+  "  Array m_children;\n".
   "  Array m_attributes;\n".
+  "  bool m_is_text;\n".
+  "  virtual Array o_toArray() const;\n".
   "  virtual Array o_toIterArray(const char *context);\n".
+  "  virtual Variant &___lval(Variant v_name);\n".
   " private:\n".
   "  bool m_is_attribute;\n".
   "  bool m_is_children;\n".

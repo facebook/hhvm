@@ -9,11 +9,11 @@ f('get_declared_interfaces', VariantMap);
 
 f('class_exists', Boolean,
   array('class_name' => String,
-        'autoload' => array(Boolean, 'false')));
+        'autoload' => array(Boolean, 'true')));
 
 f('interface_exists', Boolean,
   array('interface_name' => String,
-        'autoload' => array(Boolean, 'false')));
+        'autoload' => array(Boolean, 'true')));
 
 f('get_class_methods', VariantMap,
   array('class_or_object' => Variant));

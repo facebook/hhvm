@@ -19,16 +19,17 @@
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
 
-#include <lib/package.h>
-#include <lib/analysis/analysis_result.h>
-#include <lib/analysis/dependency_graph.h>
-#include <lib/analysis/code_error.h>
+#include <compiler/package.h>
+#include <compiler/analysis/analysis_result.h>
+#include <compiler/analysis/alias_manager.h>
+#include <compiler/analysis/dependency_graph.h>
+#include <compiler/analysis/code_error.h>
 #include <util/json.h>
 #include <util/logger.h>
-#include <lib/analysis/symbol_table.h>
-#include <lib/option.h>
-#include <lib/parser/parser.h>
-#include <lib/system/builtin_symbols.h>
+#include <compiler/analysis/symbol_table.h>
+#include <compiler/option.h>
+#include <compiler/parser/parser.h>
+#include <compiler/builtin_symbols.h>
 #include <util/db_conn.h>
 #include <util/exception.h>
 #include <util/process.h>
@@ -48,9 +49,9 @@ struct ProgramOptions {
   string target;
   string format;
   string outputDir;
+  string outputFile;
   string syncDir;
-  string config;
-  string dbConfig;
+  vector<string> config;
   string configDir;
   vector<string> confStrings;
   string inputDir;
@@ -86,6 +87,9 @@ struct ProgramOptions {
   string javaRoot;
   bool generateFFI;
   bool dump;
+  bool coredump;
+  bool nofork;
+  string optimizations;
 };
 
 int prepareOptions(ProgramOptions &po, int argc, char **argv);
@@ -99,33 +103,36 @@ int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
 int runTargetCheck(const ProgramOptions &po, AnalysisResultPtr ar);
 int buildTarget(const ProgramOptions &po);
 int runTarget(const ProgramOptions &po);
+int generateSepExtCpp(const ProgramOptions &po, AnalysisResultPtr ar);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char **argv) {
   try {
     ProgramOptions po;
-    void (*lib_hook_initialize)();
-    lib_hook_initialize =
-      (void (*)())dlsym(NULL, "lib_hook_initialize");
-    if (lib_hook_initialize) lib_hook_initialize();
+    void (*compiler_hook_initialize)();
+    compiler_hook_initialize =
+      (void (*)())dlsym(NULL, "compiler_hook_initialize");
+    if (compiler_hook_initialize) compiler_hook_initialize();
+
     int ret = prepareOptions(po, argc, argv);
+    if (ret == 1) return 0; // --help
+    if (ret == -1) return -1; // command line error
+
     Timer totalTimer(Timer::WallTime, "running hphp");
     createOutputDirectory(po);
     if (ret == 0) {
-// This forking is needed, if parser holds large amount of memory and later
-// Process::Exec() will try to fork with failures.
-#if HAVE_LARGE_COMPILATION
-      int pid = fork();
-      if (pid == 0) {
+      if (!po.nofork) {
+        int pid = fork();
+        if (pid == 0) {
+          ret = process(po);
+          _exit(ret);
+        }
+        wait(&ret);
+        ret = WEXITSTATUS(ret);
+      } else {
         ret = process(po);
-        _exit(ret);
       }
-      wait(&ret);
-      ret = WEXITSTATUS(ret);
-#else
-      ret = process(po);
-#endif
     }
     if (ret == 0) {
       if (po.target == "cpp") {
@@ -165,6 +172,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
      "analyze | "
      "php | "
      "cpp | "
+     "sep-ext-cpp | "
      "filecache | "
      "run (default)")
     ("format,f", value<string>(&po.format),
@@ -217,6 +225,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     ("branch", value<string>(&po.branch), "SVN branch")
     ("revision", value<int>(&po.revision), "SVN revision")
     ("output-dir,o", value<string>(&po.outputDir), "output directory")
+    ("output-file", value<string>(&po.outputFile), "output file")
     ("sync-dir", value<string>(&po.syncDir),
      "Files will be created in this directory first, then sync with output "
      "directory without overwriting identical files. Great for incremental "
@@ -243,10 +252,8 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
      value<bool>(&po.noMetaInfo)->default_value(false),
      "do not generate class map, function jump table and macros "
      "when generating code; good for demo purposes")
-    ("config", value<string>(&po.config), "config file name")
-    ("db-config", value<string>(&po.dbConfig),
-     "database connection string to read configurable options from: "
-     "<username>:<password>@<host>:<port>/<db>")
+    ("config,c", value<vector<string> >(&po.config)->composing(),
+     "config file name")
     ("config-dir", value<string>(&po.configDir),
      "root directory configuration is based on (for example, "
      "excluded directories may be relative path in configuration.")
@@ -258,7 +265,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
      "-1: (default); 0: no logging; 1: errors only; 2: warnings and errors; "
      "3: informational as well; 4: really verbose.")
     ("force",
-     value<bool>(&po.force)->default_value(false),
+     value<bool>(&po.force)->default_value(true),
      "force to ignore code generation errors and continue compilations")
     ("file-cache",
      value<string>(&po.filecache),
@@ -274,6 +281,16 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     ("dump",
      value<bool>(&po.dump)->default_value(false),
      "dump the program graph")
+    ("coredump",
+     value<bool>(&po.coredump)->default_value(false),
+     "turn on coredump")
+    ("nofork",
+     value<bool>(&po.nofork)->default_value(false),
+     "forking is needed for large compilation to release memory before g++"
+     "compilation. turning off forking can help gdb debugging.")
+    ("opts",
+     value<string>(&po.optimizations)->default_value(""),
+     "Set optimizations to enable/disable")
     ;
 
   positional_options_description p;
@@ -286,7 +303,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
   } catch (unknown_option e) {
     cerr << "Error in command line: " << e.what() << "\n\n";
     cout << desc << "\n";
-    return 1;
+    return -1;
   }
   if (argc <= 1 || vm.count("help")) {
     cout << desc << "\n";
@@ -308,28 +325,17 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     Option::GenerateCPPMetaInfo = false;
     Option::GenerateCPPMacros = false;
   }
-  if (po.config.empty() ||
-      (po.config.size() > 4 &&
-       po.config.substr(po.config.size() - 4) == ".hdf")) {
-    Hdf config;
-    if (!po.config.empty()) {
-      config.open(po.config);
-    }
-    for (unsigned int i = 0; i < po.confStrings.size(); i++) {
-      config.fromString(po.confStrings[i].c_str());
-    }
-    Option::Load(config);
-  } else if (!po.config.empty() && !Option::Load(po.config.c_str())) {
-    return 1;
+
+  Hdf config;
+  for (vector<string>::const_iterator it = po.config.begin();
+       it != po.config.end(); ++it) {
+    config.append(*it);
   }
-  if (!po.dbConfig.empty()) {
-    try {
-      Option::Load(ServerData::Create(po.dbConfig));
-    } catch (DatabaseException e) {
-      Logger::Error("%s", e.what());
-      return 1;
-    }
+  for (unsigned int i = 0; i < po.confStrings.size(); i++) {
+    config.fromString(po.confStrings[i].c_str());
   }
+  Option::Load(config);
+
   if (po.inputDir.empty()) {
     po.inputDir = '.';
   }
@@ -350,17 +356,37 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
   for (unsigned int i = 0; i < po.excludeFiles.size(); i++) {
     Option::PackageExcludeFiles.insert(po.excludeFiles[i]);
   }
+  size_t rootSize = po.inputDir.size();
   for (unsigned int i = 0; i < po.excludePatterns.size(); i++) {
     const char *argv[] = {"", "-L", (char*)po.inputDir.c_str(),
                           "-type", "f",
                           "-regex", po.excludePatterns[i].c_str(),
                           NULL};
-    string files; vector<string> out;
-    Process::Exec("find", argv, NULL, files);
-    Util::split('\n', files.c_str(), out, true);
-    for (unsigned int j = 0; j < out.size(); j++) {
-      string file = out[j].substr(po.inputDir.size());
-      Option::PackageExcludeFiles.insert(file);
+    int numErrors = 0;
+    for (;;) {
+      string files;
+      vector<string> out;
+      Process::Exec("find", argv, NULL, files);
+      Util::split('\n', files.c_str(), out, true);
+      bool errorOccurred = false;
+      for (unsigned int j = 0; j < out.size(); j++) {
+        if (rootSize > out[j].size()) {
+          Logger::Error("File name: '%s'", out[j].c_str());
+          ++numErrors;
+          if (numErrors > 1000) {
+            throw Exception("find command returned bad results");
+          }
+          errorOccurred = true;
+          break;
+        }
+      }
+      // If an error occurred, retry
+      if (errorOccurred) continue;
+      for (unsigned int j = 0; j < out.size(); j++) {
+        string file = out[j].substr(rootSize);
+        Option::PackageExcludeFiles.insert(file);
+      }
+      break;
     }
   }
   for (unsigned int i = 0; i < po.excludeStaticPatterns.size(); i++) {
@@ -368,12 +394,31 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
                           "-type", "f",
                           "-regex", po.excludeStaticPatterns[i].c_str(),
                           NULL};
-    string files; vector<string> out;
-    Process::Exec("find", argv, NULL, files);
-    Util::split('\n', files.c_str(), out, true);
-    for (unsigned int j = 0; j < out.size(); j++) {
-      string file = out[j].substr(po.inputDir.size());
-      Option::PackageExcludeStaticFiles.insert(file);
+    int numErrors = 0;
+    for (;;) {
+      string files;
+      vector<string> out;
+      Process::Exec("find", argv, NULL, files);
+      Util::split('\n', files.c_str(), out, true);
+      bool errorOccurred = false;
+      for (unsigned int j = 0; j < out.size(); j++) {
+        if (rootSize > out[j].size()) {
+          Logger::Error("File name: '%s'", out[j].c_str());
+          ++numErrors;
+          if (numErrors > 1000) {
+            throw Exception("find command returned bad results");
+          }
+          errorOccurred = true;
+          break;
+        }
+      }
+      // If an error occurred, retry
+      if (errorOccurred) continue;
+      for (unsigned int j = 0; j < out.size(); j++) {
+        string file = out[j].substr(rootSize);
+        Option::PackageExcludeStaticFiles.insert(file);
+      }
+      break;
     }
   }
 
@@ -411,6 +456,16 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
 ///////////////////////////////////////////////////////////////////////////////
 
 int process(const ProgramOptions &po) {
+  if (po.coredump) {
+    struct rlimit rl;
+    getrlimit(RLIMIT_CORE, &rl);
+    rl.rlim_cur = 8000000000LL;
+    if (rl.rlim_max < rl.rlim_cur) {
+      rl.rlim_max = rl.rlim_cur;
+    }
+    setrlimit(RLIMIT_CORE, &rl);
+  }
+
   // lint doesn't need analysis
   if (po.target == "lint") {
     return lintTarget(po);
@@ -422,8 +477,17 @@ int process(const ProgramOptions &po) {
   // prepare a package
   Package package(po.inputDir.c_str());
   ar = package.getAnalysisResult();
+
+  std::string errs;
+  if (!AliasManager::parseOptimizations(po.optimizations, errs)) {
+    cerr << errs << "\n";
+    return false;
+  }
+
   if (po.target != "php" || po.format != "pickled") {
-    BuiltinSymbols::load(ar, po.target == "cpp" && po.format == "sys");
+    if (!BuiltinSymbols::Load(ar, po.target == "cpp" && po.format == "sys")) {
+      return false;
+    }
     ar->loadBuiltins();
   }
 
@@ -503,6 +567,8 @@ int process(const ProgramOptions &po) {
     fatalErrorOnly = true;
   } else if (po.target == "filecache") {
     // do nothing
+  } else if (po.target == "sep-ext-cpp") {
+    ret = generateSepExtCpp(po, ar);
   } else {
     Logger::Error("Unknown target: %s", po.target.c_str());
     return 1;
@@ -719,6 +785,13 @@ int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
   }
 
   return ret;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+int generateSepExtCpp(const ProgramOptions &po, AnalysisResultPtr ar) {
+  ar->outputCPPSepExtensionImpl(po.outputFile);
+  return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

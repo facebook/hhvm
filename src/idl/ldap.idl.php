@@ -4,68 +4,53 @@ include_once 'base.php';
 
 ///////////////////////////////////////////////////////////////////////////////
 
-f('ldap_connect', Resource,
+f('ldap_connect', Variant,
   array('hostname' => array(String, 'null_string'),
         'port' => array(Int32, '389')));
 
-f('ldap_explode_dn', VariantVec,
+f('ldap_explode_dn', Variant,
   array('dn' => String,
         'with_attrib' => Int32));
 
-f('ldap_dn2ufn', String,
+f('ldap_dn2ufn', Variant,
   array('db' => String));
 
 f('ldap_err2str', String,
   array('errnum' => Int32));
 
-f('ldap_8859_to_t61', String,
-  array('value' => String));
-
-f('ldap_t61_to_8859', String,
-  array('value' => String));
-
 f('ldap_add', Boolean,
-  array('link_identifier' => Resource,
+  array('link' => Resource,
         'dn' => String,
         'entry' => VariantVec));
 
 f('ldap_mod_add', Boolean,
-  array('link_identifier' => Resource,
+  array('link' => Resource,
         'dn' => String,
         'entry' => VariantVec));
 
 f('ldap_mod_del', Boolean,
-  array('link_identifier' => Resource,
+  array('link' => Resource,
         'dn' => String,
         'entry' => VariantVec));
 
 f('ldap_mod_replace', Boolean,
-  array('link_identifier' => Resource,
+  array('link' => Resource,
         'dn' => String,
         'entry' => VariantVec));
 
 f('ldap_modify', Boolean,
-  array('link_identifier' => Resource,
+  array('link' => Resource,
         'dn' => String,
         'entry' => VariantVec));
 
 f('ldap_bind', Boolean,
-  array('link_identifier' => Resource,
+  array('link' => Resource,
         'bind_rdn' => array(String, 'null_string'),
         'bind_password' => array(String, 'null_string')));
 
-f('ldap_sasl_bind', Boolean,
-  array('link' => Resource,
-        'binddn' => array(String, 'null_string'),
-        'password' => array(String, 'null_string'),
-        'sasl_mech' => array(String, 'null_string'),
-        'sasl_realm' => array(String, 'null_string'),
-        'sasl_authz_id' => array(String, 'null_string'),
-        'props' => array(String, 'null_string')));
-
 f('ldap_set_rebind_proc', Boolean,
   array('link' => Resource,
-        'callback' => String));
+        'callback' => Variant));
 
 f('ldap_sort', Boolean,
   array('link' => Resource,
@@ -76,136 +61,136 @@ f('ldap_start_tls', Boolean,
   array('link' => Resource));
 
 f('ldap_unbind', Boolean,
-  array('link_identifier' => Resource));
+  array('link' => Resource));
 
 f('ldap_get_option', Boolean,
-  array('link_identifier' => Resource,
+  array('link' => Resource,
         'option' => Int32,
         'retval' => Variant | Reference));
 
 f('ldap_set_option', Boolean,
-  array('link_identifier' => Resource,
+  array('link' => Variant,
         'option' => Int32,
         'newval' => Variant));
 
 f('ldap_close', Boolean,
-  array('link_identifier' => Resource));
+  array('link' => Resource));
 
-f('ldap_list', Resource,
-  array('link_identifier' => Resource,
-        'base_dn' => String,
-        'filter' => String,
-        'attributes' => array(StringVec, 'null'),
+f('ldap_list', Variant,
+  array('link' => Variant,
+        'base_dn' => Variant,
+        'filter' => Variant,
+        'attributes' => array(StringVec, 'null_array'),
         'attrsonly' => array(Int32, '0'),
-        'sizelimit' => array(Int32, '0'),
-        'timelimit' => array(Int32, '0'),
-        'deref' => array(Int32, '0')));
+        'sizelimit' => array(Int32, '-1'),
+        'timelimit' => array(Int32, '-1'),
+        'deref' => array(Int32, '-1')));
 
-f('ldap_read', Resource,
-  array('link_identifier' => Resource,
-        'base_dn' => String,
-        'filter' => String,
-        'attributes' => array(StringVec, 'null'),
+f('ldap_read', Variant,
+  array('link' => Variant,
+        'base_dn' => Variant,
+        'filter' => Variant,
+        'attributes' => array(StringVec, 'null_array'),
         'attrsonly' => array(Int32, '0'),
-        'sizelimit' => array(Int32, '0'),
-        'timelimit' => array(Int32, '0'),
-        'deref' => array(Int32, '0')));
+        'sizelimit' => array(Int32, '-1'),
+        'timelimit' => array(Int32, '-1'),
+        'deref' => array(Int32, '-1')));
 
-f('ldap_search', Resource,
-  array('link_identifier' => Resource,
-        'base_dn' => String,
-        'filter' => String,
-        'attributes' => array(StringVec, 'null'),
+f('ldap_search', Variant,
+  array('link' => Variant,
+        'base_dn' => Variant,
+        'filter' => Variant,
+        'attributes' => array(StringVec, 'null_array'),
         'attrsonly' => array(Int32, '0'),
-        'sizelimit' => array(Int32, '0'),
-        'timelimit' => array(Int32, '0'),
-        'deref' => array(Int32, '0')));
+        'sizelimit' => array(Int32, '-1'),
+        'timelimit' => array(Int32, '-1'),
+        'deref' => array(Int32, '-1')));
 
 f('ldap_rename', Boolean,
-  array('link_identifier' => Resource,
+  array('link' => Resource,
         'dn' => String,
         'newrdn' => String,
         'newparent' => String,
         'deleteoldrdn' => Boolean));
 
 f('ldap_delete', Boolean,
-  array('link_identifier' => Resource,
+  array('link' => Resource,
         'dn' => String));
 
 f('ldap_compare', Variant,
-  array('link_identifier' => Resource,
+  array('link' => Resource,
         'dn' => String,
         'attribute' => String,
         'value' => String));
 
 f('ldap_errno', Int32,
-  array('link_identifier' => Resource));
+  array('link' => Resource));
 
 f('ldap_error', String,
-  array('link_identifier' => Resource));
+  array('link' => Resource));
 
-f('ldap_get_dn', String,
-  array('link_identifier' => Resource,
-        'result_entry_identifier' => Resource));
+f('ldap_get_dn', Variant,
+  array('link' => Resource,
+        'result_entry' => Resource));
 
 f('ldap_count_entries', Int32,
-  array('link_identifier' => Resource,
-        'result_identifier' => Resource));
+  array('link' => Resource,
+        'result' => Resource));
 
-f('ldap_get_entries', StringVec,
-  array('link_identifier' => Resource,
-        'result_identifier' => Resource));
+f('ldap_get_entries', Variant,
+  array('link' => Resource,
+        'result' => Resource));
 
-f('ldap_first_entry', Resource,
-  array('link_identifier' => Resource,
-        'result_identifier' => Resource));
+f('ldap_first_entry', Variant,
+  array('link' => Resource,
+        'result' => Resource));
 
-f('ldap_next_entry', Resource,
-  array('link_identifier' => Resource,
-        'result_identifier' => Resource));
+f('ldap_next_entry', Variant,
+  array('link' => Resource,
+        'result_entry' => Resource));
 
 f('ldap_get_attributes', StringVec,
-  array('link_identifier' => Resource,
-        'result_entry_identifier' => Resource));
+  array('link' => Resource,
+        'result_entry' => Resource));
 
-f('ldap_first_attribute', String,
-  array('link_identifier' => Resource,
-        'result_identifier' => Resource));
+f('ldap_first_attribute', Variant,
+  array('link' => Resource,
+        'result_entry' => Resource));
 
-f('ldap_next_attribute', String,
-  array('link_identifier' => Resource,
-        'result_entry_identifier' => Resource));
+f('ldap_next_attribute', Variant,
+  array('link' => Resource,
+        'result_entry' => Resource));
 
-f('ldap_first_reference', Resource,
-  array('link_identifier' => Resource,
-        'result_identifier' => Resource));
+f('ldap_first_reference', Variant,
+  array('link' => Resource,
+        'result' => Resource));
 
-f('ldap_next_reference', Resource,
-  array('link_identifier' => Resource,
-        'result_identifier' => Resource));
+f('ldap_next_reference', Variant,
+  array('link' => Resource,
+        'result_entry' => Resource));
 
 f('ldap_parse_reference', Boolean,
-  array('link_identifier' => Resource,
-        'result_identifier' => Resource,
+  array('link' => Resource,
+        'result_entry' => Resource,
         'referrals' => StringVec | Reference));
 
 f('ldap_parse_result', Boolean,
-  array('link_identifier' => Resource,
-        'result_entry_identifier' => Resource,
+  array('link' => Resource,
+        'result' => Resource,
         'errcode' => Int32 | Reference,
         'matcheddn' => array(String | Reference, 'null'),
         'errmsg' => array(String | Reference, 'null'),
         'referrals' => array(StringVec | Reference, 'null')));
 
 f('ldap_free_result', Boolean,
-  array('result_identifier' => Resource));
+  array('result' => Resource));
 
-f('ldap_get_values_len', StringVec,
-  array('link_identifier' => Resource,
-        'result_entry_identifier' => Resource,
+f('ldap_get_values_len', Variant,
+  array('link' => Resource,
+        'result_entry' => Resource,
         'attribute' => String));
 
-f('ldap_get_values', StringVec,
-  array('link_identifier' => Resource,
-        'result_entry_identifier' => Resource,
+f('ldap_get_values', Variant,
+  array('link' => Resource,
+        'result_entry' => Resource,
         'attribute' => String));

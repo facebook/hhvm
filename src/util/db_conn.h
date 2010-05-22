@@ -134,7 +134,8 @@ class DBConn {
   void escapeString(const char *s, int len, std::string &out);
 
   static void clearLocalDatabases();
-  static void addLocalDB(unsigned int dbId, const char *ip, const char *db);
+  static void addLocalDB(unsigned int dbId, const char *ip, const char *db,
+                         int port, const char *username, const char *password);
 
  private:
   static Mutex s_mutex;
@@ -170,7 +171,9 @@ class DBConn {
 
   class QueryWorker {
   public:
+    void onThreadEnter() {}
     void doJob(QueryJobPtr job);
+    void onThreadExit() { my_thread_end();}
   };
 
   static int parallelExecute(QueryJobPtrVec &jobs,

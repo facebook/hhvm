@@ -51,20 +51,28 @@ pre {
 
 .hphp {
   font-family:    arial;
-  font-size:      36px;
-  color:          white;
+  font-size:      28px;
+  color:          #3B5998;
   border-bottom:  5px dotted #DDDDDD;
 }
 
 .file {
-  color:          white;
   font-size:      12px;
+  color:          navy;
 }
 
 .current_file {
-  background:     white;
-  font-size:      16px;
-  border-bottom:  1px dotted #DDDDDD;
+  font-size:      12px;
+  color:          $FF6600;
+}
+.current_file  a:link {
+   color:         #FF6600;
+}
+
+.topic {
+  background:     #dddddd;
+  font-size:      12px;
+  font-weight:    bold;
 }
 
 .item_header {

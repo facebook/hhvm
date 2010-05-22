@@ -17,18 +17,21 @@ f('error_log', Boolean,
         'extra_headers' => array(String, 'null_string')));
 
 f('error_reporting', Int32,
-  array('level' => array(Int32, '0')));
+  array('level' => array(Variant, 'null')));
 
 f('restore_error_handler', Boolean);
 
 f('restore_exception_handler', Boolean);
 
 f('set_error_handler', Variant,
-  array('error_handler' => String,
+  array('error_handler' => Variant,
         'error_types' => array(Int32, '0')));
 
 f('set_exception_handler', String,
   array('exception_handler' => String));
+
+f('hphp_set_error_page', null,
+  array('page' => String));
 
 f('trigger_error', Boolean,
   array('error_msg' => String,

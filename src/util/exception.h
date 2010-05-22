@@ -29,6 +29,7 @@ namespace HPHP {
 class Exception : public std::exception {
 public:
   Exception(const char *fmt, ...);
+  Exception(bool trace);
   Exception(const Exception &e);
   Exception();
 

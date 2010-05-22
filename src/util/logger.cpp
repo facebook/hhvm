@@ -23,34 +23,21 @@
 
 using namespace std;
 
-#define IMPLEMENT_LOGLEVEL(LOGLEVEL)                            \
-  void Logger::LOGLEVEL(const char *fmt, ...) {                 \
-    if (LogLevel < Log ## LOGLEVEL) return;                     \
-    if (s_logger->silenced) return;                             \
-    va_list ap; va_start(ap, fmt); Log(fmt, ap); va_end(ap);    \
-  }                                                             \
-  void Logger::LOGLEVEL(const std::string &msg) {               \
-    if (LogLevel < Log ## LOGLEVEL) return;                     \
-    if (s_logger->silenced) return;                             \
-    Log(msg, NULL);                                             \
-  }                                                             \
+#define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                   \
+  void Logger::LOGLEVEL(const char *fmt, ...) {                        \
+    if (LogLevel < Log ## LOGLEVEL) return;                            \
+    va_list ap; va_start(ap, fmt); Log(fmt, ap); va_end(ap);           \
+  }                                                                    \
+  void Logger::LOGLEVEL(const std::string &msg) {                      \
+    if (LogLevel < Log ## LOGLEVEL) return;                            \
+    Log(msg, NULL);                                                    \
+  }                                                                    \
+  void Logger::Raw ## LOGLEVEL(const std::string &msg) {               \
+    if (LogLevel < Log ## LOGLEVEL) return;                            \
+    Log(msg, NULL, false);                                             \
+  }                                                                    \
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-// statics
-
-class LoggerInfo {
-public:
-  LoggerInfo() : silenced(false) {}
-
-  bool silenced;
-};
-
-static ThreadLocal<LoggerInfo> s_logger;
-
-void Logger::SetSilenced(bool silence) {
-  s_logger->silenced = silence;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -66,9 +53,10 @@ bool Logger::UseLogFile = true;
 FILE *Logger::Output = NULL;
 Logger::LogLevelType Logger::LogLevel = LogInfo;
 bool Logger::LogHeader = false;
+bool Logger::LogNativeStackTrace = true;
 std::string Logger::ExtraHeader;
 int Logger::MaxMessagesPerRequest = -1;
-ThreadLocal<Logger::ThreadData> Logger::s_threadData;
+IMPLEMENT_THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
 
 void Logger::VSNPrintf(std::string &msg, const char *fmt, va_list ap) {
   int i = 0;
@@ -97,7 +85,6 @@ void Logger::Log(const char *fmt, va_list ap) {
 
 void Logger::Log(const char *type, const Exception &e,
                  const char *file /* = NULL */, int line /* = 0 */) {
-  if (s_logger->silenced) return;
   if (!UseLogAggregator && !UseLogFile) return;
 
   std::string msg = type;
@@ -116,7 +103,14 @@ void Logger::OnNewRequest() {
   threadData->message = 0;
 }
 
-void Logger::Log(const std::string &msg, const StackTrace *stackTrace) {
+void Logger::ResetRequestCount() {
+  ThreadData *threadData = s_threadData.get();
+  threadData->request = 0;
+  threadData->message = 0;
+}
+
+void Logger::Log(const std::string &msg, const StackTrace *stackTrace,
+                 bool escape /* = true */) {
   ThreadData *threadData = s_threadData.get();
   if (++threadData->message > MaxMessagesPerRequest &&
       MaxMessagesPerRequest >= 0) {
@@ -138,16 +132,22 @@ void Logger::Log(const std::string &msg, const StackTrace *stackTrace) {
     string header, sheader;
     if (LogHeader) {
       header = GetHeader();
-      sheader = header + " [" + stackTrace->hexEncode(5) + "] ";
+      if (LogNativeStackTrace) {
+        sheader = header + "[" + stackTrace->hexEncode(5) + "] ";
+      } else {
+        sheader = header;
+      }
     }
-    char *escaped = EscapeString(msg);
+    const char *escaped = escape ? EscapeString(msg) : msg.c_str();
     fprintf(f, "%s%s\n", sheader.c_str(), escaped);
     FILE *tf = threadData->log;
     if (tf) {
       fprintf(tf, "%s%s\n", header.c_str(), escaped);
       fflush(tf);
     }
-    free(escaped);
+    if (escape) {
+      free((void*)escaped);
+    }
 
     fflush(f);
   }
@@ -165,7 +165,7 @@ std::string Logger::GetHeader() {
 
   char header[128];
   ThreadData *threadData = s_threadData.get();
-  snprintf(header, sizeof(header), "[%s] [hphp] [%lld:%llx:%d:%06d%s]",
+  snprintf(header, sizeof(header), "[%s] [hphp] [%lld:%llx:%d:%06d%s] ",
            snow,
            (unsigned long long)pid,
            (unsigned long long)Process::GetThreadId(),

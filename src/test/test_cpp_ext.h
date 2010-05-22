@@ -18,7 +18,7 @@
 #define __TEST_CPP_EXT_H__
 
 #include <test/test_cpp_base.h>
-#include <cpp/ext/ext_variable.h> // we frequently need to call f_var_dump()
+#include <runtime/ext/ext_variable.h> // we frequently need to call f_var_dump()
 
 ///////////////////////////////////////////////////////////////////////////////
 

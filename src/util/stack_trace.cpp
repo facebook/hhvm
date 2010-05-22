@@ -25,7 +25,6 @@
 #include <bfd.h>
 #endif
 
-#include <dlfcn.h>
 #include <signal.h>
 
 using namespace std;
@@ -48,42 +47,63 @@ std::string StackTrace::Frame::toString() const {
 ///////////////////////////////////////////////////////////////////////////////
 // signal handler
 
+bool SegFaulting = false;
+
 static void bt_handler(int sig) {
   // In case we crash again in the signal hander or something
   signal(sig, SIG_DFL);
 
-  // Calling all of these library functions in a signal handler
-  // is completely undefined behavior, but we seem to get away with it.
+  // Generating a stack dumps significant time, try to stop threads
+  // from flushing bad data or generating more faults meanwhile
+  if (sig==SIGQUIT || sig==SIGILL || sig==SIGSEGV || sig==SIGBUS) {
+    SegFaulting=true;
+    // leave running for SIGTERM SIGFPE SIGABRT
+  }
 
-  Logger::Error("Core dumped: %s", strsignal(sig));
+  // Turn on stack traces for coredumps
+  StackTrace::Enabled = true;
+  StackTraceNoHeap st;
 
-  StackTrace st;
-  std::string logmessage;
-  std::string outfn = st.log(strsignal(sig), &logmessage);
+  char pid[sizeof(Process::GetProcessId())*3+2]; // '-' and \0
+  sprintf(pid,"%u",Process::GetProcessId());
+  char tracefn [strlen("/tmp/stacktrace..log" + strlen(pid) +1 )];
+  sprintf(tracefn,"/tmp/stacktrace.%s.log" , pid);
+
+  st.log(strsignal(sig), tracefn, pid);
 
   //cerr << logmessage << endl;
   if (!StackTrace::ReportEmail.empty()) {
     //cerr << "Emailing trace to " << StackTrace::ReportEmail << endl;
-    string cmdline = "cat " + outfn + string(" | mail -s \"Stack Trace from ")
-      + Process::GetAppName() + string("\" ") + StackTrace::ReportEmail;
-    Util::ssystem(cmdline.c_str());
+    char format [] = "cat %s | mail -s \"Stack Trace from %s\"%s";
+    char cmdline[strlen(format)+strlen(tracefn)
+                 +strlen(Process::GetAppName().c_str())
+                 +strlen(StackTrace::ReportEmail.c_str())+1];
+    sprintf(cmdline, format, tracefn, Process::GetAppName().c_str(),
+            StackTrace::ReportEmail.c_str());
+    Util::ssystem(cmdline);
   }
+
+  // Calling all of these library functions in a signal handler
+  // is completely undefined behavior, but we seem to get away with it.
+  // Do it last just in case
+
+  Logger::Error("Core dumped: %s", strsignal(sig));
 
   // re-raise the signal and pass it to the default handler
   // to terminate the process.
   raise(sig);
 }
-
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-string StackTrace::ReportEmail;
+bool StackTraceBase::Enabled = true;
+string StackTraceBase::ReportEmail;
 
-void StackTrace::InstallReportOnSignal(int sig) {
+void StackTraceBase::InstallReportOnSignal(int sig) {
   signal(sig, bt_handler);
 }
 
-void StackTrace::InstallReportOnErrors() {
+void StackTraceBase::InstallReportOnErrors() {
   static bool already_set = false;
   if (already_set) return;
   already_set = true;
@@ -101,8 +121,7 @@ void StackTrace::InstallReportOnErrors() {
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
-StackTrace::StackTrace() {
-  create();
+StackTraceBase::StackTraceBase() {
 #ifndef MAC_OS_X
   bfd_init();
 #endif
@@ -115,6 +134,18 @@ StackTrace::StackTrace(const StackTrace &bt) {
   m_bt = bt.m_bt;
 }
 
+StackTrace::StackTrace(bool trace) {
+  if (trace && Enabled) {
+    create();
+  }
+}
+
+StackTraceNoHeap::StackTraceNoHeap(bool trace) {
+  if (trace && Enabled) {
+    create();
+  }
+}
+
 StackTrace::StackTrace(const std::string &hexEncoded) {
   vector<string> frames;
   Util::split(':', hexEncoded.c_str(), frames);
@@ -124,13 +155,12 @@ StackTrace::StackTrace(const std::string &hexEncoded) {
 }
 
 void StackTrace::create() {
-  const int MAXFRAME = 175;
   void *btpointers[MAXFRAME];
   int framecount = 0;
 #ifndef MAC_OS_X
   framecount = backtrace(btpointers, MAXFRAME);
 #endif
-  if (framecount <= 0 || framecount > MAXFRAME) {
+  if (framecount <= 0 || framecount > (signed) MAXFRAME) {
     m_bt_pointers.clear();
     return;
   }
@@ -138,6 +168,18 @@ void StackTrace::create() {
   for (int i = 0; i < framecount; i++) {
     m_bt_pointers[i] = btpointers[i];
   }
+}
+
+void StackTraceNoHeap::create() {
+  int unsigned framecount = 0;
+#ifndef MAC_OS_X
+  framecount = backtrace(m_btpointers, MAXFRAME);
+#endif
+  if (framecount <= 0 || framecount > MAXFRAME) {
+    m_btpointers_cnt = 0;
+    return;
+  }
+  m_btpointers_cnt = framecount;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -165,6 +207,14 @@ const std::string &StackTrace::toString() const {
   return m_bt;
 }
 
+void StackTraceNoHeap::print(FILE *f) const {
+  int frame=0;
+  for (unsigned int i=0; i<m_btpointers_cnt; i++) {
+    if (!Translate(f, m_btpointers[i], frame)) continue;;
+    frame++;
+  }
+}
+
 void StackTrace::get(FramePtrVec &frames) const {
   frames.clear();
   for (vector<void*>::const_iterator btpi = m_bt_pointers.begin();
@@ -185,69 +235,92 @@ std::string StackTrace::hexEncode(int minLevel /* = 0 */,
   return bts;
 }
 
-string StackTrace::log(const char *errorType, string *out /* = NULL */) const {
-  string pid = lexical_cast<string>(Process::GetProcessId());
-
-  string msg;
-  msg += "Host: " + Process::GetHostName();
-  msg += "\nProcessID: " + pid;
-  msg += "\nThreadID: " + lexical_cast<string>(Process::GetThreadId());
-  msg += "\nName: " + Process::GetAppName();
-  msg += "\nType: ";
-  if (errorType) {
-    msg += errorType;
-  } else {
-    msg += "(unknown error)";
+template <class T>
+struct DumpGetThreadId {
+  void print(FILE *f, const pthread_t& p) {
+    fprintf (f, lexical_cast<string>(p).c_str());
   }
-  msg += "\n\n";
-  msg += toString();
-  msg += "\n";
+};
 
-  string tracefn = "/tmp/stacktrace." + pid + ".log";
-  ofstream f(tracefn.c_str());
-  if (f) {
-    f << msg;
-    f.close();
+template <>
+struct DumpGetThreadId<unsigned long int> {
+  // no heap version, if possible
+  void print(FILE *f, const pthread_t& p) {
+    fprintf (f, "%lu", (unsigned long int)(p));
   }
+};
 
-  if (out) {
-    *out = msg;
-  }
-  return tracefn;
+void StackTraceNoHeap::log(const char *errorType, const char *tracefn,
+                           const char * pid) const {
+  FILE *f = fopen(tracefn,"w");
+  if (!f) return;
+
+  fprintf(f, "Host: %s\n",Process::GetHostName().c_str());
+  fprintf(f, "ProcessID: %s\n", pid);
+  fprintf(f, "ThreadID: ");
+  { DumpGetThreadId<pthread_t> p; p.print(f,Process::GetThreadId()); }
+  fprintf(f, "\nName: %s\n", Process::GetAppName().c_str());
+  fprintf(f, "Type: %s\n\n", errorType ? errorType : "(unknown error)");
+  print(f);
+  fprintf(f, "\n");
+  fclose(f);
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-StackTrace::FramePtr StackTrace::Translate(void *frame) {
-  FramePtr f(new Frame(frame));
+struct addr2line_data {
+  asymbol **syms;
+  bfd_vma pc;
+  const char *filename;
+  const char *functionname;
+  unsigned int line;
+  bfd_boolean found;
+};
 
+
+bool StackTraceBase::Translate(void *frame, StackTraceBase::Frame * f,
+                               Dl_info &dlInfo, void* data) {
   char sframe[32];
   snprintf(sframe, sizeof(sframe), "%p", frame);
-  string original_frame = sframe;
 
-  Dl_info dlInfo;
   if (!dladdr(frame, &dlInfo)) {
-    return f;
+    return false;
   }
 
   // frame pointer offset in previous frame
   f->offset = (char*)frame - (char*)dlInfo.dli_saddr;
 
-  string out;
   if (dlInfo.dli_fname) {
-    string fname = dlInfo.dli_fname;
 
     // 1st attempt without offsetting base address
-    if (!Addr2line(dlInfo.dli_fname, sframe, f) &&
-        fname.find(".so") != string::npos) {
+    if (!Addr2line(dlInfo.dli_fname, sframe, f, data) &&
+        dlInfo.dli_fname && strstr(dlInfo.dli_fname,".so")) {
       // offset shared lib's base address
       frame = (char*)frame - (size_t)dlInfo.dli_fbase;
       snprintf(sframe, sizeof(sframe), "%p", frame);
 
       // Use addr2line to get line number info.
-      Addr2line(dlInfo.dli_fname, sframe, f);
+      Addr2line(dlInfo.dli_fname, sframe, f, data);
     }
+  }
+  return true;
+}
+
+StackTrace::FramePtr StackTrace::Translate(void *frame) {
+  Dl_info dlInfo;
+  addr2line_data adata;
+
+  Frame * f1 = new Frame(frame);
+  FramePtr f(f1);
+  if (!StackTraceBase::Translate(frame, f1, dlInfo, &adata)) return f;
+
+  if (adata.filename) {
+    f->filename = adata.filename;
+  }
+  if (adata.functionname) {
+    f->funcname = Demangle(adata.functionname);
   }
   if (f->filename.empty() && dlInfo.dli_fname) {
     f->filename = dlInfo.dli_fname;
@@ -259,19 +332,35 @@ StackTrace::FramePtr StackTrace::Translate(void *frame) {
   return f;
 }
 
+bool StackTraceNoHeap::Translate(FILE *fp, void *frame, int frame_num) {
+  // frame pointer offset in previous frame
+  Dl_info dlInfo;
+  addr2line_data adata;
+  Frame f(frame);
+  if (!StackTraceBase::Translate(frame, &f, dlInfo, &adata))  {
+    return false;
+  }
+
+  const char *filename = adata.filename ? adata.filename : dlInfo.dli_fname;
+  if (!filename) filename = "??";
+  const char *funcname = adata.functionname ? adata.functionname
+                                            : dlInfo.dli_sname;
+  if (!funcname) funcname = "??";
+
+  // ignore frames in the StackTrace class
+  if (strstr(funcname, "StackTraceNoHeap")) return false ;
+
+  fprintf(fp, "# %d%s ", frame_num, frame_num < 10 ? " " : "");
+  Demangle(fp, funcname);
+  fprintf(fp, " at %s:%u\n", filename, f.lineno);
+
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // copied and re-factored from addr2line
 
 #ifndef MAC_OS_X
-
-struct addr2line_data {
-  asymbol **syms;
-  bfd_vma pc;
-  const char *filename;
-  const char *functionname;
-  unsigned int line;
-  bfd_boolean found;
-};
 
 static void find_address_in_section(bfd *abfd, asection *section, void *data) {
   addr2line_data *adata = reinterpret_cast<addr2line_data*>(data);
@@ -382,27 +471,21 @@ static bfd_cache_ptr get_bfd_cache(const char *filename) {
 
 #endif
 
-bool StackTrace::Addr2line(const char *filename, const char *address,
-                           FramePtr &frame) {
+bool StackTraceBase::Addr2line(const char *filename, const char *address,
+                           Frame *frame, void *adata) {
 #ifndef MAC_OS_X
   Lock lock(s_bfdMutex);
+  addr2line_data *data = reinterpret_cast<addr2line_data*>(adata);
   bfd_cache_ptr p = get_bfd_cache(filename);
   if (!p) return false;
 
-  addr2line_data data;
-  data.filename = NULL;
-  data.functionname = NULL;
-  data.line = 0;
-  data.syms = p->syms;
-  bool ret = translate_addresses(p->abfd, address, &data);
+  data->filename = NULL;
+  data->functionname = NULL;
+  data->line = 0;
+  data->syms = p->syms;
+  bool ret = translate_addresses(p->abfd, address, data);
   if (ret) {
-    if (data.filename) {
-      frame->filename = data.filename;
-    }
-    if (data.functionname) {
-      frame->funcname = Demangle(data.functionname);
-    }
-    frame->lineno = data.line;
+    frame->lineno = data->line;
   }
   return ret;
 #else
@@ -413,9 +496,9 @@ bool StackTrace::Addr2line(const char *filename, const char *address,
 ///////////////////////////////////////////////////////////////////////////////
 // copied and re-factored from demangle/c++filt
 
-#define DMGL_PARAMS	 (1 << 0)	/* Include function args */
-#define DMGL_ANSI	 (1 << 1)	/* Include const, volatile, etc */
-#define DMGL_VERBOSE	 (1 << 3)	/* Include implementation details.  */
+#define DMGL_PARAMS   (1 << 0)  /* Include function args */
+#define DMGL_ANSI     (1 << 1)  /* Include const, volatile, etc */
+#define DMGL_VERBOSE  (1 << 3)  /* Include implementation details. */
 
 #ifndef MAC_OS_X
 
@@ -448,6 +531,32 @@ std::string StackTrace::Demangle(const char *mangled) {
   return mangled;
 #endif
 }
+
+void StackTraceNoHeap::Demangle(FILE *f, const char *mangled) {
+  assert(mangled);
+  if (!mangled || !*mangled) {
+    fprintf(f, "??");
+    return ;
+  }
+
+#ifndef MAC_OS_X
+  size_t skip_first = 0;
+  if (mangled[0] == '.' || mangled[0] == '$') ++skip_first;
+  //if (mangled[skip_first] == '_') ++skip_first;
+
+  char *result = cplus_demangle(mangled + skip_first, DMGL_PARAMS | DMGL_ANSI | DMGL_VERBOSE);
+  if (result == NULL) {
+    fprintf (f, "%s", mangled);
+    return;
+  }
+  fprintf (f, "%s%s", mangled[0]=='.' ? "." : "", result);
+  return ;
+#else
+  fprintf (f, "%s", mangled);
+  return ;
+#endif
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

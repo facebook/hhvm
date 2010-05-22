@@ -15,10 +15,10 @@
 */
 
 #include <test/test_ext_server.h>
-#include <cpp/ext/ext_server.h>
-#include <cpp/base/server/pagelet_server.h>
-#include <cpp/base/server/xbox_server.h>
-#include <cpp/base/runtime_option.h>
+#include <runtime/ext/ext_server.h>
+#include <runtime/base/server/pagelet_server.h>
+#include <runtime/base/server/xbox_server.h>
+#include <runtime/base/runtime_option.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

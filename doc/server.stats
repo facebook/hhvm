@@ -1,0 +1,189 @@
+
+<h2>Server Stats</h2>
+
+For each page, we collect stats by time slots. Each time slot is configured as
+StatsSlotDuration seconds and server internally keeps StatsMaxSlot number of
+slots. Inside each slot, we keep a set of stats by page or URL. These stats
+include 3 built-in ones ("url", "code" and "hit") and many key-value pairs
+defined by different parts of the system.
+
+  slot:
+    time:
+    pages:
+      page:
+        url:   original URL
+        code:  return code
+        hit:   total counts
+        details:
+          key-value pair
+          key-value pair
+          key-value pair
+          ...
+
+
+<h2>Stats Query</h2>
+
+To query stats, hit admin port with a URL like this,
+
+  http://[server]:9999/stats.[fmt]?from=[t1]&to=[t2]...
+
+from: (optional) starting time's timestamp (e.g. 1251927393),
+        - use -n for n seconds ago
+        - when omitted or 0, it will be the earliest possible time server keeps
+
+to:   (optional) ending time's timestamp,
+        - use -n for n seconds ago
+        - when omitted or 0, it will be "now"
+
+agg:  (optional) aggregation, can be any one of these,
+        *          aggregate all data into one list of key value pairs
+        url        aggregate all data by URLs
+        code       aggregate all data by response code
+        (omitted)  default by time slots
+
+keys: (optional) comma delimited keys to query, each of which can be decorated
+        [key]      just the key's value, e.g. "sql.conn"
+        [key]/hit  average per page hit, e.g. "sql.conn/hit"
+        [key]/sec  per second rate, e.g. "sql.conn/sec"
+        #[regex]#  keys matching the regular expression
+        (omitted)  all available keys
+
+url:  (optional) only output stats matching the specified URL
+
+code: (optional) only output stats of pages that have response code
+
+[fmt]: can be one of these:
+
+        xml        XML format
+        json       JSON format
+        kvp        simple key-value pairs in JSON format, assuming agg=*
+
+
+<h2>Available Keys</h2>
+
+1. SQL Stats:
+
+(1) Connections
+
+sql.conn:       number of connections newly created
+sql.reconn_new: number of connections newly created when trying to reconnect
+sql.reconn_ok:  number of connections re-picked up when trying to reconnect
+sql.reconn_old: number of connections dropped when trying to reconnect
+
+(2) Queries
+
+sql.query:                number of queries executed
+sql.query.[table].[verb]: per table-verb stats
+sql.query.[verb]:         per verb stats, where [verb] can be one of these:
+
+- select
+- insert
+- update
+- replace
+- delete
+- begin
+- commit
+- rollback
+- unknown
+
+2. MemCache Stats:
+
+mcc.madd:           number of multi_add() calls
+mcc.madd.count:     total count of multi added keys
+mcc.mreplace:       number of multi_replace() calls
+mcc.mreplace.count: total count of multi replaced keys
+mcc.set:            number of set() calls
+mcc.add:            number of add() calls
+mcc.decr:           number of decr() calls
+mcc.incr:           number of incr() calls
+mcc.delete:         number of delete() calls
+mcc.delete_details: number of delete_details() calls
+mcc.get:            number of get() calls
+mcc.mget:           number of multi_get() calls
+mcc.mget.count:     total count of multi got keys
+mcc.replace:        number of replace() calls
+mcc.set:            number of set() calls
+mcc.stats:          number of stats() calls
+
+3. APC Stats:
+
+apc.miss:   number of item misses
+apc.hit:    number of item hits
+apc.update: number of item updates
+apc.new:    number of new items
+apc.erased: number of successfully erased items
+apc.erase:  number of items that failed to erase (because they were absent)
+apc.inc:    number of inc() call
+apc.cas:    number of cas() call
+
+4. Memory Stats:
+
+mem.[type].[size].alloc: total number of objects allocated of the type
+mem.[type].[size].freed: total number of objects freed of the type
+
+These two stats are only available when Google heap profler is turned on for
+debugging purposes:
+
+mem.malloc.peak:   peak malloc()-ed memory
+mem.malloc.leaked: leaked malloc()-ed memory
+
+5. Page Sections:
+
+page.wall.[section]:   wall time a page section takes
+page.cpu.[section]:    CPU time a page section takes
+mem.[section]:         SmartAllocator memory a page section takes
+network.uncompressed:  total bytes to be sent before compression
+network.compressed:    total bytes sent after compression
+
+Section can be one of these:
+
+- queuing
+- all
+- input
+- invoke
+- send
+- psp
+- rollback
+- free
+
+6. evhttp Stats:
+
+- evhttp.hit              used cached connection
+- evhttp.hit.[address]    used cached connection by URL
+- evhttp.miss             no cached connection available
+- evhttp.miss.[address]   no cached connection available by URL
+- evhttp.close            cached connection got closed
+- evhttp.close.[address]  cached connection got closed by URL
+- evhttp.skip             not set to use cached connection
+- evhttp.skip.[address]   not set to use cached connection by URL
+
+7. Application Stats:
+
+PHP page can collect application-defined stats by calling
+
+  hphp_stats($key, $count);
+
+where $key is arbitrary and $count will be tallied across different calls of
+the same key.
+
+8. Special Keys:
+
+hit:   page hit
+load:  number of active worker threads
+idle:  number of idle worker threads
+
+
+<h2>Example URL</h2>
+
+  GET "http://localhost:9999/stats.kvp?prefix=hphp&agg=*" \
+    "&keys=apc.hit/sec,hit,load,:sql.query..*.select:," \
+    "network.compressed/hit,hit/sec"
+
+This URL queries the following data:
+
+hit:                        page hits
+hit/sec:                    request per second
+apc.hit/sec:                APC hit per second
+load:                       number of active threads currently
+network.compressed/hit:     sent bytes per request
+:sql.query..*.select:       all SELECTs on different tables

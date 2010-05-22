@@ -30,6 +30,7 @@ class TestExtThread : public TestCppExt {
   bool test_hphp_service_thread_started();
   bool test_hphp_thread_is_warmup_enabled();
   bool test_hphp_thread_set_warmup_enabled();
+  bool test_hphp_get_thread_id();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

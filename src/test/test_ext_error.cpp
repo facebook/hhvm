@@ -15,7 +15,8 @@
 */
 
 #include <test/test_ext_error.h>
-#include <cpp/ext/ext_error.h>
+#include <runtime/ext/ext_error.h>
+#include <runtime/base/runtime_option.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -40,14 +41,20 @@ bool TestExtError::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtError::test_debug_backtrace() {
+  bool oldValue = RuntimeOption::InjectedStackTrace;
+  RuntimeOption::InjectedStackTrace = false;
   Array ret = f_debug_backtrace();
 #ifndef MAC_OS_X
   VERIFY(ret.size() > 0);
 #endif
+  RuntimeOption::InjectedStackTrace = oldValue;
   return Count(true);
 }
 
 bool TestExtError::test_debug_print_backtrace() {
+  bool oldValue = RuntimeOption::InjectedStackTrace;
+  RuntimeOption::InjectedStackTrace = false;
+  StackTrace::Enabled = true;
   g_context->obStart();
   f_debug_print_backtrace();
   String output = g_context->obGetContents();
@@ -55,6 +62,7 @@ bool TestExtError::test_debug_print_backtrace() {
 #ifndef MAC_OS_X
   VERIFY(strstr((const char *)output, "test_debug_print_backtrace"));
 #endif
+  RuntimeOption::InjectedStackTrace = oldValue;
   return Count(true);
 }
 

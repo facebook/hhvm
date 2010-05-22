@@ -15,9 +15,9 @@
 */
 
 #include <test/test_ext_preg.h>
-#include <cpp/ext/ext_preg.h>
-#include <cpp/ext/ext_array.h>
-#include <cpp/ext/ext_string.h>
+#include <runtime/ext/ext_preg.h>
+#include <runtime/ext/ext_array.h>
+#include <runtime/ext/ext_string.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -350,7 +350,7 @@ bool TestExtPreg::test_preg_quote() {
 
 bool TestExtPreg::test_preg_last_error() {
   f_preg_match("/(?:\\D+|<\\d+>)*[!?]/", "foobar foobar foobar");
-  VS(f_preg_last_error(), 0);
+  VS(f_preg_last_error(), 2);
   return Count(true);
 }
 

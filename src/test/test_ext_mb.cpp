@@ -15,9 +15,9 @@
 */
 
 #include <test/test_ext_mb.h>
-#include <cpp/ext/ext_mb.h>
-#include <cpp/ext/ext_string.h>
-#include <cpp/ext/ext_array.h>
+#include <runtime/ext/ext_mb.h>
+#include <runtime/ext/ext_string.h>
+#include <runtime/ext/ext_array.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_misc.h>
-#include <cpp/ext/ext_misc.h>
+#include <runtime/ext/ext_misc.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

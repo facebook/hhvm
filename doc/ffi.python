@@ -5,9 +5,9 @@
 
 When an HPHP project is compiled with --format=lib-ffi, a SWIG .i file is
 generated to wrap all the top-level PHP functions, located in directory
-<b>output/ffi</b>. In <b>output</b>, run "make" with <b>hphp/src/python.mk</b>,
-then a python wrapper and a corresponding shared library will be created in
-directory <b>output/ffi/python</b>.
+<b>output/ffi</b>. In <b>output</b>, run "make" with
+<b>hphp/src/ffi/python.mk</b>, then a python wrapper and a corresponding
+shared library will be created in directory <b>output/ffi/python</b>.
 
 For example, if your HPHP project is named phplib, after the above steps,
 you will get a Python wrapper phplib.py and a shared library _phplib.so, both
@@ -152,3 +152,17 @@ strings, but array keys are HPHP variants. For example,
   phplib.hphpSetField(s, a, "f", v2);     # a->f = v2
   phplib.hphpIssetField(s, a, "f");       # should return TRUE now
   phplib.hphpUnsetField(s, a, "f");       # unsets the field f
+
+(8) Manipulating global variables
+
+Global variables are accessed with helper functions hphpGetGlobal() and
+hphpSetGlobal(). For example,
+
+  a = phplib.hphpGetGlobal(s, "_SERVER"); # gets a copy of the global variable
+                                          # $_SERVER
+  phplib.hphpSet(s, a, "SRC", "/");       # $_SERVER['SRC'] NOT updated yet
+  phplib.hphpSetGlobal(s, "_SERVER", a);  # $_SERVER updated
+
+Note that the value obtained with hphpGetGlobal() is logically just a copy of
+the global variable, and it takes a call to hphpSetGlobal() to really update
+the value of the global variable.

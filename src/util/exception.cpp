@@ -27,6 +27,10 @@ Exception::Exception(const char *fmt, ...)
   va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
 }
 
+Exception::Exception(bool trace)
+  : m_handled(false), m_st(trace) {
+}
+
 Exception::Exception(const Exception &e)
   : m_handled(true), m_msg(e.m_msg), m_what(e.m_what), m_st(e.m_st) {
   e.m_handled = true;

@@ -15,12 +15,12 @@
 */
 
 #include <test/test_depend_graph.h>
-#include <lib/parser/parser.h>
-#include <lib/analysis/analysis_result.h>
-#include <lib/analysis/code_error.h>
-#include <lib/code_generator.h>
-#include <lib/option.h>
-#include <lib/system/builtin_symbols.h>
+#include <compiler/parser/parser.h>
+#include <compiler/analysis/analysis_result.h>
+#include <compiler/analysis/code_error.h>
+#include <compiler/code_generator.h>
+#include <compiler/option.h>
+#include <compiler/builtin_symbols.h>
 
 using namespace std;
 
@@ -29,7 +29,7 @@ using namespace std;
 bool TestDependGraph::RunTests(const std::string &which) {
   bool ret = true;
 #define DEPENDENCY_ENTRY(x) RUN_TEST(Test ## x);
-#include "../lib/analysis/core_dependency.inc"
+#include "../compiler/analysis/core_dependency.inc"
 #undef DEPENDENCY_ENTRY
   return ret;
 }
@@ -47,9 +47,9 @@ bool TestDependGraph::VerifyDependency(DependencyGraph::KindOf kindOf,
 
   Option::IncludeRoots["$_SERVER['PHP_ROOT']"] = "";
   AnalysisResultPtr ar(new AnalysisResult());
-  BuiltinSymbols::load(ar);
-  Parser::parseString(input1, ar, "f1");
-  if (input2) Parser::parseString(input2, ar, "f2");
+  BuiltinSymbols::Load(ar);
+  Parser::ParseString(input1, ar, "f1");
+  if (input2) Parser::ParseString(input2, ar, "f2");
   ar->analyzeProgram();
   ar->inferTypes();
   DependencyGraphPtr dg = ar->getDependencyGraph();
@@ -112,9 +112,9 @@ bool TestDependGraph::TestFunctionCall() {
   {
     Option::IncludeRoots["$_SERVER['PHP_ROOT']"] = "";
     AnalysisResultPtr ar(new AnalysisResult());
-    BuiltinSymbols::load(ar);
-    Parser::parseString("<?php function test() {}", ar, "f1");
-    Parser::parseString("<?php /*|MasterCopy|*/ function test() {}", ar, "f2");
+    BuiltinSymbols::Load(ar);
+    Parser::ParseString("<?php function test() {}", ar, "f1");
+    Parser::ParseString("<?php /*|MasterCopy|*/ function test() {}", ar, "f2");
     ar->analyzeProgram();
     ar->inferTypes();
     DependencyGraphPtr dg = ar->getDependencyGraph();

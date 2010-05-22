@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <cpp/base/type_variant.h>
-#include <cpp/base/type_object.h>
+#include <runtime/base/complex_types.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,9 +58,12 @@ Variant invoke_file(CStrRef path, bool once /* = false */,
   return false;
 }
 
-Variant get_constant(CStrRef name) { return null;}
-Variant get_builtin_constant(CStrRef name) { return null;}
-Variant get_class_constant(const char *s, const char *prop) { return null;}
+Variant get_constant(CStrRef name) { return name;}
+Variant get_builtin_constant(CStrRef name) { return name;}
+Variant get_class_constant(const char *s, const char *prop,
+                           bool fatal /* = true */) {
+  return null;
+}
 
 Variant get_static_property(const char *s, const char *prop) {
   return Variant();
@@ -69,6 +71,14 @@ Variant get_static_property(const char *s, const char *prop) {
 Variant *get_static_property_lv(const char *s, const char *prop) {
   return NULL;
 }
+
+Variant get_class_var_init(const char *s, const char *var) {
+  return null;
+}
+Variant get_builtin_class_var_init(const char *s, const char *var) {
+  return null;
+}
+
 Array get_global_array_wrapper() {
   return Array();
 }

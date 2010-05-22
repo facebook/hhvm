@@ -171,15 +171,15 @@ if (BINUTIL_LIB STREQUAL "BINUTIL_LIB-NOTFOUND")
 	message(FATAL_ERROR "You need to install binutils")
 endif()
 
-find_package(BISON REQUIRED)
-find_package(FLEX REQUIRED)
+#find_package(BISON REQUIRED)
+#find_package(FLEX REQUIRED)
 
-if (${FLEX_VERSION} VERSION_LESS 2.5.33)
-	message(FATAL_ERROR "Flex is too old, found ${FLEX_VERSION} and we need 2.5.33")
-endif()
+#if (${FLEX_VERSION} VERSION_LESS 2.5.33)
+#	message(FATAL_ERROR "Flex is too old, found ${FLEX_VERSION} and we need 2.5.33")
+#endif()
 
 include_directories(${HPHP_HOME}/src)
-include_directories(${HPHP_HOME}/src/lib/system/gen)
+include_directories(${HPHP_HOME}/src/system/gen)
 
 macro(hphp_link target)
 	target_link_libraries(${target} ${Boost_LIBRARIES})

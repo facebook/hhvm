@@ -294,40 +294,6 @@ int Util::ssystem(const char* command) {
   return ret;
 }
 
-std::string Util::canonicalize(const std::string &path) {
-  int len = path.size();
-  if (len == 0) return path;
-
-  vector<string> paths;
-  string p = path;
-  Util::replaceAll(p, "\\/", "/");
-  Util::split('/', p.c_str(), paths, true);
-  for (unsigned int i = 0; i < paths.size();) {
-    if (paths[i] == ".") {
-      paths.erase(paths.begin() + i);
-    } else if (paths[i] == "..") {
-      if (i < 1) {
-        return path; // path cannot be canonicalized
-      }
-      paths.erase(paths.begin() + i - 1, paths.begin() + i + 1);
-      i--;
-    } else {
-      i++;
-    }
-  }
-
-  string ret;
-  if (path[0] == '/') ret = '/';
-  for (unsigned int i = 0; i < paths.size(); i++) {
-    if (i > 0) ret += '/';
-    ret += paths[i];
-  }
-  if (path[len - 1] == '/' && ret != "/") {
-    ret += '/';
-  }
-  return ret;
-}
-
 std::string Util::safe_strerror(int errnum) {
   char buf[1024];
   return strerror_r(errnum, buf, sizeof(buf));
@@ -344,6 +310,108 @@ int Util::roundUpToPowerOfTwo(int value) {
     value |= value >> i;
   ++value;
   return (value);
+}
+
+std::string Util::canonicalize(const std::string &path) {
+  const char *r = canonicalize(path.c_str(), path.size());
+  string res(r);
+  free((void*)r);
+  return res;
+}
+
+/* Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const char *Util::canonicalize(const char *addpath, size_t addlen) {
+  // 4 for slashes at start, after root, and at end, plus trailing
+  // null
+  size_t maxlen = addlen + 4;
+  size_t pathlen = 0; // is the length of the result path
+  size_t seglen;  // is the end of the current segment
+
+  /* Treat null as an empty path.
+   */
+  if (!addpath)
+    addpath = "";
+
+  char *path = (char *)malloc(maxlen);
+
+  if (addpath[0] == '/') {
+    /* Ignore the given root path, strip off leading
+     * '/'s to a single leading '/' from the addpath,
+     * and leave addpath at the first non-'/' character.
+     */
+    while (addpath[0] == '/')
+      ++addpath;
+    path[0] = '/';
+    pathlen = 1;
+  }
+
+  while (*addpath) {
+    /* Parse each segment, find the closing '/'
+     */
+    const char *next = addpath;
+    while (*next && (*next != '/')) {
+      ++next;
+    }
+    seglen = next - addpath;
+
+    if (seglen == 0 || (seglen == 1 && addpath[0] == '.')) {
+      /* noop segment (/ or ./) so skip it
+       */
+    } else if (seglen == 2 && addpath[0] == '.' && addpath[1] == '.') {
+      /* backpath (../) */
+      if (pathlen == 1 && path[0] == '/') {
+      } else if (pathlen == 0
+                 || (pathlen == 3
+                     && !memcmp(path + pathlen - 3, "../", 3))
+                 || (pathlen  > 3
+                     && !memcmp(path + pathlen - 4, "/../", 4))) {
+        /* Append another backpath, including
+         * trailing slash if present.
+         */
+        memcpy(path + pathlen, "../", *next ? 3 : 2);
+        pathlen += *next ? 3 : 2;
+      } else {
+        /* otherwise crop the prior segment
+         */
+        do {
+          --pathlen;
+        } while (pathlen && path[pathlen - 1] != '/');
+      }
+    } else {
+      /* An actual segment, append it to the destination path
+       */
+      if (*next) {
+        seglen++;
+      }
+      memcpy(path + pathlen, addpath, seglen);
+      pathlen += seglen;
+    }
+
+    /* Skip over trailing slash to the next segment
+     */
+    if (*next) {
+      ++next;
+    }
+
+    addpath = next;
+  }
+  path[pathlen] = '\0';
+  return path;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

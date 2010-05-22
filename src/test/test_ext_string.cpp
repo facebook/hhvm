@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_string.h>
-#include <cpp/ext/ext_string.h>
+#include <runtime/ext/ext_string.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

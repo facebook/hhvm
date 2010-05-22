@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_hash.h>
-#include <cpp/ext/ext_hash.h>
+#include <runtime/ext/ext_hash.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

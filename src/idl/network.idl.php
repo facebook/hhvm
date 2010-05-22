@@ -107,6 +107,9 @@ f('headers_sent', Boolean,
   array('file' => array(String | Reference, 'null'),
         'line' => array(Int32 | Reference, 'null')));
 
+f('header_remove', NULL,
+  array('name' => array(String, 'null_string')));
+
 f('setcookie', Boolean,
   array('name' => String,
         'value' => array(String, 'null_string'),

@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_iconv.h>
-#include <cpp/ext/ext_iconv.h>
+#include <runtime/ext/ext_iconv.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

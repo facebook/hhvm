@@ -1,0 +1,125 @@
+
+<h2> Multi-Tasking and Multi-Threading Support</h2>
+
+To perform parallel execution in PHP without forking a new process, we can
+choose one of these 3 new facilities:
+
+1. Pagelet Server
+
+This is already implemented. A pagelet server is similar to a CURL call to
+localhost. Look for "Pagelet Server" in compiled program's options for how to
+set it up. The new pagelet server functions work like this,
+
+  // This starts a pagelet server thread to process the URL just as if
+  // it's a new web request with specified headers and post data.
+  $task = <b>pagelet_server_task_start</b>($url, $headers, $post_data);
+  // Main thread can now do extra work while pagelet server is processing.
+  ...
+  // Optionally make this non-blocking call any time to check status.
+  $status = <b>pagelet_server_task_status</b>($task);
+  ...
+  // Finally, we make a blocking call to wait for pagelet server's result,
+  // which is the entire output of the web page, with response headers and
+  // status code.
+  $headers = array(); $code = 0;
+  $result = <b>pagelet_server_task_result</b>($task, $headers, $code);
+
+2. Xbox Tasks
+
+This is already implemented. An xbox system is designed for cross-box messaging
+that's described in "server.xbox_server" documentation. But when it runs
+locally, it provides parallel execution in a separate thread.
+
+  // We start an xbox task by sending to localhost a message.
+  $task = <b>xbox_task_start</b>($message);
+  // Main thread can now do extra work while xbox task is processing.
+  ...
+  // Optionally make this non-blocking call any time to check status.
+  $status = <b>xbox_task_status</b>($task);
+  ...
+  // Finally, we make a blocking call to check message processing returns.
+  $ret = null;
+  $code = <b>xbox_task_result</b>($task, $timeout_ms, $ret);
+
+On message processing side, one has to implement a PHP function like this,
+
+  function <b>xbox_process_message</b>($msg) {
+    ...
+    return $ret;
+  }
+
+Please note that an xbox thread starts its execution with its own global
+states without sharing anything with main thread, other than $msg and $ret that
+are passed between these threads at enter and exit points. To share states,
+please read on for call_user_func_async() series.
+
+3. call_user_func_async() and call_user_func_array_async()
+
+This is only a proposal now. Basically we want to be able to "fork" program
+into 2 or more threads at any time point of the execution from the same set
+of global states, then "join" when a thread finishes its execution. So it will
+look like this,
+
+  // This is non-blocking, and global states will be duplicated here.
+  $handle = <b>call_user_func_async</b>($func, $param1, $param2, ...);
+  // Main thread can now do extra work while the other thread is running.
+  do_main_thread_jobs();
+  $ret = <b>end_user_func_async</b>($handle, $options);
+
+Please note that global states will be duplicated when call_user_func_async()
+is called, so that each thread (the main thread and the new thread) will have
+its own copy of the states. From then on, they never share anything (other than
+APC). When end_user_func_async() is called, the global state of the new
+thread will be "merged" back into main thread's depending on how $options are
+specified.
+
+$options can be,
+
+(1) GLOBAL_STATE_IGNORE
+
+In this case, new thread's modifications of global states will be thrown away.
+
+(2) GLOBAL_STATE_OVERWRITE (default)
+
+In this case, new thread's modifications of global states will be merged into
+main thread's, and when there is a conflict, new thread's state will overwrite
+main thread's.
+
+(3) GLOBAL_STATE_SKIP
+
+In this case, new thread's modifications of global states will be merged into
+main thread's, and when there is a conflict, new thread's state will not be
+merged at all.
+
+(4) GLOBAL_STATE_RESOLVE_CONFLICT
+
+In this case, new thread's modifications of global states will be merged into
+main thread's, and when there is a conflict, a PHP function is called to
+resolve the conflict. For example,
+
+  $ret = <b>end_user_func_async</b>
+    ($handle, array('strategy' => GLOBAL_STATE_RESOLVE_CONFLICT,
+                    'resolver' => 'my_merge_conflict_resolver'));
+  ...
+  function my_merge_conflict_resolver($name, &$value, $new_value) {
+    if ($name == 'CACHE') {
+      $value = $new_value; // same as GLOBAL_STATE_OVERWRITE
+    } else if ($name == 'user_id') {
+      // do nothing, same as GLOBAL_STATE_SKIP
+    } else if (is_array($value)) {
+      $value = array_merge($value, $new_value);
+    }
+  }
+
+The global state is actually more complicated than just global variables. It
+also includes,
+
+- dynamic constants
+- function/method static variables
+- class static variables
+- files includes
+- redeclared functions
+- redeclared classes
+
+Modifications to these states are all thrown away, without changing main
+thread's.

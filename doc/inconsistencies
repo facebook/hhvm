@@ -1,44 +1,33 @@
 <h2>Inconsistenties</h2>
 
-These are the known inconsistencies between current HPHP and PHP.
+These are the known inconsistencies between current HipHop and PHP.
 
 1. Operators
 
 (1) instanceof
 
 In PHP, [constant] instanceof [class name] will cause a fatal.
-In HPHP, there is no special case for constants and the expression's value is
+In HipHop, there is no special case for constants and the expression's value is
 false.
 
 2. Classes and objects
 
 (1) Exceptions thrown from destructors
 
-In HPHP, exceptions and fatals thrown from destructors will be swallowed while
-logging an error. Effectively, there is a try/catch enclosing the body of the
-__destruct method. These exceptions are catchable in PHP outside of the
+In HipHop, exceptions and fatals thrown from destructors will be swallowed
+while logging an error. Effectively, there is a try/catch enclosing the body
+of the __destruct method. These exceptions are catchable in PHP outside of the
 __destruct method.
 
-(2) Private properties are shared throughout class hierarchy
-
-In PHP, every class in a class hierarchy could define a private property
-with the same name and have these properties be treated distinctly.
-In HPHP, there is only one instance of the property that is shared by all
-classes in the hierarchy.
-
-(3) Private and protected properties and __get
-
-In PHP, __get will be called if a property cannot be accessed from the
-context of the object property expression.
-In HPHP, __get will be called only if the property does not exist at all.
-The interpreter will throw a fatal, and the compiler will silently ignore
-the class privacy violation.
-
-(4) unset
+(2) unset
 
 In PHP, a data member that is unset will not appear at all in vardump or
 serialize.
-In HPHP, it will still appear, as null.
+In HipHop, it will still appear, as null.
+
+(3) isset($this)
+
+This is not supported yet.
 
 3. Eval Issues
 
@@ -63,6 +52,13 @@ are not supported, e.g. (phpt...bug24396)
 
   global $$k;
   $$k = $v;
+
+Also, in PHP, $GLOBALS can be used as a regular variable, for example,
+
+  $GLOBALS = 0;
+  $x = $GLOBALS - 5;
+
+In HipHop, this is not allowed.
 
 5. Dynamic declared constants
 

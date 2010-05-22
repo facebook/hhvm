@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2007 The PHP Group                                |
+   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id: parse_tz.c,v 1.20.2.6.2.13 2007/09/04 18:46:21 tony2001 Exp $ */
+/* $Id: parse_tz.c 293036 2010-01-03 09:23:27Z sebastian $ */
 
 #include "timelib.h"
 
@@ -125,46 +125,52 @@ static void read_types(char **tzf, timelib_tzinfo *tz)
 	memcpy(tz->timezone_abbr, *tzf, sizeof(char) * tz->charcnt);
 	*tzf += sizeof(char) * tz->charcnt;
 
-	leap_buffer = (int32_t *) malloc(tz->leapcnt * 2 * sizeof(int32_t));
-	if (!leap_buffer) {
-		return;
-	}
-	memcpy(leap_buffer, *tzf, sizeof(int32_t) * tz->leapcnt * 2);
-	*tzf += sizeof(int32_t) * tz->leapcnt * 2;
+	if (tz->leapcnt) {
+		leap_buffer = (int32_t *) malloc(tz->leapcnt * 2 * sizeof(int32_t));
+		if (!leap_buffer) {
+			return;
+		}
+		memcpy(leap_buffer, *tzf, sizeof(int32_t) * tz->leapcnt * 2);
+		*tzf += sizeof(int32_t) * tz->leapcnt * 2;
 
-	tz->leap_times = (tlinfo*) malloc(tz->leapcnt * sizeof(tlinfo));
-	if (!tz->leap_times) {
-		return;
+		tz->leap_times = (tlinfo*) malloc(tz->leapcnt * sizeof(tlinfo));
+		if (!tz->leap_times) {
+			return;
+		}
+		for (i = 0; i < tz->leapcnt; i++) {
+			tz->leap_times[i].trans = timelib_conv_int(leap_buffer[i * 2]);
+			tz->leap_times[i].offset = timelib_conv_int(leap_buffer[i * 2 + 1]);
+		}
+		free(leap_buffer);
 	}
-	for (i = 0; i < tz->leapcnt; i++) {
-		tz->leap_times[i].trans = timelib_conv_int(leap_buffer[i * 2]);
-		tz->leap_times[i].offset = timelib_conv_int(leap_buffer[i * 2 + 1]);
-	}
-	free(leap_buffer);
-	
-	buffer = (unsigned char*) malloc(tz->ttisstdcnt * sizeof(unsigned char));
-	if (!buffer) {
-		return;
-	}
-	memcpy(buffer, *tzf, sizeof(unsigned char) * tz->ttisstdcnt);
-	*tzf += sizeof(unsigned char) * tz->ttisstdcnt;
 
-	for (i = 0; i < tz->ttisstdcnt; i++) {
-		tz->type[i].isstdcnt = buffer[i];
-	}
-	free(buffer);
+	if (tz->ttisstdcnt) {
+		buffer = (unsigned char*) malloc(tz->ttisstdcnt * sizeof(unsigned char));
+		if (!buffer) {
+			return;
+		}
+		memcpy(buffer, *tzf, sizeof(unsigned char) * tz->ttisstdcnt);
+		*tzf += sizeof(unsigned char) * tz->ttisstdcnt;
 
-	buffer = (unsigned char*) malloc(tz->ttisgmtcnt * sizeof(unsigned char));
-	if (!buffer) {
-		return;
+		for (i = 0; i < tz->ttisstdcnt; i++) {
+			tz->type[i].isstdcnt = buffer[i];
+		}
+		free(buffer);
 	}
-	memcpy(buffer, *tzf, sizeof(unsigned char) * tz->ttisgmtcnt);
-	*tzf += sizeof(unsigned char) * tz->ttisgmtcnt;
 
-	for (i = 0; i < tz->ttisgmtcnt; i++) {
-		tz->type[i].isgmtcnt = buffer[i];
+	if (tz->ttisgmtcnt) {
+		buffer = (unsigned char*) malloc(tz->ttisgmtcnt * sizeof(unsigned char));
+		if (!buffer) {
+			return;
+		}
+		memcpy(buffer, *tzf, sizeof(unsigned char) * tz->ttisgmtcnt);
+		*tzf += sizeof(unsigned char) * tz->ttisgmtcnt;
+
+		for (i = 0; i < tz->ttisgmtcnt; i++) {
+			tz->type[i].isgmtcnt = buffer[i];
+		}
+		free(buffer);
 	}
-	free(buffer);
 }
 
 void timelib_dump_tzinfo(timelib_tzinfo *tz)
@@ -391,7 +397,7 @@ timelib_sll timelib_get_current_offset(timelib_time *t)
 	switch (t->zone_type) {
 		case TIMELIB_ZONETYPE_ABBR:
 		case TIMELIB_ZONETYPE_OFFSET:
-			return t->z * 60;
+			return (t->z + t->dst) * -60;
 			
 		case TIMELIB_ZONETYPE_ID:
 			gmt_offset = timelib_get_time_zone_info(t->sse, t->tz_info);

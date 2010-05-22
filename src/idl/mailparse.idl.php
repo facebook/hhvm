@@ -23,32 +23,32 @@ f('mailparse_msg_create', Resource);
 f('mailparse_msg_free', Boolean,
   array('mimemail' => Resource));
 
-f('mailparse_msg_parse_file', Resource,
+f('mailparse_msg_parse_file', Variant,
   array('filename' => String));
 
 f('mailparse_msg_parse', Boolean,
   array('mimemail' => Resource,
         'data' => String));
 
-f('mailparse_msg_extract_part_file', String,
+f('mailparse_msg_extract_part_file', Variant,
   array('mimemail' => Resource,
-        'filename' => String,
-        'callbackfunc' => array(String, 'null_string')));
+        'filename' => Variant,
+        'callbackfunc' => array(Variant, '""')));
 
-f('mailparse_msg_extract_whole_part_file', String,
+f('mailparse_msg_extract_whole_part_file', Variant,
   array('mimemail' => Resource,
-        'filename' => String,
-        'callbackfunc' => array(String, 'null_string')));
+        'filename' => Variant,
+        'callbackfunc' => array(Variant, '""')));
 
-f('mailparse_msg_extract_part', NULL,
+f('mailparse_msg_extract_part', Variant,
   array('mimemail' => Resource,
-        'msgbody' => String,
-        'callbackfunc' => array(String, 'null_string')));
+        'msgbody' => Variant,
+        'callbackfunc' => array(Variant, '""')));
 
 f('mailparse_msg_get_part_data', VariantMap,
   array('mimemail' => Resource));
 
-f('mailparse_msg_get_part', Resource,
+f('mailparse_msg_get_part', Variant,
   array('mimemail' => Resource,
         'mimesection' => String));
 
@@ -63,8 +63,8 @@ f('mailparse_stream_encode', Boolean,
         'destfp' => Resource,
         'encoding' => String));
 
-f('mailparse_uudecode_all', StringVec,
+f('mailparse_uudecode_all', Variant,
   array('fp' => Resource));
 
-f('mailparse_determine_best_xfer_encoding', String,
+f('mailparse_determine_best_xfer_encoding', Variant,
   array('fp' => Resource));

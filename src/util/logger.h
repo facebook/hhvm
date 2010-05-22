@@ -43,6 +43,7 @@ public:
   static LogLevelType LogLevel;
 
   static bool LogHeader;
+  static bool LogNativeStackTrace;
   static std::string ExtraHeader;
   static int MaxMessagesPerRequest;
 
@@ -56,13 +57,19 @@ public:
   static void Info(const char *fmt, ...);
   static void Verbose(const char *fmt, ...);
 
+  // log messages without escaping
+  static void RawError(const std::string &msg);
+  static void RawWarning(const std::string &msg);
+  static void RawInfo(const std::string &msg);
+  static void RawVerbose(const std::string &msg);
+
   static void Log(const char *type, const Exception &e,
                   const char *file = NULL, int line = 0);
 
   static void VSNPrintf(std::string &msg, const char *fmt, va_list ap);
 
   static void OnNewRequest();
-  static void SetSilenced(bool silence);
+  static void ResetRequestCount();
 
   static bool SetThreadLog(const char *file);
   static void ClearThreadLog();
@@ -75,10 +82,11 @@ private:
     int message;
     FILE *log;
   };
-  static ThreadLocal<ThreadData> s_threadData;
+  static DECLARE_THREAD_LOCAL(ThreadData, s_threadData);
 
   static void Log(const char *fmt, va_list ap);
-  static void Log(const std::string &msg, const StackTrace *stackTrace);
+  static void Log(const std::string &msg, const StackTrace *stackTrace,
+                  bool escape = true);
 
   /**
    * What needs to be print for each line of logging. Currently it's

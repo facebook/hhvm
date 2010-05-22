@@ -16,10 +16,10 @@
 
 #include <test/test_util.h>
 #include <util/lfu_table.h>
-#include <cpp/base/util/hphp_map.h>
-#include <cpp/base/type_string.h>
+#include <runtime/base/util/hphp_map.h>
+#include <runtime/base/complex_types.h>
 #include <util/logger.h>
-#include <cpp/base/shared/shared_string.h>
+#include <runtime/base/shared/shared_string.h>
 
 using namespace std;
 
@@ -42,8 +42,9 @@ bool TestUtil::RunTests(const std::string &which) {
   bool ret = true;
   RUN_TEST(TestHphpMap);
   RUN_TEST(TestHphpVector);
-  RUN_TEST(TestLFUTable);
+  //RUN_TEST(TestLFUTable);
   RUN_TEST(TestSharedString);
+  RUN_TEST(TestCanonicalize);
   return ret;
 }
 
@@ -64,8 +65,21 @@ struct testeqstr {
 
 bool TestUtil::TestHphpMap() {
   {
+    VS(Variant("0").toKey(), Variant(0));
     VS(Variant("10").toKey(), Variant(10));
+    VS(Variant("00").toKey(), Variant("00"));
+    VS(Variant("01").toKey(), Variant("01"));
     VS(Variant("name").toKey(), Variant("name"));
+    VS(Variant("-0").toKey(), Variant("-0"));
+    VS(Variant("-").toKey(), Variant("-"));
+    VS(Variant("9223372036854775806").toKey(),
+       Variant(9223372036854775806));
+    VS(Variant("9223372036854775807").toKey(),
+       Variant("9223372036854775807"));
+    VS(Variant("-9223372036854775807").toKey(),
+       Variant(-9223372036854775807));
+    VS(Variant("-9223372036854775808").toKey(),
+       Variant("-9223372036854775808"));
   }
 
   {
@@ -487,5 +501,24 @@ bool TestUtil::TestSharedString() {
     }
   }
 
+  return Count(true);
+}
+
+bool TestUtil::TestCanonicalize() {
+  VERIFY(Util::canonicalize("foo") == "foo");
+  VERIFY(Util::canonicalize("/foo") == "/foo");
+  VERIFY(Util::canonicalize("./foo") == "foo");
+  VERIFY(Util::canonicalize("foo/bar") == "foo/bar");
+  VERIFY(Util::canonicalize("foo/////bar") == "foo/bar");
+  VERIFY(Util::canonicalize("foo/bar/") == "foo/bar/");
+  VERIFY(Util::canonicalize("foo/../bar") == "bar");
+  VERIFY(Util::canonicalize("./foo/../bar") == "bar");
+  VERIFY(Util::canonicalize(".////foo/xyz////..////../bar") == "bar");
+  VERIFY(Util::canonicalize("a/foo../bar") == "a/foo../bar");
+  VERIFY(Util::canonicalize("a./foo/./bar") == "a./foo/bar");
+  VERIFY(Util::canonicalize("////a/foo") == "/a/foo");
+  VERIFY(Util::canonicalize("../foo") == "../foo");
+  VERIFY(Util::canonicalize("foo/../../bar") == "../bar");
+  VERIFY(Util::canonicalize("./../../") == "../../");
   return Count(true);
 }

@@ -17,13 +17,12 @@
 #define __HPHP_SWIG_H__
 
 #include <vector>
-#include <cpp/base/hphp_ffi.h>
-#include <cpp/base/type_variant.h>
-#include <cpp/base/type_string.h>
-#include <cpp/base/type_array.h>
-#include <cpp/base/type_object.h>
-#include <cpp/base/externals.h>
-#include <cpp/base/builtin_functions.h>
+#include <runtime/base/hphp_ffi.h>
+#include <runtime/base/complex_types.h>
+#include <runtime/base/externals.h>
+#include <runtime/base/builtin_functions.h>
+#include <runtime/base/program_functions.h>
+#include <runtime/base/hphp_system.h>
 
 #define SWIG_NO_LLONG_MAX 1
 
@@ -36,27 +35,26 @@ class HphpSession {
 public:
   HphpSession() {
     hphp_ffi_session_init();
-    context = hphp_ffi_context_init();
+    m_context = hphp_ffi_context_init();
   }
 
   ~HphpSession() {
-    for (typeof(pointers.begin()) it = pointers.begin(); it != pointers.end();
-         it++) {
-      hphp_ffi_freeVariant(*it);
+    for (unsigned int i = 0; i < m_pointers.size(); i++) {
+      hphp_ffi_freeVariant(m_pointers[i]);
     }
-    pointers.clear();
-    hphp_ffi_context_exit(context);
-    context = NULL;
+    m_pointers.clear();
+    hphp_ffi_context_exit(m_context);
+    m_context = NULL;
     hphp_ffi_session_exit();
   }
 
   void addVariant(HPHP::Variant *v) {
-    pointers.push_back(v);
+    m_pointers.push_back(v);
   }
 
 private:
-  HPHP::ExecutionContext *context;
-  std::vector<HPHP::Variant *> pointers;
+  HPHP::ExecutionContext *m_context;
+  std::vector<HPHP::Variant *> m_pointers;
 };
 
 }
@@ -327,6 +325,22 @@ void hphpUnsetField(HPHP::HphpSession *s, HPHP::Variant *obj,
 bool hphpIssetField(HPHP::HphpSession *s, HPHP::Variant *obj,
                     const char *field) {
   return toObject(*obj)->t___isset(field);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// global variables
+
+HPHP::Variant *hphpGetGlobal(HPHP::HphpSession *s, const char *name) {
+  void *result;
+  int kind = hphp_ffi_get_global(&result, name);
+  HPHP::Variant *ret = hphpBuildVariant(kind, result);
+  s->addVariant(ret);
+  return ret;
+}
+
+void hphpSetGlobal(HPHP::HphpSession *s, const char *name,
+                   HPHP::Variant *value) {
+  hphp_ffi_set_global(name, value);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

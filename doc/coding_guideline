@@ -41,6 +41,11 @@ Follow existing code when in doubt.
 
   if (...) one-liner;
 
+- But no one-liner on 2nd line like this:
+
+  if (...)
+    one-liner;
+
 - When possible, fit one function into one screen-ful. Or, no long functions.
 
 (5) Naming
@@ -68,14 +73,14 @@ Follow existing code when in doubt.
 
 (8) License Info
 
-- run "php license.php" from src/, and it will automatically add license info.
+- run "php license.php" from bin/, and it will automatically add license info.
 
 2. Library Dependencies
 
 (1) Utility Library
 
 util/ is at very bottom of the ladder. It may not depend on anything other
-than external libraries. Therefore, if it includes anything cpp/, it's
+than external libraries. Therefore, if it includes anything runtime/, it's
 wrong.
 
 Since it doesn't depend on any other libraries, includes can use double-quotes:
@@ -84,22 +89,22 @@ Since it doesn't depend on any other libraries, includes can use double-quotes:
 
 (2) Core Runtime Library
 
-cpp/base and cpp/eval depend on util/. Since there may be file name conflicts,
+runtime/base and runtime/eval depend on util/. Since there may be file name conflicts,
 ALWAYS use full include paths starting after src/. No double-quote include is
 allowed:
 
-  #include &lt;cpp/base/exceptions.h&gt;
+  #include &lt;runtime/base/exceptions.h&gt;
 
 (3) Extension Library
 
-cpp/ext should theoretically strictly depend on cpp/base. We have messed up
+runtime/ext should theoretically strictly depend on runtime/base. We have messed up
 some part of it, and we will clean them up. Please do NOT introduce more
 violations.
 
 (4) Generated Code
 
 Generated code provides some functions, for example invoke(), that's referenced
-by cpp/base and cpp/ext. We will come up with a solution to resolve this, maybe
+by runtime/base and runtime/ext. We will come up with a solution to resolve this, maybe
 by some raw pointers initialization routines. We want generated code to be on
 top of the hierarchy after the modification.
 

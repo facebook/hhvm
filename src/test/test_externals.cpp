@@ -14,14 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <cpp/base/class_info.h>
-#include <cpp/base/type_object.h>
-#include <cpp/base/type_variant.h>
-#include <cpp/ext/ext_string.h>
-#include <cpp/ext/ext_network.h>
-#include <cpp/ext/ext_soap.h>
-#include <cpp/base/program_functions.h>
-#include <lib/system/gen/sys/system_globals.h>
+#include <runtime/base/class_info.h>
+#include <runtime/base/complex_types.h>
+#include <runtime/ext/ext_string.h>
+#include <runtime/ext/ext_network.h>
+#include <runtime/ext/ext_soap.h>
+#include <runtime/base/program_functions.h>
+#include <system/gen/sys/system_globals.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // These are normally code-generated and we are implementing them here
@@ -104,6 +103,10 @@ const char *g_source_info[] = { NULL};
 const char *g_source_cls2file[] = { "test", "test_file", NULL};
 const char *g_source_func2file[] = { NULL};
 const char *g_paramrtti_map[] = { NULL};
+
+Variant get_class_var_init(const char *s, const char *var) {
+  return null;
+}
 
 Object create_object(const char *s, const Array &params, bool init,
                      ObjectData *root) {
@@ -279,7 +282,7 @@ Variant invoke_static_method(const char* cls, const char *function,
 void init_static_variables() { SystemScalarArrays::initialize();}
 
 class GlobalVariables : public SystemGlobals {};
-static ThreadLocal<GlobalVariables> g_variables;
+static IMPLEMENT_THREAD_LOCAL(GlobalVariables, g_variables);
 GlobalVariables *get_global_variables() { return g_variables.get();}
 LVariableTable *get_variable_table() { return g_variables.get(); }
 Globals *get_globals() { return g_variables.get(); }
@@ -316,9 +319,10 @@ Variant get_static_property(const char *s, const char *prop) {
   return null;
 }
 Variant get_constant(CStrRef name) {
-  return null;
+  return name;
 }
-Variant get_class_constant(const char *s, const char *prop) {
+Variant get_class_constant(const char *s, const char *prop,
+                           bool fatal /* = true */) {
   return null;
 }
 

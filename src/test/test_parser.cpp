@@ -15,10 +15,10 @@
 */
 
 #include <test/test_parser.h>
-#include <lib/parser/parser.h>
-#include <lib/code_generator.h>
-#include <lib/statement/statement_list.h>
-#include <lib/analysis/analysis_result.h>
+#include <compiler/parser/parser.h>
+#include <compiler/code_generator.h>
+#include <compiler/statement/statement_list.h>
+#include <compiler/analysis/analysis_result.h>
 
 using namespace std;
 
@@ -31,7 +31,7 @@ bool TestParser::VerifyParser(const char *input, const char *output,
   ASSERT(output);
 
   AnalysisResultPtr ar(new AnalysisResult());
-  StatementListPtr tree = Parser::parseString(input, ar);
+  StatementListPtr tree = Parser::ParseString(input, ar);
   ostringstream code;
   CodeGenerator cg(&code);
   tree->outputPHP(cg, ar);

@@ -18,7 +18,7 @@
 include(HPHPSetup)
 
 # find all the source files
-set(RECURSIVE_SOURCE_SUBDIRS cpp/base cpp/eval cpp/ext lib/system/gen util)
+set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/eval runtime/ext system/gen util)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 
 	auto_sources(files "*.no.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
@@ -71,25 +71,27 @@ foreach (t ${HPHP_EXCLUDE_FILES})
 	endif ()
 endforeach(t ${HPHP_EXCLUDE_FILES})
 
-FLEX_TARGET(HphpScanner ${CMAKE_CURRENT_SOURCE_DIR}/cpp/eval/parser/hphp.x ${CMAKE_CURRENT_SOURCE_DIR}/cpp/eval/parser/lex.eval_.cpp COMPILE_FLAGS " -w -i -Peval_")
-BISON_TARGET(HphpParser ${CMAKE_CURRENT_SOURCE_DIR}/cpp/eval/parser/hphp.y ${CMAKE_CURRENT_SOURCE_DIR}/cpp/eval/parser/hphp.tab.cpp  COMPILE_FLAGS " -v -d -p eval_")
-ADD_FLEX_BISON_DEPENDENCY(HphpScanner HphpParser)
+#FLEX_TARGET(HphpScanner ${CMAKE_CURRENT_SOURCE_DIR}/runtime/eval/parser/hphp.x ${CMAKE_CURRENT_SOURCE_DIR}/runtime/eval/parser/lex.eval_.cpp COMPILE_FLAGS " -w -i -Peval_")
+#BISON_TARGET(HphpParser ${CMAKE_CURRENT_SOURCE_DIR}/runtime/eval/parser/hphp.y ${CMAKE_CURRENT_SOURCE_DIR}/runtime/eval/parser/hphp.tab.cpp  COMPILE_FLAGS " -v -d -p eval_")
+#ADD_FLEX_BISON_DEPENDENCY(HphpScanner HphpParser)
 
 # required to remove warning when a file is there twice
-list(REMOVE_ITEM CXX_SOURCES ${FLEX_HphpScanner_OUTPUTS} ${BISON_HphpParser_OUTPUTS})
-list(APPEND CXX_SOURCES ${FLEX_HphpScanner_OUTPUTS} ${BISON_HphpParser_OUTPUTS})
+#list(REMOVE_ITEM CXX_SOURCES ${FLEX_HphpScanner_OUTPUTS} ${BISON_HphpParser_OUTPUTS})
+#list(APPEND CXX_SOURCES ${FLEX_HphpScanner_OUTPUTS} ${BISON_HphpParser_OUTPUTS})
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 
-add_library(sqlite3 STATIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/libsqlite3/sqlite3.c")
+#add_library(sqlite3 STATIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/libsqlite3/sqlite3.c")
 
-auto_sources(TIMELIB_SOURCES "*.c" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/third_party/timelib")
-add_library(timelib STATIC ${TIMELIB_SOURCES})
+#auto_sources(TIMELIB_SOURCES "*.c" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/third_party/timelib")
+#add_library(timelib STATIC ${TIMELIB_SOURCES})
 
 add_subdirectory(third_party/xhp/xhp)
 add_subdirectory(third_party/libafdt)
 add_subdirectory(third_party/libmbfl)
+add_subdirectory(third_party/libsqlite3)
+add_subdirectory(third_party/timelib)
 
 foreach (CXX_FILE ${CXX_SOURCES})
 	if(${CXX_FILE} MATCHES ".no.cpp$")
@@ -110,7 +112,7 @@ SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 
 hphp_link(hphp_runtime_static)
 
-add_subdirectory(lib)
+add_subdirectory(compiler)
 
 add_subdirectory(hphp)
 

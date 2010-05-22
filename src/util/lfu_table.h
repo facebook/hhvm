@@ -136,7 +136,10 @@ public:
   LFUTable(time_t maturity, size_t maxCap, int updatePeriod)
     : m_head(NULL), m_tail(NULL), m_immortalCount(0),
       m_maturityThreshold(maturity), m_maximumCapacity(maxCap),
-      m_updatePeriod(updatePeriod) {}
+      m_updatePeriod(updatePeriod) {
+        //Lfu table is currently buggy and at the moment not worth fixing
+        ASSERT(false);
+      }
   ~LFUTable() {
     clear();
   }

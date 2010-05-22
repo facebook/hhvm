@@ -51,6 +51,7 @@ class TestExtNetwork : public TestCppExt {
   bool test_header();
   bool test_headers_list();
   bool test_headers_sent();
+  bool test_header_remove();
   bool test_setcookie();
   bool test_setrawcookie();
   bool test_define_syslog_variables();

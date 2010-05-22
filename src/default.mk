@@ -17,15 +17,16 @@ unexport SUB_CLEAN_DIRS
 clobber:
 	$(V)$(RM) $(SUB_INTERMEDIATE_FILES) $(SUB_OBJECTS)
 	$(V)$(RM) *.merge-left.* *.merge-right.* *.working www.pid
-	$(V)$(RM) lib$(PROJECT_NAME).so lib$(PROJECT_NAME).a *~ $(OBJECTS:.o=)
+	$(V)$(RM) $(OUT_DIR)lib$(PROJECT_NAME).so $(OUT_DIR)lib$(PROJECT_NAME).a
+	$(V)$(RM) *~ $(addprefix $(OUT_DIR),$(OBJECTS:.o=))
 	$(V)$(RM) $(filter-out $(SUB_PROGRAMS) $(SUB_LIB_TARGETS), $(TARGETS))
-	$(V)$(RM) $(shell echo `find . -name "*.o"`)
-	$(V)$(RM) $(shell echo `find . -name "*.d"`)
+	$(V)$(RM) $(shell echo `find $(OUT_DIR) -name "*.o"`)
+	$(V)$(RM) $(shell echo `find $(OUT_DIR) -name "*.d"`)
 	$(V)$(RM) $(shell echo `find . -name "*~"`)
 	$(V)$(RMDIR) gen-cpp
-	$(V)for mdir in $(SUB_CLEAN_DIRS); do $(MAKE) -C $$mdir clobber; done
-	$(V)for mdir in $(SUB_PROGRAMS); do $(MAKE) -C $$mdir clobber; done
-	$(V)for mdir in $(SUB_LIB_TARGETS); do $(MAKE) -C $$mdir clobber; done
+	$(V)for mdir in $(dir $(wildcard $(addsuffix /Makefile, \
+		$(SUB_CLEAN_DIRS) $(SUB_PROGRAMS) $(SUB_LIB_TARGETS)))); \
+		do $(MAKE) -C $$mdir clobber; done
 	$(V)for mdir in $(INTERMEDIATE_DIRS); do rm -fR $$mdir; done
 
 .PHONY: clean

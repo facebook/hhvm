@@ -75,4 +75,8 @@ void hphpUnsetField(HphpSession *, Variant *, const char *);
 
 bool hphpIssetField(HphpSession *, Variant *, const char *);
 
+Variant *hphpGetGlobal(HphpSession *, const char *);
+
+void hphpSetGlobal(HphpSession *, const char *, Variant *);
+
 void hphpDump(HphpSession *, Variant *);

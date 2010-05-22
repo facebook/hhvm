@@ -82,7 +82,7 @@ bool TestTransformerExpr::TestAssignmentExpression() {
      "}\n"
      "void c_test::init() {\n"
      "}\n"
-     "gv_a = p_test(p_test(new c_test())->create());\n");
+     "gv_a = sp_test(sp_test(NEW(c_test)())->create());\n");
   VT("<?php $a = &new $b();",
      "Variant gv_b;\n"
      "Variant gv_a;\n"
@@ -335,7 +335,7 @@ bool TestTransformerExpr::TestObjectPropertyExpression() {
      "}\n"
      "void c_test::init() {\n"
      "}\n"
-     "gv_b = p_test(p_test(new c_test())->create());\n"
+     "gv_b = sp_test(sp_test(NEW(c_test)())->create());\n"
      "print(toString(toObject(gv_b).o_get(\"c\", 0x000000000002B608LL)));\n"
      );
 
@@ -410,7 +410,7 @@ bool TestTransformerExpr::TestObjectMethodExpression() {
      "}\n"
      "void c_test::init() {\n"
      "}\n"
-     "gv_b = p_test(p_test(new c_test())->create());\n"
+     "gv_b = sp_test(sp_test(NEW(c_test)())->create());\n"
      "echo(toString(toObject(gv_b)->o_invoke(\"c\", Array(), 0x000000000002B608LL)));\n"
      );
 
@@ -428,8 +428,8 @@ bool TestTransformerExpr::TestObjectMethodExpression() {
      "}\n"
      "void c_test::t_c() {\n"
      "}\n"
-     "gv_b = p_test(p_test(new c_test())->create());\n"
-     "echo((p_test(gv_b)->t_c(), null));\n"
+     "gv_b = sp_test(sp_test(NEW(c_test)())->create());\n"
+     "echo((sp_test(gv_b)->t_c(), null));\n"
      );
 
   VT("<?php echo $b->c();",
@@ -512,7 +512,7 @@ bool TestTransformerExpr::TestNewObjectExpression() {
      "}\n"
      "void c_test::init() {\n"
      "}\n"
-     "p_test(p_test(new c_test())->create());\n");
+     "sp_test(sp_test(NEW(c_test)())->create());\n");
 
   VT("<?php new Test;",
      "throw_fatal_object(\"unknown class test\", ((void*)NULL));\n");
@@ -936,7 +936,7 @@ bool TestTransformerExpr::TestParameterExpression() {
      "void f_a(CVarRef v_a, Variant v_b) {\n"
      "}\n");
   VT("<?php class TT {} function a(TT $a) {}",
-     "void f_a(p_tt v_a);\n"
+     "void f_a(sp_tt v_a);\n"
      "class c_tt : public ObjectData {\n"
      "  void c_tt::init();\n"
      "};\n"
@@ -944,7 +944,7 @@ bool TestTransformerExpr::TestParameterExpression() {
      "}\n"
      "void c_tt::init() {\n"
      "}\n"
-     "void f_a(p_tt v_a) {\n"
+     "void f_a(sp_tt v_a) {\n"
      "}\n");
   VT("<?php function a(TT $a) {}",
      "void f_a(CVarRef v_a);\n"

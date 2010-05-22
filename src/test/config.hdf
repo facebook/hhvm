@@ -1,10 +1,12 @@
 
 Log {
   AlwaysLogUnhandledExceptions = false
+  RuntimeErrorReportingLevel = 0
 }
 
 Server {
   Port = 8080
+  EnableMemoryManager = false
 
   AllowedFiles {
     0 = string

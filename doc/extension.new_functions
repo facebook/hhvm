@@ -9,19 +9,19 @@ testing and some alternative PHP implementation.
 - hphp_stats
 - hphp_get_stats
 - hphp_output_global_state
+- hphp_set_error_page
+
+- hphp_service_thread_started
+- hphp_thread_is_warmup_enabled
+- hphp_thread_set_warmup_enabled
+- hphp_get_thread_id
 
 - clock_getres
 - clock_gettime
 - clock_settime
 
-- mysql_connect
-
- added connect_timeout_ms and query_timeout_ms
-
-- mysql_pconnect
-
- added connect_timeout_ms and query_timeout_ms
-
+- mysql_connect added connect_timeout_ms and query_timeout_ms
+- mysql_pconnect added connect_timeout_ms and query_timeout_ms
 - mysql_set_timeout
 
 - fb_load_local_databases
@@ -48,53 +48,9 @@ testing and some alternative PHP implementation.
 - evhttp_async_post
 - evhttp_recv
 
-- fb_call_user_func_array_safe($function, $args = array())
-
- Like call_user_func_array(), but checks that the function exists before
- calling it. `$function' may be any PHP callable: the name of a function,
- an array with an object and a method, or an array with the name of a class
- and a static method. If whatever you pass in can actually be called without
- dependency problems, it will be called and this function will return true
- as the first part of its result.
-
-   list($called, $return) = fb_call_user_func_array_safe('example', $args);
-   if ($called) {
-     // ...
-   }
-
- @param  callable   Name of a function to invoke, or an array with an object
-                    and method, or an array with the name of an object and
-                    the name of a static method.
- @param  array      Vector of arguments to the function.
- @return array      A list, with a boolean indicating whether or not the
-                    function was called, and the return value of the
-                     function.
-
-- fb_call_user_func_safe($function /*, $arg, ... */)
-
- Like call_user_func(), but checks that the function exists. See
- fb_call_user_func_array_safe() for more details.
-
- @param  callable    Name of a function to invoke, or an array with an object
-                     and method, or an array with the name of an object and
-                     the name of a static method.
- @param  ...         Arguments to the function.
- @return array       A list, with a boolean indicating whether or not the
-                     function was called, and the return value of the
-                     function.
-
-- fb_call_user_func_safe_return($function, $default /*, $arg, ... */);
-
- Same as above but directly returning $default when $function is not
- callable.
-
- WARNING: You have to make sure that $default return will be okay to get
- mixed up with a null or false or other returns from that function. If a
- clear distinction needs to be made, please use this form instead:
-
-   list($called, $ret) = fb_call_user_func_safe(...);
-   if (!$called) ...
-
+- fb_call_user_func_array_safe
+- fb_call_user_func_safe
+- fb_call_user_func_safe_return
 
 - fb_thrift_serialize
 - fb_thrift_unserialize

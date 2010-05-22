@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_url.h>
-#include <cpp/ext/ext_url.h>
+#include <runtime/ext/ext_url.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -84,13 +84,14 @@ bool TestExtUrl::test_http_build_query() {
        "foo=bar&amp;baz=boom&amp;cow=milk&amp;php=hypertext+processor");
   }
   {
-    Array data = Array(NEW(ArrayElement)("foo"),
-                       NEW(ArrayElement)("bar"),
-                       NEW(ArrayElement)("baz"),
-                       NEW(ArrayElement)("boom"),
-                       NEW(ArrayElement)("cow", "milk"),
-                       NEW(ArrayElement)("php", "hypertext processor"),
-                       NULL);
+    Array data = Array(ArrayInit(6, false).
+                       set(0, "foo").
+                       set(1, "bar").
+                       set(2, "baz").
+                       set(3, "boom").
+                       set(4, "cow", "milk").
+                       set(5, "php", "hypertext processor").
+                       create());
     VS(f_http_build_query(data),
        "0=foo&1=bar&2=baz&3=boom&cow=milk&php=hypertext+processor");
     VS(f_http_build_query(data, "myvar_"),
@@ -98,20 +99,19 @@ bool TestExtUrl::test_http_build_query() {
        "php=hypertext+processor");
   }
   {
-    Array data = Array
-      (NEW(ArrayElement)("user",
-                         CREATE_MAP4("name", "Bob Smith",
-                                     "age", 47,
-                                     "sex", "M",
-                                     "dob", "5/12/1956")),
-       NEW(ArrayElement)("pastimes",
-                         CREATE_VECTOR4("golf", "opera", "poker", "rap")),
-       NEW(ArrayElement)("children",
-                         CREATE_MAP2("bobby", CREATE_MAP2("age",12,"sex","M"),
-                                     "sally", CREATE_MAP2("age", 8,"sex","F"))
-                         ),
-       NEW(ArrayElement)("CEO"),
-       NULL);
+    Array data = Array(ArrayInit(4, false).
+      set(0, "user",
+             CREATE_MAP4("name", "Bob Smith",
+                         "age", 47,
+                         "sex", "M",
+                         "dob", "5/12/1956")).
+      set(1, "pastimes",
+             CREATE_VECTOR4("golf", "opera", "poker", "rap")).
+      set(2, "children",
+             CREATE_MAP2("bobby", CREATE_MAP2("age",12,"sex","M"),
+                         "sally", CREATE_MAP2("age", 8,"sex","F"))).
+      set(3, "CEO").
+      create());
 
     VS(f_http_build_query(data, "flags_"),
        "user%5Bname%5D=Bob+Smith&user%5Bage%5D=47&user%5Bsex%5D=M&"

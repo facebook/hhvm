@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_xml.h>
-#include <cpp/ext/ext_xml.h>
+#include <runtime/ext/ext_xml.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

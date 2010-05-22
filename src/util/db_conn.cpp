@@ -107,13 +107,15 @@ void DBConn::clearLocalDatabases() {
   s_localDatabases.reserve(32 * 1024);
 }
 
-void DBConn::addLocalDB(unsigned int dbId, const char *ip, const char *db) {
+void DBConn::addLocalDB(unsigned int dbId, const char *ip, const char *db,
+                        int port, const char *username, const char *password) {
   if (dbId < 102400) {
     Lock lock(s_mutex);
     if (s_localDatabases.size() <= dbId) {
       s_localDatabases.resize(dbId + 1);
     }
-    s_localDatabases[dbId] = ServerDataPtr(new ServerData(ip, db));
+    s_localDatabases[dbId] =
+      ServerDataPtr(new ServerData(ip, db, port, username, password));
   }
 }
 
@@ -138,7 +140,8 @@ void DBConn::open(ServerDataPtr server, int connectTimeout /* = -1 */,
   if (readTimeout <= 0) readTimeout = DefaultReadTimeout;
 
   m_conn = mysql_init(NULL);
-  MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout, connectTimeout);
+  MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout,
+                               connectTimeout);
   MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ReadTimeout, readTimeout);
   MYSQL *ret = mysql_real_connect(m_conn, server->getIP().c_str(),
                                   server->getUserName().c_str(),

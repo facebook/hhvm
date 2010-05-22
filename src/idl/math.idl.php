@@ -26,7 +26,7 @@ f('bindec',  Variant,   array('binary_string' => String));
 f('hexdec',  Variant,   array('hex_string'    => String));
 f('octdec',  Variant,   array('octal_string'  => String));
 
-f('base_convert', String,
+f('base_convert', Variant,
   array('number' => String,
         'frombase' => Int64,
         'tobase' => Int64));

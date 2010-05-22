@@ -15,10 +15,11 @@
 */
 
 #include <test/test_ext_file.h>
-#include <cpp/ext/ext_file.h>
-#include <cpp/ext/ext_output.h>
-#include <cpp/ext/ext_string.h>
-#include <cpp/base/util/light_process.h>
+#include <runtime/ext/ext_file.h>
+#include <runtime/ext/ext_output.h>
+#include <runtime/ext/ext_string.h>
+#include <runtime/base/runtime_option.h>
+#include <util/light_process.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -57,6 +58,11 @@ bool TestExtFile::RunTests(const std::string &which) {
   RUN_TEST(test_readfile);
   RUN_TEST(test_move_uploaded_file);
   RUN_TEST(test_parse_ini_file);
+  RUN_TEST(test_parse_ini_string);
+  RUN_TEST(test_parse_hdf_file);
+  RUN_TEST(test_parse_hdf_string);
+  RUN_TEST(test_write_hdf_file);
+  RUN_TEST(test_write_hdf_string);
   RUN_TEST(test_md5_file);
   RUN_TEST(test_sha1_file);
   RUN_TEST(test_chmod);
@@ -116,10 +122,11 @@ bool TestExtFile::RunTests(const std::string &which) {
   RUN_TEST(test_scandir);
   RUN_TEST(test_closedir);
 
-  LightProcess::initialize();
+  LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
+                           RuntimeOption::LightProcessCount);
   RUN_TEST(test_popen);
   RUN_TEST(test_pclose);
-  LightProcess::close();
+  LightProcess::Close();
 
   return ret;
 }
@@ -412,6 +419,7 @@ bool TestExtFile::test_pclose() {
 
 bool TestExtFile::test_file_exists() {
   VERIFY(f_file_exists("test/test_ext_file.txt"));
+  VERIFY(!f_file_exists(""));
   return Count(true);
 }
 
@@ -459,12 +467,91 @@ bool TestExtFile::test_move_uploaded_file() {
 }
 
 bool TestExtFile::test_parse_ini_file() {
-  try {
-    f_parse_ini_file("");
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  // tested with test_parse_ini_string()
+  return Count(true);
+}
+
+bool TestExtFile::test_parse_ini_string() {
+  String ini
+    (";;; Created on Tuesday, October 27, 2009 at 12:01 PM GMT\n"
+     "[GJK_Browscap_Version]\n"
+     "Version=4520\n"
+     "Released=Tue, 27 Oct 2009 12:01:07 -0000\n"
+     "\n"
+     "\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; DefaultProperties\n"
+     "\n"
+     "[DefaultProperties]\n"
+     "Browser=\"DefaultProperties\"\n"
+     "Version=0\n"
+     "Platform=unknown\n"
+     "Beta=false\n");
+  VS(f_parse_ini_string(ini),
+     CREATE_MAP5("Version", "0",
+                 "Released", "Tue, 27 Oct 2009 12:01:07 -0000",
+                 "Browser", "DefaultProperties",
+                 "Platform", "unknown",
+                 "Beta", ""));
+  VS(f_parse_ini_string(ini, true),
+     CREATE_MAP2("GJK_Browscap_Version",
+                 CREATE_MAP2("Version", "4520",
+                             "Released", "Tue, 27 Oct 2009 12:01:07 -0000"),
+                 "DefaultProperties",
+                 CREATE_MAP4("Browser", "DefaultProperties",
+                             "Version", "0",
+                             "Platform", "unknown",
+                             "Beta", "")));
+  return Count(true);
+}
+
+bool TestExtFile::test_parse_hdf_file() {
+  // tested with test_parse_hdf_string()
+  return Count(true);
+}
+
+bool TestExtFile::test_parse_hdf_string() {
+  Array hdf;
+  hdf.set("bool", false);
+  hdf.set("string", "text");
+  hdf.set("num", 12345);
+  Array arr = CREATE_MAP3("bool", false, "string", "anothertext", "num", 6789);
+  hdf.set("arr", arr);
+
+  VS(f_parse_hdf_string("bool = false\n"
+                        "string = text\n"
+                        "num = 12345\n"
+                        "arr {\n"
+                        "  bool = false\n"
+                        "  string = anothertext\n"
+                        "  num = 6789\n"
+                        "}\n"), hdf);
+  return Count(true);
+}
+
+bool TestExtFile::test_write_hdf_file() {
+  // tested with test_write_hdf_string()
+  return Count(true);
+}
+
+bool TestExtFile::test_write_hdf_string() {
+  Array hdf;
+  hdf.set("bool", false);
+  hdf.set("string", "text");
+  hdf.set("num", 12345);
+  Array arr = CREATE_MAP3("bool", false, "string", "anothertext", "num", 6789);
+  hdf.set("arr", arr);
+
+  String str = f_write_hdf_string(hdf);
+  VS(str,
+     "bool = false\n"
+     "string = text\n"
+     "num = 12345\n"
+     "arr {\n"
+     "  bool = false\n"
+     "  string = anothertext\n"
+     "  num = 6789\n"
+     "}\n");
+
+  return Count(true);
 }
 
 bool TestExtFile::test_md5_file() {
@@ -692,7 +779,7 @@ bool TestExtFile::test_filectime() {
 }
 
 bool TestExtFile::test_filegroup() {
-  VERIFY(more(f_filegroup("test/test_ext_file.txt"), 0));
+  f_filegroup("test/test_ext_file.txt");
   return Count(true);
 }
 
@@ -707,7 +794,7 @@ bool TestExtFile::test_filemtime() {
 }
 
 bool TestExtFile::test_fileowner() {
-  VERIFY(more(f_fileowner("test/test_ext_file.txt"), 0));
+  f_fileowner("test/test_ext_file.txt");
   return Count(true);
 }
 

@@ -22,11 +22,11 @@
 
 #include <jni.h>
 #include <vector>
-#include <cpp/base/hphp_ffi.h>
-#include <cpp/base/type_variant.h>
-#include <cpp/base/string_data.h>
-#include <cpp/base/program_functions.h>
-#include <cpp/base/runtime_option.h>
+#include <runtime/base/hphp_ffi.h>
+#include <runtime/base/complex_types.h>
+#include <runtime/base/string_data.h>
+#include <runtime/base/program_functions.h>
+#include <runtime/base/runtime_option.h>
 #include "hphp_ffi_java.h"
 
 using namespace HPHP;
@@ -117,10 +117,8 @@ extern "C" {
 JNIEXPORT jlong JNICALL
 Java_hphp_Hphp_buildVariant(JNIEnv *env, jclass hphp,
                             jint kind, jlong v, jint len) {
-//  Variant *result = buildAndStoreVariant(env, hphp, kind, (void *)v, len);
   Variant *result = hphp_ffi_buildVariant(kind, (void *)v, len);
   pointers.push_back(result);
-//  ((JavaFFISession *)session)->pointers.push_back(result);
   return (jlong)result;
 }
 
@@ -332,7 +330,7 @@ Java_hphp_Hphp_ffiProcessInit(JNIEnv *env, jclass hphp) {
  * Method:    ffiSessionInit
  * Signature: ()V
  */
-JNIEXPORT void JNICALL 
+JNIEXPORT void JNICALL
 Java_hphp_Hphp_ffiSessionInit(JNIEnv *env, jclass hphp) {
   hphp_ffi_session_init();
   context = hphp_ffi_context_init();
@@ -345,7 +343,8 @@ Java_hphp_Hphp_ffiSessionInit(JNIEnv *env, jclass hphp) {
  */
 JNIEXPORT void JNICALL
 Java_hphp_Hphp_ffiSessionExit(JNIEnv *env, jclass hphp) {
-  for (typeof(pointers.begin()) it = pointers.begin(); it != pointers.end(); it++) {
+  for (typeof(pointers.begin()) it = pointers.begin(); it != pointers.end();
+       it++) {
     hphp_ffi_freeVariant(*it);
   }
   pointers.clear();
@@ -353,27 +352,6 @@ Java_hphp_Hphp_ffiSessionExit(JNIEnv *env, jclass hphp) {
   context = NULL;
   hphp_ffi_session_exit();
 }
-
-/*
- * Class:     hphp_Hphp
- * Method:    ffiContextInit
- * Signature: ()J
- */
-/*JNIEXPORT jlong JNICALL 
-Java_hphp_Hphp_ffiContextInit(JNIEnv *env, jclass hphp) {
-  ExecutionContext *context = hphp_ffi_context_init();
-  return (jlong)context;
-}*/
-
-/*
- * Class:     hphp_Hphp
- * Method:    ffiContextExit
- * Signature: (J)V
- */
-/*JNIEXPORT void JNICALL
-Java_hphp_Hphp_ffiContextExit(JNIEnv * env, jclass hphp, jlong context) {
-  hphp_ffi_context_exit((ExecutionContext *)context);
-}*/
 
 /* Header for class hphp_HphpString */
 
@@ -394,8 +372,8 @@ Java_hphp_HphpString_getHphpString(JNIEnv *env, jobject str, jlong ptr) {
  * Method:    append
  * Signature: (JJ)V
  */
-JNIEXPORT void JNICALL 
-Java_hphp_HphpArray_append(JNIEnv *env, jobject arr, jlong arrPtr, 
+JNIEXPORT void JNICALL
+Java_hphp_HphpArray_append(JNIEnv *env, jobject arr, jlong arrPtr,
                            jlong valPtr) {
   ((Variant *)arrPtr)->append(*(Variant *)valPtr);
 }

@@ -15,16 +15,17 @@
 */
 
 #include <test/test_cpp_base.h>
-#include <cpp/base/base_includes.h>
+#include <runtime/base/base_includes.h>
 #include <util/logger.h>
-#include <cpp/base/memory/memory_manager.h>
-#include <cpp/base/builtin_functions.h>
-#include <cpp/ext/ext_variable.h>
-#include <cpp/ext/ext_apc.h>
-#include <cpp/ext/ext_mysql.h>
-#include <cpp/ext/ext_curl.h>
-#include <cpp/base/shared/shared_store.h>
-#include <cpp/base/runtime_option.h>
+#include <runtime/base/memory/memory_manager.h>
+#include <runtime/base/builtin_functions.h>
+#include <runtime/ext/ext_variable.h>
+#include <runtime/ext/ext_apc.h>
+#include <runtime/ext/ext_mysql.h>
+#include <runtime/ext/ext_curl.h>
+#include <runtime/base/shared/shared_store.h>
+#include <runtime/base/runtime_option.h>
+#include <runtime/base/server/ip_block_map.h>
 #include <test/test_mysql_info.inc>
 
 using namespace std;
@@ -47,6 +48,7 @@ bool TestCppBase::RunTests(const std::string &which) {
 #ifndef DEBUGGING_SMART_ALLOCATOR
   RUN_TEST(TestMemoryManager);
 #endif
+  RUN_TEST(TestIpBlockMap);
   return ret;
 }
 
@@ -215,7 +217,7 @@ bool TestCppBase::TestString() {
 }
 
 bool TestCppBase::TestArray() {
-  // Array::Create(), ArrayElement constructors and informational
+  // Array::Create(), Array constructors and informational
   {
     Array arr;
     VERIFY(arr.empty()); VERIFY(arr.size() == 0); VERIFY(arr.length() == 0);
@@ -229,13 +231,13 @@ bool TestCppBase::TestArray() {
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY((int)arr[0] == 0);
-    VS(arr, Array(NEW(ArrayElement)(0), NULL));
+    VS(arr, Array(ArrayInit(1, true).set(0, 0).create()));
 
     arr = Array::Create("test");
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY(arr[0] == "test");
-    VS(arr, Array(NEW(ArrayElement)("test"), NULL));
+    VS(arr, Array(ArrayInit(1, true).set(0, "test").create()));
 
     Array arrCopy = arr;
     arr = Array::Create(arr);
@@ -243,19 +245,19 @@ bool TestCppBase::TestArray() {
     VERIFY(!arr.isNull());
     VERIFY(arr[0].toArray().size() == 1);
     VS(arr[0], arrCopy);
-    VS(arr, Array(NEW(ArrayElement)(arrCopy), NULL));
+    VS(arr, Array(ArrayInit(1, true).set(0, arrCopy).create()));
 
     arr = Array::Create("name", 1);
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY((int)arr["name"] == 1);
-    VS(arr, Array(NEW(ArrayElement)("name", 1), NULL));
+    VS(arr, Array(ArrayInit(1, false).set(0, "name", 1).create()));
 
     arr = Array::Create("name", "test");
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY(arr["name"] == "test");
-    VS(arr, Array(NEW(ArrayElement)("name", "test"), NULL));
+    VS(arr, Array(ArrayInit(1, false).set(0, "name", "test").create()));
 
     arrCopy = arr;
     arr = Array::Create("name", arr);
@@ -263,7 +265,7 @@ bool TestCppBase::TestArray() {
     VERIFY(!arr.isNull());
     VS(arr["name"], arrCopy);
     VERIFY(arr["name"].toArray().size() == 1);
-    VS(arr, Array(NEW(ArrayElement)("name", arrCopy), NULL));
+    VS(arr, Array(ArrayInit(1, false).set(0, "name", arrCopy).create()));
   }
 
   // iteration
@@ -756,7 +758,7 @@ bool TestCppBase::TestVariant() {
   }
   {
     Variant v1 = 10;
-    Variant v2 = Array(NEW(ArrayElement)(ref(v1)), NULL);
+    Variant v2 = Array(ArrayInit(1, true).setRef(0, v1).create());
     v1 = 20;
     VS(v2[0], 20);
   }
@@ -955,5 +957,39 @@ bool TestCppBase::TestMemoryManager() {
 
   }
   DELETE(TestGlobals)(globals);
+  return Count(true);
+}
+
+bool TestCppBase::TestIpBlockMap() {
+  unsigned int start, end;
+
+  VERIFY(IpBlockMap::ReadIPv4Address("204.15.21.0/22", start, end));
+  VS((int)start, (int)0xCC0F1400);
+  VS((int)end, (int)0xCC0F17FF);
+
+  VERIFY(IpBlockMap::ReadIPv4Address("127.0.0.1", start, end));
+  VS((int)start, 0x7F000001);
+  VS((int)end, 0x7F000001);
+
+  Hdf hdf;
+  hdf.fromString(
+    "  0 {\n"
+    "    Location = /test\n"
+    "    AllowFirst = true\n"
+    "    Ip {\n"
+    "      Allow {\n"
+    "       * = 127.0.0.1\n"
+    "     }\n"
+    "     Deny {\n"
+    "       * = 8.32.0.0/24\n"
+    "     }\n"
+    "    }\n"
+    "  }\n"
+  );
+
+  IpBlockMap ibm(hdf);
+  VERIFY(!ibm.isBlocking("test/blah.php", "127.0.0.1"));
+  VERIFY(ibm.isBlocking("test/blah.php", "8.32.0.104"));
+
   return Count(true);
 }

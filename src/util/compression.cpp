@@ -297,7 +297,9 @@ char *gzencode(const char *data, int &len, int level, int encoding_mode) {
   char *s2 = (char *)malloc
     (stream.avail_out + GZIP_HEADER_LENGTH +
      (encoding_mode == CODING_GZIP ? GZIP_FOOTER_LENGTH : 0));
-
+  if (!s2) {
+    return NULL;
+  }
   /* add gzip file header */
   s2[0] = gz_magic[0];
   s2[1] = gz_magic[1];
@@ -336,9 +338,13 @@ char *gzencode(const char *data, int &len, int level, int encoding_mode) {
   }
 
   if (status == Z_OK) {
+
     int old_len = len;
     len = stream.total_out + GZIP_HEADER_LENGTH +
       (encoding_mode == CODING_GZIP ? GZIP_FOOTER_LENGTH : 0);
+    /* resize to buffer to the "right" size */
+    s2 = (char *)realloc(s2, len + 1);
+    ASSERT(s2);
     if (encoding_mode == CODING_GZIP) {
       char *trailer = s2 + (stream.total_out + GZIP_HEADER_LENGTH);
       uLong crc = crc32(0L, Z_NULL, 0);
@@ -374,7 +380,7 @@ char *gzdecode(const char *data, int &len) {
   unsigned long length;
   int status;
   unsigned int factor = 4, maxfactor = 16;
-  char *s2 = NULL;
+  char *s1 = NULL, *s2 = NULL;
   do {
     stream.next_in = (Bytef *)data;
     stream.avail_in = (uInt)len + 1; /* there is room for \0 */
@@ -384,8 +390,12 @@ char *gzdecode(const char *data, int &len) {
     }
 
     length = len * (1 << factor++);
-    if (s2) free(s2);
-    s2 = (char *)malloc(length);
+    s2 = (char *)realloc(s1, length);
+    if (!s2) {
+      if (s1) free(s1);
+      return NULL;
+    }
+    s1 = s2;
 
     stream.next_out = (Bytef*)s2;
     stream.avail_out = (uInt)length;
@@ -407,6 +417,11 @@ char *gzdecode(const char *data, int &len) {
 
   if (status == Z_OK) {
     len = stream.total_out;
+
+    // shrink the buffer down to what we really need since this can be 16
+    // times greater than we actually need.
+    s2 = (char *)realloc(s2, len + 1);
+    ASSERT(s2);
     s2[len] = '\0';
     return s2;
   }
@@ -438,6 +453,8 @@ char *gzcompress(const char *data, int &len, int level /* = -1 */) {
   }
 
   if (status == Z_OK) {
+    s2 = (char *)realloc(s2, l2 + 1);
+    ASSERT(s2);
     s2[l2] = '\0';
     len = l2;
     return s2;
@@ -457,19 +474,22 @@ char *gzuncompress(const char *data, int &len, int limit /* = 0 */) {
   unsigned long plength = limit;
   unsigned long length;
   unsigned int factor = 4, maxfactor = 16;
-  char *s2 = NULL;
+  char *s1=NULL, *s2 = NULL;
   int status;
   do {
     length = plength ? plength : (unsigned long)len * (1 << factor++);
-    if (s2) free(s2);
-    s2 = (char *)malloc(length);
+    s2 = (char *)realloc(s1, length);
     if (!s2) {
-      return false;
+      if (s1) free(s1);
+      return NULL;
     }
+    s1 = s2;
     status = uncompress((Bytef*)s2, &length, (const Bytef*)data, len);
   } while ((status == Z_BUF_ERROR) && (!plength) && (factor < maxfactor));
 
   if (status == Z_OK) {
+    s2 = (char *)realloc(s2, length + 1); /* space for \0 */
+    ASSERT(s2);
     s2[length] = '\0';
     len = length;
     return s2;
@@ -522,7 +542,10 @@ char *gzdeflate(const char *data, int &len, int level /* = -1 */) {
   }
 
   if (status == Z_OK) {
+    /* resize to buffer to the "right" size */
     len = stream.total_out;
+    s2 = (char *)realloc(s2, len + 1);
+    ASSERT(s2);
     s2[len] = '\0';
     return s2;
   }
@@ -550,14 +573,15 @@ char *gzinflate(const char *data, int &len, int limit /* = 0 */) {
   unsigned long length;
   int status;
   unsigned int factor = 4, maxfactor = 16;
-  char *s2 = NULL;
+  char *s1 = NULL, *s2 = NULL;
   do {
     length = plength ? plength : (unsigned long)len * (1 << factor++);
-    if (s2) free(s2);
-    s2 = (char *)malloc(length);
+    s2 = (char *)realloc(s1, length);
     if (!s2) {
+      if (s1) free(s1);
       return NULL;
     }
+    s1 = s2;
 
     stream.next_in = (Bytef *)data;
     stream.avail_in = (uInt)len + 1; /* there is room for \0 */
@@ -582,6 +606,8 @@ char *gzinflate(const char *data, int &len, int limit /* = 0 */) {
 
   if (status == Z_OK) {
     len = stream.total_out;
+    s2 = (char *)realloc(s2, len + 1); /* room for \0 */
+    ASSERT(s2);
     s2[len] = '\0';
     return s2;
   }

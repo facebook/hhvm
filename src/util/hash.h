@@ -33,7 +33,7 @@ inline long long hash_int64(long long key) {
 
 /*
  * How to toggle hash functions: comment/uncomment the following macro
- * definition, build hphp, make -C lib/system, and then rebuild hphp.
+ * definition, build hphp, make -C system, and then rebuild hphp.
  */
 #define USE_MURMUR 1
 
@@ -280,31 +280,54 @@ inline long long hash_string_i(const char *arKey) {
   return hash_string_i(arKey, strlen(arKey));
 }
 
+// This function returns true and sets the res parameter if arKey
+// is a non-empty string that matches one of the following conditions:
+//   1) The string is "0".
+//   2) The string starts with a non-zero digit, followed by at most
+//      18 more digits, and is less than or equal to 9223372036854775806.
+//   3) The string starts with a negative sign, followed by a non-zero
+//      digit, followed by at most 18 more digits, and is greater than
+//      or equal to -9223372036854775807.
 inline bool is_strictly_integer(const char* arKey, size_t nKeyLength,
                                 int64& res) {
-  if (nKeyLength > 0 &&
-      (nKeyLength <= 19 ||
-       (arKey[0] == '-' && nKeyLength == 20))) {
+  if (nKeyLength == 0 || arKey[0] > '9')
+    return false;
+  if (nKeyLength <= 19 ||
+      (arKey[0] == '-' && nKeyLength == 20)) {
     uint64 num = 0;
     bool neg = false;
     uint32 i = 0;
     if (arKey[0] == '-') {
       neg = true;
       i = 1;
-      if (nKeyLength == 1) return false;
-    }
-    if (nKeyLength == i + 1 || arKey[i] != '0') {
-      bool good = true;
-      for (; i < nKeyLength; ++i) {
-        if (arKey[i] >= '0' && arKey[i] <= '9') {
-          num = 10*num + arKey[i] - '0';
-        }
-        else {
-          good = false;
-          break;
-        }
+      // The string "-" is NOT strictly an integer
+      if (nKeyLength == 1)
+        return false;
+      // A string that starts with "-0" is NOT strictly an integer
+      if (arKey[1] == '0')
+        return false;
+    } else if (arKey[0] == '0') {
+      // The string "0" is strictly an integer
+      if (nKeyLength == 1) {
+        res = 0;
+        return true;
       }
-      if (good && num <= 0x7FFFFFFFFFFFFFFF) {
+      // A string that starts with "0" followed by at least one digit
+      // is NOT strictly an integer
+      return false;
+    }
+    bool good = true;
+    for (; i < nKeyLength; ++i) {
+      if (arKey[i] >= '0' && arKey[i] <= '9') {
+        num = 10*num + arKey[i] - '0';
+      }
+      else {
+        good = false;
+        break;
+      }
+    }
+    if (good) {
+      if (num <= 0x7FFFFFFFFFFFFFFE || (neg && num == 0x7FFFFFFFFFFFFFFF)) {
         res = neg ? 0 - num : (int64)num;
         return true;
       }

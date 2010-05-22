@@ -138,7 +138,26 @@ f('move_uploaded_file', Boolean,
 
 f('parse_ini_file', Variant,
   array('filename' => String,
-        'process_sections' => array(Boolean, 'false')));
+        'process_sections' => array(Boolean, 'false'),
+        'scanner_mode' => array(Int32, 'k_INI_SCANNER_NORMAL')));
+
+f('parse_ini_string', Variant,
+  array('ini' => String,
+        'process_sections' => array(Boolean, 'false'),
+        'scanner_mode' => array(Int32, 'k_INI_SCANNER_NORMAL')));
+
+f('parse_hdf_file', Variant,
+  array('filename' => String));
+
+f('parse_hdf_string', Variant,
+  array('input' => String));
+
+f('write_hdf_file', Boolean,
+  array('data' => VariantMap,
+        'filename' => String));
+
+f('write_hdf_string', String,
+  array('data' => VariantMap));
 
 f('md5_file', Variant,
   array('filename' => String,
@@ -258,7 +277,7 @@ f('disk_total_space', Variant, array('directory' => String));
 
 f('mkdir', Boolean,
   array('pathname' => String,
-        'mode' => array(Int64, '0'),
+        'mode' => array(Int64, '0777'),
         'recursive' => array(Boolean, 'false'),
         'context' => array(Resource, 'null_object')));
 

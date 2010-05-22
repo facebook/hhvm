@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_json.h>
-#include <cpp/ext/ext_json.h>
+#include <runtime/ext/ext_json.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +36,7 @@ bool TestExtJson::test_json_encode() {
   VS(f_json_encode(CREATE_VECTOR5("a", 1, true, false, null)),
      "[\"a\",1,true,false,null]");
 
-  VS(f_json_encode("a\xE0"), "\"\"");
+  VS(f_json_encode("a\xE0"), "null");
   VS(f_json_encode("a\xE0", true), "\"a?\"");
 
   VS(f_json_encode(CREATE_MAP2("0", "apple", "1", "banana")),
@@ -61,7 +61,11 @@ bool TestExtJson::test_json_decode() {
      CREATE_VECTOR5("a", 1, true, false, null));
 
   Object obj = f_json_decode("{\"a\":1,\"b\":2.3,\"3\":\"test\"}");
-  VS(obj.toArray(), CREATE_MAP3("a", 1, "b", 2.3, 3, "test"));
+  Object obj2((NEW(c_stdclass)())->create());
+  obj2->o_set("a", -1, 1);
+  obj2->o_set("b", -1, 2.3);
+  obj2->o_set("3", -1, "test");
+  VS(obj.toArray(), obj2.toArray());
 
   obj = f_json_decode("[\"a\",1,true,false,null]");
   VS(obj.toArray(), CREATE_VECTOR5("a", 1, true, false, null));

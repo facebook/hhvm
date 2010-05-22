@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_splfile.h>
-#include <cpp/ext/ext_splfile.h>
+#include <runtime/ext/ext_splfile.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

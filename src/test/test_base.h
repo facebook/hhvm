@@ -19,8 +19,8 @@
 
 #include <string>
 #include <assert.h>
-#include <lib/hphp.h>
-#include <cpp/base/types.h>
+#include <compiler/hphp.h>
+#include <runtime/base/types.h>
 #include <test/test.h>
 
 using namespace HPHP;
@@ -37,6 +37,8 @@ class TestBase {
 
  protected:
   bool Count(bool result);
+  bool CountSkip();
+
   bool VerifySame(const char *exp1, const char *exp2,
                   CVarRef v1, CVarRef v2);
   bool VerifyClose(const char *exp1, const char *exp2,
@@ -57,6 +59,11 @@ class TestBase {
     printf(#test " failed\n");                                          \
     ret = false;                                                        \
   }                                                                     \
+  fflush(0)
+
+#define SKIP(reason)                                                    \
+  printf("%s skipped [" #reason "]\n", __FUNCTION__);                   \
+  return CountSkip();                                                   \
 
 #define VERIFY(exp)                                                     \
   if (!(exp)) {                                                         \

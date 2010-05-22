@@ -18,6 +18,14 @@ f('fb_thrift_unserialize', Variant,
         'success' => Boolean | Reference,
         'errcode' => array(Int32 | Reference, 'null_variant')));
 
+f('fb_serialize', Variant,
+  array('thing' => Variant));
+
+f('fb_unserialize', Variant,
+  array('thing' => Variant,
+        'success' => Boolean | Reference,
+        'errcode' => array(Int32 | Reference, 'null_variant')));
+
 f('fb_rename_function', Boolean,
   array('orig_func_name' => String,
         'new_func_name' => String));
@@ -37,6 +45,8 @@ f('fb_call_user_func_safe_return', Variant,
 f('fb_call_user_func_array_safe', VariantVec,
   array('function' => Variant,
         'params' => VariantVec));
+
+f('fb_get_code_coverage', Variant);
 
 ///////////////////////////////////////////////////////////////////////////////
 // xhprof

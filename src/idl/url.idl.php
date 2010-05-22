@@ -19,10 +19,10 @@ f('get_meta_tags', StringVec,
   array('filename' => String,
         'use_include_path' => array(Boolean, 'false')));
 
-f('http_build_query', String,
+f('http_build_query', Variant,
   array('formdata' => Variant,
         'numeric_prefix' => array(String, 'null_string'),
-        'arg_separator' => array(String, '"&"')));
+        'arg_separator' => array(String, 'null_string')));
 
 f('parse_url', Variant,
   array('url' => String,

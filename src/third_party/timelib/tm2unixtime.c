@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2007 The PHP Group                                |
+   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id: tm2unixtime.c,v 1.13.2.3.2.2 2007/01/01 09:35:59 sebastian Exp $ */
+/* $Id: tm2unixtime.c 293036 2010-01-03 09:23:27Z sebastian $ */
 
 #include "timelib.h"
 
@@ -31,20 +31,12 @@ static int days_in_month[13]      = {  31,  31,  28,  31,  30,  31,  30,  31,  3
 static int do_range_limit(timelib_sll start, timelib_sll end, timelib_sll adj, timelib_sll *a, timelib_sll *b)
 {
 	if (*a < start) {
-		*a += adj;
-		(*b)--;
-		return 1;
+		*b -= (start - *a - 1) / adj + 1;
+		*a += adj * ((start - *a - 1) / adj + 1);
 	}
 	if (*a >= end) {
-		if (start == 0) {
-			(*b) += (*a / end);
-			(*a) -= (end * (*a / end));
-			return 0;
-		}
-
-		*a -= adj;
-		(*b)++;
-		return 1;
+		*b += *a / adj;
+		*a -= adj * (*a / adj);
 	}
 	return 0;
 }
@@ -55,6 +47,12 @@ static int do_range_limit_days(timelib_sll *y, timelib_sll *m, timelib_sll *d)
 	timelib_sll days_this_month;
 	timelib_sll last_month, last_year;
 	timelib_sll days_last_month;
+	
+	/* can jump an entire leap year period quickly */
+	if (*d >= DAYS_PER_LYEAR_PERIOD || *d <= -DAYS_PER_LYEAR_PERIOD) {
+		*y += YEARS_PER_LYEAR_PERIOD * (*d / DAYS_PER_LYEAR_PERIOD);
+		*d -= DAYS_PER_LYEAR_PERIOD * (*d / DAYS_PER_LYEAR_PERIOD);
+	}
 
 	do_range_limit(1, 13, 12, m, y);
 
@@ -98,6 +96,7 @@ static void do_adjust_for_weekday(timelib_time* time)
 	} else {
 		time->d -= (7 - (abs(time->relative.weekday) - current_dow));
 	}
+	time->have_weekday_relative = 0;
 }
 
 static void do_normalize(timelib_time* time)
@@ -130,39 +129,60 @@ static void do_adjust_relative(timelib_time* time)
 	do_normalize(time);
 
 	memset(&(time->relative), 0, sizeof(time->relative));
+	time->have_relative = 0;
 }
 
 static void do_adjust_special_weekday(timelib_time* time)
 {
-	timelib_sll current_dow, this_weekday = 0, count;
+	timelib_sll current_dow, count;
+
+	count = time->special.amount;
 
 	current_dow = timelib_day_of_week(time->y, time->m, time->d);
-	count = time->special.amount;
 	if (count == 0) {
+		/* skip over saturday and sunday */
 		if (current_dow == 6) {
-			this_weekday = 2;
+			time->d += 2;
 		}
+		/* skip over sunday */
 		if (current_dow == 0) {
-			this_weekday = 1;
+			time->d += 1;
 		}
-		time->d += this_weekday;
-		return;
 	} else if (count > 0) {
+		/* skip over saturday and sunday */
 		if (current_dow == 5) {
-			this_weekday = 2;
+			time->d += 2;
 		}
+		/* skip over sunday */
 		if (current_dow == 6) {
-			this_weekday = 1;
+			time->d += 1;
+		}
+		/* add increments of 5 weekdays as a week */
+		time->d += (count / 5) * 7;
+		/* if current DOW plus the remainder > 5, add two days */
+		current_dow = timelib_day_of_week(time->y, time->m, time->d);
+		time->d += (count % 5);
+		if ((count % 5) + current_dow > 5) {
+			time->d += 2;
 		}
 	} else if (count < 0) {
-		if (current_dow == 0) {
-			this_weekday = -1;
-		}
+		/* skip over sunday and saturday */
 		if (current_dow == 1) {
-			this_weekday = -2;
+			time->d -= 2;
+		}
+		/* skip over satruday */
+		if (current_dow == 0 ) {
+			time->d -= 1;
+		}
+		/* subtract increments of 5 weekdays as a week */
+		time->d += (count / 5) * 7;
+		/* if current DOW minus the remainder < 0, subtract two days */
+		current_dow = timelib_day_of_week(time->y, time->m, time->d);
+		time->d += (count % 5);
+		if ((count % 5) + current_dow < 1) {
+			time->d -= 2;
 		}
 	}
-	time->d += this_weekday + ((count / 5) * 7) + (count % 5);
 }
 
 static void do_adjust_special(timelib_time* time)
@@ -176,6 +196,7 @@ static void do_adjust_special(timelib_time* time)
 	}
 	do_normalize(time);
 	memset(&(time->special), 0, sizeof(time->special));
+	time->have_relative = 0;
 }
 
 static timelib_sll do_years(timelib_sll year)
@@ -184,10 +205,10 @@ static timelib_sll do_years(timelib_sll year)
 	timelib_sll res = 0;
 	timelib_sll eras;
 
-	eras = (year - 1970) / 400;
+	eras = (year - 1970) / 40000;
 	if (eras != 0) {
-		year = year - (eras * 400);
-		res += (SECS_PER_ERA * eras);
+		year = year - (eras * 40000);
+		res += (SECS_PER_ERA * eras * 100);
 	}
 
 	if (year >= 1970) {

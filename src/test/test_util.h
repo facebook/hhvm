@@ -32,6 +32,7 @@ class TestUtil : public TestBase {
   bool TestHphpVector();
   bool TestLFUTable();
   bool TestSharedString();
+  bool TestCanonicalize();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

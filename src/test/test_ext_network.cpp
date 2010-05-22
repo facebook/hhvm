@@ -15,9 +15,10 @@
 */
 
 #include <test/test_ext_network.h>
-#include <cpp/ext/ext_network.h>
-#include <cpp/ext/ext_file.h>
-#include <cpp/ext/ext_string.h>
+#include <runtime/ext/ext_network.h>
+#include <runtime/ext/ext_file.h>
+#include <runtime/ext/ext_string.h>
+#include <runtime/base/util/string_buffer.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -48,6 +49,7 @@ bool TestExtNetwork::RunTests(const std::string &which) {
   RUN_TEST(test_header);
   RUN_TEST(test_headers_list);
   RUN_TEST(test_headers_sent);
+  RUN_TEST(test_header_remove);
   RUN_TEST(test_setcookie);
   RUN_TEST(test_setrawcookie);
   RUN_TEST(test_define_syslog_variables);
@@ -153,10 +155,27 @@ bool TestExtNetwork::test_getmxrr() {
 }
 
 bool TestExtNetwork::test_fsockopen() {
-  Variant f = f_fsockopen("facebook.com", 80);
-  VERIFY(!same(f, false));
-  f_fputs(f, "GET / HTTP/1.0\n\n");
-  VERIFY(!f_fread(f, 15).toString().empty());
+  {
+    Variant f = f_fsockopen("facebook.com", 80);
+    VERIFY(!same(f, false));
+    f_fputs(f, "GET / HTTP/1.0\n\n");
+    VERIFY(!f_fread(f, 15).toString().empty());
+  }
+  {
+    Variant f = f_fsockopen("ssl://www.facebook.com", 443);
+    VERIFY(!same(f, false));
+    f_fwrite(f,
+             "GET / HTTP/1.1\r\n"
+             "Host: www.facebook.com\r\n"
+             "Connection: Close\r\n"
+             "\r\n");
+    StringBuffer response;
+    while (!same(f_feof(f), true)) {
+      Variant line = f_fgets(f, 128);
+      response.append(line.toString());
+    }
+    VERIFY(!response.detach().empty());
+  }
   return Count(true);
 }
 
@@ -199,6 +218,12 @@ bool TestExtNetwork::test_headers_list() {
 bool TestExtNetwork::test_headers_sent() {
   f_header("Location: http://www.facebook.com");
   VERIFY(!f_headers_sent());
+  return Count(true);
+}
+
+bool TestExtNetwork::test_header_remove() {
+  f_header_remove("name");
+  f_header_remove();
   return Count(true);
 }
 

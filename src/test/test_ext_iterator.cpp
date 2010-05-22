@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_iterator.h>
-#include <cpp/ext/ext_iterator.h>
+#include <runtime/ext/ext_iterator.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

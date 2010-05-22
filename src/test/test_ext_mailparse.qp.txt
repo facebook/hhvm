@@ -1,0 +1,47 @@
+Return-Path: <wez@thebrainroom.com>
+Received: from TITAN (titan.brainnet.i [192.168.2.7])
+	by zaneeb.brainnet.i (8.10.2/8.10.2/SuSE Linux 8.10.0-0.3) with ESMTP id g87Bel721254
+	for <wez@thebrainroom.com>; Sat, 7 Sep 2002 12:40:47 +0100
+X-Authentication-Warning: zaneeb.brainnet.i: Host titan.brainnet.i [192.168.2.7] claimed to be TITAN
+From: "Wez Furlong" <wez@thebrainroom.com>
+To: <wez@thebrainroom.com>
+Subject: qp attachments
+Date: Sat, 7 Sep 2002 12:40:37 +0100
+Message-ID: <000201c25663$65e80250$0702a8c0@TITAN>
+MIME-Version: 1.0
+Content-Type: multipart/mixed;
+	boundary="----=_NextPart_000_0003_01C2566B.C7AC6A50"
+X-Priority: 3 (Normal)
+X-MSMail-Priority: Normal
+X-Mailer: Microsoft Outlook, Build 10.0.2627
+Importance: Normal
+X-MimeOLE: Produced By Microsoft MimeOLE V6.00.2600.0000
+X-TBR-DestBox: user.wez (auth as wez) (wez:)
+
+This is a multi-part message in MIME format.
+
+------=_NextPart_000_0003_01C2566B.C7AC6A50
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+
+this is a message with a qp attachment.
+
+------=_NextPart_000_0003_01C2566B.C7AC6A50
+Content-Type: application/octet-stream;
+	name="README"
+Content-Transfer-Encoding: quoted-printable
+Content-Disposition: attachment;
+	filename="README"
+
+Xnti rpam and gnti yirusjkools for bendmail=0A=
+=0A=
+Requirements: =0A=
+	o php with mailparse=0A=
+    o virus scanner (optional)=0A=
+	=0A=
+=0A=
+
+------=_NextPart_000_0003_01C2566B.C7AC6A50--
+
+

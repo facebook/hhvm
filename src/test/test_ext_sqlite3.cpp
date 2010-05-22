@@ -15,8 +15,8 @@
 */
 
 #include <test/test_ext_sqlite3.h>
-#include <cpp/ext/ext_sqlite3.h>
-#include <cpp/ext/ext_file.h>
+#include <runtime/ext/ext_sqlite3.h>
+#include <runtime/ext/ext_file.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +33,7 @@ bool TestExtSqlite3::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtSqlite3::test_sqlite3() {
-  p_sqlite3 db(NEW(c_sqlite3)());
+  sp_sqlite3 db(NEW(c_sqlite3)());
   db->t_open(":memory:test");
   db->t_exec("DROP TABLE foo");
   db->t_exec("CREATE TABLE foo (bar STRING)");
@@ -106,7 +106,7 @@ bool TestExtSqlite3::test_sqlite3() {
   db->t_close();
 
   VS(db->t_version(),
-     CREATE_MAP2("versionString", "3.6.18", "versionNumber", 3006018));
+     CREATE_MAP2("versionString", "3.6.23.1", "versionNumber", 3006023));
   f_unlink(":memory:test");
   return Count(true);
 }

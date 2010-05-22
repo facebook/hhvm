@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_thread.h>
-#include <cpp/ext/ext_thread.h>
+#include <runtime/ext/ext_thread.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -25,6 +25,7 @@ bool TestExtThread::RunTests(const std::string &which) {
   RUN_TEST(test_hphp_service_thread_started);
   RUN_TEST(test_hphp_thread_is_warmup_enabled);
   RUN_TEST(test_hphp_thread_set_warmup_enabled);
+  RUN_TEST(test_hphp_get_thread_id);
 
   return ret;
 }
@@ -41,5 +42,10 @@ bool TestExtThread::test_hphp_thread_is_warmup_enabled() {
 }
 
 bool TestExtThread::test_hphp_thread_set_warmup_enabled() {
+  return Count(true);
+}
+
+bool TestExtThread::test_hphp_get_thread_id() {
+  f_hphp_get_thread_id();
   return Count(true);
 }

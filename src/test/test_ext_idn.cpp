@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_idn.h>
-#include <cpp/ext/ext_idn.h>
+#include <runtime/ext/ext_idn.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

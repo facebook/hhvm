@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_math.h>
-#include <cpp/ext/ext_math.h>
+#include <runtime/ext/ext_math.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -115,6 +115,9 @@ bool TestExtMath::test_abs() {
   VS(f_abs(-4.2), 4.2);
   VS(f_abs(5), 5);
   VS(f_abs(-5), 5);
+  VS(f_abs("-4.2"), 4.2);
+  VS(f_abs("5"), 5);
+  VS(f_abs("-5"), 5);
   return Count(true);
 }
 
@@ -158,6 +161,14 @@ bool TestExtMath::test_round() {
   VS(f_round(1241757, -3), 1242000.0);
   VS(f_round(5.045, 2), 5.05);
   VS(f_round(5.055, 2), 5.06);
+  VS(f_round("3.4"), 3.0);
+  VS(f_round("3.5"), 4.0);
+  VS(f_round("3.6"), 4.0);
+  VS(f_round("3.6", 0), 4.0);
+  VS(f_round("1.95583", 2), 1.96);
+  VS(f_round("1241757", -3), 1242000.0);
+  VS(f_round("5.045", 2), 5.05);
+  VS(f_round("5.055", 2), 5.06);
   return Count(true);
 }
 
@@ -220,6 +231,10 @@ bool TestExtMath::test_pow() {
   VC(f_pow(-1, 20), 1);
   VS(f_pow(0, 0), 1);
   VERIFY(f_pow(2, 32).isInteger());
+  VC(f_pow("2", "8"), 256);
+  VC(f_pow("-1", "20"), 1);
+  VS(f_pow("0", "0"), 1);
+  VERIFY(f_pow("2", "32").isInteger());
   return Count(true);
 }
 
@@ -348,6 +363,11 @@ bool TestExtMath::test_rand() {
   f_rand();
   VERIFY(f_rand(5, 15) >= 5);
   VERIFY(f_rand(5, 15) <= 15);
+
+  int64 n = f_rand(10000000000, 19999999999);
+  VERIFY(n >= 10000000000);
+  VERIFY(n <= 19999999999);
+
   return Count(true);
 }
 

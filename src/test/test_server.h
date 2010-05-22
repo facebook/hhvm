@@ -18,7 +18,7 @@
 #define __TEST_SERVER_H__
 
 #include <test/test_code_run.h>
-#include <cpp/base/type_string.h>
+#include <runtime/base/complex_types.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

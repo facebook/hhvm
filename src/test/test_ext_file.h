@@ -58,6 +58,11 @@ class TestExtFile : public TestCppExt {
   bool test_readfile();
   bool test_move_uploaded_file();
   bool test_parse_ini_file();
+  bool test_parse_ini_string();
+  bool test_parse_hdf_file();
+  bool test_parse_hdf_string();
+  bool test_write_hdf_file();
+  bool test_write_hdf_string();
   bool test_md5_file();
   bool test_sha1_file();
   bool test_chmod();

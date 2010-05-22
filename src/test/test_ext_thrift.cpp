@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_thrift.h>
-#include <cpp/ext/ext_thrift.h>
+#include <runtime/ext/ext_thrift.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

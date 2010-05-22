@@ -15,7 +15,7 @@ END
 f('curl_init', Variant,
   array('url' => array(String, 'null_string')));
 
-f('curl_copy_handle', Resource,
+f('curl_copy_handle', Variant,
   array('ch' => Resource));
 
 f('curl_version', Variant,
@@ -37,43 +37,43 @@ f('curl_getinfo', Variant,
   array('ch' => Resource,
         'opt' => array(Int32, '0')));
 
-f('curl_errno', Int32,
+f('curl_errno', Variant,
   array('ch' => Resource));
 
-f('curl_error', String,
+f('curl_error', Variant,
   array('ch' => Resource));
 
-f('curl_close', NULL,
+f('curl_close', Variant,
   array('ch' => Resource));
 
 ///////////////////////////////////////////////////////////////////////////////
 
 f('curl_multi_init', Resource);
 
-f('curl_multi_add_handle', Int32,
+f('curl_multi_add_handle', Variant,
   array('mh' => Resource,
         'ch' => Resource));
 
-f('curl_multi_remove_handle', Int32,
+f('curl_multi_remove_handle', Variant,
   array('mh' => Resource,
         'ch' => Resource));
 
-f('curl_multi_exec', Int32,
+f('curl_multi_exec', Variant,
   array('mh' => Resource,
         'still_running' => Int32 | Reference));
 
-f('curl_multi_select', Int32,
+f('curl_multi_select', Variant,
   array('mh' => Resource,
         'timeout' => array(Double, '1.0')));
 
-f('curl_multi_getcontent', String,
+f('curl_multi_getcontent', Variant,
   array('ch' => Resource));
 
 f('curl_multi_info_read', Variant,
   array('mh' => Resource,
         'msgs_in_queue' => array(Int32 | Reference, 'null')));
 
-f('curl_multi_close', NULL,
+f('curl_multi_close', Variant,
   array('mh' => Resource));
 
 ///////////////////////////////////////////////////////////////////////////////

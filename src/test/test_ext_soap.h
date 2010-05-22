@@ -18,7 +18,7 @@
 #define __TEST_EXT_SOAP_H__
 
 #include <test/test_cpp_ext.h>
-#include <cpp/ext/ext_soap.h>
+#include <runtime/ext/ext_soap.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -35,7 +35,7 @@ public:
   bool test_SoapServerFault();
 
 private:
-  p_soapserver m_server;
+  sp_soapserver m_server;
 
   bool verify_response(CStrRef request, CStrRef expected);
 };

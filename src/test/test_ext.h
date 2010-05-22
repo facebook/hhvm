@@ -35,6 +35,7 @@
 #include <test/test_ext_icu.h>
 #include <test/test_ext_idn.h>
 #include <test/test_ext_image.h>
+#include <test/test_ext_intl.h>
 #include <test/test_ext_ipc.h>
 #include <test/test_ext_iterator.h>
 #include <test/test_ext_json.h>
@@ -49,13 +50,14 @@
 #include <test/test_ext_network.h>
 #include <test/test_ext_openssl.h>
 #include <test/test_ext_options.h>
-#include <test/test_ext_oracle.h>
 #include <test/test_ext_output.h>
+#include <test/test_ext_pdo.h>
 #include <test/test_ext_posix.h>
 #include <test/test_ext_preg.h>
 #include <test/test_ext_process.h>
 #include <test/test_ext_reflection.h>
 #include <test/test_ext_server.h>
+#include <test/test_ext_session.h>
 #include <test/test_ext_simplexml.h>
 #include <test/test_ext_soap.h>
 #include <test/test_ext_socket.h>

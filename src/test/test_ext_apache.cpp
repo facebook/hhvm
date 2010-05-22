@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_apache.h>
-#include <cpp/ext/ext_apache.h>
+#include <runtime/ext/ext_apache.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -98,12 +98,8 @@ bool TestExtApache::test_apache_note() {
 }
 
 bool TestExtApache::test_apache_request_headers() {
-  try {
-    f_apache_request_headers();
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  f_apache_request_headers();
+  return Count(true);
 }
 
 bool TestExtApache::test_apache_reset_timeout() {
@@ -116,12 +112,8 @@ bool TestExtApache::test_apache_reset_timeout() {
 }
 
 bool TestExtApache::test_apache_response_headers() {
-  try {
-    f_apache_response_headers();
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  f_apache_response_headers();
+  return Count(true);
 }
 
 bool TestExtApache::test_apache_setenv() {
@@ -148,12 +140,8 @@ bool TestExtApache::test_ebcdic2ascii() {
 }
 
 bool TestExtApache::test_getallheaders() {
-  try {
-    f_getallheaders();
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  f_getallheaders();
+  return Count(true);
 }
 
 bool TestExtApache::test_virtual() {

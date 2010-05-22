@@ -78,7 +78,7 @@ f('date_timezone_set', NULL,
   array('object' => Object,
         'timezone' => Object));
 
-f('date', String,
+f('date', Variant,
   array('format' => String,
         'timestamp' => array(Int64, 'TimeStamp::Current()')));
 
@@ -88,23 +88,23 @@ f('getdate', VariantMap,
 f('gettimeofday', Variant,
   array('return_float' => array(Boolean, 'false')));
 
-f('gmdate', String,
+f('gmdate', Variant,
   array('format' => String,
         'timestamp' => array(Int64, 'TimeStamp::Current()')));
 
 f('gmmktime', Variant,
-  array('hour' => array(Int32, '-1'),
-        'minute' => array(Int32, '-1'),
-        'second' => array(Int32, '-1'),
-        'month' => array(Int32, '-1'),
-        'day' => array(Int32, '-1'),
-        'year' => array(Int32, '-1')));
+  array('hour' => array(Int32, 'INT_MAX'),
+        'minute' => array(Int32, 'INT_MAX'),
+        'second' => array(Int32, 'INT_MAX'),
+        'month' => array(Int32, 'INT_MAX'),
+        'day' => array(Int32, 'INT_MAX'),
+        'year' => array(Int32, 'INT_MAX')));
 
 f('gmstrftime', String,
   array('format' => String,
         'timestamp' => array(Int64, 'TimeStamp::Current()')));
 
-f('idate', Int64,
+f('idate', Variant,
   array('format' => String,
         'timestamp' => array(Int64, 'TimeStamp::Current()')));
 
@@ -116,14 +116,14 @@ f('microtime', Variant,
   array('get_as_float' => array(Boolean, 'false')));
 
 f('mktime', Variant,
-  array('hour' => array(Int32, '-1'),
-        'minute' => array(Int32, '-1'),
-        'second' => array(Int32, '-1'),
-        'month' => array(Int32, '-1'),
-        'day' => array(Int32, '-1'),
-        'year' => array(Int32, '-1')));
+  array('hour' => array(Int32, 'INT_MAX'),
+        'minute' => array(Int32, 'INT_MAX'),
+        'second' => array(Int32, 'INT_MAX'),
+        'month' => array(Int32, 'INT_MAX'),
+        'day' => array(Int32, 'INT_MAX'),
+        'year' => array(Int32, 'INT_MAX')));
 
-f('strftime', String,
+f('strftime', Variant,
   array('format' => String,
         'timestamp' => array(Int64, 'TimeStamp::Current()')));
 

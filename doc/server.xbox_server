@@ -1,0 +1,39 @@
+
+<h2> Xbox Server</h2>
+
+Xbox stands for "cross-box" communication, and it's a very simple messaging
+system. There are only 2 functions to learn,
+
+  $ret = null;
+  $code = xbox_send_message($msg, $ret, $timeout_ms, $host);
+  $code = xbox_post_message($msg, $host);
+
+1. xbox_send_message()
+
+xbox_send_message() is a blocking call. It will send the message, which is just
+a string, to specified host. It waits for $timeout_ms long and returns 0 if
+times out. On the specified host's side, there has to be an xbox server that's
+set up through compiled program's options, and one also has to implement a PHP
+function like this,
+
+  function xbox_process_message($msg) {
+    ...
+    return $ret;
+  }
+
+The final result gets returned to the caller if timeout hasn't been reached and
+the $code would be 200. The function name is configurable, but it is by design
+to have just one function to serve as main entry point of all messages. A
+message string can encode message types by itself.
+
+2. xbox_post_message()
+
+xbox_post_message() is a non-blocking call. It will not wait for server to
+process the message and it will return 200 immediately, unless server cannot
+be contacted at all.
+
+3. local host
+
+When $host is local, xbox task functions give more control over task statuses.
+In that case, xbox processing becomes a multi-threading facility that's better
+described in "threading" documentation.

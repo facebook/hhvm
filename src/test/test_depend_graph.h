@@ -18,7 +18,7 @@
 #define __TEST_DEPEND_GRAPH_H__
 
 #include <test/test_base.h>
-#include <lib/analysis/dependency_graph.h>
+#include <compiler/analysis/dependency_graph.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -27,7 +27,7 @@ class TestDependGraph : public TestBase {
   virtual bool RunTests(const std::string &which);
 
 #define DEPENDENCY_ENTRY(x) bool Test ## x();
-#include "../lib/analysis/core_dependency.inc"
+#include "../compiler/analysis/core_dependency.inc"
 #undef DEPENDENCY_ENTRY
 
  private:

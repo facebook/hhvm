@@ -25,6 +25,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <vector>
 #include "base.h"
 #include "util.h"
@@ -67,10 +68,6 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void sigChildHandler(int signum) {
-  wait(0);
-}
-
 // Cached process statics
 std::string Process::HostName;
 std::string Process::CurrentWorkingDirectory;
@@ -82,14 +79,11 @@ void Process::InitProcessStatics() {
 
 bool Process::Exec(const char *path, const char *argv[], const char *in,
                    string &out, string *err /* = NULL */) {
-  signal(SIGCHLD, sigChildHandler);
 
   int fdin = 0; int fdout = 0; int fderr = 0;
   int pid = Exec(path, argv, &fdin, &fdout, &fderr);
   if (pid == 0) return false;
 
-  FilePtr sout(fdopen(fdout, "r"), file_closer());
-  FilePtr serr(fdopen(fderr, "r"), file_closer());
   {
     FilePtr sin(fdopen(fdin, "w"), file_closer());
     if (!sin) return false;
@@ -97,18 +91,83 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
       fwrite(in, 1, strlen(in), sin.get());
     }
   }
-  if (!sout || !serr) return false;
 
-  FileReader outReader(sout, out);
-  AsyncFunc<FileReader> func(&outReader, &FileReader::read);
-  func.start();
+  char buffer[4096];
+  if (fcntl(fdout, F_SETFL, O_NONBLOCK)) {
+    perror("fcntl failed on fdout");
+  }
 
-  string junk;
-  if (err == NULL) err = &junk; // hzhao: don't know if this is needed
-  FileReader::readString(serr.get(), *err);
+  if (fcntl(fderr, F_SETFL, O_NONBLOCK)) {
+    perror("fcntl failed on fderr");
+  }
 
-  func.waitForEnd();
-  return true;
+  while (fdout || fderr) {
+    pollfd fds[2];
+    int n = 0;
+    if (fdout) {
+      fds[n].fd = fdout;
+      fds[n].events = POLLIN | POLLHUP;
+      n++;
+    }
+    if (fderr) {
+      fds[n].fd = fderr;
+      fds[n].events = POLLIN | POLLHUP;
+      n++;
+    }
+
+    n = poll(fds, n, -1);
+    if (n < 0) {
+      continue;
+    }
+
+    n = 0;
+    if (fdout) {
+      if (fds[n++].revents & (POLLIN | POLLHUP)) {
+        int e = read(fdout, buffer, sizeof buffer);
+        if (e <= 0) {
+          close(fdout);
+          fdout = 0;
+        } else {
+          out.append(buffer, e);
+        }
+      }
+    }
+
+    if (fderr) {
+      if (fds[n++].revents & (POLLIN | POLLHUP)) {
+        int e = read(fderr, buffer, sizeof buffer);
+        if (e <= 0) {
+          close(fderr);
+          fderr = 0;
+        } else if (err) {
+          err->append(buffer, e);
+        }
+      }
+    }
+  }
+
+  int status;
+  bool ret = false;
+  if (waitpid(pid, &status, 0) != pid) {
+    Logger::Error("Failed to wait for `%s'\n", path);
+  } else if (WIFEXITED(status)) {
+    if (WEXITSTATUS(status) != 0) {
+      Logger::Verbose("Status %d running command: `%s'\n",
+                      WEXITSTATUS(status), path);
+      while (*argv) {
+        Logger::Verbose("  arg: `%s'\n", *argv);
+        argv++;
+      }
+    } else {
+      ret = true;
+    }
+  } else {
+    Logger::Verbose("Non-normal exit\n");
+    if (WIFSIGNALED(status)) {
+      Logger::Verbose("  signaled with %d\n", WTERMSIG(status));
+    }
+  }
+  return ret;
 }
 
 int Process::Exec(const std::string &cmd, const std::string &outf,
@@ -139,6 +198,7 @@ int Process::Exec(const std::string &cmd, const std::string &outf,
     argv[count] = NULL;
 
     execvp(argv[0], argv);
+    Logger::Error("Failed to exec `%s'\n", cmd.c_str());
     _exit(-1);
   }
   int status = -1;
@@ -167,16 +227,15 @@ int Process::Exec(const char *path, const char *argv[], int *fdin, int *fdout,
      */
     signal(SIGTSTP,SIG_IGN);
 
-    if (!pipein.dupOut2(fileno(stdin)) || !pipeout.dupIn2(fileno(stdout)) ||
-        !pipeerr.dupIn2(fileno(stderr))) {
-      return 0;
+    if (pipein.dupOut2(fileno(stdin)) && pipeout.dupIn2(fileno(stdout)) &&
+        pipeerr.dupIn2(fileno(stderr))) {
+      pipeout.close(); pipeerr.close(); pipein.close();
+
+      const char *argvnull[2] = {"", NULL};
+      execvp(path, const_cast<char**>(argv ? argv : argvnull));
     }
-
-    pipeout.close(); pipeerr.close(); pipein.close();
-
-    const char *argvnull[2] = {"", NULL};
-    execvp(path, const_cast<char**>(argv ? argv : argvnull));
-    return 0;
+    Logger::Error("Failed to exec `%s'\n", path);
+    _exit(-1);
   }
   if (fdout) *fdout = pipeout.detachOut();
   if (fderr) *fderr = pipeerr.detachOut();
@@ -224,16 +283,16 @@ void Process::Daemonize(const char *stdoutFile /* = "/dev/null" */,
   }
 
   /* Redirect standard files to /dev/null */
-  freopen("/dev/null", "r", stdin);
+  if (!freopen("/dev/null", "r", stdin)) exit(EXIT_FAILURE);
   if (stdoutFile && *stdoutFile) {
-    freopen(stdoutFile, "a", stdout);
+    if (!freopen(stdoutFile, "a", stdout)) exit(EXIT_FAILURE);
   } else {
-    freopen("/dev/null", "w", stdout);
+    if (!freopen("/dev/null", "w", stdout)) exit(EXIT_FAILURE);
   }
   if (stderrFile && *stderrFile) {
-    freopen(stderrFile, "a", stderr);
+    if (!freopen(stderrFile, "a", stderr)) exit(EXIT_FAILURE);
   } else {
-    freopen("/dev/null", "w", stderr);
+    if (!freopen("/dev/null", "w", stderr)) exit(EXIT_FAILURE);
   }
 }
 

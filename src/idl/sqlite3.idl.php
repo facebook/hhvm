@@ -98,7 +98,7 @@ c('sqlite3stmt', null, array(),
   ),
   array(),
   "\n  public: void validate() const;".
-  "\n  public: p_sqlite3 m_db;".
+  "\n  public: sp_sqlite3 m_db;".
   "\n  public: sqlite3_stmt *m_raw_stmt;".
   "\n    DECLARE_BOOST_TYPES(BoundParam);".
   "\n    struct BoundParam {".
@@ -124,5 +124,5 @@ c('sqlite3result', null, array(),
   ),
   array(),
   "\n  public: void validate() const;".
-  "\n  public: p_sqlite3stmt m_stmt;"
+  "\n  public: sp_sqlite3stmt m_stmt;"
  );

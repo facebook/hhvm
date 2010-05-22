@@ -1,0 +1,69 @@
+
+I. Language Internals
+=========================
+
+1. ext_variable      30 x
+2. ext_function      14 x
+3. ext_class         15 x
+4. ext_error         11 x
+5. ext_misc          25 x
+6. ext_options       46 x
+7. ext_apache        14 x
+8. ext_session       20 x
+-------------------------
+                    175 x
+
+II. Data Types
+=========================
+
+01. ext_string       90 x
+02. ext_url          10 x
+03. ext_datetime     37 x
+04. ext_array        72 x
+05. ext_hash         10 x
+06. ext_mcrypt       37 x
+07. ext_openssl      39 x
+08. ext_math         48 x
+09. ext_bcmath       10 x
+10. ext_json         02 x
+-------------------------
+                    355 x
+
+III. System Functions
+=========================
+
+1. ext_output        17 x
+2. ext_file          89 x
+3. ext_stream        40 x
+4. ext_socket        25 x
+5. ext_network       32 x
+6. ext_ipc           17 x
+7. ext_process       25 x
+8. ext_posix         35 x
+-------------------------
+                    280 x
+
+IV. External Packages
+=========================
+
+01. ext_apc          10 x
+02. ext_mysql        49 x
+03. ext_preg         15 x
+04. ext_zlib         22 x
+05. ext_ctype        11 x
+06. ext_curl         18 x
+07. ext_apd           9 x
+08. ext_iconv        11 x
+09. ext_mb           55 x
+10. ext_simplexml     7 x
+11. ext_image       107 x
+12. ext_xmlwriter    42 x
+13. ext_mailparse    16 x
+14. ext_xml          24 x
+15. ext_domdocument  72 x
+16. ext_ldap         40 x
+17. ext_oracle       38 x
+
+18. ext_magick      428 -
+-------------------------
+                    974

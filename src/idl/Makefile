@@ -1,20 +1,22 @@
 
+V ?= @
+
 IDL_PHPS = $(wildcard  *.idl.php)
 ifndef REPO_ADD
-REPO_ADD = svn add
+REPO_ADD = git add
 endif
 ifndef REPO_DEL
-REPO_DEL = svn delete
+REPO_DEL = git rm
 endif
 
 all:
 
-lists: ../lib/system/ext.inc ../test/test_ext.h ../test/test_ext.inc ../cpp/ext/ext.h
+lists: ../system/ext.inc ../test/test_ext.h ../test/test_ext.inc ../runtime/ext/ext.h
 
-../lib/system/ext.inc: idl_list.php $(IDL_PHPS)
+../system/ext.inc: idl_list.php $(IDL_PHPS)
 	@echo 'Generating $@'
 	$(V)php idl_list.php inc $@
-	$(V)touch ../lib/system/builtin_symbols.cpp
+	$(V)touch ../compiler/builtin_symbols.cpp
 
 ../test/test_ext.h: idl_list.php $(IDL_PHPS)
 	@echo 'Generating $@'
@@ -25,7 +27,7 @@ lists: ../lib/system/ext.inc ../test/test_ext.h ../test/test_ext.inc ../cpp/ext/
 	$(V)php idl_list.php test_suites $@
 	$(V)touch ../test/test.cpp
 
-../cpp/ext/ext.h: idl_list.php $(IDL_PHPS)
+../runtime/ext/ext.h: idl_list.php $(IDL_PHPS)
 	@echo 'Generating $@'
 	$(V)php idl_list.php ext $@
 
@@ -37,45 +39,45 @@ $(EXT): $(EXT).idl.php idl.php base.php
 	$(V)php idl.php inc  $< $@.inc
 	@echo ' --> test_ext_$@.h test_ext_$@.cpp'
 	$(V)php idl.php test $< test_ext_$@.h test_ext_$@.cpp
-	@echo ' --> ../cpp/ext/ext_$@.h ../cpp/ext/ext_$@.cpp'
-	$(V)php idl.php param $< ../cpp/ext/ext_$@.h ../cpp/ext/ext_$@.cpp
-	@echo ' --> ../cpp/ext/profile/extprofile_$@.h'
-	$(V)php idl.php profile $< ../cpp/ext/profile/extprofile_$@.h
+	@echo ' --> ../runtime/ext/ext_$@.h ../runtime/ext/ext_$@.cpp'
+	$(V)php idl.php param $< ../runtime/ext/ext_$@.h ../runtime/ext/ext_$@.cpp
+	@echo ' --> ../runtime/ext/profile/extprofile_$@.h'
+	$(V)php idl.php profile $< ../runtime/ext/profile/extprofile_$@.h
 
 # run this for a newly prepared idl file
 install: $(EXT) lists
-	cp ext_$<.h ext_$<.cpp ../cpp/ext/
-	$(REPO_ADD) ../cpp/ext/ext_$<.h ../cpp/ext/ext_$<.cpp
-	$(REPO_ADD) ../cpp/ext/profile/extprofile_$<.h
-	cp $<.inc ../lib/system/
-	$(REPO_ADD) ../lib/system/$<.inc
-	touch ../lib/system/builtin_symbols.cpp
-	cp test_ext_$<.h test_ext_$<.cpp ../test/
+	$(V)cp ext_$<.h ext_$<.cpp ../runtime/ext/
+	$(REPO_ADD) ../runtime/ext/ext_$<.h ../runtime/ext/ext_$<.cpp
+	$(REPO_ADD) ../runtime/ext/profile/extprofile_$<.h
+	$(V)cp $<.inc ../system/
+	$(REPO_ADD) ../system/$<.inc
+	$(V)touch ../compiler/builtin_symbols.cpp
+	$(V)cp test_ext_$<.h test_ext_$<.cpp ../test/
 	$(REPO_ADD) ../test/test_ext_$<.h ../test/test_ext_$<.cpp
 
 # run this to add or remove a function from an existing idl file
 update: $(EXT) lists
-	cp $<.inc ../lib/system/
-	touch ../lib/system/builtin_symbols.cpp
+	$(V)cp $<.inc ../system/
+	$(V)touch ../compiler/builtin_symbols.cpp
 
 remove:
 	@echo 'Removing extension index...'
 	$(V)perl -p -i -n -e "s/#include \"$(EXT)\.inc\"\n//" \
-		../lib/system/ext.inc
+		../system/ext.inc
 	@echo 'Regenerating dynamic tables...'
-	make -C ../ clobber && make -C ../ && make -C ../lib/system
+	make -C ../ clobber && make -C ../ && make -C ../system
 	@echo 'Removing list files...'
 	$(V)perl -p -i -n -e "s/#include <test\/test_ext_$(EXT)\.h>\n//" \
 		../test/test_ext.h
 	$(V)perl -p -i -n -e "s/RUN_TESTSUITE\(TestExt$(EXT)\);\n//i" \
 		../test/test_ext.inc
 	$(V)perl -p -i -n -e "s/#include .*extprofile_$(EXT).h>\n//" \
-		../cpp/ext/ext.h
+		../runtime/ext/ext.h
 	@echo 'Removing source files...'
 	$(REPO_DEL) ../test/test_ext_$(EXT).h
 	$(REPO_DEL) ../test/test_ext_$(EXT).cpp
-	$(REPO_DEL) ../cpp/ext/ext_$(EXT).h
-	$(REPO_DEL) ../cpp/ext/ext_$(EXT).cpp
+	$(REPO_DEL) ../runtime/ext/ext_$(EXT).h
+	$(REPO_DEL) ../runtime/ext/ext_$(EXT).cpp
 	@echo 'Removing IDL file...'
 	$(REPO_DEL) $(EXT).idl.php
 	make -C ../ clobber && make -C ../

@@ -42,6 +42,7 @@ using namespace std;
 
 TestPerformance::TestPerformance() {
   m_perfMode = true;
+  TestCodeRun::FastMode = false;
 }
 
 bool TestPerformance::RunTests(const std::string &which) {

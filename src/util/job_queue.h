@@ -183,7 +183,7 @@ public:
         doJob(job);
         if (countActive) m_queue->decActiveWorker();
       } catch (typename JobQueue<TJob>::StopSignal) {
-        m_stopped = true; // queue is empty and queue is stopped, so we are done
+        m_stopped = true; // queue is empty and stopped, so we are done
       }
     }
     onThreadExit();

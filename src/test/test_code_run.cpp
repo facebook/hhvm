@@ -15,17 +15,20 @@
 */
 
 #include <test/test_code_run.h>
-#include <lib/parser/parser.h>
-#include <lib/system/builtin_symbols.h>
-#include <lib/code_generator.h>
-#include <lib/analysis/analysis_result.h>
+#include <compiler/parser/parser.h>
+#include <compiler/builtin_symbols.h>
+#include <compiler/code_generator.h>
+#include <compiler/analysis/analysis_result.h>
 #include <util/util.h>
 #include <util/process.h>
-#include <lib/option.h>
+#include <compiler/option.h>
 
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+// By default, use shared linking for faster testing.
+bool TestCodeRun::FastMode = true;
 
 TestCodeRun::TestCodeRun() : m_perfMode(false) {
   Option::GenerateCPPMain = true;
@@ -38,6 +41,7 @@ TestCodeRun::TestCodeRun() : m_perfMode(false) {
 }
 
 bool TestCodeRun::preTest() {
+  if (!CleanUp()) return false;
   m_infos.clear();
   return true;
 }
@@ -50,9 +54,9 @@ bool TestCodeRun::postTest() {
 bool TestCodeRun::CleanUp() {
   string out, err;
   const char *argv[] = {"", NULL};
-  Process::Exec("cpp/tmp/cleanup.sh", argv, NULL, out, &err);
+  Process::Exec("runtime/tmp/cleanup.sh", argv, NULL, out, &err);
   if (!err.empty()) {
-    printf("Failed to clean up cpp/tmp: %s\n", err.c_str());
+    printf("Failed to clean up runtime/tmp: %s\n", err.c_str());
     return false;
   }
   return true;
@@ -62,10 +66,10 @@ bool TestCodeRun::GenerateFiles(const char *input,
                                 const char *subdir) {
   ASSERT(subdir && subdir[0]);
   AnalysisResultPtr ar(new AnalysisResult());
-  string path = string("cpp/tmp/") + subdir;
+  string path = string("runtime/tmp/") + subdir;
   ar->setOutputPath(path.c_str());
-  Parser::parseString(input, ar);
-  BuiltinSymbols::load(ar);
+  Parser::ParseString(input, ar);
+  BuiltinSymbols::Load(ar);
   ar->loadBuiltins();
   ar->analyzeProgram();
   ar->preOptimize();
@@ -75,12 +79,23 @@ bool TestCodeRun::GenerateFiles(const char *input,
   ar->outputAllCPP(CodeGenerator::ClusterCPP, 0, NULL);
 
   string target = path + "/Makefile";
-  const char *argv[] = {"", "cpp/tmp/single.mk", target.c_str(), NULL};
+  const char *argv1[] = {"", "runtime/tmp/single.mk", target.c_str(), NULL};
   string out, err;
-  Process::Exec("cp", argv, NULL, out, &err);
+  Process::Exec("cp", argv1, NULL, out, &err);
   if (!err.empty()) {
-    printf("Failed to copy cpp/tmp/single.mk: %s\n", err.c_str());
+    printf("Failed to copy runtime/tmp/single.mk: %s\n", err.c_str());
     return false;
+  }
+
+  if (FastMode) {
+    string sys = string(subdir) + "/sys";
+    const char *argv2[] = {"", sys.c_str(), NULL};
+    Process::Exec("runtime/tmp/mergecpp.sh", argv2, NULL, out, &err);
+    if (!err.empty()) {
+      printf("Failed to merge runtime/tmp/%s/*.cpp: %s\n",
+             sys.c_str(), err.c_str());
+      return false;
+    }
   }
 
   return true;
@@ -100,11 +115,38 @@ static string filter_distcc(string &msg) {
 
 bool TestCodeRun::CompileFiles() {
   string out, err;
-  const char *argv[] = {"", NULL};
-  Process::Exec("cpp/makeall.sh", argv, NULL, out, &err);
+  const char *argv[] = {"", FastMode ? "SHARED" : "LINK", NULL};
+  Process::Exec("runtime/makeall.sh", argv, NULL, out, &err);
   err = filter_distcc(err);
   if (!err.empty()) {
-    printf("Failed to compile files: %s\n", err.c_str());
+    printf("Failed to compile files:\n");
+
+    istringstream is(err);
+    string line;
+    string buffer;
+    while (getline(is, line)) {
+      buffer += line + "\n";
+      if (!line.compare(0, 4, "make")) {
+        unsigned int start = 0;
+        while (start < line.length() && line.compare(start, 4, "Test")) {
+          start++;
+        }
+        if (start < line.length()) {
+          istringstream isl(line.substr(start + 4));
+          int seqno;
+          if (isl >> seqno) {
+            printf("\n%s:%d\nParsing: [%s]\n%s\n", m_infos[seqno].file,
+                   m_infos[seqno].line, m_infos[seqno].input, buffer.c_str());
+            buffer = "";
+          }
+        }
+      }
+    }
+    if (!buffer.empty()) {
+      // leftover error messages, if any
+      printf("\n%s\n", buffer.c_str());
+    }
+
     return false;
   }
   return true;
@@ -112,13 +154,14 @@ bool TestCodeRun::CompileFiles() {
 
 static bool verify_result(const char *input, const char *output, bool perfMode,
                           const char *file = "", int line = 0,
-                          bool nowarnings = false, const char *subdir = "") {
+                          bool nowarnings = false, const char *subdir = "",
+                          bool fastMode = false) {
   // generate main.php and get PHP's output
   string expected;
   if (output) {
     expected = output;
   } else {
-    string fullPath = "cpp/tmp";
+    string fullPath = "runtime/tmp";
     if (subdir && subdir[0]) fullPath = fullPath + "/" + subdir;
     fullPath += "/main.php";
     Util::mkdir(fullPath.c_str());
@@ -147,14 +190,23 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
   {
     string actual, err;
     if (Option::EnableEval < Option::FullEval) {
-      const char *argv[] = {"", "--file=string", "--config=test/config.hdf",
-                            NULL};
-      string path = "cpp/tmp/";
-      if (subdir) path = path + subdir + "/";
-      path += "test";
-      Process::Exec(path.c_str(), argv, NULL, actual, &err);
+      if (fastMode) {
+        string path = "runtime/tmp/";
+        if (subdir) path = path + subdir + "/";
+        path += "libtest.so";
+        const char *argv[] = {"", "--file=string", "--config=test/config.hdf",
+                              path.c_str(), NULL};
+        Process::Exec("runtime/tmp/run.sh", argv, NULL, actual, &err);
+      } else {
+        const char *argv[] = {"", "--file=string", "--config=test/config.hdf",
+                              NULL};
+        string path = "runtime/tmp/";
+        if (subdir) path = path + subdir + "/";
+        path += "test";
+        Process::Exec(path.c_str(), argv, NULL, actual, &err);
+      }
     } else {
-      string filearg = "--file=cpp/tmp/";
+      string filearg = "--file=runtime/tmp/";
       if (subdir) filearg = filearg + subdir + "/";
       filearg += "main.php";
       const char *argv[] = {"", filearg.c_str(),
@@ -221,31 +273,39 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
   return true;
 }
 
-bool TestCodeRun::MultiVerifyCodeRun() {
-  if (!CleanUp()) return false;
+bool TestCodeRun::RecordMulti(const char *input, const char *file, int line,
+                              bool flag) {
+  size_t i = m_infos.size();
+  m_infos.push_back(VCRInfo(input, NULL, file, line, flag));
 
   if (Option::EnableEval < Option::FullEval) {
-    for (unsigned i = 0; i < m_infos.size(); i++) {
-      ASSERT(m_infos[i].input);
-      ostringstream os;
-      os << "Test" << i;
-      if (!GenerateFiles(m_infos[i].input, os.str().c_str())) return false;
-    }
-
-    if (!CompileFiles()) return false;
+    ASSERT(m_infos[i].input);
+    ostringstream os;
+    os << "Test" << i;
+    if (!GenerateFiles(m_infos[i].input, os.str().c_str())) return false;
   }
 
+  return true;
+}
+
+bool TestCodeRun::MultiVerifyCodeRun() {
+  if (Option::EnableEval < Option::FullEval) {
+    CompileFiles();
+  }
+
+  bool ret = true;
   for (unsigned i = 0; i < m_infos.size(); i++) {
     ASSERT(m_infos[i].input);
     ostringstream os;
     os << "Test" << i;
     if (!Count(verify_result(m_infos[i].input, m_infos[i].output, m_perfMode,
                              m_infos[i].file, m_infos[i].line,
-                             m_infos[i].nowarnings, os.str().c_str()))) {
-      return false;
+                             m_infos[i].nowarnings, os.str().c_str(),
+                             FastMode))) {
+      ret = false;
     }
   }
-  return true;
+  return ret;
 }
 
 bool TestCodeRun::VerifyCodeRun(const char *input, const char *output,
@@ -261,7 +321,7 @@ bool TestCodeRun::VerifyCodeRun(const char *input, const char *output,
   }
 
   return verify_result(input, output, m_perfMode,
-                       file, line, nowarnings, "Test0");
+                       file, line, nowarnings, "Test0", FastMode);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -315,6 +375,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestErrorHandler);
   RUN_TEST(TestAssertOptions);
   RUN_TEST(TestExtMisc);
+  RUN_TEST(TestInvalidArgument);
   RUN_TEST(TestSuperGlobals);
   RUN_TEST(TestGlobalStatement);
   RUN_TEST(TestStaticStatement);
@@ -340,7 +401,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestEvalOrder);
   RUN_TEST(TestGetObjectVars);
   RUN_TEST(TestSerialization);
-  //RUN_TEST(TestJson);
+  RUN_TEST(TestJson);
   RUN_TEST(TestThrift);
   RUN_TEST(TestExit);
   RUN_TEST(TestCreateFunction);
@@ -351,6 +412,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestConstantFunction);
   RUN_TEST(TestDefined);
   RUN_TEST(TestSimpleXML);
+  RUN_TEST(TestDOMDocument);
   RUN_TEST(TestFile);
   RUN_TEST(TestDirectory);
   RUN_TEST(TestAssignment);
@@ -360,9 +422,14 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestUselessAssignment);
   RUN_TEST(TestTypes);
   RUN_TEST(TestSwitchStatement);
+  RUN_TEST(TestExtString);
+  RUN_TEST(TestExtArray);
+  RUN_TEST(TestExtFile);
+  RUN_TEST(TestExtDate);
   RUN_TEST(TestExtImage);
-  RUN_TEST(TestSplFile);
-  RUN_TEST(TestIterator);
+  RUN_TEST(TestExtSplFile);
+  RUN_TEST(TestExtIterator);
+  RUN_TEST(TestExtSoap);
   //RUN_TEST(TestEvaluationOrder);
 
   RUN_TEST(TestAdHoc);
@@ -502,10 +569,99 @@ bool TestCodeRun::TestListAssignment() {
   MVCR("<?php $info = array('coffee', 'brown', 'caffeine');"
       "list($a[0], $a[1], $a[2]) = $info;"
       "var_dump($a);");
+  MVCR("<?php "
+      "class obj implements arrayaccess {"
+      "    private $container = array();"
+      "    public function __construct() {"
+      "        $this->container = array("
+      "            'one'   => 1,"
+      "            'two'   => 2,"
+      "            'three' => 3,"
+      "        );"
+      "    }"
+      "    public function offsetSet($offset, $value) {"
+      "        $this->container[$offset] = $value;"
+      "    }"
+      "    public function offsetExists($offset) {"
+      "        return isset($this->container[$offset]);"
+      "    }"
+      "    public function offsetUnset($offset) {"
+      "        unset($this->container[$offset]);"
+      "    }"
+      "    public function offsetGet($offset) {"
+      "        return isset($this->container[$offset]) ? $this->container[$offset] : null;"
+      "    }"
+      "}"
+      "class SetTest {"
+      "  private $_vals = array("
+      "      'one'   => 1,"
+      "      'two'   => 2,"
+      "      'three' => 3,"
+      "      );"
+      "  public function __set($name, $value) {"
+      "    $this->_vals[$name] = $value;"
+      "  }"
+      "}"
+      "$o = new obj;"
+      "$q = list($o['one'], $o['two'], list($o['three'])) ="
+      "  array('eins', 'zwei', array('drei'));"
+      "var_dump($o);"
+      "var_dump($q);"
+      "$x = new SetTest;"
+      "$qq = list($x->one, $x->two, list($x->three)) = 1;"
+      "var_dump($x);"
+      "$qq = list($x->one, $x->two, list($x->three)) = $q;"
+      "var_dump($x);"
+      "var_dump($qq);");
+
+  if (Option::EnableEval < Option::FullEval) {
+    MVCR("<?php "
+         "function test($a) {"
+         "  list($a[0], $a[1], $a) = $a;"
+         "  var_dump($a);"
+         "  }"
+         "test(array('abc', 'cde', 'fgh'));");
+    MVCR("<?php "
+         "function test($a, $b, $i) {"
+         "  list($a[$i++], $a[$i++], $a[$i++]) = $b;"
+         "  var_dump($a);"
+         "  }"
+         "test(array(), array('x', 'y', 'z'), 0);");
+  }
   return true;
 }
 
 bool TestCodeRun::TestExceptions() {
+  MVCR("<?php\n"
+       "\n"
+       "class Exception1 extends Exception {\n"
+       "  public function __Construct() {\n"
+       "    parent::__construct();\n"
+       "  }\n"
+       "}\n"
+       "\n"
+       "class Exception2 extends Exception1 {\n"
+       "  public function exception2() {\n"
+       "    parent::__construct();\n"
+       "  }\n"
+       "}\n"
+       "\n"
+       "function foo() {\n"
+       "  throw new Exception2();\n"
+       "}\n"
+       "\n"
+       "function bar() {\n"
+       "  try {\n"
+       "    foo();\n"
+       "  } catch (Exception $exn) {\n"
+       "    $a = $exn->getTrace(); foreach($a as &$b) $b['file'] = 'string';\n"
+       "    var_dump($a);\n"
+       "    var_dump($exn->getLine());\n"
+       "  }\n"
+       "}\n"
+       "\n"
+       "bar();\n");
+
   MVCR("<?php try { throw new Exception('test');} "
       "catch (Exception $e) {}");
   MVCR("<?php try { try { throw new Exception('test');} "
@@ -534,6 +690,45 @@ bool TestCodeRun::TestExceptions() {
       "  var_dump(2);"
       "}"
       "foo();");
+  MVCR("<?php "
+      "function foo($a, $b) { return $a + $b; }"
+      "function myErrorHandler($errno, $errstr, $errfile, $errline) {"
+      "  var_dump($errstr, $errline);"
+      "}"
+      "$old_error_handler = set_error_handler('myErrorHandler');"
+      ""
+      "function bar($a, $b) {"
+      "  if ($a) {"
+      "    $value = $a * foo(1, 2);"
+      "  }"
+      "  return 1 / $b;"
+      "}"
+      "set_error_handler('myErrorHandler');"
+      "$r = bar(1, 0);");
+  MVCR("<?php "
+       "class a extends Exception {};"
+       "class b extends a {"
+       "  function dump() {"
+       "    echo 'c:', $this->code, '\nm:', $this->message, '\n';"
+       "    echo 'x:', $this->x, '\ny:', $this->y, '\n';"
+       "  }"
+       "}"
+       "if (0) { class a extends Exception {} }"
+       "try {"
+       "  throw(new b(1, 2));"
+       "} catch (b $e) {"
+       "  $e->dump();"
+       "}");
+  MVCR("<?php "
+       "class X {"
+       "  static function eh($errno, $errstr) {"
+       "    echo \"eh: $errno\\n\";"
+       "    die;"
+       "  }};"
+       "set_error_handler(array('X', 'eh'));"
+       "$g = array();"
+       "echo $g['foobar'];");
+
   return true;
 }
 
@@ -728,6 +923,13 @@ bool TestCodeRun::TestString() {
   // serialization of binary string
   MVCR("<?php var_dump(bin2hex(serialize(\"a\\x00b\")));");
 
+  MVCR("<?php "
+      "$a = array('x'=>'foo');"
+      "$b = 'qqq';"
+      "class c {}"
+      "$c = new c;"
+      "$c->p = 'zzz';"
+      "var_dump(\"AAA ${a['x']} $a[x] $b $c->p\");");
   return true;
 }
 
@@ -888,6 +1090,10 @@ bool TestCodeRun::TestArray() {
       "push_stack();"
       "$info = array(count($stack), $stack[count($stack)-1], $stack);"
       "var_dump($info);");
+  MVCR("<?php "
+      "class A { function f($a) { var_dump($a === null); } }"
+      "$a = true; $a = new A();"
+      "$a->f(array());");
 
   return true;
 }
@@ -1054,6 +1260,23 @@ bool TestCodeRun::TestArrayOffset() {
       "var_dump(\"$a[08]\");"
       "var_dump(\"$a[0xa]\");");
 
+  MVCR("<?php "
+       "class A {"
+       "  const i1= -1;"
+       "  const i2= -2;"
+       "  static $s = -4;"
+       "};"
+       "class B {"
+       "  static $s = -5;"
+       "};"
+       "$attr=array();"
+       "$attr[a::i1]='abc';"
+       "$attr[a::i2]='def';"
+       "$attr[-3]='ghi';"
+       "$attr[a::$s]='jkl';"
+       "$attr[b::$s]='mno';"
+       "var_dump($attr);");
+
   return true;
 }
 
@@ -1062,6 +1285,7 @@ bool TestCodeRun::TestArrayAccess() {
       "class A implements ArrayAccess {"
       "  public $a;"
       "  public function offsetExists($offset) {"
+      "    echo \"offsetExist\";"
       "    return false;"
       "  }"
       "  public function offsetGet($offset) {"
@@ -1078,6 +1302,9 @@ bool TestCodeRun::TestArrayAccess() {
       "$obj = new A();"
       "if (!isset($obj['a'])) {"
       "  $obj['a'] = 'test';"
+      "}"
+      "if (!empty($obj['a'])) {"
+      "  $obj['a'] = 'test2';"
       "}"
       "var_dump($obj['a']);"
       "unset($obj['a']);"
@@ -1336,6 +1563,21 @@ bool TestCodeRun::TestArrayAssignment() {
 }
 
 bool TestCodeRun::TestArrayMerge() {
+  MVCR("<?php\n"
+       "$x = array('x' => 'y');\n"
+       "$a = array('a1' => $x, 'a2' => $x);\n"
+       "$b = array('a1' => array(1,2,3), 'a2' => array(1,2,3));\n"
+       "var_dump(array_merge_recursive($a, $b));");
+  MVCR("<?php\n"
+       "$x = array('x' => 'y');\n"
+       "$a = array('a1' => &$x, 'a2' => &$x);\n"
+       "$b = array('a1' => array(), 'a2' => array(1,2));\n"
+       "var_dump(array_merge_recursive($a, $b));");
+  MVCR("<?php\n"
+       "$x = array('x' => 'y');\n"
+       "$a = array('a1' => &$x, 'a2' => &$x);\n"
+       "$b = array('a1' => array(1,2), 'a2' => array(3,4));\n"
+       "var_dump(array_merge_recursive($a, $b));");
   MVCR("<?php $a = array(1 => 1, 3 => 3); "
       "var_dump(array_merge($a, array(2)));");
   MVCR("<?php $a = array(1 => 1, 3 => 3); "
@@ -1666,12 +1908,101 @@ bool TestCodeRun::TestObject() {
       "  }"
       "}"
       "new E;");
+  MVCR("<?php "
+      "class A {"
+      "  var $a;"
+      "  var $b;"
+      "};"
+      "$obj = new A();"
+      "var_dump($obj);"
+      "foreach ($obj as &$value) {"
+      "  $value = 1;"
+      "}"
+      "var_dump($obj);"
+      "$obj->c = 3;"
+      "var_dump($obj);"
+      "foreach ($obj as &$value) {"
+      "  $value = 2;"
+      "}"
+      "var_dump($obj);");
+  MVCR("<?php "
+      "class A {"
+      "  var $a;"
+      "  var $b;"
+      "};"
+      "$obj = new A();"
+      "$obj2 = $obj;"
+      "foreach ($obj2 as $k => &$value) {"
+      "  $value = 'ok';"
+      "}"
+      "var_dump($obj);"
+      "var_dump($obj2);");
+  MVCR("<?php "
+      "class A {"
+      "  var $a;"
+      "  var $b;"
+      "  var $c;"
+      "  var $d;"
+      "  public function __construct($p1, $p2, $p3, $p4) {"
+      "    $this->a = $p1;"
+      "    $this->b = $p2;"
+      "    $this->c = $p3;"
+      "    $this->d = $p4;"
+      "  }"
+      "};"
+      "$obj = new A(1, 2, 3, 4);"
+      "foreach ($obj as $key => &$val) {"
+      "  if($val == 2) {"
+      "    $obj->$key = 0;"
+      "  } else if($val == 3) {"
+      "    var_dump($key);"
+      "    unset($obj->$key);"
+      "  } else {"
+      "    $val++;"
+      "  }"
+      "}"
+      "var_dump($obj);");
+  MVCR("<?php "
+      "class A {"
+      "  var $a = 1;"
+      "  var $b = 2;"
+      "  var $c = 3;"
+      "  var $d = 4;"
+      "  public function __construct() {"
+      "    $this->a = 1;"
+      "    $this->b = 2;"
+      "    $this->c = 3;"
+      "    $this->d = 4;"
+      "  }"
+      "};"
+      "function f() {"
+      "  $obj = new A();"
+      "  foreach ($obj as $key => &$val) {"
+      "    $val = 5;"
+      "  }"
+      "  var_dump($obj);"
+      "}"
+      "f();");
 
+  MVCR("<?php function test() {"
+       "$abc = 'abc'; var_dump($abc instanceof Nothing); }"
+      "test();");
 
   return true;
 }
 
 bool TestCodeRun::TestObjectProperty() {
+  MVCR("<?php\n"
+       "class A {\n"
+       "  private $prop = 'test';\n"
+       "\n"
+       "  function __get($name) {\n"
+       "    return $this->$name;\n"
+       "  }}\n"
+       "\n"
+       "$obj = new A();\n"
+       "var_dump($obj->prop);\n"
+      );
 
   MVCR("<?php "
       "class A { public $a = 10; public function foo() { $this->a = 20;} } "
@@ -1774,6 +2105,93 @@ bool TestCodeRun::TestObjectProperty() {
       "var_dump(isset($one->cluster));"
       "var_dump(empty($one->cluster));");
 
+  MVCR("<?php "
+      "function f() { return false; }"
+      "if (f()) { class A { } }"
+      "else { class A { static $a = 100; var $b = 1000; } }"
+      "class B { var $a = 1; static $b = array(1, 2, 3); }"
+      "var_dump(get_class_vars('A'));"
+      "A::$a = 1;"
+      "var_dump(get_class_vars('A'));"
+      "var_dump(get_class_vars('B'));");
+
+  MVCR("<?php "
+      "class A {"
+      "  private $pri = 'a-pri';"
+      "  protected $pro = 'a-pro';"
+      "  function bar() {"
+      "    var_dump($this->pri);"
+      "    $pri = $q ? 'zz' : 'p'.'ri';"
+      "    var_dump($this->$pri);"
+      "  }"
+      "  function bar2() {"
+      "    var_dump($this->pro);"
+      "  }"
+      "}"
+      "class B extends A {"
+      "  private $pri = 'b-pri';"
+      "  function bar() {"
+      "    parent::bar();"
+      "    var_dump($this->pri);"
+      "  }"
+      "}"
+      "$obj = new B(); $obj->bar();"
+      "class C extends B {"
+      "  public $pri = 'c-pri';"
+      "  public $pro = 'c-pro';"
+      "  function bar2() {"
+      "    parent::bar2();"
+      "    var_dump($this->pro);"
+      "  }"
+      "}"
+      "$obj = new C; $obj->bar(); $obj->bar2();"
+      "var_dump(serialize($obj));"
+      "class Base {"
+      "  protected $pro = 1;"
+      "  private $pri = 'base-pri';"
+      "  function q0() {"
+      "    var_dump($this->pri);"
+      "  }"
+      "}"
+      ""
+      "class R extends Base {"
+      "  public $rpub = 1;"
+      "  protected $pro = 2;"
+      "  private $pri = 'r-pri';"
+      "  function q() {"
+      "    var_dump($this->pri);"
+      "  }"
+      "}"
+      ""
+      "class D extends R {"
+      "  public $dpub = 'd';"
+      "  protected $pro = 'pro';"
+      "  private $pri = 'd-pri';"
+      "  function qq() {"
+      "    var_dump($this->pri);"
+      "  }"
+      "}"
+      ""
+      "class DD extends D {"
+      "  private $pri = 'dd-pri';"
+      "  function qqq() {"
+      "    var_dump($this->pri);"
+      "  }"
+      "}"
+      ""
+      "if (false) {"
+      "  class R{}"
+      "}"
+      "$d = new D;"
+      "$d->qq();"
+      "$d->q();"
+      "$d->q0();"
+      "$d = new DD;"
+      "$d->qqq();"
+      "$d->qq();"
+      "$d->q();"
+      "$d->q0();"
+      );
   return true;
 }
 
@@ -1890,6 +2308,369 @@ bool TestCodeRun::TestObjectMethod() {
       "  $p = null;"
       "}"
       "z();");
+  MVCR("<?php "
+       "interface intf {"
+       "  function meth();"
+       "}"
+       "class m {"
+       "  function meth() {"
+       "    return 1;"
+       "  }"
+       "}"
+       "class m2 extends m implements intf {"
+       "}"
+       "class m3 extends m2 {"
+       "  function f() {"
+       "    var_dump(parent::meth());"
+       "  }"
+       "}"
+       "$y = new m3;"
+       "$y->f();"
+       "function g() {"
+       "  $y = new m3;"
+       "  var_dump($y->meth());"
+       "}"
+       "g();");
+  MVCR("<?php "
+       "class c {"
+       "  function x() {"
+       "    var_dump($this);"
+       "    $t = 'this';"
+       "    var_dump($$t);"
+       "  }"
+       "}"
+       "$x = new c;"
+       "$x->x();");
+  MVCR("<?php "
+      "class RootBase {}"
+      "class Base extends RootBase {"
+      "  private $privateData;"
+      "}"
+      "class Test extends Base {"
+      "  protected function f1() {"
+      "    $this->privateData = 1;"
+      "    var_dump('ok');"
+      "  }"
+      "  public function f2() {"
+      "    $this->f1();"
+      "  }"
+      "}"
+      "function foo() {"
+      "  $obj = new Test();"
+      "  $obj->f2();"
+      "  $obj->privateData = 2;"
+      "  $obj = new Base();"
+      "}"
+      "foo();");
+
+#define TEST_BODY_FOR_IS_CALLABLE \
+      "var_dump(is_callable('A::a_spub'));" \
+      "var_dump(is_callable('A::a_spro'));" \
+      "var_dump(is_callable('A::a_spri'));" \
+      "var_dump(is_callable('A::a_pro'));" \
+      "var_dump(is_callable('A::a_pri'));" \
+      "var_dump(is_callable('a_spub'));" \
+      "var_dump(is_callable('a_spro'));" \
+      "var_dump(is_callable('a_spri'));" \
+      "var_dump(is_callable('a_pub'));" \
+      "var_dump(is_callable('a_pro'));" \
+      "var_dump(is_callable('a_pri'));" \
+      "var_dump(is_callable('B::b_spub'));" \
+      "var_dump(is_callable('B::b_spro'));" \
+      "var_dump(is_callable('B::b_spri'));" \
+      "var_dump(is_callable('B::b_pro'));" \
+      "var_dump(is_callable('B::b_pri'));" \
+      "var_dump(is_callable('b_spub'));" \
+      "var_dump(is_callable('b_spro'));" \
+      "var_dump(is_callable('b_spri'));" \
+      "var_dump(is_callable('b_pub'));" \
+      "var_dump(is_callable('b_pro'));" \
+      "var_dump(is_callable('b_pri'));" \
+      "var_dump(is_callable(array('A', 'a_spub')));" \
+      "var_dump(is_callable(array('A', 'a_spro')));" \
+      "var_dump(is_callable(array('A', 'a_spri')));" \
+      "var_dump(is_callable(array('A', 'a_pub')));" \
+      "var_dump(is_callable(array('A', 'a_pro')));" \
+      "var_dump(is_callable(array('A', 'a_pri')));" \
+      "var_dump(is_callable(array('A', 'A::a_spub')));" \
+      "var_dump(is_callable(array('A', 'A::a_spro')));" \
+      "var_dump(is_callable(array('A', 'A::a_spri')));" \
+      "var_dump(is_callable(array('A', 'A::a_pro')));" \
+      "var_dump(is_callable(array('A', 'A::a_pri')));" \
+      "var_dump(is_callable(array('A', 'A::A::a_spub')));" \
+      "var_dump(is_callable(array('A', 'A::A::a_spro')));" \
+      "var_dump(is_callable(array('A', 'A::A::a_spri')));" \
+      "var_dump(is_callable(array('A', 'A::A::a_pro')));" \
+      "var_dump(is_callable(array('A', 'A::A::a_pri')));" \
+      "var_dump(is_callable(array('A', 'C::a_spub')));" \
+      "var_dump(is_callable(array('A', 'C::a_spro')));" \
+      "var_dump(is_callable(array('A', 'C::a_spri')));" \
+      "var_dump(is_callable(array('A', 'C::a_pub')));" \
+      "var_dump(is_callable(array('A', 'C::a_pro')));" \
+      "var_dump(is_callable(array('A', 'C::a_pri')));" \
+      "var_dump(is_callable(array('A', 'A::C::a_spub')));" \
+      "var_dump(is_callable(array('A', 'A::C::a_spro')));" \
+      "var_dump(is_callable(array('A', 'A::C::a_spri')));" \
+      "var_dump(is_callable(array('A', 'A::C::a_pub')));" \
+      "var_dump(is_callable(array('A', 'A::C::a_pro')));" \
+      "var_dump(is_callable(array('A', 'A::C::a_pri')));" \
+      "var_dump(is_callable(array('A', 'b_spub')));" \
+      "var_dump(is_callable(array('A', 'b_spro')));" \
+      "var_dump(is_callable(array('A', 'b_spri')));" \
+      "var_dump(is_callable(array('A', 'b_pub')));" \
+      "var_dump(is_callable(array('A', 'b_pro')));" \
+      "var_dump(is_callable(array('A', 'b_pri')));" \
+      "var_dump(is_callable(array('A', 'B::a_spub')));" \
+      "var_dump(is_callable(array('A', 'B::a_spro')));" \
+      "var_dump(is_callable(array('A', 'B::a_spri')));" \
+      "var_dump(is_callable(array('A', 'B::a_pub')));" \
+      "var_dump(is_callable(array('A', 'B::a_pro')));" \
+      "var_dump(is_callable(array('A', 'B::a_pri')));" \
+      "var_dump(is_callable(array('A', 'B::B::a_spub')));" \
+      "var_dump(is_callable(array('A', 'B::B::a_spro')));" \
+      "var_dump(is_callable(array('A', 'B::B::a_spri')));" \
+      "var_dump(is_callable(array('A', 'B::B::a_pub')));" \
+      "var_dump(is_callable(array('A', 'B::B::a_pro')));" \
+      "var_dump(is_callable(array('A', 'B::B::a_pri')));" \
+      "var_dump(is_callable(array('B', 'a_spub')));" \
+      "var_dump(is_callable(array('B', 'a_spro')));" \
+      "var_dump(is_callable(array('B', 'a_spri')));" \
+      "var_dump(is_callable(array('B', 'a_pub')));" \
+      "var_dump(is_callable(array('B', 'a_pro')));" \
+      "var_dump(is_callable(array('B', 'a_pri')));" \
+      "var_dump(is_callable(array('B', 'A::a_spub')));" \
+      "var_dump(is_callable(array('B', 'A::a_spro')));" \
+      "var_dump(is_callable(array('B', 'A::a_spri')));" \
+      "var_dump(is_callable(array('B', 'A::a_pro')));" \
+      "var_dump(is_callable(array('B', 'A::a_pri')));" \
+      "var_dump(is_callable(array('B', 'A::A::a_spub')));" \
+      "var_dump(is_callable(array('B', 'A::A::a_spro')));" \
+      "var_dump(is_callable(array('B', 'A::A::a_spri')));" \
+      "var_dump(is_callable(array('B', 'A::A::a_pro')));" \
+      "var_dump(is_callable(array('B', 'A::A::a_pri')));" \
+      "var_dump(is_callable(array('B', 'C::a_spub')));" \
+      "var_dump(is_callable(array('B', 'C::a_spro')));" \
+      "var_dump(is_callable(array('B', 'C::a_spri')));" \
+      "var_dump(is_callable(array('B', 'C::a_pub')));" \
+      "var_dump(is_callable(array('B', 'C::a_pro')));" \
+      "var_dump(is_callable(array('B', 'C::a_pri')));" \
+      "var_dump(is_callable(array('B', 'B::C::a_spub')));" \
+      "var_dump(is_callable(array('B', 'B::C::a_spro')));" \
+      "var_dump(is_callable(array('B', 'B::C::a_spri')));" \
+      "var_dump(is_callable(array('B', 'B::C::a_pub')));" \
+      "var_dump(is_callable(array('B', 'B::C::a_pro')));" \
+      "var_dump(is_callable(array('B', 'B::C::a_pri')));" \
+      "var_dump(is_callable(array('B', 'b_spub')));" \
+      "var_dump(is_callable(array('B', 'b_spro')));" \
+      "var_dump(is_callable(array('B', 'b_spri')));" \
+      "var_dump(is_callable(array('B', 'b_pub')));" \
+      "var_dump(is_callable(array('B', 'b_pro')));" \
+      "var_dump(is_callable(array('B', 'b_pri')));" \
+      "var_dump(is_callable(array('B', 'B::a_spub')));" \
+      "var_dump(is_callable(array('B', 'B::a_spro')));" \
+      "var_dump(is_callable(array('B', 'B::a_spri')));" \
+      "var_dump(is_callable(array('B', 'B::a_pub')));" \
+      "var_dump(is_callable(array('B', 'B::a_pro')));" \
+      "var_dump(is_callable(array('B', 'B::a_pri')));" \
+      "var_dump(is_callable(array('B', 'B::A::a_spub')));" \
+      "var_dump(is_callable(array('B', 'B::A::a_spro')));" \
+      "var_dump(is_callable(array('B', 'B::A::a_spri')));" \
+      "var_dump(is_callable(array('B', 'B::A::a_pro')));" \
+      "var_dump(is_callable(array('B', 'B::A::a_pri')));" \
+      "var_dump(is_callable(array('B', 'B::B::a_spub')));" \
+      "var_dump(is_callable(array('B', 'B::B::a_spro')));" \
+      "var_dump(is_callable(array('B', 'B::B::a_spri')));" \
+      "var_dump(is_callable(array('B', 'B::B::a_pub')));" \
+      "var_dump(is_callable(array('B', 'B::B::a_pro')));" \
+      "var_dump(is_callable(array('B', 'B::B::a_pri')));" \
+      "var_dump(is_callable(array(new A(), 'a_spub')));" \
+      "var_dump(is_callable(array(new A(), 'a_spro')));" \
+      "var_dump(is_callable(array(new A(), 'a_spri')));" \
+      "var_dump(is_callable(array(new A(), 'a_pub')));" \
+      "var_dump(is_callable(array(new A(), 'a_pro')));" \
+      "var_dump(is_callable(array(new A(), 'a_pri')));" \
+      "var_dump(is_callable(array(new A(), 'A::a_spub')));" \
+      "var_dump(is_callable(array(new A(), 'A::a_spro')));" \
+      "var_dump(is_callable(array(new A(), 'A::a_spri')));" \
+      "var_dump(is_callable(array(new A(), 'A::a_pro')));" \
+      "var_dump(is_callable(array(new A(), 'A::a_pri')));" \
+      "var_dump(is_callable(array(new A(), 'A::A::a_spub')));" \
+      "var_dump(is_callable(array(new A(), 'A::A::a_spro')));" \
+      "var_dump(is_callable(array(new A(), 'A::A::a_spri')));" \
+      "var_dump(is_callable(array(new A(), 'A::A::a_pro')));" \
+      "var_dump(is_callable(array(new A(), 'A::A::a_pri')));" \
+      "var_dump(is_callable(array(new A(), 'C::a_spub')));" \
+      "var_dump(is_callable(array(new A(), 'C::a_spro')));" \
+      "var_dump(is_callable(array(new A(), 'C::a_spri')));" \
+      "var_dump(is_callable(array(new A(), 'C::a_pub')));" \
+      "var_dump(is_callable(array(new A(), 'C::a_pro')));" \
+      "var_dump(is_callable(array(new A(), 'C::a_pri')));" \
+      "var_dump(is_callable(array(new A(), 'A::C::a_spub')));" \
+      "var_dump(is_callable(array(new A(), 'A::C::a_spro')));" \
+      "var_dump(is_callable(array(new A(), 'A::C::a_spri')));" \
+      "var_dump(is_callable(array(new A(), 'A::C::a_pub')));" \
+      "var_dump(is_callable(array(new A(), 'A::C::a_pro')));" \
+      "var_dump(is_callable(array(new A(), 'A::C::a_pri')));" \
+      "var_dump(is_callable(array(new A(), 'b_spub')));" \
+      "var_dump(is_callable(array(new A(), 'b_spro')));" \
+      "var_dump(is_callable(array(new A(), 'b_spri')));" \
+      "var_dump(is_callable(array(new A(), 'b_pub')));" \
+      "var_dump(is_callable(array(new A(), 'b_pro')));" \
+      "var_dump(is_callable(array(new A(), 'b_pri')));" \
+      "var_dump(is_callable(array(new A(), 'B::a_spub')));" \
+      "var_dump(is_callable(array(new A(), 'B::a_spro')));" \
+      "var_dump(is_callable(array(new A(), 'B::a_spri')));" \
+      "var_dump(is_callable(array(new A(), 'B::a_pub')));" \
+      "var_dump(is_callable(array(new A(), 'B::a_pro')));" \
+      "var_dump(is_callable(array(new A(), 'B::a_pri')));" \
+      "var_dump(is_callable(array(new A(), 'B::A::a_spub')));" \
+      "var_dump(is_callable(array(new A(), 'B::A::a_spro')));" \
+      "var_dump(is_callable(array(new A(), 'B::A::a_spri')));" \
+      "var_dump(is_callable(array(new A(), 'B::A::a_pro')));" \
+      "var_dump(is_callable(array(new A(), 'B::A::a_pri')));" \
+      "var_dump(is_callable(array(new B(), 'b_spub')));" \
+      "var_dump(is_callable(array(new B(), 'b_spro')));" \
+      "var_dump(is_callable(array(new B(), 'b_spri')));" \
+      "var_dump(is_callable(array(new B(), 'b_pub')));" \
+      "var_dump(is_callable(array(new B(), 'b_pro')));" \
+      "var_dump(is_callable(array(new B(), 'b_pri')));" \
+      "var_dump(is_callable(array(new B(), 'B::b_spub')));" \
+      "var_dump(is_callable(array(new B(), 'B::b_spro')));" \
+      "var_dump(is_callable(array(new B(), 'B::b_spri')));" \
+      "var_dump(is_callable(array(new B(), 'B::b_pro')));" \
+      "var_dump(is_callable(array(new B(), 'B::b_pri')));" \
+      "var_dump(is_callable(array(new B(), 'B::B::b_spub')));" \
+      "var_dump(is_callable(array(new B(), 'B::B::b_spro')));" \
+      "var_dump(is_callable(array(new B(), 'B::B::b_spri')));" \
+      "var_dump(is_callable(array(new B(), 'B::B::b_pro')));" \
+      "var_dump(is_callable(array(new B(), 'B::B::b_pri')));" \
+      "var_dump(is_callable(array(new B(), 'C::b_spub')));" \
+      "var_dump(is_callable(array(new B(), 'C::b_spro')));" \
+      "var_dump(is_callable(array(new B(), 'C::b_spri')));" \
+      "var_dump(is_callable(array(new B(), 'C::b_pub')));" \
+      "var_dump(is_callable(array(new B(), 'C::b_pro')));" \
+      "var_dump(is_callable(array(new B(), 'C::b_pri')));" \
+      "var_dump(is_callable(array(new B(), 'B::C::b_spub')));" \
+      "var_dump(is_callable(array(new B(), 'B::C::b_spro')));" \
+      "var_dump(is_callable(array(new B(), 'B::C::b_spri')));" \
+      "var_dump(is_callable(array(new B(), 'B::C::b_pub')));" \
+      "var_dump(is_callable(array(new B(), 'B::C::b_pro')));" \
+      "var_dump(is_callable(array(new B(), 'B::C::b_pri')));" \
+      "var_dump(is_callable(array(new B(), 'a_spub')));" \
+      "var_dump(is_callable(array(new B(), 'a_spro')));" \
+      "var_dump(is_callable(array(new B(), 'a_spri')));" \
+      "var_dump(is_callable(array(new B(), 'a_pub')));" \
+      "var_dump(is_callable(array(new B(), 'a_pro')));" \
+      "var_dump(is_callable(array(new B(), 'a_pri')));" \
+      "var_dump(is_callable(array(new B(), 'A::B::b_spub')));" \
+      "var_dump(is_callable(array(new B(), 'A::B::b_spro')));" \
+      "var_dump(is_callable(array(new B(), 'A::B::b_spri')));" \
+      "var_dump(is_callable(array(new B(), 'A::B::b_pro')));" \
+      "var_dump(is_callable(array(new B(), 'A::B::b_pri')));" \
+
+
+  MVCR("<?php "
+      "function test() {"
+        TEST_BODY_FOR_IS_CALLABLE
+      "}"
+      "class EXT {"
+      "  static public function ext_spub() {"
+      "    test();"
+           TEST_BODY_FOR_IS_CALLABLE
+      "  }"
+      "}"
+      "class A {"
+      "  static public function a_spub() {"
+      "    test();"
+      "  }"
+      "  static protected function a_spro() {"
+      "    test();"
+      "  }"
+      "  static private function a_spri() {"
+      "    test();"
+      "  }"
+      "  public function a_pub() {"
+      "    test();"
+      "  }"
+      "  protected function a_pro() {"
+      "    test();"
+      "  }"
+      "  private function a_pri() {"
+      "    test();"
+      "  }"
+      "  public static function a_sf() {"
+      "    test();"
+      "    self::a_spub();"
+      "    self::a_spro();"
+      "    self::a_spri();"
+      "    self::a_pub();"
+      "    self::a_pro();"
+      "    self::a_pri();"
+      "  }"
+      "  public function a_f() {"
+      "    test();"
+      "    self::a_spub();"
+      "    self::a_spro();"
+      "    self::a_spri();"
+      "    self::a_pub();"
+      "    self::a_pro();"
+      "    self::a_pri();"
+      "  }"
+      "};"
+      "class B extends A {"
+      "  static public function b_spub() {"
+      "    test();"
+      "  }"
+      "  static protected function b_spro() {"
+      "    test();"
+      "  }"
+      "  static private function b_spri() {"
+      "    test();"
+      "  }"
+      "  public function b_pub() {"
+      "    test();"
+      "  }"
+      "  protected function b_pro() {"
+      "    test();"
+      "  }"
+      "  private function b_pri() {"
+      "    test();"
+      "  }"
+      "  public static function b_sf() {"
+      "    test();"
+      "    self::b_spub();"
+      "    self::b_spro();"
+      "    self::b_spri();"
+      "    self::b_pub();"
+      "    self::b_pro();"
+      "    self::b_pri();"
+      "  }"
+      "  public function b_f() {"
+      "    test();"
+      "    self::b_spub();"
+      "    self::b_spro();"
+      "    self::b_spri();"
+      "    self::b_pub();"
+      "    self::b_pro();"
+      "    self::b_pri();"
+      "  }"
+      "}"
+      "EXT::ext_spub();"
+      "test();"
+           TEST_BODY_FOR_IS_CALLABLE
+      "var_dump(is_callable('A::b_spub'));"
+      "var_dump(is_callable('A::b_spro'));"
+      "var_dump(is_callable('A::b_spri'));"
+      "var_dump(is_callable('A::b_pub'));"
+      "var_dump(is_callable('A::b_pro'));"
+      "var_dump(is_callable('A::b_pri'));"
+      "B::a_sf();"
+      "B::b_sf();"
+      "$obj = new B;"
+      "$obj->a_sf();"
+      "$obj->b_sf();"
+      "$obj->a_f();"
+      "$obj->b_f();");
   return true;
 }
 
@@ -1906,6 +2687,10 @@ bool TestCodeRun::TestClassMethod() {
       "    echo $classname . \"::\" . $s;"
       "  }"
       "}");
+  MVCR("<?php class A { "
+      "  function f() { return \"hello\" ;}"
+      "}; "
+      "$g = new A(); echo $g->{'f'}();");
 
   return true;
 }
@@ -2004,6 +2789,40 @@ bool TestCodeRun::TestObjectMagicMethod() {
       "$foo = unserialize(\"O:3:\\\"foo\\\":1:{s:6:\\\"public\\\";s:6:\\\"public\\\";}\");"
       "var_dump($foo);");
 
+  MVCR("<?php "
+      "class b {"
+      "  private $f2 = 10;"
+      "  function t2() {"
+      "    var_dump($this->f2);"
+      "  }"
+      "}"
+      "class c extends b{"
+      "  private $f = 10;"
+      "  private static $sf = 10;"
+      "  function __get($n) {"
+      "    echo 'got';"
+      "    return 1;"
+      "  }"
+      "  function t() {"
+      "    var_dump($this->f2);"
+      "  }"
+      "}"
+      "$x = new c;"
+      "var_dump($x->f);"
+      "$x->t();"
+      "$x->t2();");
+
+#if 0
+  MVCR("<?php "
+       "class foo"
+       "{"
+       "  public function __get($n)  { return 'foo'; }"
+       "  public function __set($n,$v)  { }"
+       "}"
+       "$foo = new foo; $a = $foo->x = 'baz'; $b = $foo->x .= 'bar';"
+       "var_dump($a,$b);");
+#endif
+
   return true;
 }
 
@@ -2053,6 +2872,14 @@ bool TestCodeRun::TestNewObjectExpression() {
       "foreach(($a=new A()) as $v);"
       "$a->num = 1;"
       "print($a->num);");
+
+  MVCR("<?php class A {} class B extends A { "
+       "static function foo() { return new self();} } "
+       "var_dump(B::foo());");
+
+  MVCR("<?php class A {} class B extends A { "
+       "static function foo() { return new parent();} } "
+       "var_dump(B::foo());");
 
   return true;
 }
@@ -2497,6 +3324,17 @@ bool TestCodeRun::TestComparisons() {
   COMPARE_OP(>);
   COMPARE_OP(<=);
   COMPARE_OP(>=);
+
+  MVCR("<?php "
+      "class c {"
+      "  public $x = 0;"
+      "}"
+      "$x = new c;"
+      "$x->x = 1;"
+      "$y = new c;"
+      "var_dump($x > $y);"
+      "var_dump(array($x) == array($y));");
+
   return true;
 }
 
@@ -2536,6 +3374,53 @@ bool TestCodeRun::TestUnset() {
       "f4();");
   MVCR("<?php class A { public $arr;} $obj = new A; $obj->arr[] = 'test';"
       "var_dump($obj->arr); unset($obj->arr); var_dump($obj->arr);");
+  MVCR("<?php function test() {$a=array(1,2,3); unset($a[0]);}");
+  MVCR("<?php "
+      "function foo() {"
+      "  $a = 1;"
+      "  $b = 2;"
+      "  $c = 3;"
+      "  unset($a, $b, $c);"
+      "  var_dump($b);"
+      "}"
+      "foo();");
+  MVCR("<?php "
+      "$a = 1;"
+      "function foo() {"
+      "  $GLOBALS['foo'] = 1;"
+      "  unset($GLOBALS['foo']);"
+      "  var_dump(array_key_exists('foo', $GLOBALS));"
+      "  $g['foo'] = 1;"
+      "  unset($g['foo']);"
+      "  var_dump(array_key_exists('foo', $g));"
+      "  var_dump(array_key_exists('a', $GLOBALS));"
+      "  unset($GLOBALS['a']);"
+      "  var_dump(array_key_exists('a', $GLOBALS));"
+      "}"
+      "foo();");
+  MVCR("<?php "
+      "class A {"
+      "  var $a;"
+      "  public function __construct($p) {"
+      "    $this->a = $p;"
+      "  }"
+      "};"
+      "$obj = new A(1);"
+      "var_dump($obj);"
+      "unset($obj->a);"
+      "var_dump($obj);"
+      "$obj->a = 2;"
+      "var_dump($obj);"
+      "$obj->b = 3;"
+      "var_dump($obj);"
+      "unset($obj->b);"
+      "var_dump($obj);"
+      "$obj->a = 2;"
+      "var_dump($obj);"
+      "$obj->b = 3;"
+      "var_dump($obj);"
+      "unset($obj->a, $obj->b);"
+      "var_dump($obj);");
   return true;
 }
 
@@ -2638,7 +3523,6 @@ bool TestCodeRun::TestReference() {
         "$w = 3;"
         "foo(&$u, &$v, $w);"
         "var_dump($u, $v, $w);");
-
   // reference self assignment
   MVCR("<?php "
        "class A {"
@@ -2673,6 +3557,36 @@ bool TestCodeRun::TestReference() {
        "test2($v, $v);"
        "var_dump($v);");
 
+  // reference, parameter & assignment
+  MVCR("<?php "
+      "function test(&$some_ref) {"
+      "  $some_ref = 42;"
+      "}"
+      "test($some_ref = 1);"
+      "var_dump($some_ref);"
+      "$var = null;"
+      "test($var);"
+      "var_dump($var);"
+      "$var = null;"
+      "test($some_ref = $var);"
+      "var_dump($some_ref, $var);"
+      "$var = null;"
+      "test($some_ref = &$var);"
+      "var_dump($some_ref, $var);"
+      "function test2($some_ref) {"
+      "  $some_ref = 42;"
+      "}"
+      "test2($some_ref = 1);"
+      "var_dump($some_ref);"
+      "$var = null;"
+      "test2($var);"
+      "var_dump($var);"
+      "$var = null;"
+      "test2($some_ref = $var);"
+      "var_dump($some_ref, $var);"
+      "$var = null;"
+      "test2($some_ref = &$var);"
+      "var_dump($some_ref, $var);");
   return true;
 }
 
@@ -2774,6 +3688,16 @@ bool TestCodeRun::TestDynamicProperties() {
 
   MVCR("<?php class A { public $a = 1;} class B { public $a = 2;} "
       "$obj = 1; $obj = new A(); var_dump($obj->a);");
+
+  MVCR("<?php "
+      "class A { } "
+      "function f(&$a) { $a = 1000; } "
+      "$a = new A(); $f = 10; $a->$f = 100; var_dump($a); "
+      "var_dump((array)$a); "
+      "$f = 100; "
+      "f($a->$f); "
+      "foreach ($a as $k => &$v) { var_dump($k); $v = 1; } "
+      "var_dump($a); ");
   return true;
 }
 
@@ -2831,18 +3755,41 @@ bool TestCodeRun::TestDynamicFunctions() {
 
   Option::DynamicInvokeFunctions.insert("test1");
   Option::DynamicInvokeFunctions.insert("test2");
-  VCR("<?php "
+  MVCR("<?php "
       "function test1() { print __FUNCTION__;} "
       "function test2() { print __FUNCTION__;} "
       "fb_rename_function('test2', 'test3');"
-      "fb_rename_function('test1', 'test2'); test2();"
+      "fb_rename_function('test1', 'test2'); teSt2();"
+      "fb_rename_function('test2', 'test3'); teSt2();"
       );
+  MVCR("<?php\n"
+       "function one() { echo 'one';}\n"
+       "fb_rename_function('one', 'two');\n"
+       "fb_rename_function('two', 'three');\n"
+       "three();");
+  MVCR("<?php "
+       "function test1() { echo \"test1\n\"; }"
+       "function test3() { echo \"test3\n\"; }"
+       "function baz($test1, $test2) {"
+       "  var_dump(function_exists(\"Test1\"));"
+       "  var_dump(function_exists(\"tEst2\"));"
+       "  var_dump(function_exists($test1));"
+       "  var_dump(function_exists($test2));"
+       "}"
+       "baz(\"teSt1\", \"test2\");"
+       "fb_rename_function(\"test1\", \"test2\");"
+       "baz(\"TEst1\", \"test2\");"
+       "fb_rename_function(\"test3\", \"test1\");"
+       "baz(\"test1\", \"test2\");"
+       "test1();"
+       "test2();")
   Option::DynamicInvokeFunctions.clear();
 
   return true;
 }
 
 bool TestCodeRun::TestDynamicMethods() {
+  bool saveDynamic = Option::AllDynamic;
   Option::AllDynamic = true;
   MVCR("<?php "
       "class A { public function test() { print 'in A';} } "
@@ -2969,6 +3916,18 @@ bool TestCodeRun::TestDynamicMethods() {
       "$m = new z();"
       "$m->q();");
 
+  MVCR("<?php "
+       "class A {"
+       "  function foo(&$test) {"
+       "    $test = 10;"
+       "  }"
+       "}"
+       "$obj = new A();"
+       "$method = 'foo';"
+       "$obj->$method($aa[3]);"
+       "var_dump($aa);");
+
+  Option::AllDynamic = saveDynamic;
   return true;
 }
 
@@ -3148,6 +4107,288 @@ bool TestCodeRun::TestVolatile() {
       "foo('MyInterface');"
       "foo('MyInterface');");
 #endif
+  // Autoloading
+  MVCR("<?php "
+       "function z() {"
+       "  var_dump('__autoload');"
+       "  var_dump(class_exists('cNew'));"
+       "  var_dump(class_exists('cNew_r'));"
+       "  var_dump(class_exists('cNew_d'));"
+       "  var_dump(class_exists('csm'));"
+       "  var_dump(class_exists('csm_r'));"
+       "  var_dump(class_exists('CcOn'));"
+       "  var_dump(class_exists('CcOn_r'));"
+       "  var_dump(class_exists('CcOn_d'));"
+       "  var_dump(class_exists('csmeth'));"
+       "  var_dump(class_exists('csmeth_r'));"
+       "  var_dump(class_exists('csmeth_d'));"
+       "  var_dump(class_exists('cpar'));"
+       "  var_dump(class_exists('cpar_r'));"
+       "  var_dump(class_exists('cref'));"
+       "  var_dump(class_exists('cex'));"
+       "}"
+       "function test() {"
+       "  function t1() {"
+       "    new cNew();"
+       "  }"
+       "  t1();"
+       "  function t2() {"
+       "    new cNew_r();"
+       "  }"
+       "  t2();"
+       "  function t4() {"
+       "    $x = 'cNew_d';"
+       "    new $x();"
+       "  }"
+       "  t4();"
+       "  function t5() {"
+       "    var_dump(csm::$mem);"
+       "  }"
+       "  t5();"
+       "  function t6() {"
+       "    var_dump(csm_r::$mem);"
+       "  }"
+       "  t6();"
+       "  function t7() {"
+       "    var_dump(CcOn::C);"
+       "  }"
+       "  t7();"
+       "  function t8() {"
+       "    var_dump(CcOn_r::C);"
+       "  }"
+       "  t8();"
+       "  function t9() {"
+       "    var_dump(constant('CcOn_d::C'));"
+       "  }"
+       "  t9();"
+       "  function t10() {"
+       "    csmeth::m();"
+       "  }"
+       "  t10();"
+       "  function t11() {"
+       "    csmeth_r::m();"
+       "  }"
+       "  t11();"
+       "  function t12() {"
+       "    call_user_func(array('csmeth_d', 'm'));"
+       "  }"
+       "  t12();"
+       "  function t13() {"
+       "    class a extends cpar {}"
+       "    new a;"
+       "  }"
+       "  t13();"
+       "  function t14() {"
+       "    class b extends cpar_r {}"
+       "    new b;"
+       "  }"
+       "  t14();"
+       "  function t15() {"
+       "    new ReflectionClass('cref');"
+       "  }"
+       "  t15();"
+       "  function t16() {"
+       "    var_dump(class_exists('cex'));"
+       "  }"
+       "  t16();"
+       "  function t17() {"
+       "    var_dump(class_exists('cex_r'));"
+       "  }"
+       "  t17();"
+       "}"
+       "test();"
+       "z();"
+       "function __autoload($name) {"
+       "  var_dump('autoload ' . $name);"
+       "  switch ($name) {"
+       "    case 'cNew':"
+       "      class cNew {}"
+       "      break;"
+       "    case 'cNew_r':"
+       "      class cNew_r {}"
+       "      if (false) {"
+       "        class cNew_r {}"
+       "      }"
+       "      break;"
+       "    case 'cNew_d':"
+       "      class cNew_d {}"
+       "      break;"
+       "    case 'csm':"
+       "      class csm {"
+       "        public static $mem = 1;"
+       "      }"
+       "      break;"
+       "    case 'csm_r':"
+       "      class csm_r {"
+       "        public static $mem = 1;"
+       "      }"
+       "      if (false) {"
+       "        class csm_r {}"
+       "      }"
+       "      break;"
+       "    case 'CcOn':"
+       "      class CcOn {"
+       "        const C = 2;"
+       "      }"
+       "      break;"
+       "    case 'CcOn_r':"
+       "      class CcOn_r {"
+       "        const C = 2;"
+       "      }"
+       "      if (false) {"
+       "        class CcOn_r {}"
+       "      }"
+       "      break;"
+       "    case 'CcOn_d':"
+       "      class CcOn_d {"
+       "        const C = 2;"
+       "      }"
+       "      break;"
+       "    case 'csmeth':"
+       "      class csmeth {"
+       "        public static function m() { echo '1\n'; }"
+       "      }"
+       "      break;"
+       "    case 'csmeth_r':"
+       "      class csmeth_r {"
+       "        public static function m() { echo '1'; }"
+       "      }"
+       "      if (false) {"
+       "        class csmeth_r {}"
+       "      }"
+       "      break;"
+       "    case 'csmeth_d':"
+       "      class csmeth_d {"
+       "        public static function m() { echo '1'; }"
+       "      }"
+       "      break;"
+       "    case 'cpar':"
+       "      class cpar {}"
+       "      break;"
+       "    case 'cpar_r':"
+       "      class cpar_r {}"
+       "      if (false) {"
+       "        class cpar_r {}"
+       "      }"
+       "      break;"
+       "    case 'cref':"
+       "      class cref {}"
+       "      break;"
+       "    case 'cex':"
+       "      class cex {}"
+       "      break;"
+       "    case 'cex_r':"
+       "      class cex_r {}"
+       "      if (false) {"
+       "        class cex_r {}"
+       "      }"
+       "      break;"
+       "  }"
+       "}");
+  MVCR("<?php "
+       "class_exists('c');"
+       "class c {"
+       "  const A = 'a';"
+       "  const B = 'b';"
+       "  const C = 'c';"
+       "  const D = 'd';"
+       "  public static $S = array("
+       "    self::A,"
+       "    self::B,"
+       "    self::C,"
+       "    self::D);"
+       "}"
+       "var_dump(c::$S);");
+  MVCR("<?php "
+       "class B {}"
+       "class A extends B {"
+       "  static function make() {"
+       "    $b = new parent();"
+       "    $a = new self();"
+       "  }"
+       "}"
+       "if (false) { class A {};}"
+       "A::make();");
+  MVCR("<?php "
+      "function foo($a) {"
+      "  if ($a) {"
+      "    class A {}"
+      "  }"
+      "}"
+      "foo(true);"
+      "function bar() {"
+      "  if (class_exists('A')) {"
+      "    class C extends A { }"
+      "    $obj = new C;"
+      "    var_dump($obj);"
+      "  } else {"
+      "    var_dump('no');"
+      "  }"
+      "}"
+      "bar();");
+  MVCR("<?php "
+      "function foo($a) {"
+      "  if ($a) {"
+      "    interface A {}"
+      "  }"
+      "}"
+      "foo(true);"
+      "function bar() {"
+      "  if (interface_exists('A')) {"
+      "    class C implements A { }"
+      "    $obj = new C;"
+      "    var_dump($obj);"
+      "  } else {"
+      "    var_dump('no');"
+      "  }"
+      "}"
+      "bar();");
+
+  MVCR("<?php "
+      "if (class_exists('B')) {"
+      "  class A extends B {"
+      "    public function f() {"
+      "      var_dump('A');"
+      "    }"
+      "  }"
+      "}"
+      "class B extends C {"
+      "  public function f() {"
+      "    var_dump('B');"
+      "  }"
+      "}"
+      "class C {}"
+      "if (class_exists('A')) {"
+      "  $obj = new A;"
+      "  $obj->f();"
+      "} else {"
+      "  var_dump('correct');"
+      "}");
+  MVCR("<?php "
+      "function wrapper($a) {"
+      "  if ($a) {"
+      "    class C {"
+      "      private static $v;"
+      "      public static function f() {"
+      "        return self::$v;"
+      "      }"
+      "    }"
+      "  }"
+      "}"
+      "class C2 {"
+      "  private static $v;"
+      "  public static function f() {"
+      "    return self::$v;"
+      "  }"
+      "}"
+      "function foo($a) {"
+      "  if ($a == 0) return is_callable(array('C', 'f'), null);"
+      "  return is_callable(array('C2', 'f'), null);"
+      "}"
+      "wrapper(false);"
+      "var_dump(foo(0));"
+      "var_dump(foo(1));"
+      "if (class_exists('C')) var_dump('yes'); else var_dump('no');");
   return true;
 }
 
@@ -3306,7 +4547,7 @@ bool TestCodeRun::TestCompilation() {
   // [][]
   MVCR("<?php $a['a']['b'] = 'test'; var_dump($a['a']['b']);");
 
-  // testing Variant -> p_class conversion
+  // testing Variant to specific class conversion
   MVCR("<?php class A { function test(A $a) { $a->foo();} "
       "function foo() { print 'foo';}}");
 
@@ -3325,6 +4566,33 @@ bool TestCodeRun::TestCompilation() {
       "  var_dump($p1, $p2);"
       "}"
       "foo();");
+
+  MVCR("<?php "
+       "$n = floor(1.0);"
+       "var_dump(($n > 0) ? $n : $n + 1);");
+
+  MVCR("<?php "
+       "class X {"
+       "  function test($a, $b, $c) {"
+       "    return $a != $b;"
+       "  }"
+       "}"
+       "function test($a) {"
+       "  $x = new X;"
+       "  return $a ? $x->test(1, 2) : false;"
+       "}"
+       "var_dump(test(1));");
+
+  MVCR("<?php function bug1($a, $b) {"
+       "foreach ($b[$a++ + $a++] as &$x) { echo $x; }}");
+
+  MVCR("<?php "
+       "function f($a, $b, $c) { return 'hello'; }"
+       "function test($a) {"
+       "  $x = ($a->foo = f($b++, $b++, $b++)) . f(1,2,3);"
+       "  return $x;"
+       "}");
+
   return true;
 }
 
@@ -3591,6 +4859,17 @@ bool TestCodeRun::TestReflectionClasses() {
       "$i = new ReflectionClass('Ioo');"
       "var_dump($c->getFileName() !== '');"
       "var_dump($i->getFileName() !== '');");
+  MVCR("<?php "
+       "class C {"
+       "public function mE() {"
+       "echo 'fail';"
+       "}"
+       "}"
+       "$ref = new ReflectionClass('C');"
+       "var_dump($ref->hasMethod('mE'));"
+       "var_dump($ref->hasMethod('me'));"
+       "$m = $ref->getMethod('me');"
+       "var_dump($m->getName());");
 
   return true;
 }
@@ -3659,6 +4938,141 @@ bool TestCodeRun::TestExtMisc() {
   MVCR("<?php var_dump(pack('nvc*', 0x1234, 0x5678, 65, 66));");
   MVCR("<?php var_dump(unpack('nfrist/vsecond/c2chars', "
       "pack('nvc*', 0x1234, 0x5678, 65, 66)));");
+  MVCR("<?php $d=fopen('test/test_code_run.cpp', 'r');"
+       "var_dump(is_object($d));var_dump(is_resource($d));");
+  return true;
+}
+
+bool TestCodeRun::TestInvalidArgument() {
+  MVCR("<?php "
+      "var_dump(fb_rename_function('', ''));"
+
+      "$ch = curl_init();"
+      "var_dump(curl_setopt($ch, -1, 'http://www.example.com/'));"
+      "curl_close($ch);"
+
+      "var_dump(hotprofiler_enable(-1));"
+
+      "var_dump(iconv_set_encoding('internal_encoding',"
+      "  str_pad('invalid-charset', 64)));"
+      "var_dump(iconv_mime_decode("
+      "  'Subject: =?UTF-8?B?UHLDvGZ1bmcgUHLDvGZ1bmc=?=',"
+      "  0, str_pad('invalid-charset', 64)));"
+      "var_dump(iconv_mime_decode_headers("
+      " 'Subject: =?UTF-8?B?UHLDvGZ1bmcgUHLDvGZ1bmc=?=', 0,"
+      "  str_pad('invalid-charset', 64)));"
+      "var_dump(iconv_strlen('UHLDvGZ1bmcgUHLDvGZ1bmc=',"
+      "  str_pad('invalid-charset', 64)));"
+      "$subject = 'Subject: =?UTF-8?B?UHLDvGZ1bmcgUHLDvGZ1bmc=?=';"
+      "var_dump(iconv_strpos($subject,"
+      " 'H', 0, str_pad('invalid-charset', 64)));"
+      "var_dump(iconv_strrpos($subject,"
+      " 'H', str_pad('invalid-charset', 64)));"
+      "var_dump(iconv_substr('AB',0,1, str_pad('invalid-charset', 64)));"
+      "$preferences = array("
+      "  'output-charset' => 'UTF-8',"
+      "  'line-length' => 76,"
+      "  'line-break-chars' => '\n'"
+      ");"
+      "$preferences['scheme'] = 'Q';"
+      "$preferences['input-charset'] = str_pad('invalid-charset', 64);"
+      "var_dump(iconv_mime_encode('Subject', 'Prüfung Prüfung',"
+      "  $preferences));"
+      "$preferences['input-charset'] = 'ISO-8859-1';"
+      "$preferences['output-charset'] = str_pad('invalid-charset', 64);"
+      "var_dump(iconv_mime_encode('Subject', 'Prüfung Prüfung',"
+      "  $preferences));"
+      "var_dump(iconv_set_encoding('internal_encoding',"
+      "                            str_pad('invalid-charset', 64)));"
+      "var_dump(iconv('UTF-8', str_pad('invalid-charset', 64), ''));"
+      "var_dump(iconv(str_pad('invalid-charset', 64), 'UTF-8', ''));"
+
+      "var_dump(time_nanosleep(-1, 0));"
+      "var_dump(time_nanosleep(0, -1));"
+      "var_dump(time_sleep_until(0));"
+
+      "var_dump(gzcompress('abc', -2));"
+      "var_dump(gzdeflate('abc', -2));"
+
+      "var_dump(http_build_query(1));"
+      "var_dump(parse_url('http://www.example.com', 100));"
+
+      "var_dump(mysql_fetch_array(null, 0));"
+      "var_dump(mysql_fetch_object(null, 'stdClass'));"
+
+      "var_dump(dns_check_record('127.0.0.1', 'INVALID_TYPE'));"
+
+      "var_dump(assert_options(-1));"
+
+      "var_dump(simplexml_load_string('', 'INVALID_CLASS'));"
+      "var_dump(simplexml_load_string('', 'stdClass'));"
+
+      "var_dump(stream_get_contents('', -1));"
+
+      "$fp = fopen('test/test_ext_file.txt', 'r');"
+      "var_dump(fgets($fp, -1));"
+      "var_dump(fputcsv($fp, array(), 'abc'));"
+      "var_dump(fputcsv($fp, array(), 'a', 'def'));"
+      "var_dump(fgetcsv($fp, array(), 'abc'));"
+      "var_dump(fgetcsv($fp, array(), 'a', 'def'));"
+      "fclose($fp);"
+      "$tmpfname = tempnam('', str_repeat('a', 128));"
+      "var_dump(strlen(basename($tmpfname)));"
+      "unlink($tmpfname);"
+      "$tmpfname = tempnam('', '/var/www' . str_repeat('a', 128));"
+      "var_dump(strlen(basename($tmpfname)));"
+      "unlink($tmpfname);"
+
+      "$ar1 = array(10, 100, 100, 0);"
+      "$ar2 = array(1, 3, 2);"
+      "var_dump(array_multisort($ar1, $ar2));"
+
+      "$phrase  = 'eat fruits, vegetables, and fiber every day.';"
+      "$healthy = array('fruits', 'vegetables');"
+      "$yummy   = array('pizza', 'beer', 'ice cream');"
+      "var_dump(str_replace($healthy, $yummy, $phrase));"
+      "var_dump(str_replace('ll', $yummy, 'good golly miss molly!',"
+      "                     $count));"
+      "var_dump(setlocale(LC_ALL, array('de_DE@euro', 'de_DE', 'deu_deu'),"
+      "                   array(1, 2)));"
+      "var_dump(setlocale(LC_ALL, str_pad('a', 255)));"
+
+      "var_dump(pack(\"\\xf4\", 0x1234, 0x5678, 65, 66));"
+      "var_dump(pack(\"x5\", 0x1234, 0x5678, 65, 66));"
+      "var_dump(pack(\"h\", -0x1234));"
+      "var_dump(pack(\"h\", 12345678900));"
+      "var_dump(unpack(\"\\xf4\", \"0x1234\"));"
+
+      "var_dump(sscanf('foo', '[%s', $id, $first, $last));"
+      "var_dump(sscanf('foo', '%z', $id, $first, $last));"
+      "var_dump(sscanf(\"SN/abc\", \"SN/%d%d\", $out));"
+      "var_dump($out);"
+      "var_dump(sscanf(\"SN/abc\", \"\", $out));"
+      "var_dump($out);"
+
+      "var_dump(printf('%$', 3));"
+      "var_dump(vsprintf('%$', 3));"
+      "var_dump(sprintf('%$', 3));"
+      "var_dump(vsprintf('%$', 3));"
+
+      "var_dump(str_word_count('abc', 2, '...'));"
+      "var_dump(str_word_count('abc', 2, 'b..a'));"
+      "var_dump(str_word_count('abc', 2, 'a..b..c'));"
+
+      "var_dump(base_convert('05678', 8, 37));"
+
+      "var_dump(convert_cyr_string('abc', 'y', 'z'));"
+
+      "var_dump(money_format('%abc', 1.33));"
+      "var_dump(money_format('%i%i', 1.33));"
+
+      "var_dump(str_pad('abc', 10, '', 100));"
+      "var_dump(str_pad('abc', 10, ' ', 100));"
+
+      "var_dump(wordwrap('', 75, '', true));"
+      "var_dump(wordwrap(null, 75, '', true));"
+      "var_dump(wordwrap('abc', 75, '', true));"
+      "var_dump(wordwrap('abc', 0, '', true));");
   return true;
 }
 
@@ -3667,10 +5081,32 @@ bool TestCodeRun::TestSuperGlobals() {
       "file_get_contents('http://example.com');"
       "var_dump(empty($http_response_header));"
       "} foo();");
+  MVCR("<?php "
+      "function test() {"
+      "  unset($GLOBALS['_SERVER']);"
+      "  $GLOBALS['_SERVER']['foo'] = 'bar';"
+      "  var_dump($_SERVER['foo']);"
+      "  }"
+      "test();");
   return true;
 }
 
 bool TestCodeRun::TestGlobalStatement() {
+  MVCR("<?php\n"
+       "global $c;\n"
+       "function &foo() {\n"
+       "  $a = 5;\n"
+       "  global $c;\n"
+       "  $c = &$a;\n"
+       "  var_dump($c);\n"
+       "  return $a;\n"
+       "}\n"
+       "$b = foo();\n"
+       "$b = 6;\n"
+       "var_dump($c);\n"
+       "var_dump($b);\n"
+      );
+
   MVCR("<?php "
       "$global_var = 10;"
       "function test_unset() {"
@@ -4648,14 +6084,13 @@ bool TestCodeRun::TestOperationTypes() {
       "}"
       "function bar() {"
       "  $a = 1;"
-      "  $a += foo(1);"
+      "  $a += foo();"
       "  var_dump($a);"
       "  $b = 1;"
-      "  $b -= foo(1);"
+      "  $b -= foo();"
       "  var_dump($b);"
       "}"
       "bar();");
-
   return true;
 }
 
@@ -5063,6 +6498,8 @@ bool TestCodeRun::TestLogicalOperators() {
        "$x = $x || foo(true);"
        "var_dump($x);");
 
+  MVCR("<?php var_dump($a || null);");
+
   return true;
 }
 
@@ -5181,6 +6618,13 @@ bool TestCodeRun::TestRedeclaredFunctions() {
       "}"
       "test();"
       );
+
+  MVCR("<?php "
+       "function test($a, $b, $c, $d, $e, $f, $g = 0) {"
+       "  return $a;"
+       "}"
+       "if (0) { function test($a) {} }"
+       "test(1,2,3,4,5,6);");
 
   return true;
 }
@@ -5493,6 +6937,57 @@ bool TestCodeRun::TestRedeclaredClasses() {
       "B::foo();"
       "C::foo();");
 
+  MVCR("<?php "
+       "$a = 1;"
+       "if ($a) {"
+       "interface A {}"
+       "} else {"
+       "interface A {}"
+       "}"
+       "if ($a) {"
+       "interface B extends A {}"
+       "} else {"
+       "interface B extends A {}"
+       "}"
+       "class Z implements B {}");
+  MVCR("<?php "
+       "$ok = 1;"
+       "if ($ok) {"
+       "class A {"
+       "const FOO = 'test';"
+       "public $a = A::FOO;"
+       "}"
+       "} else {"
+       "class A {"
+       "const FOO = 'test';"
+       "public $a = A::FOO;"
+       "}"
+       "}");
+  MVCR("<?php "
+       "class B {};"
+       "if (0) {"
+       "  class B {}"
+       "}"
+       "class A extends B {"
+       "  function __call($name,$args) { echo 'A::$name\n'; }"
+       "};"
+       "$a = new A;"
+       "call_user_func_array(array($a, 'foo'), array());");
+  MVCR("<?php "
+       "class A extends Exception { public $a = 1; }"
+       "if (0) {"
+       "  class A { public $a = 2; }"
+       "}"
+       "function test() {"
+       "try {"
+       "  throw new A;"
+       "} catch (A $e) {"
+       "  echo $e->a, '\n';"
+       "}} test();");
+  MVCR("<?php "
+       "class X extends Y {}"
+       "function test() { return new x;}");
+
   return true;
 }
 
@@ -5501,6 +6996,7 @@ bool TestCodeRun::TestClone() {
       "class A {"
       "  public $foo = 0;"
       "  public $fooref = 1;"
+      "  private $foopriv = 2;"
       "  function __clone() {"
       "    echo \"clone\n\";"
       "  }"
@@ -5668,6 +7164,7 @@ bool TestCodeRun::TestEvalOrder() {
       "$z = array(1, 2, $q);"
       );
   MVCR("<?php "
+      "error_reporting(E_ALL & ~E_NOTICE);"
       "function id($x,$y) { return $x; }"
       "function id1($x) { return $x; }"
       "function pid($x) { var_dump($x); return $x; }"
@@ -5737,8 +7234,159 @@ bool TestCodeRun::TestEvalOrder() {
       "$a = id(new A)->set($x);"
       "$x = id(new Q(1))->blah();"
       "var_dump($a);");
+  MVCR("<?php "
+      "$a = array(array($id = 1, $id), array($id = 2, $id));"
+      "var_dump($a);"
+      "$a = array(+($id = 1), $id, -($id = 2), $id, "
+      "           !($id = 3), $id, ~($id = 4), $id, "
+      "           isset($a[$id = 5]), $id);"
+      "var_dump($a);");
 
-  return true;
+  MVCR("<?php "
+       "function test($a)"
+       "{"
+       "  echo \"$a\\n\";"
+       "}"
+       "test(1, test(2), test(3, test(4), test(5)));");
+
+  MVCR("<?php "
+      "$v = 1;"
+      "function foo($a, $b, $c) {"
+      "  var_dump($a, $b, $c);"
+      "}"
+      "function bar($a) {"
+      "  foo($a, $a++, $a);"
+      "  $arr = array($a, $a++, $a);"
+      "  var_dump($arr);"
+      "}"
+      "bar($v);");
+  MVCR("<?php "
+      "$GLOBALS['t'] = 0;"
+      "$GLOBALS['f'] = 0;"
+      "$GLOBALS['i'] = 0;"
+      "$GLOBALS['d'] = 0;"
+      "$GLOBALS['v'] = 'a';"
+      "function t() {"
+      "  global $t;"
+      "  $t++;"
+      "  return true;"
+      "}"
+      "function f() {"
+      "  global $f;"
+      "  $f++;"
+      "  return false;"
+      "}"
+      "function i() {"
+      "  global $i;"
+      "  $i++;"
+      "  return 1;"
+      "}"
+      "function d() {"
+      "  global $d;"
+      "  $d++;"
+      "  return 3.14;"
+      "}"
+      "function v() {"
+      "  global $v;"
+      "  $v++;"
+      "  return $v;"
+      "}"
+      "function foo() {"
+      "  var_dump(t() + t());"
+      "  var_dump(t() + f());"
+      "  var_dump(t() + i());"
+      "  var_dump(t() + d());"
+      "  var_dump(t() + v());"
+      "  var_dump(f() + t());"
+      "  var_dump(f() + f());"
+      "  var_dump(f() + i());"
+      "  var_dump(f() + d());"
+      "  var_dump(f() + v());"
+      "  var_dump(i() + t());"
+      "  var_dump(i() + f());"
+      "  var_dump(i() + i());"
+      "  var_dump(i() + d());"
+      "  var_dump(i() + v());"
+      "  var_dump(d() + t());"
+      "  var_dump(d() + f());"
+      "  var_dump(d() + i());"
+      "  var_dump(d() + d());"
+      "  var_dump(d() + v());"
+      "  var_dump(v() + t());"
+      "  var_dump(v() + f());"
+      "  var_dump(v() + i());"
+      "  var_dump(v() + d());"
+      "  var_dump(v() + v());"
+      "  var_dump($GLOBALS['t'], $GLOBALS['f'],"
+      "           $GLOBALS['i'], $GLOBALS['d'],"
+      "           $GLOBALS['v']);"
+      "  var_dump(t() - t());"
+      "  var_dump(t() - f());"
+      "  var_dump(t() - i());"
+      "  var_dump(t() - d());"
+      "  var_dump(t() - v());"
+      "  var_dump(f() - t());"
+      "  var_dump(f() - f());"
+      "  var_dump(f() - i());"
+      "  var_dump(f() - d());"
+      "  var_dump(f() - v());"
+      "  var_dump(i() - t());"
+      "  var_dump(i() - f());"
+      "  var_dump(i() - i());"
+      "  var_dump(i() - d());"
+      "  var_dump(i() - v());"
+      "  var_dump(d() - t());"
+      "  var_dump(d() - f());"
+      "  var_dump(d() - i());"
+      "  var_dump(d() - d());"
+      "  var_dump(d() - v());"
+      "  var_dump(v() - t());"
+      "  var_dump(v() - f());"
+      "  var_dump(v() - i());"
+      "  var_dump(v() - d());"
+      "  var_dump(v() - v());"
+      "  var_dump($GLOBALS['t'], $GLOBALS['f'],"
+      "           $GLOBALS['i'], $GLOBALS['d'],"
+      "           $GLOBALS['v']);"
+      "  var_dump(t() * t());"
+      "  var_dump(t() * f());"
+      "  var_dump(t() * i());"
+      "  var_dump(t() * d());"
+      "  var_dump(t() * v());"
+      "  var_dump(f() * t());"
+      "  var_dump(f() * f());"
+      "  var_dump(f() * i());"
+      "  var_dump(f() * d());"
+      "  var_dump(f() * v());"
+      "  var_dump(i() * t());"
+      "  var_dump(i() * f());"
+      "  var_dump(i() * i());"
+      "  var_dump(i() * d());"
+      "  var_dump(i() * v());"
+      "  var_dump(d() * t());"
+      "  var_dump(d() * f());"
+      "  var_dump(d() * i());"
+      "  var_dump(d() * d());"
+      "  var_dump(d() * v());"
+      "  var_dump(v() * t());"
+      "  var_dump(v() * f());"
+      "  var_dump(v() * i());"
+      "  var_dump(v() * d());"
+      "  var_dump(v() * v());"
+      "  var_dump($GLOBALS['t'], $GLOBALS['f'],"
+      "           $GLOBALS['i'], $GLOBALS['d'],"
+      "           $GLOBALS['v']);"
+      "}"
+      "foo();");
+
+  MVCR("<?php "
+       "function f($a) { echo \"test$a\\n\"; return 1; }"
+       "function bug2($a, $b) {"
+       "  return isset($b[f($a++)], $b[f($a++)], $b[f($a++)]);"
+       "}"
+       "bug2(0, array());");
+
+ return true;
 }
 
 bool TestCodeRun::TestGetObjectVars() {
@@ -5847,6 +7495,29 @@ bool TestCodeRun::TestGetObjectVars() {
 }
 
 bool TestCodeRun::TestSerialization() {
+  MVCR("<?php\n"
+       "class A implements Serializable {\n"
+       "  public $__foo = true;\n"
+       "  public function serialize() {\n"
+       "    return null;\n"
+       "  }\n"
+       "  public function unserialize($serialized) {\n"
+       "  }\n"
+       "} var_dump(unserialize(serialize(new A())));");
+
+  MVCR("<?php\n"
+       "class A implements Serializable {\n"
+       "  public $__foo = true;\n"
+       "  public function serialize() {\n"
+       "    return serialize(array('a' => 'apple', 'b' => 'banana'));\n"
+       "  }\n"
+       "  public function unserialize($serialized) {\n"
+       "    $props = unserialize($serialized);\n"
+       "    $this->a = $props['a'];\n"
+       "    $this->b = $props['b'];\n"
+       "  }\n"
+       "} $obj = unserialize(serialize(new A())); var_dump($obj->b);");
+
   MVCR("<?php "
       "class Small {"
       "  private static $nc = 0;"
@@ -5917,6 +7588,20 @@ bool TestCodeRun::TestSerialization() {
       "var_dump($x2);"
       "echo serialize($x2) . '\n';");
 
+  MVCR("<?php "
+      "class b {"
+      "  private $foo = 1;"
+      "  private $bar = 2;"
+      "}"
+      "class b2 extends b {"
+      "  public $bar = 3;"
+      "}"
+      "$x = new b2;"
+      "$x->foo = 100;"
+      "var_dump((array)$x);"
+      "var_dump(serialize($x));"
+      "var_dump($x);");
+
   return true;
 }
 
@@ -5932,6 +7617,20 @@ bool TestCodeRun::TestJson() {
       "var_dump($a);");
   MVCR("<?php "
       "var_dump(json_decode(\"[\\\"a\\\",1,true,false,null]\", true));");
+
+  MVCR("<?php "
+       "class A {"
+       "  public $a = 'foo';"
+       "  protected $b = 'bar';"
+       "  private $c = 'blah';"
+       "  public function aaaa() {"
+       "    var_dump(json_encode($this));"
+       "  }"
+       "}"
+       "$obj = new A();"
+       "$obj->aaaa();");
+
+#if 0
   MVCR("<?php "
       "$a = array(1);"
       "$a[] = $a;"
@@ -6172,7 +7871,7 @@ bool TestCodeRun::TestJson() {
       "$a[] = &$a;"
       "var_dump(&$a);"
       "var_dump(json_encode(&$a));");
-
+#endif
   return true;
 }
 
@@ -6215,8 +7914,9 @@ bool TestCodeRun::TestThrift() {
       "    $this->buff .= $buff;"
       "  }"
       "  function read($n) {"
-      "    return substr($this->buff, $pos, $n);"
-      "    $pos += $n;"
+      "    $r = substr($this->buff, $this->pos, $n);"
+      "    $this->pos += $n;"
+      "    return $r;"
       "  }"
       "}"
       "class TestStruct {"
@@ -6619,6 +8319,19 @@ bool TestCodeRun::TestConcat() {
       "$a = 3;"
       "echo 0 + \"1$a\";");
 
+  MVCR("<?php "
+       "function test($a)"
+       "{"
+       "  if ($a > 0) {"
+       "    $sql = 'foo';"
+       "  } else {"
+       "    $sql = 'bar';"
+       "  }"
+       "  $sql .= ' baz';"
+       "  return $sql;"
+       "}"
+       "echo test(1),test(-1),\"\\n\";");
+
   return true;
 }
 
@@ -6760,6 +8473,9 @@ bool TestCodeRun::TestConstant() {
       "var_dump(PHP_EOL);"
       "var_dump(FOO);"
       "var_dump(BAR);");
+  MVCR("<?php "
+      "var_dump(INF);"
+      "var_dump(NAN);");
 
   return true;
 }
@@ -6842,6 +8558,25 @@ bool TestCodeRun::TestClassConstant() {
       "  function foo($x = self::BLAH) {}"
       "}");
 
+  MVCR("<?php "
+      "interface X {"
+      "  const A=1;"
+      "}"
+      "class Y {"
+      "  const B = 2;"
+      "}"
+      "class Z extends Y implements X {"
+      "  function x() {"
+      "    print self::A;"
+      "    print self::B;"
+      "    print Z::A;"
+      "    print Z::B;"
+      "    print X::A;"
+      "    print Y::B;"
+      "  }"
+      "}"
+      "$z = new Z;"
+      "$z->x();");
   return true;
 }
 
@@ -7059,6 +8794,71 @@ bool TestCodeRun::TestEvaluationOrder() {
 }
 
 bool TestCodeRun::TestSimpleXML() {
+  MVCR("<?php\n"
+       "$xml = '<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>"
+       "<invalidations><invalidation id=\"12345\"/></invalidations></root>';\n"
+       "$dom = new SimpleXMLElement($xml);\n"
+       "$invalidations = $dom->invalidations;\n"
+       "var_dump((string)$invalidations->invalidation[\"id\"]);\n"
+       "foreach ($invalidations as $node) {\n"
+       "  var_dump((string)$node->invalidation[\"id\"]);\n"
+       "}\n");
+
+  MVCR("<?php\n"
+       "\n"
+       "$file = <<<EOM\n"
+       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+       "<wurfl-config>\n"
+       "  <persistence>\n"
+       "    <provider>memcache</provider>\n"
+       "    <params></params>\n"
+       "  </persistence>\n"
+       "\n"
+       "  <cache>\n"
+       "    <provider>memcache</provider>\n"
+       "    <params></params>\n"
+       "  </cache>\n"
+       "</wurfl-config>\n"
+       "EOM;\n"
+       "var_dump($file);\n"
+       "\n"
+       "$xml = simplexml_load_string($file);\n"
+       "foreach ($xml->children() as $parent_name => $xml_ele) {\n"
+       "  var_dump($parent_name);\n"
+       "\n"
+       "  foreach ($xml_ele->children() as $key => $value) {\n"
+       "    var_dump((string)$key, (string)$value);\n"
+       "  }\n"
+       "}\n"
+      );
+
+  MVCR("<?php\n"
+       "$xml = '<?xml version=\"1.0\" encoding=\"UTF-8\"?><response><t>6</t></response>';\n"
+       "$sxml = simplexml_load_string($xml);\n"
+       "function convert_simplexml_to_array($sxml) {\n"
+       "  if ($sxml) {\n"
+       "    foreach ($sxml as $k => $v) {\n"
+       "      var_dump((string)$v);\n"
+       "      convert_simplexml_to_array($v);\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "convert_simplexml_to_array($sxml);");
+
+  MVCR("<?php $doc = new SimpleXMLElement('<?xml version=\"1.0\"?><root><node><option>1</option></node></root>'); $doc->node->option = false; var_dump($doc->asXML());");
+
+  MVCR("<?php $doc = new SimpleXMLElement('<?xml version=\"1.0\"?><root><node><option>1</option></node></root>'); $doc->node->option = 0; var_dump($doc->asXML());");
+
+  MVCR("<?php $doc = new SimpleXMLElement('<?xml version=\"1.0\"?><root><node><option>1</option></node></root>'); unset($doc->node->option); var_dump($doc->asXML());");
+
+  MVCR("<?php $doc = simplexml_load_String('<?xml version=\"1.0\"?><lists><list path=\"svn+ssh\"><entry kind=\"dir\"></entry><entry kind=\"file\"></entry></list></lists>'); foreach ($doc->list[0]->entry as $r) { var_dump((array)$r->attributes());}");
+
+  MVCR("<?php "
+       "$sxe = new SimpleXMLElement('<foo />');"
+       "$sxe->addChild('options');"
+       "$sxe->options->addChild('paddingtop', 0);"
+       "echo 'Success\n';");
+
   MVCR("<?php $doc = simplexml_load_string('<?xml version=\"1.0\"?><root xmlns:foo=\"http://example.com\"><foo:b1>c1</foo:b1><foo:b2>c2</foo:b2><foo:b2>c3</foo:b2></root>'); $foo_ns_bar = $doc->children('http://example.com');"
       "var_dump($doc->getName());"
       "foreach ($foo_ns_bar as $v) var_dump((string)$v);"
@@ -7100,11 +8900,11 @@ bool TestCodeRun::TestSimpleXML() {
       "var_dump((array)$a->subnode[0]->attributes());"
       "var_dump((array)$a->subnode[1]->attributes());"
       "var_dump($a->asxml());"
-      "var_dump((array)$a->addchild('newnode', 'newvalue'));"
+      "var_dump((string)$a->addchild('newnode', 'newvalue'));"
       "$a->addattribute('newattr', 'newattrvalue');"
       "var_dump($a->asxml());"
       "var_dump((array)$a->attributes());"
-      "var_dump((array)$a->newnode);"
+      "var_dump((string)$a->newnode);"
       "var_dump($a->getname());"
       "var_dump((array)$a->children()->subnode[0]->subsubnode);"
       "$nodes = $a->xpath('//node/subnode');"
@@ -7147,14 +8947,405 @@ bool TestCodeRun::TestSimpleXML() {
       "  echo $item['itemName'] . \"\\n\";"
       "}");
 
+  MVCR("<?php $a = simplexml_load_string('<?xml version=\"1.0\" encoding=\"utf-8\"?><?mso-application progid=\"Excel.Sheet\"?><node><subnode><subsubnode>test</subsubnode></subnode></node>');"
+      "var_dump((string)($a->subnode->subsubnode[0]));"
+      );
+  return true;
+}
+
+bool TestCodeRun::TestDOMDocument() {
+  MVCR("<?php $obj = new DOMText(); var_dump($obj instanceof DOMNode);");
+
+  MVCR("<?php $xml = '<?xml version=\"1.0\"?><dependencies><dependency dependency_id=\"0\" dependent_id=\"1\"/><dependency dependency_id=\"4\" dependent_id=\"5\"/><dependency dependency_id=\"5\" dependent_id=\"6\"/><dependency dependency_id=\"9\" dependent_id=\"8\"/><dependency dependency_id=\"10\" dependent_id=\"8\"/><dependency dependency_id=\"12\" dependent_id=\"13\"/><dependency dependency_id=\"12\" dependent_id=\"14\"/></dependencies>';\n"
+       "$dom = new domDocument;\n"
+       "$dom->loadxml($xml);\n"
+       "$xpath = new DOMXPath($dom);\n"
+       "$node_list = $xpath->query('//dependencies/dependency[@dependency_id = 0 and @dependent_id = 1]');\n"
+       "$dependencies = $xpath->query('//dependencies')->item(0);\n"
+       "$dependencies->removeChild($node_list->item(0));\n"
+      );
+
+  MVCR("<?php $xml = '<?xml version=\"1.0\"?><dependencies><dependency dependency_id=\"0\" dependent_id=\"1\"/><dependency dependency_id=\"4\" dependent_id=\"5\"/><dependency dependency_id=\"5\" dependent_id=\"6\"/><dependency dependency_id=\"9\" dependent_id=\"8\"/><dependency dependency_id=\"10\" dependent_id=\"8\"/><dependency dependency_id=\"12\" dependent_id=\"13\"/><dependency dependency_id=\"12\" dependent_id=\"14\"/></dependencies>';\n"
+       "$dom = new domDocument;\n"
+       "$dom->loadxml($xml);\n"
+       "$xpath = new DOMXPath($dom);\n"
+       "$node_list = $xpath->query('//dependencies/dependency[@dependent_id = 8]');\n"
+       "foreach ($node_list as $node) {\n"
+       "  var_dump($node->getAttribute($attribute));\n"
+       "}\n"
+      );
+
+  MVCR("<?PHP\n"
+       "$xmlstr = \"<?xml version='1.0' standalone='yes'?>\n"
+       "<!DOCTYPE chapter SYSTEM '/share/sgml/Norman_Walsh/"
+       "db3xml10/db3xml10.dtd'\n"
+       "[ <!ENTITY sp \\\"spanish\\\">\n"
+       "]>\n"
+       "<!-- lsfj  -->\n"
+       "<chapter language='en'><title language='en'>Title</title>\n"
+       "<para language='ge'>\n"
+       "&sp;\n"
+       "<!-- comment -->\n"
+       "<informaltable language='&sp;kkk'>\n"
+       "<tgroup cols='3'>\n"
+       "<tbody>\n"
+       "<row><entry>a1</entry><entry morerows='1'>b1</entry>"
+       "<entry>c1</entry></row>\n"
+       "<row><entry>a2</entry><entry>c2</entry></row>\n"
+       "<row><entry>a3</entry><entry>b3</entry><entry>c3</entry></row>\n"
+       "</tbody>\n"
+       "</tgroup>\n"
+       "</informaltable>\n"
+       "</para>\n"
+       "</chapter> \";\n"
+       "\n"
+       "function print_node($node)\n"
+       "{\n"
+       "  print \"Node Name: \" . $node->nodeName;\n"
+       "  print \"\nNode Type: \" . $node->nodeType;\n"
+       "  if ($node->nodeType != 3) {\n"
+       "      $child_count = $node->childNodes->length;\n"
+       "  } else {\n"
+       "      $child_count = 0;\n"
+       "  }\n"
+       "  print \"\nNum Children: \" . $child_count;\n"
+       "  if($child_count <= 1){\n"
+       "    print \"\nNode Content: \" . $node->nodeValue;\n"
+       "  }\n"
+       "  print \"\n\n\";\n"
+       "}\n"
+       "\n"
+       "function print_node_list($nodelist)\n"
+       "{\n"
+       "  foreach($nodelist as $node)\n"
+       "  {\n"
+       "    print_node($node);\n"
+       "  }\n"
+       "}\n"
+       "\n"
+       "echo \"Test 1: accessing single nodes from php\n\";\n"
+       "$dom = new domDocument;\n"
+       "$dom->loadxml($xmlstr);\n"
+       "if(!$dom) {\n"
+       "  echo \"Error while parsing the document\n\";\n"
+       "  exit;\n"
+       "}\n"
+       "\n"
+       "// children() of of document would result in a memleak\n"
+       "//$children = $dom->children();\n"
+       "//print_node_list($children);\n"
+       "\n"
+       "echo \"--------- root\n\";\n"
+       "$rootnode = $dom->documentElement;\n"
+       "print_node($rootnode);\n"
+       "\n"
+       "echo \"--------- children of root\n\";\n"
+       "$children = $rootnode->childNodes;\n"
+       "print_node_list($children);\n"
+       "\n"
+       "// The last node should be identical with the last "
+       "entry in the children array\n"
+       "echo \"--------- last\n\";\n"
+       "$last = $rootnode->lastChild;\n"
+       "print_node($last);\n"
+       "\n"
+       "// The parent of this last node is the root again\n"
+       "echo \"--------- parent\n\";\n"
+       "$parent = $last->parentNode;\n"
+       "print_node($parent);\n"
+       "\n"
+       "// The children of this parent are the same children as one above\n"
+       "echo \"--------- children of parent\n\";\n"
+       "$children = $parent->childNodes;\n"
+       "print_node_list($children);\n"
+       "\n"
+       "echo \"--------- creating a new attribute\n\";\n"
+       "//This is worthless\n"
+       "//$attr = $dom->createAttribute(\"src\", \"picture.gif\");\n"
+       "//print_r($attr);\n"
+       "\n"
+       "//$rootnode->set_attributeNode($attr);\n"
+       "$attr = $rootnode->setAttribute(\"src\", \"picture.gif\");\n"
+       "$attr = $rootnode->getAttribute(\"src\");\n"
+       "print_r($attr);\n"
+       "print \"\n\";\n"
+       "\n"
+       "echo \"--------- Get Attribute Node\n\";\n"
+       "$attr = $rootnode->getAttributeNode(\"src\");\n"
+       "print_node($attr);\n"
+       "\n"
+       "echo \"--------- Remove Attribute Node\n\";\n"
+       "$attr = $rootnode->removeAttribute(\"src\");\n"
+       "print \"Removed \" . $attr . \" attributes.\n\";\n"
+       "\n"
+       "echo \"--------- attributes of rootnode\n\";\n"
+       "$attrs = $rootnode->attributes;\n"
+       "print_node_list($attrs);\n"
+       "\n"
+       "echo \"--------- children of an attribute\n\";\n"
+       "$children = $attrs->item(0)->childNodes;\n"
+       "print_node_list($children);\n"
+       "\n"
+       "echo \"--------- Add child to root\n\";\n"
+       "$myelement = new domElement(\"Silly\", \"Symphony\");\n"
+       "$newchild = $rootnode->appendChild($myelement);\n"
+       "print_node($newchild);\n"
+       "print $dom->saveXML();\n"
+       "print \"\n\";\n"
+       "\n"
+       "echo \"--------- Find element by tagname\n\";\n"
+       "echo \"    Using dom\n\";\n"
+       "$children = $dom->getElementsByTagname(\"Silly\");\n"
+       "print_node_list($children);\n"
+       "\n"
+       "echo \"    Using elem\n\";\n"
+       "$children = $rootnode->getElementsByTagName(\"Silly\");\n"
+       "print_node_list($children);\n"
+       "\n"
+       "echo \"--------- Unlink Node\n\";\n"
+       "print_node($children->item(0));\n"
+       "$rootnode->removeChild($children->item(0));\n"
+       "print_node_list($rootnode->childNodes);\n"
+       "print $dom->savexml();\n"
+       );
+
+  // dom002.phpt
+  MVCR("<?php\n"
+       "$xml = <<<HERE\n"
+       "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n"
+       "<foo xmlns=\"http://www.example.com/ns/foo\"\n"
+       "     xmlns:fubar=\"http://www.example.com/ns/fubar\">\n"
+       "  <bar><test1 /></bar>\n"
+       "  <bar><test2 /></bar>\n"
+       "  <fubar:bar><test3 /></fubar:bar>\n"
+       "  <fubar:bar><test4 /></fubar:bar>\n"
+       "</foo>\n"
+       "HERE;\n"
+       "\n"
+       "function dump($elems) {\n"
+       " foreach ($elems as $elem) {\n"
+       "  var_dump($elem->nodeName);\n"
+       "  dump($elem->childNodes);\n"
+       "}\n"
+       "}\n"
+       "\n"
+       "$dom = new DOMDocument();\n"
+       "$dom->loadXML($xml);\n"
+       "$doc = $dom->documentElement;\n"
+       "dump($dom->getElementsByTagName('bar'));\n"
+       "dump($doc->getElementsByTagName('bar'));\n"
+       "dump($dom->getElementsByTagNameNS('http://www.example.com/ns/fubar',"
+       " 'bar'));\n"
+       "dump($doc->getElementsByTagNameNS('http://www.example.com/ns/fubar',"
+       " 'bar'));\n"
+       );
+
+  // dom005.phpt
+  MVCR("<?php\n"
+       "$dom = new domdocument;\n"
+       "$html = <<<EOM\n"
+       "<html><head>\n"
+       "<title>Hello world</title>\n"
+       "</head>\n"
+       "<body>\n"
+       "This is a not well-formed<br>\n"
+       "html files with undeclared entities&nbsp;\n"
+       "</body>\n"
+       "</html>\n"
+       "EOM;\n"
+       "$dom->loadHTML($html);\n"
+       "print  \"--- save as XML\n\";\n"
+       "\n"
+       "print adjustDoctype($dom->saveXML());\n"
+       "print  \"--- save as HTML\n\";\n"
+       "\n"
+       "print adjustDoctype($dom->saveHTML());\n"
+       "\n"
+       "function adjustDoctype($xml) {\n"
+       "    return str_replace(array(\"DOCTYPE HTML\",'<p>','</p>'),"
+       "array(\"DOCTYPE html\",'',''),$xml);\n"
+       "}\n"
+       );
+
+  // dom006.phpt
+  MVCR("<?php\n"
+       "class books extends domDocument {\n"
+       "  function addBook($title, $author) {\n"
+       "    $titleElement = $this->createElement('title');\n"
+       "    $titleElement->appendChild($this->createTextNode($title));\n"
+       "    $authorElement = $this->createElement('author');\n"
+       "    $authorElement->appendChild($this->createTextNode($author));\n"
+       "    $bookElement = $this->createElement('book');\n"
+       "    $bookElement->appendChild($titleElement);\n"
+       "    $bookElement->appendChild($authorElement);\n"
+       "    $this->documentElement->appendChild($bookElement);\n"
+       "  }\n"
+       "}\n"
+       "\n"
+       "$dom = new books;\n"
+       "\n"
+       "$xml = <<<EOM\n"
+       "<?xml version='1.0' ?>\n"
+       "<books>\n"
+       " <book>\n"
+       "  <title>The Grapes of Wrath</title>\n"
+       "  <author>John Steinbeck</author>\n"
+       " </book> <book>\n"
+       "  <title>The Pearl</title>  <author>John Steinbeck</author>\n"
+       " </book></books>\n"
+       "EOM;\n"
+       "\n"
+       "$dom->loadXML($xml);\n"
+       "$dom->addBook('PHP de Luxe', 'Richard Samar, Christian Stocker');\n"
+       "print $dom->saveXML();"
+       );
+
+  // dom007.phpt
+  MVCR("<?php\n"
+       "$xml = <<< EOXML\n"
+       "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"
+       "<!DOCTYPE courses [\n"
+       "<!ELEMENT courses (course+)>\n"
+       "<!ELEMENT course (title, description, temp*)>\n"
+       "<!ATTLIST course cid ID #REQUIRED>\n"
+       "<!ELEMENT title (#PCDATA)>\n"
+       "<!ELEMENT description (#PCDATA)>\n"
+       "<!ELEMENT temp (#PCDATA)>\n"
+       "<!ATTLIST temp vid ID #REQUIRED>\n"
+       "<!ENTITY test 'http://www.hpl.hp.com/semweb/2003/query_tester#'>\n"
+       "<!ENTITY rdf  'http://www.w3.org/1999/02/22-rdf-syntax-ns#'>\n"
+       "<!NOTATION GIF PUBLIC \"-\" \"image/gif\">\n"
+       "<!ENTITY myimage PUBLIC \"-\" \"mypicture.gif\" NDATA GIF>\n"
+       "]>\n"
+       "<courses>\n"
+       "   <course cid=\"c1\">\n"
+       "      <title>Basic Languages</title>\n"
+       "      <description>Introduction to Languages</description>\n"
+       "   </course>\n"
+       "   <course cid=\"c6\">\n"
+       "      <title>French I</title>\n"
+       "      <description>Introduction to French</description>\n"
+       "      <temp vid=\"c7\">\n"
+       "      </temp>\n"
+       "   </course>\n"
+       "</courses>\n"
+       "EOXML;\n"
+       "\n"
+       "$dom = new DOMDocument();\n"
+       "$dom->loadXML($xml);\n"
+       "\n"
+       "$dtd = $dom->doctype;\n"
+       "\n"
+       "/* Notation Tests */\n"
+       "$nots = $dtd->notations;\n"
+       "\n"
+       "$length = $nots->length; var_dump($length);\n"
+       "echo \"Length: \".$length.\"\n\";\n"
+       "\n"
+       "foreach ($nots AS $key=>$node) {\n"
+       " echo \"Key $key: \".$node->nodeName.\" (\".\n"
+       "$node->systemId.\") (\".$node->publicId.\")\n\";\n"
+       "}\n"
+       "print \"\n\";\n"
+       "for($x=0; $x < $length; $x++) {\n"
+       " echo \"Index $x: \".$nots->item($x)->nodeName.\" (\".\n"
+       "  $nots->item($x)->systemId.\") "
+       "(\".$nots->item($x)->publicId.\")\n\";\n"
+       "}\n"
+       "\n"
+       "echo \"\n\";\n"
+       "$node = $nots->getNamedItem('xxx');\n"
+       "var_dump($node);\n"
+       "\n"
+       "echo \"\n\";\n"
+       "/* Entity Decl Tests */\n"
+       "$ents = $dtd->entities;\n"
+       "$length = $ents->length;\n"
+       "echo \"Length: \".$length.\"\n\";\n"
+       "foreach ($ents AS $key=>$node) {\n"
+       " echo \"Key: $key Name: \".$node->nodeName.\"\n\";\n"
+       "}\n"
+       "echo \"\n\";\n"
+       "for($x=0; $x < $length; $x++) {\n"
+       " echo \"Index $x: \".$ents->item($x)->nodeName.\"\n\";\n"
+       "}\n"
+       "\n"
+       "echo \"\n\";\n"
+       "$node = $ents->item(3);\n"
+       "var_dump($node);\n"
+       "$node = $ents->getNamedItem('xxx');\n"
+       "var_dump($node);\n"
+       );
+
+  MVCR("<?php"
+       "    function rerender($html, $frag = false) {"
+       "    $doc = new DOMDocument();"
+       "    if ($frag) {"
+       "      $body = $doc->createDocumentFragment();"
+       "      $body->appendXML($html);"
+       "    } else {"
+       "      $doc->loadHTML($html);"
+       "      $body = $doc->documentElement;"
+       "    }"
+       "    return helper($body);"
+       "  }"
+       ""
+       "  function helper($element) {"
+       "    if ($element instanceof DOMText) {"
+       "      return htmlspecialchars($element->nodeValue);"
+       "    } else {"
+       "      $body = '';"
+       "      foreach ($element->childNodes as $child) {"
+       "        $body .= helper($child);"
+       "      }"
+       ""
+       "      if ($element instanceof DOMElement) {"
+       "        $attrs = array();"
+       "        foreach ($element->attributes as $attr) {"
+       "          $attrs[] = htmlspecialchars($attr->name) . '=\"' . "
+       "            htmlspecialchars($attr->value) . '\"';"
+       "        }"
+       "        if ($attrs) {"
+       "          $attrs = ' ' . implode(' ', $attrs);"
+       "        } else {"
+       "          $attrs = '';"
+       "        }"
+       "        return '<' . $element->tagName . $attrs . '>' . $body . "
+       "          '</' . $element->tagName . '>';"
+       "      } else {"
+       "        return $body;"
+       "      }"
+       "    }"
+       "  }"
+       ""
+       "  $fragment = 'Hello, <b>world</b>.';"
+       "  $document = '<html><body><div style=\"color:red\">"
+       "    <p class=\"thing\">'.$fragment.'</p></div>';"
+       ""
+       "  echo rerender($fragment, true).\"\n\n\";"
+       "  echo rerender($document, false).\"\n\n\";"
+       );
+
+  MVCR("<?php "
+       "$xml ="
+       "  '<root>$1 - <template><title>SITENAME</title></template></root>';"
+       "$dom = new DOMDocument();"
+       "$dom->loadXML($xml);"
+       "new foo($dom->documentElement);"
+       "class foo {"
+       "  function foo($a) {"
+       "    var_dump($a);"
+       "  }"
+       "}");
+
   return true;
 }
 
 bool TestCodeRun::TestFile() {
-  MVCR("<?php "
-      "$gif = imagecreatefromgif('http://www.php.net/images/php.gif');"
-      "imagegif($gif);"
-      "imagedestroy($gif);");
+  //MVCR("<?php "
+  //    "$gif = imagecreatefromgif('http://www.php.net/images/php.gif');"
+  //    "imagegif($gif);"
+  //    "imagedestroy($gif);");
   MVCR("<?php "
       "file_put_contents(\"/tmp/temp.txt\","
       "                  \"put this in the txt file\\n\");"
@@ -7191,12 +9382,13 @@ bool TestCodeRun::TestFile() {
       "var_dump(is_link('test/test_ext_file2.tmp'));"
       "$a = lstat('test/test_ext_file2.tmp');"
       "var_dump($a['mtime']);");
+
   return true;
 }
 
 bool TestCodeRun::TestDirectory() {
   MVCR("<?php "
-      "$d = dir(\"/tmp/\");"
+      "$d = dir(\"test/\");"
       "echo \"Path: \" . $d->path . \"\\n\";"
       "while (false !== ($entry = $d->read())) {"
       "   echo $entry.\"\\n\";"
@@ -7211,17 +9403,24 @@ bool TestCodeRun::TestDirectory() {
 
 bool TestCodeRun::TestBadFunctionCalls() {
   // make sure no error
-  MVCR("<?php class A { function __construct() {}} $obj = new A(10);");
+  MVCR("<?php "
+      "error_reporting(E_ALL & ~E_NOTICE);"
+      "class A { function __construct() {}} $obj = new A(10);");
 
   // make sure foo() is still called
-  MVCR("<?php function foo($a) { print $a;} "
+  MVCR("<?php "
+      "error_reporting(E_ALL & ~E_NOTICE);"
+      "function foo($a) { print $a;} "
       "class A { function __construct() {}} $obj = new A(foo(10));");
 
   // make sure 1st parameter is corrected passed in
-  MVCR("<?php function foo($a) { print $a;} function bar($a) { return $a;}"
+  MVCR("<?php "
+      "error_reporting(E_ALL & ~E_NOTICE);"
+      "function foo($a) { print $a;} function bar($a) { return $a;}"
       " foo('ok', bar('bad'));");
   // Too many args
   MVCR("<?php "
+      "error_reporting(E_ALL & ~E_NOTICE);"
       "function foo($x) {}"
       "function z() {"
       "  $yay = 1;"
@@ -7389,6 +9588,69 @@ bool TestCodeRun::TestUselessAssignment() {
       "}"
       "bar(1);");
 
+  MVCR("<?php "
+       "function out($a) {"
+       "  echo $a,'\\n';"
+       "}"
+       "function test($a) {"
+       "  $a ? out('?a') : out(':a');"
+       "  $a ? out('+a') : 0;"
+       "  $a ? 0 : out('-a');"
+       "  $a && out('&&a');"
+       "  $a || out('||a');"
+       "  $a and out('and a');"
+       "  $a or out('or a');"
+       "  $b = $c = 0;"
+       "  $a || (($b = 5) + ($c = 6));"
+       "  out($b); out($c);"
+       "}"
+       "test(0);"
+       "test('foo');");
+  MVCR("<?php "
+      "class A {"
+      "  function __destruct() {"
+      "    var_dump('done');"
+      "  }"
+      "}"
+      ""
+      "function foo() {"
+      "  $a = 10;"
+      "  if ($a == 11) {"
+      "    return null;"
+      "  }"
+      "  return new A();"
+      "}"
+      ""
+      "function bar() {"
+      "  $a = foo();"
+      "  var_dump('doing');"
+      "}"
+      ""
+      "bar();");
+  MVCR("<?php "
+      "function foo($p) {"
+      "  global $b;"
+      "  for ($i = 0; $i < 5; $i++) {"
+      "    if ($i > $p) {"
+      "      $a = 10;"
+      "    } else {"
+      "      $a = &$b;"
+      "    }"
+      "  }"
+      "}"
+      "function bar() {"
+      "  $a = foo(2);"
+      "  var_dump($GLOBALS['b']);"
+      "}"
+      "bar();");
+  MVCR("<?php "
+      "function bar() {}"
+      "function foo() {"
+      "  $foo = bar();"
+      "  unset($foo);"
+      "}"
+      "foo();");
+
   return true;
 }
 
@@ -7419,6 +9681,142 @@ bool TestCodeRun::TestSwitchStatement() {
       "case 'foo': "
       "default:"
       "}");
+
+  MVCR("<?php class A {};"
+      "switch (new A()) { "
+      "case 'foo': "
+      "default:"
+      "}");
+  return true;
+}
+
+bool TestCodeRun::TestExtString() {
+  MVCR("<?php "
+      "var_dump(strtr(\"\", \"ll\", \"a\"));"
+      "var_dump(strtr(\"hello\", \"\", \"a\"));"
+      "var_dump(strtr(\"hello\", \"ll\", \"a\"));"
+      "var_dump(strtr(\"hello\", array(\"\" => \"a\")));"
+      "var_dump(strtr(\"hello\", array(\"ll\" => \"a\")));");
+  MVCR("<?php "
+      "var_dump(explode('', ''));"
+      "$str = 'Hello Friend';"
+      "var_dump(str_split($str, -3));"
+      "var_dump(chunk_split('-=blender=-', -3, '-=blender=-')); "
+      "var_dump(strpbrk('hello', ''));"
+      "var_dump(substr_count('hello', ''));"
+      "var_dump(substr_count('hello', 'o', -1));"
+      "var_dump(substr_count('hello', 'o', 2, -1));"
+      "var_dump(substr_count('hello', 'o', 2, 100));"
+      "var_dump(count_chars('hello', 100));"
+      "var_dump(str_word_count('hello', 100));"
+      "var_dump(strtr('hello', 100));"
+      "var_dump(implode('abcd', 'abcd'));");
+  MVCR("<?php "
+      "error_reporting(0);"
+      "var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', array(0)));"
+      "var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', array(0), 3));"
+      "var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', array(0), 1.0));"
+      "var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', array(0), null));"
+      "$obj = new stdClass();"
+      "var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', 0, $obj));"
+      "var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', '0', '1.0'));"
+      "var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', '0.0', 1.0));"
+      "var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', '0.0', 1));"
+      "var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', 0.0, '1'));"
+      "var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob',"
+      "                        array(0), array(1)));"
+      "var_dump(substr_replace('ABCDEFGH:/MNRPQR/', array('bob'),"
+      "                        array(0), array(3,4)));"
+      "var_dump(substr_replace('ABCDEFGH:/MNRPQR/', array('bob'),"
+      "                        array(0), array(3)));"
+      "var_dump(substr_replace(array('ABCDEFGH:/MNRPQR/'), array(),"
+      "                        array(0,1), array(3, 4)));"
+      "var_dump(substr_replace(array('ABCDEFGH:/MNRPQR/'), array('bob'),"
+      "                        array(0,1), array(3)));"
+      "var_dump(substr_replace(array('ABCDEFGH:/MNRPQR/'),"
+      "                        array('bob', 'cat'), 0));"
+      "var_dump(substr_replace(array('ABCDEFGH:/MNRPQR/'),"
+      "                        array('bob'), array(0,1)));"
+
+      "var_dump(sscanf(\"SN/2350001\", \"SN/%d\"));"
+      "var_dump(sscanf(\"SN/2350001\", \"SN/%d\", $out));"
+      "var_dump($out);"
+      "var_dump(sscanf(\"SN/abc\", \"SN/%d\", $out));"
+      "var_dump($out);"
+      "var_dump(sscanf(\"30\", \"%da\", $out));"
+      "var_dump($out);"
+      "var_dump(sscanf(\"-\", \"%da\", $out));"
+      "var_dump($out);");
+  return true;
+}
+
+bool TestCodeRun::TestExtArray() {
+  MVCR("<?php "
+      "error_reporting(0);"
+      "var_dump(range('', '', 1));"
+      "var_dump(range('', '', -1));"
+      "var_dump(range('9', '10', -1));"
+      "var_dump(range(9, 10, -1));"
+      "var_dump(range(9, 10, -1.5));"
+      "var_dump(range(9, 10, 33333333.33));"
+      "var_dump(range(9, 10, -33333333.33));"
+      "var_dump(range(9223372036854775807, 9223372036854775805, -1));"
+      "var_dump(range(9223372036854775807, 9223372036854775805,"
+      "               9223372036854775807));"
+      "var_dump(range(9223372036854775807, 9223372036854775805,"
+      "               -9223372036854775807));"
+      "var_dump(range(9223372036854775807, 9223372036854775805,"
+      "               2147483648));"
+      "var_dump(range(9223372036854775807, 9223372036854775805,"
+      "               -2147483648));"
+      "var_dump(range('9', '10', '-1'));"
+      "var_dump(range('9', '10', '-1.5'));"
+      "var_dump(range('9', '10', '33333333.33'));"
+      "var_dump(range('9', '10', '-33333333.33'));"
+      "var_dump(range('9223372036854775807', '9223372036854775805', '-1'));"
+      "var_dump(range('9223372036854775807', '9223372036854775805',"
+      "               '9223372036854775807'));"
+      "var_dump(range('9223372036854775807', '9223372036854775805',"
+      "               '-9223372036854775807'));"
+      "var_dump(range(null, null, -2.5));"
+      "var_dump(range(null, null, 3.5));"
+      "var_dump(range(null, null, null));"
+      "var_dump(range(3.5, -4.5, null));");
+  MVCR("<?php "
+      "var_dump(array_fill(-2, -2, 'pear'));"
+      "var_dump(array_combine(array(1, 2), array(3)));"
+      "var_dump(array_combine(array(), array()));"
+      "var_dump(array_chunk(1));"
+      "var_dump(array_chunk(array()));"
+      "$a = array(1, 2);"
+      "var_dump(asort($a, 100000));");
+
+  return true;
+}
+
+bool TestCodeRun::TestExtFile() {
+  MVCR("<?php "
+      "error_reporting(0);"
+      "$fp = fopen('/tmp/lock.txt', 'w');"
+      "fclose($fp);"
+      "$fp = fopen('/tmp/lock.txt', 'r+');"
+      "var_dump(flock($fp, 0xf0));"
+      "fclose($fp);");
+
+  return true;
+}
+
+bool TestCodeRun::TestExtDate() {
+  MVCR("<?php "
+      "error_reporting(0);"
+      "var_dump(idate('@@'));"
+      "var_dump(idate('@'));"
+      "var_dump(date(''));"
+      "var_dump(date('@'));"
+      "var_dump(strftime(''));"
+      "setlocale(LC_ALL, 'nl_NL');"
+      "var_dump(strftime('%p'));");
+
   return true;
 }
 
@@ -7683,7 +10081,7 @@ bool TestCodeRun::TestExtImage() {
       ""
       "$text = 'foobar@yahoo.com';"
       "$fsize = '9.8';"
-      "foo($text, $fsize, false);");
+      "foo($text, $fsize);");
   MVCR("<?php "
       "for ($i = 0; $i < 100000; $i++) {"
       "  $str =  exif_tagname($i);"
@@ -7703,7 +10101,7 @@ bool TestCodeRun::TestExtImage() {
   return true;
 }
 
-bool TestCodeRun::TestSplFile() {
+bool TestCodeRun::TestExtSplFile() {
   MVCR("<?php "
       "$info = new SplFileInfo('test');"
       "if (!$info->isFile()) {"
@@ -7725,10 +10123,41 @@ bool TestCodeRun::TestSplFile() {
       "var_dump($info->isLink());"
       "var_dump($info->isReadable());"
       "var_dump($info->isWritable());");
+  MVCR("<?php "
+      "$info = new SplFileInfo('test');"
+      "var_dump($info->getRealPath());"
+      "var_dump($info->getPath());"
+      "var_dump($info->getPathName());"
+      "$info = new SplFileInfo('test/');"
+      "var_dump($info->getRealPath());"
+      "var_dump($info->getPath());"
+      "var_dump($info->getPathName());"
+      "$info = new SplFileInfo('test//../test');"
+      "var_dump($info->getRealPath());"
+      "var_dump($info->getPath());"
+      "var_dump($info->getPathName());"
+      "$info = new SplFileInfo('test/../../external');"
+      "var_dump($info->getLinkTarget());"
+      "var_dump($info->getRealPath());"
+      "var_dump($info->getPath());"
+      "var_dump($info->getPathName());");
+  MVCR("<?php "
+      "$info = new SplFileInfo('does-not-exist-will-fail-on-getLinkTarget');"
+      "//readlink('does-not-throw-but-warns');"
+      "try{"
+      "  $info->getLinkTarget();"
+      "}"
+      "catch (Exception $e) {"
+      "  echo 'Caught exception: ',  $e->getMessage(), \"\\n\";"
+      "  return;"
+      "}"
+      "echo \"failed to throw\\n\";"
+      "  return true;"
+      "}");
   return true;
 }
 
-bool TestCodeRun::TestIterator() {
+bool TestCodeRun::TestExtIterator() {
   MVCR("<?php "
       "$files = array();"
       "foreach (new DirectoryIterator('test/') as $file) {"
@@ -7849,6 +10278,12 @@ bool TestCodeRun::TestIterator() {
       "  RecursiveIteratorIterator::LEAVES_ONLY);"
       "foreach( $fileSPLObjects as $fullFileName => $fileSPLObject ) {"
       "  print $fullFileName . \" \" .$fileSPLObject->getFilename(). \"\\n\";"
+      "}"
+      "// invalid mode -100"
+      "$fileSPLObjects =  new RecursiveIteratorIterator("
+      "  new RecursiveDirectoryIterator($directory), -100);"
+      "foreach( $fileSPLObjects as $fullFileName => $fileSPLObject ) {"
+      "  print $fullFileName . \" \" .$fileSPLObject->getFilename(). \"\\n\";"
       "}");
   MVCR("<?php "
       "function getFiles(&$rdi,$depth=0) {"
@@ -7863,6 +10298,28 @@ bool TestCodeRun::TestIterator() {
       "  }"
       "}"
       "getFiles(new RecursiveDirectoryIterator('test'));");
+  return true;
+}
+
+bool TestCodeRun::TestExtSoap() {
+  MVCR("<?php "
+      "function add($a, $b) { return $a + $b; }"
+      "$server = new SoapServer(NULL, array('uri' => 'http://test-uri'));"
+      "$str = '<?xml version=\"1.0\" '."
+      "       'encoding=\"ISO-8859-1\"?>'."
+      "       '<SOAP-ENV:Envelope SOAP-ENV:encodingStyle='."
+      "       '\"http://schemas.xmlsoap.org/soap/encoding/\"'."
+      "       ' xmlns:SOAP-ENV='."
+      "       '\"http://schemas.xmlsoap.org/soap/envelope/\"'."
+      "       ' xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"'."
+      "       ' xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"'."
+      "       ' xmlns:si=\"http://soapinterop.org/xsd\"><SOAP-ENV:Body>'."
+      "       '<ns1:Add xmlns:ns1=\"http://testuri.org\">'."
+      "       '<x xsi:type=\"xsd:hexBinary\">16</x>'."
+      "       '<y xsi:type=\"xsd:hexBinary\">21</y>'."
+      "       '</ns1:Add>  </SOAP-ENV:Body></SOAP-ENV:Envelope>';"
+      "$server->addFunction('Add');"
+      "$server->handle($str);");
   return true;
 }
 

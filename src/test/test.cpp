@@ -15,40 +15,25 @@
 */
 
 #include <test/test.h>
-#include <test/test_suite.inc>
-#include <cpp/base/shared/shared_store.h>
-#include <lib/option.h>
-//#include <cpp/base/util/light_process.h>
+#include <runtime/base/shared/shared_store.h>
+#include <compiler/option.h>
+
+using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 int Test::s_total = 0;
 int Test::s_passed = 0;
+int Test::s_skipped = 0;
+
 bool Test::s_quiet = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define RUN_TESTSUITE(name)                                             \
-  if (suite.empty() || suite == #name) {                                \
-    if (!s_quiet) {                                                     \
-      printf(#name "......\n\n");                                       \
-    }                                                                   \
-    name test;                                                          \
-    if (test.RunTests(which)) {                                         \
-      if (!s_quiet) {                                                   \
-        printf("\n" #name " OK\n\n");                                   \
-      }                                                                 \
-    } else {                                                            \
-      printf("\n" #name " #####>>> FAILED <<< #####\n\n");              \
-      allPassed = false;                                                \
-    }                                                                   \
-  }                                                                     \
-
-///////////////////////////////////////////////////////////////////////////////
-
-void Test::RunTests(std::string &suite, std::string &which, std::string &set) {
+bool Test::RunTests(std::string &suite, std::string &which, std::string &set) {
   bool allPassed = true;
   SharedMemoryManager::Init(16 * 1024 * 1024, true);
+  Option::Load();
 
   size_t pos = suite.find("::");
   if (pos != std::string::npos) {
@@ -56,52 +41,19 @@ void Test::RunTests(std::string &suite, std::string &which, std::string &set) {
     suite = suite.substr(0, pos);
   }
 
-  // individual test suites
-  if (suite == "TestCodeRun") {
-    RUN_TESTSUITE(TestCodeRun);
-    goto done;
-  }
-  if (suite == "TestCodeRunEval") {
-    suite = "TestCodeRun";
-    Option::EnableEval = Option::FullEval;
-    RUN_TESTSUITE(TestCodeRun);
-    goto done;
-  }
-  if (suite == "TestServer") {
-    RUN_TESTSUITE(TestServer);
-    goto done;
-  }
-  if (suite == "TestServerEval") {
-    suite = "TestServer";
-    Option::EnableEval = Option::FullEval;
-    RUN_TESTSUITE(TestServer);
-    goto done;
-  }
-  if (suite == "TestPerformance") {
-    RUN_TESTSUITE(TestPerformance);
-    goto done;
+  RunTestsImpl(allPassed, suite, which, set);
+
+  if (s_skipped) {
+    printf("%d/%d unit tests skipped.\n", s_skipped, s_total);
   }
 
-  // fast unit tests
-  if (set != "TestExt") {
-#include <test/test_fast.inc>
-  }
-  if (set == "QuickTests") {
-    goto done;
-  }
-
-  // complete extension tests
-#include "test_ext.inc"
-
-  if (suite == "" && set != "NoCodeRun" && set != "TestExt") {
-    RUN_TESTSUITE(TestCodeRun);
-  }
-
- done:
   if (allPassed) {
-    ASSERT(s_total == s_passed);
+    ASSERT(s_total == s_passed + s_skipped);
     printf("%d/%d unit tests passed.\n", s_passed, s_total);
-  } else {
-    printf("ERROR: %d/%d unit tests failed.\n", s_total - s_passed, s_total);
+    return true;
   }
+
+  printf("ERROR: %d/%d unit tests failed.\n", s_total - s_passed - s_skipped,
+         s_total);
+  return false;
 }

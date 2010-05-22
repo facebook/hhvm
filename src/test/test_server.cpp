@@ -15,19 +15,19 @@
 */
 
 #include <test/test_server.h>
-#include <lib/parser/parser.h>
-#include <lib/system/builtin_symbols.h>
-#include <lib/code_generator.h>
-#include <lib/analysis/analysis_result.h>
+#include <compiler/parser/parser.h>
+#include <compiler/builtin_symbols.h>
+#include <compiler/code_generator.h>
+#include <compiler/analysis/analysis_result.h>
 #include <util/util.h>
 #include <util/process.h>
-#include <lib/option.h>
+#include <compiler/option.h>
 #include <util/async_func.h>
-#include <cpp/ext/ext_curl.h>
-#include <cpp/ext/ext_options.h>
-#include <cpp/base/server/http_request_handler.h>
-#include <cpp/base/util/http_client.h>
-#include <cpp/base/runtime_option.h>
+#include <runtime/ext/ext_curl.h>
+#include <runtime/ext/ext_options.h>
+#include <runtime/base/server/http_request_handler.h>
+#include <runtime/base/util/http_client.h>
+#include <runtime/base/runtime_option.h>
 
 using namespace std;
 using namespace boost;
@@ -36,6 +36,7 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
 TestServer::TestServer() {
+  TestCodeRun::FastMode = false;
 }
 
 bool TestServer::VerifyServerResponse(const char *input, const char *output,
@@ -124,9 +125,10 @@ void TestServer::RunServer() {
   if (Option::EnableEval < Option::FullEval) {
     const char *argv[] = {"", "--mode=server",
                           "--config=test/config-server.hdf", NULL};
-    Process::Exec("cpp/tmp/TestServer/test", argv, NULL, out, &err);
+    Process::Exec("runtime/tmp/TestServer/test", argv, NULL, out, &err);
   } else {
-    const char *argv[] = {"", "--file=/unittest/rootdoc/string", "--mode=server",
+    const char *argv[] = {"", "--file=/unittest/rootdoc/string",
+                          "--mode=server",
                           "--config=test/config-eval.hdf", NULL};
     Process::Exec("hphpi/hphpi", argv, NULL, out, &err);
   }
@@ -154,8 +156,6 @@ void TestServer::StopServer() {
 bool TestServer::RunTests(const std::string &which) {
   bool ret = true;
 
-  Logger::LogLevel = Logger::LogError; // so to suppress timer output
-
   RUN_TEST(TestSanity);
   RUN_TEST(TestServerVariables);
   RUN_TEST(TestGet);
@@ -163,11 +163,10 @@ bool TestServer::RunTests(const std::string &which) {
   RUN_TEST(TestCookie);
   RUN_TEST(TestResponseHeader);
   RUN_TEST(TestSetCookie);
-  RUN_TEST(TestRequestHandling);
+  //RUN_TEST(TestRequestHandling);
   //RUN_TEST(TestLibeventServer);
   RUN_TEST(TestHttpClient);
 
-  Logger::LogLevel = Logger::LogInfo;
   return ret;
 }
 

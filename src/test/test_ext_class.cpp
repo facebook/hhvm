@@ -15,7 +15,7 @@
 */
 
 #include <test/test_ext_class.h>
-#include <cpp/ext/ext_class.h>
+#include <runtime/ext/ext_class.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -76,9 +76,7 @@ bool TestExtClass::test_get_class_methods() {
 
 bool TestExtClass::test_get_class_vars() {
   Array properties = f_get_class_vars("TEst");
-  VS(properties[0], "foo");
-  VS(properties[1], "prop");
-  VS(properties[2], "bar");
+  VS(properties, CREATE_MAP3("foo", null, "prop", null, "bar", null));
   return Count(true);
 }
 

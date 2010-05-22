@@ -1,4 +1,4 @@
-9999
+
 <h2>Debugging Memory Leaks</h2>
 
 First of all, we need unit tests to verify different classes and functions

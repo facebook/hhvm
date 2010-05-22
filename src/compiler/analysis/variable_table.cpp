@@ -1022,8 +1022,8 @@ void VariableTable::outputCPPGlobalVariablesGetIndex(CodeGenerator &cg,
                  "int64 prehash) const {\n");
   cg.printDeclareGlobals();
   outputCPPJumpTable(cg, ar, NULL, true, true, EitherStatic, JumpIndex);
-  cg.printf("return m_data.parr ? (m_data.parr->getIndex(s, prehash) + %d) "
-            ": %d;\n", m_symbols.size(), ArrayData::invalid_index);
+  cg.printf("return m_px ? (m_px->getIndex(s, prehash) + %d) : %d;\n",
+            m_symbols.size(), ArrayData::invalid_index);
   cg.indentEnd("}\n");
 }
 

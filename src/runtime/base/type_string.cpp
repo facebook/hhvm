@@ -54,8 +54,7 @@ String::String(int n) {
 
   buf = (char*)malloc(len + 1);
   memcpy(buf, p, len + 1); // including the null terminator.
-  m_data.pstr = NEW(StringData)(buf, AttachString);
-  m_data.pstr->incRefCount();
+  SmartPtr<StringData>::operator=(NEW(StringData)(buf, AttachString));
 }
 
 String::String(int64 n) {
@@ -70,21 +69,21 @@ String::String(int64 n) {
 
   buf = (char*)malloc(len + 1);
   memcpy(buf, p, len + 1); // including the null terminator.
-  m_data.pstr = NEW(StringData)(buf, AttachString);
-  m_data.pstr->incRefCount();
+  m_px = NEW(StringData)(buf, AttachString);
+  m_px->incRefCount();
 }
 
 String::String(double n) {
   char *buf;
   if (n == 0.0) n = 0.0; // so to avoid "-0" output
   vspprintf(&buf, 0, "%.*G", 14, n);
-  m_data.pstr = NEW(StringData)(buf, AttachString);
-  m_data.pstr->incRefCount();
+  m_px = NEW(StringData)(buf, AttachString);
+  m_px->incRefCount();
 }
 
 void String::assign(const char *data, StringDataMode mode) {
   if (data) {
-    setPtr(NEW(StringData)(data, mode));
+    SmartPtr<StringData>::operator=(NEW(StringData)(data, mode));
   } else {
     reset();
   }
@@ -92,7 +91,7 @@ void String::assign(const char *data, StringDataMode mode) {
 
 void String::assign(const char *data, int len, StringDataMode mode) {
   if (data) {
-    setPtr(NEW(StringData)(data, len, mode));
+    SmartPtr<StringData>::operator=(NEW(StringData)(data, len, mode));
   } else {
     reset();
   }
@@ -110,8 +109,7 @@ String String::substr(int start, int length /* = 0x7FFFFFFF */) const {
 int String::find(char ch, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
   if (empty()) return -1;
-  return string_find(m_data.pstr->data(), m_data.pstr->size(), ch, pos,
-                     caseSensitive);
+  return string_find(m_px->data(), m_px->size(), ch, pos, caseSensitive);
 }
 
 int String::find(const char *s, int pos /* = 0 */,
@@ -121,7 +119,7 @@ int String::find(const char *s, int pos /* = 0 */,
   if (*s && *(s+1) == 0) {
     return find(*s, pos, caseSensitive);
   }
-  return string_find(m_data.pstr->data(), m_data.pstr->size(), s, strlen(s),
+  return string_find(m_px->data(), m_px->size(), s, strlen(s),
                      pos, caseSensitive);
 }
 
@@ -131,15 +129,14 @@ int String::find(CStrRef s, int pos /* = 0 */,
   if (s.size() == 1) {
     return find(*s.data(), pos, caseSensitive);
   }
-  return string_find(m_data.pstr->data(), m_data.pstr->size(), s.data(),
-                     s.size(), pos, caseSensitive);
+  return string_find(m_px->data(), m_px->size(), s.data(), s.size(),
+                     pos, caseSensitive);
 }
 
 int String::rfind(char ch, int pos /* = -1 */,
                   bool caseSensitive /* = true */) const {
   if (empty()) return -1;
-  return string_rfind(m_data.pstr->data(), m_data.pstr->size(), ch, pos,
-                      caseSensitive);
+  return string_rfind(m_px->data(), m_px->size(), ch, pos, caseSensitive);
 }
 
 int String::rfind(const char *s, int pos /* = -1 */,
@@ -149,7 +146,7 @@ int String::rfind(const char *s, int pos /* = -1 */,
   if (*s && *(s+1) == 0) {
     return rfind(*s, pos, caseSensitive);
   }
-  return string_rfind(m_data.pstr->data(), m_data.pstr->size(), s, strlen(s),
+  return string_rfind(m_px->data(), m_px->size(), s, strlen(s),
                       pos, caseSensitive);
 }
 
@@ -159,8 +156,8 @@ int String::rfind(CStrRef s, int pos /* = -1 */,
   if (s.size() == 1) {
     return rfind(*s.data(), pos, caseSensitive);
   }
-  return string_rfind(m_data.pstr->data(), m_data.pstr->size(), s.data(),
-                      s.size(), pos, caseSensitive);
+  return string_rfind(m_px->data(), m_px->size(), s.data(), s.size(),
+                      pos, caseSensitive);
 }
 
 String String::replace(int start, int length, CStrRef replacement) const {
@@ -179,10 +176,10 @@ String String::replace(CStrRef search, CStrRef replacement, int &count,
                        bool caseSensitive) const {
   count = 0;
   if (!search.empty() && !empty()) {
-    int len = m_data.pstr->size();
-    char *ret = string_replace(m_data.pstr->data(), len, search.data(),
-                               search.size(), replacement.data(),
-                               replacement.size(), count, caseSensitive);
+    int len = m_px->size();
+    char *ret = string_replace(m_px->data(), len, search.data(), search.size(),
+                               replacement.data(), replacement.size(), count,
+                               caseSensitive);
     if (ret) {
       return String(ret, len, AttachString);
     }
@@ -228,7 +225,7 @@ char String::charAt(int pos) const {
 
 String &String::operator=(litstr s) {
   if (s) {
-    setPtr(NEW(StringData)(s, AttachLiteral));
+    SmartPtr<StringData>::operator=(NEW(StringData)(s, AttachLiteral));
   } else {
     reset();
   }
@@ -236,12 +233,12 @@ String &String::operator=(litstr s) {
 }
 
 String &String::operator=(StringData *data) {
-  set(data);
+  SmartPtr<StringData>::operator=(data);
   return *this;
 }
 
 String &String::operator=(CStrRef str) {
-  set(str.m_data.pstr);
+  SmartPtr<StringData>::operator=(str.m_px);
   return *this;
 }
 
@@ -255,14 +252,14 @@ String &String::operator=(CVarRef var) {
 String &String::operator+=(litstr s) {
   if (s && *s) {
     if (empty()) {
-      setPtr(NEW(StringData)(s, AttachLiteral));
-    } else if (m_data.pstr->getCount() == 1) {
+      SmartPtr<StringData>::operator=(NEW(StringData)(s, AttachLiteral));
+    } else if (m_px->getCount() == 1) {
       int len = strlen(s);
-      m_data.pstr->append(s, len);
+      m_px->append(s, len);
     } else {
       int len;
       char *ret = string_concat(data(), size(), s, strlen(s), len);
-      setPtr(NEW(StringData)(ret, len, AttachString));
+      SmartPtr<StringData>::operator=(NEW(StringData)(ret, len, AttachString));
     }
   }
   return *this;
@@ -271,13 +268,13 @@ String &String::operator+=(litstr s) {
 String &String::operator+=(CStrRef str) {
   if (!str.empty()) {
     if (empty()) {
-      set(str.m_data.pstr);
-    } else if (m_data.pstr->getCount() == 1) {
-      m_data.pstr->append(str.data(), str.size());
+      SmartPtr<StringData>::operator=(str.m_px);
+    } else if (m_px->getCount() == 1) {
+      m_px->append(str.data(), str.size());
     } else {
       int len;
       char *ret = string_concat(data(), size(), str.data(), str.size(), len);
-      setPtr(NEW(StringData)(ret, len, AttachString));
+      SmartPtr<StringData>::operator=(NEW(StringData)(ret, len, AttachString));
     }
   }
   return *this;
@@ -310,15 +307,15 @@ String String::operator~() const {
 }
 
 String String::operator|(CStrRef v) const {
-  return String(m_data.pstr).operator|=(v);
+  return String(m_px).operator|=(v);
 }
 
 String String::operator&(CStrRef v) const {
-  return String(m_data.pstr).operator&=(v);
+  return String(m_px).operator&=(v);
 }
 
 String String::operator^(CStrRef v) const {
-  return String(m_data.pstr).operator^=(v);
+  return String(m_px).operator^=(v);
 }
 
 String &String::operator|=(CStrRef v) {
@@ -330,11 +327,11 @@ String &String::operator|=(CStrRef v) {
   if (len2 > len1) {
     copy = string_duplicate(s2, len2);
     for (int i = 0; i < len1; i++) copy[i] |= s1[i];
-    setPtr(NEW(StringData)(copy, len2, AttachString));
+    SmartPtr<StringData>::operator=(NEW(StringData)(copy, len2, AttachString));
   } else {
     copy = string_duplicate(s1, len1);
     for (int i = 0; i < len2; i++) copy[i] |= s2[i];
-    setPtr(NEW(StringData)(copy, len1, AttachString));
+    SmartPtr<StringData>::operator=(NEW(StringData)(copy, len1, AttachString));
   }
   return *this;
 }
@@ -348,11 +345,11 @@ String &String::operator&=(CStrRef v) {
   if (len2 < len1) {
     copy = string_duplicate(s2, len2);
     for (int i = 0; i < len2; i++) copy[i] &= s1[i];
-    setPtr(NEW(StringData)(copy, len2, AttachString));
+    SmartPtr<StringData>::operator=(NEW(StringData)(copy, len2, AttachString));
   } else {
     copy = string_duplicate(s1, len1);
     for (int i = 0; i < len1; i++) copy[i] &= s2[i];
-    setPtr(NEW(StringData)(copy, len1, AttachString));
+    SmartPtr<StringData>::operator=(NEW(StringData)(copy, len1, AttachString));
   }
   return *this;
 }
@@ -366,11 +363,11 @@ String &String::operator^=(CStrRef v) {
   if (len2 < len1) {
     copy = string_duplicate(s2, len2);
     for (int i = 0; i < len2; i++) copy[i] ^= s1[i];
-    setPtr(NEW(StringData)(copy, len2, AttachString));
+    SmartPtr<StringData>::operator=(NEW(StringData)(copy, len2, AttachString));
   } else {
     copy = string_duplicate(s1, len1);
     for (int i = 0; i < len1; i++) copy[i] ^= s2[i];
-    setPtr(NEW(StringData)(copy, len1, AttachString));
+    SmartPtr<StringData>::operator=(NEW(StringData)(copy, len1, AttachString));
   }
   return *this;
 }
@@ -379,10 +376,9 @@ String &String::operator^=(CStrRef v) {
 // conversions
 
 Variant String::toKey() const {
-  if (!m_data.pstr) return *this;
-  ASSERT(m_data.pstr);
+  if (!m_px) return *this;
   int64 n = 0;
-  if (m_data.pstr->isStrictlyInteger(n)) {
+  if (m_px->isStrictlyInteger(n)) {
     return n;
   } else {
     return *this;
@@ -397,8 +393,8 @@ bool String::same(litstr v2) const {
 }
 
 bool String::same(CStrRef v2) const {
-  if (m_data.pstr == NULL && v2.m_data.pstr == NULL) return true;
-  if (m_data.pstr && v2.m_data.pstr) return equal(v2);
+  if (m_px == NULL && v2.get() == NULL) return true;
+  if (m_px && v2.get()) return equal(v2);
   return false;
 }
 
@@ -416,21 +412,21 @@ bool String::equal(litstr v2) const {
 
 bool String::equal(CStrRef v2) const {
   if (size() != v2.size()) return false;
-  if (m_data.pstr == NULL && v2.m_data.pstr == NULL) return true;
-  if (m_data.pstr == NULL) return v2.empty();
-  if (v2.m_data.pstr == NULL) return empty();
-  return m_data.pstr->compare(v2.get()) == 0;
+  if (m_px == NULL && v2.get() == NULL) return true;
+  if (m_px == NULL) return v2.empty();
+  if (v2.get() == NULL) return empty();
+  return m_px->compare(v2.get()) == 0;
 }
 
 bool String::equal(CArrRef v2) const {
-  if (!m_data.pstr || !v2.get()) {
+  if (m_px == NULL || v2.get() == NULL) {
     return HPHP::equal(toBoolean(), v2.toBoolean());
   }
   return false;
 }
 
 bool String::equal(CObjRef v2) const {
-  if (m_data.pstr == NULL || v2.get() == NULL) {
+  if (m_px == NULL || v2.get() == NULL) {
     return HPHP::equal(toBoolean(), v2.toBoolean());
   }
   if (v2.isResource())
@@ -447,21 +443,21 @@ bool String::less(litstr v2) const {
 }
 
 bool String::less(CStrRef v2) const {
-  if (m_data.pstr == NULL && v2.m_data.pstr == NULL) return false;
-  if (m_data.pstr == NULL) return !v2.empty();
-  if (v2.m_data.pstr == NULL) return empty();
-  return m_data.pstr->compare(v2.get()) < 0;
+  if (m_px == NULL && v2.get() == NULL) return false;
+  if (m_px == NULL) return !v2.empty();
+  if (v2.get() == NULL) return empty();
+  return m_px->compare(v2.get()) < 0;
 }
 
 bool String::less(CArrRef v2) const {
-  if (m_data.pstr == NULL || v2.get() == NULL) {
+  if (m_px == NULL || v2.get() == NULL) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
   return true;
 }
 
 bool String::less(CObjRef v2) const {
-  if (m_data.pstr == NULL || v2.get() == NULL) {
+  if (m_px == NULL || v2.get() == NULL) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
   return true;
@@ -472,21 +468,21 @@ bool String::more(litstr v2) const {
 }
 
 bool String::more(CStrRef v2) const {
-  if (m_data.pstr == NULL && v2.m_data.pstr == NULL) return false;
-  if (m_data.pstr == NULL) return v2.empty();
-  if (v2.m_data.pstr == NULL) return !empty();
-  return m_data.pstr->compare(v2.get()) > 0;
+  if (m_px == NULL && v2.get() == NULL) return false;
+  if (m_px == NULL) return v2.empty();
+  if (v2.get() == NULL) return !empty();
+  return m_px->compare(v2.get()) > 0;
 }
 
 bool String::more(CArrRef v2) const {
-  if (m_data.pstr == NULL || v2.get() == NULL) {
+  if (m_px == NULL || v2.get() == NULL) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
   return false;
 }
 
 bool String::more(CObjRef v2) const {
-  if (m_data.pstr == NULL || v2.get() == NULL) {
+  if (m_px == NULL || v2.get() == NULL) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
   return false;
@@ -571,8 +567,8 @@ bool String::operator<(CVarRef v) const {
 // input/output
 
 void String::serialize(VariableSerializer *serializer) const {
-  if (m_data.pstr) {
-    serializer->write(m_data.pstr->data(), m_data.pstr->size());
+  if (m_px) {
+    serializer->write(m_px->data(), m_px->size());
   } else {
     serializer->writeNull();
   }
@@ -600,7 +596,7 @@ void String::unserialize(std::istream &in,
   char *buf = (char*)malloc(size + 1);
   in.read(buf, size);
   buf[size] = '\0';
-  setPtr(NEW(StringData)(buf, size, AttachString));
+  SmartPtr<StringData>::operator=(NEW(StringData)(buf, size, AttachString));
 
   in >> ch;
   if (ch != delimiter1) {
@@ -612,8 +608,8 @@ void String::unserialize(std::istream &in,
 // debugging
 
 void String::dump() {
-  if (m_data.pstr) {
-    m_data.pstr->dump();
+  if (m_px) {
+    m_px->dump();
   } else {
     printf("(null)\n");
   }
@@ -624,26 +620,26 @@ void String::dump() {
 
 StaticString::StaticString(litstr s) : m_data(s) {
   String::operator=(&m_data);
-  String::m_data.pstr->setStatic();
+  m_px->setStatic();
 }
 
 StaticString::StaticString(litstr s, int length)
   : m_data(s, length, AttachLiteral) {
   String::operator=(&m_data);
-  String::m_data.pstr->setStatic();
+  m_px->setStatic();
 }
 
 StaticString::StaticString(std::string s) : m_data(s.c_str(), s.size(),
                                                    CopyString) {
   String::operator=(&m_data);
-  String::m_data.pstr->setStatic();
+  m_px->setStatic();
 }
 
 
 StaticString::StaticString(const StaticString &str)
   : m_data(str.m_data.data(), str.m_data.size(), AttachLiteral) {
   String::operator=(&m_data);
-  String::m_data.pstr->setStatic();
+  m_px->setStatic();
 }
 
 StaticString &StaticString::operator=(litstr s) {

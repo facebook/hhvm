@@ -35,128 +35,39 @@ namespace HPHP {
 /**
  * Object type wrapping around ObjectData to implement reference count.
  */
-class Object : protected Value {
+class Object : public SmartPtr<ObjectData> {
  public:
-  friend class Variant;
-
-  Object() {
-    m_data.pobj = NULL;
-  }
-  ~Object() {
-    if (m_data.pobj && m_data.pobj->decRefCount() == 0) {
-      m_data.pobj->release();
-    }
-  }
+  Object() {}
 
   static const Object s_nullObject;
 
   /**
    * Constructors
    */
-  Object(ObjectData *data) {
-    m_data.pobj = data;
-    if (m_data.pobj) {
-      m_data.pobj->incRefCount();
-    }
-  }
-
+  Object(ObjectData *data) : SmartPtr<ObjectData>(data) { }
   template <typename T>
-  Object(T *data) {
+  Object(T *data) : SmartPtr<ObjectData>() {
+    // Assert that casting does not adjust the 'this' pointer
+    ASSERT((void*)dynamic_cast<ObjectData*>(data) == (void*)data);
     // Performs a static_cast from T* to ObjectData*. This statement will
     // cause a compile time failure if T is not a descendent of ObjectData
     // in the inheritance hierarchy
-    m_data.pobj = static_cast<ObjectData*>(data);
-    // Assert that casting does not adjust the 'this' pointer
-    ASSERT((void*)dynamic_cast<ObjectData*>(data) == (void*)data);
-    if (m_data.pobj) m_data.pobj->incRefCount();
+    SmartPtr<ObjectData>::operator=(static_cast<ObjectData*>(data));
   }
 
-  Object(CObjRef src) {
-    m_data.pobj = src.m_data.pobj;
-    if (m_data.pobj) {
-      m_data.pobj->incRefCount();
-    }
-  }
-
-  bool isNull() const {
-    return m_data.pobj == NULL;
-  }
-
-  Object& set(ObjectData *px) {
-    if (m_data.pobj != px) {
-      if (m_data.pobj && m_data.pobj->decRefCount() == 0) {
-        m_data.pobj->release();
-      }
-      m_data.pobj = px;
-      if (m_data.pobj) {
-        m_data.pobj->incRefCount();
-      }
-    }
-    return *this;
-  }
-
- private:
-  Object& setPtr(ObjectData *px) {
-    ASSERT(m_data.pobj != px);
-    ASSERT(px != NULL);
-    if (m_data.pobj && m_data.pobj->decRefCount() == 0) {
-      m_data.pobj->release();
-    }
-    m_data.pobj = px;
-    m_data.pobj->incRefCount();
-    return *this;
-  }
-
- public:
-  Object& set(const Object& src) {
-    return set(src.m_data.pobj);
-  }
-
-  void reset() {
-    if (m_data.pobj && m_data.pobj->decRefCount() == 0) {
-      m_data.pobj->release();
-    }
-    m_data.pobj = NULL;
-  }
-
-  /**
-   * Magic delegation.
-   */
-  ObjectData *operator->() const {
-    if (!m_data.pobj) throw NullPointerException();
-    return m_data.pobj;
-  }
-
-  /**
-   * Get the raw pointer.
-   */
-  ObjectData *get() const {
-    return m_data.pobj;
-  }
-
-  /**
-   * Operators
-   */
-  Object &operator=(ObjectData *data) {
-    set(data);
-    return *this;
-  }
-
-  Object &operator=(CObjRef obj) {
-    set(obj.m_data.pobj);
-    return *this;
-  }
-
-  Object &operator=(CVarRef var);
+  Object(CObjRef src) : SmartPtr<ObjectData>(src.m_px) { }
 
   /**
    * Informational
    */
+  bool isNull() const {
+    return m_px == NULL;
+  }
   bool isResource() const {
-    return m_data.pobj && m_data.pobj->isResource();
+    return m_px && m_px->isResource();
   }
   bool instanceof(const char *s) const {
-    return m_data.pobj && m_data.pobj->o_instanceof(s);
+    return m_px && m_px->o_instanceof(s);
   }
 
   /**
@@ -170,19 +81,18 @@ class Object : protected Value {
   T *getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
     CT_ASSERT_DESCENDENT_OF_OBJECTDATA(T);
 
-    if (!m_data.pobj) {
+    if (!m_px) {
       if (!nullOkay) {
         throw NullPointerException();
       }
       return NULL;
     }
-    ASSERT(m_data.pobj);
 
-    T *px = dynamic_cast<T*>(m_data.pobj);
+    T *px = dynamic_cast<T*>(m_px);
     // Assert that casting does not adjust the 'this' pointer
-    ASSERT(px == NULL || (void*)px == (void*)m_data.pobj);
+    ASSERT(px == NULL || (void*)px == (void*)m_px);
     if (!px && !badTypeOkay) {
-      throw InvalidObjectTypeException(m_data.pobj->o_getClassName());
+      throw InvalidObjectTypeException(m_px->o_getClassName());
     }
 
     return px;
@@ -195,22 +105,20 @@ class Object : protected Value {
   /**
    * Type conversions
    */
-  bool   toBoolean() const { return m_data.pobj;}
-  char   toByte   () const { return m_data.pobj ? m_data.pobj->o_toInt64() : 0;}
-  short  toInt16  () const { return m_data.pobj ? m_data.pobj->o_toInt64() : 0;}
-  int    toInt32  () const { return m_data.pobj ? m_data.pobj->o_toInt64() : 0;}
-  int64  toInt64  () const { return m_data.pobj ? m_data.pobj->o_toInt64() : 0;}
-  double toDouble () const { return m_data.pobj ? m_data.pobj->o_toInt64() : 0;}
-  String toString () const {
-    return m_data.pobj ? m_data.pobj->t___tostring() : String();
-  }
+  bool   toBoolean() const { return m_px != NULL;}
+  char   toByte   () const { return m_px ? m_px->o_toInt64() : 0;}
+  short  toInt16  () const { return m_px ? m_px->o_toInt64() : 0;}
+  int    toInt32  () const { return m_px ? m_px->o_toInt64() : 0;}
+  int64  toInt64  () const { return m_px ? m_px->o_toInt64() : 0;}
+  double toDouble () const { return m_px ? m_px->o_toInt64() : 0;}
+  String toString () const { return m_px ? m_px->t___tostring() : String();}
   Array  toArray  () const;
   Variant toKey   () const;
 
   /**
    * Comparisons
    */
-  bool same (CObjRef v2) const { return m_data.pobj == v2.m_data.pobj;}
+  bool same (CObjRef v2) const { return m_px == v2.get();}
   bool equal(CObjRef v2) const;
   bool less (CObjRef v2) const;
   bool more (CObjRef v2) const;
@@ -227,6 +135,11 @@ class Object : protected Value {
    */
   void serialize(VariableSerializer *serializer) const;
   bool unserialize(std::istream &in);
+
+ private:
+  static void compileTimeAssertions() {
+    CT_ASSERT(offsetof(Object, m_px) == offsetof(Value, m_data));
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

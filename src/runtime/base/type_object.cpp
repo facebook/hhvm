@@ -26,66 +26,55 @@ const Object Object::s_nullObject = Object();
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Object &Object::operator=(CVarRef var) {
-  return operator=(var.toObject());
-}
-
 Array Object::toArray() const {
-  return m_data.pobj ? m_data.pobj->o_toArray() : Array();
+  return m_px ? m_px->o_toArray() : Array();
 }
 
 Variant Object::toKey() const {
-  if (m_data.pobj) {
-    if (isResource()) {
-      return m_data.pobj->o_toInt64();
-    } else {
-      return m_data.pobj->t___tostring();
-    }
-  } else {
-    return null_variant;
-  }
+  return m_px ? (isResource() ? m_px->o_toInt64() : m_px->t___tostring())
+              : String();
 }
 
 bool Object::equal(CObjRef v2) const {
-  if (m_data.pobj == v2.m_data.pobj)
+  if (m_px == v2.get())
     return true;
-  if (!m_data.pobj || !v2.m_data.pobj)
+  if (!m_px || !v2.get())
     return false;
   if (isResource() || v2.isResource())
     return false;
-  return (v2.get()->o_isClass(m_data.pobj->o_getClassName()) &&
+  return (v2.get()->o_isClass(m_px->o_getClassName()) &&
           toArray().equal(v2.toArray()));
 }
 
 bool Object::less(CObjRef v2) const {
-  return m_data.pobj != v2.m_data.pobj &&
+  return m_px != v2.m_px &&
     toArray().less(v2.toArray());
 }
 
 bool Object::more(CObjRef v2) const {
-  return m_data.pobj != v2.m_data.pobj &&
+  return m_px != v2.m_px &&
     toArray().more(v2.toArray());
 }
 
 Variant Object::o_get(CStrRef propName, int64 hash /* = -1 */,
     bool error /* = true */) const {
-  if (!m_data.pobj) throw NullPointerException();
-  return m_data.pobj->o_get(propName, hash, error);
+  if (!m_px) throw NullPointerException();
+  return m_px->o_get(propName, hash, error);
 }
 
 ObjectOffset Object::o_lval(CStrRef propName, int64 hash /* = -1 */) {
-  if (!m_data.pobj) {
+  if (!m_px) {
     operator=(NEW(c_stdclass)());
   }
-  return ObjectOffset(m_data.pobj, propName, hash);
+  return ObjectOffset(m_px, propName, hash);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // output
 
 void Object::serialize(VariableSerializer *serializer) const {
-  if (m_data.pobj) {
-    m_data.pobj->serialize(serializer);
+  if (m_px) {
+    m_px->serialize(serializer);
   } else {
     serializer->writeNull();
   }

@@ -35,12 +35,10 @@ IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(Variant);
 ///////////////////////////////////////////////////////////////////////////////
 // private implementations
 
-Variant::Variant(CStrRef v) {
-  _count = 0;
+Variant::Variant(CStrRef v) : _count(0), m_type(KindOfString) {
   StringData *s = v.get();
   if (s) {
     m_data.pstr = s;
-    m_type = KindOfString;
     s->incRefCount();
   } else {
     m_data.num = 0;
@@ -48,12 +46,10 @@ Variant::Variant(CStrRef v) {
   }
 }
 
-Variant::Variant(CArrRef v) {
-  _count = 0;
+Variant::Variant(CArrRef v) : _count(0), m_type(KindOfArray) {
   ArrayData *a = v.get();
   if (a) {
     m_data.parr = a;
-    m_type = KindOfArray;
     a->incRefCount();
   } else {
     m_data.num = 0;
@@ -61,12 +57,10 @@ Variant::Variant(CArrRef v) {
   }
 }
 
-Variant::Variant(CObjRef v) {
-  _count = 0;
+Variant::Variant(CObjRef v) : _count(0), m_type(KindOfObject) {
   ObjectData *o = v.get();
   if (o) {
     m_data.pobj = o;
-    m_type = KindOfObject;
     o->incRefCount();
   } else {
     m_data.num = 0;
@@ -74,11 +68,9 @@ Variant::Variant(CObjRef v) {
   }
 }
 
-Variant::Variant(StringData *v) {
-  _count = 0;
+Variant::Variant(StringData *v) : _count(0), m_type(KindOfString) {
   if (v) {
     m_data.pstr = v;
-    m_type = KindOfString;
     v->incRefCount();
   } else {
     m_data.num = 0;
@@ -86,11 +78,9 @@ Variant::Variant(StringData *v) {
   }
 }
 
-Variant::Variant(ArrayData *v) {
-  _count = 0;
+Variant::Variant(ArrayData *v) : _count(0), m_type(KindOfArray) {
   if (v) {
     m_data.parr = v;
-    m_type = KindOfArray;
     v->incRefCount();
   } else {
     m_data.num = 0;
@@ -98,11 +88,9 @@ Variant::Variant(ArrayData *v) {
   }
 }
 
-Variant::Variant(ObjectData *v) {
-  _count = 0;
+Variant::Variant(ObjectData *v) : _count(0), m_type(KindOfObject) {
   if (v) {
     m_data.pobj = v;
-    m_type = KindOfObject;
     v->incRefCount();
   } else {
     m_data.num = 0;
@@ -110,21 +98,17 @@ Variant::Variant(ObjectData *v) {
   }
 }
 
-Variant::Variant(Variant *v) {
-  _count = 0;
+Variant::Variant(Variant *v) : _count(0), m_type(KindOfVariant) {
   if (v) {
     m_data.pvar = v;
-    m_type = KindOfVariant;
   } else {
     m_data.num = 0;
     m_type = KindOfNull;
   }
 }
 
-Variant::Variant(CVarRef v) {
+Variant::Variant(CVarRef v) : _count(0), m_type(KindOfNull) {
   m_data.num = 0;
-  _count = 0;
-  m_type = KindOfNull;
   if (v.isContagious()) {
     assignContagious(v);
     return;

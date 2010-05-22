@@ -29,7 +29,6 @@
 #include <runtime/base/type_string.h>
 #include <runtime/base/hphp_value.h>
 
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -54,10 +53,8 @@ CVarRef ref(CVarRef v);
  * VectorVariant escalates to MapVariant when a string key is added, or when
  * an integer key that is out of range is added.
  */
-class Array : protected Value {
+class Array : public SmartPtr<ArrayData> {
  public:
-  friend class Variant;
-
   /**
    * Create an empty array or an array with one element. Note these are
    * different than those copying constructors that also take one value.
@@ -67,14 +64,7 @@ class Array : protected Value {
   static Array Create(CVarRef key, CVarRef value);
 
  public:
-  Array() {
-    m_data.parr = NULL;
-  }
-  ~Array() {
-    if (m_data.parr && m_data.parr->decRefCount() == 0) {
-      m_data.parr->release();
-    }
-  }
+  Array() {}
 
   static const Array s_nullArray;
 
@@ -86,73 +76,20 @@ class Array : protected Value {
   Array(ArrayData *data);
   Array(CArrRef arr);
 
-  bool isNull() const {
-    return m_data.parr == NULL;
-  }
-
-  Array& set(ArrayData *px) {
-    if (m_data.parr != px) {
-      if (m_data.parr && m_data.parr->decRefCount() == 0) {
-        m_data.parr->release();
-      }
-      m_data.parr = px;
-      if (m_data.parr) {
-        m_data.parr->incRefCount();
-      }
-    }
-    return *this;
-  }
-
- private:
-  Array& setPtr(ArrayData *px) {
-    ASSERT(m_data.parr != px);
-    ASSERT(px != NULL);
-    if (m_data.parr && m_data.parr->decRefCount() == 0) {
-      m_data.parr->release();
-    }
-    m_data.parr = px;
-    m_data.parr->incRefCount();
-    return *this;
-  }
-
- public:
-  Array& set(const Array& src) {
-    return set(src.m_data.parr);
-  }
-
-  void reset() {
-    if (m_data.parr && m_data.parr->decRefCount() == 0) {
-      m_data.parr->release();
-    }
-    m_data.parr = NULL;
-  }
-
-  /**
-   * Magic delegation.
-   */
-  ArrayData *operator->() const {
-    if (!m_data.parr) throw NullPointerException();
-    return m_data.parr;
-  }
-
-  /**
-   * Get the raw pointer.
-   */
-  ArrayData *get() const {
-    return m_data.parr;
-  }
-
   /**
    * Informational
    */
   bool empty() const {
-    return m_data.parr == NULL || m_data.parr->empty();
+    return m_px == NULL || m_px->empty();
   }
   ssize_t size() const {
-    return m_data.parr ? m_data.parr->size() : 0;
+    return m_px ? m_px->size() : 0;
   }
   ssize_t length() const {
-    return m_data.parr ? m_data.parr->size() : 0;
+    return m_px ? m_px->size() : 0;
+  }
+  bool isNull() const {
+    return m_px == NULL;
   }
   bool valueExists(CVarRef search_value, bool strict = false) const;
   Variant key(CVarRef search_value, bool strict = false) const;
@@ -204,7 +141,7 @@ class Array : protected Value {
    * escalate() will escalate me to become VectorVariant or MapVariant, so that
    * getValueRef() can be called to take a reference to an array element.
    */
-  ArrayIter begin(const char *context = NULL) const { return m_data.parr;}
+  ArrayIter begin(const char *context = NULL) const { return m_px;}
   void escalate();
 
   /**
@@ -259,27 +196,13 @@ class Array : protected Value {
   /**
    * Type conversions
    */
-  bool   toBoolean() const {
-    return m_data.parr && !m_data.parr->empty();
-  }
-  char   toByte   () const {
-    return (m_data.parr && !m_data.parr->empty()) ? 1 : 0;
-  }
-  short  toInt16  () const {
-    return (m_data.parr && !m_data.parr->empty()) ? 1 : 0;
-  }
-  int    toInt32  () const {
-    return (m_data.parr && !m_data.parr->empty()) ? 1 : 0;
-  }
-  int64  toInt64  () const {
-    return (m_data.parr && !m_data.parr->empty()) ? 1 : 0;
-  }
-  double toDouble () const {
-    return (m_data.parr && !m_data.parr->empty()) ? 1.0 : 0.0;
-  }
-  String toString () const {
-    return m_data.parr ? "Array" : "";
-  }
+  bool   toBoolean() const { return  m_px && !m_px->empty();}
+  char   toByte   () const { return (m_px && !m_px->empty()) ? 1 : 0;}
+  short  toInt16  () const { return (m_px && !m_px->empty()) ? 1 : 0;}
+  int    toInt32  () const { return (m_px && !m_px->empty()) ? 1 : 0;}
+  int64  toInt64  () const { return (m_px && !m_px->empty()) ? 1 : 0;}
+  double toDouble () const { return (m_px && !m_px->empty()) ? 1.0 : 0.0;}
+  String toString () const { return m_px ? "Array" : "";}
   Object toObject () const;
 
   /**
@@ -324,35 +247,33 @@ class Array : protected Value {
   const Variant operator[](CVarRef key) const;
 
   Variant &lval() {
-    ASSERT(m_data.parr);
+    ASSERT(m_px);
     Variant *ret = NULL;
-    ArrayData *escalated = m_data.parr->lval(ret, m_data.parr->getCount() > 1);
+    ArrayData *escalated = m_px->lval(ret, m_px->getCount() > 1);
     if (escalated) {
-      setPtr(escalated);
+      SmartPtr<ArrayData>::operator=(escalated);
     }
     ASSERT(ret);
     return *ret;
   }
 
   Variant &lval(int64 key) {
-    ASSERT(m_data.parr);
+    ASSERT(m_px);
     Variant *ret = NULL;
-    ArrayData *escalated =
-      m_data.parr->lval(key, ret, m_data.parr->getCount() > 1);
+    ArrayData *escalated = m_px->lval(key, ret, m_px->getCount() > 1);
     if (escalated) {
-      setPtr(escalated);
+      SmartPtr<ArrayData>::operator=(escalated);
     }
     ASSERT(ret);
     return *ret;
   }
 
   Variant &lval(CStrRef key) {
-    ASSERT(m_data.parr);
+    ASSERT(m_px);
     Variant *ret = NULL;
-    ArrayData *escalated =
-      m_data.parr->lval(key, ret, m_data.parr->getCount() > 1);
+    ArrayData *escalated = m_px->lval(key, ret, m_px->getCount() > 1);
     if (escalated) {
-      setPtr(escalated);
+      SmartPtr<ArrayData>::operator=(escalated);
     }
     ASSERT(ret);
     return *ret;
@@ -425,7 +346,7 @@ class Array : protected Value {
    */
   template<typename T>
     bool existsImpl(const T &key, int64 prehash) const {
-    if (m_data.parr) return m_data.parr->exists(key, prehash);
+    if (m_px) return m_px->exists(key, prehash);
     return false;
   }
   bool exists(bool    key, int64 prehash = -1) const {
@@ -452,11 +373,10 @@ class Array : protected Value {
 
   template<typename T>
   void removeImpl(const T &key, int64 prehash) {
-    if (m_data.parr) {
-      ArrayData *escalated =
-        m_data.parr->remove(key, (m_data.parr->getCount() > 1), prehash);
+    if (m_px) {
+      ArrayData *escalated = m_px->remove(key, (m_px->getCount() > 1), prehash);
       if (escalated) {
-        setPtr(escalated);
+        SmartPtr<ArrayData>::operator=(escalated);
       }
     }
   }
@@ -484,7 +404,7 @@ class Array : protected Value {
 
   template<typename T>
   void weakRemove(const T &key, int64 prehash = -1) {
-    if (m_data.parr) remove(key, prehash);
+    if (m_px) remove(key, prehash);
   }
 
   void removeAll();
@@ -508,13 +428,13 @@ class Array : protected Value {
   void dump();
 
   ArrayData *getArrayData() const {
-    return m_data.parr;
+    return m_px;
   }
 
   void setStatic() const {
-    if (m_data.parr) {
-      m_data.parr->setStatic();
-      m_data.parr->onSetStatic();
+    if (m_px) {
+      m_px->setStatic();
+      m_px->onSetStatic();
     }
   }
 
@@ -529,18 +449,21 @@ class Array : protected Value {
   template<typename T>
   Variant &lvalAtImpl(const T &key, int64 prehash = -1,
                       bool checkExist = false) {
-    if (!m_data.parr) {
-      setPtr(ArrayData::Create());
+    if (!m_px) {
+      SmartPtr<ArrayData>::operator=(ArrayData::Create());
     }
     Variant *ret = NULL;
-    ArrayData *escalated = m_data.parr->lval(key, ret,
-                                             m_data.parr->getCount() > 1,
-                                             prehash, checkExist);
+    ArrayData *escalated =
+      m_px->lval(key, ret, m_px->getCount() > 1, prehash, checkExist);
     if (escalated) {
-      setPtr(escalated);
+      SmartPtr<ArrayData>::operator=(escalated);
     }
     ASSERT(ret);
     return *ret;
+  }
+
+  static void compileTimeAssertions() {
+    CT_ASSERT(offsetof(Array, m_px) == offsetof(Value, m_data));
   }
 };
 
@@ -556,12 +479,12 @@ class StaticArray : public Array {
 public:
   StaticArray() { }
   StaticArray(ArrayData *data) : Array(data) {
-    m_data.parr->setStatic();
-    m_data.parr->onSetStatic();
+    m_px->setStatic();
+    m_px->onSetStatic();
   }
   ~StaticArray() {
-    // prevent ~Array from calling decRefCount after data is released
-    m_data.parr = NULL;
+    // prevent ~SmartPtr from calling decRefCount after data is released
+    m_px = NULL;
   }
 };
 

@@ -45,30 +45,20 @@ Array Array::Create(CVarRef name, CVarRef var) {
   return ArrayData::Create(name.isString() ? name.toKey() : name, var);
 }
 
-Array::Array(ArrayData *data) {
-  m_data.parr = data;
-  if (m_data.parr) {
-    m_data.parr->incRefCount();
-  }
-}
+Array::Array(ArrayData *data) : SmartPtr<ArrayData>(data) { }
 
-Array::Array(CArrRef arr) {
-  m_data.parr = arr.m_data.parr;
-  if (m_data.parr) {
-    m_data.parr->incRefCount();
-  }
-}
+Array::Array(CArrRef arr) : SmartPtr<ArrayData>(arr.m_px) { }
 
 ///////////////////////////////////////////////////////////////////////////////
 // operators
 
 Array &Array::operator=(ArrayData *data) {
-  set(data);
+  SmartPtr<ArrayData>::operator=(data);
   return *this;
 }
 
 Array &Array::operator=(CArrRef arr) {
-  set(arr.m_data.parr);
+  SmartPtr<ArrayData>::operator=(arr.m_px);
   return *this;
 }
 
@@ -84,7 +74,7 @@ Array Array::operator+(CVarRef var) const {
 }
 
 Array Array::operator+(CArrRef arr) const {
-  return Array(m_data.parr).operator+=(arr);
+  return Array(m_px).operator+=(arr);
 }
 
 Array &Array::operator+=(CVarRef var) {
@@ -249,36 +239,35 @@ Array &Array::merge(CArrRef arr) {
 }
 
 Array &Array::mergeImpl(CArrRef arr, ArrayData::ArrayOp op) {
-  if (m_data.parr == NULL || arr.m_data.parr == NULL) {
+  if (m_px == NULL || arr.m_px == NULL) {
     throw BadArrayMergeException();
   }
-  if (!arr.m_data.parr->empty()) {
-    if (op != ArrayData::Merge && m_data.parr->empty()) {
-      set(arr.m_data.parr);
+  if (!arr.m_px->empty()) {
+    if (op != ArrayData::Merge && m_px->empty()) {
+      SmartPtr<ArrayData>::operator=(arr.m_px);
     } else {
-      ArrayData *escalated = m_data.parr->append(arr.m_data.parr, op,
-                                                 m_data.parr->getCount() > 1);
+      ArrayData *escalated = m_px->append(arr.m_px, op, m_px->getCount() > 1);
       if (escalated) {
-        setPtr(escalated);
+        SmartPtr<ArrayData>::operator=(escalated);
       }
     }
   } else if (op == ArrayData::Merge) {
-    m_data.parr->renumber();
+    m_px->renumber();
   }
   return *this;
 }
 
 Array Array::slice(int offset, int length, bool preserve_keys) const {
-  if (!m_data.parr) return Array();
-  return ArrayUtil::Slice(m_data.parr, offset, length, preserve_keys);
+  if (m_px == NULL) return Array();
+  return ArrayUtil::Slice(m_px, offset, length, preserve_keys);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // type conversions
 
 Object Array::toObject() const {
-  if (m_data.parr) {
-    return m_data.parr->toObject();
+  if (m_px) {
+    return m_px->toObject();
   }
   return Object(NEW(c_stdclass)());
 }
@@ -287,9 +276,9 @@ Object Array::toObject() const {
 // comparisons
 
 bool Array::same(CArrRef v2) const {
-  if (m_data.parr == NULL && v2.m_data.parr == NULL) return true;
-  if (m_data.parr && v2.m_data.parr) {
-    return m_data.parr->compare(v2.m_data.parr, true) == 0;
+  if (m_px == NULL && v2.get() == NULL) return true;
+  if (m_px && v2.get()) {
+    return m_px->compare(v2.get(), true) == 0;
   }
   return false;
 }
@@ -299,69 +288,69 @@ bool Array::same(CObjRef v2) const {
 }
 
 bool Array::equal(CArrRef v2) const {
-  if (m_data.parr == NULL || v2.m_data.parr == NULL) {
+  if (m_px == NULL || v2.get() == NULL) {
     return HPHP::equal(toBoolean(), v2.toBoolean());
   }
-  return m_data.parr->compare(v2.get(), false) == 0;
+  return m_px->compare(v2.get(), false) == 0;
 }
 
 bool Array::equal(CObjRef v2) const {
-  if (m_data.parr == NULL || v2.get() == NULL) {
+  if (m_px == NULL || v2.get() == NULL) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
   return false;
 }
 
 bool Array::less(CArrRef v2, bool flip /* = false */) const {
-  if (m_data.parr == NULL || v2.m_data.parr == NULL) {
+  if (m_px == NULL || v2.get() == NULL) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
   if (flip) {
-    return v2.get()->compare(m_data.parr, false) > 0;
+    return v2.get()->compare(m_px, false) > 0;
   }
-  return m_data.parr->compare(v2.get(), false) < 0;
+  return m_px->compare(v2.get(), false) < 0;
 }
 
 bool Array::less(CObjRef v2) const {
-  if (m_data.parr == NULL || v2.get() == NULL) {
+  if (m_px == NULL || v2.get() == NULL) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
   return false;
 }
 
 bool Array::less(CVarRef v2) const {
-  if (m_data.parr == NULL || v2.isNull()) {
+  if (m_px == NULL || v2.isNull()) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
   if (v2.getType() == KindOfArray) {
-    return m_data.parr->compare(v2.toArray().get(), false) < 0;
+    return m_px->compare(v2.toArray().get(), false) < 0;
   }
   return v2.more(*this);
 }
 
 bool Array::more(CArrRef v2, bool flip /* = true */) const {
-  if (m_data.parr == NULL || v2.m_data.parr == NULL) {
+  if (m_px == NULL || v2.get() == NULL) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
   if (flip) {
-    return v2.get()->compare(m_data.parr, false) < 0;
+    return v2.get()->compare(m_px, false) < 0;
   }
-  return m_data.parr->compare(v2.get(), false) > 0;
+  return m_px->compare(v2.get(), false) > 0;
 }
 
 bool Array::more(CObjRef v2) const {
-  if (m_data.parr == NULL || v2.get() == NULL) {
+  if (m_px == NULL || v2.get() == NULL) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
   return true;
 }
 
 bool Array::more(CVarRef v2) const {
-  if (m_data.parr == NULL || v2.isNull()) {
+  if (m_px == NULL || v2.isNull()) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
   if (v2.getType() == KindOfArray) {
-    return v2.toArray().get()->compare(m_data.parr, false) < 0;
+    return v2.toArray().get()->compare(m_px, false) < 0;
   }
   return v2.less(*this);
 }
@@ -370,21 +359,21 @@ bool Array::more(CVarRef v2) const {
 // iterator
 
 void Array::escalate() {
-  if (m_data.parr) {
-    SharedMap *mapShared = dynamic_cast<SharedMap *>(m_data.parr);
+  if (m_px) {
+    SharedMap *mapShared = dynamic_cast<SharedMap *>(m_px);
     if (mapShared) {
-      setPtr(mapShared->escalate());
+      SmartPtr<ArrayData>::operator=(mapShared->escalate());
       return;
     }
     if (!RuntimeOption::UseZendArray) {
-      VectorVariant *vecVariant = dynamic_cast<VectorVariant *>(m_data.parr);
+      VectorVariant *vecVariant = dynamic_cast<VectorVariant *>(m_px);
       if (vecVariant) {
-        setPtr(NEW(MapVariant)(vecVariant));
+        SmartPtr<ArrayData>::operator=(NEW(MapVariant)(vecVariant));
         return;
       }
 
-      ASSERT(dynamic_cast<VectorVariant *>(m_data.parr) ||
-             dynamic_cast<MapVariant *>(m_data.parr));
+      ASSERT(dynamic_cast<VectorVariant *>(m_px) ||
+             dynamic_cast<MapVariant *>(m_px));
     }
   }
 }
@@ -394,57 +383,57 @@ void Array::escalate() {
 
 Variant Array::rvalAt(bool key, int64 prehash /* = -1 */,
                       bool error /* = false*/) const {
-  if (m_data.parr) return m_data.parr->get(key ? 1LL : 0LL, prehash, error);
+  if (m_px) return m_px->get(key ? 1LL : 0LL, prehash, error);
   return null_variant;
 }
 
 Variant Array::rvalAt(char key, int64 prehash /* = -1 */,
                       bool error /* = false */) const {
-  if (m_data.parr) return m_data.parr->get((int64)key, prehash, error);
+  if (m_px) return m_px->get((int64)key, prehash, error);
   return null_variant;
 }
 
 Variant Array::rvalAt(short key, int64 prehash /* = -1 */,
                       bool error /* = false */) const {
-  if (m_data.parr) return m_data.parr->get((int64)key, prehash, error);
+  if (m_px) return m_px->get((int64)key, prehash, error);
   return null_variant;
 }
 
 Variant Array::rvalAt(int key, int64 prehash /* = -1 */,
                       bool error /* = false */) const {
-  if (m_data.parr) return m_data.parr->get((int64)key, prehash, error);
+  if (m_px) return m_px->get((int64)key, prehash, error);
   return null_variant;
 }
 
 Variant Array::rvalAt(int64 key, int64 prehash /* = -1 */,
                       bool error /* = false */) const {
-  if (m_data.parr) return m_data.parr->get(key, prehash, error);
+  if (m_px) return m_px->get(key, prehash, error);
   return null_variant;
 }
 
 Variant Array::rvalAt(ssize_t key, int64 prehash /* = -1 */,
                       bool error /* = false */) const {
-  if (m_data.parr) return m_data.parr->get((int64)key, error);
+  if (m_px) return m_px->get((int64)key, error);
   return null_variant;
 }
 
 Variant Array::rvalAt(double key, int64 prehash /* = -1 */,
                       bool error /* = false */) const {
-  if (m_data.parr) return m_data.parr->get((int64)key, prehash, error);
+  if (m_px) return m_px->get((int64)key, prehash, error);
   return null_variant;
 }
 
 Variant Array::rvalAt(litstr key, int64 prehash /* = -1 */,
                       bool error /* = false */,
                       bool isString /* = false */) const {
-  if (m_data.parr) {
-    if (isString) return m_data.parr->get(key, prehash, error);
+  if (m_px) {
+    if (isString) return m_px->get(key, prehash, error);
     int64 n;
     int len = strlen(key);
     if (!is_strictly_integer(key, len, n)) {
-      return m_data.parr->get(key, prehash, error);
+      return m_px->get(key, prehash, error);
     } else {
-      return m_data.parr->get(n, prehash, error);
+      return m_px->get(n, prehash, error);
     }
   }
   return null_variant;
@@ -453,13 +442,13 @@ Variant Array::rvalAt(litstr key, int64 prehash /* = -1 */,
 Variant Array::rvalAt(CStrRef key, int64 prehash /* = -1 */,
                       bool error /* = false */,
                       bool isString /* = false */) const {
-  if (m_data.parr) {
-    if (isString) return m_data.parr->get(key, prehash, error);
+  if (m_px) {
+    if (isString) return m_px->get(key, prehash, error);
     int64 n;
     if (!key->isStrictlyInteger(n)) {
-      return m_data.parr->get(key, prehash, error);
+      return m_px->get(key, prehash, error);
     } else {
-      return m_data.parr->get(n, prehash, error);
+      return m_px->get(n, prehash, error);
     }
   }
   return null_variant;
@@ -467,27 +456,27 @@ Variant Array::rvalAt(CStrRef key, int64 prehash /* = -1 */,
 
 Variant Array::rvalAt(CVarRef key, int64 prehash /* = -1 */,
                       bool error /* = false*/) const {
-  if (!m_data.parr) return null_variant;
+  if (!m_px) return null_variant;
   switch (key.m_type) {
   case KindOfNull:
-    return m_data.parr->get("", prehash, error);
+    return m_px->get("", prehash, error);
   case KindOfBoolean:
   case KindOfByte:
   case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
-    return m_data.parr->get(key.m_data.num, prehash, error);
+    return m_px->get(key.m_data.num, prehash, error);
   case KindOfDouble:
-    return m_data.parr->get((int64)key.m_data.dbl, prehash, error);
+    return m_px->get((int64)key.m_data.dbl, prehash, error);
   case LiteralString:
     key.escalateString();
     // fall through
   case KindOfString: {
     int64 n;
     if (key.m_data.pstr->isStrictlyInteger(n)) {
-      return m_data.parr->get(n, prehash, error);
+      return m_px->get(n, prehash, error);
     } else {
-      return m_data.parr->get(String(key.m_data.pstr), prehash, error);
+      return m_px->get(String(key.m_data.pstr), prehash, error);
     }
   }
   case KindOfArray:
@@ -495,7 +484,7 @@ Variant Array::rvalAt(CVarRef key, int64 prehash /* = -1 */,
     break;
   case KindOfObject:
     if (key.isResource()) {
-      return m_data.parr->get(key.toInt64(), prehash, error);
+      return m_px->get(key.toInt64(), prehash, error);
     }
     throw_bad_type_exception("Invalid type used as key");
     break;
@@ -665,27 +654,26 @@ void Array::removeAll() {
 }
 
 Variant Array::append(CVarRef v) {
-  if (!m_data.parr) {
-    setPtr(ArrayData::Create(v));
+  if (!m_px) {
+    SmartPtr<ArrayData>::operator=(ArrayData::Create(v));
   } else {
     if (v.isContagious()) {
       escalate();
     }
-    bool copy = (m_data.parr->getCount() > 1);
-    ArrayData *escalated = m_data.parr->append(v, copy);
+    ArrayData *escalated = m_px->append(v, (m_px->getCount() > 1));
     if (escalated) {
-      setPtr(escalated);
+      SmartPtr<ArrayData>::operator=(escalated);
     }
   }
   return v;
 }
 
 Variant Array::pop() {
-  if (m_data.parr) {
+  if (m_px) {
     Variant ret;
-    ArrayData *newarr = m_data.parr->pop(ret);
+    ArrayData *newarr = m_px->pop(ret);
     if (newarr) {
-      setPtr(newarr);
+      SmartPtr<ArrayData>::operator=(newarr);
     }
     return ret;
   }
@@ -693,11 +681,11 @@ Variant Array::pop() {
 }
 
 Variant Array::dequeue() {
-  if (m_data.parr) {
+  if (m_px) {
     Variant ret;
-    ArrayData *newarr = m_data.parr->dequeue(ret);
+    ArrayData *newarr = m_px->dequeue(ret);
     if (newarr) {
-      setPtr(newarr);
+      SmartPtr<ArrayData>::operator=(newarr);
     }
     return ret;
   }
@@ -705,14 +693,14 @@ Variant Array::dequeue() {
 }
 
 void Array::prepend(CVarRef v) {
-  if (!m_data.parr) {
+  if (!m_px) {
     operator=(Create());
   }
-  ASSERT(m_data.parr);
+  ASSERT(m_px);
 
-  ArrayData *newarr = m_data.parr->prepend(v, (m_data.parr->getCount() > 1));
+  ArrayData *newarr = m_px->prepend(v, (m_px->getCount() > 1));
   if (newarr) {
-    setPtr(newarr);
+    SmartPtr<ArrayData>::operator=(newarr);
   }
 }
 
@@ -720,8 +708,8 @@ void Array::prepend(CVarRef v) {
 // output functions
 
 void Array::serialize(VariableSerializer *serializer) const {
-  if (m_data.parr) {
-    m_data.parr->serialize(serializer);
+  if (m_px) {
+    m_px->serialize(serializer);
   } else {
     serializer->writeNull();
   }
@@ -756,8 +744,8 @@ void Array::unserialize(VariableUnserializer *unserializer) {
 }
 
 void Array::dump() {
-  if (m_data.parr) {
-    m_data.parr->dump();
+  if (m_px) {
+    m_px->dump();
   } else {
     printf("(null)\n");
   }
@@ -937,9 +925,9 @@ void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
   for (int i = 0; i < count; i++) {
     ssize_t pos = opaque.positions[indices[i]];
     if (renumber) {
-      sorted.append(m_data.parr->getValue(pos));
+      sorted.append(m_px->getValue(pos));
     } else {
-      sorted.set(m_data.parr->getKey(pos), m_data.parr->getValue(pos));
+      sorted.set(m_px->getKey(pos), m_px->getValue(pos));
     }
   }
   operator=(sorted);

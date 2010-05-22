@@ -37,121 +37,33 @@ namespace HPHP {
  * String type wrapping around StringData to implement copy-on-write and
  * literal string handling (to avoid string copying).
  */
-class String : protected Value {
- public:
-  friend class Variant;
+class String : public SmartPtr<StringData> {
+public:
+  // create a string from a character
+  static String FromChar(char ch);
 
-  String() {
-    m_data.pstr = NULL;
-  }
-  ~String() {
-    if (m_data.pstr && m_data.pstr->decRefCount() == 0) {
-      m_data.pstr->release();
-    }
-  }
+public:
+  String() {}
 
   static const String s_nullString;
 
   /**
    * Constructors
    */
-  String(StringData *data) {
-    m_data.pstr = data;
-    if (m_data.pstr) {
-      m_data.pstr->incRefCount();
-    }
-  }
+  String(StringData *data) : SmartPtr<StringData>(data) { }
   String(int     n);
   String(int64   n);
   String(double  n);
-  String(litstr  s) {
-    m_data.pstr = NEW(StringData)(s, AttachLiteral);
-    m_data.pstr->incRefCount();
-  }
-  String(CStrRef str) {
-    m_data.pstr = str.m_data.pstr;
-    if (m_data.pstr) {
-      m_data.pstr->incRefCount();
-    }
-  }
+  String(litstr  s)
+    : SmartPtr<StringData>(NEW(StringData)(s, AttachLiteral)) { }
+  String(CStrRef str) : SmartPtr<StringData>(str.m_px) { }
 
-  String(const std::string &s) {
-    // always make a copy
-    m_data.pstr = NEW(StringData)(s.data(), s.size(), CopyString);
-    m_data.pstr->incRefCount();
-  }
-  String(const char *s, StringDataMode mode) {
-    // null-terminated string
-    m_data.pstr = s ? NEW(StringData)(s, mode) : NULL;
-    if (m_data.pstr) {
-      m_data.pstr->incRefCount();
-    }
-  }
-  String(const char *s, int length, StringDataMode mode) {
-    // binary string
-    m_data.pstr = s ? NEW(StringData)(s, length, mode) : NULL;
-    if (m_data.pstr) {
-      m_data.pstr->incRefCount();
-    }
-  }
-
-  // create a string from a character
-  static String FromChar(char ch);
-
-  bool isNull() const { return m_data.pstr == NULL; }
-
-  String& set(StringData *px) {
-    if (m_data.pstr != px) {
-      if (m_data.pstr && m_data.pstr->decRefCount() == 0) {
-        m_data.pstr->release();
-      }
-      m_data.pstr = px;
-      if (m_data.pstr) {
-        m_data.pstr->incRefCount();
-      }
-    }
-    return *this;
-  }
-
- private:
-  String& setPtr(StringData *px) {
-    ASSERT(m_data.pstr != px);
-    ASSERT(px != NULL);
-    if (m_data.pstr && m_data.pstr->decRefCount() == 0) {
-      m_data.pstr->release();
-    }
-    m_data.pstr = px;
-    m_data.pstr->incRefCount();
-    return *this;
-  }
-
- public:
-  String& set(const String& src) {
-    return set(src.m_data.pstr);
-  }
-
-  void reset() {
-    if (m_data.pstr && m_data.pstr->decRefCount() == 0) {
-      m_data.pstr->release();
-    }
-    m_data.pstr = NULL;
-  }
-
-  /**
-   * Magic delegation.
-   */
-  StringData *operator->() const {
-    if (!m_data.pstr) throw NullPointerException();
-    return m_data.pstr;
-  }
-
-  /**
-   * Get the raw pointer.
-   */
-  StringData *get() const {
-    return m_data.pstr;
-  }
-
+  String(const std::string &s) // always make a copy
+    : SmartPtr<StringData>(NEW(StringData)(s.data(), s.size(), CopyString)) { }
+  String(const char *s, StringDataMode mode) // null-terminated string
+    : SmartPtr<StringData>(s ? NEW(StringData)(s, mode) : NULL) { }
+  String(const char *s, int length, StringDataMode mode) // binary string
+    : SmartPtr<StringData>(s ? NEW(StringData)(s, length, mode) : NULL) { }
 
   void assign(const char *data, StringDataMode mode);
   void assign(const char *data, int len, StringDataMode mode);
@@ -164,38 +76,41 @@ class String : protected Value {
    * Informational
    */
   operator const char *() const {
-    return m_data.pstr ? m_data.pstr->data() : "";
+    return m_px ? m_px->data() : "";
   }
   const char *data() const {
-    return m_data.pstr ? m_data.pstr->data() : "";
+    return m_px ? m_px->data() : "";
   }
   const char *c_str() const {
-    return m_data.pstr ? m_data.pstr->data() : "";
+    return m_px ? m_px->data() : "";
   }
   bool empty() const {
-    return m_data.pstr ? m_data.pstr->empty() : true;
+    return m_px ? m_px->empty() : true;
   }
   int size() const {
-    return m_data.pstr ? m_data.pstr->size() : 0;
+    return m_px ? m_px->size() : 0;
   }
   int length() const {
-    return m_data.pstr ? m_data.pstr->size() : 0;
+    return m_px ? m_px->size() : 0;
+  }
+  bool isNull() const {
+    return m_px == NULL;
   }
   bool isNumeric() const {
-    return m_data.pstr ? m_data.pstr->isNumeric() : false;
+    return m_px ? m_px->isNumeric() : false;
   }
   bool isInteger() const {
-    return m_data.pstr ? m_data.pstr->isInteger() : false;
+    return m_px ? m_px->isInteger() : false;
   }
   bool isZero() const {
-    return m_data.pstr ? m_data.pstr->isZero() : false;
+    return m_px ? m_px->isZero() : false;
   }
 
   bool isValidVariableName() const {
-    return m_data.pstr ? m_data.pstr->isValidVariableName() : false;
+    return m_px ? m_px->isValidVariableName() : false;
   }
   bool isLiteral() const {
-    return m_data.pstr ? m_data.pstr->isLiteral() : true;
+    return m_px ? m_px->isLiteral() : true;
   }
 
   /**
@@ -276,16 +191,12 @@ class String : protected Value {
   /**
    * Type conversions
    */
-  bool   toBoolean() const {
-    return m_data.pstr ? m_data.pstr->toBoolean() : false;
-  }
-  char   toByte   () const {
-    return m_data.pstr ? m_data.pstr->toByte() : false;
-  }
-  short  toInt16  () const { return m_data.pstr ? m_data.pstr->toInt16  () : 0;}
-  int    toInt32  () const { return m_data.pstr ? m_data.pstr->toInt32  () : 0;}
-  int64  toInt64  () const { return m_data.pstr ? m_data.pstr->toInt64  () : 0;}
-  double toDouble () const { return m_data.pstr ? m_data.pstr->toDouble () : 0;}
+  bool   toBoolean() const { return m_px ? m_px->toBoolean() : false;}
+  char   toByte   () const { return m_px ? m_px->toByte   () : false;}
+  short  toInt16  () const { return m_px ? m_px->toInt16  () : 0;}
+  int    toInt32  () const { return m_px ? m_px->toInt32  () : 0;}
+  int64  toInt64  () const { return m_px ? m_px->toInt64  () : 0;}
+  double toDouble () const { return m_px ? m_px->toDouble () : 0;}
   Variant toKey   () const;
 
   /**
@@ -360,15 +271,20 @@ class String : protected Value {
 
  private:
   StringOffset lvalAtImpl(int key) {
-    setPtr(NEW(StringData)(data(), size(), CopyString));
-    return StringOffset(m_data.pstr, key);
+    SmartPtr<StringData>::operator=
+      (NEW(StringData)(data(), size(), CopyString));
+    return StringOffset(m_px, key);
   }
 
   String rvalAtImpl(int key) const {
-    if (m_data.pstr) {
-      return m_data.pstr->getChar(key);
+    if (m_px) {
+      return m_px->getChar(key);
     }
     return String();
+  }
+
+  static void compileTimeAssertions() {
+    CT_ASSERT(offsetof(String, m_px) == offsetof(Value, m_data));
   }
 };
 
@@ -409,8 +325,8 @@ public:
   StaticString(std::string s);
   StaticString(const StaticString &str);
   ~StaticString() {
-    // prevent ~String from calling decRefCount after data is released
-    String::m_data.pstr = NULL;
+    // prevent ~SmartPtr from calling decRefCount after data is released
+    m_px = NULL;
   }
   StaticString &operator =  (litstr  v);
 private:

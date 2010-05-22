@@ -77,7 +77,7 @@ namespace HPHP {
 
 #define null (Variant())
 
-class Variant : protected TypedValue {
+class Variant {
  public:
   friend class Array;
 
@@ -87,10 +87,9 @@ class Variant : protected TypedValue {
    */
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
-  Variant() {
-    m_data.num = 1; // uninitialized
-    _count = 0;
-    m_type = KindOfNull;
+  Variant() : _count(0), m_type(KindOfNull) {
+    // uninitialized
+    m_data.num = 1;
   }
 
   void destruct();
@@ -106,51 +105,15 @@ class Variant : protected TypedValue {
    * operator overloads.
    */
   Variant(CVarRef v);
-  Variant(bool    v) {
-    m_data.num = (v ? 1 : 0);
-    _count = 0;
-    m_type = KindOfBoolean;
-  }
-  Variant(char    v) {
-    m_data.num = v;
-    _count = 0;
-    m_type = KindOfByte;
-  }
-  Variant(short   v) {
-    m_data.num = v;
-    _count = 0;
-    m_type = KindOfInt16;
-  }
-  Variant(int     v) {
-    m_data.num = v;
-    _count = 0;
-    m_type = KindOfInt32;
-  }
-  Variant(int64   v) {
-    m_data.num = v;
-    _count = 0;
-    m_type = KindOfInt64;
-  }
-  Variant(uint64  v) {
-    m_data.num = v;
-    _count = 0;
-    m_type = KindOfInt64;
-  }
-  Variant(ssize_t v) {
-    m_data.num = v;
-    _count = 0;
-    m_type = KindOfInt64;
-  }
-  Variant(double  v) {
-    m_data.dbl = v;
-    _count = 0;
-    m_type = KindOfDouble;
-  }
-  Variant(litstr  v) {
-    m_data.str = v;
-    _count = 0;
-    m_type = LiteralString;
-  }
+  Variant(bool    v) : _count(0), m_type(KindOfBoolean) { m_data.num = (v?1:0);}
+  Variant(char    v) : _count(0), m_type(KindOfByte   ) { m_data.num = v;}
+  Variant(short   v) : _count(0), m_type(KindOfInt16  ) { m_data.num = v;}
+  Variant(int     v) : _count(0), m_type(KindOfInt32  ) { m_data.num = v;}
+  Variant(int64   v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
+  Variant(uint64  v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
+  Variant(ssize_t v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
+  Variant(double  v) : _count(0), m_type(KindOfDouble ) { m_data.dbl = v;}
+  Variant(litstr  v) : _count(0), m_type(LiteralString) { m_data.str = v;}
 
   Variant(CStrRef v);
   Variant(CArrRef v);
@@ -161,10 +124,7 @@ class Variant : protected TypedValue {
   Variant(Variant *v);
 
   template<typename T>
-  Variant(const SmartObject<T> &v) {
-    m_data.num = 0;
-    _count = 0;
-    m_type = KindOfNull;
+  Variant(const SmartObject<T> &v) : _count(0), m_type(KindOfNull) {
     set(v);
   }
 
@@ -188,32 +148,32 @@ class Variant : protected TypedValue {
    */
   const String & asCStrRef() const {
     ASSERT(m_type == KindOfString);
-    return *static_cast<const String*>(static_cast<const Value*>(this));
+    return *(const String*)(this);
   }
 
   String & asStrRef() {
     ASSERT(m_type == KindOfString);
-    return *static_cast<String*>(static_cast<Value*>(this));
+    return *(String*)(this);
   }
 
   const Array & asCArrRef() const {
     ASSERT(m_type == KindOfArray);
-    return *static_cast<const Array*>(static_cast<const Value*>(this));
+    return *(const Array*)(this);
   }
 
   Array & asArrRef() {
     ASSERT(m_type == KindOfArray);
-    return *static_cast<Array*>(static_cast<Value*>(this));
+    return *(Array*)(this);
   }
 
   const Object & asCObjRef() const {
     ASSERT(m_type == KindOfObject);
-    return *static_cast<const Object*>(static_cast<const Value*>(this));
+    return *(const Object*)(this);
   }
 
   Object & asObjRef() {
     ASSERT(m_type == KindOfObject);
-    return *static_cast<Object*>(static_cast<Value*>(this));
+    return *(Object*)(this);
   }
 
   /**
@@ -279,13 +239,9 @@ class Variant : protected TypedValue {
    * Borrowing Countable::_count for contagious bit, and this is okay, since
    * outer Variant never uses reference counting.
    */
-  void setContagious() const {
-    _count = -1;
-  }
-  void clearContagious() const {
-    _count = 0;
-  }
-  bool isContagious() const { return _count == -1; }
+  void setContagious() const { _count = -1;}
+  void clearContagious() const { _count = 0;}
+  bool isContagious() const { return _count == -1;}
 
   /**
    * Whether or not there are at least two variables that are strongly bound.
@@ -716,6 +672,7 @@ class Variant : protected TypedValue {
   CVarRef set(CStrRef key, CVarRef v, int64 prehash = -1,
               bool isString = false);
   CVarRef set(CVarRef key, CVarRef v, int64 prehash = -1);
+
   CVarRef append(CVarRef v);
 
   template<typename T>
@@ -831,7 +788,25 @@ class Variant : protected TypedValue {
   bool isStatic() const { return _count == (1 << 30); }
   void setStatic() const;
 
+  /**
+   * The order of the data members is significant. The _count field must
+   * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.
+   */
  private:
+  mutable union {
+    int64        num;
+    double       dbl;
+    litstr       str;
+    StringData  *pstr;
+    ArrayData   *parr;
+    ObjectData  *pobj;
+    Variant     *pvar; // shared data between strongly bound Variants
+  } m_data;
+ protected:
+  mutable int _count;
+ private:
+  mutable DataType m_type;
+
   bool isPrimitive() const { return m_type <= LiteralString; }
 
   CVarRef set(bool    v);
@@ -1014,12 +989,16 @@ class Variant : protected TypedValue {
 
   Variant refvalAtImpl(CStrRef key, int64 prehash = -1, bool isString = false);
 
-#ifdef FAST_REFCOUNT_FOR_VARIANT
+
  private:
   static void compileTimeAssertions() {
-    CT_ASSERT(offsetof(Variant, _count) == FAST_REFCOUNT_OFFSET);
-  }
+    CT_ASSERT(offsetof(Variant,m_data) == offsetof(TypedValue,m_data));
+    CT_ASSERT(offsetof(Variant,_count) == offsetof(TypedValue,_count));
+    CT_ASSERT(offsetof(Variant,m_type) == offsetof(TypedValue,m_type));
+#ifdef FAST_REFCOUNT_FOR_VARIANT
+    CT_ASSERT(offsetof(Variant,_count) == FAST_REFCOUNT_OFFSET);
 #endif
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1070,17 +1049,17 @@ inline Variant operator/(CVarRef v, double  n) { return Variant(v) /= n;}
 
 template<typename T>
 CVarRef Array::setImpl(const T &key, CVarRef v, int64 prehash) {
-  if (!m_data.parr) {
+  if (!m_px) {
     ArrayData *data = ArrayData::Create(key, v);
-    setPtr(data);
+    SmartPtr<ArrayData>::operator=(data);
   } else {
     if (v.isContagious()) {
       escalate();
     }
     ArrayData *escalated =
-      m_data.parr->set(key, v, (m_data.parr->getCount() > 1), prehash);
+      m_px->set(key, v, (m_px->getCount() > 1), prehash);
     if (escalated) {
-      setPtr(escalated);
+      SmartPtr<ArrayData>::operator=(escalated);
     }
   }
   return v;

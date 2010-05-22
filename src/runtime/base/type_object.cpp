@@ -57,8 +57,15 @@ bool Object::equal(CObjRef v2) const {
           toArray().equal(v2.toArray()));
 }
 
-bool Object::less(CObjRef v2) const { return toArray().less(v2.toArray());}
-bool Object::more(CObjRef v2) const { return toArray().more(v2.toArray());}
+bool Object::less(CObjRef v2) const {
+  return m_data.pobj != v2.m_data.pobj &&
+    toArray().less(v2.toArray());
+}
+
+bool Object::more(CObjRef v2) const {
+  return m_data.pobj != v2.m_data.pobj &&
+    toArray().more(v2.toArray());
+}
 
 Variant Object::o_get(CStrRef propName, int64 hash /* = -1 */,
     bool error /* = true */) const {

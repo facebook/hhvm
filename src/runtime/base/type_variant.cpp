@@ -1645,6 +1645,7 @@ Variant Variant::toKey() const {
       }
     }
   case KindOfBoolean:
+  case KindOfByte:
   case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:

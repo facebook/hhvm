@@ -101,14 +101,28 @@ public:
                  bool keyConverted = false) {
     ASSERT(m_kind != KindOfVectorVariant);
     Variant v(value);
-    m_data->set(keyConverted ? name : getName(name), v, false, prehash);
+    if (keyConverted) {
+      m_data->set(name, v, false, prehash);
+    } else {
+      Variant k(name.toKey());
+      if (!k.isNull()) {
+        m_data->set(k, v, false, prehash);
+      }
+    }
     return *this;
   }
 
   ArrayInit &set(int p, CVarRef name, CVarRef v, int64 prehash = -1,
                  bool keyConverted = false) {
     ASSERT(m_kind != KindOfVectorVariant);
-    m_data->set(keyConverted ? name : getName(name), v, false, prehash);
+    if (keyConverted) {
+      m_data->set(name, v, false, prehash);
+    } else {
+      Variant k(name.toKey());
+      if (!k.isNull()) {
+        m_data->set(k, v, false, prehash);
+      }
+    }
     return *this;
   }
 
@@ -118,7 +132,14 @@ public:
     v.setContagious();
     Variant value = v;
     value.setContagious();
-    m_data->set(keyConverted ? name : getName(name), value, false, prehash);
+    if (keyConverted) {
+      m_data->set(name, value, false, prehash);
+    } else {
+      Variant k(name.toKey());
+      if (!k.isNull()) {
+        m_data->set(k, value, false, prehash);
+      }
+    }
     return *this;
   }
 
@@ -126,26 +147,6 @@ public:
     ArrayData *ret = m_data;
     m_data = NULL;
     return ret;
-  }
-
-  static Variant getName(CVarRef name) {
-    if (name.isNull()) return "";
-    switch (name.getType()) {
-    case KindOfBoolean:
-      return name.toBoolean() ? 1LL : 0LL;
-    case KindOfByte:
-    case KindOfInt16:
-    case KindOfInt32:
-    case KindOfInt64:
-      return name.toInt64();
-    case KindOfDouble:
-    case LiteralString:
-    case KindOfString:
-      return name.toKey();
-    default:
-      break;
-    }
-    return name;
   }
 
 private:

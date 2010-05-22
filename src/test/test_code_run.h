@@ -64,6 +64,7 @@ class TestCodeRun : public TestBase {
   bool TestDouble();
   bool TestString();
   bool TestArray();
+  bool TestArrayInit();
   bool TestArrayEscalation();
   bool TestArrayOffset();
   bool TestArrayAccess();

@@ -341,6 +341,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestString);
   RUN_TEST(TestLocale);
   RUN_TEST(TestArray);
+  RUN_TEST(TestArrayInit);
   RUN_TEST(TestArrayEscalation);
   RUN_TEST(TestArrayOffset);
   RUN_TEST(TestArrayAccess);
@@ -1094,6 +1095,16 @@ bool TestCodeRun::TestArray() {
       "class A { function f($a) { var_dump($a === null); } }"
       "$a = true; $a = new A();"
       "$a->f(array());");
+
+  return true;
+}
+
+bool TestCodeRun::TestArrayInit() {
+  MVCR("<?php\n"
+       "class MyClass { function __toString() { return 'foo'; } }\n"
+       "$obj = new MyClass();\n"
+       "$arr = array($obj => 1);\n"
+       "var_dump($arr);\n");
 
   return true;
 }

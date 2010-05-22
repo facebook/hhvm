@@ -218,11 +218,13 @@ static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
   ASSERT(sockets.is(KindOfArray));
   Array sock_array = sockets.toArray();
   Array ret;
+  int count = 0;
   for (ArrayIter iter(sock_array); iter; ++iter) {
-    pollfd &fd = fds[nfds++];
+    pollfd &fd = fds[count++];
     ASSERT(fd.fd == iter.second().toObject().getTyped<File>()->fd());
     if (fd.revents & flag) {
       ret.append(iter.second());
+      nfds++;
     }
   }
   sockets = ret;
@@ -641,7 +643,7 @@ Variant f_socket_select(Variant read, Variant write, Variant except,
   if (!except.isNull()) sock_array_from_fd_set(except, fds, count, POLLPRI);
 
   free(fds);
-  return retval;
+  return count;
 }
 
 Variant f_socket_server(CStrRef hostname, int port /* = -1 */,

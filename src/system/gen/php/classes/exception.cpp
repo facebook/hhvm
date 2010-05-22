@@ -3336,8 +3336,12 @@ void c_exception::t___construct(Variant v_message //  = ""
       }
     }
   }
-  (m_file = v_frame.rvalAt("file", 0x612E37678CE7DB5BLL, true, true));
-  (m_line = v_frame.rvalAt("line", 0x21093C71DDF8728CLL, true, true));
+  if (isset(v_frame, "file", 0x612E37678CE7DB5BLL, true)) {
+    (m_file = v_frame.rvalAt("file", 0x612E37678CE7DB5BLL, true, true));
+  }
+  if (isset(v_frame, "line", 0x21093C71DDF8728CLL, true)) {
+    (m_line = v_frame.rvalAt("line", 0x21093C71DDF8728CLL, true, true));
+  }
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/exception.php line 32 */

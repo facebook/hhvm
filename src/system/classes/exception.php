@@ -24,8 +24,8 @@ class Exception {
       $frame = array_shift($this->trace);
     }
 
-    $this->file = $frame['file'];
-    $this->line = $frame['line'];
+    if (isset($frame['file'])) $this->file = $frame['file'];
+    if (isset($frame['line'])) $this->line = $frame['line'];
   }
 
   // message of exception

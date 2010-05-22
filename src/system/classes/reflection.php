@@ -386,7 +386,7 @@ class ReflectionClass implements Reflector {
     foreach ($this->fetch('interfaces') as $name => $_) {
       $cls = new ReflectionClass($name);
       if ($cls->isInterface()) {
-        $ret[$name] = $cls;
+        $ret[$cls->getName()] = $cls;
       }
     }
     return $ret;

@@ -66,6 +66,10 @@ const Eval::MethodStatement *ObjectData::getMethodStatement(const char* name)
   return NULL;
 }
 
+void ObjectData::bindThis(ThreadInfo *info) {
+  FrameInjection::SetCallingObject(info, this);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // static methods and properties
 

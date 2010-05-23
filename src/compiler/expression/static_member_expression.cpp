@@ -55,9 +55,13 @@ StaticMemberExpression::StaticMemberExpression
   if (m_class->is(KindOfScalarExpression)) {
     ScalarExpressionPtr s(dynamic_pointer_cast<ScalarExpression>(m_class));
     const string &className = s->getString();
-    m_origClassName = className;
     m_className = Util::toLower(className);
-    m_class.reset();
+    if (m_className == "static") {
+      m_className.clear();
+    } else {
+      m_origClassName = className;
+      m_class.reset();
+    }
   }
 }
 
@@ -272,9 +276,19 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
     if (m_context & (LValue | RefValue)) {
       func_suffix = "_lval";
     }
-    cg.printf("get_static_property%s(toString(", func_suffix);
-    m_class->outputCPP(cg, ar);
-    cg.printf(").data(), toString(");
+    cg.printf("get_static_property%s(", func_suffix);
+
+    if (m_class->is(KindOfScalarExpression)) {
+      ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
+                        getString().c_str(), "static") == 0);
+      cg.printf("FrameInjection::GetStaticClassName(info).data()");
+    } else {
+      cg.printf("toString(");
+      m_class->outputCPP(cg, ar);
+      cg.printf(").data()");
+    }
+
+    cg.printf(", toString(");
     m_exp->outputCPP(cg, ar);
     cg.printf(").data())");
     return;

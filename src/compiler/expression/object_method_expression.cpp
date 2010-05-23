@@ -41,7 +41,7 @@ ObjectMethodExpression::ObjectMethodExpression
  ExpressionPtr object, ExpressionPtr method, ExpressionListPtr params)
   : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES,
                  method, "", params, ExpressionPtr()), m_object(object),
-    m_invokeFewArgsDecision(true) {
+    m_invokeFewArgsDecision(true), m_bindClass(true) {
   m_object->setContext(Expression::ObjectContext);
   m_object->clearContext(Expression::LValue);
   m_objTemp = -1;
@@ -212,6 +212,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
   ConstructPtr self = shared_from_this();
   TypePtr objectType = m_object->inferAndCheck(ar, NEW_TYPE(Object), true);
   m_valid = true;
+  m_bindClass = true;
 
   if (m_name.empty()) {
     // if dynamic property or method, we have nothing to find out
@@ -263,6 +264,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
     return checkTypesImpl(ar, type, Type::Variant, coerce);
   }
   bool valid = true;
+  m_bindClass = func->isStatic();
 
   // use $this inside a static function
   if (m_object->isThis()) {
@@ -378,38 +380,51 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       } else {
         cg.printf("%s", objTmp.str().c_str());
       }
-      cg.printf(".");
+      if (m_bindClass) {
+        cg.printf(". BIND_CLASS_DOT ");
+      } else {
+        cg.printf(".");
+      }
     } else {
-      if (m_objTemp == -1) {
-        TypePtr type = m_object->getType();
-        // We only need to use the AS_CLASS macro if we are working
-        // with a specific object type and we are not going to use
-        // one of the invoke methods
-        if (type->isSpecificObject() && !m_name.empty() && m_valid) {
-          cg.printf("AS_CLASS(");
+      string objType;
+      TypePtr type = m_object->getType();
+      // We only need to use the AS_CLASS macro if we are working
+      // with a specific object type and we are not going to use
+      // one of the invoke methods
+      if (type->isSpecificObject() && !m_name.empty() && m_valid) {
+        objType = type->getName();
+      }
+
+      if (!objType.empty()) {
+        cg.printf("AS_CLASS(");
+        if (m_objTemp == -1) {
           m_object->outputCPP(cg, ar);
-          cg.printf(",%s%s)",
-                    Option::ClassPrefix,
-                    m_object->getType()->getName().c_str());
         } else {
-          m_object->outputCPP(cg, ar);
+          cg.printf("%s.toObject()", objTmp.str().c_str());
+        }
+        cg.printf(",%s%s)", Option::ClassPrefix, objType.c_str());
+        if (m_bindClass) {
+          cg.printf("-> BIND_CLASS_ARROW(%s) ", objType.c_str());
+        } else {
+          cg.printf("->");
         }
       } else {
-        TypePtr type = m_object->getType();
-        // We only need to use the AS_CLASS macro if we are working
-        // with a specific object type and we are not going to use
-        // one of the invoke methods
-        if (type->isSpecificObject() && !m_name.empty() && m_valid) {
-          cg.printf("AS_CLASS(");
-          cg.printf("%s.toObject()", objTmp.str().c_str());
-          cg.printf(",%s%s)",
-                    Option::ClassPrefix,
-                    m_object->getType()->getName().c_str());
+        if (m_objTemp == -1) {
+          m_object->outputCPP(cg, ar);
         } else {
           cg.printf("%s.toObject()", objTmp.str().c_str());
         }
+        if (m_bindClass) {
+          cg.printf("-> BIND_CLASS_ARROW(ObjectData) ");
+        } else {
+          cg.printf("->");
+        }
       }
-      cg.printf("->");
+    }
+  } else if (m_bindClass) {
+    ClassScopePtr cls = ar->getClassScope();
+    if (cls) {
+      cg.printf(" BIND_CLASS_ARROW(%s) ", cls->getId().c_str());
     }
   }
 

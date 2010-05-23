@@ -605,6 +605,7 @@ function_call:
 ;
 static_class_name:
     T_STRING                           { _p->onName($$, $1, true);}
+  | T_STATIC                           { _p->onName($$, $1, true);}
   | reference_variable                 { _p->onName($$, $1, false);}
 ;
 fully_qualified_class_name:

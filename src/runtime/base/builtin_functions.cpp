@@ -601,5 +601,24 @@ Variant &get_static_property_lval(const char *s, const char *prop) {
   return Variant::lvalBlackHole();
 }
 
+Variant invoke_static_method_bind(CStrRef s, const char *method,
+                                  const Array &params,
+                                  bool fatal /* = true */) {
+  ThreadInfo *info = ThreadInfo::s_threadInfo.get();
+
+  String cls = s;
+  bool isStatic = (strcasecmp(cls.data(), "static") == 0);
+  if (isStatic) {
+    cls = FrameInjection::GetStaticClassName(info);
+  } else {
+    FrameInjection::SetStaticClassName(info, cls);
+  }
+  Variant ret = invoke_static_method(cls.data(), method, params, fatal);
+  if (!isStatic) {
+    FrameInjection::ResetStaticClassName(info);
+  }
+  return ref(ret);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

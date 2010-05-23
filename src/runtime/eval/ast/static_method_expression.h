@@ -28,12 +28,13 @@ DECLARE_AST_PTR(Name);
 
 class StaticMethodExpression : public SimpleFunctionCallExpression {
 public:
-  StaticMethodExpression(EXPRESSION_ARGS, const NamePtr &cname,
+  StaticMethodExpression(EXPRESSION_ARGS, const NamePtr &cname, bool sp,
       const NamePtr &name, const std::vector<ExpressionPtr> &params);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual void dump() const;
 protected:
   NamePtr m_cname;
+  bool m_sp; // it was "self" or "parent"
   bool m_construct;
 };
 

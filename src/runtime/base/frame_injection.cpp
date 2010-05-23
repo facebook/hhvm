@@ -160,4 +160,60 @@ Array FrameInjection::getArgs() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// static late binding
+
+String FrameInjection::GetStaticClassName(ThreadInfo *info) {
+  if (!info) info = ThreadInfo::s_threadInfo.get();
+  for (FrameInjection *t = info->m_top; t; t = t->m_prev) {
+    if (!t->m_staticClass.empty()) {
+      return t->m_staticClass;
+    }
+    if (!t->m_callingObject.isNull()) {
+      return t->m_callingObject->o_getClassName();
+    }
+    if (!t->m_object.isNull()) {
+      return t->m_object->o_getClassName();
+    }
+  }
+  return "";
+}
+
+void FrameInjection::SetStaticClassName(ThreadInfo *info, CStrRef cls) {
+  if (!info) info = ThreadInfo::s_threadInfo.get();
+  FrameInjection *t = info->m_top;
+  if (t) t->m_staticClass = cls;
+}
+
+void FrameInjection::ResetStaticClassName(ThreadInfo *info) {
+  if (!info) info = ThreadInfo::s_threadInfo.get();
+  FrameInjection *t = info->m_top;
+  if (t) t->m_staticClass.reset();
+}
+
+void FrameInjection::SetCallingObject(ThreadInfo* info, ObjectData *obj) {
+  if (!info) info = ThreadInfo::s_threadInfo.get();
+  FrameInjection *t = info->m_top;
+  if (t) t->m_callingObject = obj;
+}
+
+FrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
+(CStrRef name, CStrRef resolved, bool sp) : m_set(false) {
+  if (!sp && strcasecmp(name.data(), "static")) {
+    FrameInjection::SetStaticClassName(NULL, resolved);
+    m_set = true;
+  }
+}
+
+FrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
+(CObjRef obj) {
+  FrameInjection::SetCallingObject(NULL, obj.get());
+}
+
+FrameInjection::EvalStaticClassNameHelper::~EvalStaticClassNameHelper() {
+  if (m_set) {
+    FrameInjection::ResetStaticClassName(NULL);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

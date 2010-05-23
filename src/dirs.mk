@@ -32,6 +32,8 @@ REQUEST_TIMEOUT_DETECTION = 1
 # This requires the patched libmysql
 MYSQL_MILLISECOND_TIMEOUT = 1
 
+#ENABLE_LATE_STATIC_BINDING = 1
+
 -include $(wildcard $(PROJECT_ROOT)/local/*.mk)
 
 # This normally generates debug symbols, but you may also use this in your

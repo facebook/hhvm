@@ -99,6 +99,13 @@ class ObjectData : public Countable {
   bool o_isClass(const char *s) const;
   int o_getId() const { return o_id;}
 
+  template<typename T>
+  T *bindClass(ThreadInfo *info) {
+    bindThis(info);
+    return dynamic_cast<T*>(this);
+  }
+  void bindThis(ThreadInfo *info);
+
   virtual void init() {}
   ObjectData *create() { incRefCount(); init(); decRefCount(); return this;}
   ObjectData *dynCreate(const Array &params, bool init = true) {

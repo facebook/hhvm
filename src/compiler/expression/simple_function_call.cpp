@@ -829,9 +829,15 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         }
       } else {
         if (m_class) {
-          cg.printf("invoke_static_method(toString(");
-          m_class->outputCPP(cg, ar);
-          cg.printf(").data(), \"%s\",", m_name.c_str());
+          cg.printf("INVOKE_STATIC_METHOD(toString(");
+          if (m_class->is(KindOfScalarExpression)) {
+            ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
+                              getString().c_str(), "static") == 0);
+            cg.printf("\"static\"");
+          } else {
+            m_class->outputCPP(cg, ar);
+          }
+          cg.printf("), \"%s\",", m_name.c_str());
         } else {
           cg.printf("invoke_static_method(\"%s\", \"%s\",",
                     m_className.c_str(), m_name.c_str());

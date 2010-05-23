@@ -611,6 +611,7 @@ function_call:
 ;
 static_class_name:
     T_STRING                           { _p->onScalar(&$$, T_STRING, &$1);}
+  | T_STATIC                           { _p->onScalar(&$$, T_STRING, &$1);}
   | reference_variable                 { $$ = $1;}
 ;
 fully_qualified_class_name:

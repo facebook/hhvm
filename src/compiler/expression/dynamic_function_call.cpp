@@ -17,6 +17,7 @@
 #include <compiler/expression/dynamic_function_call.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/expression/expression_list.h>
+#include <compiler/expression/scalar_expression.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/class_scope.h>
 #include <util/util.h>
@@ -146,9 +147,15 @@ void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
   bool linemap = outputLineMap(cg, ar, true);
   if (m_class || !m_className.empty()) {
     if (m_class) {
-      cg.printf("invoke_static_method(toString(");
-      m_class->outputCPP(cg, ar);
-      cg.printf(").data(), ");
+      cg.printf("INVOKE_STATIC_METHOD(toString(");
+      if (m_class->is(KindOfScalarExpression)) {
+        ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
+                          getString().c_str(), "static") == 0);
+        cg.printf("\"static\"");
+      } else {
+        m_class->outputCPP(cg, ar);
+      }
+      cg.printf("), ");
     } else if (m_validClass) {
       cg.printf("%s%s::%sinvoke(\"%s\", ", Option::ClassPrefix,
                 m_className.c_str(), Option::ObjectStaticPrefix,

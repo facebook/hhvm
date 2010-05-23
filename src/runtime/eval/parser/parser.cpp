@@ -345,9 +345,9 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     }
   }
   if (className) {
-    NamePtr cn = procStaticClassName(*className, false);
-    out->exp() = NEW_EXP(StaticMethod, cn, n,
-        params->exprs());
+    bool sp = false;
+    NamePtr cn = procStaticClassName(*className, false, &sp);
+    out->exp() = NEW_EXP(StaticMethod, cn, sp, n, params->exprs());
   } else {
     out->exp() = SimpleFunctionCallExpression::make(this, n,
                                                     params->exprs(), *this);
@@ -1121,13 +1121,16 @@ void Parser::addHphpSuppressError(Token &error) {
 
 }
 
-NamePtr Parser::procStaticClassName(Token &className, bool text) {
+NamePtr Parser::procStaticClassName(Token &className, bool text,
+                                    bool *sp /* = NULL */) {
   NamePtr cname;
   if (text) {
     if (className.getText() == "self") {
       cname = Name::fromString(this, peekClass()->name());
+      if (sp) *sp = true;
     } else if (className.getText() == "parent") {
       cname = Name::fromString(this, peekClass()->parent());
+      if (sp) *sp = true;
     } else {
       cname = Name::fromString(this, className.getText());
     }
@@ -1137,8 +1140,10 @@ NamePtr Parser::procStaticClassName(Token &className, bool text) {
     if (haveClass() && cname->getStatic()) {
       if (cname->getStatic() == "self") {
         cname = Name::fromString(this, peekClass()->name());
+        if (sp) *sp = true;
       } else if (cname->getStatic() == "parent") {
         cname = Name::fromString(this, peekClass()->parent());
+        if (sp) *sp = true;
       }
     }
   }

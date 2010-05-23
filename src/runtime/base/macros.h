@@ -431,6 +431,25 @@ namespace HPHP {
   HOTPROFILER_INJECTION_BUILTIN(n)              \
   FRAME_INJECTION_WITH_THIS(c, n)               \
 
+#ifdef ENABLE_LATE_STATIC_BINDING
+
+#define STATIC_CLASS_NAME_CALL(s, exp)                          \
+  (FrameInjection::SetStaticClassName(info, #s),                \
+   FrameInjection::StaticClassNameHelper(info).call(exp))       \
+
+#define BIND_CLASS_DOT  bindClass(info).
+#define BIND_CLASS_ARROW(T) bindClass<c_##T>(info)->
+#define INVOKE_STATIC_METHOD invoke_static_method_bind
+
+#else
+
+#define STATIC_CLASS_NAME_CALL(s, exp) exp
+#define BIND_CLASS_DOT
+#define BIND_CLASS_ARROW(T)
+#define INVOKE_STATIC_METHOD invoke_static_method
+
+#endif
+
 // for collecting function/method parameter type information at runtime
 #define RTTI_INJECTION(v, id)                   \
   do {                                          \

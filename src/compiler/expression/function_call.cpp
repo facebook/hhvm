@@ -60,9 +60,13 @@ FunctionCall::FunctionCall
   if (m_class && m_class->is(KindOfScalarExpression)) {
     ScalarExpressionPtr s(dynamic_pointer_cast<ScalarExpression>(m_class));
     const string &className = s->getString();
-    m_origClassName = className;
     m_className = Util::toLower(className);
-    m_class.reset();
+    if (m_className == "static") {
+      m_className.clear();
+    } else {
+      m_origClassName = className;
+      m_class.reset();
+    }
   }
 }
 
@@ -161,6 +165,15 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
 }
 
 void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
+  bool staticClassName = false;
+  if (!m_className.empty() && m_cppTemp.empty() &&
+      m_origClassName != "self" &&
+      m_origClassName != "parent") {
+    cg.printf("STATIC_CLASS_NAME_CALL(%s, ", m_className.c_str());
+    if (m_voidReturn) m_voidWrapper = true;
+    staticClassName = true;
+  }
+
   bool wrap = m_voidWrapper && m_cppTemp.empty();
   if (wrap) {
     cg.printf("(");
@@ -170,6 +183,10 @@ void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   Expression::outputCPP(cg, ar);
   if (wrap) {
     cg.printf(", null)");
+  }
+
+  if (staticClassName) {
+    cg.printf(")");
   }
 }
 

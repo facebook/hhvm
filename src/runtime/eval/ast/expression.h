@@ -23,6 +23,7 @@ namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+DECLARE_AST_PTR(Name);
 DECLARE_AST_PTR(Expression);
 DECLARE_AST_PTR(LvalExpression);
 class ByteCodeProgram;
@@ -43,6 +44,9 @@ public:
 
   static Variant evalVector(const std::vector<ExpressionPtr> &v,
                             VariableEnvironment &env);
+
+protected:
+  String getClassName(NamePtr name, VariableEnvironment &env) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

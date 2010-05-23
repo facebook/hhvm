@@ -49,10 +49,17 @@ extern Variant invoke_builtin(const char *s, const Array &params, int64 hash,
 extern Variant invoke_static_method(const char *s, const char *method,
                                     const Array &params, bool fatal = true);
 /**
+ * defined in builtin_functions.cpp, used for "static::" resolution
+ */
+Variant invoke_static_method_bind(CStrRef s, const char *method,
+                                  const Array &params, bool fatal = true);
+
+/**
  * Invoking an arbitrary system static method.
  */
 extern Variant invoke_builtin_static_method(const char *s, const char *method,
                                             const Array &params, bool fatal);
+
 /**
  * Getting a static property
  */

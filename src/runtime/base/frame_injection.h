@@ -57,12 +57,49 @@ public:
   virtual Array getArgs();
   CObjRef getObjectRef() { return m_object; }
 
+public:
+  // what does "static::" resolve to?
+  static String GetStaticClassName(ThreadInfo *info);
+  static void SetStaticClassName(ThreadInfo *info, CStrRef cls);
+  static void ResetStaticClassName(ThreadInfo *info);
+  static void SetCallingObject(ThreadInfo* info, ObjectData *obj);
+
+  class StaticClassNameHelper {
+  public:
+    StaticClassNameHelper(ThreadInfo *info) : m_info(info) {}
+    ~StaticClassNameHelper() {
+      FrameInjection::ResetStaticClassName(m_info);
+    }
+
+    int64   call(int64   ret) { return ret;}
+    CStrRef call(CStrRef ret) { return ret;}
+    CArrRef call(CArrRef ret) { return ret;}
+    CObjRef call(CObjRef ret) { return ret;}
+    Variant call(CVarRef ret) { return ref(ret);}
+
+  private:
+    ThreadInfo *m_info;
+  };
+
+  class EvalStaticClassNameHelper {
+  public:
+    EvalStaticClassNameHelper(CStrRef name, CStrRef resolved, bool sp);
+    EvalStaticClassNameHelper(CObjRef obj);
+    ~EvalStaticClassNameHelper();
+
+    bool m_set;
+  };
+
 private:
   ThreadInfo *m_info;
   FrameInjection *m_prev;
   const char *m_class;
   const char *m_name;
   Object      m_object;
+
+  // for static late binding
+  String      m_staticClass;
+  Object      m_callingObject;
 };
 
 /**

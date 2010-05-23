@@ -184,7 +184,7 @@ private:
 
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);
-  NamePtr procStaticClassName(Token &className, bool text);
+  NamePtr procStaticClassName(Token &className, bool text, bool *sp = NULL);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

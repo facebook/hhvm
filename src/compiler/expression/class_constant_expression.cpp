@@ -44,9 +44,13 @@ ClassConstantExpression::ClassConstantExpression
   if (m_class->is(KindOfScalarExpression)) {
     ScalarExpressionPtr s(dynamic_pointer_cast<ScalarExpression>(m_class));
     const string &className = s->getString();
-    m_origClassName = className;
     m_className = Util::toLower(className);
-    m_class.reset();
+    if (m_className == "static") {
+      m_className.clear();
+    } else {
+      m_origClassName = className;
+      m_class.reset();
+    }
   }
 }
 
@@ -240,9 +244,17 @@ void ClassConstantExpression::outputPHP(CodeGenerator &cg,
 void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
                                             AnalysisResultPtr ar) {
   if (m_class) {
-    cg.printf("get_class_constant(toString(");
-    m_class->outputCPP(cg, ar);
-    cg.printf(").data(), \"%s\")", m_varName.c_str());
+    cg.printf("get_class_constant(");
+    if (m_class->is(KindOfScalarExpression)) {
+      ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
+                        getString().c_str(), "static") == 0);
+      cg.printf("FrameInjection::GetStaticClassName(info).data()");
+    } else {
+      cg.printf("toString(");
+      m_class->outputCPP(cg, ar);
+      cg.printf(").data()");
+    }
+    cg.printf(", \"%s\")", m_varName.c_str());
     return;
   }
 

@@ -31,6 +31,11 @@ PlainFile::PlainFile(FILE *stream, bool pipe)
   if (stream) m_fd = fileno(stream);
 }
 
+PlainFile::PlainFile(int fd, bool pipe)
+  : File(pipe), m_stream(NULL), m_eof(false) {
+  m_fd = fd;
+}
+
 PlainFile::~PlainFile() {
   closeImpl();
 }
@@ -57,9 +62,12 @@ bool PlainFile::closeImpl() {
   if (!m_closed) {
     if (m_stream) {
       ret = (fclose(m_stream) == 0);
+      m_stream = NULL;
+    } else {
+      ret = (::close(m_fd) == 0);
     }
     m_closed = true;
-    m_stream = NULL;
+    m_fd = -1;
   }
   File::closeImpl();
   return ret;
@@ -69,7 +77,7 @@ bool PlainFile::closeImpl() {
 // virtual functions
 
 int PlainFile::readImpl(char *buffer, int length) {
-  ASSERT(m_stream);
+  ASSERT(valid());
   ASSERT(length > 0);
   // use read instead of fread to handle EOL in stdin
   size_t ret = ::read(m_fd, buffer, length);
@@ -82,12 +90,12 @@ int PlainFile::readImpl(char *buffer, int length) {
 }
 
 int PlainFile::getc() {
-  ASSERT(m_stream);
+  ASSERT(valid());
   return File::getc();
 }
 
 int PlainFile::writeImpl(const char *buffer, int length) {
-  ASSERT(m_stream);
+  ASSERT(valid());
   ASSERT(length > 0);
 
   // use write instead of fwrite to be consistent with read
@@ -97,7 +105,7 @@ int PlainFile::writeImpl(const char *buffer, int length) {
 }
 
 bool PlainFile::seek(int offset, int whence /* = SEEK_SET */) {
-  ASSERT(m_stream);
+  ASSERT(valid());
 
   if (whence == SEEK_CUR) {
     if (offset > 0 && offset < m_writepos - m_readpos) {
@@ -121,12 +129,12 @@ bool PlainFile::seek(int offset, int whence /* = SEEK_SET */) {
 }
 
 int PlainFile::tell() {
-  ASSERT(m_stream);
+  ASSERT(valid());
   return m_position;
 }
 
 bool PlainFile::eof() {
-  ASSERT(m_stream);
+  ASSERT(valid());
   int avail = m_writepos - m_readpos;
   if (avail > 0) {
     return false;
@@ -135,7 +143,7 @@ bool PlainFile::eof() {
 }
 
 bool PlainFile::rewind() {
-  ASSERT(m_stream);
+  ASSERT(valid());
   seek(0);
   m_writepos = 0;
   m_readpos = 0;
@@ -144,13 +152,17 @@ bool PlainFile::rewind() {
 }
 
 bool PlainFile::flush() {
-  ASSERT(m_stream);
-  return fflush(m_stream) == 0;
+  if (m_stream) {
+    return fflush(m_stream) == 0;
+  }
+  ASSERT(valid());
+  // No need to flush a file descriptor.
+  return true;
 }
 
 bool PlainFile::truncate(int size) {
-  ASSERT(m_stream);
-  return ftruncate(fileno(m_stream), size) == 0;
+  ASSERT(valid());
+  return ftruncate(m_fd, size) == 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

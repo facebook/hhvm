@@ -35,6 +35,7 @@ public:
   DECLARE_OBJECT_ALLOCATION(PlainFile);
 
   PlainFile(FILE *stream = NULL, bool pipe = false);
+  PlainFile(int fd, bool pipe = false);
   virtual ~PlainFile();
 
   // overriding ResourceData
@@ -67,7 +68,7 @@ protected:
 };
 
 /**
- * A request-local wrapper for the three standard files: 
+ * A request-local wrapper for the three standard files:
  * STDIN, STDOUT, and STDERR.
  */
 class BuiltinFiles : public RequestEventHandler {

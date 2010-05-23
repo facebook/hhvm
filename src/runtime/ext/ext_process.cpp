@@ -517,23 +517,10 @@ public:
     close(childend); childend = -1;
 
     if ((mode & ~DESC_PARENT_MODE_WRITE) == DESC_PIPE) {
-      const char *mode_string = NULL;
-      switch(mode_flags) {
-      case O_WRONLY:
-        mode_string = "w";
-        break;
-      case O_RDONLY:
-        mode_string = "r";
-        break;
-      case O_RDWR:
-        mode_string = "r+";
-        break;
-      }
-      FILE *f = fdopen(parentend, mode_string);
       /* mark the descriptor close-on-exec, so that it won't be inherited
          by potential other children */
       fcntl(parentend, F_SETFD, FD_CLOEXEC);
-      return Object(NEW(PlainFile)(f, true));
+      return Object(NEW(PlainFile)(parentend, true));
     }
 
     return Object();
@@ -541,7 +528,8 @@ public:
 };
 
 Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
-                    CStrRef cwd /* = null_string */, CVarRef env /* = null_variant */,
+                    CStrRef cwd /* = null_string */,
+                    CVarRef env /* = null_variant */,
                     CVarRef other_options /* = null_variant */) {
   /* walk the descriptor spec and set up files/pipes */
   std::vector<DescriptorItem> items;

@@ -27,18 +27,15 @@ IMPLEMENT_OBJECT_ALLOCATION(TempFile);
 // constructor and destructor
 
 TempFile::TempFile(bool autoDelete /* = true */) : m_autoDelete(autoDelete) {
-  FILE *tmp;
   char path[PATH_MAX];
 
   // open a temporary file
   snprintf(path, sizeof(path), "/tmp/XXXXXX");
   int fd = mkstemp(path);
-  if (fd == -1 || (tmp = fdopen(fd, "r+b")) == NULL) {
-    if (fd != -1) ::close(fd);
+  if (fd == -1) {
     raise_warning("Unable to open temporary file");
     return;
   }
-  m_stream = tmp;
   m_fd = fd;
   m_name = string(path);
 }
@@ -59,8 +56,8 @@ bool TempFile::close() {
 bool TempFile::closeImpl() {
   bool ret = true;
   if (!m_closed) {
-    ASSERT(m_stream);
-    ret = (fclose(m_stream) == 0);
+    ASSERT(valid());
+    ret = (::close(m_fd) == 0);
     m_closed = true;
     m_stream = NULL;
     m_fd = -1;

@@ -115,7 +115,7 @@ Variant File::Open(CStrRef filename, CStrRef mode,
 
   if (!strncasecmp(filename.c_str(), "php://", 6)) {
     if (!strcasecmp(filename.c_str(), "php://stdin")) {
-      return Object(NEW(PlainFile)(fdopen(dup(STDIN_FILENO), "r")));
+      return Object(NEW(PlainFile)(dup(STDIN_FILENO)));
     }
 
     if (!strncasecmp(filename.c_str(), "php://temp", 10) ||

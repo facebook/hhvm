@@ -552,12 +552,11 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   if (!ret || ar->inExpression()) {
-    bool skipLast = true;
     for (i = 0; i <= lastEffect; i++) {
       ExpressionPtr k = getNthExpr(i);
       if (k && !k->isScalar()) {
         int s = kidState;
-        if (i == n - 1 && skipLast) s = 0;
+        if (i == n - 1) s = 0;
         if (m_kindOf == KindOfExpressionList) {
           cg.setItemIndex(i);
           ExpressionList *el = static_cast<ExpressionList*>(this);
@@ -571,9 +570,6 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
             */
             s = kidState;
           }
-        }
-        if (k->is(KindOfSimpleVariable)) {
-          skipLast = false;
         }
         if (k->preOutputCPP(cg, ar, s)) {
           ret = true;

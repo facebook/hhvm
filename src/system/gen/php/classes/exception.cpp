@@ -3305,34 +3305,13 @@ void c_exception::t___construct(Variant v_message //  = ""
     while (!(empty(o_get("trace", 0x0253015494C9CE77LL, false)))) {
       LOOP_COUNTER_CHECK(1);
       {
-        {
-          Variant tmp2((o_get("trace", 0x0253015494C9CE77LL).rvalAt(0LL, 0x77CFA1EEF01BCA90LL, true)));
-          (v_top = tmp2);
-        }
-        {
-          bool tmp3;
+        (v_top = o_get("trace", 0x0253015494C9CE77LL).rvalAt(0LL, 0x77CFA1EEF01BCA90LL, true));
+        if (empty(v_top, "class", 0x45397FE5C82DBD12LL, true) || (toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52403931LL, true, true)), "__construct")) && toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52403931LL, true, true)), toString(v_top.rvalAt("class", 0x45397FE5C82DBD12LL, true, true))))) || (toBoolean(x_strcasecmp(toString(v_top.rvalAt("class", 0x45397FE5C82DBD12LL, true, true)), "exception")) && !(x_is_subclass_of(v_top.rvalAt("class", 0x45397FE5C82DBD12LL, true, true), "exception")))) {
           {
-            bool tmp4 = (empty(v_top, "class", 0x45397FE5C82DBD12LL, true));
-            if (!tmp4) {
-              bool tmp5 = (toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52403931LL, true, true)), "__construct")));
-              if (tmp5) {
-                String tmp6((toString(v_top.rvalAt("function", 0x736D912A52403931LL, true, true))));
-                tmp5 = (toBoolean(x_strcasecmp(tmp6, toString(v_top.rvalAt("class", 0x45397FE5C82DBD12LL, true, true)))));
-              }
-              tmp4 = ((tmp5));
-            }
-            tmp3 = (tmp4 || (toBoolean(x_strcasecmp(toString(v_top.rvalAt("class", 0x45397FE5C82DBD12LL, true, true)), "exception")) && !(x_is_subclass_of(v_top.rvalAt("class", 0x45397FE5C82DBD12LL, true, true), "exception"))));
-          }
-          if (tmp3) {
-            {
-              break;
-            }
+            break;
           }
         }
-        {
-          Variant tmp7((x_array_shift(ref(lval(o_lval("trace", 0x0253015494C9CE77LL))))));
-          (v_frame = tmp7);
-        }
+        (v_frame = x_array_shift(ref(lval(o_lval("trace", 0x0253015494C9CE77LL)))));
       }
     }
   }
@@ -3379,39 +3358,24 @@ String c_exception::t_gettraceasstring() {
   (v_i = 0LL);
   (v_s = "");
   {
-    LOOP_COUNTER(8);
-    Variant map9 = t_gettrace();
-    for (ArrayIterPtr iter10 = map9.begin("exception"); !iter10->end(); iter10->next()) {
-      LOOP_COUNTER_CHECK(8);
-      iter10->second(v_frame);
+    LOOP_COUNTER(2);
+    Variant map3 = t_gettrace();
+    for (ArrayIterPtr iter4 = map3.begin("exception"); !iter4->end(); iter4->next()) {
+      LOOP_COUNTER_CHECK(2);
+      iter4->second(v_frame);
       {
         if (!(x_is_array(v_frame))) {
           continue;
         }
         {
-          String tmp11((toString(v_i)));
-          String tmp12((toString(v_frame.rvalAt("file", 0x612E37678CE7DB5BLL, true, true))));
-          String tmp13((concat5("#", tmp11, " ", tmp12, "(")));
-          String tmp14((concat(concat(tmp13, toString(v_frame.rvalAt("line", 0x21093C71DDF8728CLL, true, true))), "): ")));
-          Variant tmp15;
-          if (isset(v_frame, "class", 0x45397FE5C82DBD12LL, true)) {
-            String tmp16((toString(v_frame.rvalAt("class", 0x45397FE5C82DBD12LL, true, true))));
-            tmp15 = (concat(tmp16, toString(v_frame.rvalAt("type", 0x508FC7C8724A760ALL, true, true))));
-          } else {
-            tmp15 = ("");
-          }
-          String tmp17((concat(tmp14, toString((tmp15)))));
-          String tmp18((concat(concat(tmp17, toString(v_frame.rvalAt("function", 0x736D912A52403931LL, true, true))), "()\n")));
-          concat_assign(v_s, tmp18);
+          String tmp5((concat4("#", toString(v_i), " ", toString(v_frame.rvalAt("file", 0x612E37678CE7DB5BLL, true, true)))));
+          concat_assign(v_s, concat(tmp5, concat6("(", toString(v_frame.rvalAt("line", 0x21093C71DDF8728CLL, true, true)), "): ", toString((isset(v_frame, "class", 0x45397FE5C82DBD12LL, true) ? ((Variant)(concat(toString(v_frame.rvalAt("class", 0x45397FE5C82DBD12LL, true, true)), toString(v_frame.rvalAt("type", 0x508FC7C8724A760ALL, true, true))))) : ((Variant)("")))), toString(v_frame.rvalAt("function", 0x736D912A52403931LL, true, true)), "()\n")));
         }
         v_i++;
       }
     }
   }
-  {
-    String tmp19((concat3("#", toString(v_i), " {main}")));
-    concat_assign(v_s, tmp19);
-  }
+  concat_assign(v_s, concat3("#", toString(v_i), " {main}"));
   return v_s;
 } /* function */
 /* SRC: classes/exception.php line 75 */

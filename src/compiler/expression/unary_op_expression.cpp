@@ -409,15 +409,11 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 }
 
 ExpressionPtr UnaryOpExpression::unneededHelper(AnalysisResultPtr ar) {
-  if ((m_op != '@' && m_op != T_ISSET && m_op != T_EMPTY) ||
-      !m_exp->getContainedEffects()) {
+  if (m_op != '@' || !m_exp->getContainedEffects()) {
     return Expression::unneededHelper(ar);
   }
 
-  if (m_op == '@') {
-    m_exp = m_exp->unneeded(ar);
-  }
-
+  m_exp = m_exp->unneeded(ar);
   return static_pointer_cast<Expression>(shared_from_this());
 }
 

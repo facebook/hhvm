@@ -21,7 +21,6 @@
 #include <compiler/analysis/function_container.h>
 #include <compiler/statement/class_statement.h>
 #include <util/json.h>
-#include <util/case_insensitive.h>
 #include <compiler/option.h>
 
 namespace HPHP {
@@ -281,15 +280,6 @@ public:
   void outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar);
 
-  /*
-    returns 1 if it does, -1 if it may, and 0 if it doesnt
-  */
-  int implementsArrayAccess(AnalysisResultPtr ar);
-  /*
-    returns 1 if it does, -1 if it may, and 0 if it doesnt
-  */
-  int implementsAccessor(AnalysisResultPtr ar, const char *name);
-
 
   void clearBases() {
     m_bases.clear();
@@ -340,7 +330,6 @@ private:
      const std::vector <const char*> &keys,
      const StringToFunctionScopePtrVecMap &funcScopes, bool fewArgs,
      bool staticOnly, bool forEval);
-  hphp_const_char_imap<int> m_implemented;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

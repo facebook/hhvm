@@ -32,7 +32,7 @@ public:
                            ExpressionPtr object, ExpressionPtr property);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  virtual int getLocalEffects() const { return m_localEffects; }
+  virtual int getLocalEffects() const { return NoEffect; }
   virtual bool isRefable(bool checkError = false) const { return true;}
 
   virtual void setContext(Context context);
@@ -52,7 +52,6 @@ private:
 
   bool m_valid;
   bool m_static; // whether m_property is actually a static property
-  int m_localEffects;
   ClassScopePtr m_class; // when m_object's type was inferred
   // for avoiding code generate toObject(Variant)
   bool directVariantProxy(AnalysisResultPtr ar);

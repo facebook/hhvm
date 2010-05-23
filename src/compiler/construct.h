@@ -64,8 +64,7 @@ public:
     DynamicParamEffect = 0x40,   // a function creates dynamic exps based
                                  // on its parameters, which it could affect
     CanThrow = 0x80,             // can throw PHP exception
-    AccessorEffect = 0x100,      // could contain a getter/setter
-    UnknownEffect = 0x3ff        // anything might happen
+    UnknownEffect = 0x1ff        // anything might happen
   };
 
   LocationPtr getLocation() { return m_loc;}

@@ -38,8 +38,7 @@ ObjectPropertyExpression::ObjectPropertyExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr object, ExpressionPtr property)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_object(object), m_property(property),
-    m_valid(false), m_static(false), m_localEffects(AccessorEffect) {
+    m_object(object), m_property(property), m_valid(false), m_static(false) {
   m_object->setContext(Expression::ObjectContext);
 }
 
@@ -168,16 +167,6 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     m_object->inferAndCheck(ar, Type::CreateObjectType(cls->getName()), true);
   }
 
-  const char *accessorName = hasContext(DeepAssignmentLHS) ? "__set" :
-    hasContext(ExistContext) ? "__isset" :
-    hasContext(UnsetContext) ? "__unset" : "__get";
-  if (!cls->implementsAccessor(ar, accessorName)) {
-    if (m_localEffects & AccessorEffect) {
-      recomputeEffects();
-    }
-    m_localEffects &= ~AccessorEffect;
-  }
-
   // resolved to this class
   int present = 0;
   if (m_context & RefValue) {
@@ -218,12 +207,6 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     m_actualType = Type::Variant;
     return m_actualType;
   }
-
-  if (m_localEffects & AccessorEffect) {
-    recomputeEffects();
-    m_localEffects &= ~AccessorEffect;
-  }
-
   if (ar->getPhase() == AnalysisResult::LastInference) {
     if (!(m_context & ObjectContext)) {
       m_object->clearContext(Expression::LValue);

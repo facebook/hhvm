@@ -148,7 +148,7 @@ void GlobalStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void GlobalStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_dynamicGlobal) {
     cg.printf("throw_fatal(\"dynamic global\");\n");
-  } else if (!ar->getScope()->inPseudoMain() || !isTopLevel()) {
+  } else {
     BlockScopePtr scope = ar->getScope();
     if (m_exp->getCount() > 1) cg.indentBegin("{\n");
     for (int i = 0; i < m_exp->getCount(); i++) {

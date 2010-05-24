@@ -1396,65 +1396,65 @@ void c_appenditerator::t___construct() {
 /* SRC: classes/iterator.php line 286 */
 void c_appenditerator::t_append(p_iterator v_it) {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::append);
-  m_iterators.o_invoke_few_args("append", 0x4DEE4A472DC69EC2LL, 1, v_it);
+  m_iterators. BIND_CLASS_DOT o_invoke_few_args("append", 0x4DEE4A472DC69EC2LL, 1, v_it);
 } /* function */
 /* SRC: classes/iterator.php line 290 */
 Variant c_appenditerator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::getInnerIterator);
-  return m_iterators.o_invoke_few_args("current", 0x5B3A4A72846B21DCLL, 0);
+  return m_iterators. BIND_CLASS_DOT o_invoke_few_args("current", 0x5B3A4A72846B21DCLL, 0);
 } /* function */
 /* SRC: classes/iterator.php line 294 */
 void c_appenditerator::t_rewind() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::rewind);
-  m_iterators.o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
-  if (toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
+  m_iterators. BIND_CLASS_DOT o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
+  if (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
     {
-      o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
+      o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
     }
   }
 } /* function */
 /* SRC: classes/iterator.php line 301 */
 bool c_appenditerator::t_valid() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::valid);
-  return toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) && toBoolean(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0));
+  return toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) && toBoolean(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0));
 } /* function */
 /* SRC: classes/iterator.php line 305 */
 Variant c_appenditerator::t_current() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::current);
-  return toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("current", 0x5B3A4A72846B21DCLL, 0))) : ((Variant)(null));
+  return toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("current", 0x5B3A4A72846B21DCLL, 0))) : ((Variant)(null));
 } /* function */
 /* SRC: classes/iterator.php line 314 */
 Variant c_appenditerator::t_key() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::key);
-  return toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("key", 0x56EDB60C824E8C51LL, 0))) : ((Variant)(null));
+  return toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("key", 0x56EDB60C824E8C51LL, 0))) : ((Variant)(null));
 } /* function */
 /* SRC: classes/iterator.php line 318 */
 void c_appenditerator::t_next() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::next);
-  if (!(toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)))) {
+  if (!(toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)))) {
     {
       return;
     }
   }
-  o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);
-  if (toBoolean(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
+  o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);
+  if (toBoolean(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
     {
       return;
     }
   }
-  m_iterators.o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);
+  m_iterators. BIND_CLASS_DOT o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);
   LOOP_COUNTER(2);
   {
-    while (toBoolean(m_iterators.o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
+    while (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
       LOOP_COUNTER_CHECK(2);
       {
-        o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
-        if (toBoolean(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0).o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
+        o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
+        if (toBoolean(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
           {
             return;
           }
         }
-        m_iterators.o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);
+        m_iterators. BIND_CLASS_DOT o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);
       }
     }
   }

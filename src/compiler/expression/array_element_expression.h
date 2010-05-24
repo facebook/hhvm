@@ -30,7 +30,7 @@ public:
                          ExpressionPtr variable, ExpressionPtr offset);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  virtual int getLocalEffects() const { return NoEffect; }
+  virtual int getLocalEffects() const { return m_localEffects; }
   virtual bool isRefable(bool checkError = false) const { return true;}
 
   ExpressionPtr getVariable() const { return m_variable;}
@@ -56,12 +56,15 @@ public:
   virtual bool canonCompare(ExpressionPtr e) const;
 
 private:
+  void clearEffects();
+
   ExpressionPtr m_variable;
   ExpressionPtr m_offset;
   bool m_global;
   bool m_dynamicGlobal;
   std::string m_globalName;
   std::string m_text;
+  int m_localEffects;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -38,7 +38,7 @@ ArrayElementExpression::ArrayElementExpression
  ExpressionPtr variable, ExpressionPtr offset)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
     m_variable(variable), m_offset(offset), m_global(false),
-    m_dynamicGlobal(false) {
+    m_dynamicGlobal(false), m_localEffects(AccessorEffect) {
 }
 
 ExpressionPtr ArrayElementExpression::clone() {
@@ -153,6 +153,13 @@ ExpressionPtr ArrayElementExpression::postOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
+void ArrayElementExpression::clearEffects() {
+  if (m_localEffects & AccessorEffect) {
+    recomputeEffects();
+  }
+  m_localEffects &= ~AccessorEffect;
+}
+
 /**
  * ArrayElementExpression comes from:
  *
@@ -170,6 +177,7 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
     SimpleVariablePtr var =
       dynamic_pointer_cast<SimpleVariable>(m_variable);
     if (var->getName() == "GLOBALS") {
+      clearEffects();
       m_global = true;
       m_dynamicGlobal = true;
       ar->getScope()->getVariables()->
@@ -251,8 +259,13 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
   }
 
   if (varType && Type::SameType(varType, Type::String)) {
+    clearEffects();
     m_implementedType.reset();
     return Type::String;
+  }
+
+  if (varType && Type::SameType(varType, Type::Array)) {
+    clearEffects();
   }
 
   TypePtr ret = propagateTypes(ar, Type::Variant);

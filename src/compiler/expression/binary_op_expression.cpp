@@ -790,8 +790,12 @@ static bool castIfNeeded(TypePtr top, TypePtr arg,
 
 bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                       int state) {
-  if (!isShortCircuitOperator() || !m_exp2->hasEffect()) {
+  if (!isShortCircuitOperator()) {
     return Expression::preOutputCPP(cg, ar, state);
+  }
+
+  if (!m_exp2->hasEffect()) {
+    return m_exp1->preOutputCPP(cg, ar, state);
   }
 
   bool fix_e1 = m_exp1->preOutputCPP(cg, ar, 0);

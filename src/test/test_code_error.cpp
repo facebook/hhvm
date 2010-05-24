@@ -352,7 +352,6 @@ bool TestCodeError::TestComplexForEach() {
 
 bool TestCodeError::TestStatementHasNoEffect() {
   VE(StatementHasNoEffect, "<?php $a;");
-  VE(StatementHasNoEffect, "<?php $a[$b + $c];");
   VE(StatementHasNoEffect, "<?php $a + $b;");
   VE(StatementHasNoEffect, "<?php 'test';");
   VE(StatementHasNoEffect, "<?php -$a;");

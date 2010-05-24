@@ -311,7 +311,7 @@ Variant ArrayUtil::FromHdf(const Hdf &hdf) {
     }
 
     for (Hdf child = hdf.firstChild(); child.exists(); child = child.next()) {
-      ret.set(child.getName(), FromHdf(child));
+      ret.set(String(child.getName()), FromHdf(child));
     }
     return ret;
   }

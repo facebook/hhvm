@@ -22,17 +22,17 @@ IMPLEMENT_DEFAULT_EXTENSION(date);
 ///////////////////////////////////////////////////////////////////////////////
 // constants
 
-const StaticString q_datetime_ATOM = "Y-m-d\\TH:i:sP";
-const StaticString q_datetime_COOKIE = "l, d-M-y H:i:s T";
-const StaticString q_datetime_ISO8601 = "Y-m-d\\TH:i:sO";
-const StaticString q_datetime_RFC822 = "D, d M y H:i:s O";
-const StaticString q_datetime_RFC850 = "l, d-M-y H:i:s T";
-const StaticString q_datetime_RFC1036 = "D, d M y H:i:s O";
-const StaticString q_datetime_RFC1123 = "D, d M Y H:i:s O";
-const StaticString q_datetime_RFC2822 = "D, d M Y H:i:s O";
-const StaticString q_datetime_RFC3339 = "Y-m-d\\TH:i:sP";
-const StaticString q_datetime_RSS = "D, d M Y H:i:s O";
-const StaticString q_datetime_W3C = "Y-m-d\\TH:i:sP";
+const StaticString q_datetime_ATOM(LITSTR_INIT("Y-m-d\\TH:i:sP"));
+const StaticString q_datetime_COOKIE(LITSTR_INIT("l, d-M-y H:i:s T"));
+const StaticString q_datetime_ISO8601(LITSTR_INIT("Y-m-d\\TH:i:sO"));
+const StaticString q_datetime_RFC822(LITSTR_INIT("D, d M y H:i:s O"));
+const StaticString q_datetime_RFC850(LITSTR_INIT("l, d-M-y H:i:s T"));
+const StaticString q_datetime_RFC1036(LITSTR_INIT("D, d M y H:i:s O"));
+const StaticString q_datetime_RFC1123(LITSTR_INIT("D, d M Y H:i:s O"));
+const StaticString q_datetime_RFC2822(LITSTR_INIT("D, d M Y H:i:s O"));
+const StaticString q_datetime_RFC3339(LITSTR_INIT("Y-m-d\\TH:i:sP"));
+const StaticString q_datetime_RSS(LITSTR_INIT("D, d M Y H:i:s O"));
+const StaticString q_datetime_W3C(LITSTR_INIT("Y-m-d\\TH:i:sP"));
 
 const int64 q_datetimezone_AFRICA = 1;
 const int64 q_datetimezone_AMERICA = 2;

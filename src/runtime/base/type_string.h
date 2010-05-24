@@ -54,8 +54,7 @@ public:
   String(int     n);
   String(int64   n);
   String(double  n);
-  String(litstr  s)
-    : SmartPtr<StringData>(NEW(StringData)(s, AttachLiteral)) { }
+  String(litstr  s);
   String(CStrRef str) : SmartPtr<StringData>(str.m_px) { }
 
   String(const std::string &s) // always make a copy
@@ -152,6 +151,7 @@ public:
   String &operator =  (litstr  v);
   String &operator =  (CStrRef v);
   String &operator =  (CVarRef v);
+  String &operator =  (const std::string & s);
   String  operator +  (litstr  v) const;
   String  operator +  (CStrRef v) const;
   String &operator += (litstr  v);
@@ -319,7 +319,10 @@ typedef hphp_hash_map<String, int, zend_hash, zend_eqstr> MapStringToInt;
  */
 class StaticString : public String {
 public:
-  StaticString() {}
+  friend class StringUtil;
+  friend class LiteralStringInitializer;
+
+  StaticString() { m_px = &m_data; m_px->setStatic(); }
   StaticString(litstr s);
   StaticString(litstr s, int length); // binary string
   StaticString(std::string s);
@@ -328,8 +331,9 @@ public:
     // prevent ~SmartPtr from calling decRefCount after data is released
     m_px = NULL;
   }
-  StaticString &operator =  (litstr  v);
+  StaticString& operator=(const StaticString &str);
 private:
+  void init(litstr s, int length);
   StringData m_data;
 };
 

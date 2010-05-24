@@ -46,6 +46,28 @@ Variant::Variant(CStrRef v) : _count(0), m_type(KindOfString) {
   }
 }
 
+Variant::Variant(const std::string & v) : _count(0), m_type(KindOfString) {
+  StringData *s = NEW(StringData)(v.c_str(), v.size(), CopyString);
+  if (s) {
+    m_data.pstr = s;
+    s->incRefCount();
+  } else {
+    m_data.num = 0;
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(const StaticString & v) : _count(0), m_type(KindOfString) {
+  StringData *s = v.get();
+  if (s) {
+    m_data.pstr = s;
+    s->incRefCount();
+  } else {
+    m_data.num = 0;
+    m_type = KindOfNull;
+  }
+}
+
 Variant::Variant(CArrRef v) : _count(0), m_type(KindOfArray) {
   ArrayData *a = v.get();
   if (a) {

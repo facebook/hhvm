@@ -22,6 +22,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class macros
 
+#define LITSTR_INIT(str)    (true ? (str) : ("" str "")), (sizeof(str)-1)
+#define LITSTR(index, str)  (literalStrings[index])
+
 #ifndef DEBUG
 #define AS_CLASS(obj,cls) \
   (static_cast<cls*>(obj.get()))

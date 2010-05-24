@@ -138,21 +138,24 @@ void ClassConstant::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                 scope->getId().c_str(),
                 var->getName().c_str());
       break;
-    case CodeGenerator::CppClassConstantsImpl:
+    case CodeGenerator::CppClassConstantsImpl: {
       cg.printf("const ");
-      if (type->is(Type::KindOfString)) {
+      bool isString = type->is(Type::KindOfString);
+      if (isString) {
         cg.printf("StaticString");
       } else {
         type->outputCPPDecl(cg, ar);
       }
       value->outputCPPBegin(cg, ar);
-      cg.printf(" %s%s_%s = ", Option::ClassConstantPrefix,
+      cg.printf(" %s%s_%s", Option::ClassConstantPrefix,
                 scope->getId().c_str(),
                 var->getName().c_str());
+      cg.printf(isString ? "(" : " = ");
       value->outputCPP(cg, ar);
-      cg.printf(";\n");
+      cg.printf(isString ? ");\n" : ";\n");
       value->outputCPPEnd(cg, ar);
       break;
+    }
     case CodeGenerator::CppLazyStaticInitializer:
       value->outputCPPBegin(cg, ar);
       cg.printf("g->%s%s_%s = ", Option::ClassConstantPrefix,

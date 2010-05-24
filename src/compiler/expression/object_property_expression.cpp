@@ -150,6 +150,8 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   string name = exp->getString();
   ASSERT(!name.empty());
 
+  m_property->inferAndCheck(ar, Type::String, false);
+
   ClassScopePtr cls;
   if (objectType && !objectType->getName().empty()) {
     // what object-> has told us
@@ -321,7 +323,18 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
           // cannot be declared as a class variable (var $val), $this->val
           // refers to a non-static class variable and has to use get/lval.
           uint64 hash = hash_string(propName);
-          cg.printf("%s(\"%s\", 0x%016llXLL)", func.c_str(), propName, hash);
+          cg.printf("%s(", func.c_str());
+          if (Option::PrecomputeLiteralStrings &&
+              cg.getOutput() != CodeGenerator::SystemCPP &&
+              cg.getContext() != CodeGenerator::CppConstantsDecl &&
+              cg.getContext() != CodeGenerator::CppClassConstantsImpl) {
+            int stringId = ar->getLiteralStringId(propName);
+            ASSERT(stringId >= 0);
+            cg.printf("LITSTR(%d, \"%s\")", stringId, propName);
+          } else {
+            cg.printf("\"%s\"", propName);
+          }
+          cg.printf(", 0x%016llXLL)", hash);
         }
       } else {
         if (!bThis) {
@@ -349,8 +362,18 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
         cg.printf(op);
       }
       uint64 hash = hash_string(propName);
-      cg.printf("%s(\"%s\", 0x%016llXLL%s)", func.c_str(), propName, hash,
-                error);
+      cg.printf("%s(", func.c_str());
+      if (Option::PrecomputeLiteralStrings &&
+          cg.getOutput() != CodeGenerator::SystemCPP &&
+          cg.getContext() != CodeGenerator::CppConstantsDecl &&
+          cg.getContext() != CodeGenerator::CppClassConstantsImpl) {
+        int stringId = ar->getLiteralStringId(propName);
+        ASSERT(stringId >= 0);
+        cg.printf("LITSTR(%d, \"%s\")", stringId, propName);
+      } else {
+        cg.printf("\"%s\"", propName);
+      }
+      cg.printf(", 0x%016llXLL%s)", hash, error);
     }
   } else {
     if (!bThis) {

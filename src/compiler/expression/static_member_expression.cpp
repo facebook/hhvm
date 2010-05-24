@@ -149,6 +149,8 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
     return Type::Variant;
   }
 
+  m_exp->inferAndCheck(ar, Type::String, false);
+
   ClassScopePtr cls = ar->resolveClass(m_className);
   m_valid = true;
 
@@ -207,8 +209,6 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
   } else if (cls) {
     cls->getVariables()->forceVariants(ar);
   }
-
-  m_exp->inferAndCheck(ar, Type::String, false);
 
   // we have to use a variant to hold dynamic value
   return m_implementedType = Type::Variant;

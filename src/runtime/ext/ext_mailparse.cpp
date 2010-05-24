@@ -87,7 +87,7 @@ bool php_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef headers,
   return (!ret);
 }
 
-static const StaticString zero("\0", 1);
+static const StaticString zero(LITSTR_INIT("\0"));
 
 bool f_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef additional_headers /* = null_string */, CStrRef additional_parameters /* = null_string */) {
   // replace \0 with spaces

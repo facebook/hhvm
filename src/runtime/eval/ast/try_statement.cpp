@@ -35,7 +35,7 @@ bool CatchBlock::match(CObjRef exn) const {
 bool CatchBlock::proc(CObjRef exn, VariableEnvironment &env) const {
   if (exn.instanceof(m_ename.c_str())) {
     if (m_body) {
-      env.get(m_vname) = exn;
+      env.get(String(m_vname)) = exn;
       m_body->eval(env);
     }
     return true;
@@ -62,7 +62,7 @@ void TryStatement::eval(VariableEnvironment &env) const {
          it != m_catches.end(); ++it) {
       if ((*it)->match(e)) {
         if ((*it)->body()) {
-          env.get((*it)->vname()) = e;
+          env.get(String((*it)->vname())) = e;
           EVAL_STMT((*it)->body(), env);
         }
         return;

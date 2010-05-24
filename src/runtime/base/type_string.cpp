@@ -81,6 +81,9 @@ String::String(double n) {
   m_px->incRefCount();
 }
 
+String::String(litstr s)
+  : SmartPtr<StringData>(NEW(StringData)(s, AttachLiteral)) { }
+
 void String::assign(const char *data, StringDataMode mode) {
   if (data) {
     SmartPtr<StringData>::operator=(NEW(StringData)(data, mode));
@@ -234,6 +237,12 @@ String &String::operator=(litstr s) {
 
 String &String::operator=(StringData *data) {
   SmartPtr<StringData>::operator=(data);
+  return *this;
+}
+
+String &String::operator=(const std::string & s) {
+  SmartPtr<StringData>::operator=(
+    NEW(StringData)(s.c_str(), s.size(), CopyString));
   return *this;
 }
 
@@ -635,16 +644,22 @@ StaticString::StaticString(std::string s) : m_data(s.c_str(), s.size(),
   m_px->setStatic();
 }
 
-
 StaticString::StaticString(const StaticString &str)
   : m_data(str.m_data.data(), str.m_data.size(), AttachLiteral) {
   String::operator=(&m_data);
   m_px->setStatic();
 }
 
-StaticString &StaticString::operator=(litstr s) {
-  m_data.assign(s, AttachLiteral);
+StaticString& StaticString::operator=(const StaticString &str) {
+  // Assignment to a StaticString is ignored. Generated code
+  // should never use a StaticString on the left-hand side of
+  // assignment. A StaticString can only be initialized by a
+  // StaticString constructor or StaticString::init().
   return *this;
+}
+
+void StaticString::init(litstr s, int length) {
+  m_data.assign(s, length, AttachLiteral);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

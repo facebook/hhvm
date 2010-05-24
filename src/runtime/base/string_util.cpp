@@ -483,7 +483,7 @@ void StringUtil::InitLiteralStrings(StaticString literalStrings[],
   for (int i = 0; i < nliteralStrings; i++) {
     int size;
     memcpy(&size, pl, sizeof(size));
-    literalStrings[i] = StaticString(pb, size);
+    literalStrings[i].init(pb, size);
     pb += size;
     ASSERT(*pb == '\0');
     pb++;

@@ -20,6 +20,7 @@
 #include <compiler/analysis/type.h>
 #include <compiler/code_generator.h>
 #include <compiler/expression/expression.h>
+#include <compiler/expression/scalar_expression.h>
 #include <compiler/option.h>
 #include <util/util.h>
 #include <util/hash.h>
@@ -240,7 +241,8 @@ void ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
     cg.printf(decl ? "extern const " : "const ");
     TypePtr type = getFinalType(name);
-    if (type->is(Type::KindOfString)) {
+    bool isString = type->is(Type::KindOfString);
+    if (isString) {
       cg.printf("StaticString");
     } else {
       type->outputCPPDecl(cg, ar);
@@ -249,13 +251,24 @@ void ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (decl) {
       cg.printf(" %s%s", Option::ConstantPrefix, nameStr);
     } else {
-      cg.printf(" %s%s = ", Option::ConstantPrefix, nameStr);
+      cg.printf(" %s%s", Option::ConstantPrefix, nameStr);
+      cg.printf(isString ? "(" : " = ");
       if (value) {
         ExpressionPtr exp = dynamic_pointer_cast<Expression>(value);
         ASSERT(!exp->getExpectedType());
-        exp->outputCPP(cg, ar);
+        ScalarExpressionPtr scalarExp =
+          dynamic_pointer_cast<ScalarExpression>(exp);
+        if (isString && scalarExp) {
+          cg.printf("LITSTR_INIT(%s)",
+                    scalarExp->getCPPLiteralString().c_str());
+        } else {
+          exp->outputCPP(cg, ar);
+        }
       } else {
         cg.printf("\"%s\"", nameStr);
+      }
+      if (isString) {
+        cg.printf(")");
       }
     }
     cg.printf(";\n");

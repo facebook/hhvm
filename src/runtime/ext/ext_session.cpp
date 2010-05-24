@@ -1462,22 +1462,23 @@ bool f_session_start() {
    */
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
   if (PS(id).empty()) {
-    if (PS(use_cookies) && g->gv__COOKIE.toArray().exists(PS(session_name))) {
-      PS(id) = g->gv__COOKIE[PS(session_name)].toString();
+    if (PS(use_cookies) &&
+        g->gv__COOKIE.toArray().exists(String(PS(session_name)))) {
+      PS(id) = g->gv__COOKIE[String(PS(session_name))].toString();
       PS(apply_trans_sid) = 0;
       PS(send_cookie) = 0;
       PS(define_sid) = 0;
     }
 
     if (!PS(use_only_cookies) && !PS(id) &&
-        g->gv__GET.toArray().exists(PS(session_name))) {
-      PS(id) = g->gv__GET[PS(session_name)].toString();
+        g->gv__GET.toArray().exists(String(PS(session_name)))) {
+      PS(id) = g->gv__GET[String(PS(session_name))].toString();
       PS(send_cookie) = 0;
     }
 
     if (!PS(use_only_cookies) && !PS(id) &&
-        g->gv__POST.toArray().exists(PS(session_name))) {
-      PS(id) = g->gv__POST[PS(session_name)].toString();
+        g->gv__POST.toArray().exists(String(PS(session_name)))) {
+      PS(id) = g->gv__POST[String(PS(session_name))].toString();
       PS(send_cookie) = 0;
     }
   }

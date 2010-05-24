@@ -122,9 +122,9 @@ unsigned ScalarExpression::getCanonHash() const {
 
 bool ScalarExpression::canonCompare(ExpressionPtr e) const {
   if (!Expression::canonCompare(e)) return false;
-  ScalarExpressionPtr s = 
+  ScalarExpressionPtr s =
     static_pointer_cast<ScalarExpression>(e);
-  
+
   return
     m_value == s->m_value &&
     m_type == s->m_type &&
@@ -222,8 +222,7 @@ TypePtr ScalarExpression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
   }
 
   if (Option::PrecomputeLiteralStrings &&
-      Type::SameType(actualType, Type::String) &&
-      m_quoted) {
+      Type::SameType(actualType, Type::String)) {
     ScalarExpressionPtr self =
       dynamic_pointer_cast<ScalarExpression>(shared_from_this());
     ar->addLiteralString(getLiteralString(), self);
@@ -293,7 +292,7 @@ bool ScalarExpression::isLiteralString() const {
 
 std::string ScalarExpression::getLiteralString() const {
   string output;
-  if(!isLiteralString()) {
+  if (!isLiteralString() && m_type != T_STRING) {
     return output;
   }
 
@@ -375,6 +374,61 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
+std::string ScalarExpression::getCPPLiteralString(
+    bool * hasEmbeddedNullPtr /* = NULL */) {
+  string output;
+  bool hasEmbeddedNull = false;
+  switch (m_type) {
+  case T_CONSTANT_ENCAPSED_STRING:
+  case T_ENCAPSED_AND_WHITESPACE:
+  case T_STRING: {
+    output.reserve((m_value.length() << 1) + 2);
+    output = "\"";
+    for (unsigned int i = 0; i < m_value.length(); i++) {
+      unsigned char ch = m_value[i];
+      switch (ch) {
+      case '\n': output += "\\n";  break;
+      case '\r': output += "\\r";  break;
+      case '\t': output += "\\t";  break;
+      case '\a': output += "\\a";  break;
+      case '\b': output += "\\b";  break;
+      case '\f': output += "\\f";  break;
+      case '\v': output += "\\v";  break;
+      case '\0': output += "\\0";  hasEmbeddedNull = true; break;
+      case '\"': output += "\\\""; break;
+      case '\\': output += "\\\\"; break;
+      case '?':  output += "\\?";  break; // avoiding trigraph errors
+      default:
+        if (isprint(ch)) {
+          output += ch;
+        } else {
+          // output in octal notation
+          char buf[10];
+          snprintf(buf, sizeof(buf), "\\%03o", ch);
+          output += buf;
+        }
+        break;
+      }
+    }
+    output += "\"";
+    break;
+  }
+  case T_CLASS_C:
+  case T_METHOD_C:
+  case T_FUNC_C:
+    output = "\"";
+    output += m_translated;
+    output += "\"";
+    break;
+  default:
+    ASSERT(false);
+  }
+  if (hasEmbeddedNullPtr) {
+    *hasEmbeddedNullPtr = hasEmbeddedNull;
+  }
+  return output;
+}
+
 void ScalarExpression::outputCPPString(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
   switch (m_type) {
@@ -382,38 +436,9 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
   case T_ENCAPSED_AND_WHITESPACE:
     ASSERT(m_quoted); // fall through
   case T_STRING: {
-    bool hasEmbeddedNull = false;
     if (m_quoted) {
-      string output;
-      output.reserve((m_value.length() << 1) + 2);
-      output = "\"";
-      for (unsigned int i = 0; i < m_value.length(); i++) {
-        unsigned char ch = m_value[i];
-        switch (ch) {
-        case '\n': output += "\\n";  break;
-        case '\r': output += "\\r";  break;
-        case '\t': output += "\\t";  break;
-        case '\a': output += "\\a";  break;
-        case '\b': output += "\\b";  break;
-        case '\f': output += "\\f";  break;
-        case '\v': output += "\\v";  break;
-        case '\0': output += "\\0";  hasEmbeddedNull = true; break;
-        case '\"': output += "\\\""; break;
-        case '\\': output += "\\\\"; break;
-        case '?':  output += "\\?";  break; // avoiding trigraph errors
-        default:
-          if (isprint(ch)) {
-            output += ch;
-          } else {
-            // output in octal notation
-            char buf[10];
-            snprintf(buf, sizeof(buf), "\\%03o", ch);
-            output += buf;
-          }
-          break;
-        }
-      }
-      output += "\"";
+      bool hasEmbeddedNull = false;
+      string output = getCPPLiteralString(&hasEmbeddedNull);
       if (hasEmbeddedNull) {
         char length[20];
         snprintf(length, sizeof(length), "%ld", m_value.length());
@@ -450,13 +475,16 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_CLASS_C:
   case T_METHOD_C:
   case T_FUNC_C:
-    if (Option::PrecomputeLiteralStrings && cg.getOutput() !=
-        CodeGenerator::SystemCPP && m_quoted &&
+    if (Option::PrecomputeLiteralStrings &&
+        cg.getOutput() != CodeGenerator::SystemCPP &&
+        m_quoted &&
         cg.getContext() != CodeGenerator::CppConstantsDecl &&
         cg.getContext() != CodeGenerator::CppClassConstantsImpl) {
       int stringId = ar->getLiteralStringId(getLiteralString());
       ASSERT(stringId >= 0);
-      cg.printf("literalStrings[%d]", stringId);
+      cg.printf("LITSTR(%d, ", stringId);
+      outputCPPString(cg, ar);
+      cg.printf(")");
     } else {
       outputCPPString(cg, ar);
     }

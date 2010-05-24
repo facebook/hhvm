@@ -25,6 +25,7 @@
 #include <runtime/base/ini_setting.h>
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/util/request_local.h>
+#include <runtime/base/macros.h>
 
 #define PDO_HANDLE_DBH_ERR(dbh)                         \
   if (strcmp(dbh->error_code, PDO_ERR_NONE)) {          \
@@ -111,7 +112,7 @@ const int64 q_pdo_NULL_NATURAL             = PDO_NULL_NATURAL;
 const int64 q_pdo_NULL_EMPTY_STRING        = PDO_NULL_EMPTY_STRING;
 const int64 q_pdo_NULL_TO_STRING           = PDO_NULL_TO_STRING;
 
-const StaticString q_pdo_ERR_NONE          = PDO_ERR_NONE;
+const StaticString q_pdo_ERR_NONE(LITSTR_INIT(PDO_ERR_NONE));
 
 const int64 q_pdo_FETCH_ORI_NEXT           = PDO_FETCH_ORI_NEXT;
 const int64 q_pdo_FETCH_ORI_PRIOR          = PDO_FETCH_ORI_PRIOR;

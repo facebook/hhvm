@@ -115,6 +115,9 @@ class Variant {
   Variant(double  v) : _count(0), m_type(KindOfDouble ) { m_data.dbl = v;}
   Variant(litstr  v) : _count(0), m_type(LiteralString) { m_data.str = v;}
 
+  Variant(const std::string & stds);
+  Variant(const StaticString & ss);
+
   Variant(CStrRef v);
   Variant(CArrRef v);
   Variant(CObjRef v);

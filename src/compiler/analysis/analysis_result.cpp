@@ -2961,9 +2961,9 @@ void AnalysisResult::outputCPPLiteralStringPrecomputation() {
     } else {
       for (int j = 0; j < bucketSize &&
            it != m_stringLiterals.end(); ++it, ++j) {
-        cg.printf("%s[%d] = ", lsname, it->second.first);
-        it->second.second->outputCPPString(cg, self);
-        cg.printf(";\n");
+        std::string str = it->second.second->getCPPLiteralString();
+        cg.printf("%s[%d].init(LITSTR_INIT(%s));", lsname,
+                  it->second.first, str.c_str());
       }
     }
     cg.indentEnd("}\n");

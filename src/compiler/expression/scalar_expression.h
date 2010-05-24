@@ -67,6 +67,8 @@ public:
 
   void outputCPPString(CodeGenerator &cg, AnalysisResultPtr ar);
 
+  std::string getCPPLiteralString(bool * hasEmbeddedNullPtr = NULL);
+
   static void setHookHandler(void (*hookHandler)(AnalysisResultPtr ar,
                                                  ScalarExpressionPtr sc,
                                                  HphpHookUniqueId id)) {

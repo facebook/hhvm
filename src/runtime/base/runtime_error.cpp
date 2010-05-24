@@ -54,7 +54,7 @@ void raise_error_ex(const std::string &msg,
 }
 
 void raise_error(const std::string &msg) {
-  int64 errnum = 1LL;  // E_ERROR
+  int64 errnum = ErrorConstants::ERROR;
   raise_error_ex(msg, errnum, false, AlwaysThrow, "HipHop Fatal error: ");
 }
 
@@ -68,7 +68,7 @@ void raise_error(const char *fmt, ...) {
 }
 
 void raise_recoverable_error(const std::string &msg) {
-  int64 errnum = 4096LL;  // E_RECOVERABLE_ERROR
+  int64 errnum = ErrorConstants::RECOVERABLE_ERROR;
   raise_error_ex(msg, errnum, true, ThrowIfUnhandled,
                  "HipHop Recoverable Fatal error: ");
 }
@@ -82,12 +82,27 @@ void raise_recoverable_error(const char *fmt, ...) {
   raise_recoverable_error(msg);
 }
 
+void raise_strict_warning(const std::string &msg) {
+  int64 errnum = ErrorConstants::STRICT;
+  raise_error_ex(msg, errnum, true, NeverThrow,
+                 "HipHop Strict Warning:  ");
+}
+
+void raise_strict_warning(const char *fmt, ...) {
+  std::string msg;
+  va_list ap;
+  va_start(ap, fmt);
+  Logger::VSNPrintf(msg, fmt, ap);
+  va_end(ap);
+  raise_strict_warning(msg);
+}
+
 static int64 g_warning_counter = 0;
 
 void raise_warning(const std::string &msg) {
   if (RuntimeOption::WarningFrequency > 0 &&
       (++g_warning_counter) % RuntimeOption::WarningFrequency == 0) {
-    int64 errnum = 2LL;  // E_WARNING
+    int64 errnum = ErrorConstants::WARNING;
     raise_error_ex(msg, errnum, true, NeverThrow, "HipHop Warning:  ");
   }
 }
@@ -106,7 +121,7 @@ static int64 g_notice_counter = 0;
 void raise_notice(const std::string &msg) {
   if (RuntimeOption::NoticeFrequency > 0 &&
       (++g_notice_counter) % RuntimeOption::NoticeFrequency == 0) {
-    int64 errnum = 8LL;  // E_NOTICE
+    int64 errnum = ErrorConstants::NOTICE;
     raise_error_ex(msg, errnum, true, NeverThrow, "HipHop Notice:  ");
   }
 }

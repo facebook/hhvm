@@ -96,6 +96,19 @@ String TimeZone::CurrentName() {
   if (!tzid) {
     tzid = "UTC";
   }
+
+#define DATE_TZ_ERRMSG \
+  "It is not safe to rely on the system's timezone settings. Please use " \
+  "the date.timezone setting, the TZ environment variable or the " \
+  "date_default_timezone_set() function. In case you used any of those " \
+  "methods and you are still getting this warning, you most likely " \
+  "misspelled the timezone identifier. "
+
+  raise_strict_warning(DATE_TZ_ERRMSG "We selected '%s' for '%s/%.1f/%s' instead",
+                       tzid, ta ? ta->tm_zone : "Unknown",
+                       ta ? (float) (ta->tm_gmtoff / 3600) : 0,
+                       ta ? (ta->tm_isdst ? "DST" : "no DST") : "Unknown");
+
   return String(tzid, CopyString);
 }
 

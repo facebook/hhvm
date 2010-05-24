@@ -29,9 +29,7 @@ void throw_strict(const ExtendedException &exn,
     if (RuntimeOption::StrictFatal) {
       throw exn;
     } else {
-      int64 errnum = 2048LL; // E_STRICT
-      raise_error_ex(exn.getMessage(), errnum, true, NeverThrow,
-          "HipHop Strict warning:  ");
+      raise_strict_warning(exn.getMessage());
     }
   }
 }

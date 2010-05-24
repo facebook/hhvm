@@ -54,6 +54,7 @@ class TestCodeRun : public TestBase {
   bool TestInnerFunction();
   bool TestInnerClass();
   bool TestVariableArgument();
+  bool TestArgumentHandling();
   bool TestListAssignment();
   bool TestExceptions();
   bool TestPredefined();
@@ -130,7 +131,6 @@ class TestCodeRun : public TestBase {
   bool TestConstantFunction();
   bool TestDefined();
   bool TestAssignment();
-  bool TestEvaluationOrder();
   bool TestPrint();
   bool TestLocale();
   bool TestBadFunctionCalls();

@@ -134,27 +134,25 @@ Variant c_directory::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(directory)
 c_directory *c_directory::create(Variant v_path) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(v_path);
-  decRefCount();
   return this;
 }
 ObjectData *c_directory::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("directory::__construct", count+1);
-    (t___construct(params.rvalAt(0)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 1) throw_wrong_arguments("directory::__construct", count, 1, 1, 2);
+    (t___construct(params[0]));
   }
   return this;
 }
 void c_directory::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("directory::__construct", count+1);
-  (t___construct(params.rvalAt(0)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("directory::__construct", count, 1, 1, 2);
+  (t___construct(params[0]));
 }
 void c_directory::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -181,26 +179,29 @@ void c_directory::cloneSet(c_directory *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_directory::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 7) {
     case 1:
       HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
+        if (count > 0) return throw_toomany_arguments("directory::close", 0, 1);
         return (t_close());
       }
       HASH_GUARD(0x1F479267E49EF301LL, read) {
+        if (count > 0) return throw_toomany_arguments("directory::read", 0, 1);
         return (t_read());
       }
       break;
     case 2:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("directory::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 7:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("directory::__construct", count+1);
-        return (t___construct(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("directory::__construct", count, 1, 1, 2);
+        return (t___construct(params[0]), null);
       }
       break;
     default:
@@ -213,20 +214,23 @@ Variant c_directory::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   switch (hash & 7) {
     case 1:
       HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
+        if (count > 0) return throw_toomany_arguments("directory::close", 0, 1);
         return (t_close());
       }
       HASH_GUARD(0x1F479267E49EF301LL, read) {
+        if (count > 0) return throw_toomany_arguments("directory::read", 0, 1);
         return (t_read());
       }
       break;
     case 2:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("directory::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 7:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("directory::__construct", count+1);
+        if (count != 1) return throw_wrong_arguments("directory::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       break;
@@ -236,6 +240,7 @@ Variant c_directory::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_directory::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

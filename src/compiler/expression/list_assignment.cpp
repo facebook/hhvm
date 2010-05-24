@@ -163,7 +163,7 @@ void ListAssignment::outputCPPAssignment(CodeGenerator &cg,
       if (exp->is(Expression::KindOfListAssignment)) {
         ListAssignmentPtr sublist = dynamic_pointer_cast<ListAssignment>(exp);
         string subTmp = genCPPTemp(cg, ar);
-        cg.printf("Variant %s((ref(%s.rvalAt(%d))));\n", subTmp.c_str(),
+        cg.printf("Variant %s((ref(%s[%d])));\n", subTmp.c_str(),
                   arrTmp.c_str(), i);
         sublist->outputCPPAssignment(cg, ar, subTmp);
       } else {
@@ -180,7 +180,7 @@ void ListAssignment::outputCPPAssignment(CodeGenerator &cg,
             } else {
               cg.printf(".append(");
             }
-            cg.printf("%s.rvalAt(%d));\n", arrTmp.c_str(), i);
+            cg.printf("%s[%d]);\n", arrTmp.c_str(), i);
             done = true;
           }
         }
@@ -189,7 +189,7 @@ void ListAssignment::outputCPPAssignment(CodeGenerator &cg,
           if (arrTmp == "null") {
             cg.printf(" = null;\n");
           } else {
-            cg.printf(" = %s.rvalAt(%d);\n", arrTmp.c_str(), i);
+            cg.printf(" = %s[%d];\n", arrTmp.c_str(), i);
           }
         }
       }

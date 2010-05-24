@@ -174,29 +174,27 @@ Variant c_arrayiterator::os_constant(const char *s) {
 IMPLEMENT_CLASS(arrayiterator)
 c_arrayiterator *c_arrayiterator::create(Variant v_array, Variant v_flags //  = 0LL /* SORT_REGULAR */
 ) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(v_array, v_flags);
-  decRefCount();
   return this;
 }
 ObjectData *c_arrayiterator::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("arrayiterator::__construct", count+1);
-    if (count <= 1) (t___construct(params.rvalAt(0)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count < 1 || count > 2) throw_wrong_arguments("arrayiterator::__construct", count, 1, 2, 2);
+    if (count <= 1) (t___construct(params[0]));
+    else (t___construct(params[0], params[1]));
   }
   return this;
 }
 void c_arrayiterator::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("arrayiterator::__construct", count+1);
-  if (count <= 1) (t___construct(params.rvalAt(0)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) throw_wrong_arguments("arrayiterator::__construct", count, 1, 2, 2);
+  if (count <= 1) (t___construct(params[0]));
+  else (t___construct(params[0], params[1]));
 }
 void c_arrayiterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -229,129 +227,132 @@ void c_arrayiterator::cloneSet(c_arrayiterator *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_arrayiterator::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 0:
       HASH_GUARD(0x3E6BCFB9742FC700LL, offsetexists) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("arrayiterator::offsetexists", count+1);
-        return (t_offsetexists(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("arrayiterator::offsetexists", count, 1, 1, 1);
+        return (t_offsetexists(params[0]));
       }
       break;
     case 2:
       HASH_GUARD(0x4DEE4A472DC69EC2LL, append) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("arrayiterator::append", count+1);
-        return (t_append(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("arrayiterator::append", count, 1, 1, 1);
+        return (t_append(params[0]), null);
       }
       break;
     case 4:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::valid", 0, 1);
         return (t_valid());
       }
       HASH_GUARD(0x4842AF70A71BE6C4LL, uksort) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("arrayiterator::uksort", count+1);
-        return (t_uksort(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("arrayiterator::uksort", count, 1, 1, 1);
+        return (t_uksort(params[0]));
       }
       break;
     case 6:
       HASH_GUARD(0x234F6A0A486E8646LL, natcasesort) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::natcasesort", 0, 1);
         return (t_natcasesort());
       }
       break;
     case 10:
       HASH_GUARD(0x2FC3A6941D522E0ALL, setflags) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("arrayiterator::setflags", count+1);
-        return (t_setflags(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("arrayiterator::setflags", count, 1, 1, 1);
+        return (t_setflags(params[0]), null);
       }
       break;
     case 16:
       HASH_GUARD(0x5CEFA5A265104D10LL, count) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::count", 0, 1);
         return (t_count());
       }
       break;
     case 17:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 24:
       HASH_GUARD(0x61D11ECEF4404498LL, offsetget) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("arrayiterator::offsetget", count+1);
-        return (t_offsetget(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("arrayiterator::offsetget", count, 1, 1, 1);
+        return (t_offsetget(params[0]));
       }
       HASH_GUARD(0x70448A629A74FB18LL, ksort) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::ksort", 0, 1);
         return (t_ksort());
       }
       break;
     case 28:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("arrayiterator::__construct", count+1);
-        if (count <= 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count < 1 || count > 2) return throw_wrong_arguments("arrayiterator::__construct", count, 1, 2, 2);
+        if (count <= 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       break;
     case 32:
       HASH_GUARD(0x6FACBD7F02B6FD60LL, uasort) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("arrayiterator::uasort", count+1);
-        return (t_uasort(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("arrayiterator::uasort", count, 1, 1, 1);
+        return (t_uasort(params[0]));
       }
       break;
     case 33:
       HASH_GUARD(0x0E210679B2DFD461LL, getarraycopy) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::getarraycopy", 0, 1);
         return (t_getarraycopy());
       }
       HASH_GUARD(0x27E7DBA875AD17E1LL, getflags) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::getflags", 0, 1);
         return (t_getflags());
       }
       break;
     case 39:
       HASH_GUARD(0x7EF5445C77054C67LL, seek) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("arrayiterator::seek", count+1);
-        return (t_seek(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("arrayiterator::seek", count, 1, 1, 1);
+        return (t_seek(params[0]), null);
       }
       break;
     case 42:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 46:
       HASH_GUARD(0x790B7C44A3442BEELL, asort) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::asort", 0, 1);
         return (t_asort());
       }
       break;
     case 51:
       HASH_GUARD(0x7DB9D839ACE0DEB3LL, natsort) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::natsort", 0, 1);
         return (t_natsort());
       }
       break;
     case 56:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::next", 0, 1);
         return (t_next());
       }
       HASH_GUARD(0x0957F693A48AF738LL, offsetset) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("arrayiterator::offsetset", count+1);
-        return (t_offsetset(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("arrayiterator::offsetset", count, 2, 2, 1);
+        return (t_offsetset(params[0], params[1]));
       }
       break;
     case 58:
       HASH_GUARD(0x08329980E6369ABALL, offsetunset) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("arrayiterator::offsetunset", count+1);
-        return (t_offsetunset(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("arrayiterator::offsetunset", count, 1, 1, 1);
+        return (t_offsetunset(params[0]));
       }
       break;
     default:
@@ -364,114 +365,126 @@ Variant c_arrayiterator::o_invoke_few_args(const char *s, int64 hash, int count,
   switch (hash & 63) {
     case 0:
       HASH_GUARD(0x3E6BCFB9742FC700LL, offsetexists) {
-        if (count < 1) throw_missing_argument("arrayiterator::offsetexists", count+1);
+        if (count != 1) return throw_wrong_arguments("arrayiterator::offsetexists", count, 1, 1, 1);
         return (t_offsetexists(a0));
       }
       break;
     case 2:
       HASH_GUARD(0x4DEE4A472DC69EC2LL, append) {
-        if (count < 1) throw_missing_argument("arrayiterator::append", count+1);
+        if (count != 1) return throw_wrong_arguments("arrayiterator::append", count, 1, 1, 1);
         return (t_append(a0), null);
       }
       break;
     case 4:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::valid", 0, 1);
         return (t_valid());
       }
       HASH_GUARD(0x4842AF70A71BE6C4LL, uksort) {
-        if (count < 1) throw_missing_argument("arrayiterator::uksort", count+1);
+        if (count != 1) return throw_wrong_arguments("arrayiterator::uksort", count, 1, 1, 1);
         return (t_uksort(a0));
       }
       break;
     case 6:
       HASH_GUARD(0x234F6A0A486E8646LL, natcasesort) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::natcasesort", 0, 1);
         return (t_natcasesort());
       }
       break;
     case 10:
       HASH_GUARD(0x2FC3A6941D522E0ALL, setflags) {
-        if (count < 1) throw_missing_argument("arrayiterator::setflags", count+1);
+        if (count != 1) return throw_wrong_arguments("arrayiterator::setflags", count, 1, 1, 1);
         return (t_setflags(a0), null);
       }
       break;
     case 16:
       HASH_GUARD(0x5CEFA5A265104D10LL, count) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::count", 0, 1);
         return (t_count());
       }
       break;
     case 17:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 24:
       HASH_GUARD(0x61D11ECEF4404498LL, offsetget) {
-        if (count < 1) throw_missing_argument("arrayiterator::offsetget", count+1);
+        if (count != 1) return throw_wrong_arguments("arrayiterator::offsetget", count, 1, 1, 1);
         return (t_offsetget(a0));
       }
       HASH_GUARD(0x70448A629A74FB18LL, ksort) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::ksort", 0, 1);
         return (t_ksort());
       }
       break;
     case 28:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("arrayiterator::__construct", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("arrayiterator::__construct", count, 1, 2, 2);
         if (count <= 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       break;
     case 32:
       HASH_GUARD(0x6FACBD7F02B6FD60LL, uasort) {
-        if (count < 1) throw_missing_argument("arrayiterator::uasort", count+1);
+        if (count != 1) return throw_wrong_arguments("arrayiterator::uasort", count, 1, 1, 1);
         return (t_uasort(a0));
       }
       break;
     case 33:
       HASH_GUARD(0x0E210679B2DFD461LL, getarraycopy) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::getarraycopy", 0, 1);
         return (t_getarraycopy());
       }
       HASH_GUARD(0x27E7DBA875AD17E1LL, getflags) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::getflags", 0, 1);
         return (t_getflags());
       }
       break;
     case 39:
       HASH_GUARD(0x7EF5445C77054C67LL, seek) {
-        if (count < 1) throw_missing_argument("arrayiterator::seek", count+1);
+        if (count != 1) return throw_wrong_arguments("arrayiterator::seek", count, 1, 1, 1);
         return (t_seek(a0), null);
       }
       break;
     case 42:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 46:
       HASH_GUARD(0x790B7C44A3442BEELL, asort) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::asort", 0, 1);
         return (t_asort());
       }
       break;
     case 51:
       HASH_GUARD(0x7DB9D839ACE0DEB3LL, natsort) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::natsort", 0, 1);
         return (t_natsort());
       }
       break;
     case 56:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("arrayiterator::next", 0, 1);
         return (t_next());
       }
       HASH_GUARD(0x0957F693A48AF738LL, offsetset) {
-        if (count < 2) throw_missing_argument("arrayiterator::offsetset", count+1);
+        if (count != 2) return throw_wrong_arguments("arrayiterator::offsetset", count, 2, 2, 1);
         return (t_offsetset(a0, a1));
       }
       break;
     case 58:
       HASH_GUARD(0x08329980E6369ABALL, offsetunset) {
-        if (count < 1) throw_missing_argument("arrayiterator::offsetunset", count+1);
+        if (count != 1) return throw_wrong_arguments("arrayiterator::offsetunset", count, 1, 1, 1);
         return (t_offsetunset(a0));
       }
       break;
@@ -481,6 +494,7 @@ Variant c_arrayiterator::o_invoke_few_args(const char *s, int64 hash, int count,
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_arrayiterator::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1088,22 +1102,24 @@ Variant c_appenditerator::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(appenditerator)
 c_appenditerator *c_appenditerator::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_appenditerator::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("appenditerator::__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_appenditerator::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("appenditerator::__construct", 0, 2);
   (t___construct());
 }
 void c_appenditerator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -1129,52 +1145,58 @@ Variant c_appenditerator::doCall(Variant v_name, Variant v_arguments, bool fatal
   return t___call(v_name, v_arguments);
 }
 Variant c_appenditerator::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x4DEE4A472DC69EC2LL, append) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appenditerator::append", count+1);
-        return (t_append(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("appenditerator::append", count, 1, 1, 1);
+        return (t_append(params[0]), null);
       }
       break;
     case 4:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("appenditerator::valid", 0, 1);
         return (t_valid());
       }
       HASH_GUARD(0x3106F858B09C7424LL, getinneriterator) {
+        if (count > 0) return throw_toomany_arguments("appenditerator::getinneriterator", 0, 1);
         return (t_getinneriterator());
       }
       break;
     case 10:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("appenditerator::rewind", 0, 1);
         return (t_rewind(), null);
       }
       break;
     case 12:
       HASH_GUARD(0x5D73364F53CEEB6CLL, __call) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("appenditerator::__call", count+1);
-        return (t___call(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("appenditerator::__call", count, 2, 2, 1);
+        return (t___call(params[0], params[1]));
       }
       break;
     case 17:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("appenditerator::key", 0, 1);
         return (t_key());
       }
       break;
     case 24:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("appenditerator::next", 0, 1);
         return (t_next(), null);
       }
       break;
     case 28:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("appenditerator::current", 0, 1);
         return (t_current());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("appenditerator::__construct", 0, 2);
         return (t___construct(), null);
       }
       break;
@@ -1188,46 +1210,53 @@ Variant c_appenditerator::o_invoke_few_args(const char *s, int64 hash, int count
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x4DEE4A472DC69EC2LL, append) {
-        if (count < 1) throw_missing_argument("appenditerator::append", count+1);
+        if (count != 1) return throw_wrong_arguments("appenditerator::append", count, 1, 1, 1);
         return (t_append(a0), null);
       }
       break;
     case 4:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("appenditerator::valid", 0, 1);
         return (t_valid());
       }
       HASH_GUARD(0x3106F858B09C7424LL, getinneriterator) {
+        if (count > 0) return throw_toomany_arguments("appenditerator::getinneriterator", 0, 1);
         return (t_getinneriterator());
       }
       break;
     case 10:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("appenditerator::rewind", 0, 1);
         return (t_rewind(), null);
       }
       break;
     case 12:
       HASH_GUARD(0x5D73364F53CEEB6CLL, __call) {
-        if (count < 2) throw_missing_argument("appenditerator::__call", count+1);
+        if (count != 2) return throw_wrong_arguments("appenditerator::__call", count, 2, 2, 1);
         return (t___call(a0, a1));
       }
       break;
     case 17:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("appenditerator::key", 0, 1);
         return (t_key());
       }
       break;
     case 24:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("appenditerator::next", 0, 1);
         return (t_next(), null);
       }
       break;
     case 28:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("appenditerator::current", 0, 1);
         return (t_current());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("appenditerator::__construct", 0, 2);
         return (t___construct(), null);
       }
       break;
@@ -1237,6 +1266,7 @@ Variant c_appenditerator::o_invoke_few_args(const char *s, int64 hash, int count
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_appenditerator::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1553,29 +1583,27 @@ Variant c_recursivedirectoryiterator::os_constant(const char *s) {
 IMPLEMENT_CLASS(recursivedirectoryiterator)
 c_recursivedirectoryiterator *c_recursivedirectoryiterator::create(Variant v_path, Variant v_flags //  = 16LL /* recursivedirectoryiterator::CURRENT_AS_FILEINFO */
 ) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(v_path, v_flags);
-  decRefCount();
   return this;
 }
 ObjectData *c_recursivedirectoryiterator::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("recursivedirectoryiterator::__construct", count+1);
-    if (count <= 1) (t___construct(params.rvalAt(0)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count < 1 || count > 2) throw_wrong_arguments("recursivedirectoryiterator::__construct", count, 1, 2, 2);
+    if (count <= 1) (t___construct(params[0]));
+    else (t___construct(params[0], params[1]));
   }
   return this;
 }
 void c_recursivedirectoryiterator::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("recursivedirectoryiterator::__construct", count+1);
-  if (count <= 1) (t___construct(params.rvalAt(0)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) throw_wrong_arguments("recursivedirectoryiterator::__construct", count, 1, 2, 2);
+  if (count <= 1) (t___construct(params[0]));
+  else (t___construct(params[0], params[1]));
 }
 void c_recursivedirectoryiterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -1606,207 +1634,237 @@ void c_recursivedirectoryiterator::cloneSet(c_recursivedirectoryiterator *clone)
   c_directoryiterator::cloneSet(clone);
 }
 Variant c_recursivedirectoryiterator::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {
     case 6:
       HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
         return (t_getrealpath());
       }
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
       HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
         return (t_isdir());
       }
       break;
     case 9:
       HASH_GUARD(0x430BA7B88ED3A809LL, getsubpathname) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::getsubpathname", 0, 1);
         return (t_getsubpathname());
       }
       break;
     case 14:
       HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
         return (t_getowner());
       }
       break;
     case 15:
       HASH_GUARD(0x732EC1BDA8EC520FLL, getchildren) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::getchildren", 0, 1);
         return (t_getchildren());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 21:
       HASH_GUARD(0x40044334DA397C15LL, haschildren) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::haschildren", 0, 1);
         return (t_haschildren());
       }
       break;
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
         if (count <= 0) return (t_getbasename());
-        return (t_getbasename(params.rvalAt(0)));
+        return (t_getbasename(params[0]));
       }
       break;
     case 29:
       HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
         return (t_isfile());
       }
       break;
     case 31:
       HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
         return (t_getatime());
       }
       break;
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
         if (count <= 0) return (t_setfileclass());
-        return (t_setfileclass(params.rvalAt(0)));
+        return (t_setfileclass(params[0]));
       }
       break;
     case 43:
       HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 47:
       HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
         return (t_getctime());
       }
       break;
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
-        int count = params.size();
+        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
         if (count <= 0) return (t_openfile());
-        if (count == 1) return (t_openfile(params.rvalAt(0)));
-        if (count == 2) return (t_openfile(params.rvalAt(0), params.rvalAt(1)));
-        return (t_openfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count == 1) return (t_openfile(params[0]));
+        if (count == 2) return (t_openfile(params[0], params[1]));
+        return (t_openfile(params[0], params[1], params[2]));
       }
       break;
     case 56:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::next", 0, 1);
         return (t_next());
       }
       break;
     case 63:
       HASH_GUARD(0x04C642C6C162243FLL, getpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
         return (t_getpath());
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
-        return (t_getfileinfo(params.rvalAt(0)));
+        return (t_getfileinfo(params[0]));
       }
       break;
     case 68:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 69:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
-        return (t_setinfoclass(params.rvalAt(0)));
+        return (t_setinfoclass(params[0]));
       }
       break;
     case 74:
       HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
         return (t_getinode());
       }
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 79:
       HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 81:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 88:
       HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
         return (t_islink());
       }
       break;
     case 92:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("recursivedirectoryiterator::__construct", count+1);
-        if (count <= 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count < 1 || count > 2) return throw_wrong_arguments("recursivedirectoryiterator::__construct", count, 1, 2, 2);
+        if (count <= 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       break;
     case 99:
       HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 103:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
-        return (t_getpathinfo(params.rvalAt(0)));
+        return (t_getpathinfo(params[0]));
       }
       HASH_GUARD(0x7EF5445C77054C67LL, seek) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("recursivedirectoryiterator::seek", count+1);
-        return (t_seek(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("recursivedirectoryiterator::seek", count, 1, 1, 1);
+        return (t_seek(params[0]));
       }
       break;
     case 106:
       HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
         return (t_getgroup());
       }
       HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
         return (t_getsize());
       }
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 116:
       HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
         return (t_getmtime());
       }
       HASH_GUARD(0x08D1EA51B78DA5F4LL, isdot) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::isdot", 0, 1);
         return (t_isdot());
       }
       break;
     case 120:
       HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 122:
       HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 123:
       HASH_GUARD(0x7CF26A0E76B5E27BLL, getsubpath) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::getsubpath", 0, 1);
         return (t_getsubpath());
       }
       break;
     case 125:
       HASH_GUARD(0x4351578037A06E7DLL, getperms) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
         return (t_getperms());
       }
       break;
@@ -1820,76 +1878,91 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(const char *s, int64 has
   switch (hash & 127) {
     case 6:
       HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
         return (t_getrealpath());
       }
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
       HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
         return (t_isdir());
       }
       break;
     case 9:
       HASH_GUARD(0x430BA7B88ED3A809LL, getsubpathname) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::getsubpathname", 0, 1);
         return (t_getsubpathname());
       }
       break;
     case 14:
       HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
         return (t_getowner());
       }
       break;
     case 15:
       HASH_GUARD(0x732EC1BDA8EC520FLL, getchildren) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::getchildren", 0, 1);
         return (t_getchildren());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 21:
       HASH_GUARD(0x40044334DA397C15LL, haschildren) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::haschildren", 0, 1);
         return (t_haschildren());
       }
       break;
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
         if (count <= 0) return (t_getbasename());
         return (t_getbasename(a0));
       }
       break;
     case 29:
       HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
         return (t_isfile());
       }
       break;
     case 31:
       HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
         return (t_getatime());
       }
       break;
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
         if (count <= 0) return (t_setfileclass());
         return (t_setfileclass(a0));
       }
       break;
     case 43:
       HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 47:
       HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
         return (t_getctime());
       }
       break;
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
+        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
         if (count <= 0) return (t_openfile());
         if (count == 1) return (t_openfile(a0));
         if (count == 2) return (t_openfile(a0, a1));
@@ -1898,117 +1971,139 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(const char *s, int64 has
       break;
     case 56:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::next", 0, 1);
         return (t_next());
       }
       break;
     case 63:
       HASH_GUARD(0x04C642C6C162243FLL, getpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
         return (t_getpath());
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
         return (t_getfileinfo(a0));
       }
       break;
     case 68:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 69:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
         return (t_setinfoclass(a0));
       }
       break;
     case 74:
       HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
         return (t_getinode());
       }
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 79:
       HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 81:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 88:
       HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
         return (t_islink());
       }
       break;
     case 92:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("recursivedirectoryiterator::__construct", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("recursivedirectoryiterator::__construct", count, 1, 2, 2);
         if (count <= 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       break;
     case 99:
       HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 103:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
         return (t_getpathinfo(a0));
       }
       HASH_GUARD(0x7EF5445C77054C67LL, seek) {
-        if (count < 1) throw_missing_argument("recursivedirectoryiterator::seek", count+1);
+        if (count != 1) return throw_wrong_arguments("recursivedirectoryiterator::seek", count, 1, 1, 1);
         return (t_seek(a0));
       }
       break;
     case 106:
       HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
         return (t_getgroup());
       }
       HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
         return (t_getsize());
       }
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 116:
       HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
         return (t_getmtime());
       }
       HASH_GUARD(0x08D1EA51B78DA5F4LL, isdot) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::isdot", 0, 1);
         return (t_isdot());
       }
       break;
     case 120:
       HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 122:
       HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 123:
       HASH_GUARD(0x7CF26A0E76B5E27BLL, getsubpath) {
+        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::getsubpath", 0, 1);
         return (t_getsubpath());
       }
       break;
     case 125:
       HASH_GUARD(0x4351578037A06E7DLL, getperms) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
         return (t_getperms());
       }
       break;
@@ -2018,6 +2113,7 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(const char *s, int64 has
   return c_directoryiterator::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_recursivedirectoryiterator::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_directoryiterator::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -2682,27 +2778,25 @@ Variant c_directoryiterator::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(directoryiterator)
 c_directoryiterator *c_directoryiterator::create(Variant v_path) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(v_path);
-  decRefCount();
   return this;
 }
 ObjectData *c_directoryiterator::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("directoryiterator::__construct", count+1);
-    (t___construct(params.rvalAt(0)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 1) throw_wrong_arguments("directoryiterator::__construct", count, 1, 1, 2);
+    (t___construct(params[0]));
   }
   return this;
 }
 void c_directoryiterator::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("directoryiterator::__construct", count+1);
-  (t___construct(params.rvalAt(0)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("directoryiterator::__construct", count, 1, 1, 2);
+  (t___construct(params[0]));
 }
 void c_directoryiterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -2727,186 +2821,212 @@ void c_directoryiterator::cloneSet(c_directoryiterator *clone) {
   c_splfileinfo::cloneSet(clone);
 }
 Variant c_directoryiterator::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {
     case 6:
       HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
         return (t_getrealpath());
       }
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
       HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
         return (t_isdir());
       }
       break;
     case 14:
       HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
         return (t_getowner());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
         if (count <= 0) return (t_getbasename());
-        return (t_getbasename(params.rvalAt(0)));
+        return (t_getbasename(params[0]));
       }
       break;
     case 29:
       HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
         return (t_isfile());
       }
       break;
     case 31:
       HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
         return (t_getatime());
       }
       break;
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
         if (count <= 0) return (t_setfileclass());
-        return (t_setfileclass(params.rvalAt(0)));
+        return (t_setfileclass(params[0]));
       }
       break;
     case 43:
       HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 47:
       HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
         return (t_getctime());
       }
       break;
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
-        int count = params.size();
+        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
         if (count <= 0) return (t_openfile());
-        if (count == 1) return (t_openfile(params.rvalAt(0)));
-        if (count == 2) return (t_openfile(params.rvalAt(0), params.rvalAt(1)));
-        return (t_openfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count == 1) return (t_openfile(params[0]));
+        if (count == 2) return (t_openfile(params[0], params[1]));
+        return (t_openfile(params[0], params[1], params[2]));
       }
       break;
     case 56:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::next", 0, 1);
         return (t_next());
       }
       break;
     case 63:
       HASH_GUARD(0x04C642C6C162243FLL, getpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
         return (t_getpath());
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
-        return (t_getfileinfo(params.rvalAt(0)));
+        return (t_getfileinfo(params[0]));
       }
       break;
     case 68:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 69:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
-        return (t_setinfoclass(params.rvalAt(0)));
+        return (t_setinfoclass(params[0]));
       }
       break;
     case 74:
       HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
         return (t_getinode());
       }
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 79:
       HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 81:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 88:
       HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
         return (t_islink());
       }
       break;
     case 92:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("directoryiterator::__construct", count+1);
-        return (t___construct(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("directoryiterator::__construct", count, 1, 1, 2);
+        return (t___construct(params[0]), null);
       }
       break;
     case 99:
       HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 103:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
-        return (t_getpathinfo(params.rvalAt(0)));
+        return (t_getpathinfo(params[0]));
       }
       HASH_GUARD(0x7EF5445C77054C67LL, seek) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("directoryiterator::seek", count+1);
-        return (t_seek(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("directoryiterator::seek", count, 1, 1, 1);
+        return (t_seek(params[0]));
       }
       break;
     case 106:
       HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
         return (t_getgroup());
       }
       HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
         return (t_getsize());
       }
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 116:
       HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
         return (t_getmtime());
       }
       HASH_GUARD(0x08D1EA51B78DA5F4LL, isdot) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::isdot", 0, 1);
         return (t_isdot());
       }
       break;
     case 120:
       HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 122:
       HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 125:
       HASH_GUARD(0x4351578037A06E7DLL, getperms) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
         return (t_getperms());
       }
       break;
@@ -2920,61 +3040,73 @@ Variant c_directoryiterator::o_invoke_few_args(const char *s, int64 hash, int co
   switch (hash & 127) {
     case 6:
       HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
         return (t_getrealpath());
       }
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
       HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
         return (t_isdir());
       }
       break;
     case 14:
       HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
         return (t_getowner());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
         if (count <= 0) return (t_getbasename());
         return (t_getbasename(a0));
       }
       break;
     case 29:
       HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
         return (t_isfile());
       }
       break;
     case 31:
       HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
         return (t_getatime());
       }
       break;
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
         if (count <= 0) return (t_setfileclass());
         return (t_setfileclass(a0));
       }
       break;
     case 43:
       HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 47:
       HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
         return (t_getctime());
       }
       break;
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
+        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
         if (count <= 0) return (t_openfile());
         if (count == 1) return (t_openfile(a0));
         if (count == 2) return (t_openfile(a0, a1));
@@ -2983,111 +3115,132 @@ Variant c_directoryiterator::o_invoke_few_args(const char *s, int64 hash, int co
       break;
     case 56:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::next", 0, 1);
         return (t_next());
       }
       break;
     case 63:
       HASH_GUARD(0x04C642C6C162243FLL, getpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
         return (t_getpath());
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
         return (t_getfileinfo(a0));
       }
       break;
     case 68:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 69:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
         return (t_setinfoclass(a0));
       }
       break;
     case 74:
       HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
         return (t_getinode());
       }
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 79:
       HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 81:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 88:
       HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
         return (t_islink());
       }
       break;
     case 92:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("directoryiterator::__construct", count+1);
+        if (count != 1) return throw_wrong_arguments("directoryiterator::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       break;
     case 99:
       HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 103:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
         return (t_getpathinfo(a0));
       }
       HASH_GUARD(0x7EF5445C77054C67LL, seek) {
-        if (count < 1) throw_missing_argument("directoryiterator::seek", count+1);
+        if (count != 1) return throw_wrong_arguments("directoryiterator::seek", count, 1, 1, 1);
         return (t_seek(a0));
       }
       break;
     case 106:
       HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
         return (t_getgroup());
       }
       HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
         return (t_getsize());
       }
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 116:
       HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
         return (t_getmtime());
       }
       HASH_GUARD(0x08D1EA51B78DA5F4LL, isdot) {
+        if (count > 0) return throw_toomany_arguments("directoryiterator::isdot", 0, 1);
         return (t_isdot());
       }
       break;
     case 120:
       HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 122:
       HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 125:
       HASH_GUARD(0x4351578037A06E7DLL, getperms) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
         return (t_getperms());
       }
       break;
@@ -3097,6 +3250,7 @@ Variant c_directoryiterator::o_invoke_few_args(const char *s, int64 hash, int co
   return c_splfileinfo::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_directoryiterator::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_splfileinfo::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -3712,31 +3866,29 @@ IMPLEMENT_CLASS(recursiveiteratoriterator)
 c_recursiveiteratoriterator *c_recursiveiteratoriterator::create(Variant v_iterator, Variant v_mode //  = 0LL /* recursiveiteratoriterator::LEAVES_ONLY */
 , Variant v_flags //  = 0LL
 ) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(v_iterator, v_mode, v_flags);
-  decRefCount();
   return this;
 }
 ObjectData *c_recursiveiteratoriterator::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("recursiveiteratoriterator::__construct", count+1);
-    if (count <= 1) (t___construct(params.rvalAt(0)));
-    else if (count == 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count < 1 || count > 3) throw_wrong_arguments("recursiveiteratoriterator::__construct", count, 1, 3, 2);
+    if (count <= 1) (t___construct(params[0]));
+    else if (count == 2) (t___construct(params[0], params[1]));
+    else (t___construct(params[0], params[1], params[2]));
   }
   return this;
 }
 void c_recursiveiteratoriterator::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("recursiveiteratoriterator::__construct", count+1);
-  if (count <= 1) (t___construct(params.rvalAt(0)));
-  else if (count == 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 3) throw_wrong_arguments("recursiveiteratoriterator::__construct", count, 1, 3, 2);
+  if (count <= 1) (t___construct(params[0]));
+  else if (count == 2) (t___construct(params[0], params[1]));
+  else (t___construct(params[0], params[1], params[2]));
 }
 void c_recursiveiteratoriterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -3772,43 +3924,49 @@ void c_recursiveiteratoriterator::cloneSet(c_recursiveiteratoriterator *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_recursiveiteratoriterator::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 1:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 4:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::valid", 0, 1);
         return (t_valid());
       }
       HASH_GUARD(0x3106F858B09C7424LL, getinneriterator) {
+        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::getinneriterator", 0, 1);
         return (t_getinneriterator());
       }
       break;
     case 8:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::next", 0, 1);
         return (t_next());
       }
       break;
     case 10:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 12:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("recursiveiteratoriterator::__construct", count+1);
-        if (count <= 1) return (t___construct(params.rvalAt(0)), null);
-        if (count == 2) return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)), null);
+        if (count < 1 || count > 3) return throw_wrong_arguments("recursiveiteratoriterator::__construct", count, 1, 3, 2);
+        if (count <= 1) return (t___construct(params[0]), null);
+        if (count == 2) return (t___construct(params[0], params[1]), null);
+        return (t___construct(params[0], params[1], params[2]), null);
       }
       break;
     default:
@@ -3821,35 +3979,41 @@ Variant c_recursiveiteratoriterator::o_invoke_few_args(const char *s, int64 hash
   switch (hash & 15) {
     case 1:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 4:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::valid", 0, 1);
         return (t_valid());
       }
       HASH_GUARD(0x3106F858B09C7424LL, getinneriterator) {
+        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::getinneriterator", 0, 1);
         return (t_getinneriterator());
       }
       break;
     case 8:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::next", 0, 1);
         return (t_next());
       }
       break;
     case 10:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 12:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("recursiveiteratoriterator::__construct", count+1);
+        if (count < 1 || count > 3) return throw_wrong_arguments("recursiveiteratoriterator::__construct", count, 1, 3, 2);
         if (count <= 1) return (t___construct(a0), null);
         if (count == 2) return (t___construct(a0, a1), null);
         return (t___construct(a0, a1, a2), null);
@@ -3861,6 +4025,7 @@ Variant c_recursiveiteratoriterator::o_invoke_few_args(const char *s, int64 hash
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_recursiveiteratoriterator::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_recursiveiteratoriterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -4089,12 +4254,14 @@ void c_filteriterator::cloneSet(c_filteriterator *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_filteriterator::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 Variant c_filteriterator::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_filteriterator::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_filteriterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

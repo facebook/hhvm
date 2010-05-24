@@ -50,9 +50,10 @@ public:
   static bool NoInfiniteLoopDetection;
   static bool NoInfiniteRecursionDetection;
   static bool ThrowBadTypeExceptions;
-  static bool ThrowMissingArgument;
-  static bool ThrowInvalidArgument;
-  static bool NoticeExtraArguments;
+  static bool ThrowTooManyArguments;
+  static bool WarnTooManyArguments;
+  static bool ThrowMissingArguments;
+  static bool ThrowInvalidArguments;
   static bool AssertActive;
   static bool AssertWarning;
   static int NoticeFrequency; // output 1 out of NoticeFrequency notices

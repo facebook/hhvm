@@ -268,22 +268,24 @@ Variant c_pdoexception::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(pdoexception)
 c_pdoexception *c_pdoexception::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_pdoexception::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_pdoexception::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_pdoexception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -313,48 +315,58 @@ void c_pdoexception::cloneSet(c_pdoexception *clone) {
   c_exception::cloneSet(clone);
 }
 Variant c_pdoexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
@@ -368,44 +380,53 @@ Variant c_pdoexception::o_invoke_few_args(const char *s, int64 hash, int count, 
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
@@ -415,6 +436,7 @@ Variant c_pdoexception::o_invoke_few_args(const char *s, int64 hash, int count, 
   return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_pdoexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_exception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -605,22 +627,24 @@ Variant c_domdocumentfragment::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domdocumentfragment)
 c_domdocumentfragment *c_domdocumentfragment::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_domdocumentfragment::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_domdocumentfragment::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_domdocumentfragment::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -650,143 +674,138 @@ void c_domdocumentfragment::cloneSet(c_domdocumentfragment *clone) {
   c_domnode::cloneSet(clone);
 }
 Variant c_domdocumentfragment::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
-        int count = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params.rvalAt(0)));
-        if (count == 2) return (t_c14n(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count == 1) return (t_c14n(params[0]));
+        if (count == 2) return (t_c14n(params[0], params[1]));
+        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
+        return (t_c14n(params[0], params[1], params[2], params[3]));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("replacechild", count+1);
-        return (t_replacechild(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
+        return (t_replacechild(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appendchild", count+1);
-        return (t_appendchild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
+        return (t_appendchild(params[0]));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params.rvalAt(0)));
+        return (t_clonenode(params[0]));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
-        return (t_lookupnamespaceuri(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
+        return (t_lookupnamespaceuri(params[0]));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removechild", count+1);
-        return (t_removechild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
+        return (t_removechild(params[0]));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
-        return (t_lookupprefix(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
+        return (t_lookupprefix(params[0]));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
-        return (t_isdefaultnamespace(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
+        return (t_isdefaultnamespace(params[0]));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("issamenode", count+1);
-        return (t_issamenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
+        return (t_issamenode(params[0]));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       HASH_GUARD(0x1E44C8E8C1920931LL, appendxml) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appendxml", count+1);
-        return (t_appendxml(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appendxml", count, 1, 1, 1);
+        return (t_appendxml(params[0]));
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
-        if (count <= 1) return (t_insertbefore(params.rvalAt(0)));
-        return (t_insertbefore(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
+        if (count <= 1) return (t_insertbefore(params[0]));
+        return (t_insertbefore(params[0], params[1]));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
-        if (count <= 1) return (t_c14nfile(params.rvalAt(0)));
-        if (count == 2) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
+        if (count <= 1) return (t_c14nfile(params[0]));
+        if (count == 2) return (t_c14nfile(params[0], params[1]));
+        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
+        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
+        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("issupported", count+1);
-        return (t_issupported(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
+        return (t_issupported(params[0], params[1]));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -800,11 +819,13 @@ Variant c_domdocumentfragment::o_invoke_few_args(const char *s, int64 hash, int 
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
         if (count == 2) return (t_c14n(a0, a1));
@@ -814,97 +835,103 @@ Variant c_domdocumentfragment::o_invoke_few_args(const char *s, int64 hash, int 
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        if (count < 2) throw_missing_argument("replacechild", count+1);
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        if (count < 1) throw_missing_argument("appendchild", count+1);
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        if (count < 1) throw_missing_argument("removechild", count+1);
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        if (count < 1) throw_missing_argument("issamenode", count+1);
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       HASH_GUARD(0x1E44C8E8C1920931LL, appendxml) {
-        if (count < 1) throw_missing_argument("appendxml", count+1);
+        if (count != 1) return throw_wrong_arguments("appendxml", count, 1, 1, 1);
         return (t_appendxml(a0));
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
         if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -914,10 +941,11 @@ Variant c_domdocumentfragment::o_invoke_few_args(const char *s, int64 hash, int 
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        if (count < 2) throw_missing_argument("issupported", count+1);
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -927,6 +955,7 @@ Variant c_domdocumentfragment::o_invoke_few_args(const char *s, int64 hash, int 
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domdocumentfragment::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1383,27 +1412,27 @@ Variant c_domtext::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domtext)
 c_domtext *c_domtext::create(String a0) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0);
-  decRefCount();
   return this;
 }
 ObjectData *c_domtext::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 1) throw_toomany_arguments("__construct", 1, 2);
     if (count <= 0) (t___construct());
-    else (t___construct(params.rvalAt(0)));
-    decRefCount();
+    else (t___construct(params[0]));
   }
   return this;
 }
 void c_domtext::dynConstruct(CArrRef params) {
-  int count = params.size();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 1) throw_toomany_arguments("__construct", 1, 2);
   if (count <= 0) (t___construct());
-  else (t___construct(params.rvalAt(0)));
+  else (t___construct(params[0]));
 }
 void c_domtext::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -1441,184 +1470,174 @@ Variant c_domtext::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
 Variant c_domtext::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
-        int count = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params.rvalAt(0)));
-        if (count == 2) return (t_c14n(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count == 1) return (t_c14n(params[0]));
+        if (count == 2) return (t_c14n(params[0], params[1]));
+        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
+        return (t_c14n(params[0], params[1], params[2], params[3]));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("replacechild", count+1);
-        return (t_replacechild(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
+        return (t_replacechild(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appendchild", count+1);
-        return (t_appendchild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
+        return (t_appendchild(params[0]));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params.rvalAt(0)));
+        return (t_clonenode(params[0]));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       HASH_GUARD(0x7543EC746714D118LL, deletedata) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("deletedata", count+1);
-        return (t_deletedata(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
+        return (t_deletedata(params[0], params[1]));
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
-        return (t_lookupnamespaceuri(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
+        return (t_lookupnamespaceuri(params[0]));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removechild", count+1);
-        return (t_removechild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
+        return (t_removechild(params[0]));
       }
       HASH_GUARD(0x28FBAB4F0F6C02DDLL, iswhitespaceinelementcontent) {
+        if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
         return (t_iswhitespaceinelementcontent());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
         if (count <= 0) return (t___construct(), null);
-        return (t___construct(params.rvalAt(0)), null);
+        return (t___construct(params[0]), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
-        return (t_lookupprefix(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
+        return (t_lookupprefix(params[0]));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
-        return (t_isdefaultnamespace(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
+        return (t_isdefaultnamespace(params[0]));
       }
       break;
     case 45:
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appenddata", count+1);
-        return (t_appenddata(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
+        return (t_appenddata(params[0]));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("issamenode", count+1);
-        return (t_issamenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
+        return (t_issamenode(params[0]));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 50:
       HASH_GUARD(0x2D8D2253C2149972LL, substringdata) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("substringdata", count+1);
-        return (t_substringdata(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
+        return (t_substringdata(params[0], params[1]));
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
-        if (count <= 1) return (t_insertbefore(params.rvalAt(0)));
-        return (t_insertbefore(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
+        if (count <= 1) return (t_insertbefore(params[0]));
+        return (t_insertbefore(params[0], params[1]));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 52:
       HASH_GUARD(0x470F2F0EA1F3D4B4LL, replacedata) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("replacedata", count+1);
-        return (t_replacedata(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
+        return (t_replacedata(params[0], params[1], params[2]));
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
-        if (count <= 1) return (t_c14nfile(params.rvalAt(0)));
-        if (count == 2) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
+        if (count <= 1) return (t_c14nfile(params[0]));
+        if (count == 2) return (t_c14nfile(params[0], params[1]));
+        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
+        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
+        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
       }
       break;
     case 55:
       HASH_GUARD(0x714D38308D8212B7LL, splittext) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("splittext", count+1);
-        return (t_splittext(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("splittext", count, 1, 1, 1);
+        return (t_splittext(params[0]));
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("issupported", count+1);
-        return (t_issupported(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
+        return (t_issupported(params[0], params[1]));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 61:
       HASH_GUARD(0x0E19CE7886BCEF3DLL, insertdata) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("insertdata", count+1);
-        return (t_insertdata(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
+        return (t_insertdata(params[0], params[1]));
       }
       break;
     default:
@@ -1631,11 +1650,13 @@ Variant c_domtext::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
         if (count == 2) return (t_c14n(a0, a1));
@@ -1645,119 +1666,126 @@ Variant c_domtext::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        if (count < 2) throw_missing_argument("replacechild", count+1);
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        if (count < 1) throw_missing_argument("appendchild", count+1);
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       HASH_GUARD(0x7543EC746714D118LL, deletedata) {
-        if (count < 2) throw_missing_argument("deletedata", count+1);
+        if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         return (t_deletedata(a0, a1));
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        if (count < 1) throw_missing_argument("removechild", count+1);
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       HASH_GUARD(0x28FBAB4F0F6C02DDLL, iswhitespaceinelementcontent) {
+        if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
         return (t_iswhitespaceinelementcontent());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
         if (count <= 0) return (t___construct(), null);
         return (t___construct(a0), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 45:
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
-        if (count < 1) throw_missing_argument("appenddata", count+1);
+        if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         return (t_appenddata(a0));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        if (count < 1) throw_missing_argument("issamenode", count+1);
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 50:
       HASH_GUARD(0x2D8D2253C2149972LL, substringdata) {
-        if (count < 2) throw_missing_argument("substringdata", count+1);
+        if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         return (t_substringdata(a0, a1));
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 52:
       HASH_GUARD(0x470F2F0EA1F3D4B4LL, replacedata) {
-        if (count < 3) throw_missing_argument("replacedata", count+1);
+        if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         return (t_replacedata(a0, a1, a2));
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
         if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -1767,22 +1795,23 @@ Variant c_domtext::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
       break;
     case 55:
       HASH_GUARD(0x714D38308D8212B7LL, splittext) {
-        if (count < 1) throw_missing_argument("splittext", count+1);
+        if (count != 1) return throw_wrong_arguments("splittext", count, 1, 1, 1);
         return (t_splittext(a0));
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        if (count < 2) throw_missing_argument("issupported", count+1);
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 61:
       HASH_GUARD(0x0E19CE7886BCEF3DLL, insertdata) {
-        if (count < 2) throw_missing_argument("insertdata", count+1);
+        if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         return (t_insertdata(a0, a1));
       }
       break;
@@ -1792,6 +1821,7 @@ Variant c_domtext::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
   return c_domcharacterdata::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domtext::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_domcharacterdata::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -2364,27 +2394,25 @@ Variant c_domcdatasection::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domcdatasection)
 c_domcdatasection *c_domcdatasection::create(String a0) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0);
-  decRefCount();
   return this;
 }
 ObjectData *c_domcdatasection::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("__construct", count+1);
-    (t___construct(params.rvalAt(0)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
+    (t___construct(params[0]));
   }
   return this;
 }
 void c_domcdatasection::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("__construct", count+1);
-  (t___construct(params.rvalAt(0)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
+  (t___construct(params[0]));
 }
 void c_domcdatasection::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -2417,184 +2445,173 @@ void c_domcdatasection::cloneSet(c_domcdatasection *clone) {
   c_domtext::cloneSet(clone);
 }
 Variant c_domcdatasection::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
-        int count = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params.rvalAt(0)));
-        if (count == 2) return (t_c14n(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count == 1) return (t_c14n(params[0]));
+        if (count == 2) return (t_c14n(params[0], params[1]));
+        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
+        return (t_c14n(params[0], params[1], params[2], params[3]));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("replacechild", count+1);
-        return (t_replacechild(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
+        return (t_replacechild(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appendchild", count+1);
-        return (t_appendchild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
+        return (t_appendchild(params[0]));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params.rvalAt(0)));
+        return (t_clonenode(params[0]));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       HASH_GUARD(0x7543EC746714D118LL, deletedata) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("deletedata", count+1);
-        return (t_deletedata(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
+        return (t_deletedata(params[0], params[1]));
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
-        return (t_lookupnamespaceuri(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
+        return (t_lookupnamespaceuri(params[0]));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removechild", count+1);
-        return (t_removechild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
+        return (t_removechild(params[0]));
       }
       HASH_GUARD(0x28FBAB4F0F6C02DDLL, iswhitespaceinelementcontent) {
+        if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
         return (t_iswhitespaceinelementcontent());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__construct", count+1);
-        return (t___construct(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
+        return (t___construct(params[0]), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
-        return (t_lookupprefix(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
+        return (t_lookupprefix(params[0]));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
-        return (t_isdefaultnamespace(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
+        return (t_isdefaultnamespace(params[0]));
       }
       break;
     case 45:
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appenddata", count+1);
-        return (t_appenddata(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
+        return (t_appenddata(params[0]));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("issamenode", count+1);
-        return (t_issamenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
+        return (t_issamenode(params[0]));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 50:
       HASH_GUARD(0x2D8D2253C2149972LL, substringdata) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("substringdata", count+1);
-        return (t_substringdata(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
+        return (t_substringdata(params[0], params[1]));
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
-        if (count <= 1) return (t_insertbefore(params.rvalAt(0)));
-        return (t_insertbefore(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
+        if (count <= 1) return (t_insertbefore(params[0]));
+        return (t_insertbefore(params[0], params[1]));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 52:
       HASH_GUARD(0x470F2F0EA1F3D4B4LL, replacedata) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("replacedata", count+1);
-        return (t_replacedata(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
+        return (t_replacedata(params[0], params[1], params[2]));
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
-        if (count <= 1) return (t_c14nfile(params.rvalAt(0)));
-        if (count == 2) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
+        if (count <= 1) return (t_c14nfile(params[0]));
+        if (count == 2) return (t_c14nfile(params[0], params[1]));
+        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
+        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
+        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
       }
       break;
     case 55:
       HASH_GUARD(0x714D38308D8212B7LL, splittext) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("splittext", count+1);
-        return (t_splittext(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("splittext", count, 1, 1, 1);
+        return (t_splittext(params[0]));
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("issupported", count+1);
-        return (t_issupported(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
+        return (t_issupported(params[0], params[1]));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 61:
       HASH_GUARD(0x0E19CE7886BCEF3DLL, insertdata) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("insertdata", count+1);
-        return (t_insertdata(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
+        return (t_insertdata(params[0], params[1]));
       }
       break;
     default:
@@ -2607,11 +2624,13 @@ Variant c_domcdatasection::o_invoke_few_args(const char *s, int64 hash, int coun
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
         if (count == 2) return (t_c14n(a0, a1));
@@ -2621,119 +2640,125 @@ Variant c_domcdatasection::o_invoke_few_args(const char *s, int64 hash, int coun
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        if (count < 2) throw_missing_argument("replacechild", count+1);
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        if (count < 1) throw_missing_argument("appendchild", count+1);
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       HASH_GUARD(0x7543EC746714D118LL, deletedata) {
-        if (count < 2) throw_missing_argument("deletedata", count+1);
+        if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         return (t_deletedata(a0, a1));
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        if (count < 1) throw_missing_argument("removechild", count+1);
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       HASH_GUARD(0x28FBAB4F0F6C02DDLL, iswhitespaceinelementcontent) {
+        if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
         return (t_iswhitespaceinelementcontent());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("__construct", count+1);
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         return (t___construct(a0), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 45:
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
-        if (count < 1) throw_missing_argument("appenddata", count+1);
+        if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         return (t_appenddata(a0));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        if (count < 1) throw_missing_argument("issamenode", count+1);
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 50:
       HASH_GUARD(0x2D8D2253C2149972LL, substringdata) {
-        if (count < 2) throw_missing_argument("substringdata", count+1);
+        if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         return (t_substringdata(a0, a1));
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 52:
       HASH_GUARD(0x470F2F0EA1F3D4B4LL, replacedata) {
-        if (count < 3) throw_missing_argument("replacedata", count+1);
+        if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         return (t_replacedata(a0, a1, a2));
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
         if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -2743,22 +2768,23 @@ Variant c_domcdatasection::o_invoke_few_args(const char *s, int64 hash, int coun
       break;
     case 55:
       HASH_GUARD(0x714D38308D8212B7LL, splittext) {
-        if (count < 1) throw_missing_argument("splittext", count+1);
+        if (count != 1) return throw_wrong_arguments("splittext", count, 1, 1, 1);
         return (t_splittext(a0));
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        if (count < 2) throw_missing_argument("issupported", count+1);
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 61:
       HASH_GUARD(0x0E19CE7886BCEF3DLL, insertdata) {
-        if (count < 2) throw_missing_argument("insertdata", count+1);
+        if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         return (t_insertdata(a0, a1));
       }
       break;
@@ -2768,6 +2794,7 @@ Variant c_domcdatasection::o_invoke_few_args(const char *s, int64 hash, int coun
   return c_domtext::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domcdatasection::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_domtext::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -3338,22 +3365,24 @@ Variant c_domdocumenttype::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domdocumenttype)
 c_domdocumenttype *c_domdocumenttype::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_domdocumenttype::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_domdocumenttype::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_domdocumenttype::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -3386,138 +3415,134 @@ Variant c_domdocumenttype::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
 Variant c_domdocumenttype::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
-        int count = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params.rvalAt(0)));
-        if (count == 2) return (t_c14n(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count == 1) return (t_c14n(params[0]));
+        if (count == 2) return (t_c14n(params[0], params[1]));
+        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
+        return (t_c14n(params[0], params[1], params[2], params[3]));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("replacechild", count+1);
-        return (t_replacechild(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
+        return (t_replacechild(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appendchild", count+1);
-        return (t_appendchild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
+        return (t_appendchild(params[0]));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params.rvalAt(0)));
+        return (t_clonenode(params[0]));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
-        return (t_lookupnamespaceuri(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
+        return (t_lookupnamespaceuri(params[0]));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removechild", count+1);
-        return (t_removechild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
+        return (t_removechild(params[0]));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
-        return (t_lookupprefix(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
+        return (t_lookupprefix(params[0]));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
-        return (t_isdefaultnamespace(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
+        return (t_isdefaultnamespace(params[0]));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("issamenode", count+1);
-        return (t_issamenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
+        return (t_issamenode(params[0]));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
-        if (count <= 1) return (t_insertbefore(params.rvalAt(0)));
-        return (t_insertbefore(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
+        if (count <= 1) return (t_insertbefore(params[0]));
+        return (t_insertbefore(params[0], params[1]));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
-        if (count <= 1) return (t_c14nfile(params.rvalAt(0)));
-        if (count == 2) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
+        if (count <= 1) return (t_c14nfile(params[0]));
+        if (count == 2) return (t_c14nfile(params[0], params[1]));
+        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
+        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
+        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("issupported", count+1);
-        return (t_issupported(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
+        return (t_issupported(params[0], params[1]));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -3531,11 +3556,13 @@ Variant c_domdocumenttype::o_invoke_few_args(const char *s, int64 hash, int coun
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
         if (count == 2) return (t_c14n(a0, a1));
@@ -3545,93 +3572,99 @@ Variant c_domdocumenttype::o_invoke_few_args(const char *s, int64 hash, int coun
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        if (count < 2) throw_missing_argument("replacechild", count+1);
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        if (count < 1) throw_missing_argument("appendchild", count+1);
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        if (count < 1) throw_missing_argument("removechild", count+1);
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        if (count < 1) throw_missing_argument("issamenode", count+1);
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
         if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -3641,10 +3674,11 @@ Variant c_domdocumenttype::o_invoke_few_args(const char *s, int64 hash, int coun
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        if (count < 2) throw_missing_argument("issupported", count+1);
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -3654,6 +3688,7 @@ Variant c_domdocumenttype::o_invoke_few_args(const char *s, int64 hash, int coun
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domdocumenttype::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -4096,27 +4131,25 @@ Variant c_sqlite3stmt::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(sqlite3stmt)
 c_sqlite3stmt *c_sqlite3stmt::create(Object a0, String a1) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  decRefCount();
   return this;
 }
 ObjectData *c_sqlite3stmt::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 2) throw_missing_argument("__construct", count+1);
-    (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 2) throw_wrong_arguments("__construct", count, 2, 2, 2);
+    (t___construct(params[0], params[1]));
   }
   return this;
 }
 void c_sqlite3stmt::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 2) throw_missing_argument("__construct", count+1);
-  (t___construct(params.rvalAt(0), params.rvalAt(1)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) throw_wrong_arguments("__construct", count, 2, 2, 2);
+  (t___construct(params[0], params[1]));
 }
 void c_sqlite3stmt::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -4153,59 +4186,63 @@ void c_sqlite3stmt::cloneSet(c_sqlite3stmt *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_sqlite3stmt::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x340A51AE22A924E0LL, reset) {
+        if (count > 0) return throw_toomany_arguments("reset", 0, 1);
         return (t_reset());
       }
       break;
     case 1:
       HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
+        if (count > 0) return throw_toomany_arguments("close", 0, 1);
         return (t_close());
       }
       break;
     case 3:
       HASH_GUARD(0x436E6AFC3628E403LL, bindvalue) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("bindvalue", count+1);
-        if (count <= 2) return (t_bindvalue(params.rvalAt(0), params.rvalAt(1)));
-        return (t_bindvalue(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
+        if (count <= 2) return (t_bindvalue(params[0], params[1]));
+        return (t_bindvalue(params[0], params[1], params[2]));
       }
       break;
     case 7:
       HASH_GUARD(0x31DA235C5A226667LL, clear) {
+        if (count > 0) return throw_toomany_arguments("clear", 0, 1);
         return (t_clear());
       }
       break;
     case 14:
       HASH_GUARD(0x187C7F43EB57714ELL, execute) {
+        if (count > 0) return throw_toomany_arguments("execute", 0, 1);
         return (t_execute());
       }
       break;
     case 19:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 22:
       HASH_GUARD(0x77B13FCF1BA41696LL, bindparam) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("bindparam", count+1);
-        if (count <= 2) return (t_bindparam(params.rvalAt(0), ref(const_cast<Array&>(params).lvalAt(1))));
-        return (t_bindparam(params.rvalAt(0), ref(const_cast<Array&>(params).lvalAt(1)), params.rvalAt(2)));
+        if (count < 2 || count > 3) return throw_wrong_arguments("bindparam", count, 2, 3, 1);
+        if (count <= 2) return (t_bindparam(params[0], ref(const_cast<Array&>(params).lvalAt(1))));
+        return (t_bindparam(params[0], ref(const_cast<Array&>(params).lvalAt(1)), params[2]));
       }
       break;
     case 23:
       HASH_GUARD(0x72FA987001E93357LL, paramcount) {
+        if (count > 0) return throw_toomany_arguments("paramcount", 0, 1);
         return (t_paramcount());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__construct", count+1);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
+        return (t___construct(params[0], params[1]), null);
       }
       break;
     default:
@@ -4218,51 +4255,57 @@ Variant c_sqlite3stmt::o_invoke_few_args(const char *s, int64 hash, int count, C
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x340A51AE22A924E0LL, reset) {
+        if (count > 0) return throw_toomany_arguments("reset", 0, 1);
         return (t_reset());
       }
       break;
     case 1:
       HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
+        if (count > 0) return throw_toomany_arguments("close", 0, 1);
         return (t_close());
       }
       break;
     case 3:
       HASH_GUARD(0x436E6AFC3628E403LL, bindvalue) {
-        if (count < 2) throw_missing_argument("bindvalue", count+1);
+        if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
         if (count <= 2) return (t_bindvalue(a0, a1));
         return (t_bindvalue(a0, a1, a2));
       }
       break;
     case 7:
       HASH_GUARD(0x31DA235C5A226667LL, clear) {
+        if (count > 0) return throw_toomany_arguments("clear", 0, 1);
         return (t_clear());
       }
       break;
     case 14:
       HASH_GUARD(0x187C7F43EB57714ELL, execute) {
+        if (count > 0) return throw_toomany_arguments("execute", 0, 1);
         return (t_execute());
       }
       break;
     case 19:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 22:
       HASH_GUARD(0x77B13FCF1BA41696LL, bindparam) {
-        if (count < 2) throw_missing_argument("bindparam", count+1);
+        if (count < 2 || count > 3) return throw_wrong_arguments("bindparam", count, 2, 3, 1);
         if (count <= 2) return (t_bindparam(a0, ref(a1)));
         return (t_bindparam(a0, ref(a1), a2));
       }
       break;
     case 23:
       HASH_GUARD(0x72FA987001E93357LL, paramcount) {
+        if (count > 0) return throw_toomany_arguments("paramcount", 0, 1);
         return (t_paramcount());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 2) throw_missing_argument("__construct", count+1);
+        if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
         return (t___construct(a0, a1), null);
       }
       break;
@@ -4272,6 +4315,7 @@ Variant c_sqlite3stmt::o_invoke_few_args(const char *s, int64 hash, int count, C
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_sqlite3stmt::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -4500,22 +4544,24 @@ Variant c_domnodelist::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domnodelist)
 c_domnodelist *c_domnodelist::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_domnodelist::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_domnodelist::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_domnodelist::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -4548,38 +4594,39 @@ Variant c_domnodelist::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
 Variant c_domnodelist::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       HASH_GUARD(0x570B2E1232A12503LL, getiterator) {
+        if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
         return (t_getiterator());
       }
       break;
     case 5:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 6:
       HASH_GUARD(0x0A41DBE0830902C6LL, item) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("item", count+1);
-        return (t_item(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
+        return (t_item(params[0]));
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     default:
@@ -4592,30 +4639,33 @@ Variant c_domnodelist::o_invoke_few_args(const char *s, int64 hash, int count, C
   switch (hash & 15) {
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       HASH_GUARD(0x570B2E1232A12503LL, getiterator) {
+        if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
         return (t_getiterator());
       }
       break;
     case 5:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 6:
       HASH_GUARD(0x0A41DBE0830902C6LL, item) {
-        if (count < 1) throw_missing_argument("item", count+1);
+        if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
         return (t_item(a0));
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
@@ -4625,6 +4675,7 @@ Variant c_domnodelist::o_invoke_few_args(const char *s, int64 hash, int count, C
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domnodelist::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -4819,22 +4870,24 @@ Variant c_normalizer::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(normalizer)
 c_normalizer *c_normalizer::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_normalizer::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_normalizer::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_normalizer::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -4864,31 +4917,32 @@ void c_normalizer::cloneSet(c_normalizer *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_normalizer::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 7) {
     case 2:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("normalize", count+1);
-        if (count <= 1) return (ti_normalize(o_getClassName(), params.rvalAt(0)));
-        return (ti_normalize(o_getClassName(), params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
+        if (count <= 1) return (ti_normalize(o_getClassName(), params[0]));
+        return (ti_normalize(o_getClassName(), params[0], params[1]));
       }
       break;
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 5:
       HASH_GUARD(0x58CF37E15F66ED1DLL, isnormalized) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isnormalized", count+1);
-        if (count <= 1) return (ti_isnormalized(o_getClassName(), params.rvalAt(0)));
-        return (ti_isnormalized(o_getClassName(), params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
+        if (count <= 1) return (ti_isnormalized(o_getClassName(), params[0]));
+        return (ti_isnormalized(o_getClassName(), params[0], params[1]));
       }
       break;
     case 7:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
@@ -4902,25 +4956,27 @@ Variant c_normalizer::o_invoke_few_args(const char *s, int64 hash, int count, CV
   switch (hash & 7) {
     case 2:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
-        if (count < 1) throw_missing_argument("normalize", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
         if (count <= 1) return (ti_normalize(o_getClassName(), a0));
         return (ti_normalize(o_getClassName(), a0, a1));
       }
       break;
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 5:
       HASH_GUARD(0x58CF37E15F66ED1DLL, isnormalized) {
-        if (count < 1) throw_missing_argument("isnormalized", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
         if (count <= 1) return (ti_isnormalized(o_getClassName(), a0));
         return (ti_isnormalized(o_getClassName(), a0, a1));
       }
       break;
     case 7:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
@@ -4930,22 +4986,21 @@ Variant c_normalizer::o_invoke_few_args(const char *s, int64 hash, int count, CV
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_normalizer::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 3) {
     case 1:
       HASH_GUARD(0x58CF37E15F66ED1DLL, isnormalized) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isnormalized", count+1);
-        if (count <= 1) return (ti_isnormalized(c, params.rvalAt(0)));
-        return (ti_isnormalized(c, params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
+        if (count <= 1) return (ti_isnormalized(c, params[0]));
+        return (ti_isnormalized(c, params[0], params[1]));
       }
       break;
     case 2:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("normalize", count+1);
-        if (count <= 1) return (ti_normalize(c, params.rvalAt(0)));
-        return (ti_normalize(c, params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
+        if (count <= 1) return (ti_normalize(c, params[0]));
+        return (ti_normalize(c, params[0], params[1]));
       }
       break;
     default:
@@ -5152,22 +5207,24 @@ Variant c_domcharacterdata::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domcharacterdata)
 c_domcharacterdata *c_domcharacterdata::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_domcharacterdata::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_domcharacterdata::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_domcharacterdata::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -5200,172 +5257,163 @@ Variant c_domcharacterdata::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
 Variant c_domcharacterdata::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
-        int count = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params.rvalAt(0)));
-        if (count == 2) return (t_c14n(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count == 1) return (t_c14n(params[0]));
+        if (count == 2) return (t_c14n(params[0], params[1]));
+        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
+        return (t_c14n(params[0], params[1], params[2], params[3]));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("replacechild", count+1);
-        return (t_replacechild(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
+        return (t_replacechild(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appendchild", count+1);
-        return (t_appendchild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
+        return (t_appendchild(params[0]));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params.rvalAt(0)));
+        return (t_clonenode(params[0]));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       HASH_GUARD(0x7543EC746714D118LL, deletedata) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("deletedata", count+1);
-        return (t_deletedata(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
+        return (t_deletedata(params[0], params[1]));
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
-        return (t_lookupnamespaceuri(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
+        return (t_lookupnamespaceuri(params[0]));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removechild", count+1);
-        return (t_removechild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
+        return (t_removechild(params[0]));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
-        return (t_lookupprefix(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
+        return (t_lookupprefix(params[0]));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
-        return (t_isdefaultnamespace(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
+        return (t_isdefaultnamespace(params[0]));
       }
       break;
     case 45:
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appenddata", count+1);
-        return (t_appenddata(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
+        return (t_appenddata(params[0]));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("issamenode", count+1);
-        return (t_issamenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
+        return (t_issamenode(params[0]));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 50:
       HASH_GUARD(0x2D8D2253C2149972LL, substringdata) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("substringdata", count+1);
-        return (t_substringdata(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
+        return (t_substringdata(params[0], params[1]));
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
-        if (count <= 1) return (t_insertbefore(params.rvalAt(0)));
-        return (t_insertbefore(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
+        if (count <= 1) return (t_insertbefore(params[0]));
+        return (t_insertbefore(params[0], params[1]));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 52:
       HASH_GUARD(0x470F2F0EA1F3D4B4LL, replacedata) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("replacedata", count+1);
-        return (t_replacedata(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
+        return (t_replacedata(params[0], params[1], params[2]));
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
-        if (count <= 1) return (t_c14nfile(params.rvalAt(0)));
-        if (count == 2) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
+        if (count <= 1) return (t_c14nfile(params[0]));
+        if (count == 2) return (t_c14nfile(params[0], params[1]));
+        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
+        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
+        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("issupported", count+1);
-        return (t_issupported(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
+        return (t_issupported(params[0], params[1]));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 61:
       HASH_GUARD(0x0E19CE7886BCEF3DLL, insertdata) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("insertdata", count+1);
-        return (t_insertdata(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
+        return (t_insertdata(params[0], params[1]));
       }
       break;
     default:
@@ -5378,11 +5426,13 @@ Variant c_domcharacterdata::o_invoke_few_args(const char *s, int64 hash, int cou
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
         if (count == 2) return (t_c14n(a0, a1));
@@ -5392,115 +5442,121 @@ Variant c_domcharacterdata::o_invoke_few_args(const char *s, int64 hash, int cou
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        if (count < 2) throw_missing_argument("replacechild", count+1);
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        if (count < 1) throw_missing_argument("appendchild", count+1);
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       HASH_GUARD(0x7543EC746714D118LL, deletedata) {
-        if (count < 2) throw_missing_argument("deletedata", count+1);
+        if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         return (t_deletedata(a0, a1));
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        if (count < 1) throw_missing_argument("removechild", count+1);
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 45:
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
-        if (count < 1) throw_missing_argument("appenddata", count+1);
+        if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         return (t_appenddata(a0));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        if (count < 1) throw_missing_argument("issamenode", count+1);
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 50:
       HASH_GUARD(0x2D8D2253C2149972LL, substringdata) {
-        if (count < 2) throw_missing_argument("substringdata", count+1);
+        if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         return (t_substringdata(a0, a1));
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 52:
       HASH_GUARD(0x470F2F0EA1F3D4B4LL, replacedata) {
-        if (count < 3) throw_missing_argument("replacedata", count+1);
+        if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         return (t_replacedata(a0, a1, a2));
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
         if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -5510,16 +5566,17 @@ Variant c_domcharacterdata::o_invoke_few_args(const char *s, int64 hash, int cou
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        if (count < 2) throw_missing_argument("issupported", count+1);
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 61:
       HASH_GUARD(0x0E19CE7886BCEF3DLL, insertdata) {
-        if (count < 2) throw_missing_argument("insertdata", count+1);
+        if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         return (t_insertdata(a0, a1));
       }
       break;
@@ -5529,6 +5586,7 @@ Variant c_domcharacterdata::o_invoke_few_args(const char *s, int64 hash, int cou
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domcharacterdata::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -6069,27 +6127,25 @@ Variant c_domentityreference::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domentityreference)
 c_domentityreference *c_domentityreference::create(String a0) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0);
-  decRefCount();
   return this;
 }
 ObjectData *c_domentityreference::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("__construct", count+1);
-    (t___construct(params.rvalAt(0)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
+    (t___construct(params[0]));
   }
   return this;
 }
 void c_domentityreference::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("__construct", count+1);
-  (t___construct(params.rvalAt(0)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
+  (t___construct(params[0]));
 }
 void c_domentityreference::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -6122,140 +6178,134 @@ void c_domentityreference::cloneSet(c_domentityreference *clone) {
   c_domnode::cloneSet(clone);
 }
 Variant c_domentityreference::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
-        int count = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params.rvalAt(0)));
-        if (count == 2) return (t_c14n(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count == 1) return (t_c14n(params[0]));
+        if (count == 2) return (t_c14n(params[0], params[1]));
+        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
+        return (t_c14n(params[0], params[1], params[2], params[3]));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("replacechild", count+1);
-        return (t_replacechild(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
+        return (t_replacechild(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appendchild", count+1);
-        return (t_appendchild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
+        return (t_appendchild(params[0]));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params.rvalAt(0)));
+        return (t_clonenode(params[0]));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
-        return (t_lookupnamespaceuri(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
+        return (t_lookupnamespaceuri(params[0]));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removechild", count+1);
-        return (t_removechild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
+        return (t_removechild(params[0]));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__construct", count+1);
-        return (t___construct(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
+        return (t___construct(params[0]), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
-        return (t_lookupprefix(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
+        return (t_lookupprefix(params[0]));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
-        return (t_isdefaultnamespace(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
+        return (t_isdefaultnamespace(params[0]));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("issamenode", count+1);
-        return (t_issamenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
+        return (t_issamenode(params[0]));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
-        if (count <= 1) return (t_insertbefore(params.rvalAt(0)));
-        return (t_insertbefore(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
+        if (count <= 1) return (t_insertbefore(params[0]));
+        return (t_insertbefore(params[0], params[1]));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
-        if (count <= 1) return (t_c14nfile(params.rvalAt(0)));
-        if (count == 2) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
+        if (count <= 1) return (t_c14nfile(params[0]));
+        if (count == 2) return (t_c14nfile(params[0], params[1]));
+        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
+        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
+        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("issupported", count+1);
-        return (t_issupported(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
+        return (t_issupported(params[0], params[1]));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -6269,11 +6319,13 @@ Variant c_domentityreference::o_invoke_few_args(const char *s, int64 hash, int c
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
         if (count == 2) return (t_c14n(a0, a1));
@@ -6283,94 +6335,99 @@ Variant c_domentityreference::o_invoke_few_args(const char *s, int64 hash, int c
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        if (count < 2) throw_missing_argument("replacechild", count+1);
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        if (count < 1) throw_missing_argument("appendchild", count+1);
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        if (count < 1) throw_missing_argument("removechild", count+1);
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("__construct", count+1);
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         return (t___construct(a0), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        if (count < 1) throw_missing_argument("issamenode", count+1);
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
         if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -6380,10 +6437,11 @@ Variant c_domentityreference::o_invoke_few_args(const char *s, int64 hash, int c
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        if (count < 2) throw_missing_argument("issupported", count+1);
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -6393,6 +6451,7 @@ Variant c_domentityreference::o_invoke_few_args(const char *s, int64 hash, int c
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domentityreference::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -6882,27 +6941,25 @@ Variant c_datetimezone::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(datetimezone)
 c_datetimezone *c_datetimezone::create(String a0) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0);
-  decRefCount();
   return this;
 }
 ObjectData *c_datetimezone::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("__construct", count+1);
-    (t___construct(params.rvalAt(0)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
+    (t___construct(params[0]));
   }
   return this;
 }
 void c_datetimezone::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("__construct", count+1);
-  (t___construct(params.rvalAt(0)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
+  (t___construct(params[0]));
 }
 void c_datetimezone::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -6935,43 +6992,47 @@ void c_datetimezone::cloneSet(c_datetimezone *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_datetimezone::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 3:
       HASH_GUARD(0x6D7CD16BBA93D063LL, listidentifiers) {
+        if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
         return (ti_listidentifiers(o_getClassName()));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 4:
       HASH_GUARD(0x63D3CF3884CE93F4LL, gettransitions) {
+        if (count > 0) return throw_toomany_arguments("gettransitions", 0, 1);
         return (t_gettransitions());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("getname", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x2D0CCAB16C3ED068LL, listabbreviations) {
+        if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
         return (ti_listabbreviations(o_getClassName()));
       }
       break;
     case 11:
       HASH_GUARD(0x68DB66F60B55BD0BLL, getoffset) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("getoffset", count+1);
-        return (t_getoffset(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("getoffset", count, 1, 1, 1);
+        return (t_getoffset(params[0]));
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__construct", count+1);
-        return (t___construct(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
+        return (t___construct(params[0]), null);
       }
       break;
     default:
@@ -6984,36 +7045,41 @@ Variant c_datetimezone::o_invoke_few_args(const char *s, int64 hash, int count, 
   switch (hash & 15) {
     case 3:
       HASH_GUARD(0x6D7CD16BBA93D063LL, listidentifiers) {
+        if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
         return (ti_listidentifiers(o_getClassName()));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 4:
       HASH_GUARD(0x63D3CF3884CE93F4LL, gettransitions) {
+        if (count > 0) return throw_toomany_arguments("gettransitions", 0, 1);
         return (t_gettransitions());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("getname", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x2D0CCAB16C3ED068LL, listabbreviations) {
+        if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
         return (ti_listabbreviations(o_getClassName()));
       }
       break;
     case 11:
       HASH_GUARD(0x68DB66F60B55BD0BLL, getoffset) {
-        if (count < 1) throw_missing_argument("getoffset", count+1);
+        if (count != 1) return throw_wrong_arguments("getoffset", count, 1, 1, 1);
         return (t_getoffset(a0));
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("__construct", count+1);
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         return (t___construct(a0), null);
       }
       break;
@@ -7023,15 +7089,18 @@ Variant c_datetimezone::o_invoke_few_args(const char *s, int64 hash, int count, 
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_datetimezone::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 3) {
     case 0:
       HASH_GUARD(0x2D0CCAB16C3ED068LL, listabbreviations) {
+        if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
         return (ti_listabbreviations(c));
       }
       break;
     case 3:
       HASH_GUARD(0x6D7CD16BBA93D063LL, listidentifiers) {
+        if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
         return (ti_listidentifiers(c));
       }
       break;
@@ -7241,22 +7310,24 @@ Variant c_domnodeiterator::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domnodeiterator)
 c_domnodeiterator *c_domnodeiterator::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_domnodeiterator::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_domnodeiterator::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_domnodeiterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -7286,40 +7357,48 @@ void c_domnodeiterator::cloneSet(c_domnodeiterator *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_domnodeiterator::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 1:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("key", 0, 1);
         return (t_key());
       }
       break;
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 4:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("valid", 0, 1);
         return (t_valid());
       }
       break;
     case 8:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("next", 0, 1);
         return (t_next());
       }
       break;
     case 10:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 12:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("current", 0, 1);
         return (t_current());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
@@ -7333,36 +7412,43 @@ Variant c_domnodeiterator::o_invoke_few_args(const char *s, int64 hash, int coun
   switch (hash & 15) {
     case 1:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("key", 0, 1);
         return (t_key());
       }
       break;
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 4:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("valid", 0, 1);
         return (t_valid());
       }
       break;
     case 8:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("next", 0, 1);
         return (t_next());
       }
       break;
     case 10:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 12:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("current", 0, 1);
         return (t_current());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
@@ -7372,6 +7458,7 @@ Variant c_domnodeiterator::o_invoke_few_args(const char *s, int64 hash, int coun
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domnodeiterator::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -7540,22 +7627,24 @@ Variant c_domimplementation::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domimplementation)
 c_domimplementation *c_domimplementation::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_domimplementation::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_domimplementation::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_domimplementation::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -7585,36 +7674,38 @@ void c_domimplementation::cloneSet(c_domimplementation *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_domimplementation::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 3:
       HASH_GUARD(0x3CB56A796F3DBAC3LL, createdocumenttype) {
-        int count = params.size();
+        if (count > 3) return throw_toomany_arguments("createdocumenttype", 3, 1);
         if (count <= 0) return (t_createdocumenttype());
-        if (count == 1) return (t_createdocumenttype(params.rvalAt(0)));
-        if (count == 2) return (t_createdocumenttype(params.rvalAt(0), params.rvalAt(1)));
-        return (t_createdocumenttype(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count == 1) return (t_createdocumenttype(params[0]));
+        if (count == 2) return (t_createdocumenttype(params[0], params[1]));
+        return (t_createdocumenttype(params[0], params[1], params[2]));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       HASH_GUARD(0x280878EAC306A6A3LL, hasfeature) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("hasfeature", count+1);
-        return (t_hasfeature(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("hasfeature", count, 2, 2, 1);
+        return (t_hasfeature(params[0], params[1]));
       }
       break;
     case 14:
       HASH_GUARD(0x30855E95B37D1B4ELL, createdocument) {
-        int count = params.size();
+        if (count > 3) return throw_toomany_arguments("createdocument", 3, 1);
         if (count <= 0) return (t_createdocument());
-        if (count == 1) return (t_createdocument(params.rvalAt(0)));
-        if (count == 2) return (t_createdocument(params.rvalAt(0), params.rvalAt(1)));
-        return (t_createdocument(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count == 1) return (t_createdocument(params[0]));
+        if (count == 2) return (t_createdocument(params[0], params[1]));
+        return (t_createdocument(params[0], params[1], params[2]));
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
@@ -7628,21 +7719,24 @@ Variant c_domimplementation::o_invoke_few_args(const char *s, int64 hash, int co
   switch (hash & 15) {
     case 3:
       HASH_GUARD(0x3CB56A796F3DBAC3LL, createdocumenttype) {
+        if (count > 3) return throw_toomany_arguments("createdocumenttype", 3, 1);
         if (count <= 0) return (t_createdocumenttype());
         if (count == 1) return (t_createdocumenttype(a0));
         if (count == 2) return (t_createdocumenttype(a0, a1));
         return (t_createdocumenttype(a0, a1, a2));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       HASH_GUARD(0x280878EAC306A6A3LL, hasfeature) {
-        if (count < 2) throw_missing_argument("hasfeature", count+1);
+        if (count != 2) return throw_wrong_arguments("hasfeature", count, 2, 2, 1);
         return (t_hasfeature(a0, a1));
       }
       break;
     case 14:
       HASH_GUARD(0x30855E95B37D1B4ELL, createdocument) {
+        if (count > 3) return throw_toomany_arguments("createdocument", 3, 1);
         if (count <= 0) return (t_createdocument());
         if (count == 1) return (t_createdocument(a0));
         if (count == 2) return (t_createdocument(a0, a1));
@@ -7651,6 +7745,7 @@ Variant c_domimplementation::o_invoke_few_args(const char *s, int64 hash, int co
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
@@ -7660,6 +7755,7 @@ Variant c_domimplementation::o_invoke_few_args(const char *s, int64 hash, int co
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domimplementation::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -7840,33 +7936,31 @@ Variant c_soapheader::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(soapheader)
 c_soapheader *c_soapheader::create(String a0, String a1, Variant a2, bool a3, Variant a4) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4);
-  decRefCount();
   return this;
 }
 ObjectData *c_soapheader::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 2) throw_missing_argument("__construct", count+1);
-    if (count <= 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    else if (count == 3) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-    else if (count == 4) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count < 2 || count > 5) throw_wrong_arguments("__construct", count, 2, 5, 2);
+    if (count <= 2) (t___construct(params[0], params[1]));
+    else if (count == 3) (t___construct(params[0], params[1], params[2]));
+    else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
+    else (t___construct(params[0], params[1], params[2], params[3], params[4]));
   }
   return this;
 }
 void c_soapheader::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 2) throw_missing_argument("__construct", count+1);
-  if (count <= 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-  else if (count == 3) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-  else if (count == 4) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 5) throw_wrong_arguments("__construct", count, 2, 5, 2);
+  if (count <= 2) (t___construct(params[0], params[1]));
+  else if (count == 3) (t___construct(params[0], params[1], params[2]));
+  else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
+  else (t___construct(params[0], params[1], params[2], params[3], params[4]));
 }
 void c_soapheader::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -7919,19 +8013,20 @@ void c_soapheader::cloneSet(c_soapheader *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_soapheader::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 3) {
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__construct", count+1);
-        if (count <= 2) return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
-        if (count == 3) return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)), null);
-        if (count == 4) return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)), null);
+        if (count < 2 || count > 5) return throw_wrong_arguments("__construct", count, 2, 5, 1);
+        if (count <= 2) return (t___construct(params[0], params[1]), null);
+        if (count == 3) return (t___construct(params[0], params[1], params[2]), null);
+        if (count == 4) return (t___construct(params[0], params[1], params[2], params[3]), null);
+        return (t___construct(params[0], params[1], params[2], params[3], params[4]), null);
       }
       break;
     default:
@@ -7944,10 +8039,11 @@ Variant c_soapheader::o_invoke_few_args(const char *s, int64 hash, int count, CV
   switch (hash & 3) {
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 2) throw_missing_argument("__construct", count+1);
+        if (count < 2 || count > 5) return throw_wrong_arguments("__construct", count, 2, 5, 1);
         if (count <= 2) return (t___construct(a0, a1), null);
         if (count == 3) return (t___construct(a0, a1, a2), null);
         if (count == 4) return (t___construct(a0, a1, a2, a3), null);
@@ -7960,6 +8056,7 @@ Variant c_soapheader::o_invoke_few_args(const char *s, int64 hash, int count, CV
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_soapheader::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_soapheader::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -8090,22 +8187,24 @@ Variant c_domnotation::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domnotation)
 c_domnotation *c_domnotation::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_domnotation::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_domnotation::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_domnotation::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -8138,138 +8237,134 @@ Variant c_domnotation::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
 Variant c_domnotation::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
-        int count = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params.rvalAt(0)));
-        if (count == 2) return (t_c14n(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count == 1) return (t_c14n(params[0]));
+        if (count == 2) return (t_c14n(params[0], params[1]));
+        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
+        return (t_c14n(params[0], params[1], params[2], params[3]));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("replacechild", count+1);
-        return (t_replacechild(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
+        return (t_replacechild(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appendchild", count+1);
-        return (t_appendchild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
+        return (t_appendchild(params[0]));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params.rvalAt(0)));
+        return (t_clonenode(params[0]));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
-        return (t_lookupnamespaceuri(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
+        return (t_lookupnamespaceuri(params[0]));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removechild", count+1);
-        return (t_removechild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
+        return (t_removechild(params[0]));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
-        return (t_lookupprefix(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
+        return (t_lookupprefix(params[0]));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
-        return (t_isdefaultnamespace(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
+        return (t_isdefaultnamespace(params[0]));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("issamenode", count+1);
-        return (t_issamenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
+        return (t_issamenode(params[0]));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
-        if (count <= 1) return (t_insertbefore(params.rvalAt(0)));
-        return (t_insertbefore(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
+        if (count <= 1) return (t_insertbefore(params[0]));
+        return (t_insertbefore(params[0], params[1]));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
-        if (count <= 1) return (t_c14nfile(params.rvalAt(0)));
-        if (count == 2) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
+        if (count <= 1) return (t_c14nfile(params[0]));
+        if (count == 2) return (t_c14nfile(params[0], params[1]));
+        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
+        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
+        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("issupported", count+1);
-        return (t_issupported(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
+        return (t_issupported(params[0], params[1]));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -8283,11 +8378,13 @@ Variant c_domnotation::o_invoke_few_args(const char *s, int64 hash, int count, C
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
         if (count == 2) return (t_c14n(a0, a1));
@@ -8297,93 +8394,99 @@ Variant c_domnotation::o_invoke_few_args(const char *s, int64 hash, int count, C
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        if (count < 2) throw_missing_argument("replacechild", count+1);
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        if (count < 1) throw_missing_argument("appendchild", count+1);
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        if (count < 1) throw_missing_argument("removechild", count+1);
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        if (count < 1) throw_missing_argument("issamenode", count+1);
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
         if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -8393,10 +8496,11 @@ Variant c_domnotation::o_invoke_few_args(const char *s, int64 hash, int count, C
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        if (count < 2) throw_missing_argument("issupported", count+1);
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -8406,6 +8510,7 @@ Variant c_domnotation::o_invoke_few_args(const char *s, int64 hash, int count, C
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domnotation::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -8848,27 +8953,27 @@ Variant c_domcomment::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domcomment)
 c_domcomment *c_domcomment::create(String a0) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0);
-  decRefCount();
   return this;
 }
 ObjectData *c_domcomment::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 1) throw_toomany_arguments("__construct", 1, 2);
     if (count <= 0) (t___construct());
-    else (t___construct(params.rvalAt(0)));
-    decRefCount();
+    else (t___construct(params[0]));
   }
   return this;
 }
 void c_domcomment::dynConstruct(CArrRef params) {
-  int count = params.size();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 1) throw_toomany_arguments("__construct", 1, 2);
   if (count <= 0) (t___construct());
-  else (t___construct(params.rvalAt(0)));
+  else (t___construct(params[0]));
 }
 void c_domcomment::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -8903,174 +9008,164 @@ void c_domcomment::cloneSet(c_domcomment *clone) {
   c_domcharacterdata::cloneSet(clone);
 }
 Variant c_domcomment::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
-        int count = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params.rvalAt(0)));
-        if (count == 2) return (t_c14n(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count == 1) return (t_c14n(params[0]));
+        if (count == 2) return (t_c14n(params[0], params[1]));
+        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
+        return (t_c14n(params[0], params[1], params[2], params[3]));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("replacechild", count+1);
-        return (t_replacechild(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
+        return (t_replacechild(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appendchild", count+1);
-        return (t_appendchild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
+        return (t_appendchild(params[0]));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params.rvalAt(0)));
+        return (t_clonenode(params[0]));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       HASH_GUARD(0x7543EC746714D118LL, deletedata) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("deletedata", count+1);
-        return (t_deletedata(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
+        return (t_deletedata(params[0], params[1]));
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
-        return (t_lookupnamespaceuri(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
+        return (t_lookupnamespaceuri(params[0]));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removechild", count+1);
-        return (t_removechild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
+        return (t_removechild(params[0]));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
         if (count <= 0) return (t___construct(), null);
-        return (t___construct(params.rvalAt(0)), null);
+        return (t___construct(params[0]), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
-        return (t_lookupprefix(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
+        return (t_lookupprefix(params[0]));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
-        return (t_isdefaultnamespace(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
+        return (t_isdefaultnamespace(params[0]));
       }
       break;
     case 45:
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appenddata", count+1);
-        return (t_appenddata(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
+        return (t_appenddata(params[0]));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("issamenode", count+1);
-        return (t_issamenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
+        return (t_issamenode(params[0]));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 50:
       HASH_GUARD(0x2D8D2253C2149972LL, substringdata) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("substringdata", count+1);
-        return (t_substringdata(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
+        return (t_substringdata(params[0], params[1]));
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
-        if (count <= 1) return (t_insertbefore(params.rvalAt(0)));
-        return (t_insertbefore(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
+        if (count <= 1) return (t_insertbefore(params[0]));
+        return (t_insertbefore(params[0], params[1]));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 52:
       HASH_GUARD(0x470F2F0EA1F3D4B4LL, replacedata) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("replacedata", count+1);
-        return (t_replacedata(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
+        return (t_replacedata(params[0], params[1], params[2]));
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
-        if (count <= 1) return (t_c14nfile(params.rvalAt(0)));
-        if (count == 2) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
+        if (count <= 1) return (t_c14nfile(params[0]));
+        if (count == 2) return (t_c14nfile(params[0], params[1]));
+        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
+        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
+        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("issupported", count+1);
-        return (t_issupported(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
+        return (t_issupported(params[0], params[1]));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 61:
       HASH_GUARD(0x0E19CE7886BCEF3DLL, insertdata) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("insertdata", count+1);
-        return (t_insertdata(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
+        return (t_insertdata(params[0], params[1]));
       }
       break;
     default:
@@ -9083,11 +9178,13 @@ Variant c_domcomment::o_invoke_few_args(const char *s, int64 hash, int count, CV
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
         if (count == 2) return (t_c14n(a0, a1));
@@ -9097,116 +9194,122 @@ Variant c_domcomment::o_invoke_few_args(const char *s, int64 hash, int count, CV
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        if (count < 2) throw_missing_argument("replacechild", count+1);
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        if (count < 1) throw_missing_argument("appendchild", count+1);
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       HASH_GUARD(0x7543EC746714D118LL, deletedata) {
-        if (count < 2) throw_missing_argument("deletedata", count+1);
+        if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         return (t_deletedata(a0, a1));
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        if (count < 1) throw_missing_argument("removechild", count+1);
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
         if (count <= 0) return (t___construct(), null);
         return (t___construct(a0), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 45:
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
-        if (count < 1) throw_missing_argument("appenddata", count+1);
+        if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         return (t_appenddata(a0));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        if (count < 1) throw_missing_argument("issamenode", count+1);
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 50:
       HASH_GUARD(0x2D8D2253C2149972LL, substringdata) {
-        if (count < 2) throw_missing_argument("substringdata", count+1);
+        if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         return (t_substringdata(a0, a1));
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 52:
       HASH_GUARD(0x470F2F0EA1F3D4B4LL, replacedata) {
-        if (count < 3) throw_missing_argument("replacedata", count+1);
+        if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         return (t_replacedata(a0, a1, a2));
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
         if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -9216,16 +9319,17 @@ Variant c_domcomment::o_invoke_few_args(const char *s, int64 hash, int count, CV
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        if (count < 2) throw_missing_argument("issupported", count+1);
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 61:
       HASH_GUARD(0x0E19CE7886BCEF3DLL, insertdata) {
-        if (count < 2) throw_missing_argument("insertdata", count+1);
+        if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         return (t_insertdata(a0, a1));
       }
       break;
@@ -9235,6 +9339,7 @@ Variant c_domcomment::o_invoke_few_args(const char *s, int64 hash, int count, CV
   return c_domcharacterdata::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domcomment::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_domcharacterdata::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -9781,22 +9886,24 @@ Variant c_sqlite3::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(sqlite3)
 c_sqlite3 *c_sqlite3::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_sqlite3::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_sqlite3::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_sqlite3::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -9826,120 +9933,119 @@ void c_sqlite3::cloneSet(c_sqlite3 *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_sqlite3::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 1:
       HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
+        if (count > 0) return throw_toomany_arguments("close", 0, 1);
         return (t_close());
       }
       break;
     case 2:
       HASH_GUARD(0x6081F282094466C2LL, lasterrormsg) {
+        if (count > 0) return throw_toomany_arguments("lasterrormsg", 0, 1);
         return (t_lasterrormsg());
       }
       HASH_GUARD(0x65BD6700742BF3C2LL, openblob) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("openblob", count+1);
-        if (count <= 3) return (t_openblob(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_openblob(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count < 3 || count > 4) return throw_wrong_arguments("openblob", count, 3, 4, 1);
+        if (count <= 3) return (t_openblob(params[0], params[1], params[2]));
+        return (t_openblob(params[0], params[1], params[2], params[3]));
       }
       break;
     case 3:
       HASH_GUARD(0x3AA4CCEC6BD68143LL, createaggregate) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("createaggregate", count+1);
-        if (count <= 3) return (t_createaggregate(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_createaggregate(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count < 3 || count > 4) return throw_wrong_arguments("createaggregate", count, 3, 4, 1);
+        if (count <= 3) return (t_createaggregate(params[0], params[1], params[2]));
+        return (t_createaggregate(params[0], params[1], params[2], params[3]));
       }
       break;
     case 4:
       HASH_GUARD(0x21F68C010C124BC4LL, open) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("open", count+1);
-        if (count <= 1) return (t_open(params.rvalAt(0)), null);
-        if (count == 2) return (t_open(params.rvalAt(0), params.rvalAt(1)), null);
-        return (t_open(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)), null);
+        if (count < 1 || count > 3) return throw_wrong_arguments("open", count, 1, 3, 1);
+        if (count <= 1) return (t_open(params[0]), null);
+        if (count == 2) return (t_open(params[0], params[1]), null);
+        return (t_open(params[0], params[1], params[2]), null);
       }
       break;
     case 10:
       HASH_GUARD(0x632B468FC2FCAB0ALL, lasterrorcode) {
+        if (count > 0) return throw_toomany_arguments("lasterrorcode", 0, 1);
         return (t_lasterrorcode());
       }
       break;
     case 12:
       HASH_GUARD(0x4F1D1ED7B087208CLL, exec) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("exec", count+1);
-        return (t_exec(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
+        return (t_exec(params[0]));
       }
       break;
     case 13:
       HASH_GUARD(0x7CECF508291057CDLL, createfunction) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("createfunction", count+1);
-        if (count <= 2) return (t_createfunction(params.rvalAt(0), params.rvalAt(1)));
-        return (t_createfunction(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count < 2 || count > 3) return throw_wrong_arguments("createfunction", count, 2, 3, 1);
+        if (count <= 2) return (t_createfunction(params[0], params[1]));
+        return (t_createfunction(params[0], params[1], params[2]));
       }
       break;
     case 25:
       HASH_GUARD(0x64D2BDB189B02819LL, changes) {
+        if (count > 0) return throw_toomany_arguments("changes", 0, 1);
         return (t_changes());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 36:
       HASH_GUARD(0x1B3CDE890A487664LL, loadextension) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("loadextension", count+1);
-        return (t_loadextension(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("loadextension", count, 1, 1, 1);
+        return (t_loadextension(params[0]));
       }
       break;
     case 38:
       HASH_GUARD(0x5024F08DB0FDCBE6LL, lastinsertrowid) {
+        if (count > 0) return throw_toomany_arguments("lastinsertrowid", 0, 1);
         return (t_lastinsertrowid());
       }
       break;
     case 42:
       HASH_GUARD(0x5AE41239FF63D86ALL, version) {
+        if (count > 0) return throw_toomany_arguments("version", 0, 1);
         return (t_version());
       }
       break;
     case 46:
       HASH_GUARD(0x156B1FAE4132ABEELL, querysingle) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("querysingle", count+1);
-        if (count <= 1) return (t_querysingle(params.rvalAt(0)));
-        return (t_querysingle(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("querysingle", count, 1, 2, 1);
+        if (count <= 1) return (t_querysingle(params[0]));
+        return (t_querysingle(params[0], params[1]));
       }
       break;
     case 47:
       HASH_GUARD(0x540020AE4BA591AFLL, prepare) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("prepare", count+1);
-        return (t_prepare(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("prepare", count, 1, 1, 1);
+        return (t_prepare(params[0]));
       }
       break;
     case 51:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x607C4C73BB251635LL, escapestring) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("escapestring", count+1);
-        return (t_escapestring(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("escapestring", count, 1, 1, 1);
+        return (t_escapestring(params[0]));
       }
       break;
     case 55:
       HASH_GUARD(0x356758D4414DA377LL, query) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("query", count+1);
-        return (t_query(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
+        return (t_query(params[0]));
       }
       break;
     default:
@@ -9952,29 +10058,31 @@ Variant c_sqlite3::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
   switch (hash & 63) {
     case 1:
       HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
+        if (count > 0) return throw_toomany_arguments("close", 0, 1);
         return (t_close());
       }
       break;
     case 2:
       HASH_GUARD(0x6081F282094466C2LL, lasterrormsg) {
+        if (count > 0) return throw_toomany_arguments("lasterrormsg", 0, 1);
         return (t_lasterrormsg());
       }
       HASH_GUARD(0x65BD6700742BF3C2LL, openblob) {
-        if (count < 3) throw_missing_argument("openblob", count+1);
+        if (count < 3 || count > 4) return throw_wrong_arguments("openblob", count, 3, 4, 1);
         if (count <= 3) return (t_openblob(a0, a1, a2));
         return (t_openblob(a0, a1, a2, a3));
       }
       break;
     case 3:
       HASH_GUARD(0x3AA4CCEC6BD68143LL, createaggregate) {
-        if (count < 3) throw_missing_argument("createaggregate", count+1);
+        if (count < 3 || count > 4) return throw_wrong_arguments("createaggregate", count, 3, 4, 1);
         if (count <= 3) return (t_createaggregate(a0, a1, a2));
         return (t_createaggregate(a0, a1, a2, a3));
       }
       break;
     case 4:
       HASH_GUARD(0x21F68C010C124BC4LL, open) {
-        if (count < 1) throw_missing_argument("open", count+1);
+        if (count < 1 || count > 3) return throw_wrong_arguments("open", count, 1, 3, 1);
         if (count <= 1) return (t_open(a0), null);
         if (count == 2) return (t_open(a0, a1), null);
         return (t_open(a0, a1, a2), null);
@@ -9982,75 +10090,81 @@ Variant c_sqlite3::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
       break;
     case 10:
       HASH_GUARD(0x632B468FC2FCAB0ALL, lasterrorcode) {
+        if (count > 0) return throw_toomany_arguments("lasterrorcode", 0, 1);
         return (t_lasterrorcode());
       }
       break;
     case 12:
       HASH_GUARD(0x4F1D1ED7B087208CLL, exec) {
-        if (count < 1) throw_missing_argument("exec", count+1);
+        if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
         return (t_exec(a0));
       }
       break;
     case 13:
       HASH_GUARD(0x7CECF508291057CDLL, createfunction) {
-        if (count < 2) throw_missing_argument("createfunction", count+1);
+        if (count < 2 || count > 3) return throw_wrong_arguments("createfunction", count, 2, 3, 1);
         if (count <= 2) return (t_createfunction(a0, a1));
         return (t_createfunction(a0, a1, a2));
       }
       break;
     case 25:
       HASH_GUARD(0x64D2BDB189B02819LL, changes) {
+        if (count > 0) return throw_toomany_arguments("changes", 0, 1);
         return (t_changes());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 36:
       HASH_GUARD(0x1B3CDE890A487664LL, loadextension) {
-        if (count < 1) throw_missing_argument("loadextension", count+1);
+        if (count != 1) return throw_wrong_arguments("loadextension", count, 1, 1, 1);
         return (t_loadextension(a0));
       }
       break;
     case 38:
       HASH_GUARD(0x5024F08DB0FDCBE6LL, lastinsertrowid) {
+        if (count > 0) return throw_toomany_arguments("lastinsertrowid", 0, 1);
         return (t_lastinsertrowid());
       }
       break;
     case 42:
       HASH_GUARD(0x5AE41239FF63D86ALL, version) {
+        if (count > 0) return throw_toomany_arguments("version", 0, 1);
         return (t_version());
       }
       break;
     case 46:
       HASH_GUARD(0x156B1FAE4132ABEELL, querysingle) {
-        if (count < 1) throw_missing_argument("querysingle", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("querysingle", count, 1, 2, 1);
         if (count <= 1) return (t_querysingle(a0));
         return (t_querysingle(a0, a1));
       }
       break;
     case 47:
       HASH_GUARD(0x540020AE4BA591AFLL, prepare) {
-        if (count < 1) throw_missing_argument("prepare", count+1);
+        if (count != 1) return throw_wrong_arguments("prepare", count, 1, 1, 1);
         return (t_prepare(a0));
       }
       break;
     case 51:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x607C4C73BB251635LL, escapestring) {
-        if (count < 1) throw_missing_argument("escapestring", count+1);
+        if (count != 1) return throw_wrong_arguments("escapestring", count, 1, 1, 1);
         return (t_escapestring(a0));
       }
       break;
     case 55:
       HASH_GUARD(0x356758D4414DA377LL, query) {
-        if (count < 1) throw_missing_argument("query", count+1);
+        if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
         return (t_query(a0));
       }
       break;
@@ -10060,6 +10174,7 @@ Variant c_sqlite3::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_sqlite3::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -10453,29 +10568,27 @@ Variant c_domattr::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domattr)
 c_domattr *c_domattr::create(String a0, String a1) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  decRefCount();
   return this;
 }
 ObjectData *c_domattr::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("__construct", count+1);
-    if (count <= 1) (t___construct(params.rvalAt(0)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
+    if (count <= 1) (t___construct(params[0]));
+    else (t___construct(params[0], params[1]));
   }
   return this;
 }
 void c_domattr::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("__construct", count+1);
-  if (count <= 1) (t___construct(params.rvalAt(0)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
+  if (count <= 1) (t___construct(params[0]));
+  else (t___construct(params[0], params[1]));
 }
 void c_domattr::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -10517,144 +10630,139 @@ Variant c_domattr::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
 Variant c_domattr::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
-        int count = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params.rvalAt(0)));
-        if (count == 2) return (t_c14n(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count == 1) return (t_c14n(params[0]));
+        if (count == 2) return (t_c14n(params[0], params[1]));
+        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
+        return (t_c14n(params[0], params[1], params[2], params[3]));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("replacechild", count+1);
-        return (t_replacechild(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
+        return (t_replacechild(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appendchild", count+1);
-        return (t_appendchild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
+        return (t_appendchild(params[0]));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params.rvalAt(0)));
+        return (t_clonenode(params[0]));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
-        return (t_lookupnamespaceuri(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
+        return (t_lookupnamespaceuri(params[0]));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removechild", count+1);
-        return (t_removechild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
+        return (t_removechild(params[0]));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__construct", count+1);
-        if (count <= 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
+        if (count <= 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
-        return (t_lookupprefix(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
+        return (t_lookupprefix(params[0]));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
-        return (t_isdefaultnamespace(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
+        return (t_isdefaultnamespace(params[0]));
       }
       HASH_GUARD(0x30A9329415D17F24LL, isid) {
+        if (count > 0) return throw_toomany_arguments("isid", 0, 1);
         return (t_isid());
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("issamenode", count+1);
-        return (t_issamenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
+        return (t_issamenode(params[0]));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
-        if (count <= 1) return (t_insertbefore(params.rvalAt(0)));
-        return (t_insertbefore(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
+        if (count <= 1) return (t_insertbefore(params[0]));
+        return (t_insertbefore(params[0], params[1]));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
-        if (count <= 1) return (t_c14nfile(params.rvalAt(0)));
-        if (count == 2) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
+        if (count <= 1) return (t_c14nfile(params[0]));
+        if (count == 2) return (t_c14nfile(params[0], params[1]));
+        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
+        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
+        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("issupported", count+1);
-        return (t_issupported(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
+        return (t_issupported(params[0], params[1]));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -10668,11 +10776,13 @@ Variant c_domattr::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
         if (count == 2) return (t_c14n(a0, a1));
@@ -10682,98 +10792,104 @@ Variant c_domattr::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        if (count < 2) throw_missing_argument("replacechild", count+1);
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        if (count < 1) throw_missing_argument("appendchild", count+1);
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        if (count < 1) throw_missing_argument("removechild", count+1);
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("__construct", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         if (count <= 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       HASH_GUARD(0x30A9329415D17F24LL, isid) {
+        if (count > 0) return throw_toomany_arguments("isid", 0, 1);
         return (t_isid());
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        if (count < 1) throw_missing_argument("issamenode", count+1);
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
         if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -10783,10 +10899,11 @@ Variant c_domattr::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        if (count < 2) throw_missing_argument("issupported", count+1);
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -10796,6 +10913,7 @@ Variant c_domattr::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domattr::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -11258,35 +11376,33 @@ Variant c_soapvar::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(soapvar)
 c_soapvar *c_soapvar::create(Variant a0, Variant a1, String a2, String a3, String a4, String a5) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4, a5);
-  decRefCount();
   return this;
 }
 ObjectData *c_soapvar::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 2) throw_missing_argument("__construct", count+1);
-    if (count <= 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    else if (count == 3) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-    else if (count == 4) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-    else if (count == 5) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4), params.rvalAt(5)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count < 2 || count > 6) throw_wrong_arguments("__construct", count, 2, 6, 2);
+    if (count <= 2) (t___construct(params[0], params[1]));
+    else if (count == 3) (t___construct(params[0], params[1], params[2]));
+    else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
+    else if (count == 5) (t___construct(params[0], params[1], params[2], params[3], params[4]));
+    else (t___construct(params[0], params[1], params[2], params[3], params[4], params[5]));
   }
   return this;
 }
 void c_soapvar::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 2) throw_missing_argument("__construct", count+1);
-  if (count <= 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-  else if (count == 3) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-  else if (count == 4) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-  else if (count == 5) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4), params.rvalAt(5)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 6) throw_wrong_arguments("__construct", count, 2, 6, 2);
+  if (count <= 2) (t___construct(params[0], params[1]));
+  else if (count == 3) (t___construct(params[0], params[1], params[2]));
+  else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
+  else if (count == 5) (t___construct(params[0], params[1], params[2], params[3], params[4]));
+  else (t___construct(params[0], params[1], params[2], params[3], params[4], params[5]));
 }
 void c_soapvar::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -11344,20 +11460,21 @@ void c_soapvar::cloneSet(c_soapvar *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_soapvar::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 3) {
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__construct", count+1);
-        if (count <= 2) return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
-        if (count == 3) return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)), null);
-        if (count == 4) return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)), null);
-        if (count == 5) return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4), params.rvalAt(5)), null);
+        if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
+        if (count <= 2) return (t___construct(params[0], params[1]), null);
+        if (count == 3) return (t___construct(params[0], params[1], params[2]), null);
+        if (count == 4) return (t___construct(params[0], params[1], params[2], params[3]), null);
+        if (count == 5) return (t___construct(params[0], params[1], params[2], params[3], params[4]), null);
+        return (t___construct(params[0], params[1], params[2], params[3], params[4], params[5]), null);
       }
       break;
     default:
@@ -11370,10 +11487,11 @@ Variant c_soapvar::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
   switch (hash & 3) {
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 2) throw_missing_argument("__construct", count+1);
+        if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
         if (count <= 2) return (t___construct(a0, a1), null);
         if (count == 3) return (t___construct(a0, a1, a2), null);
         if (count == 4) return (t___construct(a0, a1, a2, a3), null);
@@ -11387,6 +11505,7 @@ Variant c_soapvar::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_soapvar::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_soapvar::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -11522,22 +11641,24 @@ Variant c_domnamednodemap::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domnamednodemap)
 c_domnamednodemap *c_domnamednodemap::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_domnamednodemap::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_domnamednodemap::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_domnamednodemap::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -11570,52 +11691,51 @@ Variant c_domnamednodemap::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
 Variant c_domnamednodemap::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       HASH_GUARD(0x570B2E1232A12503LL, getiterator) {
+        if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
         return (t_getiterator());
       }
       break;
     case 5:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 6:
       HASH_GUARD(0x0A41DBE0830902C6LL, item) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("item", count+1);
-        return (t_item(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
+        return (t_item(params[0]));
       }
       break;
     case 10:
       HASH_GUARD(0x5D3CEC627F9ADC3ALL, getnameditem) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("getnameditem", count+1);
-        return (t_getnameditem(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("getnameditem", count, 1, 1, 1);
+        return (t_getnameditem(params[0]));
       }
       break;
     case 11:
       HASH_GUARD(0x53B4D840FF4F0F1BLL, getnameditemns) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("getnameditemns", count+1);
-        return (t_getnameditemns(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("getnameditemns", count, 2, 2, 1);
+        return (t_getnameditemns(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     default:
@@ -11628,42 +11748,45 @@ Variant c_domnamednodemap::o_invoke_few_args(const char *s, int64 hash, int coun
   switch (hash & 15) {
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       HASH_GUARD(0x570B2E1232A12503LL, getiterator) {
+        if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
         return (t_getiterator());
       }
       break;
     case 5:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 6:
       HASH_GUARD(0x0A41DBE0830902C6LL, item) {
-        if (count < 1) throw_missing_argument("item", count+1);
+        if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
         return (t_item(a0));
       }
       break;
     case 10:
       HASH_GUARD(0x5D3CEC627F9ADC3ALL, getnameditem) {
-        if (count < 1) throw_missing_argument("getnameditem", count+1);
+        if (count != 1) return throw_wrong_arguments("getnameditem", count, 1, 1, 1);
         return (t_getnameditem(a0));
       }
       break;
     case 11:
       HASH_GUARD(0x53B4D840FF4F0F1BLL, getnameditemns) {
-        if (count < 2) throw_missing_argument("getnameditemns", count+1);
+        if (count != 2) return throw_wrong_arguments("getnameditemns", count, 2, 2, 1);
         return (t_getnameditemns(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
@@ -11673,6 +11796,7 @@ Variant c_domnamednodemap::o_invoke_few_args(const char *s, int64 hash, int coun
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domnamednodemap::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -11877,22 +12001,24 @@ Variant c_sqlite3result::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(sqlite3result)
 c_sqlite3result *c_sqlite3result::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_sqlite3result::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_sqlite3result::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_sqlite3result::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -11922,51 +12048,55 @@ void c_sqlite3result::cloneSet(c_sqlite3result *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_sqlite3result::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 0:
       HASH_GUARD(0x340A51AE22A924E0LL, reset) {
+        if (count > 0) return throw_toomany_arguments("reset", 0, 1);
         return (t_reset());
       }
       break;
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 6:
       HASH_GUARD(0x4C7702FC22784996LL, numcolumns) {
+        if (count > 0) return throw_toomany_arguments("numcolumns", 0, 1);
         return (t_numcolumns());
       }
       break;
     case 8:
       HASH_GUARD(0x696EFC04EE7E47F8LL, columnname) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("columnname", count+1);
-        return (t_columnname(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("columnname", count, 1, 1, 1);
+        return (t_columnname(params[0]));
       }
       break;
     case 11:
       HASH_GUARD(0x59F73C4DEF1C3A6BLL, fetcharray) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("fetcharray", 1, 1);
         if (count <= 0) return (t_fetcharray());
-        return (t_fetcharray(params.rvalAt(0)));
+        return (t_fetcharray(params[0]));
       }
       break;
     case 12:
       HASH_GUARD(0x32A58B0CE493957CLL, finalize) {
+        if (count > 0) return throw_toomany_arguments("finalize", 0, 1);
         return (t_finalize());
       }
       break;
     case 13:
       HASH_GUARD(0x42EDB5CA009D8C6DLL, columntype) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("columntype", count+1);
-        return (t_columntype(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("columntype", count, 1, 1, 1);
+        return (t_columntype(params[0]));
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
@@ -11980,44 +12110,50 @@ Variant c_sqlite3result::o_invoke_few_args(const char *s, int64 hash, int count,
   switch (hash & 15) {
     case 0:
       HASH_GUARD(0x340A51AE22A924E0LL, reset) {
+        if (count > 0) return throw_toomany_arguments("reset", 0, 1);
         return (t_reset());
       }
       break;
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 6:
       HASH_GUARD(0x4C7702FC22784996LL, numcolumns) {
+        if (count > 0) return throw_toomany_arguments("numcolumns", 0, 1);
         return (t_numcolumns());
       }
       break;
     case 8:
       HASH_GUARD(0x696EFC04EE7E47F8LL, columnname) {
-        if (count < 1) throw_missing_argument("columnname", count+1);
+        if (count != 1) return throw_wrong_arguments("columnname", count, 1, 1, 1);
         return (t_columnname(a0));
       }
       break;
     case 11:
       HASH_GUARD(0x59F73C4DEF1C3A6BLL, fetcharray) {
+        if (count > 1) return throw_toomany_arguments("fetcharray", 1, 1);
         if (count <= 0) return (t_fetcharray());
         return (t_fetcharray(a0));
       }
       break;
     case 12:
       HASH_GUARD(0x32A58B0CE493957CLL, finalize) {
+        if (count > 0) return throw_toomany_arguments("finalize", 0, 1);
         return (t_finalize());
       }
       break;
     case 13:
       HASH_GUARD(0x42EDB5CA009D8C6DLL, columntype) {
-        if (count < 1) throw_missing_argument("columntype", count+1);
+        if (count != 1) return throw_wrong_arguments("columntype", count, 1, 1, 1);
         return (t_columntype(a0));
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
@@ -12027,6 +12163,7 @@ Variant c_sqlite3result::o_invoke_few_args(const char *s, int64 hash, int count,
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_sqlite3result::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -12221,35 +12358,33 @@ Variant c_simplexmlelement::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(simplexmlelement)
 c_simplexmlelement *c_simplexmlelement::create(String a0, int64 a1, bool a2, String a3, bool a4) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4);
-  decRefCount();
   return this;
 }
 ObjectData *c_simplexmlelement::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("__construct", count+1);
-    if (count <= 1) (t___construct(params.rvalAt(0)));
-    else if (count == 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    else if (count == 3) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-    else if (count == 4) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count < 1 || count > 5) throw_wrong_arguments("__construct", count, 1, 5, 2);
+    if (count <= 1) (t___construct(params[0]));
+    else if (count == 2) (t___construct(params[0], params[1]));
+    else if (count == 3) (t___construct(params[0], params[1], params[2]));
+    else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
+    else (t___construct(params[0], params[1], params[2], params[3], params[4]));
   }
   return this;
 }
 void c_simplexmlelement::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("__construct", count+1);
-  if (count <= 1) (t___construct(params.rvalAt(0)));
-  else if (count == 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-  else if (count == 3) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-  else if (count == 4) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 5) throw_wrong_arguments("__construct", count, 1, 5, 2);
+  if (count <= 1) (t___construct(params[0]));
+  else if (count == 2) (t___construct(params[0], params[1]));
+  else if (count == 3) (t___construct(params[0], params[1], params[2]));
+  else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
+  else (t___construct(params[0], params[1], params[2], params[3], params[4]));
 }
 void c_simplexmlelement::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -12306,146 +12441,138 @@ Variant c_simplexmlelement::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
 Variant c_simplexmlelement::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 0:
       HASH_GUARD(0x3E6BCFB9742FC700LL, offsetexists) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("offsetexists", count+1);
-        return (t_offsetexists(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("offsetexists", count, 1, 1, 1);
+        return (t_offsetexists(params[0]));
       }
       break;
     case 15:
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x2DDE12A9866FC794LL, addchild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("addchild", count+1);
-        if (count <= 1) return (t_addchild(params.rvalAt(0)));
-        if (count == 2) return (t_addchild(params.rvalAt(0), params.rvalAt(1)));
-        return (t_addchild(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count < 1 || count > 3) return throw_wrong_arguments("addchild", count, 1, 3, 1);
+        if (count <= 1) return (t_addchild(params[0]));
+        if (count == 2) return (t_addchild(params[0], params[1]));
+        return (t_addchild(params[0], params[1], params[2]));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 22:
       HASH_GUARD(0x52F7AA6C19BEEAD6LL, addattribute) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("addattribute", count+1);
-        if (count <= 1) return (t_addattribute(params.rvalAt(0)), null);
-        if (count == 2) return (t_addattribute(params.rvalAt(0), params.rvalAt(1)), null);
-        return (t_addattribute(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)), null);
+        if (count < 1 || count > 3) return throw_wrong_arguments("addattribute", count, 1, 3, 1);
+        if (count <= 1) return (t_addattribute(params[0]), null);
+        if (count == 2) return (t_addattribute(params[0], params[1]), null);
+        return (t_addattribute(params[0], params[1], params[2]), null);
       }
       break;
     case 24:
       HASH_GUARD(0x61D11ECEF4404498LL, offsetget) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("offsetget", count+1);
-        return (t_offsetget(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("offsetget", count, 1, 1, 1);
+        return (t_offsetget(params[0]));
       }
       break;
     case 27:
       HASH_GUARD(0x0817454F196A9A1BLL, xpath) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("xpath", count+1);
-        return (t_xpath(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("xpath", count, 1, 1, 1);
+        return (t_xpath(params[0]));
       }
       HASH_GUARD(0x04FB7028C9A2079BLL, __unset) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__unset", count+1);
-        return (t___unset(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__unset", count, 1, 1, 1);
+        return (t___unset(params[0]));
       }
       break;
     case 29:
       HASH_GUARD(0x4B65E1A09A33F21DLL, attributes) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("attributes", 2, 1);
         if (count <= 0) return (t_attributes());
-        if (count == 1) return (t_attributes(params.rvalAt(0)));
-        return (t_attributes(params.rvalAt(0), params.rvalAt(1)));
+        if (count == 1) return (t_attributes(params[0]));
+        return (t_attributes(params[0], params[1]));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__construct", count+1);
-        if (count <= 1) return (t___construct(params.rvalAt(0)), null);
-        if (count == 2) return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
-        if (count == 3) return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)), null);
-        if (count == 4) return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)), null);
+        if (count < 1 || count > 5) return throw_wrong_arguments("__construct", count, 1, 5, 1);
+        if (count <= 1) return (t___construct(params[0]), null);
+        if (count == 2) return (t___construct(params[0], params[1]), null);
+        if (count == 3) return (t___construct(params[0], params[1], params[2]), null);
+        if (count == 4) return (t___construct(params[0], params[1], params[2], params[3]), null);
+        return (t___construct(params[0], params[1], params[2], params[3], params[4]), null);
       }
       break;
     case 37:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("getname", 0, 1);
         return (t_getname());
       }
       break;
     case 38:
       HASH_GUARD(0x6D9D75B7E3B40FA6LL, getnamespaces) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("getnamespaces", 1, 1);
         if (count <= 0) return (t_getnamespaces());
-        return (t_getnamespaces(params.rvalAt(0)));
+        return (t_getnamespaces(params[0]));
       }
       HASH_GUARD(0x5C09D9345FD864A6LL, asxml) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("asxml", 1, 1);
         if (count <= 0) return (t_asxml());
-        return (t_asxml(params.rvalAt(0)));
+        return (t_asxml(params[0]));
       }
       break;
     case 45:
       HASH_GUARD(0x2B299E949E2E82ADLL, children) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("children", 2, 1);
         if (count <= 0) return (t_children());
-        if (count == 1) return (t_children(params.rvalAt(0)));
-        return (t_children(params.rvalAt(0), params.rvalAt(1)));
+        if (count == 1) return (t_children(params[0]));
+        return (t_children(params[0], params[1]));
       }
       break;
     case 49:
       HASH_GUARD(0x0D08AA5F0B2F34F1LL, getdocnamespaces) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("getdocnamespaces", 1, 1);
         if (count <= 0) return (t_getdocnamespaces());
-        return (t_getdocnamespaces(params.rvalAt(0)));
+        return (t_getdocnamespaces(params[0]));
       }
       break;
     case 51:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 56:
       HASH_GUARD(0x0957F693A48AF738LL, offsetset) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("offsetset", count+1);
-        return (t_offsetset(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count != 2) return throw_wrong_arguments("offsetset", count, 2, 2, 1);
+        return (t_offsetset(params[0], params[1]), null);
       }
       break;
     case 58:
       HASH_GUARD(0x08329980E6369ABALL, offsetunset) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("offsetunset", count+1);
-        return (t_offsetunset(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("offsetunset", count, 1, 1, 1);
+        return (t_offsetunset(params[0]), null);
       }
       break;
     case 61:
       HASH_GUARD(0x3FE8F6937854F83DLL, registerxpathnamespace) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("registerxpathnamespace", count+1);
-        return (t_registerxpathnamespace(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("registerxpathnamespace", count, 2, 2, 1);
+        return (t_registerxpathnamespace(params[0], params[1]));
       }
       break;
     default:
@@ -12458,24 +12585,25 @@ Variant c_simplexmlelement::o_invoke_few_args(const char *s, int64 hash, int cou
   switch (hash & 63) {
     case 0:
       HASH_GUARD(0x3E6BCFB9742FC700LL, offsetexists) {
-        if (count < 1) throw_missing_argument("offsetexists", count+1);
+        if (count != 1) return throw_wrong_arguments("offsetexists", count, 1, 1, 1);
         return (t_offsetexists(a0));
       }
       break;
     case 15:
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x2DDE12A9866FC794LL, addchild) {
-        if (count < 1) throw_missing_argument("addchild", count+1);
+        if (count < 1 || count > 3) return throw_wrong_arguments("addchild", count, 1, 3, 1);
         if (count <= 1) return (t_addchild(a0));
         if (count == 2) return (t_addchild(a0, a1));
         return (t_addchild(a0, a1, a2));
@@ -12483,13 +12611,13 @@ Variant c_simplexmlelement::o_invoke_few_args(const char *s, int64 hash, int cou
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 22:
       HASH_GUARD(0x52F7AA6C19BEEAD6LL, addattribute) {
-        if (count < 1) throw_missing_argument("addattribute", count+1);
+        if (count < 1 || count > 3) return throw_wrong_arguments("addattribute", count, 1, 3, 1);
         if (count <= 1) return (t_addattribute(a0), null);
         if (count == 2) return (t_addattribute(a0, a1), null);
         return (t_addattribute(a0, a1, a2), null);
@@ -12497,22 +12625,23 @@ Variant c_simplexmlelement::o_invoke_few_args(const char *s, int64 hash, int cou
       break;
     case 24:
       HASH_GUARD(0x61D11ECEF4404498LL, offsetget) {
-        if (count < 1) throw_missing_argument("offsetget", count+1);
+        if (count != 1) return throw_wrong_arguments("offsetget", count, 1, 1, 1);
         return (t_offsetget(a0));
       }
       break;
     case 27:
       HASH_GUARD(0x0817454F196A9A1BLL, xpath) {
-        if (count < 1) throw_missing_argument("xpath", count+1);
+        if (count != 1) return throw_wrong_arguments("xpath", count, 1, 1, 1);
         return (t_xpath(a0));
       }
       HASH_GUARD(0x04FB7028C9A2079BLL, __unset) {
-        if (count < 1) throw_missing_argument("__unset", count+1);
+        if (count != 1) return throw_wrong_arguments("__unset", count, 1, 1, 1);
         return (t___unset(a0));
       }
       break;
     case 29:
       HASH_GUARD(0x4B65E1A09A33F21DLL, attributes) {
+        if (count > 2) return throw_toomany_arguments("attributes", 2, 1);
         if (count <= 0) return (t_attributes());
         if (count == 1) return (t_attributes(a0));
         return (t_attributes(a0, a1));
@@ -12520,7 +12649,7 @@ Variant c_simplexmlelement::o_invoke_few_args(const char *s, int64 hash, int cou
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("__construct", count+1);
+        if (count < 1 || count > 5) return throw_wrong_arguments("__construct", count, 1, 5, 1);
         if (count <= 1) return (t___construct(a0), null);
         if (count == 2) return (t___construct(a0, a1), null);
         if (count == 3) return (t___construct(a0, a1, a2), null);
@@ -12530,21 +12659,25 @@ Variant c_simplexmlelement::o_invoke_few_args(const char *s, int64 hash, int cou
       break;
     case 37:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("getname", 0, 1);
         return (t_getname());
       }
       break;
     case 38:
       HASH_GUARD(0x6D9D75B7E3B40FA6LL, getnamespaces) {
+        if (count > 1) return throw_toomany_arguments("getnamespaces", 1, 1);
         if (count <= 0) return (t_getnamespaces());
         return (t_getnamespaces(a0));
       }
       HASH_GUARD(0x5C09D9345FD864A6LL, asxml) {
+        if (count > 1) return throw_toomany_arguments("asxml", 1, 1);
         if (count <= 0) return (t_asxml());
         return (t_asxml(a0));
       }
       break;
     case 45:
       HASH_GUARD(0x2B299E949E2E82ADLL, children) {
+        if (count > 2) return throw_toomany_arguments("children", 2, 1);
         if (count <= 0) return (t_children());
         if (count == 1) return (t_children(a0));
         return (t_children(a0, a1));
@@ -12552,30 +12685,32 @@ Variant c_simplexmlelement::o_invoke_few_args(const char *s, int64 hash, int cou
       break;
     case 49:
       HASH_GUARD(0x0D08AA5F0B2F34F1LL, getdocnamespaces) {
+        if (count > 1) return throw_toomany_arguments("getdocnamespaces", 1, 1);
         if (count <= 0) return (t_getdocnamespaces());
         return (t_getdocnamespaces(a0));
       }
       break;
     case 51:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 56:
       HASH_GUARD(0x0957F693A48AF738LL, offsetset) {
-        if (count < 2) throw_missing_argument("offsetset", count+1);
+        if (count != 2) return throw_wrong_arguments("offsetset", count, 2, 2, 1);
         return (t_offsetset(a0, a1), null);
       }
       break;
     case 58:
       HASH_GUARD(0x08329980E6369ABALL, offsetunset) {
-        if (count < 1) throw_missing_argument("offsetunset", count+1);
+        if (count != 1) return throw_wrong_arguments("offsetunset", count, 1, 1, 1);
         return (t_offsetunset(a0), null);
       }
       break;
     case 61:
       HASH_GUARD(0x3FE8F6937854F83DLL, registerxpathnamespace) {
-        if (count < 2) throw_missing_argument("registerxpathnamespace", count+1);
+        if (count != 2) return throw_wrong_arguments("registerxpathnamespace", count, 2, 2, 1);
         return (t_registerxpathnamespace(a0, a1));
       }
       break;
@@ -12585,6 +12720,7 @@ Variant c_simplexmlelement::o_invoke_few_args(const char *s, int64 hash, int cou
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_simplexmlelement::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -13048,29 +13184,27 @@ Variant c_domprocessinginstruction::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domprocessinginstruction)
 c_domprocessinginstruction *c_domprocessinginstruction::create(String a0, String a1) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  decRefCount();
   return this;
 }
 ObjectData *c_domprocessinginstruction::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("__construct", count+1);
-    if (count <= 1) (t___construct(params.rvalAt(0)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
+    if (count <= 1) (t___construct(params[0]));
+    else (t___construct(params[0], params[1]));
   }
   return this;
 }
 void c_domprocessinginstruction::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("__construct", count+1);
-  if (count <= 1) (t___construct(params.rvalAt(0)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
+  if (count <= 1) (t___construct(params[0]));
+  else (t___construct(params[0], params[1]));
 }
 void c_domprocessinginstruction::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -13112,141 +13246,135 @@ Variant c_domprocessinginstruction::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
 Variant c_domprocessinginstruction::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
-        int count = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params.rvalAt(0)));
-        if (count == 2) return (t_c14n(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count == 1) return (t_c14n(params[0]));
+        if (count == 2) return (t_c14n(params[0], params[1]));
+        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
+        return (t_c14n(params[0], params[1], params[2], params[3]));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("replacechild", count+1);
-        return (t_replacechild(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
+        return (t_replacechild(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appendchild", count+1);
-        return (t_appendchild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
+        return (t_appendchild(params[0]));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params.rvalAt(0)));
+        return (t_clonenode(params[0]));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
-        return (t_lookupnamespaceuri(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
+        return (t_lookupnamespaceuri(params[0]));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removechild", count+1);
-        return (t_removechild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
+        return (t_removechild(params[0]));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__construct", count+1);
-        if (count <= 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
+        if (count <= 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
-        return (t_lookupprefix(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
+        return (t_lookupprefix(params[0]));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
-        return (t_isdefaultnamespace(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
+        return (t_isdefaultnamespace(params[0]));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("issamenode", count+1);
-        return (t_issamenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
+        return (t_issamenode(params[0]));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
-        if (count <= 1) return (t_insertbefore(params.rvalAt(0)));
-        return (t_insertbefore(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
+        if (count <= 1) return (t_insertbefore(params[0]));
+        return (t_insertbefore(params[0], params[1]));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
-        if (count <= 1) return (t_c14nfile(params.rvalAt(0)));
-        if (count == 2) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
+        if (count <= 1) return (t_c14nfile(params[0]));
+        if (count == 2) return (t_c14nfile(params[0], params[1]));
+        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
+        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
+        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("issupported", count+1);
-        return (t_issupported(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
+        return (t_issupported(params[0], params[1]));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -13260,11 +13388,13 @@ Variant c_domprocessinginstruction::o_invoke_few_args(const char *s, int64 hash,
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
         if (count == 2) return (t_c14n(a0, a1));
@@ -13274,95 +13404,100 @@ Variant c_domprocessinginstruction::o_invoke_few_args(const char *s, int64 hash,
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        if (count < 2) throw_missing_argument("replacechild", count+1);
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        if (count < 1) throw_missing_argument("appendchild", count+1);
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        if (count < 1) throw_missing_argument("removechild", count+1);
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("__construct", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         if (count <= 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        if (count < 1) throw_missing_argument("issamenode", count+1);
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
         if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -13372,10 +13507,11 @@ Variant c_domprocessinginstruction::o_invoke_few_args(const char *s, int64 hash,
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        if (count < 2) throw_missing_argument("issupported", count+1);
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -13385,6 +13521,7 @@ Variant c_domprocessinginstruction::o_invoke_few_args(const char *s, int64 hash,
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domprocessinginstruction::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -13837,22 +13974,24 @@ Variant c_pdostatement::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(pdostatement)
 c_pdostatement *c_pdostatement::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_pdostatement::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_pdostatement::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_pdostatement::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -13882,154 +14021,159 @@ void c_pdostatement::cloneSet(c_pdostatement *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_pdostatement::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 1:
       HASH_GUARD(0x5740729B65EB8E41LL, fetchall) {
-        int count = params.size();
+        if (count > 3) return throw_toomany_arguments("fetchall", 3, 1);
         if (count <= 0) return (t_fetchall());
-        if (count == 1) return (t_fetchall(params.rvalAt(0)));
-        if (count == 2) return (t_fetchall(params.rvalAt(0), params.rvalAt(1)));
-        return (t_fetchall(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count == 1) return (t_fetchall(params[0]));
+        if (count == 2) return (t_fetchall(params[0], params[1]));
+        return (t_fetchall(params[0], params[1], params[2]));
       }
       break;
     case 3:
       HASH_GUARD(0x436E6AFC3628E403LL, bindvalue) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("bindvalue", count+1);
-        if (count <= 2) return (t_bindvalue(params.rvalAt(0), params.rvalAt(1)));
-        return (t_bindvalue(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
+        if (count <= 2) return (t_bindvalue(params[0], params[1]));
+        return (t_bindvalue(params[0], params[1], params[2]));
       }
       break;
     case 5:
       HASH_GUARD(0x75A2E23098C65C05LL, closecursor) {
+        if (count > 0) return throw_toomany_arguments("closecursor", 0, 1);
         return (t_closecursor());
       }
       break;
     case 7:
       HASH_GUARD(0x6D0664CC2372F2C7LL, errorcode) {
+        if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
         return (t_errorcode());
       }
       break;
     case 10:
       HASH_GUARD(0x1D5B8B8144F4AB8ALL, setattribute) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("setattribute", count+1);
-        return (t_setattribute(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
+        return (t_setattribute(params[0], params[1]));
       }
       break;
     case 14:
       HASH_GUARD(0x187C7F43EB57714ELL, execute) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("execute", 1, 1);
         if (count <= 0) return (t_execute());
-        return (t_execute(params.rvalAt(0)));
+        return (t_execute(params[0]));
       }
       break;
     case 15:
       HASH_GUARD(0x32A381ECDC91918FLL, columncount) {
+        if (count > 0) return throw_toomany_arguments("columncount", 0, 1);
         return (t_columncount());
       }
       break;
     case 18:
       HASH_GUARD(0x31A8917EC4F2A252LL, nextrowset) {
+        if (count > 0) return throw_toomany_arguments("nextrowset", 0, 1);
         return (t_nextrowset());
       }
       break;
     case 22:
       HASH_GUARD(0x77B13FCF1BA41696LL, bindparam) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("bindparam", count+1);
-        if (count <= 2) return (t_bindparam(params.rvalAt(0), ref(const_cast<Array&>(params).lvalAt(1))));
-        if (count == 3) return (t_bindparam(params.rvalAt(0), ref(const_cast<Array&>(params).lvalAt(1)), params.rvalAt(2)));
-        if (count == 4) return (t_bindparam(params.rvalAt(0), ref(const_cast<Array&>(params).lvalAt(1)), params.rvalAt(2), params.rvalAt(3)));
-        return (t_bindparam(params.rvalAt(0), ref(const_cast<Array&>(params).lvalAt(1)), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 2 || count > 5) return throw_wrong_arguments("bindparam", count, 2, 5, 1);
+        if (count <= 2) return (t_bindparam(params[0], ref(const_cast<Array&>(params).lvalAt(1))));
+        if (count == 3) return (t_bindparam(params[0], ref(const_cast<Array&>(params).lvalAt(1)), params[2]));
+        if (count == 4) return (t_bindparam(params[0], ref(const_cast<Array&>(params).lvalAt(1)), params[2], params[3]));
+        return (t_bindparam(params[0], ref(const_cast<Array&>(params).lvalAt(1)), params[2], params[3], params[4]));
       }
       break;
     case 25:
       HASH_GUARD(0x5C38814410C5FFD9LL, fetchcolumn) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("fetchcolumn", 1, 1);
         if (count <= 0) return (t_fetchcolumn());
-        return (t_fetchcolumn(params.rvalAt(0)));
+        return (t_fetchcolumn(params[0]));
       }
       break;
     case 26:
       HASH_GUARD(0x0D43A7148903299ALL, rowcount) {
+        if (count > 0) return throw_toomany_arguments("rowcount", 0, 1);
         return (t_rowcount());
       }
       break;
     case 28:
       HASH_GUARD(0x4389F50CAA085CDCLL, __wakeup) {
+        if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
         return (t___wakeup());
       }
       break;
     case 29:
       HASH_GUARD(0x1C87AD14A095219DLL, bindcolumn) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("bindcolumn", count+1);
-        if (count <= 2) return (t_bindcolumn(params.rvalAt(0), ref(const_cast<Array&>(params).lvalAt(1))));
-        if (count == 3) return (t_bindcolumn(params.rvalAt(0), ref(const_cast<Array&>(params).lvalAt(1)), params.rvalAt(2)));
-        if (count == 4) return (t_bindcolumn(params.rvalAt(0), ref(const_cast<Array&>(params).lvalAt(1)), params.rvalAt(2), params.rvalAt(3)));
-        return (t_bindcolumn(params.rvalAt(0), ref(const_cast<Array&>(params).lvalAt(1)), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 2 || count > 5) return throw_wrong_arguments("bindcolumn", count, 2, 5, 1);
+        if (count <= 2) return (t_bindcolumn(params[0], ref(const_cast<Array&>(params).lvalAt(1))));
+        if (count == 3) return (t_bindcolumn(params[0], ref(const_cast<Array&>(params).lvalAt(1)), params[2]));
+        if (count == 4) return (t_bindcolumn(params[0], ref(const_cast<Array&>(params).lvalAt(1)), params[2], params[3]));
+        return (t_bindcolumn(params[0], ref(const_cast<Array&>(params).lvalAt(1)), params[2], params[3], params[4]));
       }
       HASH_GUARD(0x0E1814AA3327229DLL, fetchobject) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("fetchobject", 2, 1);
         if (count <= 0) return (t_fetchobject());
-        if (count == 1) return (t_fetchobject(params.rvalAt(0)));
-        return (t_fetchobject(params.rvalAt(0), params.rvalAt(1)));
+        if (count == 1) return (t_fetchobject(params[0]));
+        return (t_fetchobject(params[0], params[1]));
       }
       break;
     case 30:
       HASH_GUARD(0x1DDD412E7F04605ELL, errorinfo) {
+        if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
         return (t_errorinfo());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 33:
       HASH_GUARD(0x78C9BF8620136861LL, setfetchmode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("setfetchmode", count+1);
-        if (count <= 1) return (t_setfetchmode(count, params.rvalAt(0)));
-        return (t_setfetchmode(count,params.rvalAt(0), params.slice(1, count - 1, false)));
+        if (count < 1) return throw_missing_arguments("setfetchmode", count+1, 1);
+        if (count <= 1) return (t_setfetchmode(count, params[0]));
+        return (t_setfetchmode(count,params[0], params.slice(1, count - 1, false)));
       }
       break;
     case 34:
       HASH_GUARD(0x699F5A1E3BD7B2A2LL, debugdumpparams) {
+        if (count > 0) return throw_toomany_arguments("debugdumpparams", 0, 1);
         return (t_debugdumpparams());
       }
       break;
     case 40:
       HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("getattribute", count+1);
-        return (t_getattribute(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
+        return (t_getattribute(params[0]));
       }
       break;
     case 45:
       HASH_GUARD(0x61D1244DDADBC02DLL, __sleep) {
+        if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
         return (t___sleep());
       }
       break;
     case 51:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 59:
       HASH_GUARD(0x5B6B980006E717FBLL, getcolumnmeta) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("getcolumnmeta", count+1);
-        return (t_getcolumnmeta(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("getcolumnmeta", count, 1, 1, 1);
+        return (t_getcolumnmeta(params[0]));
       }
       HASH_GUARD(0x5E82B850BB90B0FBLL, fetch) {
-        int count = params.size();
+        if (count > 3) return throw_toomany_arguments("fetch", 3, 1);
         if (count <= 0) return (t_fetch());
-        if (count == 1) return (t_fetch(params.rvalAt(0)));
-        if (count == 2) return (t_fetch(params.rvalAt(0), params.rvalAt(1)));
-        return (t_fetch(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count == 1) return (t_fetch(params[0]));
+        if (count == 2) return (t_fetch(params[0], params[1]));
+        return (t_fetch(params[0], params[1], params[2]));
       }
       break;
     default:
@@ -14042,6 +14186,7 @@ Variant c_pdostatement::o_invoke_few_args(const char *s, int64 hash, int count, 
   switch (hash & 63) {
     case 1:
       HASH_GUARD(0x5740729B65EB8E41LL, fetchall) {
+        if (count > 3) return throw_toomany_arguments("fetchall", 3, 1);
         if (count <= 0) return (t_fetchall());
         if (count == 1) return (t_fetchall(a0));
         if (count == 2) return (t_fetchall(a0, a1));
@@ -14050,46 +14195,51 @@ Variant c_pdostatement::o_invoke_few_args(const char *s, int64 hash, int count, 
       break;
     case 3:
       HASH_GUARD(0x436E6AFC3628E403LL, bindvalue) {
-        if (count < 2) throw_missing_argument("bindvalue", count+1);
+        if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
         if (count <= 2) return (t_bindvalue(a0, a1));
         return (t_bindvalue(a0, a1, a2));
       }
       break;
     case 5:
       HASH_GUARD(0x75A2E23098C65C05LL, closecursor) {
+        if (count > 0) return throw_toomany_arguments("closecursor", 0, 1);
         return (t_closecursor());
       }
       break;
     case 7:
       HASH_GUARD(0x6D0664CC2372F2C7LL, errorcode) {
+        if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
         return (t_errorcode());
       }
       break;
     case 10:
       HASH_GUARD(0x1D5B8B8144F4AB8ALL, setattribute) {
-        if (count < 2) throw_missing_argument("setattribute", count+1);
+        if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
         return (t_setattribute(a0, a1));
       }
       break;
     case 14:
       HASH_GUARD(0x187C7F43EB57714ELL, execute) {
+        if (count > 1) return throw_toomany_arguments("execute", 1, 1);
         if (count <= 0) return (t_execute());
         return (t_execute(a0));
       }
       break;
     case 15:
       HASH_GUARD(0x32A381ECDC91918FLL, columncount) {
+        if (count > 0) return throw_toomany_arguments("columncount", 0, 1);
         return (t_columncount());
       }
       break;
     case 18:
       HASH_GUARD(0x31A8917EC4F2A252LL, nextrowset) {
+        if (count > 0) return throw_toomany_arguments("nextrowset", 0, 1);
         return (t_nextrowset());
       }
       break;
     case 22:
       HASH_GUARD(0x77B13FCF1BA41696LL, bindparam) {
-        if (count < 2) throw_missing_argument("bindparam", count+1);
+        if (count < 2 || count > 5) return throw_wrong_arguments("bindparam", count, 2, 5, 1);
         if (count <= 2) return (t_bindparam(a0, ref(a1)));
         if (count == 3) return (t_bindparam(a0, ref(a1), a2));
         if (count == 4) return (t_bindparam(a0, ref(a1), a2, a3));
@@ -14098,29 +14248,33 @@ Variant c_pdostatement::o_invoke_few_args(const char *s, int64 hash, int count, 
       break;
     case 25:
       HASH_GUARD(0x5C38814410C5FFD9LL, fetchcolumn) {
+        if (count > 1) return throw_toomany_arguments("fetchcolumn", 1, 1);
         if (count <= 0) return (t_fetchcolumn());
         return (t_fetchcolumn(a0));
       }
       break;
     case 26:
       HASH_GUARD(0x0D43A7148903299ALL, rowcount) {
+        if (count > 0) return throw_toomany_arguments("rowcount", 0, 1);
         return (t_rowcount());
       }
       break;
     case 28:
       HASH_GUARD(0x4389F50CAA085CDCLL, __wakeup) {
+        if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
         return (t___wakeup());
       }
       break;
     case 29:
       HASH_GUARD(0x1C87AD14A095219DLL, bindcolumn) {
-        if (count < 2) throw_missing_argument("bindcolumn", count+1);
+        if (count < 2 || count > 5) return throw_wrong_arguments("bindcolumn", count, 2, 5, 1);
         if (count <= 2) return (t_bindcolumn(a0, ref(a1)));
         if (count == 3) return (t_bindcolumn(a0, ref(a1), a2));
         if (count == 4) return (t_bindcolumn(a0, ref(a1), a2, a3));
         return (t_bindcolumn(a0, ref(a1), a2, a3, a4));
       }
       HASH_GUARD(0x0E1814AA3327229DLL, fetchobject) {
+        if (count > 2) return throw_toomany_arguments("fetchobject", 2, 1);
         if (count <= 0) return (t_fetchobject());
         if (count == 1) return (t_fetchobject(a0));
         return (t_fetchobject(a0, a1));
@@ -14128,17 +14282,19 @@ Variant c_pdostatement::o_invoke_few_args(const char *s, int64 hash, int count, 
       break;
     case 30:
       HASH_GUARD(0x1DDD412E7F04605ELL, errorinfo) {
+        if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
         return (t_errorinfo());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 33:
       HASH_GUARD(0x78C9BF8620136861LL, setfetchmode) {
-        if (count < 1) throw_missing_argument("setfetchmode", count+1);
+        if (count < 1) return throw_missing_arguments("setfetchmode", count+1, 1);
         if (count <= 1) return (t_setfetchmode(count, a0));
         Array params;
         if (count >= 2) params.append(a1);
@@ -14151,31 +14307,35 @@ Variant c_pdostatement::o_invoke_few_args(const char *s, int64 hash, int count, 
       break;
     case 34:
       HASH_GUARD(0x699F5A1E3BD7B2A2LL, debugdumpparams) {
+        if (count > 0) return throw_toomany_arguments("debugdumpparams", 0, 1);
         return (t_debugdumpparams());
       }
       break;
     case 40:
       HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
-        if (count < 1) throw_missing_argument("getattribute", count+1);
+        if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
         return (t_getattribute(a0));
       }
       break;
     case 45:
       HASH_GUARD(0x61D1244DDADBC02DLL, __sleep) {
+        if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
         return (t___sleep());
       }
       break;
     case 51:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 59:
       HASH_GUARD(0x5B6B980006E717FBLL, getcolumnmeta) {
-        if (count < 1) throw_missing_argument("getcolumnmeta", count+1);
+        if (count != 1) return throw_wrong_arguments("getcolumnmeta", count, 1, 1, 1);
         return (t_getcolumnmeta(a0));
       }
       HASH_GUARD(0x5E82B850BB90B0FBLL, fetch) {
+        if (count > 3) return throw_toomany_arguments("fetch", 3, 1);
         if (count <= 0) return (t_fetch());
         if (count == 1) return (t_fetch(a0));
         if (count == 2) return (t_fetch(a0, a1));
@@ -14188,6 +14348,7 @@ Variant c_pdostatement::o_invoke_few_args(const char *s, int64 hash, int count, 
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_pdostatement::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -14684,29 +14845,27 @@ Variant c_soapclient::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(soapclient)
 c_soapclient *c_soapclient::create(Variant a0, Array a1) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  decRefCount();
   return this;
 }
 ObjectData *c_soapclient::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("__construct", count+1);
-    if (count <= 1) (t___construct(params.rvalAt(0)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
+    if (count <= 1) (t___construct(params[0]));
+    else (t___construct(params[0], params[1]));
   }
   return this;
 }
 void c_soapclient::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("__construct", count+1);
-  if (count <= 1) (t___construct(params.rvalAt(0)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
+  if (count <= 1) (t___construct(params[0]));
+  else (t___construct(params[0], params[1]));
 }
 void c_soapclient::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -14748,88 +14907,91 @@ Variant c_soapclient::doCall(Variant v_name, Variant v_arguments, bool fatal) {
   return t___call(v_name, v_arguments);
 }
 Variant c_soapclient::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
     case 4:
       HASH_GUARD(0x5C5C1E24A140F6E4LL, __getlastrequest) {
+        if (count > 0) return throw_toomany_arguments("__getlastrequest", 0, 1);
         return (t___getlastrequest());
       }
       break;
     case 12:
       HASH_GUARD(0x3648EE7D3B37DE8CLL, __getlastrequestheaders) {
+        if (count > 0) return throw_toomany_arguments("__getlastrequestheaders", 0, 1);
         return (t___getlastrequestheaders());
       }
       HASH_GUARD(0x5D73364F53CEEB6CLL, __call) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__call", count+1);
-        return (t___call(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__call", count, 2, 2, 1);
+        return (t___call(params[0], params[1]));
       }
       break;
     case 17:
       HASH_GUARD(0x1365B3105FC59871LL, __getfunctions) {
+        if (count > 0) return throw_toomany_arguments("__getfunctions", 0, 1);
         return (t___getfunctions());
       }
       break;
     case 19:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 20:
       HASH_GUARD(0x3CA9145031035A54LL, __getlastresponse) {
+        if (count > 0) return throw_toomany_arguments("__getlastresponse", 0, 1);
         return (t___getlastresponse());
       }
       break;
     case 21:
       HASH_GUARD(0x19A26CEC7E8AAEF5LL, __dorequest) {
-        int count = params.size();
-        if (count < 4) throw_missing_argument("__dorequest", count+1);
-        if (count <= 4) return (t___dorequest(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t___dorequest(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 4 || count > 5) return throw_wrong_arguments("__dorequest", count, 4, 5, 1);
+        if (count <= 4) return (t___dorequest(params[0], params[1], params[2], params[3]));
+        return (t___dorequest(params[0], params[1], params[2], params[3], params[4]));
       }
       HASH_GUARD(0x52C6ABACCBFD0C75LL, __setcookie) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__setcookie", count+1);
-        if (count <= 1) return (t___setcookie(params.rvalAt(0)));
-        return (t___setcookie(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("__setcookie", count, 1, 2, 1);
+        if (count <= 1) return (t___setcookie(params[0]));
+        return (t___setcookie(params[0], params[1]));
       }
       HASH_GUARD(0x628D398E7604B9D5LL, __gettypes) {
+        if (count > 0) return throw_toomany_arguments("__gettypes", 0, 1);
         return (t___gettypes());
       }
       break;
     case 25:
       HASH_GUARD(0x4A2F89F662050D99LL, __soapcall) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__soapcall", count+1);
-        if (count <= 2) return (t___soapcall(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t___soapcall(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t___soapcall(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t___soapcall(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), ref(const_cast<Array&>(params).lvalAt(4))));
+        if (count < 2 || count > 5) return throw_wrong_arguments("__soapcall", count, 2, 5, 1);
+        if (count <= 2) return (t___soapcall(params[0], params[1]));
+        if (count == 3) return (t___soapcall(params[0], params[1], params[2]));
+        if (count == 4) return (t___soapcall(params[0], params[1], params[2], params[3]));
+        return (t___soapcall(params[0], params[1], params[2], params[3], ref(const_cast<Array&>(params).lvalAt(4))));
       }
       break;
     case 26:
       HASH_GUARD(0x0C94657A58A82CFALL, __getlastresponseheaders) {
+        if (count > 0) return throw_toomany_arguments("__getlastresponseheaders", 0, 1);
         return (t___getlastresponseheaders());
       }
       break;
     case 27:
       HASH_GUARD(0x14842228D5E335BBLL, __setsoapheaders) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("__setsoapheaders", 1, 1);
         if (count <= 0) return (t___setsoapheaders());
-        return (t___setsoapheaders(params.rvalAt(0)));
+        return (t___setsoapheaders(params[0]));
       }
       break;
     case 31:
       HASH_GUARD(0x232D13904DBC36FFLL, __setlocation) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("__setlocation", 1, 1);
         if (count <= 0) return (t___setlocation());
-        return (t___setlocation(params.rvalAt(0)));
+        return (t___setlocation(params[0]));
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__construct", count+1);
-        if (count <= 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
+        if (count <= 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       break;
     default:
@@ -14842,51 +15004,57 @@ Variant c_soapclient::o_invoke_few_args(const char *s, int64 hash, int count, CV
   switch (hash & 31) {
     case 4:
       HASH_GUARD(0x5C5C1E24A140F6E4LL, __getlastrequest) {
+        if (count > 0) return throw_toomany_arguments("__getlastrequest", 0, 1);
         return (t___getlastrequest());
       }
       break;
     case 12:
       HASH_GUARD(0x3648EE7D3B37DE8CLL, __getlastrequestheaders) {
+        if (count > 0) return throw_toomany_arguments("__getlastrequestheaders", 0, 1);
         return (t___getlastrequestheaders());
       }
       HASH_GUARD(0x5D73364F53CEEB6CLL, __call) {
-        if (count < 2) throw_missing_argument("__call", count+1);
+        if (count != 2) return throw_wrong_arguments("__call", count, 2, 2, 1);
         return (t___call(a0, a1));
       }
       break;
     case 17:
       HASH_GUARD(0x1365B3105FC59871LL, __getfunctions) {
+        if (count > 0) return throw_toomany_arguments("__getfunctions", 0, 1);
         return (t___getfunctions());
       }
       break;
     case 19:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 20:
       HASH_GUARD(0x3CA9145031035A54LL, __getlastresponse) {
+        if (count > 0) return throw_toomany_arguments("__getlastresponse", 0, 1);
         return (t___getlastresponse());
       }
       break;
     case 21:
       HASH_GUARD(0x19A26CEC7E8AAEF5LL, __dorequest) {
-        if (count < 4) throw_missing_argument("__dorequest", count+1);
+        if (count < 4 || count > 5) return throw_wrong_arguments("__dorequest", count, 4, 5, 1);
         if (count <= 4) return (t___dorequest(a0, a1, a2, a3));
         return (t___dorequest(a0, a1, a2, a3, a4));
       }
       HASH_GUARD(0x52C6ABACCBFD0C75LL, __setcookie) {
-        if (count < 1) throw_missing_argument("__setcookie", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("__setcookie", count, 1, 2, 1);
         if (count <= 1) return (t___setcookie(a0));
         return (t___setcookie(a0, a1));
       }
       HASH_GUARD(0x628D398E7604B9D5LL, __gettypes) {
+        if (count > 0) return throw_toomany_arguments("__gettypes", 0, 1);
         return (t___gettypes());
       }
       break;
     case 25:
       HASH_GUARD(0x4A2F89F662050D99LL, __soapcall) {
-        if (count < 2) throw_missing_argument("__soapcall", count+1);
+        if (count < 2 || count > 5) return throw_wrong_arguments("__soapcall", count, 2, 5, 1);
         if (count <= 2) return (t___soapcall(a0, a1));
         if (count == 3) return (t___soapcall(a0, a1, a2));
         if (count == 4) return (t___soapcall(a0, a1, a2, a3));
@@ -14895,22 +15063,25 @@ Variant c_soapclient::o_invoke_few_args(const char *s, int64 hash, int count, CV
       break;
     case 26:
       HASH_GUARD(0x0C94657A58A82CFALL, __getlastresponseheaders) {
+        if (count > 0) return throw_toomany_arguments("__getlastresponseheaders", 0, 1);
         return (t___getlastresponseheaders());
       }
       break;
     case 27:
       HASH_GUARD(0x14842228D5E335BBLL, __setsoapheaders) {
+        if (count > 1) return throw_toomany_arguments("__setsoapheaders", 1, 1);
         if (count <= 0) return (t___setsoapheaders());
         return (t___setsoapheaders(a0));
       }
       break;
     case 31:
       HASH_GUARD(0x232D13904DBC36FFLL, __setlocation) {
+        if (count > 1) return throw_toomany_arguments("__setlocation", 1, 1);
         if (count <= 0) return (t___setlocation());
         return (t___setlocation(a0));
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("__construct", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         if (count <= 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
@@ -14921,6 +15092,7 @@ Variant c_soapclient::o_invoke_few_args(const char *s, int64 hash, int count, CV
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_soapclient::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -15251,27 +15423,25 @@ Variant c_soapparam::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(soapparam)
 c_soapparam *c_soapparam::create(Variant a0, String a1) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  decRefCount();
   return this;
 }
 ObjectData *c_soapparam::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 2) throw_missing_argument("__construct", count+1);
-    (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 2) throw_wrong_arguments("__construct", count, 2, 2, 2);
+    (t___construct(params[0], params[1]));
   }
   return this;
 }
 void c_soapparam::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 2) throw_missing_argument("__construct", count+1);
-  (t___construct(params.rvalAt(0), params.rvalAt(1)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) throw_wrong_arguments("__construct", count, 2, 2, 2);
+  (t___construct(params[0], params[1]));
 }
 void c_soapparam::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -15308,16 +15478,17 @@ void c_soapparam::cloneSet(c_soapparam *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_soapparam::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 3) {
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__construct", count+1);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
+        return (t___construct(params[0], params[1]), null);
       }
       break;
     default:
@@ -15330,10 +15501,11 @@ Variant c_soapparam::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   switch (hash & 3) {
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 2) throw_missing_argument("__construct", count+1);
+        if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
         return (t___construct(a0, a1), null);
       }
       break;
@@ -15343,6 +15515,7 @@ Variant c_soapparam::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_soapparam::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_soapparam::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -15493,29 +15666,29 @@ Variant c_datetime::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(datetime)
 c_datetime *c_datetime::create(String a0, Object a1) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  decRefCount();
   return this;
 }
 ObjectData *c_datetime::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 2) throw_toomany_arguments("__construct", 2, 2);
     if (count <= 0) (t___construct());
-    else if (count == 1) (t___construct(params.rvalAt(0)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    decRefCount();
+    else if (count == 1) (t___construct(params[0]));
+    else (t___construct(params[0], params[1]));
   }
   return this;
 }
 void c_datetime::dynConstruct(CArrRef params) {
-  int count = params.size();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 2) throw_toomany_arguments("__construct", 2, 2);
   if (count <= 0) (t___construct());
-  else if (count == 1) (t___construct(params.rvalAt(0)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1)));
+  else if (count == 1) (t___construct(params[0]));
+  else (t___construct(params[0], params[1]));
 }
 void c_datetime::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -15555,69 +15728,67 @@ void c_datetime::cloneSet(c_datetime *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_datetime::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
     case 7:
       HASH_GUARD(0x65A9B2950F080587LL, modify) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("modify", count+1);
-        return (t_modify(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("modify", count, 1, 1, 1);
+        return (t_modify(params[0]));
       }
       break;
     case 11:
       HASH_GUARD(0x67314943DC9D120BLL, setdate) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("setdate", count+1);
-        return (t_setdate(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count != 3) return throw_wrong_arguments("setdate", count, 3, 3, 1);
+        return (t_setdate(params[0], params[1], params[2]));
       }
       HASH_GUARD(0x68DB66F60B55BD0BLL, getoffset) {
+        if (count > 0) return throw_toomany_arguments("getoffset", 0, 1);
         return (t_getoffset());
       }
       break;
     case 12:
       HASH_GUARD(0x688601F33BE7716CLL, gettimezone) {
+        if (count > 0) return throw_toomany_arguments("gettimezone", 0, 1);
         return (t_gettimezone());
       }
       break;
     case 19:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 20:
       HASH_GUARD(0x16D6DBFD6EE55A74LL, setisodate) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("setisodate", count+1);
-        if (count <= 2) return (t_setisodate(params.rvalAt(0), params.rvalAt(1)));
-        return (t_setisodate(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count < 2 || count > 3) return throw_wrong_arguments("setisodate", count, 2, 3, 1);
+        if (count <= 2) return (t_setisodate(params[0], params[1]));
+        return (t_setisodate(params[0], params[1], params[2]));
       }
       break;
     case 24:
       HASH_GUARD(0x07CB96AB34F4C258LL, settime) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("settime", count+1);
-        if (count <= 2) return (t_settime(params.rvalAt(0), params.rvalAt(1)));
-        return (t_settime(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count < 2 || count > 3) return throw_wrong_arguments("settime", count, 2, 3, 1);
+        if (count <= 2) return (t_settime(params[0], params[1]));
+        return (t_settime(params[0], params[1], params[2]));
       }
       HASH_GUARD(0x3B576E558B957CB8LL, settimezone) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("settimezone", count+1);
-        return (t_settimezone(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("settimezone", count, 1, 1, 1);
+        return (t_settimezone(params[0]));
       }
       break;
     case 27:
       HASH_GUARD(0x1B6DDAF6AAF8CA9BLL, format) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("format", count+1);
-        return (t_format(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("format", count, 1, 1, 1);
+        return (t_format(params[0]));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       break;
     default:
@@ -15630,55 +15801,59 @@ Variant c_datetime::o_invoke_few_args(const char *s, int64 hash, int count, CVar
   switch (hash & 31) {
     case 7:
       HASH_GUARD(0x65A9B2950F080587LL, modify) {
-        if (count < 1) throw_missing_argument("modify", count+1);
+        if (count != 1) return throw_wrong_arguments("modify", count, 1, 1, 1);
         return (t_modify(a0));
       }
       break;
     case 11:
       HASH_GUARD(0x67314943DC9D120BLL, setdate) {
-        if (count < 3) throw_missing_argument("setdate", count+1);
+        if (count != 3) return throw_wrong_arguments("setdate", count, 3, 3, 1);
         return (t_setdate(a0, a1, a2));
       }
       HASH_GUARD(0x68DB66F60B55BD0BLL, getoffset) {
+        if (count > 0) return throw_toomany_arguments("getoffset", 0, 1);
         return (t_getoffset());
       }
       break;
     case 12:
       HASH_GUARD(0x688601F33BE7716CLL, gettimezone) {
+        if (count > 0) return throw_toomany_arguments("gettimezone", 0, 1);
         return (t_gettimezone());
       }
       break;
     case 19:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 20:
       HASH_GUARD(0x16D6DBFD6EE55A74LL, setisodate) {
-        if (count < 2) throw_missing_argument("setisodate", count+1);
+        if (count < 2 || count > 3) return throw_wrong_arguments("setisodate", count, 2, 3, 1);
         if (count <= 2) return (t_setisodate(a0, a1));
         return (t_setisodate(a0, a1, a2));
       }
       break;
     case 24:
       HASH_GUARD(0x07CB96AB34F4C258LL, settime) {
-        if (count < 2) throw_missing_argument("settime", count+1);
+        if (count < 2 || count > 3) return throw_wrong_arguments("settime", count, 2, 3, 1);
         if (count <= 2) return (t_settime(a0, a1));
         return (t_settime(a0, a1, a2));
       }
       HASH_GUARD(0x3B576E558B957CB8LL, settimezone) {
-        if (count < 1) throw_missing_argument("settimezone", count+1);
+        if (count != 1) return throw_wrong_arguments("settimezone", count, 1, 1, 1);
         return (t_settimezone(a0));
       }
       break;
     case 27:
       HASH_GUARD(0x1B6DDAF6AAF8CA9BLL, format) {
-        if (count < 1) throw_missing_argument("format", count+1);
+        if (count != 1) return throw_wrong_arguments("format", count, 1, 1, 1);
         return (t_format(a0));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -15690,6 +15865,7 @@ Variant c_datetime::o_invoke_few_args(const char *s, int64 hash, int count, CVar
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_datetime::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -16185,33 +16361,31 @@ Variant c_pdo::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(pdo)
 c_pdo *c_pdo::create(String a0, String a1, String a2, Array a3) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3);
-  decRefCount();
   return this;
 }
 ObjectData *c_pdo::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("__construct", count+1);
-    if (count <= 1) (t___construct(params.rvalAt(0)));
-    else if (count == 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    else if (count == 3) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count < 1 || count > 4) throw_wrong_arguments("__construct", count, 1, 4, 2);
+    if (count <= 1) (t___construct(params[0]));
+    else if (count == 2) (t___construct(params[0], params[1]));
+    else if (count == 3) (t___construct(params[0], params[1], params[2]));
+    else (t___construct(params[0], params[1], params[2], params[3]));
   }
   return this;
 }
 void c_pdo::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("__construct", count+1);
-  if (count <= 1) (t___construct(params.rvalAt(0)));
-  else if (count == 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-  else if (count == 3) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 4) throw_wrong_arguments("__construct", count, 1, 4, 2);
+  if (count <= 1) (t___construct(params[0]));
+  else if (count == 2) (t___construct(params[0], params[1]));
+  else if (count == 3) (t___construct(params[0], params[1], params[2]));
+  else (t___construct(params[0], params[1], params[2], params[3]));
 }
 void c_pdo::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -16260,111 +16434,114 @@ void c_pdo::cloneSet(c_pdo *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_pdo::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 7:
       HASH_GUARD(0x6D0664CC2372F2C7LL, errorcode) {
+        if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
         return (t_errorcode());
       }
       break;
     case 10:
       HASH_GUARD(0x1D5B8B8144F4AB8ALL, setattribute) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("setattribute", count+1);
-        return (t_setattribute(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
+        return (t_setattribute(params[0], params[1]));
       }
       break;
     case 12:
       HASH_GUARD(0x4F1D1ED7B087208CLL, exec) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("exec", count+1);
-        return (t_exec(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
+        return (t_exec(params[0]));
       }
       break;
     case 14:
       HASH_GUARD(0x7FF4D594AC38340ELL, getavailabledrivers) {
+        if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
         return (t_getavailabledrivers());
       }
       break;
     case 18:
       HASH_GUARD(0x25466EABBA2D7C12LL, lastinsertid) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("lastinsertid", 1, 1);
         if (count <= 0) return (t_lastinsertid());
-        return (t_lastinsertid(params.rvalAt(0)));
+        return (t_lastinsertid(params[0]));
       }
       break;
     case 28:
       HASH_GUARD(0x4389F50CAA085CDCLL, __wakeup) {
+        if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
         return (t___wakeup());
       }
       break;
     case 30:
       HASH_GUARD(0x1DDD412E7F04605ELL, errorinfo) {
+        if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
         return (t_errorinfo());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__construct", count+1);
-        if (count <= 1) return (t___construct(params.rvalAt(0)), null);
-        if (count == 2) return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
-        if (count == 3) return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)), null);
+        if (count < 1 || count > 4) return throw_wrong_arguments("__construct", count, 1, 4, 1);
+        if (count <= 1) return (t___construct(params[0]), null);
+        if (count == 2) return (t___construct(params[0], params[1]), null);
+        if (count == 3) return (t___construct(params[0], params[1], params[2]), null);
+        return (t___construct(params[0], params[1], params[2], params[3]), null);
       }
       break;
     case 36:
       HASH_GUARD(0x24D23BE465E3F324LL, commit) {
+        if (count > 0) return throw_toomany_arguments("commit", 0, 1);
         return (t_commit());
       }
       break;
     case 40:
       HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("getattribute", count+1);
-        return (t_getattribute(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
+        return (t_getattribute(params[0]));
       }
       break;
     case 45:
       HASH_GUARD(0x61D1244DDADBC02DLL, __sleep) {
+        if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
         return (t___sleep());
       }
       break;
     case 46:
       HASH_GUARD(0x1740B14E849464EELL, quote) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("quote", count+1);
-        if (count <= 1) return (t_quote(params.rvalAt(0)));
-        return (t_quote(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("quote", count, 1, 2, 1);
+        if (count <= 1) return (t_quote(params[0]));
+        return (t_quote(params[0], params[1]));
       }
       break;
     case 47:
       HASH_GUARD(0x540020AE4BA591AFLL, prepare) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("prepare", count+1);
-        if (count <= 1) return (t_prepare(params.rvalAt(0)));
-        return (t_prepare(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("prepare", count, 1, 2, 1);
+        if (count <= 1) return (t_prepare(params[0]));
+        return (t_prepare(params[0], params[1]));
       }
       break;
     case 51:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 54:
       HASH_GUARD(0x374B46BC6D79EC36LL, rollback) {
+        if (count > 0) return throw_toomany_arguments("rollback", 0, 1);
         return (t_rollback());
       }
       break;
     case 55:
       HASH_GUARD(0x356758D4414DA377LL, query) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("query", count+1);
-        return (t_query(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
+        return (t_query(params[0]));
       }
       break;
     case 59:
       HASH_GUARD(0x0DE392135C33E23BLL, begintransaction) {
+        if (count > 0) return throw_toomany_arguments("begintransaction", 0, 1);
         return (t_begintransaction());
       }
       break;
@@ -16378,45 +16555,50 @@ Variant c_pdo::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a
   switch (hash & 63) {
     case 7:
       HASH_GUARD(0x6D0664CC2372F2C7LL, errorcode) {
+        if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
         return (t_errorcode());
       }
       break;
     case 10:
       HASH_GUARD(0x1D5B8B8144F4AB8ALL, setattribute) {
-        if (count < 2) throw_missing_argument("setattribute", count+1);
+        if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
         return (t_setattribute(a0, a1));
       }
       break;
     case 12:
       HASH_GUARD(0x4F1D1ED7B087208CLL, exec) {
-        if (count < 1) throw_missing_argument("exec", count+1);
+        if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
         return (t_exec(a0));
       }
       break;
     case 14:
       HASH_GUARD(0x7FF4D594AC38340ELL, getavailabledrivers) {
+        if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
         return (t_getavailabledrivers());
       }
       break;
     case 18:
       HASH_GUARD(0x25466EABBA2D7C12LL, lastinsertid) {
+        if (count > 1) return throw_toomany_arguments("lastinsertid", 1, 1);
         if (count <= 0) return (t_lastinsertid());
         return (t_lastinsertid(a0));
       }
       break;
     case 28:
       HASH_GUARD(0x4389F50CAA085CDCLL, __wakeup) {
+        if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
         return (t___wakeup());
       }
       break;
     case 30:
       HASH_GUARD(0x1DDD412E7F04605ELL, errorinfo) {
+        if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
         return (t_errorinfo());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("__construct", count+1);
+        if (count < 1 || count > 4) return throw_wrong_arguments("__construct", count, 1, 4, 1);
         if (count <= 1) return (t___construct(a0), null);
         if (count == 2) return (t___construct(a0, a1), null);
         if (count == 3) return (t___construct(a0, a1, a2), null);
@@ -16425,52 +16607,57 @@ Variant c_pdo::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a
       break;
     case 36:
       HASH_GUARD(0x24D23BE465E3F324LL, commit) {
+        if (count > 0) return throw_toomany_arguments("commit", 0, 1);
         return (t_commit());
       }
       break;
     case 40:
       HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
-        if (count < 1) throw_missing_argument("getattribute", count+1);
+        if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
         return (t_getattribute(a0));
       }
       break;
     case 45:
       HASH_GUARD(0x61D1244DDADBC02DLL, __sleep) {
+        if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
         return (t___sleep());
       }
       break;
     case 46:
       HASH_GUARD(0x1740B14E849464EELL, quote) {
-        if (count < 1) throw_missing_argument("quote", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("quote", count, 1, 2, 1);
         if (count <= 1) return (t_quote(a0));
         return (t_quote(a0, a1));
       }
       break;
     case 47:
       HASH_GUARD(0x540020AE4BA591AFLL, prepare) {
-        if (count < 1) throw_missing_argument("prepare", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("prepare", count, 1, 2, 1);
         if (count <= 1) return (t_prepare(a0));
         return (t_prepare(a0, a1));
       }
       break;
     case 51:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 54:
       HASH_GUARD(0x374B46BC6D79EC36LL, rollback) {
+        if (count > 0) return throw_toomany_arguments("rollback", 0, 1);
         return (t_rollback());
       }
       break;
     case 55:
       HASH_GUARD(0x356758D4414DA377LL, query) {
-        if (count < 1) throw_missing_argument("query", count+1);
+        if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
         return (t_query(a0));
       }
       break;
     case 59:
       HASH_GUARD(0x0DE392135C33E23BLL, begintransaction) {
+        if (count > 0) return throw_toomany_arguments("begintransaction", 0, 1);
         return (t_begintransaction());
       }
       break;
@@ -16480,6 +16667,7 @@ Variant c_pdo::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_pdo::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -16834,22 +17022,24 @@ Variant c_domentity::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domentity)
 c_domentity *c_domentity::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_domentity::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_domentity::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_domentity::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -16882,138 +17072,134 @@ Variant c_domentity::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
 Variant c_domentity::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
-        int count = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params.rvalAt(0)));
-        if (count == 2) return (t_c14n(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count == 1) return (t_c14n(params[0]));
+        if (count == 2) return (t_c14n(params[0], params[1]));
+        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
+        return (t_c14n(params[0], params[1], params[2], params[3]));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("replacechild", count+1);
-        return (t_replacechild(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
+        return (t_replacechild(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appendchild", count+1);
-        return (t_appendchild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
+        return (t_appendchild(params[0]));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params.rvalAt(0)));
+        return (t_clonenode(params[0]));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
-        return (t_lookupnamespaceuri(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
+        return (t_lookupnamespaceuri(params[0]));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removechild", count+1);
-        return (t_removechild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
+        return (t_removechild(params[0]));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
-        return (t_lookupprefix(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
+        return (t_lookupprefix(params[0]));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
-        return (t_isdefaultnamespace(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
+        return (t_isdefaultnamespace(params[0]));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("issamenode", count+1);
-        return (t_issamenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
+        return (t_issamenode(params[0]));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
-        if (count <= 1) return (t_insertbefore(params.rvalAt(0)));
-        return (t_insertbefore(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
+        if (count <= 1) return (t_insertbefore(params[0]));
+        return (t_insertbefore(params[0], params[1]));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
-        if (count <= 1) return (t_c14nfile(params.rvalAt(0)));
-        if (count == 2) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
+        if (count <= 1) return (t_c14nfile(params[0]));
+        if (count == 2) return (t_c14nfile(params[0], params[1]));
+        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
+        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
+        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("issupported", count+1);
-        return (t_issupported(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
+        return (t_issupported(params[0], params[1]));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -17027,11 +17213,13 @@ Variant c_domentity::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
         if (count == 2) return (t_c14n(a0, a1));
@@ -17041,93 +17229,99 @@ Variant c_domentity::o_invoke_few_args(const char *s, int64 hash, int count, CVa
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        if (count < 2) throw_missing_argument("replacechild", count+1);
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        if (count < 1) throw_missing_argument("appendchild", count+1);
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        if (count < 1) throw_missing_argument("removechild", count+1);
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        if (count < 1) throw_missing_argument("issamenode", count+1);
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
         if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -17137,10 +17331,11 @@ Variant c_domentity::o_invoke_few_args(const char *s, int64 hash, int count, CVa
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        if (count < 2) throw_missing_argument("issupported", count+1);
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -17150,6 +17345,7 @@ Variant c_domentity::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domentity::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -17592,22 +17788,24 @@ Variant c_xmlwriter::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(xmlwriter)
 c_xmlwriter *c_xmlwriter::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_xmlwriter::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_xmlwriter::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_xmlwriter::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -17637,288 +17835,280 @@ void c_xmlwriter::cloneSet(c_xmlwriter *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_xmlwriter::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {
     case 2:
       HASH_GUARD(0x1EBCBEA66B6B0982LL, writecdata) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("writecdata", count+1);
-        return (t_writecdata(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("writecdata", count, 1, 1, 1);
+        return (t_writecdata(params[0]));
       }
       break;
     case 3:
       HASH_GUARD(0x55E29E84E96ACF83LL, startdtd) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("startdtd", count+1);
-        if (count <= 1) return (t_startdtd(params.rvalAt(0)));
-        if (count == 2) return (t_startdtd(params.rvalAt(0), params.rvalAt(1)));
-        return (t_startdtd(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count < 1 || count > 3) return throw_wrong_arguments("startdtd", count, 1, 3, 1);
+        if (count <= 1) return (t_startdtd(params[0]));
+        if (count == 2) return (t_startdtd(params[0], params[1]));
+        return (t_startdtd(params[0], params[1], params[2]));
       }
       break;
     case 8:
       HASH_GUARD(0x7C1FF8A79BAB3608LL, writedtd) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("writedtd", count+1);
-        if (count <= 1) return (t_writedtd(params.rvalAt(0)));
-        if (count == 2) return (t_writedtd(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_writedtd(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_writedtd(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count < 1 || count > 4) return throw_wrong_arguments("writedtd", count, 1, 4, 1);
+        if (count <= 1) return (t_writedtd(params[0]));
+        if (count == 2) return (t_writedtd(params[0], params[1]));
+        if (count == 3) return (t_writedtd(params[0], params[1], params[2]));
+        return (t_writedtd(params[0], params[1], params[2], params[3]));
       }
       break;
     case 14:
       HASH_GUARD(0x119CC9E7C3E7EF0ELL, openmemory) {
+        if (count > 0) return throw_toomany_arguments("openmemory", 0, 1);
         return (t_openmemory());
       }
       break;
     case 16:
       HASH_GUARD(0x0A7FE14C41766610LL, endcdata) {
+        if (count > 0) return throw_toomany_arguments("endcdata", 0, 1);
         return (t_endcdata());
       }
       break;
     case 19:
       HASH_GUARD(0x75F8C992981A4093LL, writecomment) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("writecomment", count+1);
-        return (t_writecomment(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("writecomment", count, 1, 1, 1);
+        return (t_writecomment(params[0]));
       }
       HASH_GUARD(0x5A7AE5A26994FF13LL, startattribute) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("startattribute", count+1);
-        return (t_startattribute(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("startattribute", count, 1, 1, 1);
+        return (t_startattribute(params[0]));
       }
       break;
     case 28:
       HASH_GUARD(0x337EFFF3783B919CLL, writeelement) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("writeelement", count+1);
-        if (count <= 1) return (t_writeelement(params.rvalAt(0)));
-        return (t_writeelement(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("writeelement", count, 1, 2, 1);
+        if (count <= 1) return (t_writeelement(params[0]));
+        return (t_writeelement(params[0], params[1]));
       }
       break;
     case 29:
       HASH_GUARD(0x4D26D167066BB11DLL, text) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("text", count+1);
-        return (t_text(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("text", count, 1, 1, 1);
+        return (t_text(params[0]));
       }
       break;
     case 32:
       HASH_GUARD(0x7DF0368A44C01B20LL, startcdata) {
+        if (count > 0) return throw_toomany_arguments("startcdata", 0, 1);
         return (t_startcdata());
       }
       break;
     case 33:
       HASH_GUARD(0x5D49A460168D5C21LL, endpi) {
+        if (count > 0) return throw_toomany_arguments("endpi", 0, 1);
         return (t_endpi());
       }
       break;
     case 41:
       HASH_GUARD(0x1D81ABDC9890C5A9LL, writedtdattlist) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("writedtdattlist", count+1);
-        return (t_writedtdattlist(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("writedtdattlist", count, 2, 2, 1);
+        return (t_writedtdattlist(params[0], params[1]));
       }
       break;
     case 43:
       HASH_GUARD(0x0DEAF425F1AD73ABLL, setindentstring) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("setindentstring", count+1);
-        return (t_setindentstring(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("setindentstring", count, 1, 1, 1);
+        return (t_setindentstring(params[0]));
       }
       break;
     case 47:
       HASH_GUARD(0x78A7A5D96EF2F4AFLL, endelement) {
+        if (count > 0) return throw_toomany_arguments("endelement", 0, 1);
         return (t_endelement());
       }
       break;
     case 53:
       HASH_GUARD(0x75B357D89DDE6EB5LL, endcomment) {
+        if (count > 0) return throw_toomany_arguments("endcomment", 0, 1);
         return (t_endcomment());
       }
       break;
     case 55:
       HASH_GUARD(0x4B0F1F6361A59C37LL, writeraw) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("writeraw", count+1);
-        return (t_writeraw(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("writeraw", count, 1, 1, 1);
+        return (t_writeraw(params[0]));
       }
       break;
     case 56:
       HASH_GUARD(0x7FC89CF1AFFB1E38LL, startdocument) {
-        int count = params.size();
+        if (count > 3) return throw_toomany_arguments("startdocument", 3, 1);
         if (count <= 0) return (t_startdocument());
-        if (count == 1) return (t_startdocument(params.rvalAt(0)));
-        if (count == 2) return (t_startdocument(params.rvalAt(0), params.rvalAt(1)));
-        return (t_startdocument(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count == 1) return (t_startdocument(params[0]));
+        if (count == 2) return (t_startdocument(params[0], params[1]));
+        return (t_startdocument(params[0], params[1], params[2]));
       }
       break;
     case 58:
       HASH_GUARD(0x0D155D1E5C6641BALL, outputmemory) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("outputmemory", 1, 1);
         if (count <= 0) return (t_outputmemory());
-        return (t_outputmemory(params.rvalAt(0)));
+        return (t_outputmemory(params[0]));
       }
       break;
     case 62:
       HASH_GUARD(0x1FBE635680ADB7BELL, openuri) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("openuri", count+1);
-        return (t_openuri(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("openuri", count, 1, 1, 1);
+        return (t_openuri(params[0]));
       }
       break;
     case 68:
       HASH_GUARD(0x275896BFD7A77144LL, enddtd) {
+        if (count > 0) return throw_toomany_arguments("enddtd", 0, 1);
         return (t_enddtd());
       }
       break;
     case 70:
       HASH_GUARD(0x5D4650E5C0DAEE46LL, writedtdentity) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("writedtdentity", count+1);
-        if (count <= 2) return (t_writedtdentity(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_writedtdentity(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t_writedtdentity(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        if (count == 5) return (t_writedtdentity(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
-        return (t_writedtdentity(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4), params.rvalAt(5)));
+        if (count < 2 || count > 6) return throw_wrong_arguments("writedtdentity", count, 2, 6, 1);
+        if (count <= 2) return (t_writedtdentity(params[0], params[1]));
+        if (count == 3) return (t_writedtdentity(params[0], params[1], params[2]));
+        if (count == 4) return (t_writedtdentity(params[0], params[1], params[2], params[3]));
+        if (count == 5) return (t_writedtdentity(params[0], params[1], params[2], params[3], params[4]));
+        return (t_writedtdentity(params[0], params[1], params[2], params[3], params[4], params[5]));
       }
       break;
     case 71:
       HASH_GUARD(0x017687FD7029CCC7LL, enddtdelement) {
+        if (count > 0) return throw_toomany_arguments("enddtdelement", 0, 1);
         return (t_enddtdelement());
       }
       break;
     case 75:
       HASH_GUARD(0x3954A2C0306CCCCBLL, writeattribute) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("writeattribute", count+1);
-        return (t_writeattribute(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("writeattribute", count, 2, 2, 1);
+        return (t_writeattribute(params[0], params[1]));
       }
       HASH_GUARD(0x7C43ECE80FF886CBLL, endattribute) {
+        if (count > 0) return throw_toomany_arguments("endattribute", 0, 1);
         return (t_endattribute());
       }
       break;
     case 77:
       HASH_GUARD(0x4F1D890D5B36D24DLL, startattributens) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("startattributens", count+1);
-        return (t_startattributens(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count != 3) return throw_wrong_arguments("startattributens", count, 3, 3, 1);
+        return (t_startattributens(params[0], params[1], params[2]));
       }
       break;
     case 82:
       HASH_GUARD(0x1357CA1E92397452LL, writedtdelement) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("writedtdelement", count+1);
-        return (t_writedtdelement(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("writedtdelement", count, 2, 2, 1);
+        return (t_writedtdelement(params[0], params[1]));
       }
       break;
     case 84:
       HASH_GUARD(0x154AE94AEFAC7C54LL, writeattributens) {
-        int count = params.size();
-        if (count < 4) throw_missing_argument("writeattributens", count+1);
-        return (t_writeattributens(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count != 4) return throw_wrong_arguments("writeattributens", count, 4, 4, 1);
+        return (t_writeattributens(params[0], params[1], params[2], params[3]));
       }
       break;
     case 86:
       HASH_GUARD(0x4520735705A382D6LL, enddtdentity) {
+        if (count > 0) return throw_toomany_arguments("enddtdentity", 0, 1);
         return (t_enddtdentity());
       }
       HASH_GUARD(0x37D51A94C6EE8F56LL, writepi) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("writepi", count+1);
-        return (t_writepi(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("writepi", count, 2, 2, 1);
+        return (t_writepi(params[0], params[1]));
       }
       break;
     case 88:
       HASH_GUARD(0x24A376E9310BF058LL, writeelementns) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("writeelementns", count+1);
-        if (count <= 3) return (t_writeelementns(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_writeelementns(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count < 3 || count > 4) return throw_wrong_arguments("writeelementns", count, 3, 4, 1);
+        if (count <= 3) return (t_writeelementns(params[0], params[1], params[2]));
+        return (t_writeelementns(params[0], params[1], params[2], params[3]));
       }
       break;
     case 89:
       HASH_GUARD(0x390B6C01AE7C4159LL, startpi) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("startpi", count+1);
-        return (t_startpi(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("startpi", count, 1, 1, 1);
+        return (t_startpi(params[0]));
       }
       break;
     case 92:
       HASH_GUARD(0x0DC5AC1E0A2F63DCLL, enddocument) {
+        if (count > 0) return throw_toomany_arguments("enddocument", 0, 1);
         return (t_enddocument());
       }
       break;
     case 93:
       HASH_GUARD(0x75A033B824EA1ADDLL, startdtdentity) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("startdtdentity", count+1);
-        return (t_startdtdentity(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("startdtdentity", count, 2, 2, 1);
+        return (t_startdtdentity(params[0], params[1]));
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 98:
       HASH_GUARD(0x55BFFBE5717EFD62LL, startelement) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("startelement", count+1);
-        return (t_startelement(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("startelement", count, 1, 1, 1);
+        return (t_startelement(params[0]));
       }
       break;
     case 101:
       HASH_GUARD(0x349B7446B5EE65E5LL, setindent) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("setindent", count+1);
-        return (t_setindent(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("setindent", count, 1, 1, 1);
+        return (t_setindent(params[0]));
       }
       break;
     case 105:
       HASH_GUARD(0x608A2D39DE12E169LL, startelementns) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("startelementns", count+1);
-        return (t_startelementns(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count != 3) return throw_wrong_arguments("startelementns", count, 3, 3, 1);
+        return (t_startelementns(params[0], params[1], params[2]));
       }
       break;
     case 112:
       HASH_GUARD(0x0CBB10FA542B7D70LL, startdtdattlist) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("startdtdattlist", count+1);
-        return (t_startdtdattlist(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("startdtdattlist", count, 1, 1, 1);
+        return (t_startdtdattlist(params[0]));
       }
       break;
     case 113:
       HASH_GUARD(0x496175DBD52E1771LL, enddtdattlist) {
+        if (count > 0) return throw_toomany_arguments("enddtdattlist", 0, 1);
         return (t_enddtdattlist());
       }
       break;
     case 115:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 120:
       HASH_GUARD(0x451436438EBA2AF8LL, startdtdelement) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("startdtdelement", count+1);
-        return (t_startdtdelement(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("startdtdelement", count, 1, 1, 1);
+        return (t_startdtdelement(params[0]));
       }
       break;
     case 122:
       HASH_GUARD(0x6A3D9F8EDB005E7ALL, flush) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("flush", 1, 1);
         if (count <= 0) return (t_flush());
-        return (t_flush(params.rvalAt(0)));
+        return (t_flush(params[0]));
       }
       break;
     case 126:
       HASH_GUARD(0x3174CCE00BFB9FFELL, fullendelement) {
+        if (count > 0) return throw_toomany_arguments("fullendelement", 0, 1);
         return (t_fullendelement());
       }
       break;
     case 127:
       HASH_GUARD(0x6A8CC27A7F0466FFLL, startcomment) {
+        if (count > 0) return throw_toomany_arguments("startcomment", 0, 1);
         return (t_startcomment());
       }
       break;
@@ -17932,13 +18122,13 @@ Variant c_xmlwriter::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   switch (hash & 127) {
     case 2:
       HASH_GUARD(0x1EBCBEA66B6B0982LL, writecdata) {
-        if (count < 1) throw_missing_argument("writecdata", count+1);
+        if (count != 1) return throw_wrong_arguments("writecdata", count, 1, 1, 1);
         return (t_writecdata(a0));
       }
       break;
     case 3:
       HASH_GUARD(0x55E29E84E96ACF83LL, startdtd) {
-        if (count < 1) throw_missing_argument("startdtd", count+1);
+        if (count < 1 || count > 3) return throw_wrong_arguments("startdtd", count, 1, 3, 1);
         if (count <= 1) return (t_startdtd(a0));
         if (count == 2) return (t_startdtd(a0, a1));
         return (t_startdtd(a0, a1, a2));
@@ -17946,7 +18136,7 @@ Variant c_xmlwriter::o_invoke_few_args(const char *s, int64 hash, int count, CVa
       break;
     case 8:
       HASH_GUARD(0x7C1FF8A79BAB3608LL, writedtd) {
-        if (count < 1) throw_missing_argument("writedtd", count+1);
+        if (count < 1 || count > 4) return throw_wrong_arguments("writedtd", count, 1, 4, 1);
         if (count <= 1) return (t_writedtd(a0));
         if (count == 2) return (t_writedtd(a0, a1));
         if (count == 3) return (t_writedtd(a0, a1, a2));
@@ -17955,77 +18145,84 @@ Variant c_xmlwriter::o_invoke_few_args(const char *s, int64 hash, int count, CVa
       break;
     case 14:
       HASH_GUARD(0x119CC9E7C3E7EF0ELL, openmemory) {
+        if (count > 0) return throw_toomany_arguments("openmemory", 0, 1);
         return (t_openmemory());
       }
       break;
     case 16:
       HASH_GUARD(0x0A7FE14C41766610LL, endcdata) {
+        if (count > 0) return throw_toomany_arguments("endcdata", 0, 1);
         return (t_endcdata());
       }
       break;
     case 19:
       HASH_GUARD(0x75F8C992981A4093LL, writecomment) {
-        if (count < 1) throw_missing_argument("writecomment", count+1);
+        if (count != 1) return throw_wrong_arguments("writecomment", count, 1, 1, 1);
         return (t_writecomment(a0));
       }
       HASH_GUARD(0x5A7AE5A26994FF13LL, startattribute) {
-        if (count < 1) throw_missing_argument("startattribute", count+1);
+        if (count != 1) return throw_wrong_arguments("startattribute", count, 1, 1, 1);
         return (t_startattribute(a0));
       }
       break;
     case 28:
       HASH_GUARD(0x337EFFF3783B919CLL, writeelement) {
-        if (count < 1) throw_missing_argument("writeelement", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("writeelement", count, 1, 2, 1);
         if (count <= 1) return (t_writeelement(a0));
         return (t_writeelement(a0, a1));
       }
       break;
     case 29:
       HASH_GUARD(0x4D26D167066BB11DLL, text) {
-        if (count < 1) throw_missing_argument("text", count+1);
+        if (count != 1) return throw_wrong_arguments("text", count, 1, 1, 1);
         return (t_text(a0));
       }
       break;
     case 32:
       HASH_GUARD(0x7DF0368A44C01B20LL, startcdata) {
+        if (count > 0) return throw_toomany_arguments("startcdata", 0, 1);
         return (t_startcdata());
       }
       break;
     case 33:
       HASH_GUARD(0x5D49A460168D5C21LL, endpi) {
+        if (count > 0) return throw_toomany_arguments("endpi", 0, 1);
         return (t_endpi());
       }
       break;
     case 41:
       HASH_GUARD(0x1D81ABDC9890C5A9LL, writedtdattlist) {
-        if (count < 2) throw_missing_argument("writedtdattlist", count+1);
+        if (count != 2) return throw_wrong_arguments("writedtdattlist", count, 2, 2, 1);
         return (t_writedtdattlist(a0, a1));
       }
       break;
     case 43:
       HASH_GUARD(0x0DEAF425F1AD73ABLL, setindentstring) {
-        if (count < 1) throw_missing_argument("setindentstring", count+1);
+        if (count != 1) return throw_wrong_arguments("setindentstring", count, 1, 1, 1);
         return (t_setindentstring(a0));
       }
       break;
     case 47:
       HASH_GUARD(0x78A7A5D96EF2F4AFLL, endelement) {
+        if (count > 0) return throw_toomany_arguments("endelement", 0, 1);
         return (t_endelement());
       }
       break;
     case 53:
       HASH_GUARD(0x75B357D89DDE6EB5LL, endcomment) {
+        if (count > 0) return throw_toomany_arguments("endcomment", 0, 1);
         return (t_endcomment());
       }
       break;
     case 55:
       HASH_GUARD(0x4B0F1F6361A59C37LL, writeraw) {
-        if (count < 1) throw_missing_argument("writeraw", count+1);
+        if (count != 1) return throw_wrong_arguments("writeraw", count, 1, 1, 1);
         return (t_writeraw(a0));
       }
       break;
     case 56:
       HASH_GUARD(0x7FC89CF1AFFB1E38LL, startdocument) {
+        if (count > 3) return throw_toomany_arguments("startdocument", 3, 1);
         if (count <= 0) return (t_startdocument());
         if (count == 1) return (t_startdocument(a0));
         if (count == 2) return (t_startdocument(a0, a1));
@@ -18034,24 +18231,26 @@ Variant c_xmlwriter::o_invoke_few_args(const char *s, int64 hash, int count, CVa
       break;
     case 58:
       HASH_GUARD(0x0D155D1E5C6641BALL, outputmemory) {
+        if (count > 1) return throw_toomany_arguments("outputmemory", 1, 1);
         if (count <= 0) return (t_outputmemory());
         return (t_outputmemory(a0));
       }
       break;
     case 62:
       HASH_GUARD(0x1FBE635680ADB7BELL, openuri) {
-        if (count < 1) throw_missing_argument("openuri", count+1);
+        if (count != 1) return throw_wrong_arguments("openuri", count, 1, 1, 1);
         return (t_openuri(a0));
       }
       break;
     case 68:
       HASH_GUARD(0x275896BFD7A77144LL, enddtd) {
+        if (count > 0) return throw_toomany_arguments("enddtd", 0, 1);
         return (t_enddtd());
       }
       break;
     case 70:
       HASH_GUARD(0x5D4650E5C0DAEE46LL, writedtdentity) {
-        if (count < 2) throw_missing_argument("writedtdentity", count+1);
+        if (count < 2 || count > 6) return throw_wrong_arguments("writedtdentity", count, 2, 6, 1);
         if (count <= 2) return (t_writedtdentity(a0, a1));
         if (count == 3) return (t_writedtdentity(a0, a1, a2));
         if (count == 4) return (t_writedtdentity(a0, a1, a2, a3));
@@ -18061,127 +18260,137 @@ Variant c_xmlwriter::o_invoke_few_args(const char *s, int64 hash, int count, CVa
       break;
     case 71:
       HASH_GUARD(0x017687FD7029CCC7LL, enddtdelement) {
+        if (count > 0) return throw_toomany_arguments("enddtdelement", 0, 1);
         return (t_enddtdelement());
       }
       break;
     case 75:
       HASH_GUARD(0x3954A2C0306CCCCBLL, writeattribute) {
-        if (count < 2) throw_missing_argument("writeattribute", count+1);
+        if (count != 2) return throw_wrong_arguments("writeattribute", count, 2, 2, 1);
         return (t_writeattribute(a0, a1));
       }
       HASH_GUARD(0x7C43ECE80FF886CBLL, endattribute) {
+        if (count > 0) return throw_toomany_arguments("endattribute", 0, 1);
         return (t_endattribute());
       }
       break;
     case 77:
       HASH_GUARD(0x4F1D890D5B36D24DLL, startattributens) {
-        if (count < 3) throw_missing_argument("startattributens", count+1);
+        if (count != 3) return throw_wrong_arguments("startattributens", count, 3, 3, 1);
         return (t_startattributens(a0, a1, a2));
       }
       break;
     case 82:
       HASH_GUARD(0x1357CA1E92397452LL, writedtdelement) {
-        if (count < 2) throw_missing_argument("writedtdelement", count+1);
+        if (count != 2) return throw_wrong_arguments("writedtdelement", count, 2, 2, 1);
         return (t_writedtdelement(a0, a1));
       }
       break;
     case 84:
       HASH_GUARD(0x154AE94AEFAC7C54LL, writeattributens) {
-        if (count < 4) throw_missing_argument("writeattributens", count+1);
+        if (count != 4) return throw_wrong_arguments("writeattributens", count, 4, 4, 1);
         return (t_writeattributens(a0, a1, a2, a3));
       }
       break;
     case 86:
       HASH_GUARD(0x4520735705A382D6LL, enddtdentity) {
+        if (count > 0) return throw_toomany_arguments("enddtdentity", 0, 1);
         return (t_enddtdentity());
       }
       HASH_GUARD(0x37D51A94C6EE8F56LL, writepi) {
-        if (count < 2) throw_missing_argument("writepi", count+1);
+        if (count != 2) return throw_wrong_arguments("writepi", count, 2, 2, 1);
         return (t_writepi(a0, a1));
       }
       break;
     case 88:
       HASH_GUARD(0x24A376E9310BF058LL, writeelementns) {
-        if (count < 3) throw_missing_argument("writeelementns", count+1);
+        if (count < 3 || count > 4) return throw_wrong_arguments("writeelementns", count, 3, 4, 1);
         if (count <= 3) return (t_writeelementns(a0, a1, a2));
         return (t_writeelementns(a0, a1, a2, a3));
       }
       break;
     case 89:
       HASH_GUARD(0x390B6C01AE7C4159LL, startpi) {
-        if (count < 1) throw_missing_argument("startpi", count+1);
+        if (count != 1) return throw_wrong_arguments("startpi", count, 1, 1, 1);
         return (t_startpi(a0));
       }
       break;
     case 92:
       HASH_GUARD(0x0DC5AC1E0A2F63DCLL, enddocument) {
+        if (count > 0) return throw_toomany_arguments("enddocument", 0, 1);
         return (t_enddocument());
       }
       break;
     case 93:
       HASH_GUARD(0x75A033B824EA1ADDLL, startdtdentity) {
-        if (count < 2) throw_missing_argument("startdtdentity", count+1);
+        if (count != 2) return throw_wrong_arguments("startdtdentity", count, 2, 2, 1);
         return (t_startdtdentity(a0, a1));
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 98:
       HASH_GUARD(0x55BFFBE5717EFD62LL, startelement) {
-        if (count < 1) throw_missing_argument("startelement", count+1);
+        if (count != 1) return throw_wrong_arguments("startelement", count, 1, 1, 1);
         return (t_startelement(a0));
       }
       break;
     case 101:
       HASH_GUARD(0x349B7446B5EE65E5LL, setindent) {
-        if (count < 1) throw_missing_argument("setindent", count+1);
+        if (count != 1) return throw_wrong_arguments("setindent", count, 1, 1, 1);
         return (t_setindent(a0));
       }
       break;
     case 105:
       HASH_GUARD(0x608A2D39DE12E169LL, startelementns) {
-        if (count < 3) throw_missing_argument("startelementns", count+1);
+        if (count != 3) return throw_wrong_arguments("startelementns", count, 3, 3, 1);
         return (t_startelementns(a0, a1, a2));
       }
       break;
     case 112:
       HASH_GUARD(0x0CBB10FA542B7D70LL, startdtdattlist) {
-        if (count < 1) throw_missing_argument("startdtdattlist", count+1);
+        if (count != 1) return throw_wrong_arguments("startdtdattlist", count, 1, 1, 1);
         return (t_startdtdattlist(a0));
       }
       break;
     case 113:
       HASH_GUARD(0x496175DBD52E1771LL, enddtdattlist) {
+        if (count > 0) return throw_toomany_arguments("enddtdattlist", 0, 1);
         return (t_enddtdattlist());
       }
       break;
     case 115:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 120:
       HASH_GUARD(0x451436438EBA2AF8LL, startdtdelement) {
-        if (count < 1) throw_missing_argument("startdtdelement", count+1);
+        if (count != 1) return throw_wrong_arguments("startdtdelement", count, 1, 1, 1);
         return (t_startdtdelement(a0));
       }
       break;
     case 122:
       HASH_GUARD(0x6A3D9F8EDB005E7ALL, flush) {
+        if (count > 1) return throw_toomany_arguments("flush", 1, 1);
         if (count <= 0) return (t_flush());
         return (t_flush(a0));
       }
       break;
     case 126:
       HASH_GUARD(0x3174CCE00BFB9FFELL, fullendelement) {
+        if (count > 0) return throw_toomany_arguments("fullendelement", 0, 1);
         return (t_fullendelement());
       }
       break;
     case 127:
       HASH_GUARD(0x6A8CC27A7F0466FFLL, startcomment) {
+        if (count > 0) return throw_toomany_arguments("startcomment", 0, 1);
         return (t_startcomment());
       }
       break;
@@ -18191,6 +18400,7 @@ Variant c_xmlwriter::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_xmlwriter::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -19045,29 +19255,29 @@ Variant c_domexception::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domexception)
 c_domexception *c_domexception::create(String a0, int64 a1) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  decRefCount();
   return this;
 }
 ObjectData *c_domexception::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 2) throw_toomany_arguments("__construct", 2, 2);
     if (count <= 0) (t___construct());
-    else if (count == 1) (t___construct(params.rvalAt(0)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    decRefCount();
+    else if (count == 1) (t___construct(params[0]));
+    else (t___construct(params[0], params[1]));
   }
   return this;
 }
 void c_domexception::dynConstruct(CArrRef params) {
-  int count = params.size();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 2) throw_toomany_arguments("__construct", 2, 2);
   if (count <= 0) (t___construct());
-  else if (count == 1) (t___construct(params.rvalAt(0)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1)));
+  else if (count == 1) (t___construct(params[0]));
+  else (t___construct(params[0], params[1]));
 }
 void c_domexception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -19107,52 +19317,61 @@ void c_domexception::cloneSet(c_domexception *clone) {
   c_exception::cloneSet(clone);
 }
 Variant c_domexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       break;
     default:
@@ -19165,44 +19384,53 @@ Variant c_domexception::o_invoke_few_args(const char *s, int64 hash, int count, 
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -19214,6 +19442,7 @@ Variant c_domexception::o_invoke_few_args(const char *s, int64 hash, int count, 
   return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_exception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -19415,27 +19644,25 @@ Variant c_domxpath::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domxpath)
 c_domxpath *c_domxpath::create(Variant a0) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0);
-  decRefCount();
   return this;
 }
 ObjectData *c_domxpath::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("__construct", count+1);
-    (t___construct(params.rvalAt(0)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
+    (t___construct(params[0]));
   }
   return this;
 }
 void c_domxpath::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("__construct", count+1);
-  (t___construct(params.rvalAt(0)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
+  (t___construct(params[0]));
 }
 void c_domxpath::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -19471,58 +19698,54 @@ Variant c_domxpath::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
 Variant c_domxpath::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x144FADF6B374AB82LL, registerphpfunctions) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("registerphpfunctions", 1, 1);
         if (count <= 0) return (t_registerphpfunctions());
-        return (t_registerphpfunctions(params.rvalAt(0)));
+        return (t_registerphpfunctions(params[0]));
       }
       break;
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 5:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 7:
       HASH_GUARD(0x356758D4414DA377LL, query) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("query", count+1);
-        if (count <= 1) return (t_query(params.rvalAt(0)));
-        return (t_query(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("query", count, 1, 2, 1);
+        if (count <= 1) return (t_query(params[0]));
+        return (t_query(params[0], params[1]));
       }
       break;
     case 8:
       HASH_GUARD(0x47ACFB6D8681B0E8LL, registernamespace) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("registernamespace", count+1);
-        return (t_registernamespace(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("registernamespace", count, 2, 2, 1);
+        return (t_registernamespace(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__construct", count+1);
-        return (t___construct(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
+        return (t___construct(params[0]), null);
       }
       HASH_GUARD(0x2443593B6F3C912FLL, evaluate) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("evaluate", count+1);
-        if (count <= 1) return (t_evaluate(params.rvalAt(0)));
-        return (t_evaluate(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("evaluate", count, 1, 2, 1);
+        if (count <= 1) return (t_evaluate(params[0]));
+        return (t_evaluate(params[0], params[1]));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     default:
@@ -19535,46 +19758,48 @@ Variant c_domxpath::o_invoke_few_args(const char *s, int64 hash, int count, CVar
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x144FADF6B374AB82LL, registerphpfunctions) {
+        if (count > 1) return throw_toomany_arguments("registerphpfunctions", 1, 1);
         if (count <= 0) return (t_registerphpfunctions());
         return (t_registerphpfunctions(a0));
       }
       break;
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 5:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 7:
       HASH_GUARD(0x356758D4414DA377LL, query) {
-        if (count < 1) throw_missing_argument("query", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("query", count, 1, 2, 1);
         if (count <= 1) return (t_query(a0));
         return (t_query(a0, a1));
       }
       break;
     case 8:
       HASH_GUARD(0x47ACFB6D8681B0E8LL, registernamespace) {
-        if (count < 2) throw_missing_argument("registernamespace", count+1);
+        if (count != 2) return throw_wrong_arguments("registernamespace", count, 2, 2, 1);
         return (t_registernamespace(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("__construct", count+1);
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         return (t___construct(a0), null);
       }
       HASH_GUARD(0x2443593B6F3C912FLL, evaluate) {
-        if (count < 1) throw_missing_argument("evaluate", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("evaluate", count, 1, 2, 1);
         if (count <= 1) return (t_evaluate(a0));
         return (t_evaluate(a0, a1));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
@@ -19584,6 +19809,7 @@ Variant c_domxpath::o_invoke_few_args(const char *s, int64 hash, int count, CVar
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domxpath::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -19810,29 +20036,27 @@ Variant c_soapserver::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(soapserver)
 c_soapserver *c_soapserver::create(Variant a0, Array a1) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  decRefCount();
   return this;
 }
 ObjectData *c_soapserver::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("__construct", count+1);
-    if (count <= 1) (t___construct(params.rvalAt(0)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
+    if (count <= 1) (t___construct(params[0]));
+    else (t___construct(params[0], params[1]));
   }
   return this;
 }
 void c_soapserver::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("__construct", count+1);
-  if (count <= 1) (t___construct(params.rvalAt(0)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
+  if (count <= 1) (t___construct(params[0]));
+  else (t___construct(params[0], params[1]));
 }
 void c_soapserver::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -19871,75 +20095,71 @@ void c_soapserver::cloneSet(c_soapserver *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_soapserver::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x758A4E04590FE203LL, fault) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("fault", count+1);
-        if (count <= 2) return (t_fault(params.rvalAt(0), params.rvalAt(1)), null);
-        if (count == 3) return (t_fault(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)), null);
-        if (count == 4) return (t_fault(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)), null);
-        return (t_fault(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)), null);
+        if (count < 2 || count > 5) return throw_wrong_arguments("fault", count, 2, 5, 1);
+        if (count <= 2) return (t_fault(params[0], params[1]), null);
+        if (count == 3) return (t_fault(params[0], params[1], params[2]), null);
+        if (count == 4) return (t_fault(params[0], params[1], params[2], params[3]), null);
+        return (t_fault(params[0], params[1], params[2], params[3], params[4]), null);
       }
       break;
     case 8:
       HASH_GUARD(0x5E77DD94E0A69328LL, setpersistence) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("setpersistence", count+1);
-        return (t_setpersistence(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("setpersistence", count, 1, 1, 1);
+        return (t_setpersistence(params[0]), null);
       }
       break;
     case 15:
       HASH_GUARD(0x652BDFA6E22F17AFLL, getfunctions) {
+        if (count > 0) return throw_toomany_arguments("getfunctions", 0, 1);
         return (t_getfunctions());
       }
       break;
     case 18:
       HASH_GUARD(0x5C4CA333F4541532LL, handle) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("handle", 1, 1);
         if (count <= 0) return (t_handle(), null);
-        return (t_handle(params.rvalAt(0)), null);
+        return (t_handle(params[0]), null);
       }
       break;
     case 19:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 20:
       HASH_GUARD(0x597B151CC4F70834LL, setclass) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("setclass", count+1);
-        if (count <= 1) return (t_setclass(count, params.rvalAt(0)), null);
-        return (t_setclass(count,params.rvalAt(0), params.slice(1, count - 1, false)), null);
+        if (count < 1) return throw_missing_arguments("setclass", count+1, 1);
+        if (count <= 1) return (t_setclass(count, params[0]), null);
+        return (t_setclass(count,params[0], params.slice(1, count - 1, false)), null);
       }
       break;
     case 25:
       HASH_GUARD(0x559622F84FE626B9LL, setobject) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("setobject", count+1);
-        return (t_setobject(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("setobject", count, 1, 1, 1);
+        return (t_setobject(params[0]), null);
       }
       break;
     case 30:
       HASH_GUARD(0x278B0E6CCA74963ELL, addsoapheader) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("addsoapheader", count+1);
-        return (t_addsoapheader(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("addsoapheader", count, 1, 1, 1);
+        return (t_addsoapheader(params[0]), null);
       }
       break;
     case 31:
       HASH_GUARD(0x48B5852A397D2D9FLL, addfunction) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("addfunction", count+1);
-        return (t_addfunction(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("addfunction", count, 1, 1, 1);
+        return (t_addfunction(params[0]), null);
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__construct", count+1);
-        if (count <= 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
+        if (count <= 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       break;
     default:
@@ -19952,7 +20172,7 @@ Variant c_soapserver::o_invoke_few_args(const char *s, int64 hash, int count, CV
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x758A4E04590FE203LL, fault) {
-        if (count < 2) throw_missing_argument("fault", count+1);
+        if (count < 2 || count > 5) return throw_wrong_arguments("fault", count, 2, 5, 1);
         if (count <= 2) return (t_fault(a0, a1), null);
         if (count == 3) return (t_fault(a0, a1, a2), null);
         if (count == 4) return (t_fault(a0, a1, a2, a3), null);
@@ -19961,29 +20181,32 @@ Variant c_soapserver::o_invoke_few_args(const char *s, int64 hash, int count, CV
       break;
     case 8:
       HASH_GUARD(0x5E77DD94E0A69328LL, setpersistence) {
-        if (count < 1) throw_missing_argument("setpersistence", count+1);
+        if (count != 1) return throw_wrong_arguments("setpersistence", count, 1, 1, 1);
         return (t_setpersistence(a0), null);
       }
       break;
     case 15:
       HASH_GUARD(0x652BDFA6E22F17AFLL, getfunctions) {
+        if (count > 0) return throw_toomany_arguments("getfunctions", 0, 1);
         return (t_getfunctions());
       }
       break;
     case 18:
       HASH_GUARD(0x5C4CA333F4541532LL, handle) {
+        if (count > 1) return throw_toomany_arguments("handle", 1, 1);
         if (count <= 0) return (t_handle(), null);
         return (t_handle(a0), null);
       }
       break;
     case 19:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 20:
       HASH_GUARD(0x597B151CC4F70834LL, setclass) {
-        if (count < 1) throw_missing_argument("setclass", count+1);
+        if (count < 1) return throw_missing_arguments("setclass", count+1, 1);
         if (count <= 1) return (t_setclass(count, a0), null);
         Array params;
         if (count >= 2) params.append(a1);
@@ -19996,23 +20219,23 @@ Variant c_soapserver::o_invoke_few_args(const char *s, int64 hash, int count, CV
       break;
     case 25:
       HASH_GUARD(0x559622F84FE626B9LL, setobject) {
-        if (count < 1) throw_missing_argument("setobject", count+1);
+        if (count != 1) return throw_wrong_arguments("setobject", count, 1, 1, 1);
         return (t_setobject(a0), null);
       }
       break;
     case 30:
       HASH_GUARD(0x278B0E6CCA74963ELL, addsoapheader) {
-        if (count < 1) throw_missing_argument("addsoapheader", count+1);
+        if (count != 1) return throw_wrong_arguments("addsoapheader", count, 1, 1, 1);
         return (t_addsoapheader(a0), null);
       }
       break;
     case 31:
       HASH_GUARD(0x48B5852A397D2D9FLL, addfunction) {
-        if (count < 1) throw_missing_argument("addfunction", count+1);
+        if (count != 1) return throw_wrong_arguments("addfunction", count, 1, 1, 1);
         return (t_addfunction(a0), null);
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("__construct", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         if (count <= 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
@@ -20023,6 +20246,7 @@ Variant c_soapserver::o_invoke_few_args(const char *s, int64 hash, int count, CV
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_soapserver::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -20288,22 +20512,24 @@ Variant c_domnode::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domnode)
 c_domnode *c_domnode::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_domnode::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_domnode::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_domnode::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -20336,138 +20562,134 @@ Variant c_domnode::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
 Variant c_domnode::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
-        int count = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params.rvalAt(0)));
-        if (count == 2) return (t_c14n(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count == 1) return (t_c14n(params[0]));
+        if (count == 2) return (t_c14n(params[0], params[1]));
+        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
+        return (t_c14n(params[0], params[1], params[2], params[3]));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("replacechild", count+1);
-        return (t_replacechild(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
+        return (t_replacechild(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appendchild", count+1);
-        return (t_appendchild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
+        return (t_appendchild(params[0]));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params.rvalAt(0)));
+        return (t_clonenode(params[0]));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
-        return (t_lookupnamespaceuri(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
+        return (t_lookupnamespaceuri(params[0]));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removechild", count+1);
-        return (t_removechild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
+        return (t_removechild(params[0]));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
-        return (t_lookupprefix(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
+        return (t_lookupprefix(params[0]));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
-        return (t_isdefaultnamespace(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
+        return (t_isdefaultnamespace(params[0]));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("issamenode", count+1);
-        return (t_issamenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
+        return (t_issamenode(params[0]));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
-        if (count <= 1) return (t_insertbefore(params.rvalAt(0)));
-        return (t_insertbefore(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
+        if (count <= 1) return (t_insertbefore(params[0]));
+        return (t_insertbefore(params[0], params[1]));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
-        if (count <= 1) return (t_c14nfile(params.rvalAt(0)));
-        if (count == 2) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
+        if (count <= 1) return (t_c14nfile(params[0]));
+        if (count == 2) return (t_c14nfile(params[0], params[1]));
+        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
+        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
+        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("issupported", count+1);
-        return (t_issupported(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
+        return (t_issupported(params[0], params[1]));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -20481,11 +20703,13 @@ Variant c_domnode::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
   switch (hash & 63) {
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
         if (count == 2) return (t_c14n(a0, a1));
@@ -20495,93 +20719,99 @@ Variant c_domnode::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        if (count < 2) throw_missing_argument("replacechild", count+1);
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        if (count < 1) throw_missing_argument("appendchild", count+1);
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        if (count < 1) throw_missing_argument("removechild", count+1);
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        if (count < 1) throw_missing_argument("issamenode", count+1);
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
         if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -20591,10 +20821,11 @@ Variant c_domnode::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        if (count < 2) throw_missing_argument("issupported", count+1);
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
@@ -20604,6 +20835,7 @@ Variant c_domnode::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domnode::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -21046,29 +21278,29 @@ Variant c_domdocument::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domdocument)
 c_domdocument *c_domdocument::create(String a0, String a1) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  decRefCount();
   return this;
 }
 ObjectData *c_domdocument::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 2) throw_toomany_arguments("__construct", 2, 2);
     if (count <= 0) (t___construct());
-    else if (count == 1) (t___construct(params.rvalAt(0)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    decRefCount();
+    else if (count == 1) (t___construct(params[0]));
+    else (t___construct(params[0], params[1]));
   }
   return this;
 }
 void c_domdocument::dynConstruct(CArrRef params) {
-  int count = params.size();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 2) throw_toomany_arguments("__construct", 2, 2);
   if (count <= 0) (t___construct());
-  else if (count == 1) (t___construct(params.rvalAt(0)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1)));
+  else if (count == 1) (t___construct(params[0]));
+  else (t___construct(params[0], params[1]));
 }
 void c_domdocument::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -21111,338 +21343,313 @@ Variant c_domdocument::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
 Variant c_domdocument::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {
     case 5:
       HASH_GUARD(0x515FE7746601E385LL, getelementbyid) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("getelementbyid", count+1);
-        return (t_getelementbyid(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("getelementbyid", count, 1, 1, 1);
+        return (t_getelementbyid(params[0]));
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
-        int count = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params.rvalAt(0)));
-        if (count == 2) return (t_c14n(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count == 1) return (t_c14n(params[0]));
+        if (count == 2) return (t_c14n(params[0], params[1]));
+        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
+        return (t_c14n(params[0], params[1], params[2], params[3]));
       }
       HASH_GUARD(0x142A28F8CE4A4E8ALL, xinclude) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("xinclude", 1, 1);
         if (count <= 0) return (t_xinclude());
-        return (t_xinclude(params.rvalAt(0)));
+        return (t_xinclude(params[0]));
       }
       break;
     case 13:
       HASH_GUARD(0x0D128C363EBF7F0DLL, createcdatasection) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("createcdatasection", count+1);
-        return (t_createcdatasection(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("createcdatasection", count, 1, 1, 1);
+        return (t_createcdatasection(params[0]));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("replacechild", count+1);
-        return (t_replacechild(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
+        return (t_replacechild(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     case 17:
       HASH_GUARD(0x69C6F7D584EC5011LL, schemavalidatesource) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("schemavalidatesource", count+1);
-        return (t_schemavalidatesource(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("schemavalidatesource", count, 1, 1, 1);
+        return (t_schemavalidatesource(params[0]));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params.rvalAt(0)));
+        return (t_clonenode(params[0]));
       }
       break;
     case 20:
       HASH_GUARD(0x04F8F7CEA46D0514LL, save) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("save", count+1);
-        if (count <= 1) return (t_save(params.rvalAt(0)));
-        return (t_save(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("save", count, 1, 2, 1);
+        if (count <= 1) return (t_save(params[0]));
+        return (t_save(params[0], params[1]));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       HASH_GUARD(0x2FC58024A75AEB15LL, createattributens) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("createattributens", count+1);
-        return (t_createattributens(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("createattributens", count, 2, 2, 1);
+        return (t_createattributens(params[0], params[1]));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 28:
       HASH_GUARD(0x1A78385D7CD10A1CLL, relaxngvalidate) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("relaxngvalidate", count+1);
-        return (t_relaxngvalidate(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("relaxngvalidate", count, 1, 1, 1);
+        return (t_relaxngvalidate(params[0]));
       }
       break;
     case 34:
       HASH_GUARD(0x1B0F4D437C8404A2LL, loadhtml) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("loadhtml", count+1);
-        return (t_loadhtml(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("loadhtml", count, 1, 1, 1);
+        return (t_loadhtml(params[0]));
       }
       HASH_GUARD(0x4C40B0F935B39FA2LL, createelement) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("createelement", count+1);
-        if (count <= 1) return (t_createelement(params.rvalAt(0)));
-        return (t_createelement(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("createelement", count, 1, 2, 1);
+        if (count <= 1) return (t_createelement(params[0]));
+        return (t_createelement(params[0], params[1]));
       }
       break;
     case 44:
       HASH_GUARD(0x1304C35F6E006FACLL, relaxngvalidatesource) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("relaxngvalidatesource", count+1);
-        return (t_relaxngvalidatesource(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("relaxngvalidatesource", count, 1, 1, 1);
+        return (t_relaxngvalidatesource(params[0]));
       }
       HASH_GUARD(0x2BFDE9CF0FE9A82CLL, createattribute) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("createattribute", count+1);
-        return (t_createattribute(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("createattribute", count, 1, 1, 1);
+        return (t_createattribute(params[0]));
       }
       break;
     case 47:
       HASH_GUARD(0x4A6C6D9AB88CD42FLL, importnode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("importnode", count+1);
-        if (count <= 1) return (t_importnode(params.rvalAt(0)));
-        return (t_importnode(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("importnode", count, 1, 2, 1);
+        if (count <= 1) return (t_importnode(params[0]));
+        return (t_importnode(params[0], params[1]));
       }
       HASH_GUARD(0x5FE94CA513F14AAFLL, loadhtmlfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("loadhtmlfile", count+1);
-        return (t_loadhtmlfile(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("loadhtmlfile", count, 1, 1, 1);
+        return (t_loadhtmlfile(params[0]));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       HASH_GUARD(0x20E2B2FD2B7AE431LL, loadxml) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("loadxml", count+1);
-        if (count <= 1) return (t_loadxml(params.rvalAt(0)));
-        return (t_loadxml(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("loadxml", count, 1, 2, 1);
+        if (count <= 1) return (t_loadxml(params[0]));
+        return (t_loadxml(params[0], params[1]));
       }
       break;
     case 50:
       HASH_GUARD(0x7A9C4709CAD09832LL, createentityreference) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("createentityreference", count+1);
-        return (t_createentityreference(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("createentityreference", count, 1, 1, 1);
+        return (t_createentityreference(params[0]));
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
-        if (count <= 1) return (t_insertbefore(params.rvalAt(0)));
-        return (t_insertbefore(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
+        if (count <= 1) return (t_insertbefore(params[0]));
+        return (t_insertbefore(params[0], params[1]));
       }
       break;
     case 55:
       HASH_GUARD(0x1CA408E02262F737LL, validate) {
+        if (count > 0) return throw_toomany_arguments("validate", 0, 1);
         return (t_validate());
       }
       break;
     case 67:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 71:
       HASH_GUARD(0x29C79E90C6FCC0C7LL, createcomment) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("createcomment", count+1);
-        return (t_createcomment(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("createcomment", count, 1, 1, 1);
+        return (t_createcomment(params[0]));
       }
       break;
     case 72:
       HASH_GUARD(0x7EB8C68BABDC5648LL, schemavalidate) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("schemavalidate", count+1);
-        return (t_schemavalidate(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("schemavalidate", count, 1, 1, 1);
+        return (t_schemavalidate(params[0]));
       }
       break;
     case 74:
       HASH_GUARD(0x3FFA3F55ECAB93CALL, getelementsbytagname) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("getelementsbytagname", count+1);
-        return (t_getelementsbytagname(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
+        return (t_getelementsbytagname(params[0]));
       }
       HASH_GUARD(0x1A9CC561CA4817CALL, getelementsbytagnamens) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("getelementsbytagnamens", count+1);
-        return (t_getelementsbytagnamens(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
+        return (t_getelementsbytagnamens(params[0], params[1]));
       }
       break;
     case 77:
       HASH_GUARD(0x35C0FF513ED3054DLL, savehtmlfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("savehtmlfile", count+1);
-        return (t_savehtmlfile(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("savehtmlfile", count, 1, 1, 1);
+        return (t_savehtmlfile(params[0]));
       }
       break;
     case 79:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appendchild", count+1);
-        return (t_appendchild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
+        return (t_appendchild(params[0]));
       }
       break;
     case 83:
       HASH_GUARD(0x21F3F1C9058310D3LL, savehtml) {
+        if (count > 0) return throw_toomany_arguments("savehtml", 0, 1);
         return (t_savehtml());
       }
       break;
     case 90:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 93:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
-        return (t_lookupnamespaceuri(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
+        return (t_lookupnamespaceuri(params[0]));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removechild", count+1);
-        return (t_removechild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
+        return (t_removechild(params[0]));
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x79B7A5774A0943DFLL, load) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("load", count+1);
-        if (count <= 1) return (t_load(params.rvalAt(0)));
-        return (t_load(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("load", count, 1, 2, 1);
+        if (count <= 1) return (t_load(params[0]));
+        return (t_load(params[0], params[1]));
       }
       break;
     case 97:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
-        return (t_lookupprefix(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
+        return (t_lookupprefix(params[0]));
       }
       break;
     case 100:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
-        return (t_isdefaultnamespace(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
+        return (t_isdefaultnamespace(params[0]));
       }
       break;
     case 101:
       HASH_GUARD(0x26D66F56DDDC32E5LL, savexml) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("savexml", 2, 1);
         if (count <= 0) return (t_savexml());
-        if (count == 1) return (t_savexml(params.rvalAt(0)));
-        return (t_savexml(params.rvalAt(0), params.rvalAt(1)));
+        if (count == 1) return (t_savexml(params[0]));
+        return (t_savexml(params[0], params[1]));
       }
       break;
     case 106:
       HASH_GUARD(0x0AC931EAB2FE3D6ALL, normalizedocument) {
+        if (count > 0) return throw_toomany_arguments("normalizedocument", 0, 1);
         return (t_normalizedocument(), null);
       }
       break;
     case 107:
       HASH_GUARD(0x05EA36F416B7EBEBLL, createelementns) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("createelementns", count+1);
-        if (count <= 2) return (t_createelementns(params.rvalAt(0), params.rvalAt(1)));
-        return (t_createelementns(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count < 2 || count > 3) return throw_wrong_arguments("createelementns", count, 2, 3, 1);
+        if (count <= 2) return (t_createelementns(params[0], params[1]));
+        return (t_createelementns(params[0], params[1], params[2]));
       }
       break;
     case 109:
       HASH_GUARD(0x2A99431FC6E7BA6DLL, createprocessinginstruction) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("createprocessinginstruction", count+1);
-        if (count <= 1) return (t_createprocessinginstruction(params.rvalAt(0)));
-        return (t_createprocessinginstruction(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("createprocessinginstruction", count, 1, 2, 1);
+        if (count <= 1) return (t_createprocessinginstruction(params[0]));
+        return (t_createprocessinginstruction(params[0], params[1]));
       }
       break;
     case 111:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("issamenode", count+1);
-        return (t_issamenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
+        return (t_issamenode(params[0]));
       }
       break;
     case 115:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 117:
       HASH_GUARD(0x615771958E1EB375LL, registernodeclass) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("registernodeclass", count+1);
-        return (t_registernodeclass(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("registernodeclass", count, 2, 2, 1);
+        return (t_registernodeclass(params[0], params[1]));
       }
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
-        if (count <= 1) return (t_c14nfile(params.rvalAt(0)));
-        if (count == 2) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
+        if (count <= 1) return (t_c14nfile(params[0]));
+        if (count == 2) return (t_c14nfile(params[0], params[1]));
+        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
+        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
+        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
       }
       break;
     case 120:
       HASH_GUARD(0x44FD8C24F4EA46F8LL, createdocumentfragment) {
+        if (count > 0) return throw_toomany_arguments("createdocumentfragment", 0, 1);
         return (t_createdocumentfragment());
       }
       break;
     case 122:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("issupported", count+1);
-        return (t_issupported(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
+        return (t_issupported(params[0], params[1]));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 123:
       HASH_GUARD(0x6056A5BB9855D7FBLL, createtextnode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("createtextnode", count+1);
-        return (t_createtextnode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("createtextnode", count, 1, 1, 1);
+        return (t_createtextnode(params[0]));
       }
       break;
     default:
@@ -21455,12 +21662,13 @@ Variant c_domdocument::o_invoke_few_args(const char *s, int64 hash, int count, C
   switch (hash & 127) {
     case 5:
       HASH_GUARD(0x515FE7746601E385LL, getelementbyid) {
-        if (count < 1) throw_missing_argument("getelementbyid", count+1);
+        if (count != 1) return throw_wrong_arguments("getelementbyid", count, 1, 1, 1);
         return (t_getelementbyid(a0));
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
         if (count == 2) return (t_c14n(a0, a1));
@@ -21468,213 +21676,223 @@ Variant c_domdocument::o_invoke_few_args(const char *s, int64 hash, int count, C
         return (t_c14n(a0, a1, a2, a3));
       }
       HASH_GUARD(0x142A28F8CE4A4E8ALL, xinclude) {
+        if (count > 1) return throw_toomany_arguments("xinclude", 1, 1);
         if (count <= 0) return (t_xinclude());
         return (t_xinclude(a0));
       }
       break;
     case 13:
       HASH_GUARD(0x0D128C363EBF7F0DLL, createcdatasection) {
-        if (count < 1) throw_missing_argument("createcdatasection", count+1);
+        if (count != 1) return throw_wrong_arguments("createcdatasection", count, 1, 1, 1);
         return (t_createcdatasection(a0));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        if (count < 2) throw_missing_argument("replacechild", count+1);
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 17:
       HASH_GUARD(0x69C6F7D584EC5011LL, schemavalidatesource) {
-        if (count < 1) throw_missing_argument("schemavalidatesource", count+1);
+        if (count != 1) return throw_wrong_arguments("schemavalidatesource", count, 1, 1, 1);
         return (t_schemavalidatesource(a0));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 20:
       HASH_GUARD(0x04F8F7CEA46D0514LL, save) {
-        if (count < 1) throw_missing_argument("save", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("save", count, 1, 2, 1);
         if (count <= 1) return (t_save(a0));
         return (t_save(a0, a1));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       HASH_GUARD(0x2FC58024A75AEB15LL, createattributens) {
-        if (count < 2) throw_missing_argument("createattributens", count+1);
+        if (count != 2) return throw_wrong_arguments("createattributens", count, 2, 2, 1);
         return (t_createattributens(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 28:
       HASH_GUARD(0x1A78385D7CD10A1CLL, relaxngvalidate) {
-        if (count < 1) throw_missing_argument("relaxngvalidate", count+1);
+        if (count != 1) return throw_wrong_arguments("relaxngvalidate", count, 1, 1, 1);
         return (t_relaxngvalidate(a0));
       }
       break;
     case 34:
       HASH_GUARD(0x1B0F4D437C8404A2LL, loadhtml) {
-        if (count < 1) throw_missing_argument("loadhtml", count+1);
+        if (count != 1) return throw_wrong_arguments("loadhtml", count, 1, 1, 1);
         return (t_loadhtml(a0));
       }
       HASH_GUARD(0x4C40B0F935B39FA2LL, createelement) {
-        if (count < 1) throw_missing_argument("createelement", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("createelement", count, 1, 2, 1);
         if (count <= 1) return (t_createelement(a0));
         return (t_createelement(a0, a1));
       }
       break;
     case 44:
       HASH_GUARD(0x1304C35F6E006FACLL, relaxngvalidatesource) {
-        if (count < 1) throw_missing_argument("relaxngvalidatesource", count+1);
+        if (count != 1) return throw_wrong_arguments("relaxngvalidatesource", count, 1, 1, 1);
         return (t_relaxngvalidatesource(a0));
       }
       HASH_GUARD(0x2BFDE9CF0FE9A82CLL, createattribute) {
-        if (count < 1) throw_missing_argument("createattribute", count+1);
+        if (count != 1) return throw_wrong_arguments("createattribute", count, 1, 1, 1);
         return (t_createattribute(a0));
       }
       break;
     case 47:
       HASH_GUARD(0x4A6C6D9AB88CD42FLL, importnode) {
-        if (count < 1) throw_missing_argument("importnode", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("importnode", count, 1, 2, 1);
         if (count <= 1) return (t_importnode(a0));
         return (t_importnode(a0, a1));
       }
       HASH_GUARD(0x5FE94CA513F14AAFLL, loadhtmlfile) {
-        if (count < 1) throw_missing_argument("loadhtmlfile", count+1);
+        if (count != 1) return throw_wrong_arguments("loadhtmlfile", count, 1, 1, 1);
         return (t_loadhtmlfile(a0));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       HASH_GUARD(0x20E2B2FD2B7AE431LL, loadxml) {
-        if (count < 1) throw_missing_argument("loadxml", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("loadxml", count, 1, 2, 1);
         if (count <= 1) return (t_loadxml(a0));
         return (t_loadxml(a0, a1));
       }
       break;
     case 50:
       HASH_GUARD(0x7A9C4709CAD09832LL, createentityreference) {
-        if (count < 1) throw_missing_argument("createentityreference", count+1);
+        if (count != 1) return throw_wrong_arguments("createentityreference", count, 1, 1, 1);
         return (t_createentityreference(a0));
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 55:
       HASH_GUARD(0x1CA408E02262F737LL, validate) {
+        if (count > 0) return throw_toomany_arguments("validate", 0, 1);
         return (t_validate());
       }
       break;
     case 67:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 71:
       HASH_GUARD(0x29C79E90C6FCC0C7LL, createcomment) {
-        if (count < 1) throw_missing_argument("createcomment", count+1);
+        if (count != 1) return throw_wrong_arguments("createcomment", count, 1, 1, 1);
         return (t_createcomment(a0));
       }
       break;
     case 72:
       HASH_GUARD(0x7EB8C68BABDC5648LL, schemavalidate) {
-        if (count < 1) throw_missing_argument("schemavalidate", count+1);
+        if (count != 1) return throw_wrong_arguments("schemavalidate", count, 1, 1, 1);
         return (t_schemavalidate(a0));
       }
       break;
     case 74:
       HASH_GUARD(0x3FFA3F55ECAB93CALL, getelementsbytagname) {
-        if (count < 1) throw_missing_argument("getelementsbytagname", count+1);
+        if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
         return (t_getelementsbytagname(a0));
       }
       HASH_GUARD(0x1A9CC561CA4817CALL, getelementsbytagnamens) {
-        if (count < 2) throw_missing_argument("getelementsbytagnamens", count+1);
+        if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
         return (t_getelementsbytagnamens(a0, a1));
       }
       break;
     case 77:
       HASH_GUARD(0x35C0FF513ED3054DLL, savehtmlfile) {
-        if (count < 1) throw_missing_argument("savehtmlfile", count+1);
+        if (count != 1) return throw_wrong_arguments("savehtmlfile", count, 1, 1, 1);
         return (t_savehtmlfile(a0));
       }
       break;
     case 79:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        if (count < 1) throw_missing_argument("appendchild", count+1);
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 83:
       HASH_GUARD(0x21F3F1C9058310D3LL, savehtml) {
+        if (count > 0) return throw_toomany_arguments("savehtml", 0, 1);
         return (t_savehtml());
       }
       break;
     case 90:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 93:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        if (count < 1) throw_missing_argument("removechild", count+1);
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x79B7A5774A0943DFLL, load) {
-        if (count < 1) throw_missing_argument("load", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("load", count, 1, 2, 1);
         if (count <= 1) return (t_load(a0));
         return (t_load(a0, a1));
       }
       break;
     case 97:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 100:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 101:
       HASH_GUARD(0x26D66F56DDDC32E5LL, savexml) {
+        if (count > 2) return throw_toomany_arguments("savexml", 2, 1);
         if (count <= 0) return (t_savexml());
         if (count == 1) return (t_savexml(a0));
         return (t_savexml(a0, a1));
@@ -21682,41 +21900,43 @@ Variant c_domdocument::o_invoke_few_args(const char *s, int64 hash, int count, C
       break;
     case 106:
       HASH_GUARD(0x0AC931EAB2FE3D6ALL, normalizedocument) {
+        if (count > 0) return throw_toomany_arguments("normalizedocument", 0, 1);
         return (t_normalizedocument(), null);
       }
       break;
     case 107:
       HASH_GUARD(0x05EA36F416B7EBEBLL, createelementns) {
-        if (count < 2) throw_missing_argument("createelementns", count+1);
+        if (count < 2 || count > 3) return throw_wrong_arguments("createelementns", count, 2, 3, 1);
         if (count <= 2) return (t_createelementns(a0, a1));
         return (t_createelementns(a0, a1, a2));
       }
       break;
     case 109:
       HASH_GUARD(0x2A99431FC6E7BA6DLL, createprocessinginstruction) {
-        if (count < 1) throw_missing_argument("createprocessinginstruction", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("createprocessinginstruction", count, 1, 2, 1);
         if (count <= 1) return (t_createprocessinginstruction(a0));
         return (t_createprocessinginstruction(a0, a1));
       }
       break;
     case 111:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        if (count < 1) throw_missing_argument("issamenode", count+1);
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 115:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 117:
       HASH_GUARD(0x615771958E1EB375LL, registernodeclass) {
-        if (count < 2) throw_missing_argument("registernodeclass", count+1);
+        if (count != 2) return throw_wrong_arguments("registernodeclass", count, 2, 2, 1);
         return (t_registernodeclass(a0, a1));
       }
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
         if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -21726,21 +21946,23 @@ Variant c_domdocument::o_invoke_few_args(const char *s, int64 hash, int count, C
       break;
     case 120:
       HASH_GUARD(0x44FD8C24F4EA46F8LL, createdocumentfragment) {
+        if (count > 0) return throw_toomany_arguments("createdocumentfragment", 0, 1);
         return (t_createdocumentfragment());
       }
       break;
     case 122:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        if (count < 2) throw_missing_argument("issupported", count+1);
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 123:
       HASH_GUARD(0x6056A5BB9855D7FBLL, createtextnode) {
-        if (count < 1) throw_missing_argument("createtextnode", count+1);
+        if (count != 1) return throw_wrong_arguments("createtextnode", count, 1, 1, 1);
         return (t_createtextnode(a0));
       }
       break;
@@ -21750,6 +21972,7 @@ Variant c_domdocument::o_invoke_few_args(const char *s, int64 hash, int count, C
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domdocument::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -22720,22 +22943,24 @@ Variant c_libxmlerror::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(libxmlerror)
 c_libxmlerror *c_libxmlerror::create() {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct();
-  decRefCount();
   return this;
 }
 ObjectData *c_libxmlerror::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
     (t___construct());
-    decRefCount();
   }
   return this;
 }
 void c_libxmlerror::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
   (t___construct());
 }
 void c_libxmlerror::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
@@ -22765,13 +22990,16 @@ void c_libxmlerror::cloneSet(c_libxmlerror *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_libxmlerror::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 3) {
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
@@ -22785,9 +23013,11 @@ Variant c_libxmlerror::o_invoke_few_args(const char *s, int64 hash, int count, C
   switch (hash & 3) {
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
@@ -22797,6 +23027,7 @@ Variant c_libxmlerror::o_invoke_few_args(const char *s, int64 hash, int count, C
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_libxmlerror::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_libxmlerror::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -22903,35 +23134,33 @@ Variant c_soapfault::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(soapfault)
 c_soapfault *c_soapfault::create(Variant a0, String a1, String a2, Variant a3, String a4, Variant a5) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4, a5);
-  decRefCount();
   return this;
 }
 ObjectData *c_soapfault::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 2) throw_missing_argument("__construct", count+1);
-    if (count <= 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    else if (count == 3) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-    else if (count == 4) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-    else if (count == 5) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4), params.rvalAt(5)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count < 2 || count > 6) throw_wrong_arguments("__construct", count, 2, 6, 2);
+    if (count <= 2) (t___construct(params[0], params[1]));
+    else if (count == 3) (t___construct(params[0], params[1], params[2]));
+    else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
+    else if (count == 5) (t___construct(params[0], params[1], params[2], params[3], params[4]));
+    else (t___construct(params[0], params[1], params[2], params[3], params[4], params[5]));
   }
   return this;
 }
 void c_soapfault::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 2) throw_missing_argument("__construct", count+1);
-  if (count <= 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-  else if (count == 3) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-  else if (count == 4) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-  else if (count == 5) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4), params.rvalAt(5)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 6) throw_wrong_arguments("__construct", count, 2, 6, 2);
+  if (count <= 2) (t___construct(params[0], params[1]));
+  else if (count == 3) (t___construct(params[0], params[1], params[2]));
+  else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
+  else if (count == 5) (t___construct(params[0], params[1], params[2], params[3], params[4]));
+  else (t___construct(params[0], params[1], params[2], params[3], params[4], params[5]));
 }
 void c_soapfault::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -22989,55 +23218,63 @@ void c_soapfault::cloneSet(c_soapfault *clone) {
   c_exception::cloneSet(clone);
 }
 Variant c_soapfault::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__construct", count+1);
-        if (count <= 2) return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
-        if (count == 3) return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)), null);
-        if (count == 4) return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)), null);
-        if (count == 5) return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4), params.rvalAt(5)), null);
+        if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
+        if (count <= 2) return (t___construct(params[0], params[1]), null);
+        if (count == 3) return (t___construct(params[0], params[1], params[2]), null);
+        if (count == 4) return (t___construct(params[0], params[1], params[2], params[3]), null);
+        if (count == 5) return (t___construct(params[0], params[1], params[2], params[3], params[4]), null);
+        return (t___construct(params[0], params[1], params[2], params[3], params[4], params[5]), null);
       }
       break;
     default:
@@ -23050,45 +23287,53 @@ Variant c_soapfault::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 2) throw_missing_argument("__construct", count+1);
+        if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
         if (count <= 2) return (t___construct(a0, a1), null);
         if (count == 3) return (t___construct(a0, a1, a2), null);
         if (count == 4) return (t___construct(a0, a1, a2, a3), null);
@@ -23102,6 +23347,7 @@ Variant c_soapfault::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_soapfault::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_exception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -23321,31 +23567,29 @@ Variant c_domelement::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(domelement)
 c_domelement *c_domelement::create(String a0, String a1, String a2) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(a0, a1, a2);
-  decRefCount();
   return this;
 }
 ObjectData *c_domelement::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("__construct", count+1);
-    if (count <= 1) (t___construct(params.rvalAt(0)));
-    else if (count == 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count < 1 || count > 3) throw_wrong_arguments("__construct", count, 1, 3, 2);
+    if (count <= 1) (t___construct(params[0]));
+    else if (count == 2) (t___construct(params[0], params[1]));
+    else (t___construct(params[0], params[1], params[2]));
   }
   return this;
 }
 void c_domelement::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("__construct", count+1);
-  if (count <= 1) (t___construct(params.rvalAt(0)));
-  else if (count == 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 3) throw_wrong_arguments("__construct", count, 1, 3, 2);
+  if (count <= 1) (t___construct(params[0]));
+  else if (count == 2) (t___construct(params[0], params[1]));
+  else (t___construct(params[0], params[1], params[2]));
 }
 void c_domelement::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -23392,265 +23636,241 @@ Variant c_domelement::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
 Variant c_domelement::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
-        int count = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params.rvalAt(0)));
-        if (count == 2) return (t_c14n(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        return (t_c14n(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+        if (count == 1) return (t_c14n(params[0]));
+        if (count == 2) return (t_c14n(params[0], params[1]));
+        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
+        return (t_c14n(params[0], params[1], params[2], params[3]));
       }
       HASH_GUARD(0x1D5B8B8144F4AB8ALL, setattribute) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("setattribute", count+1);
-        return (t_setattribute(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
+        return (t_setattribute(params[0], params[1]));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("replacechild", count+1);
-        return (t_replacechild(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
+        return (t_replacechild(params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__get", count+1);
-        return (t___get(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(params[0]));
       }
       break;
     case 16:
       HASH_GUARD(0x710986B01E1A0890LL, removeattributens) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("removeattributens", count+1);
-        return (t_removeattributens(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("removeattributens", count, 2, 2, 1);
+        return (t_removeattributens(params[0], params[1]));
       }
       break;
     case 17:
       HASH_GUARD(0x31426AC6A851EE11LL, setidattributens) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("setidattributens", count+1);
-        return (t_setidattributens(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count != 3) return throw_wrong_arguments("setidattributens", count, 3, 3, 1);
+        return (t_setidattributens(params[0], params[1], params[2]));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params.rvalAt(0)));
+        return (t_clonenode(params[0]));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("__set", count+1);
-        return (t___set(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(params[0], params[1]));
       }
       break;
     case 22:
       HASH_GUARD(0x6F83EC29E110D616LL, setidattribute) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("setidattribute", count+1);
-        return (t_setidattribute(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("setidattribute", count, 2, 2, 1);
+        return (t_setidattribute(params[0], params[1]));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       HASH_GUARD(0x640FA60DDC80EC18LL, getattributenodens) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("getattributenodens", count+1);
-        return (t_getattributenodens(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("getattributenodens", count, 2, 2, 1);
+        return (t_getattributenodens(params[0], params[1]));
       }
       break;
     case 25:
       HASH_GUARD(0x34E103E06D3F0899LL, getattributens) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("getattributens", count+1);
-        return (t_getattributens(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("getattributens", count, 2, 2, 1);
+        return (t_getattributens(params[0], params[1]));
       }
       break;
     case 40:
       HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("getattribute", count+1);
-        return (t_getattribute(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
+        return (t_getattribute(params[0]));
       }
       break;
     case 47:
       HASH_GUARD(0x47B96C0FC62E1E2FLL, removeattribute) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removeattribute", count+1);
-        return (t_removeattribute(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removeattribute", count, 1, 1, 1);
+        return (t_removeattribute(params[0]));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
-        if (count <= 1) return (t_insertbefore(params.rvalAt(0)));
-        return (t_insertbefore(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
+        if (count <= 1) return (t_insertbefore(params[0]));
+        return (t_insertbefore(params[0], params[1]));
       }
       break;
     case 67:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 74:
       HASH_GUARD(0x3FFA3F55ECAB93CALL, getelementsbytagname) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("getelementsbytagname", count+1);
-        return (t_getelementsbytagname(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
+        return (t_getelementsbytagname(params[0]));
       }
       HASH_GUARD(0x1A9CC561CA4817CALL, getelementsbytagnamens) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("getelementsbytagnamens", count+1);
-        return (t_getelementsbytagnamens(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
+        return (t_getelementsbytagnamens(params[0], params[1]));
       }
       HASH_GUARD(0x29D272CBBC0CDA4ALL, setidattributenode) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("setidattributenode", count+1);
-        return (t_setidattributenode(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("setidattributenode", count, 2, 2, 1);
+        return (t_setidattributenode(params[0], params[1]));
       }
       break;
     case 79:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("appendchild", count+1);
-        return (t_appendchild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
+        return (t_appendchild(params[0]));
       }
       break;
     case 81:
       HASH_GUARD(0x482E3873306253D1LL, setattributenodens) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("setattributenodens", count+1);
-        return (t_setattributenodens(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("setattributenodens", count, 1, 1, 1);
+        return (t_setattributenodens(params[0]));
       }
       break;
     case 85:
       HASH_GUARD(0x5EF7C3A45311D955LL, hasattributens) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("hasattributens", count+1);
-        return (t_hasattributens(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("hasattributens", count, 2, 2, 1);
+        return (t_hasattributens(params[0], params[1]));
       }
       break;
     case 87:
       HASH_GUARD(0x62A40E71FAF19157LL, setattributens) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("setattributens", count+1);
-        return (t_setattributens(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count != 3) return throw_wrong_arguments("setattributens", count, 3, 3, 1);
+        return (t_setattributens(params[0], params[1], params[2]));
       }
       break;
     case 90:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 92:
       HASH_GUARD(0x606827EF5CF34C5CLL, setattributenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("setattributenode", count+1);
-        return (t_setattributenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("setattributenode", count, 1, 1, 1);
+        return (t_setattributenode(params[0]));
       }
       break;
     case 93:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
-        return (t_lookupnamespaceuri(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
+        return (t_lookupnamespaceuri(params[0]));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removechild", count+1);
-        return (t_removechild(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
+        return (t_removechild(params[0]));
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("__construct", count+1);
-        if (count <= 1) return (t___construct(params.rvalAt(0)), null);
-        if (count == 2) return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)), null);
+        if (count < 1 || count > 3) return throw_wrong_arguments("__construct", count, 1, 3, 1);
+        if (count <= 1) return (t___construct(params[0]), null);
+        if (count == 2) return (t___construct(params[0], params[1]), null);
+        return (t___construct(params[0], params[1], params[2]), null);
       }
       break;
     case 97:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
-        return (t_lookupprefix(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
+        return (t_lookupprefix(params[0]));
       }
       break;
     case 100:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
-        return (t_isdefaultnamespace(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
+        return (t_isdefaultnamespace(params[0]));
       }
       break;
     case 106:
       HASH_GUARD(0x1BFDB4272EA150EALL, removeattributenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("removeattributenode", count+1);
-        return (t_removeattributenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("removeattributenode", count, 1, 1, 1);
+        return (t_removeattributenode(params[0]));
       }
       break;
     case 108:
       HASH_GUARD(0x6471DF8BB944FFECLL, hasattribute) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("hasattribute", count+1);
-        return (t_hasattribute(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("hasattribute", count, 1, 1, 1);
+        return (t_hasattribute(params[0]));
       }
       break;
     case 111:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("issamenode", count+1);
-        return (t_issamenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
+        return (t_issamenode(params[0]));
       }
       break;
     case 115:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 117:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
-        if (count <= 1) return (t_c14nfile(params.rvalAt(0)));
-        if (count == 2) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1)));
-        if (count == 3) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-        if (count == 4) return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-        return (t_c14nfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
+        if (count <= 1) return (t_c14nfile(params[0]));
+        if (count == 2) return (t_c14nfile(params[0], params[1]));
+        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
+        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
+        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
       }
       break;
     case 122:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("issupported", count+1);
-        return (t_issupported(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
+        return (t_issupported(params[0], params[1]));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 126:
       HASH_GUARD(0x343DF562BB5AB1FELL, getattributenode) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("getattributenode", count+1);
-        return (t_getattributenode(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("getattributenode", count, 1, 1, 1);
+        return (t_getattributenode(params[0]));
       }
       break;
     default:
@@ -23663,6 +23883,7 @@ Variant c_domelement::o_invoke_few_args(const char *s, int64 hash, int count, CV
   switch (hash & 127) {
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
         if (count == 2) return (t_c14n(a0, a1));
@@ -23670,158 +23891,163 @@ Variant c_domelement::o_invoke_few_args(const char *s, int64 hash, int count, CV
         return (t_c14n(a0, a1, a2, a3));
       }
       HASH_GUARD(0x1D5B8B8144F4AB8ALL, setattribute) {
-        if (count < 2) throw_missing_argument("setattribute", count+1);
+        if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
         return (t_setattribute(a0, a1));
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
-        if (count < 2) throw_missing_argument("replacechild", count+1);
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
-        if (count < 1) throw_missing_argument("__get", count+1);
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 16:
       HASH_GUARD(0x710986B01E1A0890LL, removeattributens) {
-        if (count < 2) throw_missing_argument("removeattributens", count+1);
+        if (count != 2) return throw_wrong_arguments("removeattributens", count, 2, 2, 1);
         return (t_removeattributens(a0, a1));
       }
       break;
     case 17:
       HASH_GUARD(0x31426AC6A851EE11LL, setidattributens) {
-        if (count < 3) throw_missing_argument("setidattributens", count+1);
+        if (count != 3) return throw_wrong_arguments("setidattributens", count, 3, 3, 1);
         return (t_setidattributens(a0, a1, a2));
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
-        if (count < 2) throw_missing_argument("__set", count+1);
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 22:
       HASH_GUARD(0x6F83EC29E110D616LL, setidattribute) {
-        if (count < 2) throw_missing_argument("setidattribute", count+1);
+        if (count != 2) return throw_wrong_arguments("setidattribute", count, 2, 2, 1);
         return (t_setidattribute(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       HASH_GUARD(0x640FA60DDC80EC18LL, getattributenodens) {
-        if (count < 2) throw_missing_argument("getattributenodens", count+1);
+        if (count != 2) return throw_wrong_arguments("getattributenodens", count, 2, 2, 1);
         return (t_getattributenodens(a0, a1));
       }
       break;
     case 25:
       HASH_GUARD(0x34E103E06D3F0899LL, getattributens) {
-        if (count < 2) throw_missing_argument("getattributens", count+1);
+        if (count != 2) return throw_wrong_arguments("getattributens", count, 2, 2, 1);
         return (t_getattributens(a0, a1));
       }
       break;
     case 40:
       HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
-        if (count < 1) throw_missing_argument("getattribute", count+1);
+        if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
         return (t_getattribute(a0));
       }
       break;
     case 47:
       HASH_GUARD(0x47B96C0FC62E1E2FLL, removeattribute) {
-        if (count < 1) throw_missing_argument("removeattribute", count+1);
+        if (count != 1) return throw_wrong_arguments("removeattribute", count, 1, 1, 1);
         return (t_removeattribute(a0));
       }
       break;
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
-        if (count < 1) throw_missing_argument("insertbefore", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 67:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 74:
       HASH_GUARD(0x3FFA3F55ECAB93CALL, getelementsbytagname) {
-        if (count < 1) throw_missing_argument("getelementsbytagname", count+1);
+        if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
         return (t_getelementsbytagname(a0));
       }
       HASH_GUARD(0x1A9CC561CA4817CALL, getelementsbytagnamens) {
-        if (count < 2) throw_missing_argument("getelementsbytagnamens", count+1);
+        if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
         return (t_getelementsbytagnamens(a0, a1));
       }
       HASH_GUARD(0x29D272CBBC0CDA4ALL, setidattributenode) {
-        if (count < 2) throw_missing_argument("setidattributenode", count+1);
+        if (count != 2) return throw_wrong_arguments("setidattributenode", count, 2, 2, 1);
         return (t_setidattributenode(a0, a1));
       }
       break;
     case 79:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
-        if (count < 1) throw_missing_argument("appendchild", count+1);
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 81:
       HASH_GUARD(0x482E3873306253D1LL, setattributenodens) {
-        if (count < 1) throw_missing_argument("setattributenodens", count+1);
+        if (count != 1) return throw_wrong_arguments("setattributenodens", count, 1, 1, 1);
         return (t_setattributenodens(a0));
       }
       break;
     case 85:
       HASH_GUARD(0x5EF7C3A45311D955LL, hasattributens) {
-        if (count < 2) throw_missing_argument("hasattributens", count+1);
+        if (count != 2) return throw_wrong_arguments("hasattributens", count, 2, 2, 1);
         return (t_hasattributens(a0, a1));
       }
       break;
     case 87:
       HASH_GUARD(0x62A40E71FAF19157LL, setattributens) {
-        if (count < 3) throw_missing_argument("setattributens", count+1);
+        if (count != 3) return throw_wrong_arguments("setattributens", count, 3, 3, 1);
         return (t_setattributens(a0, a1, a2));
       }
       break;
     case 90:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 92:
       HASH_GUARD(0x606827EF5CF34C5CLL, setattributenode) {
-        if (count < 1) throw_missing_argument("setattributenode", count+1);
+        if (count != 1) return throw_wrong_arguments("setattributenode", count, 1, 1, 1);
         return (t_setattributenode(a0));
       }
       break;
     case 93:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
-        if (count < 1) throw_missing_argument("lookupnamespaceuri", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
-        if (count < 1) throw_missing_argument("removechild", count+1);
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("__construct", count+1);
+        if (count < 1 || count > 3) return throw_wrong_arguments("__construct", count, 1, 3, 1);
         if (count <= 1) return (t___construct(a0), null);
         if (count == 2) return (t___construct(a0, a1), null);
         return (t___construct(a0, a1, a2), null);
@@ -23829,42 +24055,43 @@ Variant c_domelement::o_invoke_few_args(const char *s, int64 hash, int count, CV
       break;
     case 97:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
-        if (count < 1) throw_missing_argument("lookupprefix", count+1);
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 100:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
-        if (count < 1) throw_missing_argument("isdefaultnamespace", count+1);
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 106:
       HASH_GUARD(0x1BFDB4272EA150EALL, removeattributenode) {
-        if (count < 1) throw_missing_argument("removeattributenode", count+1);
+        if (count != 1) return throw_wrong_arguments("removeattributenode", count, 1, 1, 1);
         return (t_removeattributenode(a0));
       }
       break;
     case 108:
       HASH_GUARD(0x6471DF8BB944FFECLL, hasattribute) {
-        if (count < 1) throw_missing_argument("hasattribute", count+1);
+        if (count != 1) return throw_wrong_arguments("hasattribute", count, 1, 1, 1);
         return (t_hasattribute(a0));
       }
       break;
     case 111:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
-        if (count < 1) throw_missing_argument("issamenode", count+1);
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 115:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 117:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
-        if (count < 1) throw_missing_argument("c14nfile", count+1);
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
         if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -23874,16 +24101,17 @@ Variant c_domelement::o_invoke_few_args(const char *s, int64 hash, int count, CV
       break;
     case 122:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
-        if (count < 2) throw_missing_argument("issupported", count+1);
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 126:
       HASH_GUARD(0x343DF562BB5AB1FELL, getattributenode) {
-        if (count < 1) throw_missing_argument("getattributenode", count+1);
+        if (count != 1) return throw_wrong_arguments("getattributenode", count, 1, 1, 1);
         return (t_getattributenode(a0));
       }
       break;
@@ -23893,6 +24121,7 @@ Variant c_domelement::o_invoke_few_args(const char *s, int64 hash, int count, CV
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domelement::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

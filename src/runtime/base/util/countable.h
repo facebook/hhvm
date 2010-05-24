@@ -59,6 +59,19 @@ class Countable {
   mutable int _count;
 };
 
+class CountableHelper {
+public:
+  CountableHelper(Countable *countable) : m_countable(countable) {
+    m_countable->incRefCount();
+  }
+  ~CountableHelper() {
+    m_countable->decRefCount();
+  }
+
+private:
+  Countable *m_countable;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

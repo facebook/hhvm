@@ -51,32 +51,41 @@ ExpressionPtr ArrayElementExpression::clone() {
 
 void ArrayElementExpression::setContext(Context context) {
   m_context |= context;
-  if (context == Expression::LValue) {
-    m_variable->setContext(Expression::LValue);
-    if (m_variable->is(Expression::KindOfObjectPropertyExpression)) {
-      m_variable->clearContext(Expression::NoLValueWrapper);
-    }
-    // special case for $GLOBALS[], see the if (m_global) check in
-    // ArrayElementExpression::outputCPPImpl, we do not need lvalue wrapper
-    if (m_variable->is(Expression::KindOfSimpleVariable)) {
-      SimpleVariablePtr var =
-        dynamic_pointer_cast<SimpleVariable>(m_variable);
-      if (var->getName() == "GLOBALS") {
-        m_context |= Expression::NoLValueWrapper;
+  switch (context) {
+    case Expression::LValue:
+      m_variable->setContext(Expression::LValue);
+      if (m_variable->is(Expression::KindOfObjectPropertyExpression)) {
+        m_variable->clearContext(Expression::NoLValueWrapper);
       }
-    }
-  } else if (context == Expression::DeepAssignmentLHS ||
-             context == Expression::ExistContext ||
-             context == Expression::UnsetContext) {
-    m_variable->setContext(context);
+      // special case for $GLOBALS[], see the if (m_global) check in
+      // ArrayElementExpression::outputCPPImpl, we do not need lvalue wrapper
+      if (m_variable->is(Expression::KindOfSimpleVariable)) {
+        SimpleVariablePtr var =
+          dynamic_pointer_cast<SimpleVariable>(m_variable);
+        if (var->getName() == "GLOBALS") {
+          m_context |= Expression::NoLValueWrapper;
+        }
+      }
+      break;
+    case Expression::DeepAssignmentLHS:
+    case Expression::ExistContext:
+    case Expression::UnsetContext:
+      m_variable->setContext(context);
+      break;
+    default:
+      break;
   }
 }
 
 void ArrayElementExpression::clearContext(Context context) {
   m_context &= ~context;
-  if (context == Expression::LValue || context == Expression::DeepAssignmentLHS
-      || context == Expression::UnsetContext) {
-    m_variable->clearContext(Expression::LValue);
+  switch (context) {
+    case Expression::LValue:
+    case Expression::DeepAssignmentLHS:
+    case Expression::UnsetContext:
+      m_variable->clearContext(Expression::LValue);
+    default:
+      break;
   }
 }
 
@@ -333,6 +342,7 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
       if (hasContext(UnsetContext)) {
         // do nothing
       } else if (m_context & InvokeArgument) {
+        ASSERT(m_context & RefValue);
         cg.printf(".refvalAt(");
       } else if (m_context & (LValue|RefValue)) {
         cg.printf(".lvalAt(");

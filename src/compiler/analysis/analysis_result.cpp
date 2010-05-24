@@ -1386,6 +1386,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
                            Option::InvokePrefix, name);
             cg.indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
                            hash_string_i(name), name);
+            FunctionScope::OutputCPPDynamicInvokeCount(cg);
             func->outputCPPDynamicInvoke(cg, ar, Option::BuiltinFunctionPrefix,
                                          name);
             cg.indentEnd("}\n");
@@ -1394,6 +1395,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
           } else {
             cg.indentBegin("Variant %s%s(CArrRef params) {\n",
                            Option::InvokePrefix, name);
+            FunctionScope::OutputCPPDynamicInvokeCount(cg);
             func->outputCPPDynamicInvoke(cg, ar, Option::BuiltinFunctionPrefix,
                                          name);
             cg.indentEnd("}\n");

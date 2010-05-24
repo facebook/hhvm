@@ -88,8 +88,10 @@ flood error logs.
     NoInfiniteRecursionDetection = false
     MaxStackDepth = 1000
     ThrowBadTypeExceptions = false
-    ThrowInvalidArgument = false
-    NoticeExtraArguments = true # whether to issue notices about extra args
+    ThrowTooManyArguments = false
+    WarnTooManyArguments = false
+    ThrowMissingArguments = false
+    ThrowInvalidArguments = false
     NoticeFrequency = 1    # 1 out of these many notices to log
     WarningFrequency = 1   # 1 out of these many warnings to log
     AssertActive = false

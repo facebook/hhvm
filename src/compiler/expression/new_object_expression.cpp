@@ -150,8 +150,6 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
   bool linemap = outputLineMap(cg, ar, true);
   bool outsideClass = !ar->checkClassPresent(m_origName);
   if (!m_name.empty() && !m_redeclared && m_validClass && !m_dynamic) {
-    bool tooManyArgs =
-      (m_params && m_params->outputCPPTooManyArgsPre(cg, ar, m_name));
     ClassScopePtr cls = ar->resolveClass(m_name);
     ASSERT(cls);
     if (m_receiverTemp.empty()) {
@@ -174,9 +172,6 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
       if (outsideClass) {
         cls->outputVolatileCheckEnd(cg);
       }
-    }
-    if (tooManyArgs) {
-      m_params->outputCPPTooManyArgsPost(cg, ar, m_voidReturn);
     }
   } else {
     if (m_redeclared) {

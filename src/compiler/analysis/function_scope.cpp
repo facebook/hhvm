@@ -261,7 +261,6 @@ std::string FunctionScope::getFullName() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-
 int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
                                    ExpressionListPtr params, bool &valid) {
   if (!params) {
@@ -290,14 +289,15 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
       if (ar->isFirstPass()) {
         ar->getCodeError()->record(CodeError::TooManyArgument, exp, m_stmt);
       }
-      params->setOutputCount(m_maxParam);
+      valid = false;
+      setDynamic();
     }
   }
 
   bool canSetParamType = isUserFunction() && !m_overriding;
   for (int i = 0; i < params->getCount(); i++) {
     ExpressionPtr param = (*params)[i];
-    if (param->hasContext(Expression::InvokeArgument)) {
+    if (valid && param->hasContext(Expression::InvokeArgument)) {
       param->clearContext(Expression::InvokeArgument);
       param->clearContext(Expression::RefValue);
       param->clearContext(Expression::NoRefWrapper);
@@ -316,6 +316,8 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
     } else if (!(param->getContext() & Expression::RefParameter)) {
       param->clearContext(Expression::LValue);
       param->clearContext(Expression::RefValue);
+      param->clearContext(Expression::InvokeArgument);
+      param->clearContext(Expression::NoRefWrapper);
     }
     if (i < m_maxParam) {
       TypePtr paramType = getParamType(i);
@@ -493,8 +495,8 @@ void FunctionScope::outputCPPParamsImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   int paramcount = getMaxParamCount();
   if (isUserFunction()) {
-    outputCPPParamsDecl(cg, ar, dynamic_pointer_cast<MethodStatement>(getStmt())
-                        ->getParams(), false);
+    MethodStatementPtr m = dynamic_pointer_cast<MethodStatement>(getStmt());
+    outputCPPParamsDecl(cg, ar, m->getParams(), false);
     return;
   }
   bool first = true;
@@ -645,6 +647,10 @@ void FunctionScope::outputCPPEffectiveArguments(ExpressionListPtr params,
   }
 }
 
+void FunctionScope::OutputCPPDynamicInvokeCount(CodeGenerator &cg) {
+  cg.printf("int count __attribute__((__unused__)) = params.size();\n");
+}
+
 void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
                                            AnalysisResultPtr ar,
                                            const char *funcPrefix,
@@ -652,7 +658,8 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
                                            bool voidWrapperOff /* = false */,
                                            bool fewArgs /* = false */,
                                            bool ret /* = true */,
-                                           const char *extraArg /* = NULL */) {
+                                           const char *extraArg /* = NULL */,
+                                           bool constructor /* = false */) {
   const char *voidWrapper = (m_returnType || voidWrapperOff) ? "" : ", null";
   const char *retrn = ret ? "return " : "";
   int maxParam = fewArgs ? (m_maxParam > Option::InvokeFewArgsCount ?
@@ -661,19 +668,43 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
   bool variable = isVariableArgument();
 
   ASSERT(m_minParam >= 0);
-  if (!fewArgs && (m_maxParam != 0 || variable || getOptionalParamCount())) {
-    cg.printf("int count = params.size();\n");
-  } else if (Option::InvokeFewArgsCount < m_minParam) {
-    cg.printf("throw_missing_argument(\"%s\", count+1);\n",
-              getFullName().c_str());
-    cg.printf("%snull;\n", retrn);
-    return;
+
+  // system function has different handling of argument counts
+  bool system = (m_system || m_sep ||
+                 cg.getOutput() == CodeGenerator::SystemCPP);
+  if (!system) {
+    ClassScopePtr scope = ar->getClassScope();
+    if (scope) system = (!scope->isUserClass() || scope->isExtensionClass() ||
+                         scope->isSepExtension());
   }
 
-  if (m_minParam > 0) {
-    cg.printf("if (count < %d) throw_missing_argument(\"%s\", count+1);\n",
-              m_minParam, getFullName().c_str());
+  bool checkMissing = (m_minParam > 0);
+  bool checkTooMany = (!variable && (system ||
+                                     RuntimeOption::ThrowTooManyArguments));
+  const char *sysret = (system && ret) ? "return " : "";
+  const char *level = (system ? (constructor ? ", 2" : ", 1") : "");
+  const char *fullname = getFullName().c_str();
+  if (checkMissing && checkTooMany) {
+    if (!variable && m_minParam == m_maxParam) {
+      cg.printf("if (count != %d)"
+                " %sthrow_wrong_arguments(\"%s\", count, %d, %d%s);\n",
+                m_minParam, sysret, fullname, m_minParam, m_maxParam, level);
+    } else {
+      cg.printf("if (count < %d || count > %d)"
+                " %sthrow_wrong_arguments(\"%s\", count, %d, %d%s);\n",
+                m_minParam, m_maxParam, sysret, fullname,
+                m_minParam, variable ? -1 : m_maxParam, level);
+    }
+  } else if (checkMissing) {
+    cg.printf("if (count < %d)"
+              " %sthrow_missing_arguments(\"%s\", count+1%s);\n",
+              m_minParam, sysret, fullname, level);
+  } else if (checkTooMany) {
+    cg.printf("if (count > %d)"
+              " %sthrow_toomany_arguments(\"%s\", %d%s);\n",
+              m_maxParam, sysret, fullname, m_maxParam, level);
   }
+
   if (variable || getOptionalParamCount()) {
     if (!fewArgs || m_minParam < Option::InvokeFewArgsCount) {
       cg.printf("if (count <= %d) ", m_minParam);
@@ -699,15 +730,23 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
     if (preArgs || i > 0) cg.printf(", ");
     if (isRefParam(i)) {
       if (fewArgs) {
-        cg.printf("ref(a%d)", i);
+        if (i < Option::InvokeFewArgsCount) {
+          cg.printf("ref(a%d)", i);
+        } else {
+          cg.printf("null");
+        }
       } else {
         cg.printf("ref(const_cast<Array&>(params).lvalAt(%d))", i);
       }
     } else {
       if (fewArgs) {
-        cg.printf("a%d", i);
+        if (i < Option::InvokeFewArgsCount) {
+          cg.printf("a%d", i);
+        } else {
+          cg.printf("null");
+        }
       } else {
-        cg.printf("params.rvalAt(%d)", i);
+        cg.printf("params[%d]", i);
       }
     }
   }
@@ -723,15 +762,23 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
       if (preArgs || i > 0) cg.printf(", ");
       if (isRefParam(i)) {
         if (fewArgs) {
-          cg.printf("ref(a%d)", i);
+          if (i < Option::InvokeFewArgsCount) {
+            cg.printf("ref(a%d)", i);
+          } else {
+            cg.printf("null");
+          }
         } else {
           cg.printf("ref(const_cast<Array&>(params).lvalAt(%d))", i);
         }
       } else {
         if (fewArgs) {
-          cg.printf("a%d", i);
+          if (i < Option::InvokeFewArgsCount) {
+            cg.printf("a%d", i);
+          } else {
+            cg.printf("null");
+          }
         } else {
-          cg.printf("params.rvalAt(%d)", i);
+          cg.printf("params[%d]", i);
         }
       }
     }
@@ -743,23 +790,30 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
       if (maxParam == Option::InvokeFewArgsCount) return;
       cg.printf("Array params;\n");
       for (int i = maxParam; i < Option::InvokeFewArgsCount; i++) {
-        cg.printf(
-          "if (count >= %d) params.append(a%d);\n", i + 1, i);
+        cg.printf("if (count >= %d) params.append(a%d);\n", i + 1, i);
       }
     }
     cg.printf("%s,", call.c_str());
     for (int i = 0; i < maxParam; i++) {
       if (isRefParam(i)) {
         if (fewArgs) {
-          cg.printf("ref(a%d), ", i);
+          if (i < Option::InvokeFewArgsCount) {
+            cg.printf("ref(a%d), ", i);
+          } else {
+            cg.printf("null");
+          }
         } else {
           cg.printf("ref(const_cast<Array&>(params).lvalAt(%d)), ", i);
         }
       } else {
         if (fewArgs) {
-          cg.printf("a%d, ", i);
+          if (i < Option::InvokeFewArgsCount) {
+            cg.printf("a%d, ", i);
+          } else {
+            cg.printf("null");
+          }
         } else {
-          cg.printf("params.rvalAt(%d), ", i);
+          cg.printf("params[%d], ", i);
         }
       }
     }
@@ -941,12 +995,11 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
             Option::ClassPrefix, clsName, Option::ClassPrefix, clsName);
   outputCPPParamsImpl(cg, ar);
   cg.indentBegin(") {\n");
-  cg.printf("incRefCount();\n");
+  cg.printf("CountableHelper h(this);\n");
   cg.printf("init();\n");
   cg.printf("%s%s(", Option::MethodPrefix, consName);
   outputCPPParamsCall(cg, ar, false);
   cg.printf(");\n");
-  cg.printf("decRefCount();\n");
   cg.printf("return this;\n");
   cg.indentEnd("}\n");
   cg.indentBegin("ObjectData *%s%s::dynCreate(CArrRef params, "
@@ -954,18 +1007,19 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
                  Option::ClassPrefix, clsName);
   cg.printf("init();\n");
   cg.indentBegin("if (construct) {\n");
-  cg.printf("incRefCount();\n");
+  cg.printf("CountableHelper h(this);\n");
+  OutputCPPDynamicInvokeCount(cg);
   outputCPPDynamicInvoke(cg, ar, Option::MethodPrefix,consName,
-                         true, false, false);
-  cg.printf("decRefCount();\n");
+                         true, false, false, NULL, true);
   cg.indentEnd("}\n");
   cg.printf("return this;\n");
   cg.indentEnd("}\n");
   if (isDynamic() || isSepExtension()) {
     cg.indentBegin("void %s%s::dynConstruct(CArrRef params) {\n",
                    Option::ClassPrefix, clsName);
+    OutputCPPDynamicInvokeCount(cg);
     outputCPPDynamicInvoke(cg, ar, Option::MethodPrefix,
-                           consName, true, false, false);
+                           consName, true, false, false, NULL, true);
     cg.indentEnd("}\n");
     if (cg.getOutput() == CodeGenerator::SystemCPP ||
         Option::EnableEval >= Option::LimitedEval) {

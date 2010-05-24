@@ -331,6 +331,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
               m_funcScope->isReferenceVariableArgument()) {
             p->setContext(Expression::RefValue);
           } else if (!(p->getContext() & Expression::RefParameter)) {
+            p->clearContext(Expression::InvokeArgument);
             p->clearContext(Expression::RefValue);
           }
         }
@@ -617,7 +618,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
     return checkTypesImpl(ar, type, Type::Variant, coerce);
   }
-  m_builtinFunction = !func->isUserFunction();
+  m_builtinFunction = (!func->isUserFunction() || func->isSepExtension());
 
   if (m_redeclared) {
     if (m_params) {
@@ -736,8 +737,6 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
     }
   }
   if (m_valid) {
-    bool tooManyArgs =
-      (m_params && m_params->outputCPPTooManyArgsPre(cg, ar, m_name));
     if (!m_className.empty()) {
       cg.printf("%s%s::", Option::ClassPrefix, m_className.c_str());
       if (m_name == "__construct" && cls) {
@@ -771,9 +770,6 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
     FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
                                       m_variableArgument, m_argArrayId);
     cg.printf(")");
-    if (tooManyArgs) {
-      m_params->outputCPPTooManyArgsPost(cg, ar, m_voidReturn);
-    }
   } else {
     if (!m_class && m_className.empty()) {
       if (m_redeclared && !m_dynamicInvoke) {

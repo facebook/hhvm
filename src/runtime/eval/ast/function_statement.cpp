@@ -227,7 +227,7 @@ void FunctionStatement::directBind(VariableEnvironment &env,
   // more parameters than actual arguments
   for (; piter != m_params.end(); ++piter) {
     if (!(*piter)->isOptional()) {
-      throw_missing_argument(fullName().c_str(), (*piter)->argNum());
+      throw_missing_arguments(fullName().c_str(), (*piter)->argNum());
     }
     (*piter)->bindDefault(fenv);
   }
@@ -303,7 +303,7 @@ Variant FunctionStatement::invokeImpl(VariableEnvironment &env,
   // more params than actual args
   for (; piter != m_params.end(); ++piter) {
     if (!(*piter)->isOptional()) {
-      throw_missing_argument(fullName().c_str(), (*piter)->argNum());
+      throw_missing_arguments(fullName().c_str(), (*piter)->argNum());
     }
     (*piter)->bindDefault(env);
   }

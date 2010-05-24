@@ -171,54 +171,58 @@ void c_splobjectstorage::cloneSet(c_splobjectstorage *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_splobjectstorage::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
     case 4:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 10:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::rewind", 0, 1);
         return (t_rewind(), null);
       }
       break;
     case 12:
       HASH_GUARD(0x62DD82BFEB88A4ACLL, attach) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("splobjectstorage::attach", count+1);
-        return (t_attach(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("splobjectstorage::attach", count, 1, 1, 1);
+        return (t_attach(params[0]), null);
       }
       break;
     case 16:
       HASH_GUARD(0x5CEFA5A265104D10LL, count) {
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::count", 0, 1);
         return (t_count());
       }
       HASH_GUARD(0x61B94551FA22D290LL, contains) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("splobjectstorage::contains", count+1);
-        return (t_contains(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("splobjectstorage::contains", count, 1, 1, 1);
+        return (t_contains(params[0]));
       }
       break;
     case 17:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::key", 0, 1);
         return (t_key());
       }
       break;
     case 21:
       HASH_GUARD(0x3C7D0AC0EBA9A695LL, detach) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("splobjectstorage::detach", count+1);
-        return (t_detach(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("splobjectstorage::detach", count, 1, 1, 1);
+        return (t_detach(params[0]), null);
       }
       break;
     case 24:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::next", 0, 1);
         return (t_next(), null);
       }
       break;
     case 28:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::current", 0, 1);
         return (t_current());
       }
       break;
@@ -232,47 +236,53 @@ Variant c_splobjectstorage::o_invoke_few_args(const char *s, int64 hash, int cou
   switch (hash & 31) {
     case 4:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 10:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::rewind", 0, 1);
         return (t_rewind(), null);
       }
       break;
     case 12:
       HASH_GUARD(0x62DD82BFEB88A4ACLL, attach) {
-        if (count < 1) throw_missing_argument("splobjectstorage::attach", count+1);
+        if (count != 1) return throw_wrong_arguments("splobjectstorage::attach", count, 1, 1, 1);
         return (t_attach(a0), null);
       }
       break;
     case 16:
       HASH_GUARD(0x5CEFA5A265104D10LL, count) {
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::count", 0, 1);
         return (t_count());
       }
       HASH_GUARD(0x61B94551FA22D290LL, contains) {
-        if (count < 1) throw_missing_argument("splobjectstorage::contains", count+1);
+        if (count != 1) return throw_wrong_arguments("splobjectstorage::contains", count, 1, 1, 1);
         return (t_contains(a0));
       }
       break;
     case 17:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::key", 0, 1);
         return (t_key());
       }
       break;
     case 21:
       HASH_GUARD(0x3C7D0AC0EBA9A695LL, detach) {
-        if (count < 1) throw_missing_argument("splobjectstorage::detach", count+1);
+        if (count != 1) return throw_wrong_arguments("splobjectstorage::detach", count, 1, 1, 1);
         return (t_detach(a0), null);
       }
       break;
     case 24:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::next", 0, 1);
         return (t_next(), null);
       }
       break;
     case 28:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::current", 0, 1);
         return (t_current());
       }
       break;
@@ -282,6 +292,7 @@ Variant c_splobjectstorage::o_invoke_few_args(const char *s, int64 hash, int cou
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_splobjectstorage::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

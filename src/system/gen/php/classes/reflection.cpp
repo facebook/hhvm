@@ -134,64 +134,78 @@ void c_reflectionfunctionabstract::cloneSet(c_reflectionfunctionabstract *clone)
   ObjectData::cloneSet(clone);
 }
 Variant c_reflectionfunctionabstract::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
         return (t_getnumberofparameters());
       }
       break;
     case 1:
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
         return (t_getnumberofrequiredparameters());
       }
       break;
     case 2:
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
         return (t_getclosure());
       }
       break;
     case 4:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
         return (t_isuserdefined());
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
         return (t_getstartline());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
         return (t_getstaticvariables());
       }
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
         return (t_returnsreference());
       }
       break;
     case 13:
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
         return (t_getparameters());
       }
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 15:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 16:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
         return (t_getendline());
       }
       break;
     case 24:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
         return (t_getdoccomment());
       }
       break;
@@ -205,60 +219,73 @@ Variant c_reflectionfunctionabstract::o_invoke_few_args(const char *s, int64 has
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
         return (t_getnumberofparameters());
       }
       break;
     case 1:
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
         return (t_getnumberofrequiredparameters());
       }
       break;
     case 2:
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
         return (t_getclosure());
       }
       break;
     case 4:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
         return (t_isuserdefined());
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
         return (t_getstartline());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
         return (t_getstaticvariables());
       }
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
         return (t_returnsreference());
       }
       break;
     case 13:
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
         return (t_getparameters());
       }
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 15:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 16:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
         return (t_getendline());
       }
       break;
     case 24:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
         return (t_getdoccomment());
       }
       break;
@@ -268,6 +295,7 @@ Variant c_reflectionfunctionabstract::o_invoke_few_args(const char *s, int64 has
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_reflectionfunctionabstract::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -665,231 +693,241 @@ void c_reflectionobject::cloneSet(c_reflectionobject *clone) {
   c_reflectionclass::cloneSet(clone);
 }
 Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
         return (t_getstartline());
       }
       break;
     case 15:
       HASH_GUARD(0x40C7B30DCB439C8FLL, hasproperty) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::hasproperty", count+1);
-        return (t_hasproperty(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
+        return (t_hasproperty(params[0]));
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 24:
       HASH_GUARD(0x21820E7AA4733998LL, hasmethod) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::hasmethod", count+1);
-        return (t_hasmethod(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
+        return (t_hasmethod(params[0]));
       }
       break;
     case 27:
       HASH_GUARD(0x0F1AD0A8EC4C229BLL, getdefaultproperties) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
         return (t_getdefaultproperties());
       }
       break;
     case 30:
       HASH_GUARD(0x1BC5F3D87676509ELL, isinterface) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
         return (t_isinterface());
       }
       break;
     case 34:
       HASH_GUARD(0x323D9BCB05797B22LL, getstaticproperties) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
         return (t_getstaticproperties());
       }
       break;
     case 41:
       HASH_GUARD(0x030CE1D6142F8C29LL, isinstance) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::isinstance", count+1);
-        return (t_isinstance(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
+        return (t_isinstance(params[0]));
       }
       HASH_GUARD(0x1D6B8CA358B49929LL, getextensionname) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
         return (t_getextensionname());
       }
       break;
     case 42:
       HASH_GUARD(0x16BA16CE6488AAAALL, getmethods) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
         if (count <= 0) return (t_getmethods());
-        return (t_getmethods(params.rvalAt(0)));
+        return (t_getmethods(params[0]));
       }
       HASH_GUARD(0x226F6E80CECD3CAALL, getconstructor) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
         return (t_getconstructor());
       }
       HASH_GUARD(0x24596BE6D21F7CAALL, getinterfacenames) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
         return (t_getinterfacenames());
       }
       break;
     case 46:
       HASH_GUARD(0x3C882D4A895F612ELL, getstaticpropertyvalue) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::getstaticpropertyvalue", count+1);
-        if (count <= 1) return (t_getstaticpropertyvalue(params.rvalAt(0)));
-        return (t_getstaticpropertyvalue(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
+        if (count <= 1) return (t_getstaticpropertyvalue(params[0]));
+        return (t_getstaticpropertyvalue(params[0], params[1]));
       }
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
         return (t_isfinal());
       }
       break;
     case 48:
       HASH_GUARD(0x30A86FCA01FE7030LL, newinstance) {
-        int count = params.size();
         if (count <= 0) return (t_newinstance(count));
         return (t_newinstance(count,params.slice(0, count - 0, false)));
       }
       break;
     case 52:
       HASH_GUARD(0x3DB53E1FBD3C0734LL, getconstant) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::getconstant", count+1);
-        return (t_getconstant(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
+        return (t_getconstant(params[0]));
       }
       break;
     case 54:
       HASH_GUARD(0x0D81ECE253A3B5B6LL, getmethod) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::getmethod", count+1);
-        return (t_getmethod(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
+        return (t_getmethod(params[0]));
       }
       break;
     case 55:
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
         return (t_isabstract());
       }
       break;
     case 59:
       HASH_GUARD(0x25D24435915E6E3BLL, getextension) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
         return (t_getextension());
       }
       break;
     case 60:
       HASH_GUARD(0x0D8AAD6BA2BBCD3CLL, isinstantiable) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
         return (t_isinstantiable());
       }
       break;
     case 63:
       HASH_GUARD(0x54C2DC04C4A62B3FLL, hasconstant) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::hasconstant", count+1);
-        return (t_hasconstant(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
+        return (t_hasconstant(params[0]));
       }
       break;
     case 67:
       HASH_GUARD(0x67C15E3D98C00B43LL, getinterfaces) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
         return (t_getinterfaces());
       }
       break;
     case 68:
       HASH_GUARD(0x1EB679C3602F4B44LL, getproperties) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
         return (t_getproperties());
       }
       break;
     case 71:
       HASH_GUARD(0x0FD73627FB023047LL, getproperty) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::getproperty", count+1);
-        return (t_getproperty(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
+        return (t_getproperty(params[0]));
       }
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 78:
       HASH_GUARD(0x7D5A57B5370B68CELL, isiterateable) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
         return (t_isiterateable());
       }
       break;
     case 79:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 85:
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
         return (t_getconstants());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::__construct", count+1);
-        return (t___construct(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+        return (t___construct(params[0]), null);
       }
       break;
     case 100:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 101:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 102:
       HASH_GUARD(0x2735DCC254EE5C66LL, newinstanceargs) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::newinstanceargs", count+1);
-        return (t_newinstanceargs(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
+        return (t_newinstanceargs(params[0]));
       }
       break;
     case 104:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionobject::export", count+1);
-        return (ti_export(o_getClassName(), params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
+        return (ti_export(o_getClassName(), params[0], params[1]));
       }
       break;
     case 112:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
         return (t_getendline());
       }
       break;
     case 113:
       HASH_GUARD(0x07ECA928E37717F1LL, setstaticpropertyvalue) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionclass::setstaticpropertyvalue", count+1);
-        return (t_setstaticpropertyvalue(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
+        return (t_setstaticpropertyvalue(params[0], params[1]), null);
       }
       break;
     case 114:
       HASH_GUARD(0x74F7FEDE16957472LL, getparentclass) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
         return (t_getparentclass());
       }
       break;
     case 120:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 123:
       HASH_GUARD(0x28DC702215C7D6FBLL, implementsinterface) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::implementsinterface", count+1);
-        return (t_implementsinterface(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
+        return (t_implementsinterface(params[0]));
       }
       break;
     case 126:
       HASH_GUARD(0x373333991926C97ELL, issubclassof) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::issubclassof", count+1);
-        return (t_issubclassof(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
+        return (t_issubclassof(params[0]));
       }
       break;
     default:
@@ -902,74 +940,85 @@ Variant c_reflectionobject::o_invoke_few_args(const char *s, int64 hash, int cou
   switch (hash & 127) {
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
         return (t_getstartline());
       }
       break;
     case 15:
       HASH_GUARD(0x40C7B30DCB439C8FLL, hasproperty) {
-        if (count < 1) throw_missing_argument("reflectionclass::hasproperty", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
         return (t_hasproperty(a0));
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 24:
       HASH_GUARD(0x21820E7AA4733998LL, hasmethod) {
-        if (count < 1) throw_missing_argument("reflectionclass::hasmethod", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
         return (t_hasmethod(a0));
       }
       break;
     case 27:
       HASH_GUARD(0x0F1AD0A8EC4C229BLL, getdefaultproperties) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
         return (t_getdefaultproperties());
       }
       break;
     case 30:
       HASH_GUARD(0x1BC5F3D87676509ELL, isinterface) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
         return (t_isinterface());
       }
       break;
     case 34:
       HASH_GUARD(0x323D9BCB05797B22LL, getstaticproperties) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
         return (t_getstaticproperties());
       }
       break;
     case 41:
       HASH_GUARD(0x030CE1D6142F8C29LL, isinstance) {
-        if (count < 1) throw_missing_argument("reflectionclass::isinstance", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
         return (t_isinstance(a0));
       }
       HASH_GUARD(0x1D6B8CA358B49929LL, getextensionname) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
         return (t_getextensionname());
       }
       break;
     case 42:
       HASH_GUARD(0x16BA16CE6488AAAALL, getmethods) {
+        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
         if (count <= 0) return (t_getmethods());
         return (t_getmethods(a0));
       }
       HASH_GUARD(0x226F6E80CECD3CAALL, getconstructor) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
         return (t_getconstructor());
       }
       HASH_GUARD(0x24596BE6D21F7CAALL, getinterfacenames) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
         return (t_getinterfacenames());
       }
       break;
     case 46:
       HASH_GUARD(0x3C882D4A895F612ELL, getstaticpropertyvalue) {
-        if (count < 1) throw_missing_argument("reflectionclass::getstaticpropertyvalue", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
         if (count <= 1) return (t_getstaticpropertyvalue(a0));
         return (t_getstaticpropertyvalue(a0, a1));
       }
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
         return (t_isfinal());
       }
       break;
@@ -988,131 +1037,145 @@ Variant c_reflectionobject::o_invoke_few_args(const char *s, int64 hash, int cou
       break;
     case 52:
       HASH_GUARD(0x3DB53E1FBD3C0734LL, getconstant) {
-        if (count < 1) throw_missing_argument("reflectionclass::getconstant", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
         return (t_getconstant(a0));
       }
       break;
     case 54:
       HASH_GUARD(0x0D81ECE253A3B5B6LL, getmethod) {
-        if (count < 1) throw_missing_argument("reflectionclass::getmethod", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
         return (t_getmethod(a0));
       }
       break;
     case 55:
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
         return (t_isabstract());
       }
       break;
     case 59:
       HASH_GUARD(0x25D24435915E6E3BLL, getextension) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
         return (t_getextension());
       }
       break;
     case 60:
       HASH_GUARD(0x0D8AAD6BA2BBCD3CLL, isinstantiable) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
         return (t_isinstantiable());
       }
       break;
     case 63:
       HASH_GUARD(0x54C2DC04C4A62B3FLL, hasconstant) {
-        if (count < 1) throw_missing_argument("reflectionclass::hasconstant", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
         return (t_hasconstant(a0));
       }
       break;
     case 67:
       HASH_GUARD(0x67C15E3D98C00B43LL, getinterfaces) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
         return (t_getinterfaces());
       }
       break;
     case 68:
       HASH_GUARD(0x1EB679C3602F4B44LL, getproperties) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
         return (t_getproperties());
       }
       break;
     case 71:
       HASH_GUARD(0x0FD73627FB023047LL, getproperty) {
-        if (count < 1) throw_missing_argument("reflectionclass::getproperty", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
         return (t_getproperty(a0));
       }
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 78:
       HASH_GUARD(0x7D5A57B5370B68CELL, isiterateable) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
         return (t_isiterateable());
       }
       break;
     case 79:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 85:
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
         return (t_getconstants());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("reflectionclass::__construct", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       break;
     case 100:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 101:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 102:
       HASH_GUARD(0x2735DCC254EE5C66LL, newinstanceargs) {
-        if (count < 1) throw_missing_argument("reflectionclass::newinstanceargs", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
         return (t_newinstanceargs(a0));
       }
       break;
     case 104:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count < 2) throw_missing_argument("reflectionobject::export", count+1);
+        if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
         return (ti_export(o_getClassName(), a0, a1));
       }
       break;
     case 112:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
         return (t_getendline());
       }
       break;
     case 113:
       HASH_GUARD(0x07ECA928E37717F1LL, setstaticpropertyvalue) {
-        if (count < 2) throw_missing_argument("reflectionclass::setstaticpropertyvalue", count+1);
+        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
         return (t_setstaticpropertyvalue(a0, a1), null);
       }
       break;
     case 114:
       HASH_GUARD(0x74F7FEDE16957472LL, getparentclass) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
         return (t_getparentclass());
       }
       break;
     case 120:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 123:
       HASH_GUARD(0x28DC702215C7D6FBLL, implementsinterface) {
-        if (count < 1) throw_missing_argument("reflectionclass::implementsinterface", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
         return (t_implementsinterface(a0));
       }
       break;
     case 126:
       HASH_GUARD(0x373333991926C97ELL, issubclassof) {
-        if (count < 1) throw_missing_argument("reflectionclass::issubclassof", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
         return (t_issubclassof(a0));
       }
       break;
@@ -1122,13 +1185,13 @@ Variant c_reflectionobject::o_invoke_few_args(const char *s, int64 hash, int cou
   return c_reflectionclass::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_reflectionobject::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionobject::export", count+1);
-        return (ti_export(c, params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
+        return (ti_export(c, params[0], params[1]));
       }
       break;
     default:
@@ -1822,42 +1885,50 @@ void c_reflectionexception::cloneSet(c_reflectionexception *clone) {
   c_exception::cloneSet(clone);
 }
 Variant c_reflectionexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -1871,37 +1942,45 @@ Variant c_reflectionexception::o_invoke_few_args(const char *s, int64 hash, int 
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -1911,6 +1990,7 @@ Variant c_reflectionexception::o_invoke_few_args(const char *s, int64 hash, int 
   return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_reflectionexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_exception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -2234,27 +2314,25 @@ Variant c_reflectionclass::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(reflectionclass)
 c_reflectionclass *c_reflectionclass::create(Variant v_name) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(v_name);
-  decRefCount();
   return this;
 }
 ObjectData *c_reflectionclass::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("reflectionclass::__construct", count+1);
-    (t___construct(params.rvalAt(0)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 1) throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+    (t___construct(params[0]));
   }
   return this;
 }
 void c_reflectionclass::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("reflectionclass::__construct", count+1);
-  (t___construct(params.rvalAt(0)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+  (t___construct(params[0]));
 }
 void c_reflectionclass::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -2281,243 +2359,251 @@ void c_reflectionclass::cloneSet(c_reflectionclass *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
         return (t_getstartline());
       }
       break;
     case 15:
       HASH_GUARD(0x40C7B30DCB439C8FLL, hasproperty) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::hasproperty", count+1);
-        return (t_hasproperty(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
+        return (t_hasproperty(params[0]));
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 24:
       HASH_GUARD(0x21820E7AA4733998LL, hasmethod) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::hasmethod", count+1);
-        return (t_hasmethod(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
+        return (t_hasmethod(params[0]));
       }
       break;
     case 27:
       HASH_GUARD(0x0F1AD0A8EC4C229BLL, getdefaultproperties) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
         return (t_getdefaultproperties());
       }
       break;
     case 30:
       HASH_GUARD(0x1BC5F3D87676509ELL, isinterface) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
         return (t_isinterface());
       }
       break;
     case 34:
       HASH_GUARD(0x323D9BCB05797B22LL, getstaticproperties) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
         return (t_getstaticproperties());
       }
       break;
     case 41:
       HASH_GUARD(0x030CE1D6142F8C29LL, isinstance) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::isinstance", count+1);
-        return (t_isinstance(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
+        return (t_isinstance(params[0]));
       }
       HASH_GUARD(0x1D6B8CA358B49929LL, getextensionname) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
         return (t_getextensionname());
       }
       break;
     case 42:
       HASH_GUARD(0x16BA16CE6488AAAALL, getmethods) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
         if (count <= 0) return (t_getmethods());
-        return (t_getmethods(params.rvalAt(0)));
+        return (t_getmethods(params[0]));
       }
       HASH_GUARD(0x226F6E80CECD3CAALL, getconstructor) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
         return (t_getconstructor());
       }
       HASH_GUARD(0x24596BE6D21F7CAALL, getinterfacenames) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
         return (t_getinterfacenames());
       }
       break;
     case 46:
       HASH_GUARD(0x3C882D4A895F612ELL, getstaticpropertyvalue) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::getstaticpropertyvalue", count+1);
-        if (count <= 1) return (t_getstaticpropertyvalue(params.rvalAt(0)));
-        return (t_getstaticpropertyvalue(params.rvalAt(0), params.rvalAt(1)));
+        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
+        if (count <= 1) return (t_getstaticpropertyvalue(params[0]));
+        return (t_getstaticpropertyvalue(params[0], params[1]));
       }
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
         return (t_isfinal());
       }
       break;
     case 48:
       HASH_GUARD(0x30A86FCA01FE7030LL, newinstance) {
-        int count = params.size();
         if (count <= 0) return (t_newinstance(count));
         return (t_newinstance(count,params.slice(0, count - 0, false)));
       }
       break;
     case 52:
       HASH_GUARD(0x3DB53E1FBD3C0734LL, getconstant) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::getconstant", count+1);
-        return (t_getconstant(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
+        return (t_getconstant(params[0]));
       }
       break;
     case 54:
       HASH_GUARD(0x0D81ECE253A3B5B6LL, getmethod) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::getmethod", count+1);
-        return (t_getmethod(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
+        return (t_getmethod(params[0]));
       }
       break;
     case 55:
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
         return (t_isabstract());
       }
       break;
     case 59:
       HASH_GUARD(0x25D24435915E6E3BLL, getextension) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
         return (t_getextension());
       }
       break;
     case 60:
       HASH_GUARD(0x0D8AAD6BA2BBCD3CLL, isinstantiable) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
         return (t_isinstantiable());
       }
       break;
     case 63:
       HASH_GUARD(0x54C2DC04C4A62B3FLL, hasconstant) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::hasconstant", count+1);
-        return (t_hasconstant(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
+        return (t_hasconstant(params[0]));
       }
       break;
     case 67:
       HASH_GUARD(0x67C15E3D98C00B43LL, getinterfaces) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
         return (t_getinterfaces());
       }
       break;
     case 68:
       HASH_GUARD(0x1EB679C3602F4B44LL, getproperties) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
         return (t_getproperties());
       }
       break;
     case 71:
       HASH_GUARD(0x0FD73627FB023047LL, getproperty) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::getproperty", count+1);
-        return (t_getproperty(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
+        return (t_getproperty(params[0]));
       }
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 78:
       HASH_GUARD(0x7D5A57B5370B68CELL, isiterateable) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
         return (t_isiterateable());
       }
       break;
     case 79:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 85:
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
         return (t_getconstants());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::__construct", count+1);
-        return (t___construct(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+        return (t___construct(params[0]), null);
       }
       break;
     case 100:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 101:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 102:
       HASH_GUARD(0x2735DCC254EE5C66LL, newinstanceargs) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::newinstanceargs", count+1);
-        return (t_newinstanceargs(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
+        return (t_newinstanceargs(params[0]));
       }
       break;
     case 103:
       HASH_GUARD(0x37349B25A0ED29E7LL, test) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionclass::test", count+1);
-        return (t_test(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("reflectionclass::test", count, 2, 2, 1);
+        return (t_test(params[0], params[1]));
       }
       break;
     case 104:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionclass::export", count+1);
-        return (ti_export(o_getClassName(), params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
+        return (ti_export(o_getClassName(), params[0], params[1]));
       }
       break;
     case 112:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
         return (t_getendline());
       }
       break;
     case 113:
       HASH_GUARD(0x07ECA928E37717F1LL, setstaticpropertyvalue) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionclass::setstaticpropertyvalue", count+1);
-        return (t_setstaticpropertyvalue(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
+        return (t_setstaticpropertyvalue(params[0], params[1]), null);
       }
       break;
     case 114:
       HASH_GUARD(0x74F7FEDE16957472LL, getparentclass) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
         return (t_getparentclass());
       }
       break;
     case 120:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 123:
       HASH_GUARD(0x28DC702215C7D6FBLL, implementsinterface) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::implementsinterface", count+1);
-        return (t_implementsinterface(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
+        return (t_implementsinterface(params[0]));
       }
       HASH_GUARD(0x5E82B850BB90B0FBLL, fetch) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::fetch", count+1);
-        return (t_fetch(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::fetch", count, 1, 1, 1);
+        return (t_fetch(params[0]));
       }
       break;
     case 126:
       HASH_GUARD(0x373333991926C97ELL, issubclassof) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionclass::issubclassof", count+1);
-        return (t_issubclassof(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
+        return (t_issubclassof(params[0]));
       }
       break;
     default:
@@ -2530,74 +2616,85 @@ Variant c_reflectionclass::o_invoke_few_args(const char *s, int64 hash, int coun
   switch (hash & 127) {
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
         return (t_getstartline());
       }
       break;
     case 15:
       HASH_GUARD(0x40C7B30DCB439C8FLL, hasproperty) {
-        if (count < 1) throw_missing_argument("reflectionclass::hasproperty", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
         return (t_hasproperty(a0));
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 24:
       HASH_GUARD(0x21820E7AA4733998LL, hasmethod) {
-        if (count < 1) throw_missing_argument("reflectionclass::hasmethod", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
         return (t_hasmethod(a0));
       }
       break;
     case 27:
       HASH_GUARD(0x0F1AD0A8EC4C229BLL, getdefaultproperties) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
         return (t_getdefaultproperties());
       }
       break;
     case 30:
       HASH_GUARD(0x1BC5F3D87676509ELL, isinterface) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
         return (t_isinterface());
       }
       break;
     case 34:
       HASH_GUARD(0x323D9BCB05797B22LL, getstaticproperties) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
         return (t_getstaticproperties());
       }
       break;
     case 41:
       HASH_GUARD(0x030CE1D6142F8C29LL, isinstance) {
-        if (count < 1) throw_missing_argument("reflectionclass::isinstance", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
         return (t_isinstance(a0));
       }
       HASH_GUARD(0x1D6B8CA358B49929LL, getextensionname) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
         return (t_getextensionname());
       }
       break;
     case 42:
       HASH_GUARD(0x16BA16CE6488AAAALL, getmethods) {
+        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
         if (count <= 0) return (t_getmethods());
         return (t_getmethods(a0));
       }
       HASH_GUARD(0x226F6E80CECD3CAALL, getconstructor) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
         return (t_getconstructor());
       }
       HASH_GUARD(0x24596BE6D21F7CAALL, getinterfacenames) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
         return (t_getinterfacenames());
       }
       break;
     case 46:
       HASH_GUARD(0x3C882D4A895F612ELL, getstaticpropertyvalue) {
-        if (count < 1) throw_missing_argument("reflectionclass::getstaticpropertyvalue", count+1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
         if (count <= 1) return (t_getstaticpropertyvalue(a0));
         return (t_getstaticpropertyvalue(a0, a1));
       }
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
         return (t_isfinal());
       }
       break;
@@ -2616,141 +2713,155 @@ Variant c_reflectionclass::o_invoke_few_args(const char *s, int64 hash, int coun
       break;
     case 52:
       HASH_GUARD(0x3DB53E1FBD3C0734LL, getconstant) {
-        if (count < 1) throw_missing_argument("reflectionclass::getconstant", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
         return (t_getconstant(a0));
       }
       break;
     case 54:
       HASH_GUARD(0x0D81ECE253A3B5B6LL, getmethod) {
-        if (count < 1) throw_missing_argument("reflectionclass::getmethod", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
         return (t_getmethod(a0));
       }
       break;
     case 55:
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
         return (t_isabstract());
       }
       break;
     case 59:
       HASH_GUARD(0x25D24435915E6E3BLL, getextension) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
         return (t_getextension());
       }
       break;
     case 60:
       HASH_GUARD(0x0D8AAD6BA2BBCD3CLL, isinstantiable) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
         return (t_isinstantiable());
       }
       break;
     case 63:
       HASH_GUARD(0x54C2DC04C4A62B3FLL, hasconstant) {
-        if (count < 1) throw_missing_argument("reflectionclass::hasconstant", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
         return (t_hasconstant(a0));
       }
       break;
     case 67:
       HASH_GUARD(0x67C15E3D98C00B43LL, getinterfaces) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
         return (t_getinterfaces());
       }
       break;
     case 68:
       HASH_GUARD(0x1EB679C3602F4B44LL, getproperties) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
         return (t_getproperties());
       }
       break;
     case 71:
       HASH_GUARD(0x0FD73627FB023047LL, getproperty) {
-        if (count < 1) throw_missing_argument("reflectionclass::getproperty", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
         return (t_getproperty(a0));
       }
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 78:
       HASH_GUARD(0x7D5A57B5370B68CELL, isiterateable) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
         return (t_isiterateable());
       }
       break;
     case 79:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 85:
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
         return (t_getconstants());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("reflectionclass::__construct", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       break;
     case 100:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 101:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 102:
       HASH_GUARD(0x2735DCC254EE5C66LL, newinstanceargs) {
-        if (count < 1) throw_missing_argument("reflectionclass::newinstanceargs", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
         return (t_newinstanceargs(a0));
       }
       break;
     case 103:
       HASH_GUARD(0x37349B25A0ED29E7LL, test) {
-        if (count < 2) throw_missing_argument("reflectionclass::test", count+1);
+        if (count != 2) return throw_wrong_arguments("reflectionclass::test", count, 2, 2, 1);
         return (t_test(a0, a1));
       }
       break;
     case 104:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count < 2) throw_missing_argument("reflectionclass::export", count+1);
+        if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
         return (ti_export(o_getClassName(), a0, a1));
       }
       break;
     case 112:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
         return (t_getendline());
       }
       break;
     case 113:
       HASH_GUARD(0x07ECA928E37717F1LL, setstaticpropertyvalue) {
-        if (count < 2) throw_missing_argument("reflectionclass::setstaticpropertyvalue", count+1);
+        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
         return (t_setstaticpropertyvalue(a0, a1), null);
       }
       break;
     case 114:
       HASH_GUARD(0x74F7FEDE16957472LL, getparentclass) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
         return (t_getparentclass());
       }
       break;
     case 120:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 123:
       HASH_GUARD(0x28DC702215C7D6FBLL, implementsinterface) {
-        if (count < 1) throw_missing_argument("reflectionclass::implementsinterface", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
         return (t_implementsinterface(a0));
       }
       HASH_GUARD(0x5E82B850BB90B0FBLL, fetch) {
-        if (count < 1) throw_missing_argument("reflectionclass::fetch", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::fetch", count, 1, 1, 1);
         return (t_fetch(a0));
       }
       break;
     case 126:
       HASH_GUARD(0x373333991926C97ELL, issubclassof) {
-        if (count < 1) throw_missing_argument("reflectionclass::issubclassof", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
         return (t_issubclassof(a0));
       }
       break;
@@ -2760,13 +2871,13 @@ Variant c_reflectionclass::o_invoke_few_args(const char *s, int64 hash, int coun
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_reflectionclass::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionclass::export", count+1);
-        return (ti_export(c, params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
+        return (ti_export(c, params[0], params[1]));
       }
       break;
     default:
@@ -4202,27 +4313,25 @@ Variant c_reflectionextension::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(reflectionextension)
 c_reflectionextension *c_reflectionextension::create(Variant v_name) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(v_name);
-  decRefCount();
   return this;
 }
 ObjectData *c_reflectionextension::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("reflectionextension::__construct", count+1);
-    (t___construct(params.rvalAt(0)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 1) throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
+    (t___construct(params[0]));
   }
   return this;
 }
 void c_reflectionextension::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("reflectionextension::__construct", count+1);
-  (t___construct(params.rvalAt(0)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
+  (t___construct(params[0]));
 }
 void c_reflectionextension::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -4249,60 +4358,68 @@ void c_reflectionextension::cloneSet(c_reflectionextension *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_reflectionextension::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x0113D73FC859EDC2LL, getclasses) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getclasses", 0, 1);
         return (t_getclasses());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionextension::export", count+1);
-        return (ti_export(o_getClassName(), params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
+        return (ti_export(o_getClassName(), params[0], params[1]));
       }
       break;
     case 15:
       HASH_GUARD(0x652BDFA6E22F17AFLL, getfunctions) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getfunctions", 0, 1);
         return (t_getfunctions());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x5CE2786E11341594LL, getclassnames) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getclassnames", 0, 1);
         return (t_getclassnames());
       }
       break;
     case 21:
       HASH_GUARD(0x306B5F4D1D03D335LL, getinientries) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getinientries", 0, 1);
         return (t_getinientries());
       }
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getconstants", 0, 1);
         return (t_getconstants());
       }
       break;
     case 22:
       HASH_GUARD(0x7521E8833BE3D316LL, getversion) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getversion", 0, 1);
         return (t_getversion());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionextension::__construct", count+1);
-        return (t___construct(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
+        return (t___construct(params[0]), null);
       }
       HASH_GUARD(0x0F2EF58F157D479FLL, info) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::info", 0, 1);
         return (t_info());
       }
       break;
@@ -4316,54 +4433,63 @@ Variant c_reflectionextension::o_invoke_few_args(const char *s, int64 hash, int 
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x0113D73FC859EDC2LL, getclasses) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getclasses", 0, 1);
         return (t_getclasses());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count < 2) throw_missing_argument("reflectionextension::export", count+1);
+        if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
         return (ti_export(o_getClassName(), a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x652BDFA6E22F17AFLL, getfunctions) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getfunctions", 0, 1);
         return (t_getfunctions());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x5CE2786E11341594LL, getclassnames) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getclassnames", 0, 1);
         return (t_getclassnames());
       }
       break;
     case 21:
       HASH_GUARD(0x306B5F4D1D03D335LL, getinientries) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getinientries", 0, 1);
         return (t_getinientries());
       }
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getconstants", 0, 1);
         return (t_getconstants());
       }
       break;
     case 22:
       HASH_GUARD(0x7521E8833BE3D316LL, getversion) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getversion", 0, 1);
         return (t_getversion());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("reflectionextension::__construct", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       HASH_GUARD(0x0F2EF58F157D479FLL, info) {
+        if (count > 0) return throw_toomany_arguments("reflectionextension::info", 0, 1);
         return (t_info());
       }
       break;
@@ -4373,13 +4499,13 @@ Variant c_reflectionextension::o_invoke_few_args(const char *s, int64 hash, int 
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_reflectionextension::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionextension::export", count+1);
-        return (ti_export(c, params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
+        return (ti_export(c, params[0], params[1]));
       }
       break;
     default:
@@ -4816,27 +4942,25 @@ Variant c_reflectionmethod::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(reflectionmethod)
 c_reflectionmethod *c_reflectionmethod::create(Variant v_cls, Variant v_name) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(v_cls, v_name);
-  decRefCount();
   return this;
 }
 ObjectData *c_reflectionmethod::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 2) throw_missing_argument("reflectionmethod::__construct", count+1);
-    (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 2) throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
+    (t___construct(params[0], params[1]));
   }
   return this;
 }
 void c_reflectionmethod::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 2) throw_missing_argument("reflectionmethod::__construct", count+1);
-  (t___construct(params.rvalAt(0), params.rvalAt(1)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
+  (t___construct(params[0], params[1]));
 }
 void c_reflectionmethod::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -4867,148 +4991,169 @@ void c_reflectionmethod::cloneSet(c_reflectionmethod *clone) {
   c_reflectionfunctionabstract::cloneSet(clone);
 }
 Variant c_reflectionmethod::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 2:
       HASH_GUARD(0x3FCE192CF6199942LL, invoke) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionmethod::invoke", count+1);
-        if (count <= 1) return (t_invoke(count, params.rvalAt(0)));
-        return (t_invoke(count,params.rvalAt(0), params.slice(1, count - 1, false)));
+        if (count < 1) return throw_missing_arguments("reflectionmethod::invoke", count+1, 1);
+        if (count <= 1) return (t_invoke(count, params[0]));
+        return (t_invoke(count,params[0], params.slice(1, count - 1, false)));
       }
       break;
     case 4:
       HASH_GUARD(0x3235AF57F23103C4LL, invokeargs) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionmethod::invokeargs", count+1);
-        return (t_invokeargs(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("reflectionmethod::invokeargs", count, 2, 2, 1);
+        return (t_invokeargs(params[0], params[1]));
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
         return (t_getstartline());
       }
       break;
     case 7:
       HASH_GUARD(0x51A20EA0E327F607LL, isdestructor) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isdestructor", 0, 1);
         return (t_isdestructor());
       }
       break;
     case 13:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 15:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getmodifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 25:
       HASH_GUARD(0x7A15DC56E8CC0B19LL, isstatic) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isstatic", 0, 1);
         return (t_isstatic());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionmethod::__construct", count+1);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count != 2) return throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
+        return (t___construct(params[0], params[1]), null);
       }
       break;
     case 32:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
         return (t_getnumberofparameters());
       }
       break;
     case 33:
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
         return (t_getnumberofrequiredparameters());
       }
       break;
     case 34:
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getclosure", 0, 1);
         return (t_getclosure());
       }
       break;
     case 35:
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getdeclaringclass", 0, 1);
         return (t_getdeclaringclass());
       }
       break;
     case 36:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 37:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 40:
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
         return (t_getstaticvariables());
       }
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
         return (t_returnsreference());
       }
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("reflectionmethod::export", count+1);
-        return (ti_export(o_getClassName(), params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
+        return (ti_export(o_getClassName(), params[0], params[1], params[2]));
       }
       break;
     case 42:
       HASH_GUARD(0x2D7209A590477CEALL, isprotected) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprotected", 0, 1);
         return (t_isprotected());
       }
       break;
     case 45:
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
         return (t_getparameters());
       }
       break;
     case 46:
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isfinal", 0, 1);
         return (t_isfinal());
       }
       break;
     case 47:
       HASH_GUARD(0x37AAE0845E2F636FLL, isprivate) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprivate", 0, 1);
         return (t_isprivate());
       }
       break;
     case 48:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
         return (t_getendline());
       }
       break;
     case 55:
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isabstract", 0, 1);
         return (t_isabstract());
       }
       break;
     case 56:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 58:
       HASH_GUARD(0x654B5F965C5CAC7ALL, isconstructor) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isconstructor", 0, 1);
         return (t_isconstructor());
       }
       break;
     case 60:
       HASH_GUARD(0x2820F10358723B7CLL, ispublic) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::ispublic", 0, 1);
         return (t_ispublic());
       }
       break;
@@ -5022,7 +5167,7 @@ Variant c_reflectionmethod::o_invoke_few_args(const char *s, int64 hash, int cou
   switch (hash & 63) {
     case 2:
       HASH_GUARD(0x3FCE192CF6199942LL, invoke) {
-        if (count < 1) throw_missing_argument("reflectionmethod::invoke", count+1);
+        if (count < 1) return throw_missing_arguments("reflectionmethod::invoke", count+1, 1);
         if (count <= 1) return (t_invoke(count, a0));
         Array params;
         if (count >= 2) params.append(a1);
@@ -5035,133 +5180,157 @@ Variant c_reflectionmethod::o_invoke_few_args(const char *s, int64 hash, int cou
       break;
     case 4:
       HASH_GUARD(0x3235AF57F23103C4LL, invokeargs) {
-        if (count < 2) throw_missing_argument("reflectionmethod::invokeargs", count+1);
+        if (count != 2) return throw_wrong_arguments("reflectionmethod::invokeargs", count, 2, 2, 1);
         return (t_invokeargs(a0, a1));
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
         return (t_getstartline());
       }
       break;
     case 7:
       HASH_GUARD(0x51A20EA0E327F607LL, isdestructor) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isdestructor", 0, 1);
         return (t_isdestructor());
       }
       break;
     case 13:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 15:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getmodifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 25:
       HASH_GUARD(0x7A15DC56E8CC0B19LL, isstatic) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isstatic", 0, 1);
         return (t_isstatic());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 2) throw_missing_argument("reflectionmethod::__construct", count+1);
+        if (count != 2) return throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
         return (t___construct(a0, a1), null);
       }
       break;
     case 32:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
         return (t_getnumberofparameters());
       }
       break;
     case 33:
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
         return (t_getnumberofrequiredparameters());
       }
       break;
     case 34:
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getclosure", 0, 1);
         return (t_getclosure());
       }
       break;
     case 35:
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getdeclaringclass", 0, 1);
         return (t_getdeclaringclass());
       }
       break;
     case 36:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 37:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 40:
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
         return (t_getstaticvariables());
       }
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
         return (t_returnsreference());
       }
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count < 3) throw_missing_argument("reflectionmethod::export", count+1);
+        if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
         return (ti_export(o_getClassName(), a0, a1, a2));
       }
       break;
     case 42:
       HASH_GUARD(0x2D7209A590477CEALL, isprotected) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprotected", 0, 1);
         return (t_isprotected());
       }
       break;
     case 45:
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
         return (t_getparameters());
       }
       break;
     case 46:
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isfinal", 0, 1);
         return (t_isfinal());
       }
       break;
     case 47:
       HASH_GUARD(0x37AAE0845E2F636FLL, isprivate) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprivate", 0, 1);
         return (t_isprivate());
       }
       break;
     case 48:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
         return (t_getendline());
       }
       break;
     case 55:
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isabstract", 0, 1);
         return (t_isabstract());
       }
       break;
     case 56:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 58:
       HASH_GUARD(0x654B5F965C5CAC7ALL, isconstructor) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isconstructor", 0, 1);
         return (t_isconstructor());
       }
       break;
     case 60:
       HASH_GUARD(0x2820F10358723B7CLL, ispublic) {
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::ispublic", 0, 1);
         return (t_ispublic());
       }
       break;
@@ -5171,13 +5340,13 @@ Variant c_reflectionmethod::o_invoke_few_args(const char *s, int64 hash, int cou
   return c_reflectionfunctionabstract::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_reflectionmethod::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("reflectionmethod::export", count+1);
-        return (ti_export(c, params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
+        return (ti_export(c, params[0], params[1], params[2]));
       }
       break;
     default:
@@ -5923,27 +6092,25 @@ Variant c_reflectionproperty::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(reflectionproperty)
 c_reflectionproperty *c_reflectionproperty::create(Variant v_cls, Variant v_name) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(v_cls, v_name);
-  decRefCount();
   return this;
 }
 ObjectData *c_reflectionproperty::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 2) throw_missing_argument("reflectionproperty::__construct", count+1);
-    (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 2) throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
+    (t___construct(params[0], params[1]));
   }
   return this;
 }
 void c_reflectionproperty::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 2) throw_missing_argument("reflectionproperty::__construct", count+1);
-  (t___construct(params.rvalAt(0), params.rvalAt(1)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
+  (t___construct(params[0], params[1]));
 }
 void c_reflectionproperty::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -5975,85 +6142,94 @@ void c_reflectionproperty::cloneSet(c_reflectionproperty *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_reflectionproperty::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x791E9751F5B8C5A2LL, setaccessible) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::setaccessible", 0, 1);
         return (t_setaccessible(), null);
       }
       break;
     case 3:
       HASH_GUARD(0x56879BCEB40997E3LL, getvalue) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("reflectionproperty::getvalue", 1, 1);
         if (count <= 0) return (t_getvalue());
-        return (t_getvalue(params.rvalAt(0)));
+        return (t_getvalue(params[0]));
       }
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdeclaringclass", 0, 1);
         return (t_getdeclaringclass());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("reflectionproperty::export", count+1);
-        return (ti_export(o_getClassName(), params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
+        return (ti_export(o_getClassName(), params[0], params[1], params[2]));
       }
       break;
     case 10:
       HASH_GUARD(0x2D7209A590477CEALL, isprotected) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprotected", 0, 1);
         return (t_isprotected());
       }
       break;
     case 15:
       HASH_GUARD(0x37AAE0845E2F636FLL, isprivate) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprivate", 0, 1);
         return (t_isprivate());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getmodifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 21:
       HASH_GUARD(0x384A52597AB11F15LL, isdefault) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isdefault", 0, 1);
         return (t_isdefault());
       }
       HASH_GUARD(0x36FBED35008C8DB5LL, setvalue) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionproperty::setvalue", count+1);
-        return (t_setvalue(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("reflectionproperty::setvalue", count, 2, 2, 1);
+        return (t_setvalue(params[0], params[1]));
       }
       break;
     case 24:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdoccomment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 25:
       HASH_GUARD(0x7A15DC56E8CC0B19LL, isstatic) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isstatic", 0, 1);
         return (t_isstatic());
       }
       break;
     case 28:
       HASH_GUARD(0x2820F10358723B7CLL, ispublic) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::ispublic", 0, 1);
         return (t_ispublic());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionproperty::__construct", count+1);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count != 2) return throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
+        return (t___construct(params[0], params[1]), null);
       }
       break;
     default:
@@ -6066,76 +6242,88 @@ Variant c_reflectionproperty::o_invoke_few_args(const char *s, int64 hash, int c
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x791E9751F5B8C5A2LL, setaccessible) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::setaccessible", 0, 1);
         return (t_setaccessible(), null);
       }
       break;
     case 3:
       HASH_GUARD(0x56879BCEB40997E3LL, getvalue) {
+        if (count > 1) return throw_toomany_arguments("reflectionproperty::getvalue", 1, 1);
         if (count <= 0) return (t_getvalue());
         return (t_getvalue(a0));
       }
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdeclaringclass", 0, 1);
         return (t_getdeclaringclass());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count < 3) throw_missing_argument("reflectionproperty::export", count+1);
+        if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
         return (ti_export(o_getClassName(), a0, a1, a2));
       }
       break;
     case 10:
       HASH_GUARD(0x2D7209A590477CEALL, isprotected) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprotected", 0, 1);
         return (t_isprotected());
       }
       break;
     case 15:
       HASH_GUARD(0x37AAE0845E2F636FLL, isprivate) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprivate", 0, 1);
         return (t_isprivate());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getmodifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 21:
       HASH_GUARD(0x384A52597AB11F15LL, isdefault) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isdefault", 0, 1);
         return (t_isdefault());
       }
       HASH_GUARD(0x36FBED35008C8DB5LL, setvalue) {
-        if (count < 2) throw_missing_argument("reflectionproperty::setvalue", count+1);
+        if (count != 2) return throw_wrong_arguments("reflectionproperty::setvalue", count, 2, 2, 1);
         return (t_setvalue(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdoccomment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 25:
       HASH_GUARD(0x7A15DC56E8CC0B19LL, isstatic) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isstatic", 0, 1);
         return (t_isstatic());
       }
       break;
     case 28:
       HASH_GUARD(0x2820F10358723B7CLL, ispublic) {
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::ispublic", 0, 1);
         return (t_ispublic());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 2) throw_missing_argument("reflectionproperty::__construct", count+1);
+        if (count != 2) return throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
         return (t___construct(a0, a1), null);
       }
       break;
@@ -6145,13 +6333,13 @@ Variant c_reflectionproperty::o_invoke_few_args(const char *s, int64 hash, int c
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_reflectionproperty::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("reflectionproperty::export", count+1);
-        return (ti_export(c, params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
+        return (ti_export(c, params[0], params[1], params[2]));
       }
       break;
     default:
@@ -6654,27 +6842,25 @@ Variant c_reflectionfunction::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(reflectionfunction)
 c_reflectionfunction *c_reflectionfunction::create(Variant v_name) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(v_name);
-  decRefCount();
   return this;
 }
 ObjectData *c_reflectionfunction::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("reflectionfunction::__construct", count+1);
-    (t___construct(params.rvalAt(0)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 1) throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
+    (t___construct(params[0]));
   }
   return this;
 }
 void c_reflectionfunction::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("reflectionfunction::__construct", count+1);
-  (t___construct(params.rvalAt(0)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
+  (t___construct(params[0]));
 }
 void c_reflectionfunction::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -6699,97 +6885,108 @@ void c_reflectionfunction::cloneSet(c_reflectionfunction *clone) {
   c_reflectionfunctionabstract::cloneSet(clone);
 }
 Variant c_reflectionfunction::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 2:
       HASH_GUARD(0x3FCE192CF6199942LL, invoke) {
-        int count = params.size();
         if (count <= 0) return (t_invoke(count));
         return (t_invoke(count,params.slice(0, count - 0, false)));
       }
       break;
     case 4:
       HASH_GUARD(0x3235AF57F23103C4LL, invokeargs) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionfunction::invokeargs", count+1);
-        return (t_invokeargs(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("reflectionfunction::invokeargs", count, 1, 1, 1);
+        return (t_invokeargs(params[0]));
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
         return (t_getstartline());
       }
       break;
     case 13:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 15:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunction::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("reflectionfunction::__construct", count+1);
-        return (t___construct(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
+        return (t___construct(params[0]), null);
       }
       break;
     case 32:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
         return (t_getnumberofparameters());
       }
       break;
     case 33:
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
         return (t_getnumberofrequiredparameters());
       }
       break;
     case 34:
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
         return (t_getclosure());
       }
       break;
     case 36:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 37:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 40:
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
         return (t_getstaticvariables());
       }
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
         return (t_returnsreference());
       }
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionfunction::export", count+1);
-        return (ti_export(o_getClassName(), params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
+        return (ti_export(o_getClassName(), params[0], params[1]));
       }
       break;
     case 45:
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
         return (t_getparameters());
       }
       break;
     case 48:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
         return (t_getendline());
       }
       break;
     case 56:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
         return (t_getdoccomment());
       }
       break;
@@ -6816,83 +7013,97 @@ Variant c_reflectionfunction::o_invoke_few_args(const char *s, int64 hash, int c
       break;
     case 4:
       HASH_GUARD(0x3235AF57F23103C4LL, invokeargs) {
-        if (count < 1) throw_missing_argument("reflectionfunction::invokeargs", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionfunction::invokeargs", count, 1, 1, 1);
         return (t_invokeargs(a0));
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
         return (t_getstartline());
       }
       break;
     case 13:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 15:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunction::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("reflectionfunction::__construct", count+1);
+        if (count != 1) return throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       break;
     case 32:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
         return (t_getnumberofparameters());
       }
       break;
     case 33:
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
         return (t_getnumberofrequiredparameters());
       }
       break;
     case 34:
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
         return (t_getclosure());
       }
       break;
     case 36:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 37:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 40:
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
         return (t_getstaticvariables());
       }
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
         return (t_returnsreference());
       }
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count < 2) throw_missing_argument("reflectionfunction::export", count+1);
+        if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
         return (ti_export(o_getClassName(), a0, a1));
       }
       break;
     case 45:
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
         return (t_getparameters());
       }
       break;
     case 48:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
         return (t_getendline());
       }
       break;
     case 56:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
         return (t_getdoccomment());
       }
       break;
@@ -6902,13 +7113,13 @@ Variant c_reflectionfunction::o_invoke_few_args(const char *s, int64 hash, int c
   return c_reflectionfunctionabstract::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_reflectionfunction::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionfunction::export", count+1);
-        return (ti_export(c, params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
+        return (ti_export(c, params[0], params[1]));
       }
       break;
     default:
@@ -7361,27 +7572,25 @@ Variant c_reflectionparameter::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(reflectionparameter)
 c_reflectionparameter *c_reflectionparameter::create(Variant v_func, Variant v_param) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(v_func, v_param);
-  decRefCount();
   return this;
 }
 ObjectData *c_reflectionparameter::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 2) throw_missing_argument("reflectionparameter::__construct", count+1);
-    (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 2) throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
+    (t___construct(params[0], params[1]));
   }
   return this;
 }
 void c_reflectionparameter::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 2) throw_missing_argument("reflectionparameter::__construct", count+1);
-  (t___construct(params.rvalAt(0), params.rvalAt(1)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
+  (t___construct(params[0], params[1]));
 }
 void c_reflectionparameter::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -7411,71 +7620,81 @@ void c_reflectionparameter::cloneSet(c_reflectionparameter *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_reflectionparameter::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdeclaringclass", 0, 1);
         return (t_getdeclaringclass());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("reflectionparameter::export", count+1);
-        return (ti_export(o_getClassName(), params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
+        return (ti_export(o_getClassName(), params[0], params[1], params[2]));
       }
       HASH_GUARD(0x4044F1EEBF3BB8C8LL, getposition) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getposition", 0, 1);
         return (t_getposition());
       }
       break;
     case 9:
       HASH_GUARD(0x4F51DA0B633E9909LL, getclass) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getclass", 0, 1);
         return (t_getclass());
       }
       HASH_GUARD(0x24ED05F4504C4C09LL, allowsnull) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::allowsnull", 0, 1);
         return (t_allowsnull());
       }
       break;
     case 12:
       HASH_GUARD(0x27C482A6C7951E0CLL, getdefaultvalue) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdefaultvalue", 0, 1);
         return (t_getdefaultvalue());
       }
       break;
     case 17:
       HASH_GUARD(0x13E3F304BDD89FB1LL, ispassedbyreference) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::ispassedbyreference", 0, 1);
         return (t_ispassedbyreference());
       }
       break;
     case 18:
       HASH_GUARD(0x6E34805C91257C92LL, isdefaultvalueavailable) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isdefaultvalueavailable", 0, 1);
         return (t_isdefaultvalueavailable());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 21:
       HASH_GUARD(0x2D6EF48BBAB22735LL, isoptional) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isoptional", 0, 1);
         return (t_isoptional());
       }
       break;
     case 29:
       HASH_GUARD(0x5A9CE40C0F25871DLL, isarray) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isarray", 0, 1);
         return (t_isarray());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("reflectionparameter::__construct", count+1);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count != 2) return throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
+        return (t___construct(params[0], params[1]), null);
       }
       break;
     default:
@@ -7488,64 +7707,75 @@ Variant c_reflectionparameter::o_invoke_few_args(const char *s, int64 hash, int 
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdeclaringclass", 0, 1);
         return (t_getdeclaringclass());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getname", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count < 3) throw_missing_argument("reflectionparameter::export", count+1);
+        if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
         return (ti_export(o_getClassName(), a0, a1, a2));
       }
       HASH_GUARD(0x4044F1EEBF3BB8C8LL, getposition) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getposition", 0, 1);
         return (t_getposition());
       }
       break;
     case 9:
       HASH_GUARD(0x4F51DA0B633E9909LL, getclass) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getclass", 0, 1);
         return (t_getclass());
       }
       HASH_GUARD(0x24ED05F4504C4C09LL, allowsnull) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::allowsnull", 0, 1);
         return (t_allowsnull());
       }
       break;
     case 12:
       HASH_GUARD(0x27C482A6C7951E0CLL, getdefaultvalue) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdefaultvalue", 0, 1);
         return (t_getdefaultvalue());
       }
       break;
     case 17:
       HASH_GUARD(0x13E3F304BDD89FB1LL, ispassedbyreference) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::ispassedbyreference", 0, 1);
         return (t_ispassedbyreference());
       }
       break;
     case 18:
       HASH_GUARD(0x6E34805C91257C92LL, isdefaultvalueavailable) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isdefaultvalueavailable", 0, 1);
         return (t_isdefaultvalueavailable());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 21:
       HASH_GUARD(0x2D6EF48BBAB22735LL, isoptional) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isoptional", 0, 1);
         return (t_isoptional());
       }
       break;
     case 29:
       HASH_GUARD(0x5A9CE40C0F25871DLL, isarray) {
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isarray", 0, 1);
         return (t_isarray());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 2) throw_missing_argument("reflectionparameter::__construct", count+1);
+        if (count != 2) return throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
         return (t___construct(a0, a1), null);
       }
       break;
@@ -7555,13 +7785,13 @@ Variant c_reflectionparameter::o_invoke_few_args(const char *s, int64 hash, int 
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_reflectionparameter::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        int count = params.size();
-        if (count < 3) throw_missing_argument("reflectionparameter::export", count+1);
-        return (ti_export(c, params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
+        return (ti_export(c, params[0], params[1], params[2]));
       }
       break;
     default:

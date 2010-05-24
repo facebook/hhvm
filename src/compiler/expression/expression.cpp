@@ -563,8 +563,7 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           ExpressionList *el = static_cast<ExpressionList*>(this);
           if (i >= el->getOutputCount()) {
             /*
-              Extra arguments get output as params
-              to invoke_too_many_args, along with the call
+              Extra arguments get output along with the call
               itself. So there is nothing to enforce that
               the extra args are evaluated before the call
               unless we do this

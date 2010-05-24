@@ -363,9 +363,6 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
   }
 
   bool fewParams = canInvokeFewArgs();
-  bool tooManyArgs = m_params &&
-    m_params->outputCPPTooManyArgsPre(cg, ar, m_name);
-
   bool linemap = outputLineMap(cg, ar, true);
 
   if (!isThis) {
@@ -434,9 +431,6 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
                                         m_variableArgument, m_argArrayId);
       cg.printf(")");
-      if (tooManyArgs) {
-        m_params->outputCPPTooManyArgsPost(cg, ar, m_voidReturn);
-      }
     } else {
       if (fewParams) {
         uint64 hash = hash_string_i(m_name.data(), m_name.size());

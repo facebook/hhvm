@@ -104,6 +104,7 @@ void FunctionContainer::outputCPPJumpTableSupport
                          Option::InvokePrefix, name);
           cg.indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
                           hash_string_i(name), name);
+          FunctionScope::OutputCPPDynamicInvokeCount(cg);
           func->outputCPPDynamicInvoke(cg, ar, funcPrefix, name);
           cg.indentEnd("}\n");
           cg.printf("return invoke_builtin(s, params, hash, fatal);\n");
@@ -116,6 +117,7 @@ void FunctionContainer::outputCPPJumpTableSupport
       if (profile) {
         cg.printf("FUNCTION_INJECTION(%s);\n", name);
       }
+      FunctionScope::OutputCPPDynamicInvokeCount(cg);
       func->outputCPPDynamicInvoke(cg, ar, funcPrefix, name);
       cg.indentEnd("}\n");
     } else {
@@ -126,6 +128,7 @@ void FunctionContainer::outputCPPJumpTableSupport
         string name = func->getId();
         cg.indentBegin("Variant %s%s(CArrRef params) {\n",
                        prefix.c_str(), name.c_str());
+        FunctionScope::OutputCPPDynamicInvokeCount(cg);
         func->outputCPPDynamicInvoke(cg, ar, funcPrefix, name.c_str());
         cg.indentEnd("}\n");
 

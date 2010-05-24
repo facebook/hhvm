@@ -83,24 +83,23 @@ c_pear_error *c_pear_error::create(CStrRef v_message //  = "unknown error"
 , CVarRef v_options //  = null_variant
 , CVarRef v_userinfo //  = null_variant
 ) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t_pear_error(v_message, v_code, v_mode, v_options, v_userinfo);
-  decRefCount();
   return this;
 }
 ObjectData *c_pear_error::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 5) throw_toomany_arguments("pear_error::pear_error", 5, 2);
     if (count <= 0) (t_pear_error());
-    else if (count == 1) (t_pear_error(params.rvalAt(0)));
-    else if (count == 2) (t_pear_error(params.rvalAt(0), params.rvalAt(1)));
-    else if (count == 3) (t_pear_error(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-    else if (count == 4) (t_pear_error(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-    else (t_pear_error(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
-    decRefCount();
+    else if (count == 1) (t_pear_error(params[0]));
+    else if (count == 2) (t_pear_error(params[0], params[1]));
+    else if (count == 3) (t_pear_error(params[0], params[1], params[2]));
+    else if (count == 4) (t_pear_error(params[0], params[1], params[2], params[3]));
+    else (t_pear_error(params[0], params[1], params[2], params[3], params[4]));
   }
   return this;
 }
@@ -113,68 +112,76 @@ void c_pear_error::cloneSet(c_pear_error *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_pear_error::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
     case 1:
       HASH_GUARD(0x488B59A7AC1AD281LL, getbacktrace) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("pear_error::getbacktrace", 1, 1);
         if (count <= 0) return (t_getbacktrace(), null);
-        return (t_getbacktrace(params.rvalAt(0)), null);
+        return (t_getbacktrace(params[0]), null);
       }
       break;
     case 4:
       HASH_GUARD(0x4394241AA92AEB44LL, adduserinfo) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("pear_error::adduserinfo", count+1);
-        return (t_adduserinfo(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("pear_error::adduserinfo", count, 1, 1, 1);
+        return (t_adduserinfo(params[0]), null);
       }
       break;
     case 6:
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+        if (count > 0) return throw_toomany_arguments("pear_error::gettype", 0, 1);
         return (t_gettype(), null);
       }
       break;
     case 12:
       HASH_GUARD(0x337CF323F97137ACLL, getmode) {
+        if (count > 0) return throw_toomany_arguments("pear_error::getmode", 0, 1);
         return (t_getmode(), null);
       }
       break;
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("pear_error::getcode", 0, 1);
         return (t_getcode(), null);
       }
       break;
     case 17:
       HASH_GUARD(0x2E87870339147BF1LL, getcallback) {
+        if (count > 0) return throw_toomany_arguments("pear_error::getcallback", 0, 1);
         return (t_getcallback(), null);
       }
       break;
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("pear_error::getmessage", 0, 1);
         return (t_getmessage(), null);
       }
       break;
     case 19:
       HASH_GUARD(0x05CF5B3C831C4053LL, getuserinfo) {
+        if (count > 0) return throw_toomany_arguments("pear_error::getuserinfo", 0, 1);
         return (t_getuserinfo(), null);
       }
       HASH_GUARD(0x6271FDA592D5EF53LL, tostring) {
+        if (count > 0) return throw_toomany_arguments("pear_error::tostring", 0, 1);
         return (t_tostring(), null);
       }
       break;
     case 24:
       HASH_GUARD(0x3CEBA108A1BAB998LL, pear_error) {
-        int count = params.size();
+        if (count > 5) return throw_toomany_arguments("pear_error::pear_error", 5, 2);
         if (count <= 0) return (t_pear_error(), null);
-        if (count == 1) return (t_pear_error(params.rvalAt(0)), null);
-        if (count == 2) return (t_pear_error(params.rvalAt(0), params.rvalAt(1)), null);
-        if (count == 3) return (t_pear_error(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)), null);
-        if (count == 4) return (t_pear_error(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)), null);
-        return (t_pear_error(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)), null);
+        if (count == 1) return (t_pear_error(params[0]), null);
+        if (count == 2) return (t_pear_error(params[0], params[1]), null);
+        if (count == 3) return (t_pear_error(params[0], params[1], params[2]), null);
+        if (count == 4) return (t_pear_error(params[0], params[1], params[2], params[3]), null);
+        return (t_pear_error(params[0], params[1], params[2], params[3], params[4]), null);
       }
       break;
     case 27:
       HASH_GUARD(0x74E7C543C0FD73FBLL, getdebuginfo) {
+        if (count > 0) return throw_toomany_arguments("pear_error::getdebuginfo", 0, 1);
         return (t_getdebuginfo(), null);
       }
       break;
@@ -188,51 +195,60 @@ Variant c_pear_error::o_invoke_few_args(const char *s, int64 hash, int count, CV
   switch (hash & 31) {
     case 1:
       HASH_GUARD(0x488B59A7AC1AD281LL, getbacktrace) {
+        if (count > 1) return throw_toomany_arguments("pear_error::getbacktrace", 1, 1);
         if (count <= 0) return (t_getbacktrace(), null);
         return (t_getbacktrace(a0), null);
       }
       break;
     case 4:
       HASH_GUARD(0x4394241AA92AEB44LL, adduserinfo) {
-        if (count < 1) throw_missing_argument("pear_error::adduserinfo", count+1);
+        if (count != 1) return throw_wrong_arguments("pear_error::adduserinfo", count, 1, 1, 1);
         return (t_adduserinfo(a0), null);
       }
       break;
     case 6:
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+        if (count > 0) return throw_toomany_arguments("pear_error::gettype", 0, 1);
         return (t_gettype(), null);
       }
       break;
     case 12:
       HASH_GUARD(0x337CF323F97137ACLL, getmode) {
+        if (count > 0) return throw_toomany_arguments("pear_error::getmode", 0, 1);
         return (t_getmode(), null);
       }
       break;
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("pear_error::getcode", 0, 1);
         return (t_getcode(), null);
       }
       break;
     case 17:
       HASH_GUARD(0x2E87870339147BF1LL, getcallback) {
+        if (count > 0) return throw_toomany_arguments("pear_error::getcallback", 0, 1);
         return (t_getcallback(), null);
       }
       break;
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("pear_error::getmessage", 0, 1);
         return (t_getmessage(), null);
       }
       break;
     case 19:
       HASH_GUARD(0x05CF5B3C831C4053LL, getuserinfo) {
+        if (count > 0) return throw_toomany_arguments("pear_error::getuserinfo", 0, 1);
         return (t_getuserinfo(), null);
       }
       HASH_GUARD(0x6271FDA592D5EF53LL, tostring) {
+        if (count > 0) return throw_toomany_arguments("pear_error::tostring", 0, 1);
         return (t_tostring(), null);
       }
       break;
     case 24:
       HASH_GUARD(0x3CEBA108A1BAB998LL, pear_error) {
+        if (count > 5) return throw_toomany_arguments("pear_error::pear_error", 5, 2);
         if (count <= 0) return (t_pear_error(), null);
         if (count == 1) return (t_pear_error(a0), null);
         if (count == 2) return (t_pear_error(a0, a1), null);
@@ -243,6 +259,7 @@ Variant c_pear_error::o_invoke_few_args(const char *s, int64 hash, int count, CV
       break;
     case 27:
       HASH_GUARD(0x74E7C543C0FD73FBLL, getdebuginfo) {
+        if (count > 0) return throw_toomany_arguments("pear_error::getdebuginfo", 0, 1);
         return (t_getdebuginfo(), null);
       }
       break;
@@ -252,6 +269,7 @@ Variant c_pear_error::o_invoke_few_args(const char *s, int64 hash, int count, CV
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_pear_error::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

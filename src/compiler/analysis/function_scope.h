@@ -260,13 +260,15 @@ public:
   /**
    * Generate invoke proxy.
    */
+  static void OutputCPPDynamicInvokeCount(CodeGenerator &cg);
   void outputCPPDynamicInvoke(CodeGenerator &cg, AnalysisResultPtr ar,
                               const char *funcPrefix,
                               const char *name,
                               bool voidWrapperOff = false,
                               bool fewArgs = false,
                               bool ret = true,
-                              const char *extraArg = NULL);
+                              const char *extraArg = NULL,
+                              bool constructor = false);
   void outputCPPEvalInvoke(CodeGenerator &cg, AnalysisResultPtr ar,
                            const char *funcPrefix, const char *name,
                            const char *extraArg = NULL, bool ret = true);

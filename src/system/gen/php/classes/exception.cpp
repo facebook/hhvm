@@ -86,42 +86,50 @@ void c_unexpectedvalueexception::cloneSet(c_unexpectedvalueexception *clone) {
   c_runtimeexception::cloneSet(clone);
 }
 Variant c_unexpectedvalueexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -135,37 +143,45 @@ Variant c_unexpectedvalueexception::o_invoke_few_args(const char *s, int64 hash,
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -175,6 +191,7 @@ Variant c_unexpectedvalueexception::o_invoke_few_args(const char *s, int64 hash,
   return c_runtimeexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_unexpectedvalueexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_runtimeexception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -369,42 +386,50 @@ void c_overflowexception::cloneSet(c_overflowexception *clone) {
   c_runtimeexception::cloneSet(clone);
 }
 Variant c_overflowexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -418,37 +443,45 @@ Variant c_overflowexception::o_invoke_few_args(const char *s, int64 hash, int co
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -458,6 +491,7 @@ Variant c_overflowexception::o_invoke_few_args(const char *s, int64 hash, int co
   return c_runtimeexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_overflowexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_runtimeexception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -652,42 +686,50 @@ void c_outofboundsexception::cloneSet(c_outofboundsexception *clone) {
   c_runtimeexception::cloneSet(clone);
 }
 Variant c_outofboundsexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -701,37 +743,45 @@ Variant c_outofboundsexception::o_invoke_few_args(const char *s, int64 hash, int
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -741,6 +791,7 @@ Variant c_outofboundsexception::o_invoke_few_args(const char *s, int64 hash, int
   return c_runtimeexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_outofboundsexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_runtimeexception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -935,42 +986,50 @@ void c_logicexception::cloneSet(c_logicexception *clone) {
   c_exception::cloneSet(clone);
 }
 Variant c_logicexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -984,37 +1043,45 @@ Variant c_logicexception::o_invoke_few_args(const char *s, int64 hash, int count
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -1024,6 +1091,7 @@ Variant c_logicexception::o_invoke_few_args(const char *s, int64 hash, int count
   return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_logicexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_exception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1218,42 +1286,50 @@ void c_rangeexception::cloneSet(c_rangeexception *clone) {
   c_runtimeexception::cloneSet(clone);
 }
 Variant c_rangeexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -1267,37 +1343,45 @@ Variant c_rangeexception::o_invoke_few_args(const char *s, int64 hash, int count
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -1307,6 +1391,7 @@ Variant c_rangeexception::o_invoke_few_args(const char *s, int64 hash, int count
   return c_runtimeexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_rangeexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_runtimeexception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1501,42 +1586,50 @@ void c_invalidargumentexception::cloneSet(c_invalidargumentexception *clone) {
   c_logicexception::cloneSet(clone);
 }
 Variant c_invalidargumentexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -1550,37 +1643,45 @@ Variant c_invalidargumentexception::o_invoke_few_args(const char *s, int64 hash,
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -1590,6 +1691,7 @@ Variant c_invalidargumentexception::o_invoke_few_args(const char *s, int64 hash,
   return c_logicexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_invalidargumentexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_logicexception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1784,42 +1886,50 @@ void c_underflowexception::cloneSet(c_underflowexception *clone) {
   c_runtimeexception::cloneSet(clone);
 }
 Variant c_underflowexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -1833,37 +1943,45 @@ Variant c_underflowexception::o_invoke_few_args(const char *s, int64 hash, int c
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -1873,6 +1991,7 @@ Variant c_underflowexception::o_invoke_few_args(const char *s, int64 hash, int c
   return c_runtimeexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_underflowexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_runtimeexception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -2067,42 +2186,50 @@ void c_outofrangeexception::cloneSet(c_outofrangeexception *clone) {
   c_logicexception::cloneSet(clone);
 }
 Variant c_outofrangeexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -2116,37 +2243,45 @@ Variant c_outofrangeexception::o_invoke_few_args(const char *s, int64 hash, int 
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -2156,6 +2291,7 @@ Variant c_outofrangeexception::o_invoke_few_args(const char *s, int64 hash, int 
   return c_logicexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_outofrangeexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_logicexception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -2350,42 +2486,50 @@ void c_badmethodcallexception::cloneSet(c_badmethodcallexception *clone) {
   c_badfunctioncallexception::cloneSet(clone);
 }
 Variant c_badmethodcallexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -2399,37 +2543,45 @@ Variant c_badmethodcallexception::o_invoke_few_args(const char *s, int64 hash, i
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -2439,6 +2591,7 @@ Variant c_badmethodcallexception::o_invoke_few_args(const char *s, int64 hash, i
   return c_badfunctioncallexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_badmethodcallexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_badfunctioncallexception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -2633,42 +2786,50 @@ void c_runtimeexception::cloneSet(c_runtimeexception *clone) {
   c_exception::cloneSet(clone);
 }
 Variant c_runtimeexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -2682,37 +2843,45 @@ Variant c_runtimeexception::o_invoke_few_args(const char *s, int64 hash, int cou
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -2722,6 +2891,7 @@ Variant c_runtimeexception::o_invoke_few_args(const char *s, int64 hash, int cou
   return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_runtimeexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_exception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -3006,29 +3176,29 @@ IMPLEMENT_CLASS(exception)
 c_exception *c_exception::create(Variant v_message //  = ""
 , Variant v_code //  = 0LL
 ) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(v_message, v_code);
-  decRefCount();
   return this;
 }
 ObjectData *c_exception::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 2) throw_toomany_arguments("exception::__construct", 2, 2);
     if (count <= 0) (t___construct());
-    else if (count == 1) (t___construct(params.rvalAt(0)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    decRefCount();
+    else if (count == 1) (t___construct(params[0]));
+    else (t___construct(params[0], params[1]));
   }
   return this;
 }
 void c_exception::dynConstruct(CArrRef params) {
-  int count = params.size();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 2) throw_toomany_arguments("exception::__construct", 2, 2);
   if (count <= 0) (t___construct());
-  else if (count == 1) (t___construct(params.rvalAt(0)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1)));
+  else if (count == 1) (t___construct(params[0]));
+  else (t___construct(params[0], params[1]));
 }
 void c_exception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -3064,42 +3234,50 @@ void c_exception::cloneSet(c_exception *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_exception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -3113,37 +3291,45 @@ Variant c_exception::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -3153,6 +3339,7 @@ Variant c_exception::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_exception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -3524,35 +3711,35 @@ c_errorexception *c_errorexception::create(Variant v_message //  = ""
 , Variant v_filename //  = null
 , Variant v_lineno //  = null
 ) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(v_message, v_code, v_severity, v_filename, v_lineno);
-  decRefCount();
   return this;
 }
 ObjectData *c_errorexception::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 5) throw_toomany_arguments("errorexception::__construct", 5, 2);
     if (count <= 0) (t___construct());
-    else if (count == 1) (t___construct(params.rvalAt(0)));
-    else if (count == 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    else if (count == 3) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-    else if (count == 4) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
-    decRefCount();
+    else if (count == 1) (t___construct(params[0]));
+    else if (count == 2) (t___construct(params[0], params[1]));
+    else if (count == 3) (t___construct(params[0], params[1], params[2]));
+    else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
+    else (t___construct(params[0], params[1], params[2], params[3], params[4]));
   }
   return this;
 }
 void c_errorexception::dynConstruct(CArrRef params) {
-  int count = params.size();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 5) throw_toomany_arguments("errorexception::__construct", 5, 2);
   if (count <= 0) (t___construct());
-  else if (count == 1) (t___construct(params.rvalAt(0)));
-  else if (count == 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-  else if (count == 3) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-  else if (count == 4) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)));
+  else if (count == 1) (t___construct(params[0]));
+  else if (count == 2) (t___construct(params[0], params[1]));
+  else if (count == 3) (t___construct(params[0], params[1], params[2]));
+  else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
+  else (t___construct(params[0], params[1], params[2], params[3], params[4]));
 }
 void c_errorexception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -3600,54 +3787,63 @@ void c_errorexception::cloneSet(c_errorexception *clone) {
   c_exception::cloneSet(clone);
 }
 Variant c_errorexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 5) return throw_toomany_arguments("errorexception::__construct", 5, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        if (count == 2) return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
-        if (count == 3) return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)), null);
-        if (count == 4) return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3), params.rvalAt(4)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        if (count == 2) return (t___construct(params[0], params[1]), null);
+        if (count == 3) return (t___construct(params[0], params[1], params[2]), null);
+        if (count == 4) return (t___construct(params[0], params[1], params[2], params[3]), null);
+        return (t___construct(params[0], params[1], params[2], params[3], params[4]), null);
       }
       HASH_GUARD(0x4B378D0258AF461FLL, getseverity) {
+        if (count > 0) return throw_toomany_arguments("errorexception::getseverity", 0, 1);
         return (t_getseverity());
       }
       break;
@@ -3661,41 +3857,49 @@ Variant c_errorexception::o_invoke_few_args(const char *s, int64 hash, int count
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 5) return throw_toomany_arguments("errorexception::__construct", 5, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         if (count == 2) return (t___construct(a0, a1), null);
@@ -3704,6 +3908,7 @@ Variant c_errorexception::o_invoke_few_args(const char *s, int64 hash, int count
         return (t___construct(a0, a1, a2, a3, a4), null);
       }
       HASH_GUARD(0x4B378D0258AF461FLL, getseverity) {
+        if (count > 0) return throw_toomany_arguments("errorexception::getseverity", 0, 1);
         return (t_getseverity());
       }
       break;
@@ -3713,6 +3918,7 @@ Variant c_errorexception::o_invoke_few_args(const char *s, int64 hash, int count
   return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_errorexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_exception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -3967,42 +4173,50 @@ void c_badfunctioncallexception::cloneSet(c_badfunctioncallexception *clone) {
   c_logicexception::cloneSet(clone);
 }
 Variant c_badfunctioncallexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -4016,37 +4230,45 @@ Variant c_badfunctioncallexception::o_invoke_few_args(const char *s, int64 hash,
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -4056,6 +4278,7 @@ Variant c_badfunctioncallexception::o_invoke_few_args(const char *s, int64 hash,
   return c_logicexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_badfunctioncallexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_logicexception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -4250,42 +4473,50 @@ void c_lengthexception::cloneSet(c_lengthexception *clone) {
   c_logicexception::cloneSet(clone);
 }
 Variant c_lengthexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -4299,37 +4530,45 @@ Variant c_lengthexception::o_invoke_few_args(const char *s, int64 hash, int coun
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -4339,6 +4578,7 @@ Variant c_lengthexception::o_invoke_few_args(const char *s, int64 hash, int coun
   return c_logicexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_lengthexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_logicexception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -4533,42 +4773,50 @@ void c_domainexception::cloneSet(c_domainexception *clone) {
   c_logicexception::cloneSet(clone);
 }
 Variant c_domainexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params.rvalAt(0)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -4582,37 +4830,45 @@ Variant c_domainexception::o_invoke_few_args(const char *s, int64 hash, int coun
   switch (hash & 15) {
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         return (t___tostring());
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         return (t_getcode());
       }
       break;
@@ -4622,6 +4878,7 @@ Variant c_domainexception::o_invoke_few_args(const char *s, int64 hash, int coun
   return c_logicexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_domainexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_logicexception::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

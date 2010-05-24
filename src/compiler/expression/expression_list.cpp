@@ -178,7 +178,7 @@ void ExpressionList::markParam(int p, bool noRefWrapper) {
 }
 
 void ExpressionList::markParams(bool noRefWrapper) {
-  for (int i = 0; i < this->getCount(); i++) {
+  for (int i = 0; i < getCount(); i++) {
     markParam(i, noRefWrapper);
   }
 }
@@ -417,40 +417,4 @@ bool ExpressionList::outputCPPUnneeded(CodeGenerator &cg,
     ar->setInExpression(inExpression);
   }
   return true;
-}
-
-bool ExpressionList::outputCPPTooManyArgsPre(CodeGenerator &cg,
-                                             AnalysisResultPtr ar,
-                                             const std::string &name) {
-  if (m_outputCount >= 0) {
-    cg.printf("invoke_too_many_args(\"%s\", (", name.c_str());
-    int count = 0;
-    for (unsigned int i = m_outputCount; i < m_exps.size(); i++) {
-      ExpressionPtr exp = m_exps[i];
-      if (exp && exp->hasEffect()) {
-        if (count > 0) cg.printf(", ");
-        if (exp->hasCPPTemp()) {
-          cg.printf("id(");
-        }
-        exp->outputCPP(cg, ar);
-        if (exp->hasCPPTemp()) {
-          cg.printf(")");
-        }
-        count++;
-      }
-    }
-    if (count > 0) cg.printf(", ");
-    cg.printf("%d), ((", m_exps.size() - m_outputCount);
-    return true;
-  }
-  return false;
-}
-
-void ExpressionList::outputCPPTooManyArgsPost(CodeGenerator &cg,
-                                              AnalysisResultPtr ar,
-                                              bool voidReturn) {
-  ASSERT(m_outputCount >= 0);
-  cg.printf(")");
-  if (voidReturn) cg.printf(", null");
-  cg.printf("))");
 }

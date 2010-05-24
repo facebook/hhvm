@@ -154,20 +154,39 @@ Variant o_invoke_failed(const char *cls, const char *meth,
     msg += meth;
     throw FatalErrorException(msg.c_str());
   } else {
-    raise_warning("call_user_func to non-existent method %s::%s",
-                    cls, meth);
+    raise_warning("call_user_func to non-existent method %s::%s", cls, meth);
     return false;
   }
 }
 
-void throw_missing_argument(const char *fn, int argnum) {
-  if (RuntimeOption::ThrowMissingArgument) {
-    raise_error("Missing argument %d for %s()", argnum,
-                fn);
+Variant throw_missing_arguments(const char *fn, int num, int level /* = 0 */) {
+  if (level == 2 || RuntimeOption::ThrowMissingArguments) {
+    raise_error("Missing argument %d for %s()", num, fn);
   } else {
-    raise_warning("Missing argument %d for %s()", argnum,
-                  fn);
+    raise_warning("Missing argument %d for %s()", num, fn);
   }
+  return null;
+}
+
+Variant throw_toomany_arguments(const char *fn, int num, int level /* = 0 */) {
+  if (level == 2 || RuntimeOption::ThrowTooManyArguments) {
+    raise_error("Too many arguments for %s(), expected %d", fn, num);
+  } else if (level == 1 || RuntimeOption::WarnTooManyArguments) {
+    raise_warning("Too many arguments for %s(), expected %d", fn, num);
+  }
+  return null;
+}
+
+Variant throw_wrong_arguments(const char *fn, int count, int cmin, int cmax,
+                              int level /* = 0 */) {
+  if (cmin >= 0 && count < cmin) {
+    return throw_missing_arguments(fn, count + 1, level);
+  }
+  if (cmax >= 0 && count > cmax) {
+    return throw_toomany_arguments(fn, cmax, level);
+  }
+  ASSERT(false);
+  return null;
 }
 
 void throw_bad_type_exception(const char *fmt, ...) {
@@ -191,7 +210,7 @@ void throw_invalid_argument(const char *fmt, ...) {
   Logger::VSNPrintf(msg, fmt, ap);
   va_end(ap);
 
-  if (RuntimeOption::ThrowInvalidArgument) {
+  if (RuntimeOption::ThrowInvalidArguments) {
     throw InvalidArgumentException(msg.c_str());
   }
 

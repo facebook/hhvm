@@ -103,33 +103,31 @@ c_splfileobject *c_splfileobject::create(Variant v_filename, Variant v_open_mode
 , Variant v_use_include_path //  = false
 , Variant v_context //  = null
 ) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(v_filename, v_open_mode, v_use_include_path, v_context);
-  decRefCount();
   return this;
 }
 ObjectData *c_splfileobject::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("splfileobject::__construct", count+1);
-    if (count <= 1) (t___construct(params.rvalAt(0)));
-    else if (count == 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-    else if (count == 3) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-    else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count < 1 || count > 4) throw_wrong_arguments("splfileobject::__construct", count, 1, 4, 2);
+    if (count <= 1) (t___construct(params[0]));
+    else if (count == 2) (t___construct(params[0], params[1]));
+    else if (count == 3) (t___construct(params[0], params[1], params[2]));
+    else (t___construct(params[0], params[1], params[2], params[3]));
   }
   return this;
 }
 void c_splfileobject::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("splfileobject::__construct", count+1);
-  if (count <= 1) (t___construct(params.rvalAt(0)));
-  else if (count == 2) (t___construct(params.rvalAt(0), params.rvalAt(1)));
-  else if (count == 3) (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
-  else (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 4) throw_wrong_arguments("splfileobject::__construct", count, 1, 4, 2);
+  if (count <= 1) (t___construct(params[0]));
+  else if (count == 2) (t___construct(params[0], params[1]));
+  else if (count == 3) (t___construct(params[0], params[1], params[2]));
+  else (t___construct(params[0], params[1], params[2], params[3]));
 }
 void c_splfileobject::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -170,314 +168,343 @@ void c_splfileobject::cloneSet(c_splfileobject *clone) {
   c_splfileinfo::cloneSet(clone);
 }
 Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {
     case 0:
       HASH_GUARD(0x09637D7CA2E33F00LL, fgetc) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::fgetc", 0, 1);
         return (t_fgetc());
       }
       break;
     case 6:
       HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
         return (t_getrealpath());
       }
       HASH_GUARD(0x44CE4DB1CE7E9F86LL, flock) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("splfileobject::flock", count+1);
-        return (t_flock(params.rvalAt(0), ref(const_cast<Array&>(params).lvalAt(1))));
+        if (count != 2) return throw_wrong_arguments("splfileobject::flock", count, 2, 2, 1);
+        return (t_flock(params[0], ref(const_cast<Array&>(params).lvalAt(1))));
       }
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
       HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
         return (t_isdir());
       }
       break;
     case 10:
       HASH_GUARD(0x2FC3A6941D522E0ALL, setflags) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("splfileobject::setflags", count+1);
-        return (t_setflags(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("splfileobject::setflags", count, 1, 1, 1);
+        return (t_setflags(params[0]));
       }
       break;
     case 14:
       HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
         return (t_getowner());
       }
       break;
     case 15:
       HASH_GUARD(0x732EC1BDA8EC520FLL, getchildren) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::getchildren", 0, 1);
         return (t_getchildren());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 21:
       HASH_GUARD(0x40044334DA397C15LL, haschildren) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::haschildren", 0, 1);
         return (t_haschildren());
       }
       break;
     case 26:
       HASH_GUARD(0x2B7CAC006AF27F9ALL, fflush) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::fflush", 0, 1);
         return (t_fflush());
       }
       break;
     case 27:
       HASH_GUARD(0x5B33B55D4B7E339BLL, fpassthru) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::fpassthru", 0, 1);
         return (t_fpassthru());
       }
       break;
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
         if (count <= 0) return (t_getbasename());
-        return (t_getbasename(params.rvalAt(0)));
+        return (t_getbasename(params[0]));
       }
       break;
     case 29:
       HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
         return (t_isfile());
       }
       break;
     case 30:
       HASH_GUARD(0x3E4E7C561D3A541ELL, fgetss) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("splfileobject::fgetss", count+1);
-        return (t_fgetss(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("splfileobject::fgetss", count, 1, 1, 1);
+        return (t_fgetss(params[0]));
       }
       break;
     case 31:
       HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
         return (t_getatime());
       }
       break;
     case 35:
       HASH_GUARD(0x044B276686B77923LL, fscanf) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("splfileobject::fscanf", count+1);
-        return (t_fscanf(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("splfileobject::fscanf", count, 1, 1, 1);
+        return (t_fscanf(params[0]));
       }
       break;
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
         if (count <= 0) return (t_setfileclass());
-        return (t_setfileclass(params.rvalAt(0)));
+        return (t_setfileclass(params[0]));
       }
       break;
     case 43:
       HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 45:
       HASH_GUARD(0x1C1216F2B7C16CADLL, ftell) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::ftell", 0, 1);
         return (t_ftell());
       }
       break;
     case 47:
       HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
         return (t_getctime());
       }
       break;
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
-        int count = params.size();
+        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
         if (count <= 0) return (t_openfile());
-        if (count == 1) return (t_openfile(params.rvalAt(0)));
-        if (count == 2) return (t_openfile(params.rvalAt(0), params.rvalAt(1)));
-        return (t_openfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count == 1) return (t_openfile(params[0]));
+        if (count == 2) return (t_openfile(params[0], params[1]));
+        return (t_openfile(params[0], params[1], params[2]));
       }
       break;
     case 55:
       HASH_GUARD(0x4CEC6AA30E43D437LL, setmaxlinelen) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("splfileobject::setmaxlinelen", count+1);
-        return (t_setmaxlinelen(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("splfileobject::setmaxlinelen", count, 1, 1, 1);
+        return (t_setmaxlinelen(params[0]));
       }
       break;
     case 56:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::next", 0, 1);
         return (t_next());
       }
       HASH_GUARD(0x0890F9052322E838LL, fstat) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::fstat", 0, 1);
         return (t_fstat());
       }
       break;
     case 63:
       HASH_GUARD(0x04C642C6C162243FLL, getpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
         return (t_getpath());
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
-        return (t_getfileinfo(params.rvalAt(0)));
+        return (t_getfileinfo(params[0]));
       }
       break;
     case 67:
       HASH_GUARD(0x5ACCF9166CD9D043LL, ftruncate) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("splfileobject::ftruncate", count+1);
-        return (t_ftruncate(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("splfileobject::ftruncate", count, 1, 1, 1);
+        return (t_ftruncate(params[0]));
       }
       HASH_GUARD(0x794FAFD4412AEFC3LL, eof) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::eof", 0, 1);
         return (t_eof());
       }
       break;
     case 68:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 69:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
-        return (t_setinfoclass(params.rvalAt(0)));
+        return (t_setinfoclass(params[0]));
       }
       break;
     case 73:
       HASH_GUARD(0x4282E0231F600049LL, fseek) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("splfileobject::fseek", count+1);
-        return (t_fseek(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("splfileobject::fseek", count, 2, 2, 1);
+        return (t_fseek(params[0], params[1]));
       }
       break;
     case 74:
       HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
         return (t_getinode());
       }
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 78:
       HASH_GUARD(0x7E978C38D741664ELL, fgetcsv) {
-        int count = params.size();
+        if (count > 3) return throw_toomany_arguments("splfileobject::fgetcsv", 3, 1);
         if (count <= 0) return (t_fgetcsv());
-        if (count == 1) return (t_fgetcsv(params.rvalAt(0)));
-        if (count == 2) return (t_fgetcsv(params.rvalAt(0), params.rvalAt(1)));
-        return (t_fgetcsv(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count == 1) return (t_fgetcsv(params[0]));
+        if (count == 2) return (t_fgetcsv(params[0], params[1]));
+        return (t_fgetcsv(params[0], params[1], params[2]));
       }
       break;
     case 79:
       HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 80:
       HASH_GUARD(0x3A335010F905ACD0LL, setcsvcontrol) {
-        int count = params.size();
+        if (count > 3) return throw_toomany_arguments("splfileobject::setcsvcontrol", 3, 1);
         if (count <= 0) return (t_setcsvcontrol());
-        if (count == 1) return (t_setcsvcontrol(params.rvalAt(0)));
-        if (count == 2) return (t_setcsvcontrol(params.rvalAt(0), params.rvalAt(1)));
-        return (t_setcsvcontrol(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count == 1) return (t_setcsvcontrol(params[0]));
+        if (count == 2) return (t_setcsvcontrol(params[0], params[1]));
+        return (t_setcsvcontrol(params[0], params[1], params[2]));
       }
       break;
     case 81:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::key", 0, 1);
         return (t_key());
       }
       break;
     case 88:
       HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
         return (t_islink());
       }
       break;
     case 90:
       HASH_GUARD(0x25F68E7910FE9CDALL, getmaxlinelen) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::getmaxlinelen", 0, 1);
         return (t_getmaxlinelen());
       }
       break;
     case 92:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::current", 0, 1);
         return (t_current());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("splfileobject::__construct", count+1);
-        if (count <= 1) return (t___construct(params.rvalAt(0)), null);
-        if (count == 2) return (t___construct(params.rvalAt(0), params.rvalAt(1)), null);
-        if (count == 3) return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)), null);
-        return (t___construct(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2), params.rvalAt(3)), null);
+        if (count < 1 || count > 4) return throw_wrong_arguments("splfileobject::__construct", count, 1, 4, 2);
+        if (count <= 1) return (t___construct(params[0]), null);
+        if (count == 2) return (t___construct(params[0], params[1]), null);
+        if (count == 3) return (t___construct(params[0], params[1], params[2]), null);
+        return (t___construct(params[0], params[1], params[2], params[3]), null);
       }
       break;
     case 97:
       HASH_GUARD(0x27E7DBA875AD17E1LL, getflags) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::getflags", 0, 1);
         return (t_getflags());
       }
       break;
     case 98:
       HASH_GUARD(0x6FE9F691E4A6D962LL, getcsvcontrol) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::getcsvcontrol", 0, 1);
         return (t_getcsvcontrol());
       }
       break;
     case 99:
       HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 101:
       HASH_GUARD(0x05D72365192CE465LL, fwrite) {
-        int count = params.size();
-        if (count < 2) throw_missing_argument("splfileobject::fwrite", count+1);
-        return (t_fwrite(params.rvalAt(0), params.rvalAt(1)));
+        if (count != 2) return throw_wrong_arguments("splfileobject::fwrite", count, 2, 2, 1);
+        return (t_fwrite(params[0], params[1]));
       }
       break;
     case 103:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
-        return (t_getpathinfo(params.rvalAt(0)));
+        return (t_getpathinfo(params[0]));
       }
       HASH_GUARD(0x7EF5445C77054C67LL, seek) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("splfileobject::seek", count+1);
-        return (t_seek(params.rvalAt(0)));
+        if (count != 1) return throw_wrong_arguments("splfileobject::seek", count, 1, 1, 1);
+        return (t_seek(params[0]));
       }
       break;
     case 106:
       HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
         return (t_getgroup());
       }
       HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
         return (t_getsize());
       }
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 115:
       HASH_GUARD(0x7AE1BE187F18FDF3LL, fgets) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::fgets", 0, 1);
         return (t_fgets());
       }
       break;
     case 116:
       HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 120:
       HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 122:
       HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 125:
       HASH_GUARD(0x4351578037A06E7DLL, getperms) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
         return (t_getperms());
       }
       break;
@@ -491,113 +518,131 @@ Variant c_splfileobject::o_invoke_few_args(const char *s, int64 hash, int count,
   switch (hash & 127) {
     case 0:
       HASH_GUARD(0x09637D7CA2E33F00LL, fgetc) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::fgetc", 0, 1);
         return (t_fgetc());
       }
       break;
     case 6:
       HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
         return (t_getrealpath());
       }
       HASH_GUARD(0x44CE4DB1CE7E9F86LL, flock) {
-        if (count < 2) throw_missing_argument("splfileobject::flock", count+1);
+        if (count != 2) return throw_wrong_arguments("splfileobject::flock", count, 2, 2, 1);
         return (t_flock(a0, ref(a1)));
       }
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
       HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
         return (t_isdir());
       }
       break;
     case 10:
       HASH_GUARD(0x2FC3A6941D522E0ALL, setflags) {
-        if (count < 1) throw_missing_argument("splfileobject::setflags", count+1);
+        if (count != 1) return throw_wrong_arguments("splfileobject::setflags", count, 1, 1, 1);
         return (t_setflags(a0));
       }
       break;
     case 14:
       HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
         return (t_getowner());
       }
       break;
     case 15:
       HASH_GUARD(0x732EC1BDA8EC520FLL, getchildren) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::getchildren", 0, 1);
         return (t_getchildren());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 21:
       HASH_GUARD(0x40044334DA397C15LL, haschildren) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::haschildren", 0, 1);
         return (t_haschildren());
       }
       break;
     case 26:
       HASH_GUARD(0x2B7CAC006AF27F9ALL, fflush) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::fflush", 0, 1);
         return (t_fflush());
       }
       break;
     case 27:
       HASH_GUARD(0x5B33B55D4B7E339BLL, fpassthru) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::fpassthru", 0, 1);
         return (t_fpassthru());
       }
       break;
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
         if (count <= 0) return (t_getbasename());
         return (t_getbasename(a0));
       }
       break;
     case 29:
       HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
         return (t_isfile());
       }
       break;
     case 30:
       HASH_GUARD(0x3E4E7C561D3A541ELL, fgetss) {
-        if (count < 1) throw_missing_argument("splfileobject::fgetss", count+1);
+        if (count != 1) return throw_wrong_arguments("splfileobject::fgetss", count, 1, 1, 1);
         return (t_fgetss(a0));
       }
       break;
     case 31:
       HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
         return (t_getatime());
       }
       break;
     case 35:
       HASH_GUARD(0x044B276686B77923LL, fscanf) {
-        if (count < 1) throw_missing_argument("splfileobject::fscanf", count+1);
+        if (count != 1) return throw_wrong_arguments("splfileobject::fscanf", count, 1, 1, 1);
         return (t_fscanf(a0));
       }
       break;
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
         if (count <= 0) return (t_setfileclass());
         return (t_setfileclass(a0));
       }
       break;
     case 43:
       HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 45:
       HASH_GUARD(0x1C1216F2B7C16CADLL, ftell) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::ftell", 0, 1);
         return (t_ftell());
       }
       break;
     case 47:
       HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
         return (t_getctime());
       }
       break;
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
+        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
         if (count <= 0) return (t_openfile());
         if (count == 1) return (t_openfile(a0));
         if (count == 2) return (t_openfile(a0, a1));
@@ -606,65 +651,75 @@ Variant c_splfileobject::o_invoke_few_args(const char *s, int64 hash, int count,
       break;
     case 55:
       HASH_GUARD(0x4CEC6AA30E43D437LL, setmaxlinelen) {
-        if (count < 1) throw_missing_argument("splfileobject::setmaxlinelen", count+1);
+        if (count != 1) return throw_wrong_arguments("splfileobject::setmaxlinelen", count, 1, 1, 1);
         return (t_setmaxlinelen(a0));
       }
       break;
     case 56:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::next", 0, 1);
         return (t_next());
       }
       HASH_GUARD(0x0890F9052322E838LL, fstat) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::fstat", 0, 1);
         return (t_fstat());
       }
       break;
     case 63:
       HASH_GUARD(0x04C642C6C162243FLL, getpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
         return (t_getpath());
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
         return (t_getfileinfo(a0));
       }
       break;
     case 67:
       HASH_GUARD(0x5ACCF9166CD9D043LL, ftruncate) {
-        if (count < 1) throw_missing_argument("splfileobject::ftruncate", count+1);
+        if (count != 1) return throw_wrong_arguments("splfileobject::ftruncate", count, 1, 1, 1);
         return (t_ftruncate(a0));
       }
       HASH_GUARD(0x794FAFD4412AEFC3LL, eof) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::eof", 0, 1);
         return (t_eof());
       }
       break;
     case 68:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 69:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
         return (t_setinfoclass(a0));
       }
       break;
     case 73:
       HASH_GUARD(0x4282E0231F600049LL, fseek) {
-        if (count < 2) throw_missing_argument("splfileobject::fseek", count+1);
+        if (count != 2) return throw_wrong_arguments("splfileobject::fseek", count, 2, 2, 1);
         return (t_fseek(a0, a1));
       }
       break;
     case 74:
       HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
         return (t_getinode());
       }
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 78:
       HASH_GUARD(0x7E978C38D741664ELL, fgetcsv) {
+        if (count > 3) return throw_toomany_arguments("splfileobject::fgetcsv", 3, 1);
         if (count <= 0) return (t_fgetcsv());
         if (count == 1) return (t_fgetcsv(a0));
         if (count == 2) return (t_fgetcsv(a0, a1));
@@ -673,11 +728,13 @@ Variant c_splfileobject::o_invoke_few_args(const char *s, int64 hash, int count,
       break;
     case 79:
       HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 80:
       HASH_GUARD(0x3A335010F905ACD0LL, setcsvcontrol) {
+        if (count > 3) return throw_toomany_arguments("splfileobject::setcsvcontrol", 3, 1);
         if (count <= 0) return (t_setcsvcontrol());
         if (count == 1) return (t_setcsvcontrol(a0));
         if (count == 2) return (t_setcsvcontrol(a0, a1));
@@ -686,27 +743,31 @@ Variant c_splfileobject::o_invoke_few_args(const char *s, int64 hash, int count,
       break;
     case 81:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::key", 0, 1);
         return (t_key());
       }
       break;
     case 88:
       HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
         return (t_islink());
       }
       break;
     case 90:
       HASH_GUARD(0x25F68E7910FE9CDALL, getmaxlinelen) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::getmaxlinelen", 0, 1);
         return (t_getmaxlinelen());
       }
       break;
     case 92:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::current", 0, 1);
         return (t_current());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("splfileobject::__construct", count+1);
+        if (count < 1 || count > 4) return throw_wrong_arguments("splfileobject::__construct", count, 1, 4, 2);
         if (count <= 1) return (t___construct(a0), null);
         if (count == 2) return (t___construct(a0, a1), null);
         if (count == 3) return (t___construct(a0, a1, a2), null);
@@ -715,68 +776,80 @@ Variant c_splfileobject::o_invoke_few_args(const char *s, int64 hash, int count,
       break;
     case 97:
       HASH_GUARD(0x27E7DBA875AD17E1LL, getflags) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::getflags", 0, 1);
         return (t_getflags());
       }
       break;
     case 98:
       HASH_GUARD(0x6FE9F691E4A6D962LL, getcsvcontrol) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::getcsvcontrol", 0, 1);
         return (t_getcsvcontrol());
       }
       break;
     case 99:
       HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 101:
       HASH_GUARD(0x05D72365192CE465LL, fwrite) {
-        if (count < 2) throw_missing_argument("splfileobject::fwrite", count+1);
+        if (count != 2) return throw_wrong_arguments("splfileobject::fwrite", count, 2, 2, 1);
         return (t_fwrite(a0, a1));
       }
       break;
     case 103:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
         return (t_getpathinfo(a0));
       }
       HASH_GUARD(0x7EF5445C77054C67LL, seek) {
-        if (count < 1) throw_missing_argument("splfileobject::seek", count+1);
+        if (count != 1) return throw_wrong_arguments("splfileobject::seek", count, 1, 1, 1);
         return (t_seek(a0));
       }
       break;
     case 106:
       HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
         return (t_getgroup());
       }
       HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
         return (t_getsize());
       }
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 115:
       HASH_GUARD(0x7AE1BE187F18FDF3LL, fgets) {
+        if (count > 0) return throw_toomany_arguments("splfileobject::fgets", 0, 1);
         return (t_fgets());
       }
       break;
     case 116:
       HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 120:
       HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 122:
       HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 125:
       HASH_GUARD(0x4351578037A06E7DLL, getperms) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
         return (t_getperms());
       }
       break;
@@ -786,6 +859,7 @@ Variant c_splfileobject::o_invoke_few_args(const char *s, int64 hash, int count,
   return c_splfileinfo::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_splfileobject::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_splfileinfo::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1831,27 +1905,25 @@ Variant c_splfileinfo::os_constant(const char *s) {
 }
 IMPLEMENT_CLASS(splfileinfo)
 c_splfileinfo *c_splfileinfo::create(Variant v_file_name) {
-  incRefCount();
+  CountableHelper h(this);
   init();
   t___construct(v_file_name);
-  decRefCount();
   return this;
 }
 ObjectData *c_splfileinfo::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
-    incRefCount();
-    int count = params.size();
-    if (count < 1) throw_missing_argument("splfileinfo::__construct", count+1);
-    (t___construct(params.rvalAt(0)));
-    decRefCount();
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 1) throw_wrong_arguments("splfileinfo::__construct", count, 1, 1, 2);
+    (t___construct(params[0]));
   }
   return this;
 }
 void c_splfileinfo::dynConstruct(CArrRef params) {
-  int count = params.size();
-  if (count < 1) throw_missing_argument("splfileinfo::__construct", count+1);
-  (t___construct(params.rvalAt(0)));
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("splfileinfo::__construct", count, 1, 1, 2);
+  (t___construct(params[0]));
 }
 void c_splfileinfo::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -1876,154 +1948,175 @@ void c_splfileinfo::cloneSet(c_splfileinfo *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
     case 5:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
-        return (t_setinfoclass(params.rvalAt(0)));
+        return (t_setinfoclass(params[0]));
       }
       break;
     case 6:
       HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
         return (t_getrealpath());
       }
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
       HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
         return (t_isdir());
       }
       break;
     case 10:
       HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
         return (t_getinode());
       }
       break;
     case 13:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 14:
       HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
         return (t_getowner());
       }
       break;
     case 15:
       HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 24:
       HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
         return (t_islink());
       }
       break;
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
         if (count <= 0) return (t_getbasename());
-        return (t_getbasename(params.rvalAt(0)));
+        return (t_getbasename(params[0]));
       }
       break;
     case 29:
       HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
         return (t_isfile());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        int count = params.size();
-        if (count < 1) throw_missing_argument("splfileinfo::__construct", count+1);
-        return (t___construct(params.rvalAt(0)), null);
+        if (count != 1) return throw_wrong_arguments("splfileinfo::__construct", count, 1, 1, 2);
+        return (t___construct(params[0]), null);
       }
       HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
         return (t_getatime());
       }
       break;
     case 35:
       HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
         if (count <= 0) return (t_setfileclass());
-        return (t_setfileclass(params.rvalAt(0)));
+        return (t_setfileclass(params[0]));
       }
       break;
     case 39:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
-        return (t_getpathinfo(params.rvalAt(0)));
+        return (t_getpathinfo(params[0]));
       }
       break;
     case 42:
       HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
         return (t_getgroup());
       }
       HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
         return (t_getsize());
       }
       break;
     case 43:
       HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 47:
       HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
         return (t_getctime());
       }
       break;
     case 52:
       HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
-        int count = params.size();
+        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
         if (count <= 0) return (t_openfile());
-        if (count == 1) return (t_openfile(params.rvalAt(0)));
-        if (count == 2) return (t_openfile(params.rvalAt(0), params.rvalAt(1)));
-        return (t_openfile(params.rvalAt(0), params.rvalAt(1), params.rvalAt(2)));
+        if (count == 1) return (t_openfile(params[0]));
+        if (count == 2) return (t_openfile(params[0], params[1]));
+        return (t_openfile(params[0], params[1], params[2]));
       }
       break;
     case 56:
       HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 58:
       HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 61:
       HASH_GUARD(0x4351578037A06E7DLL, getperms) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
         return (t_getperms());
       }
       break;
     case 63:
       HASH_GUARD(0x04C642C6C162243FLL, getpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
         return (t_getpath());
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
-        int count = params.size();
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
-        return (t_getfileinfo(params.rvalAt(0)));
+        return (t_getfileinfo(params[0]));
       }
       break;
     default:
@@ -2036,115 +2129,137 @@ Variant c_splfileinfo::o_invoke_few_args(const char *s, int64 hash, int count, C
   switch (hash & 63) {
     case 5:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
         return (t_setinfoclass(a0));
       }
       break;
     case 6:
       HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
         return (t_getrealpath());
       }
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
       HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
         return (t_isdir());
       }
       break;
     case 10:
       HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
         return (t_getinode());
       }
       break;
     case 13:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 14:
       HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
         return (t_getowner());
       }
       break;
     case 15:
       HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 24:
       HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
         return (t_islink());
       }
       break;
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
         if (count <= 0) return (t_getbasename());
         return (t_getbasename(a0));
       }
       break;
     case 29:
       HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
         return (t_isfile());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1) throw_missing_argument("splfileinfo::__construct", count+1);
+        if (count != 1) return throw_wrong_arguments("splfileinfo::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
         return (t_getatime());
       }
       break;
     case 35:
       HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
         if (count <= 0) return (t_setfileclass());
         return (t_setfileclass(a0));
       }
       break;
     case 39:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
         return (t_getpathinfo(a0));
       }
       break;
     case 42:
       HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
         return (t_getgroup());
       }
       HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
         return (t_getsize());
       }
       break;
     case 43:
       HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 47:
       HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
         return (t_getctime());
       }
       break;
     case 52:
       HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
+        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
         if (count <= 0) return (t_openfile());
         if (count == 1) return (t_openfile(a0));
         if (count == 2) return (t_openfile(a0, a1));
@@ -2153,24 +2268,29 @@ Variant c_splfileinfo::o_invoke_few_args(const char *s, int64 hash, int count, C
       break;
     case 56:
       HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 58:
       HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 61:
       HASH_GUARD(0x4351578037A06E7DLL, getperms) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
         return (t_getperms());
       }
       break;
     case 63:
       HASH_GUARD(0x04C642C6C162243FLL, getpath) {
+        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
         return (t_getpath());
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
+        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
         return (t_getfileinfo(a0));
       }
@@ -2181,6 +2301,7 @@ Variant c_splfileinfo::o_invoke_few_args(const char *s, int64 hash, int count, C
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 Variant c_splfileinfo::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

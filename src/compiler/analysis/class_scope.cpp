@@ -1020,6 +1020,8 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
                            const vector <const char*> &keys,
                            const StringToFunctionScopePtrVecMap &funcScopes,
                            bool fewArgs, bool staticOnly, bool forEval) {
+  ClassScopePtr self = dynamic_pointer_cast<ClassScope>(shared_from_this());
+
   for (JumpTable jt(cg, keys, true, true, false); jt.ready(); jt.next()) {
     const char *name = jt.key();
     StringToFunctionScopePtrVecMap::const_iterator iterFuncs;
@@ -1045,7 +1047,7 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
       func->outputCPPEvalInvoke(cg, ar, prefix, name, extra);
     } else {
       func->outputCPPDynamicInvoke(cg, ar, prefix, name, false, fewArgs,
-                                   true, extra);
+                                   true, extra, func->isConstructor(self));
     }
     cg.indentEnd("}\n");
   }
@@ -1139,6 +1141,7 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
                      " int64 hash, bool fatal) {\n", scope.c_str(),
                      invokeName.c_str());
     }
+    FunctionScope::OutputCPPDynamicInvokeCount(cg);
   }
   if (needGlobals) cg.printDeclareGlobals();
   outputCPPMethodInvokeTable(cg, ar, funcs, funcScopes, false, staticOnly,

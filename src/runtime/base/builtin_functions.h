@@ -547,18 +547,6 @@ Variant o_invoke_failed(const char *cls, const char *meth,
                         bool fatal = true);
 
 /**
- * A function call that has too many arguments will be invoked through this
- * wrapper, so to make sure all extra parameters are still evaluated.
- */
-template <class T>
-T invoke_too_many_args(const char *func, int count, T ret) {
-  if (RuntimeOption::NoticeExtraArguments) {
-    raise_notice("Calling %s with %d more arguments", func, count);
-  }
-  return ret;
-}
-
-/**
  * Invocation handlers attempt to call the named function with the passed
  * parameters. They return true if the function was found and called, or
  * false if the function could not be found. They should only throw
@@ -587,7 +575,16 @@ inline Variant throw_missing_file(const char *cls) {
   throw PhpFileDoesNotExistException(cls);
 }
 
-void throw_missing_argument(const char *fn, int argnum);
+/**
+ * Argument count handling.
+ *   - When level is 2, it's from constructors that turn these into fatals
+ *   - When level is 1, it's from system funcs that turn both into warnings
+ *   - When level is 0, it's from user funcs that turn missing arg in warnings
+ */
+Variant throw_missing_arguments(const char *fn, int num, int level = 0);
+Variant throw_toomany_arguments(const char *fn, int num, int level = 0);
+Variant throw_wrong_arguments(const char *fn, int count, int cmin, int cmax,
+                              int level = 0);
 
 /**
  * When fatal coding errors are transformed to this function call.
@@ -614,9 +611,9 @@ void handle_destructor_exception();
 void throw_bad_type_exception(const char *fmt, ...);
 
 /**
- * If RuntimeOption::ThrowInvalidArgument is on, we are running in
+ * If RuntimeOption::ThrowInvalidArguments is on, we are running in
  * a restrictive mode that's not compatible with PHP, and this will throw.
- * If RuntimeOption::ThrowInvalidArgument is off, we will log a
+ * If RuntimeOption::ThrowInvalidArguments is off, we will log a
  * warning and swallow the error.
  */
 void throw_invalid_argument(const char *fmt, ...);

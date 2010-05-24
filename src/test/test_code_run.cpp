@@ -332,6 +332,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestInnerFunction);
   RUN_TEST(TestInnerClass);
   RUN_TEST(TestVariableArgument);
+  RUN_TEST(TestArgumentHandling);
   RUN_TEST(TestListAssignment);
   RUN_TEST(TestExceptions);
   RUN_TEST(TestPredefined);
@@ -431,7 +432,6 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestExtSplFile);
   RUN_TEST(TestExtIterator);
   RUN_TEST(TestExtSoap);
-  //RUN_TEST(TestEvaluationOrder);
 
   RUN_TEST(TestAdHoc);
   return ret;
@@ -547,6 +547,23 @@ bool TestCodeRun::TestVariableArgument() {
   MVCR("<?php $ar1 = array(10, 100, 100, 0); $ar2 = array(1, 3, 2, 4);"
       "array_multisort($ar1, $ar2); var_dump($ar1, $ar2);");
 
+  return true;
+}
+
+bool TestCodeRun::TestArgumentHandling() {
+  MVCR("<?php\n"
+       "function test($str) {\n"
+       "  return strlen($str);\n"
+       "}\n"
+       "var_dump(strlen());\n"
+       "var_dump(test());\n"
+       "\n"
+       "var_dump(strlen('test'));\n"
+       "var_dump(test('test'));\n"
+       "\n"
+       "var_dump(strlen('test', 123));\n"
+       "var_dump(test('test', 123));\n"
+      );
   return true;
 }
 
@@ -7423,6 +7440,9 @@ bool TestCodeRun::TestEvalOrder() {
        "}"
        "bug2(0, array());");
 
+  MVCR("<?php var_dump($v++, $v++);");
+  MVCR("<?php var_dump($v, $v = 0);");
+
  return true;
 }
 
@@ -8821,12 +8841,6 @@ bool TestCodeRun::TestAssignment() {
       "var_dump($obj);"
       "$obj->bar();");
 
-  return true;
-}
-
-bool TestCodeRun::TestEvaluationOrder() {
-  MVCR("<?php var_dump($v++, $v++);");
-  MVCR("<?php var_dump($v, $v = 0);");
   return true;
 }
 

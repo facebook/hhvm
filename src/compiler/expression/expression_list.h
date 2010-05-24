@@ -69,11 +69,6 @@ public:
   int getOutputCount() const;
   void resetOutputCount();
 
-  bool outputCPPTooManyArgsPre(CodeGenerator &cg, AnalysisResultPtr ar,
-                               const std::string &name);
-  void outputCPPTooManyArgsPost(CodeGenerator &cg, AnalysisResultPtr ar,
-                                bool voidReturn);
-
   virtual bool canonCompare(ExpressionPtr e) const;
 
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,

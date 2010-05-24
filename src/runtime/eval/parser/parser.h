@@ -44,6 +44,11 @@ public:
   parseFile(const char *input,
             std::vector<StaticStatementPtr> &statics);
 public:
+  enum NameKind {
+    StringName,
+    ExprName,
+    StaticName
+  };
   static Mutex s_lock;
 
   Parser(Scanner &s, const char *fileName,
@@ -63,7 +68,7 @@ public:
 
   // parser handlers
   void saveParseTree(Token &tree);
-  void onName(Token &out, Token &name, bool string);
+  void onName(Token &out, Token &name, NameKind kind);
   void onStaticVariable(Token &out, Token *exprs, Token &var, Token *value);
   void onSimpleVariable(Token &out, Token &var);
   void onDynamicVariable(Token &out, Token &expr, bool encap);
@@ -184,7 +189,7 @@ private:
 
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);
-  NamePtr procStaticClassName(Token &className, bool text, bool *sp = NULL);
+  NamePtr procStaticClassName(Token &className, bool text);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -41,6 +41,26 @@ void EvalFrameInjection::SetLine(const Construct *c) {
   }
 }
 
+EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
+(CStrRef name, bool sp) : m_set(false) {
+  if (!sp) {
+    FrameInjection::SetStaticClassName(NULL, name);
+    m_set = true;
+  }
+}
+
+EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
+(CObjRef obj) {
+  FrameInjection::SetCallingObject(NULL, obj.get());
+}
+
+EvalFrameInjection::EvalStaticClassNameHelper::~EvalStaticClassNameHelper() {
+  if (m_set) {
+    FrameInjection::ResetStaticClassName(NULL);
+  }
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

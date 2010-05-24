@@ -35,24 +35,28 @@ public:
   virtual int64 hash() const;
   virtual int64 hashLwr() const;
   virtual String getStatic() const { return String(); }
-
-  static NamePtr fromString(CONSTRUCT_ARGS, const std::string &name);
+  virtual bool isSp() const;
+  static NamePtr fromString(CONSTRUCT_ARGS, const std::string &name,
+      bool isSp = false);
   static NamePtr fromExp(CONSTRUCT_ARGS, ExpressionPtr e);
+  static NamePtr LateStatic(CONSTRUCT_ARGS);
 };
 
 class StringName : public Name {
 public:
-  StringName(CONSTRUCT_ARGS, const std::string &name);
+  StringName(CONSTRUCT_ARGS, const std::string &name, bool isSp = false);
   virtual String get(VariableEnvironment &env) const;
   virtual int64 hash() const;
   virtual int64 hashLwr() const;
   virtual String getStatic() const;
+  virtual bool isSp() const;
   virtual void dump() const;
 private:
   std::string m_name;
   int64 m_hash;
   int64 m_hashLwr;
   StaticString m_sname;
+  bool m_isSp;
 };
 
 class ExprName : public Name {
@@ -62,6 +66,13 @@ public:
   virtual void dump() const;
 private:
   ExpressionPtr m_name;
+};
+
+class LateStaticName : public Name {
+public:
+  LateStaticName(CONSTRUCT_ARGS);
+  virtual String get(VariableEnvironment &env) const;
+  virtual void dump() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

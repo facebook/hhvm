@@ -26,20 +26,19 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 StaticMethodExpression::
-StaticMethodExpression(EXPRESSION_ARGS, const NamePtr &cname, bool sp,
+StaticMethodExpression(EXPRESSION_ARGS, const NamePtr &cname,
     const NamePtr &name, const vector<ExpressionPtr> &params) :
   SimpleFunctionCallExpression(EXPRESSION_PASS, name, params), m_cname(cname),
-  m_sp(sp), m_construct(name->getStatic() == "__construct") {}
+  m_construct(name->getStatic() == "__construct") {}
 
 Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
   SET_LINE;
   // Static method expressions can be object method expressions inside
   // of a method when an object is available and the object's class inherits.
   // Super slow.
-  String cname = getClassName(m_cname, env);
-  FrameInjection::EvalStaticClassNameHelper helper
-    (m_cname->getStatic(), cname, m_sp);
-
+  String cname = m_cname->get(env);
+  EvalFrameInjection::EvalStaticClassNameHelper helper(cname,
+      m_cname->isSp());
   String name(m_name->get(env));
   Variant &vco = env.currentObject();
   Object co;

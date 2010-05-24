@@ -27,6 +27,14 @@ class Construct;
 
 class EvalFrameInjection : public FrameInjection {
 public:
+  class EvalStaticClassNameHelper {
+  public:
+    EvalStaticClassNameHelper(CStrRef name, bool sp);
+    EvalStaticClassNameHelper(CObjRef obj);
+    ~EvalStaticClassNameHelper();
+    bool m_set;
+  };
+
   EvalFrameInjection(const char *cls, const char *name,
                      VariableEnvironment &env, const char *file,
                      ObjectData *obj = NULL, int fs = 0)

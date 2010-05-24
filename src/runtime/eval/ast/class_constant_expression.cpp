@@ -29,7 +29,7 @@ ClassConstantExpression::ClassConstantExpression(EXPRESSION_ARGS,
   : Expression(EXPRESSION_PASS), m_class(cls), m_constant(constant) {}
 
 Variant ClassConstantExpression::eval(VariableEnvironment &env) const {
-  String cls = getClassName(m_class, env);
+  String cls = m_class->get(env);
   return get_class_constant(cls.c_str(), m_constant.c_str());
 }
 

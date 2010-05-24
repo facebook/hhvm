@@ -30,7 +30,7 @@ StaticMemberExpression::StaticMemberExpression(EXPRESSION_ARGS,
     m_variable(variable) {}
 
 Variant &StaticMemberExpression::lval(VariableEnvironment &env) const {
-  String cls = getClassName(m_class, env);
+  String cls = m_class->get(env);
   String variable(m_variable->get(env));
   Variant *lv = get_static_property_lv(cls.data(), variable.data());
   if (lv) {

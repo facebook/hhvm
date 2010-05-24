@@ -217,12 +217,14 @@ int Parser::scan(void *arg /* = NULL */) {
 ///////////////////////////////////////////////////////////////////////////////
 // names
 
-void Parser::onName(Token &out, Token &name, bool string) {
+void Parser::onName(Token &out, Token &name, Parser::NameKind kind) {
   out.reset();
-  if (string) {
+  if (kind == StringName) {
     out->name() = Name::fromString(this, name.getText());
-  } else {
+  } else if (kind == ExprName) {
     out->name() = Name::fromExp(this, name->exp());
+  } else if (kind == StaticName) {
+    out->name() = Name::LateStatic(this);
   }
 }
 
@@ -345,9 +347,8 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     }
   }
   if (className) {
-    bool sp = false;
-    NamePtr cn = procStaticClassName(*className, false, &sp);
-    out->exp() = NEW_EXP(StaticMethod, cn, sp, n, params->exprs());
+    NamePtr cn = procStaticClassName(*className, false);
+    out->exp() = NEW_EXP(StaticMethod, cn, n, params->exprs());
   } else {
     out->exp() = SimpleFunctionCallExpression::make(this, n,
                                                     params->exprs(), *this);
@@ -1121,16 +1122,13 @@ void Parser::addHphpSuppressError(Token &error) {
 
 }
 
-NamePtr Parser::procStaticClassName(Token &className, bool text,
-                                    bool *sp /* = NULL */) {
+NamePtr Parser::procStaticClassName(Token &className, bool text) {
   NamePtr cname;
   if (text) {
     if (className.getText() == "self") {
-      cname = Name::fromString(this, peekClass()->name());
-      if (sp) *sp = true;
+      cname = Name::fromString(this, peekClass()->name(), true);
     } else if (className.getText() == "parent") {
-      cname = Name::fromString(this, peekClass()->parent());
-      if (sp) *sp = true;
+      cname = Name::fromString(this, peekClass()->parent(), true);
     } else {
       cname = Name::fromString(this, className.getText());
     }
@@ -1139,11 +1137,9 @@ NamePtr Parser::procStaticClassName(Token &className, bool text,
     cname = className->name();
     if (haveClass() && cname->getStatic()) {
       if (cname->getStatic() == "self") {
-        cname = Name::fromString(this, peekClass()->name());
-        if (sp) *sp = true;
+        cname = Name::fromString(this, peekClass()->name(), true);
       } else if (cname->getStatic() == "parent") {
-        cname = Name::fromString(this, peekClass()->parent());
-        if (sp) *sp = true;
+        cname = Name::fromString(this, peekClass()->parent(), true);
       }
     }
   }

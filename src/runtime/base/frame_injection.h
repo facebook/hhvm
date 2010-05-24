@@ -81,14 +81,6 @@ public:
     ThreadInfo *m_info;
   };
 
-  class EvalStaticClassNameHelper {
-  public:
-    EvalStaticClassNameHelper(CStrRef name, CStrRef resolved, bool sp);
-    EvalStaticClassNameHelper(CObjRef obj);
-    ~EvalStaticClassNameHelper();
-
-    bool m_set;
-  };
 
 private:
   ThreadInfo *m_info;

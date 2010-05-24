@@ -196,24 +196,5 @@ void FrameInjection::SetCallingObject(ThreadInfo* info, ObjectData *obj) {
   if (t) t->m_callingObject = obj;
 }
 
-FrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
-(CStrRef name, CStrRef resolved, bool sp) : m_set(false) {
-  if (!sp && strcasecmp(name.data(), "static")) {
-    FrameInjection::SetStaticClassName(NULL, resolved);
-    m_set = true;
-  }
-}
-
-FrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
-(CObjRef obj) {
-  FrameInjection::SetCallingObject(NULL, obj.get());
-}
-
-FrameInjection::EvalStaticClassNameHelper::~EvalStaticClassNameHelper() {
-  if (m_set) {
-    FrameInjection::ResetStaticClassName(NULL);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

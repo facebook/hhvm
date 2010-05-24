@@ -45,8 +45,6 @@ public:
   static Variant evalVector(const std::vector<ExpressionPtr> &v,
                             VariableEnvironment &env);
 
-protected:
-  String getClassName(NamePtr name, VariableEnvironment &env) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -37,7 +37,7 @@ Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
     raise_error("Call to a member function %s() on a non-object",
                 name.c_str());
   }
-  FrameInjection::EvalStaticClassNameHelper helper(obj.toObject());
+  EvalFrameInjection::EvalStaticClassNameHelper helper(obj.toObject());
 
   Variant cobj(env.currentObject());
   const MethodStatement *ms = NULL;

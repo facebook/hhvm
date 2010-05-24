@@ -63,18 +63,6 @@ bool Expression::isRefParam() const {
   return false;
 }
 
-String Expression::getClassName(NamePtr name, VariableEnvironment &env) const {
-  String clsname = name->get(env);
-  if (strcasecmp(clsname.data(), "static") == 0) {
-    if (name->getStatic() != clsname) {
-      raise_error("\"static\" cannot be composed by expression in %s:%d",
-                  name->loc()->file, name->loc()->line1);
-    }
-    clsname = FrameInjection::GetStaticClassName(NULL);
-  }
-  return clsname;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

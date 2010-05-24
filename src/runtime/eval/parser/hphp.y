@@ -604,16 +604,21 @@ function_call:
     function_call_parameter_list ')'   { _p->onCall($$,1,$3,$5,&$1);}
 ;
 static_class_name:
-    T_STRING                           { _p->onName($$, $1, true);}
-  | T_STATIC                           { _p->onName($$, $1, true);}
-  | reference_variable                 { _p->onName($$, $1, false);}
+    T_STRING                           { _p->onName($$, $1,
+                                          Parser::StringName);}
+  | T_STATIC                           { _p->onName($$, $1,
+                                          Parser::StaticName);}
+  | reference_variable                 { _p->onName($$, $1,
+                                          Parser::ExprName);}
 ;
 fully_qualified_class_name:
     T_STRING                           { $$ = $1;}
 ;
 class_name_reference:
-    T_STRING                           { _p->onName($$, $1, true);}
-  | dynamic_class_name_reference       { _p->onName($$, $1, false);}
+    T_STRING                           { _p->onName($$, $1,
+                                          Parser::StringName);}
+  | dynamic_class_name_reference       { _p->onName($$, $1,
+                                          Parser::ExprName);}
 ;
 dynamic_class_name_reference:
     base_variable                      { _p->pushObject($1);}
@@ -779,8 +784,9 @@ object_dim_list:
   | variable_name                      { _p->appendProperty($1);}
 ;
 variable_name:
-    T_STRING                           { _p->onName($$, $1, true);}
-  | '{' expr '}'                       { _p->onName($$, $2, false);}
+    T_STRING                           {_p->onName($$, $1,
+                                         Parser::StringName);}
+  | '{' expr '}'                       {_p->onName($$, $2, Parser::ExprName);}
 ;
 
 simple_indirect_reference:

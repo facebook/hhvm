@@ -846,19 +846,19 @@ static const yytype_uint16 yyrline[] =
      559,   560,   561,   562,   563,   564,   565,   566,   568,   569,
      571,   573,   574,   575,   576,   577,   578,   579,   580,   581,
      582,   583,   584,   585,   586,   587,   588,   589,   593,   595,
-     597,   601,   607,   608,   609,   612,   615,   616,   619,   619,
-     622,   625,   627,   630,   634,   635,   636,   640,   642,   646,
-     647,   648,   650,   651,   652,   653,   654,   657,   658,   659,
-     660,   661,   663,   666,   670,   671,   672,   673,   674,   675,
-     676,   681,   683,   686,   687,   690,   693,   695,   697,   701,
-     702,   705,   708,   711,   714,   716,   714,   718,   722,   724,
-     727,   731,   733,   737,   738,   742,   748,   749,   752,   753,
-     755,   758,   760,   761,   764,   765,   768,   769,   773,   774,
-     777,   778,   779,   782,   783,   787,   788,   792,   793,   794,
-     796,   797,   798,   803,   805,   808,   810,   811,   812,   813,
-     816,   818,   819,   823,   824,   826,   829,   830,   832,   834,
-     836,   838,   841,   842,   843,   847,   848,   849,   850,   851,
-     852,   853,   857,   858,   862
+     597,   601,   607,   609,   611,   615,   618,   620,   624,   624,
+     627,   630,   632,   635,   639,   640,   641,   645,   647,   651,
+     652,   653,   655,   656,   657,   658,   659,   662,   663,   664,
+     665,   666,   668,   671,   675,   676,   677,   678,   679,   680,
+     681,   686,   688,   691,   692,   695,   698,   700,   702,   706,
+     707,   710,   713,   716,   719,   721,   719,   723,   727,   729,
+     732,   736,   738,   742,   743,   747,   753,   754,   757,   758,
+     760,   763,   765,   766,   769,   770,   773,   774,   778,   779,
+     782,   783,   784,   787,   789,   793,   794,   798,   799,   800,
+     802,   803,   804,   809,   811,   814,   816,   817,   818,   819,
+     822,   824,   825,   829,   830,   832,   835,   836,   838,   840,
+     842,   844,   847,   848,   849,   853,   854,   855,   856,   857,
+     858,   859,   863,   864,   868
 };
 #endif
 
@@ -4476,625 +4476,631 @@ yyreduce:
 
   case 242:
 #line 607 "hphp.y"
-    { _p->onName((yyval), (yyvsp[(1) - (1)]), true);;}
+    { _p->onName((yyval), (yyvsp[(1) - (1)]),
+                                          Parser::StringName);;}
     break;
 
   case 243:
-#line 608 "hphp.y"
-    { _p->onName((yyval), (yyvsp[(1) - (1)]), true);;}
+#line 609 "hphp.y"
+    { _p->onName((yyval), (yyvsp[(1) - (1)]),
+                                          Parser::StaticName);;}
     break;
 
   case 244:
-#line 609 "hphp.y"
-    { _p->onName((yyval), (yyvsp[(1) - (1)]), false);;}
+#line 611 "hphp.y"
+    { _p->onName((yyval), (yyvsp[(1) - (1)]),
+                                          Parser::ExprName);;}
     break;
 
   case 245:
-#line 612 "hphp.y"
+#line 615 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);;}
     break;
 
   case 246:
-#line 615 "hphp.y"
-    { _p->onName((yyval), (yyvsp[(1) - (1)]), true);;}
+#line 618 "hphp.y"
+    { _p->onName((yyval), (yyvsp[(1) - (1)]),
+                                          Parser::StringName);;}
     break;
 
   case 247:
-#line 616 "hphp.y"
-    { _p->onName((yyval), (yyvsp[(1) - (1)]), false);;}
+#line 620 "hphp.y"
+    { _p->onName((yyval), (yyvsp[(1) - (1)]),
+                                          Parser::ExprName);;}
     break;
 
   case 248:
-#line 619 "hphp.y"
+#line 624 "hphp.y"
     { _p->pushObject((yyvsp[(1) - (1)]));;}
     break;
 
   case 249:
-#line 621 "hphp.y"
+#line 626 "hphp.y"
     { _p->popObject((yyval));;}
     break;
 
   case 250:
-#line 622 "hphp.y"
+#line 627 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]); ;}
     break;
 
   case 251:
-#line 626 "hphp.y"
+#line 631 "hphp.y"
     { ;}
     break;
 
   case 252:
-#line 627 "hphp.y"
+#line 632 "hphp.y"
     { ;}
     break;
 
   case 253:
-#line 630 "hphp.y"
+#line 635 "hphp.y"
     { ;}
     break;
 
   case 254:
-#line 634 "hphp.y"
+#line 639 "hphp.y"
     { (yyval).reset();;}
     break;
 
   case 255:
-#line 635 "hphp.y"
+#line 640 "hphp.y"
     { (yyval) = (yyvsp[(2) - (3)]);;}
     break;
 
   case 256:
-#line 636 "hphp.y"
+#line 641 "hphp.y"
     { (yyval).reset();;}
     break;
 
   case 257:
-#line 641 "hphp.y"
+#line 646 "hphp.y"
     { (yyval) = (yyvsp[(2) - (3)]);;}
     break;
 
   case 258:
-#line 642 "hphp.y"
+#line 647 "hphp.y"
     { (yyval).reset();;}
     break;
 
   case 259:
-#line 646 "hphp.y"
+#line 651 "hphp.y"
     { _p->onScalar((yyval), T_LNUMBER, (yyvsp[(1) - (1)]));;}
     break;
 
   case 260:
-#line 647 "hphp.y"
+#line 652 "hphp.y"
     { _p->onScalar((yyval), T_DNUMBER, (yyvsp[(1) - (1)]));;}
     break;
 
   case 261:
-#line 648 "hphp.y"
+#line 653 "hphp.y"
     { _p->onScalar((yyval),
                                          T_CONSTANT_ENCAPSED_STRING, (yyvsp[(1) - (1)]));;}
     break;
 
   case 262:
-#line 650 "hphp.y"
+#line 655 "hphp.y"
     { _p->onScalar((yyval), T_LINE, (yyvsp[(1) - (1)]));;}
     break;
 
   case 263:
-#line 651 "hphp.y"
+#line 656 "hphp.y"
     { _p->onScalar((yyval), T_FILE, (yyvsp[(1) - (1)]));;}
     break;
 
   case 264:
-#line 652 "hphp.y"
+#line 657 "hphp.y"
     { _p->onScalar((yyval), T_CLASS_C, (yyvsp[(1) - (1)]));;}
     break;
 
   case 265:
-#line 653 "hphp.y"
+#line 658 "hphp.y"
     { _p->onScalar((yyval), T_METHOD_C, (yyvsp[(1) - (1)]));;}
     break;
 
   case 266:
-#line 654 "hphp.y"
+#line 659 "hphp.y"
     { _p->onScalar((yyval), T_FUNC_C, (yyvsp[(1) - (1)]));;}
     break;
 
   case 267:
-#line 657 "hphp.y"
+#line 662 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);;}
     break;
 
   case 268:
-#line 658 "hphp.y"
+#line 663 "hphp.y"
     { _p->onConstant((yyval), (yyvsp[(1) - (1)]));;}
     break;
 
   case 269:
-#line 659 "hphp.y"
+#line 664 "hphp.y"
     { UEXP((yyval),(yyvsp[(2) - (2)]),'+',1);;}
     break;
 
   case 270:
-#line 660 "hphp.y"
+#line 665 "hphp.y"
     { UEXP((yyval),(yyvsp[(2) - (2)]),'-',1);;}
     break;
 
   case 271:
-#line 662 "hphp.y"
+#line 667 "hphp.y"
     { _p->onArray((yyval),(yyvsp[(3) - (4)]));;}
     break;
 
   case 272:
-#line 663 "hphp.y"
+#line 668 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);;}
     break;
 
   case 273:
-#line 667 "hphp.y"
+#line 672 "hphp.y"
     { _p->onClassConst((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), true);;}
     break;
 
   case 274:
-#line 670 "hphp.y"
+#line 675 "hphp.y"
     { _p->onConstant((yyval), (yyvsp[(1) - (1)]));;}
     break;
 
   case 275:
-#line 671 "hphp.y"
+#line 676 "hphp.y"
     { _p->onConstant((yyval), (yyvsp[(1) - (1)]));;}
     break;
 
   case 276:
-#line 672 "hphp.y"
+#line 677 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 277:
-#line 673 "hphp.y"
+#line 678 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);;}
     break;
 
   case 278:
-#line 674 "hphp.y"
+#line 679 "hphp.y"
     { _p->onEncapsList((yyval),'"',(yyvsp[(2) - (3)]));;}
     break;
 
   case 279:
-#line 675 "hphp.y"
+#line 680 "hphp.y"
     { _p->onEncapsList((yyval),'\'',(yyvsp[(2) - (3)]));;}
     break;
 
   case 280:
-#line 677 "hphp.y"
+#line 682 "hphp.y"
     { _p->onEncapsList((yyval),T_START_HEREDOC,
                                                           (yyvsp[(2) - (3)]));;}
     break;
 
   case 281:
-#line 682 "hphp.y"
+#line 687 "hphp.y"
     { (yyval) = (yyvsp[(1) - (2)]);;}
     break;
 
   case 282:
-#line 683 "hphp.y"
+#line 688 "hphp.y"
     { (yyval).reset();;}
     break;
 
   case 283:
-#line 686 "hphp.y"
+#line 691 "hphp.y"
     { (yyval).reset();;}
     break;
 
   case 284:
-#line 687 "hphp.y"
+#line 692 "hphp.y"
     { (yyval).reset();;}
     break;
 
   case 285:
-#line 692 "hphp.y"
+#line 697 "hphp.y"
     { _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),false);;}
     break;
 
   case 286:
-#line 694 "hphp.y"
+#line 699 "hphp.y"
     { _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),NULL,(yyvsp[(3) - (3)]),false);;}
     break;
 
   case 287:
-#line 696 "hphp.y"
+#line 701 "hphp.y"
     { _p->onArrayPair((yyval),NULL,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),false);;}
     break;
 
   case 288:
-#line 697 "hphp.y"
+#line 702 "hphp.y"
     { _p->onArrayPair((yyval),NULL,NULL,(yyvsp[(1) - (1)]),false);;}
     break;
 
   case 289:
-#line 701 "hphp.y"
+#line 706 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);;}
     break;
 
   case 290:
-#line 702 "hphp.y"
+#line 707 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);;}
     break;
 
   case 291:
-#line 705 "hphp.y"
+#line 710 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);;}
     break;
 
   case 292:
-#line 708 "hphp.y"
+#line 713 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);;}
     break;
 
   case 293:
-#line 711 "hphp.y"
+#line 716 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);;}
     break;
 
   case 294:
-#line 714 "hphp.y"
+#line 719 "hphp.y"
     { _p->pushObject((yyvsp[(1) - (1)]));;}
     break;
 
   case 295:
-#line 716 "hphp.y"
+#line 721 "hphp.y"
     { _p->appendMethodParams((yyvsp[(5) - (5)]));;}
     break;
 
   case 296:
-#line 717 "hphp.y"
+#line 722 "hphp.y"
     { _p->popObject((yyval));;}
     break;
 
   case 297:
-#line 718 "hphp.y"
+#line 723 "hphp.y"
     { _p->pushObject((yyvsp[(1) - (1)]));
                                          _p->popObject((yyval));;}
     break;
 
   case 298:
-#line 723 "hphp.y"
+#line 728 "hphp.y"
     { ;}
     break;
 
   case 299:
-#line 724 "hphp.y"
+#line 729 "hphp.y"
     { ;}
     break;
 
   case 300:
-#line 728 "hphp.y"
+#line 733 "hphp.y"
     { _p->appendMethodParams((yyvsp[(3) - (3)]));;}
     break;
 
   case 301:
-#line 732 "hphp.y"
+#line 737 "hphp.y"
     { (yyval) = (yyvsp[(2) - (3)]); (yyval).num = 1;;}
     break;
 
   case 302:
-#line 733 "hphp.y"
+#line 738 "hphp.y"
     { (yyval).reset();;}
     break;
 
   case 303:
-#line 737 "hphp.y"
+#line 742 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);;}
     break;
 
   case 304:
-#line 739 "hphp.y"
+#line 744 "hphp.y"
     { _p->onIndirectRef((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));;}
     break;
 
   case 305:
-#line 744 "hphp.y"
+#line 749 "hphp.y"
     { _p->onStaticMember((yyval),(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]));;}
     break;
 
   case 306:
-#line 748 "hphp.y"
+#line 753 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);;}
     break;
 
   case 307:
-#line 749 "hphp.y"
+#line 754 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);;}
     break;
 
   case 308:
-#line 752 "hphp.y"
+#line 757 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);;}
     break;
 
   case 309:
-#line 754 "hphp.y"
+#line 759 "hphp.y"
     { _p->onIndirectRef((yyval),(yyvsp[(1) - (2)]),(yyvsp[(2) - (2)]));;}
     break;
 
   case 310:
-#line 755 "hphp.y"
+#line 760 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]); (yyval) = 2;;}
     break;
 
   case 311:
-#line 759 "hphp.y"
+#line 764 "hphp.y"
     { _p->onRefDim((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]));;}
     break;
 
   case 312:
-#line 760 "hphp.y"
+#line 765 "hphp.y"
     { _p->onRefDim((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]));;}
     break;
 
   case 313:
-#line 761 "hphp.y"
+#line 766 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);;}
     break;
 
   case 314:
-#line 764 "hphp.y"
+#line 769 "hphp.y"
     { _p->onSimpleVariable((yyval), (yyvsp[(1) - (1)]));;}
     break;
 
   case 315:
-#line 765 "hphp.y"
+#line 770 "hphp.y"
     { _p->onDynamicVariable((yyval), (yyvsp[(3) - (4)]), 0);;}
     break;
 
   case 316:
-#line 768 "hphp.y"
+#line 773 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]);;}
     break;
 
   case 317:
-#line 769 "hphp.y"
+#line 774 "hphp.y"
     { (yyval).reset();;}
     break;
 
   case 318:
-#line 773 "hphp.y"
+#line 778 "hphp.y"
     { ;}
     break;
 
   case 319:
-#line 774 "hphp.y"
-    { _p->appendProperty((yyvsp[(1) - (1)]));;}
-    break;
-
-  case 320:
-#line 777 "hphp.y"
-    { _p->appendRefDim((yyvsp[(3) - (4)]));;}
-    break;
-
-  case 321:
-#line 778 "hphp.y"
-    { _p->appendRefDim((yyvsp[(3) - (4)]));;}
-    break;
-
-  case 322:
 #line 779 "hphp.y"
     { _p->appendProperty((yyvsp[(1) - (1)]));;}
     break;
 
-  case 323:
+  case 320:
 #line 782 "hphp.y"
-    { _p->onName((yyval), (yyvsp[(1) - (1)]), true);;}
+    { _p->appendRefDim((yyvsp[(3) - (4)]));;}
+    break;
+
+  case 321:
+#line 783 "hphp.y"
+    { _p->appendRefDim((yyvsp[(3) - (4)]));;}
+    break;
+
+  case 322:
+#line 784 "hphp.y"
+    { _p->appendProperty((yyvsp[(1) - (1)]));;}
+    break;
+
+  case 323:
+#line 787 "hphp.y"
+    {_p->onName((yyval), (yyvsp[(1) - (1)]),
+                                         Parser::StringName);;}
     break;
 
   case 324:
-#line 783 "hphp.y"
-    { _p->onName((yyval), (yyvsp[(2) - (3)]), false);;}
+#line 789 "hphp.y"
+    {_p->onName((yyval), (yyvsp[(2) - (3)]), Parser::ExprName);;}
     break;
 
   case 325:
-#line 787 "hphp.y"
+#line 793 "hphp.y"
     { (yyval) = 1;;}
     break;
 
   case 326:
-#line 788 "hphp.y"
+#line 794 "hphp.y"
     { (yyval)++;;}
     break;
 
   case 327:
-#line 792 "hphp.y"
+#line 798 "hphp.y"
     { _p->onAListVar((yyval),&(yyvsp[(1) - (2)]),NULL);;}
     break;
 
   case 328:
-#line 793 "hphp.y"
+#line 799 "hphp.y"
     { _p->onAListVar((yyval),&(yyvsp[(1) - (3)]),&(yyvsp[(3) - (3)]));;}
     break;
 
   case 329:
-#line 795 "hphp.y"
+#line 801 "hphp.y"
     { _p->onAListSub((yyval),&(yyvsp[(1) - (6)]),(yyvsp[(5) - (6)]));;}
     break;
 
   case 330:
-#line 796 "hphp.y"
+#line 802 "hphp.y"
     { _p->onAListVar((yyval),NULL,NULL);;}
     break;
 
   case 331:
-#line 797 "hphp.y"
+#line 803 "hphp.y"
     { _p->onAListVar((yyval),NULL,&(yyvsp[(1) - (1)]));;}
     break;
 
   case 332:
-#line 798 "hphp.y"
+#line 804 "hphp.y"
     { _p->onAListSub((yyval),NULL,(yyvsp[(3) - (4)]));;}
     break;
 
   case 333:
-#line 804 "hphp.y"
+#line 810 "hphp.y"
     { (yyval) = (yyvsp[(1) - (2)]);;}
     break;
 
   case 334:
-#line 805 "hphp.y"
+#line 811 "hphp.y"
     { (yyval).reset();;}
     break;
 
   case 335:
-#line 809 "hphp.y"
+#line 815 "hphp.y"
     { _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),false);;}
     break;
 
   case 336:
-#line 810 "hphp.y"
+#line 816 "hphp.y"
     { _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),NULL,(yyvsp[(3) - (3)]),false);;}
     break;
 
   case 337:
-#line 811 "hphp.y"
+#line 817 "hphp.y"
     { _p->onArrayPair((yyval),NULL,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),false);;}
     break;
 
   case 338:
-#line 812 "hphp.y"
+#line 818 "hphp.y"
     { _p->onArrayPair((yyval),NULL,NULL,(yyvsp[(1) - (1)]),false);;}
     break;
 
   case 339:
-#line 815 "hphp.y"
+#line 821 "hphp.y"
     { _p->onArrayPair((yyval),&(yyvsp[(1) - (6)]),&(yyvsp[(3) - (6)]),(yyvsp[(6) - (6)]),true);;}
     break;
 
   case 340:
-#line 817 "hphp.y"
+#line 823 "hphp.y"
     { _p->onArrayPair((yyval),&(yyvsp[(1) - (4)]),NULL,(yyvsp[(4) - (4)]),true);;}
     break;
 
   case 341:
-#line 818 "hphp.y"
+#line 824 "hphp.y"
     { _p->onArrayPair((yyval),NULL,&(yyvsp[(1) - (4)]),(yyvsp[(4) - (4)]),true);;}
     break;
 
   case 342:
-#line 819 "hphp.y"
+#line 825 "hphp.y"
     { _p->onArrayPair((yyval),NULL,NULL,(yyvsp[(2) - (2)]),true);;}
     break;
 
   case 343:
-#line 823 "hphp.y"
+#line 829 "hphp.y"
     { _p->addEncap((yyval), (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]), -1);;}
     break;
 
   case 344:
-#line 825 "hphp.y"
+#line 831 "hphp.y"
     { _p->addEncap((yyval), (yyvsp[(1) - (2)]), (yyvsp[(2) - (2)]), 0);;}
     break;
 
   case 345:
-#line 826 "hphp.y"
+#line 832 "hphp.y"
     { (yyval).reset();;}
     break;
 
   case 346:
-#line 829 "hphp.y"
+#line 835 "hphp.y"
     { _p->onSimpleVariable((yyval), (yyvsp[(1) - (1)]));;}
     break;
 
   case 347:
-#line 831 "hphp.y"
+#line 837 "hphp.y"
     { _p->encapRefDim((yyval), (yyvsp[(1) - (4)]), (yyvsp[(3) - (4)]));;}
     break;
 
   case 348:
-#line 833 "hphp.y"
+#line 839 "hphp.y"
     { _p->encapObjProp((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));;}
     break;
 
   case 349:
-#line 835 "hphp.y"
+#line 841 "hphp.y"
     { _p->onDynamicVariable((yyval), (yyvsp[(2) - (3)]), 1);;}
     break;
 
   case 350:
-#line 837 "hphp.y"
+#line 843 "hphp.y"
     { _p->encapArray((yyval), (yyvsp[(2) - (6)]), (yyvsp[(4) - (6)]));;}
     break;
 
   case 351:
-#line 838 "hphp.y"
+#line 844 "hphp.y"
     { (yyval) = (yyvsp[(2) - (3)]);;}
     break;
 
   case 352:
-#line 841 "hphp.y"
+#line 847 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]); (yyval) = T_STRING;;}
     break;
 
   case 353:
-#line 842 "hphp.y"
+#line 848 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]); (yyval) = T_NUM_STRING;;}
     break;
 
   case 354:
-#line 843 "hphp.y"
+#line 849 "hphp.y"
     { (yyval) = (yyvsp[(1) - (1)]); (yyval) = T_VARIABLE;;}
     break;
 
   case 355:
-#line 847 "hphp.y"
+#line 853 "hphp.y"
     { UEXP((yyval),(yyvsp[(3) - (4)]),T_ISSET,1);;}
     break;
 
   case 356:
-#line 848 "hphp.y"
+#line 854 "hphp.y"
     { UEXP((yyval),(yyvsp[(3) - (4)]),T_EMPTY,1);;}
     break;
 
   case 357:
-#line 849 "hphp.y"
+#line 855 "hphp.y"
     { UEXP((yyval),(yyvsp[(2) - (2)]),T_INCLUDE,1);;}
     break;
 
   case 358:
-#line 850 "hphp.y"
+#line 856 "hphp.y"
     { UEXP((yyval),(yyvsp[(2) - (2)]),T_INCLUDE_ONCE,1);;}
     break;
 
   case 359:
-#line 851 "hphp.y"
+#line 857 "hphp.y"
     { UEXP((yyval),(yyvsp[(3) - (4)]),T_EVAL,1);;}
     break;
 
   case 360:
-#line 852 "hphp.y"
+#line 858 "hphp.y"
     { UEXP((yyval),(yyvsp[(2) - (2)]),T_REQUIRE,1);;}
     break;
 
   case 361:
-#line 853 "hphp.y"
+#line 859 "hphp.y"
     { UEXP((yyval),(yyvsp[(2) - (2)]),T_REQUIRE_ONCE,1);;}
     break;
 
   case 362:
-#line 857 "hphp.y"
+#line 863 "hphp.y"
     { _p->onExprListElem((yyval), NULL, (yyvsp[(1) - (1)]));;}
     break;
 
   case 363:
-#line 858 "hphp.y"
+#line 864 "hphp.y"
     { _p->onExprListElem((yyval), &(yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));;}
     break;
 
   case 364:
-#line 863 "hphp.y"
+#line 869 "hphp.y"
     { _p->onClassConst((yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), false);;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 5102 "hphp.tab.cpp"
+#line 5108 "hphp.tab.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -5308,7 +5314,7 @@ yyreturn:
 }
 
 
-#line 865 "hphp.y"
+#line 871 "hphp.y"
 
 
 static int __attribute__((unused)) suppress_warning = yydebug;

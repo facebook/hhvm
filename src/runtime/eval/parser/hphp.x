@@ -201,7 +201,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 <ST_IN_SCRIPTING>"isset"              {STEPPOS; return T_ISSET;}
 <ST_IN_SCRIPTING>"empty"              {STEPPOS; return T_EMPTY;}
 <ST_IN_SCRIPTING>"__halt_compiler"    {STEPPOS; return T_HALT_COMPILER;}
-<ST_IN_SCRIPTING>"static"             {SETTOKEN; return T_STATIC;}
+<ST_IN_SCRIPTING>"static"             {STEPPOS; return T_STATIC;}
 <ST_IN_SCRIPTING>"abstract"           {STEPPOS; return T_ABSTRACT;}
 <ST_IN_SCRIPTING>"final"              {STEPPOS; return T_FINAL;}
 <ST_IN_SCRIPTING>"private"            {STEPPOS; return T_PRIVATE;}

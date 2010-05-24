@@ -5910,7 +5910,7 @@ YY_RULE_SETUP
 case 63:
 YY_RULE_SETUP
 #line 204 "hphp.x"
-{SETTOKEN; return T_STATIC;}
+{STEPPOS; return T_STATIC;}
 	YY_BREAK
 case 64:
 YY_RULE_SETUP

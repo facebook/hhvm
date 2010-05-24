@@ -13,12 +13,12 @@ ENDIF()
 
 file(TO_CMAKE_PATH "$ENV{HPHP_HOME}" HPHP_HOME)
 
-SET(CMAKE_MODULE_PATH "${HPHP_HOME}/CMake" ${CMAKE_MODULE_PATH})
+SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 
-include("${HPHP_HOME}/CMake/HPHPFunctions.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/HPHPFunctions.cmake")
 include(CheckFunctionExists)
 
-IF(NOT EXISTS "src/third_party/libmbfl/mbfl/mbfilter.h")
+IF(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/third_party/libmbfl/mbfl/mbfilter.h")
 	message(FATAL_ERROR "Please setup the git submodule to pull dependencies")
 ENDIF()
 

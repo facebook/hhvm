@@ -26,7 +26,7 @@ IMPLEMENT_THREAD_LOCAL(ThreadInfo, ThreadInfo::s_threadInfo);
 ThreadInfo::ThreadInfo() {
   map<int, ObjectAllocatorWrapper *> &wrappers =
     ObjectAllocatorCollector::getWrappers();
-  m_allocators.resize(wrappers.size());
+  m_allocators.resize(wrappers.rbegin()->first + 1);
   for (map<int, ObjectAllocatorWrapper *>::iterator it = wrappers.begin();
        it != wrappers.end(); it++) {
     m_allocators[it->first] = it->second->get();

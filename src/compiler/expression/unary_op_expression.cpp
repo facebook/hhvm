@@ -330,7 +330,7 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_INCLUDE:
   case T_INCLUDE_ONCE:
   case T_REQUIRE:
-  case T_REQUIRE_ONCE:  et = Type::String;        rt = Type::Boolean;    break;
+  case T_REQUIRE_ONCE:  et = Type::String;        rt = Type::Variant;    break;
   case T_EVAL:
     et = Type::String;
     rt = NEW_TYPE(Any);

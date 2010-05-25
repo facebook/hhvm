@@ -2436,6 +2436,9 @@ void AnalysisResult::outputCPPMain() {
   cg.printInclude("<runtime/base/hphp.h>");
   cg.printInclude("<runtime/base/array/zend_array.h>");
   cg.printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
+  if (Option::PrecomputeLiteralStrings && m_stringLiterals.size() > 0) {
+    cg.printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
+  }
 
   cg.printf("\n");
   cg.printf("using namespace std;\n");
@@ -2907,23 +2910,31 @@ void AnalysisResult::outputCPPLiteralStringPrecomputation() {
     CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
 
     cg.printf("\n");
+    cg.printf("#ifndef __GENERATED_sys_literal_strings_h__\n");
+    cg.printf("#define __GENERATED_sys_literal_strings_h__\n");
     cg.printInclude("<runtime/base/hphp.h>");
     cg.printf("\n");
     cg.namespaceBegin();
     cg.indentBegin("class LiteralStringInitializer {\n");
     cg.printf("public:\n");
-    cg.indentBegin("LiteralStringInitializer() {\n");
+    cg.indentBegin("static void initialize() {\n");
     for (uint i = 0; i < bucketCount; i++) {
       cg.printf("init_%d();\n", i);
     }
+    if (Option::ScalarArrayCompression) {
+      cg.printf("StringSet &set = StaticString::TheStaticStringSet();\n");
+      cg.indentBegin("for (int i = 0; i < %d; i++) {\n",
+                     m_stringLiterals.size());
+      cg.printf("set.insert(literalStrings[i]);\n");
+      cg.indentEnd("}\n");
+    }
     cg.indentEnd("}\n");
-    map<string, pair<int, ScalarExpressionPtr> >::const_iterator it =
-      m_stringLiterals.begin();
     for (uint i = 0; i < bucketCount; i++) {
-      cg.printf("void init_%d();\n", i);
+      cg.printf("static void init_%d();\n", i);
     }
     cg.indentEnd("};\n");
     cg.namespaceEnd();
+    cg.printf("#endif // __GENERATED_sys_literal_strings_h__\n");
     f.close();
   }
   map<string, pair<int, ScalarExpressionPtr> >::const_iterator it =
@@ -2956,7 +2967,6 @@ void AnalysisResult::outputCPPLiteralStringPrecomputation() {
         outputHexBuffer(cg, "ls_cldata", ldata, ldataLen);
       }
       cg.printf("StaticString %s[%d];\n", lsname, m_stringLiterals.size());
-      cg.printf("static LiteralStringInitializer literalStringInitializer;\n");
     }
 
     cg.indentBegin("void LiteralStringInitializer::init_%d() {\n", i);

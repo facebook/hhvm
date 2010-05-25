@@ -611,6 +611,14 @@ void String::unserialize(std::istream &in,
   if (ch != delimiter1) {
     throw Exception("Expected '%c' but got '%c'", delimiter1, ch);
   }
+
+  StringSet &set = StaticString::TheStaticStringSet();
+  if (!set.empty()) {
+    StringSet::iterator it = set.find(*this);
+    if (it != set.end()) {
+      SmartPtr<StringData>::operator=(*it);
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -662,5 +670,7 @@ void StaticString::init(litstr s, int length) {
   m_data.assign(s, length, AttachLiteral);
 }
 
-///////////////////////////////////////////////////////////////////////////////
+StringSet StaticString::s_stringSet;
+
+//////////////////////////////////////////////////////////////////////////////
 }

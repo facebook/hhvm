@@ -940,7 +940,15 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
 
   if (!system) {
     cg.printf("\n");
-    cg.printf("void init_static_variables() { ScalarArrays::initialize();}\n");
+    cg.indentBegin("void init_static_variables() { \n");
+    if (Option::PrecomputeLiteralStrings && ar->getLiteralStringCount() > 0) {
+      cg.printf("LiteralStringInitializer::initialize();\n");
+    }
+    cg.printf("ScalarArrays::initialize();\n");
+    if (Option::PrecomputeLiteralStrings && ar->getLiteralStringCount() > 0) {
+      cg.printf("StaticString::TheStaticStringSet().clear();\n");
+    }
+    cg.indentEnd("}\n");
     cg.printf("static ThreadLocalSingleton<GlobalVariables> g_variables;\n");
 
     cg.printf("static IMPLEMENT_THREAD_LOCAL"

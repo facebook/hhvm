@@ -341,6 +341,8 @@ public:
    */
   void outputCPPSepExtensionImpl(const std::string &filename);
 
+  int getLiteralStringCount() { return m_stringLiterals.size(); }
+
 private:
   Package *m_package;
   bool m_parseOnDemand;

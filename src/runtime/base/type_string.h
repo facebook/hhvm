@@ -332,9 +332,12 @@ public:
     m_px = NULL;
   }
   StaticString& operator=(const StaticString &str);
+
+  static StringSet &TheStaticStringSet() { return s_stringSet; }
 private:
   void init(litstr s, int length);
   StringData m_data;
+  static StringSet s_stringSet;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

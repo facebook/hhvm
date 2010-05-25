@@ -33,7 +33,8 @@ public:
   FrameInjection(ThreadInfo *info,
                  const char *cls, const char *name, ObjectData *obj = NULL,
                  int fs = 0) : line(0), flags(fs), m_info(info),
-                 m_class(cls), m_name(name), m_object(obj) {
+                 m_class(cls), m_name(name),
+                 m_object(obj ? obj->getRoot() : NULL) {
     ASSERT(m_class);
     ASSERT(m_name);
     m_prev = m_info->m_top;

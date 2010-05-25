@@ -35,6 +35,7 @@ class DynamicObjectData : public ObjectData {
 
   virtual void destruct();
   virtual void setRoot(ObjectData *r);
+  virtual ObjectData *getRoot();
 
   virtual ObjectData* clone();
 

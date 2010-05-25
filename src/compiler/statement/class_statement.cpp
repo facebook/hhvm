@@ -357,6 +357,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
              if (!dyn && !idyn) {
                cg.printf("private: ObjectData* root;\n");
                cg.printf("public:\n");
+               cg.printf("virtual ObjectData *getRoot() { return root; }\n");
              }
           }
 

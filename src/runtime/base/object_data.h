@@ -111,7 +111,9 @@ class ObjectData : public Countable {
   ObjectData *dynCreate(const Array &params, bool init = true) {
     create();
     if (init) {
+      incRefCount();
       dynConstruct(params);
+      decRefCount();
     }
     return this;
   }
@@ -187,6 +189,7 @@ class ObjectData : public Countable {
   virtual void dump() const;
   virtual ObjectData *clone();
   virtual void setRoot(ObjectData *root) {}
+  virtual ObjectData *getRoot();
   /**
    * If __call is defined, then this gets overridden to call it.
    * Otherwise, it just throws if fatal else returns false.
@@ -244,6 +247,7 @@ public:
   Variant o_root_invoke_few_args(const char *s, int64 h, int count,
                           INVOKE_FEW_ARGS_DECL_ARGS);
   virtual void setRoot(ObjectData *r) { root = r; }
+  virtual ObjectData *getRoot() { return root; }
 protected: ObjectData *root;
 
 };

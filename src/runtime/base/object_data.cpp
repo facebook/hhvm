@@ -491,6 +491,8 @@ void ObjectData::cloneSet(ObjectData *clone) {
   }
 }
 
+ObjectData *ObjectData::getRoot() { return this; }
+
 Variant ObjectData::doCall(Variant v_name, Variant v_arguments, bool fatal) {
   return o_invoke_failed(o_getClassName(), v_name.toString().data(), fatal);
 }

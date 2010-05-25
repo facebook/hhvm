@@ -66,6 +66,9 @@ void DynamicObjectData::setRoot(ObjectData *r) {
     parent->setRoot(r);
   }
 }
+ObjectData *DynamicObjectData::getRoot() {
+  return root;
+}
 
 ObjectData* DynamicObjectData::clone() {
   ObjectData *clone = cloneImpl();

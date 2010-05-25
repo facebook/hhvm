@@ -236,7 +236,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg.printf("else alreadyRun = true;\n");
         cg.printf("if (!variables) variables = g;\n");
         cg.indentEnd("}\n");
-        cg.printf("PSEUDOMAIN_INJECTION(run_init::%s);\n",
+        cg.printf("PSEUDOMAIN_INJECTION(%s);\n",
                   origFuncName.c_str());
       } else {
         cg.printf("FUNCTION_INJECTION(%s);\n", origFuncName.c_str());

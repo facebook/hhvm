@@ -107,13 +107,12 @@ class ObjectData : public Countable {
   void bindThis(ThreadInfo *info);
 
   virtual void init() {}
-  ObjectData *create() { incRefCount(); init(); decRefCount(); return this;}
+  ObjectData *create() { CountableHelper h(this); init(); return this;}
   ObjectData *dynCreate(const Array &params, bool init = true) {
     create();
     if (init) {
-      incRefCount();
+      CountableHelper h(this);
       dynConstruct(params);
-      decRefCount();
     }
     return this;
   }

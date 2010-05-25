@@ -683,26 +683,27 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
                                      RuntimeOption::ThrowTooManyArguments));
   const char *sysret = (system && ret) ? "return " : "";
   const char *level = (system ? (constructor ? ", 2" : ", 1") : "");
-  const char *fullname = getFullName().c_str();
+  string fullname = getFullName();
   if (checkMissing && checkTooMany) {
     if (!variable && m_minParam == m_maxParam) {
       cg.printf("if (count != %d)"
                 " %sthrow_wrong_arguments(\"%s\", count, %d, %d%s);\n",
-                m_minParam, sysret, fullname, m_minParam, m_maxParam, level);
+                m_minParam, sysret, fullname.c_str(), m_minParam, m_maxParam,
+                level);
     } else {
       cg.printf("if (count < %d || count > %d)"
                 " %sthrow_wrong_arguments(\"%s\", count, %d, %d%s);\n",
-                m_minParam, m_maxParam, sysret, fullname,
+                m_minParam, m_maxParam, sysret, fullname.c_str(),
                 m_minParam, variable ? -1 : m_maxParam, level);
     }
   } else if (checkMissing) {
     cg.printf("if (count < %d)"
               " %sthrow_missing_arguments(\"%s\", count+1%s);\n",
-              m_minParam, sysret, fullname, level);
+              m_minParam, sysret, fullname.c_str(), level);
   } else if (checkTooMany) {
     cg.printf("if (count > %d)"
               " %sthrow_toomany_arguments(\"%s\", %d%s);\n",
-              m_maxParam, sysret, fullname, m_maxParam, level);
+              m_maxParam, sysret, fullname.c_str(), m_maxParam, level);
   }
 
   if (variable || getOptionalParamCount()) {

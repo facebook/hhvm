@@ -529,6 +529,8 @@ inline CVarRef ref(const ObjectOffset  &v) { return ref(v.lval());}
 ///////////////////////////////////////////////////////////////////////////////
 // misc functions
 
+bool class_exists(CStrRef class_name, bool autoload = true);
+
 Variant f_call_user_func_array(CVarRef function, CArrRef params);
 
 /**

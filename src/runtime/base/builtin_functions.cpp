@@ -48,6 +48,12 @@ hphp_const_char_iset &get_unmapped_functions() {
   return s_runtime_info->unmapped_functions;
 }
 
+bool class_exists(CStrRef class_name, bool autoload /* = true */) {
+  return f_call_user_func_array("class_exists",
+      CREATE_VECTOR2(class_name, autoload));
+}
+
+
 Variant f_call_user_func_array(CVarRef function, CArrRef params) {
   Array param_arr;
   if (!params.isNull()) {

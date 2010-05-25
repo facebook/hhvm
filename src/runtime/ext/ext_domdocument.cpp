@@ -3311,7 +3311,7 @@ void c_domdocument::t_normalizedocument() {
 
 bool c_domdocument::t_registernodeclass(CStrRef baseclass,
                                         CStrRef extendedclass) {
-  if (!f_class_exists(baseclass)) {
+  if (!class_exists(baseclass)) {
     raise_error("Class %s does not exist", baseclass.data());
     return false;
   }
@@ -3319,7 +3319,7 @@ bool c_domdocument::t_registernodeclass(CStrRef baseclass,
     raise_error("Class %s is not derived from DOMNode.", baseclass.data());
     return false;
   }
-  if (!f_class_exists(extendedclass)) {
+  if (!class_exists(extendedclass)) {
     raise_error("Class %s does not exist", extendedclass.data());
     return false;
   }

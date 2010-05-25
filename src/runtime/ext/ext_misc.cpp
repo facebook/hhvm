@@ -77,8 +77,7 @@ Variant f_constant(CStrRef name) {
       }
     }
     // taking care of volatile class
-    Array arg(CREATE_VECTOR1(className));
-    if (invoke("class_exists", arg)) {
+    if (class_exists(className)) {
       return get_class_constant(className.c_str(), constantName, false);
     } else {
       return null;
@@ -125,7 +124,7 @@ bool f_defined(CStrRef name) {
         className = parent_class;
       }
     }
-    if (f_class_exists(className)) { // taking care of volatile class
+    if (class_exists(className)) { // taking care of volatile class
       const ClassInfo::ClassInfo *info;
       for (const char *parentClass = className.data();
            parentClass && *parentClass;

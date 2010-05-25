@@ -582,7 +582,7 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
 static bool valid_statement_class(sp_PDOConnection dbh, CVarRef opt,
                                   String &clsname, Variant &ctor_args) {
   if (!opt.isArray() || !opt.toArray().exists(0) || !opt[0].isString() ||
-      !f_class_exists(opt[0])) {
+      !class_exists(opt[0])) {
     pdo_raise_impl_error
       (dbh, NULL, "HY000",
        "PDO::ATTR_STATEMENT_CLASS requires format array(classname, "
@@ -809,7 +809,7 @@ static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc, int64 mode,
         pdo_raise_impl_error(stmt->dbh, stmt, "HY000",
                              "classname must be a string");
       } else {
-        retval = f_class_exists(_argv[0]);
+        retval = class_exists(_argv[0]);
         if (retval) {
           stmt->fetch.clsname = _argv[0].toString();
         }
@@ -1786,7 +1786,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
       Variant val;
       fetch_value(stmt, val, i++, NULL);
       if (!val.isNull()) {
-        if (!f_class_exists(val)) {
+        if (!class_exists(val)) {
           stmt->fetch.clsname = "stdclass";
         } else {
           stmt->fetch.clsname = val.toString();
@@ -2684,7 +2684,7 @@ Variant c_pdostatement::t_fetchobject(CStrRef class_name /* = null_string */,
   if (class_name.isNull()) {
     m_stmt->fetch.clsname = "stdclass";
   }
-  if (!f_class_exists(m_stmt->fetch.clsname)) {
+  if (!class_exists(m_stmt->fetch.clsname)) {
     pdo_raise_impl_error(m_stmt->dbh, m_stmt, "HY000",
                          "Could not find user-supplied class");
     error = true;
@@ -2741,7 +2741,7 @@ Variant c_pdostatement::t_fetchall(int64 how /* = q_pdo_FETCH_USE_DEFAULT */,
     if (class_name.isNull()) {
       m_stmt->fetch.clsname = "stdclass";
     }
-    if (!f_class_exists(m_stmt->fetch.clsname)) {
+    if (!class_exists(m_stmt->fetch.clsname)) {
       pdo_raise_impl_error(m_stmt->dbh, m_stmt, "HY000",
                            "Could not find user-supplied class");
       error = 1;

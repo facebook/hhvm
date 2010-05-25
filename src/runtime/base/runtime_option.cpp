@@ -91,6 +91,7 @@ bool RuntimeOption::EnableEarlyFlush = true;
 bool RuntimeOption::ForceChunkedEncoding = false;
 int RuntimeOption::MaxPostSize;
 int RuntimeOption::UploadMaxFileSize;
+std::string RuntimeOption::UploadTmpDir;
 bool RuntimeOption::EnableFileUploads;
 bool RuntimeOption::LibEventSyncSend = true;
 bool RuntimeOption::ExpiresActive = true;
@@ -439,6 +440,7 @@ void RuntimeOption::Load(Hdf &config) {
     ForceChunkedEncoding = server["ForceChunkedEncoding"].getBool();
     MaxPostSize = (server["MaxPostSize"].getInt32(150)) * (1 << 20);
     UploadMaxFileSize = (server["UploadMaxFileSize"].getInt32(10)) * (1 << 20);
+    UploadTmpDir = server["UploadTmpDir"].getString("/tmp");
     ImageMemoryMaxBytes = server["ImageMemoryMaxBytes"].getInt32(0);
     if (ImageMemoryMaxBytes == 0) {
       ImageMemoryMaxBytes = UploadMaxFileSize * 2;
@@ -511,6 +513,7 @@ void RuntimeOption::Load(Hdf &config) {
         RuntimeOption::AllowedDirectories.push_back(resolved_path);
       }
     }
+    RuntimeOption::AllowedDirectories.push_back(UploadTmpDir);
     server["AllowedFiles"].get(AllowedFiles);
 
     EnableMemoryManager = server["EnableMemoryManager"].getBool(true);

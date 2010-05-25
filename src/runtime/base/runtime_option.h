@@ -89,6 +89,7 @@ public:
   static bool ForceChunkedEncoding;
   static int MaxPostSize;
   static int UploadMaxFileSize;
+  static std::string UploadTmpDir;
   static bool EnableFileUploads;
   static bool LibEventSyncSend;
   static bool ExpiresActive;

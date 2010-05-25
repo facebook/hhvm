@@ -809,7 +809,8 @@ void rfc1867PostHandler(Variant &post, Variant &files, int content_length,
         char path[PATH_MAX];
 
         // open a temporary file
-        snprintf(path, sizeof(path), "/tmp/XXXXXX");
+        snprintf(path, sizeof(path), "%s/XXXXXX",
+                 RuntimeOption::UploadTmpDir.c_str());
         fd = mkstemp(path);
         if (fd == -1) {
           Logger::Warning("Unable to open temporary file");

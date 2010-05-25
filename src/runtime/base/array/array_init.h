@@ -148,7 +148,7 @@ public:
     m_data = NULL;
     return ret;
   }
-
+  operator ArrayData *() { return create(); }
 private:
   ArrayData *m_data;
   KindOf m_kind;

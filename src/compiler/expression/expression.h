@@ -101,7 +101,9 @@ public:
 
   enum Order {
     FixOrder  = 1,
-    StashVars = 2
+    StashVars = 2,
+    StashKidVars = 4,
+    StashByRef = 8
   };
 
   enum Error {
@@ -174,9 +176,10 @@ public:
    */
   bool is(KindOf kindOf) const { return m_kindOf == kindOf;}
   KindOf getKindOf() const { return m_kindOf;}
-  virtual bool isScalar() const { return false;}
-  virtual bool isRefable(bool checkError = false) const { return false;}
-  virtual bool getScalarValue(Variant &value) { return false;}
+  virtual bool isTemporary() const { return false; }
+  virtual bool isScalar() const { return false; }
+  virtual bool isRefable(bool checkError = false) const { return false; }
+  virtual bool getScalarValue(Variant &value) { return false; }
   virtual ExpressionPtr clone() {
     ASSERT(false);
     return ExpressionPtr();
@@ -209,8 +212,7 @@ public:
 
   /**
    * Find other types that have been inferred for this expression,
-   * and apply combine them with inType to form a new, tighter
-   * type.
+   * and combine them with inType to form a new, tighter type.
    */
   TypePtr propagateTypes(AnalysisResultPtr ar, TypePtr inType);
 

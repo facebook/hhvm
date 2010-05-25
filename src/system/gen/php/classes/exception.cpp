@@ -3683,7 +3683,7 @@ void c_exception::t___construct(Variant v_message //  = ""
           }
         }
         {
-          Variant tmp7((x_array_shift(ref(lval(o_lval("trace", 0x0253015494C9CE77LL))))));
+          const Variant &tmp7((x_array_shift(ref(lval(o_lval("trace", 0x0253015494C9CE77LL))))));
           (v_frame = tmp7);
         }
       }

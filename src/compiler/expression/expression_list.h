@@ -80,7 +80,7 @@ public:
 private:
   bool optimize(AnalysisResultPtr ar);
   void outputCPPInternal(CodeGenerator &cg,
-                         AnalysisResultPtr ar, bool needed);
+                         AnalysisResultPtr ar, bool needed, bool pre);
 
   ExpressionPtrVec m_exps;
   int m_outputCount;

@@ -78,6 +78,10 @@ void FunctionCall::reset() {
   m_voidWrapper = false;
 }
 
+bool FunctionCall::isTemporary() const {
+  return m_funcScope && !m_funcScope->isRefReturn();
+}
+
 ConstructPtr FunctionCall::getNthKid(int n) const {
   switch (n) {
     case 0:

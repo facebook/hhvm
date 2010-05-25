@@ -77,6 +77,18 @@ ExpressionPtr UnaryOpExpression::clone() {
   return exp;
 }
 
+bool UnaryOpExpression::isTemporary() const {
+  switch (m_op) {
+  case '!':
+  case '+':
+  case '-':
+  case '~':
+  case T_ARRAY:
+    return true;
+  }
+  return false;
+}
+
 bool UnaryOpExpression::isScalar() const {
   switch (m_op) {
   case '!':
@@ -482,6 +494,16 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
+void UnaryOpExpression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
+                                       int state) {
+  if (hasCPPTemp() || m_op == T_FILE) return;
+  if (m_exp && !getLocalEffects() && m_op != '@') {
+    m_exp->preOutputStash(cg, ar, state);
+  } else {
+    Expression::preOutputStash(cg, ar, state);
+  }
+}
+
 bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                      int state) {
 
@@ -524,6 +546,15 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       }
       return fix_e1 || fix_en;
     }
+  }
+
+  if (m_op == '@' && !(state & FixOrder)) {
+    bool inExpression = ar->inExpression();
+    ar->setInExpression(false);
+    if (m_exp->preOutputCPP(cg, ar, state)) {
+      state |= FixOrder;
+    }
+    ar->setInExpression(inExpression);
   }
 
   return Expression::preOutputCPP(cg, ar, state);

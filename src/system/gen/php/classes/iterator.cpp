@@ -1558,9 +1558,10 @@ Variant c_appenditerator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::__call);
   INCALL_HELPER(v_func);
   {
-    Variant tmp3((o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0)));
-    Array tmp4((Array(ArrayInit(2, true).set(0, tmp3).set(1, v_func).create())));
-    return x_call_user_func_array(tmp4, toArray(v_params));
+    ArrayInit tmp3(2, true);
+    tmp3.set(0, o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0));
+    tmp3.set(1, v_func);
+    return x_call_user_func_array(Array(tmp3), toArray(v_params));
   }
 } /* function */
 /* SRC: classes/iterator.php line 209 */

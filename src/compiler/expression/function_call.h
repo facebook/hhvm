@@ -35,6 +35,7 @@ public:
   // overriding Expression::outputCPP to implement void wrapper
   virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
   virtual bool isRefable(bool checkError = false) const { return true;}
+  virtual bool isTemporary() const;
 
   virtual ConstructPtr getNthKid(int n) const;
   virtual void setNthKid(int n, ConstructPtr cp);

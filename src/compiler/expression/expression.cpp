@@ -470,13 +470,16 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
     }
   }
 
+  bool constRef = m_context & (RefValue|RefParameter) ||
+    isTemporary() && !dstType->isPrimitive();
+
   ar->wrapExpressionBegin(cg);
-  if (m_context & RefValue) {
+  if (constRef) {
     cg.printf("const ");
   }
   dstType->outputCPPDecl(cg, ar);
   std::string t = genCPPTemp(cg, ar);
-  const char *ref = isLvalue || (m_context & (RefValue|RefParameter)) ?
+  const char *ref = isLvalue || constRef ?
     "&" : "";
   /*
     Note that double parens are necessary:
@@ -529,7 +532,8 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   bool ret = (state & FixOrder) != 0;
-  int kidState = 0;
+  int kidState = (state & ~(StashKidVars|StashVars|FixOrder));
+  if (state & StashKidVars) kidState |= StashVars;
   int lastEffect = -1, i;
   int n = getKidCount();
   if (hasEffect()) {
@@ -544,10 +548,8 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       }
     }
     if (lastEffect >= 0 && j > 1) {
-      kidState = state | FixOrder;
+      kidState |= FixOrder;
       ret = true;
-    } else {
-      kidState = state & ~FixOrder;
     }
   }
 
@@ -558,25 +560,26 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       if (k && !k->isScalar()) {
         int s = kidState;
         if (i == n - 1 && skipLast) s = 0;
+        bool noEffect = false;
         if (m_kindOf == KindOfExpressionList) {
           cg.setItemIndex(i);
           ExpressionList *el = static_cast<ExpressionList*>(this);
           if (i >= el->getOutputCount()) {
-            /*
-              Extra arguments get output along with the call
-              itself. So there is nothing to enforce that
-              the extra args are evaluated before the call
-              unless we do this
-            */
-            s = kidState;
+            s = 0;
+            noEffect = true;
           }
         }
         if (k->is(KindOfSimpleVariable)) {
           skipLast = false;
         }
-        if (k->preOutputCPP(cg, ar, s)) {
+        if (k->preOutputCPP(cg, ar, i == lastEffect ? s | StashByRef : s)) {
           ret = true;
           if (!ar->inExpression()) break;
+        }
+        if (noEffect) {
+          k->outputCPPUnneeded(cg, ar);
+          k->setCPPTemp("0");
+          cg.printf(";\n");
         }
       }
     }

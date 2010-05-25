@@ -312,17 +312,21 @@ void ExpressionList::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
 
 bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                   int state) {
-  if (m_kind == ListKindParam) {
-    return Expression::preOutputCPP(cg, ar, state|StashVars);
+  if (m_kind == ListKindParam && !m_arrayElements) {
+    return Expression::preOutputCPP(cg, ar, state|StashKidVars);
   }
 
   bool inExpression = ar->inExpression();
   ar->setInExpression(false);
   bool ret = false;
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
-    if (m_exps[i]->preOutputCPP(cg, ar, 0)) {
-      ret = true;
-      break;
+  if (m_arrayElements) {
+    ret = Expression::preOutputCPP(cg, ar, state);
+  } else {
+    for (unsigned int i = 0; i < m_exps.size(); i++) {
+      if (m_exps[i]->preOutputCPP(cg, ar, 0)) {
+        ret = true;
+        break;
+      }
     }
   }
 
@@ -332,21 +336,28 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   if (!ret) return false;
 
   ar->wrapExpressionBegin(cg);
-  for (unsigned int i = 0, n = m_exps.size(); i < n; i++) {
-    ExpressionPtr e = m_exps[i];
-    e->preOutputCPP(cg, ar, state);
-    if (i < n - 1) {
-      if (e->outputCPPUnneeded(cg, ar)) {
-        cg.printf(";\n");
+  if (m_arrayElements) {
+    setCPPTemp(genCPPTemp(cg, ar));
+    outputCPPInternal(cg, ar, true, true);
+  } else {
+    for (unsigned int i = 0, n = m_exps.size(); i < n; i++) {
+      ExpressionPtr e = m_exps[i];
+      e->preOutputCPP(cg, ar, state);
+      if (i < n - 1) {
+        if (e->outputCPPUnneeded(cg, ar)) {
+          cg.printf(";\n");
+        }
+        e->setCPPTemp("/**/");
       }
-      e->setCPPTemp("/**/");
     }
   }
   return true;
 }
 
 void ExpressionList::outputCPPInternal(CodeGenerator &cg,
-                                       AnalysisResultPtr ar, bool needed) {
+                                       AnalysisResultPtr ar,
+                                       bool needed, bool pre) {
+  bool needsComma = false;
   if (m_arrayElements) {
     bool isVector = true;
     for (unsigned int i = 0; i < m_exps.size(); i++) {
@@ -357,13 +368,23 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
         break;
       }
     }
-    cg.printf("ArrayInit(%d, %s).", m_exps.size(), isVector ? "true" : "false");
+    cg.printf("ArrayInit");
+    if (pre) {
+      cg.printf(" %s", m_cppTemp.c_str());
+    }
+    cg.printf("(%d, %s)", m_exps.size(), isVector ? "true" : "false");
+    if (pre) cg.printf(";\n");
+    needsComma = true;
   }
-  bool needsComma = false;
+
   unsigned i = 0, s = m_exps.size();
   for ( ; i < s; i++) {
     cg.setItemIndex(i);
     if (ExpressionPtr exp = m_exps[i]) {
+      if (pre) {
+        exp->preOutputCPP(cg, ar, 0);
+        cg.printf("%s", m_cppTemp.c_str());
+      }
       if (needsComma) cg.printf(m_arrayElements ? "." : ", ");
       if (m_arrayElements) {
         ArrayPairExpressionPtr ap =
@@ -377,6 +398,9 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
         }
         exp->outputCPP(cg, ar);
         cg.printf(")");
+        if (pre) {
+          cg.printf(";\n");
+        }
         needsComma = true;
       } else if (m_kind != ListKindParam && (i + 1 < s || !needed)) {
         needsComma = exp->outputCPPUnneeded(cg, ar);
@@ -389,14 +413,14 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
   if (i && !needsComma) {
     cg.printf("id(0)");
   }
-  if (m_arrayElements) {
+  if (m_arrayElements && !pre) {
     cg.printf(".create()");
   }
 }
 
 void ExpressionList::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_kind == ListKindWrapped) cg.printf("(");
-  outputCPPInternal(cg, ar, true);
+  outputCPPInternal(cg, ar, true, false);
   if (m_kind == ListKindWrapped) cg.printf(")");
 }
 
@@ -409,7 +433,7 @@ bool ExpressionList::outputCPPUnneeded(CodeGenerator &cg,
     wrapped = preOutputCPP(cg, ar, 0);
   }
 
-  outputCPPInternal(cg, ar, false);
+  outputCPPInternal(cg, ar, false, false);
 
   if (!inExpression) {
     if (wrapped) cg.printf(";\n");

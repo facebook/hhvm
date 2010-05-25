@@ -3735,7 +3735,7 @@ void c_reflectionclass::t___construct(Variant v_name) {
   if (x_is_object(v_name)) {
     {
       {
-        Variant tmp11((x_get_class(v_name)));
+        const Variant &tmp11((x_get_class(v_name)));
         (v_name = tmp11);
       }
     }
@@ -3932,7 +3932,7 @@ p_reflectionmethod c_reflectionclass::t_getmethod(CVarRef v_name) {
   p_reflectionmethod v_ret;
 
   {
-    String tmp26((x_strtolower(toString(v_name))));
+    const String &tmp26((x_strtolower(toString(v_name))));
     (v_lname = tmp26);
   }
   {
@@ -4177,7 +4177,7 @@ Object c_reflectionclass::t_newinstance(int num_args, Array args /* = Array() */
   Array v_args;
 
   {
-    Array tmp57((func_get_args(num_args, Array(),args)));
+    const Array &tmp57((func_get_args(num_args, Array(),args)));
     (v_args = tmp57);
   }
   return x_hphp_create_object(toString(m_name), v_args);
@@ -6134,7 +6134,7 @@ Variant c_reflectionmethod::t_invoke(int num_args, CVarRef v_obj, Array args /* 
   Variant v_args;
 
   {
-    Array tmp90((func_get_args(num_args, Array(ArrayInit(1, true).set(0, v_obj).create()),args)));
+    const Array &tmp90((func_get_args(num_args, Array(ArrayInit(1, true).set(0, v_obj).create()),args)));
     (v_args = tmp90);
   }
   x_array_shift(ref(v_args));
@@ -6152,7 +6152,7 @@ Variant c_reflectionmethod::t_invokeargs(CVarRef v_obj, CVarRef v_args) {
     Variant tmp94((v_obj));
     String tmp95((toString(m_info.rvalAt("class", 0x45397FE5C82DBD12LL, true, true))));
     String tmp96((toString(m_info.rvalAt("name", 0x0BCDB293DC3CBDDCLL, true, true))));
-    Array tmp97((toArray(x_array_values(v_args))));
+    const Array &tmp97((toArray(x_array_values(v_args))));
     return x_hphp_invoke_method(tmp94, tmp95, tmp96, tmp97);
   }
 } /* function */
@@ -7815,7 +7815,7 @@ Variant c_reflectionfunction::t_invoke(int num_args, Array args /* = Array() */)
   Array v_args;
 
   {
-    Array tmp118((func_get_args(num_args, Array(),args)));
+    const Array &tmp118((func_get_args(num_args, Array(),args)));
     (v_args = tmp118);
   }
   {

@@ -33,6 +33,7 @@ public:
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   virtual void onParse(AnalysisResultPtr ar);
   virtual int getLocalEffects() const;
+  virtual bool isTemporary() const;
   virtual bool isRefable(bool checkError = false) const;
   virtual bool isScalar() const;
   virtual bool isThis() const;
@@ -45,6 +46,8 @@ public:
 
   virtual bool canonCompare(ExpressionPtr e) const;
   virtual ExpressionPtr unneededHelper(AnalysisResultPtr ar);
+  void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
+                      int state);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                     int state);
 protected:

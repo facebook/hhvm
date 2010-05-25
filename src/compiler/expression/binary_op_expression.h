@@ -30,6 +30,7 @@ public:
                      ExpressionPtr exp1, ExpressionPtr exp2, int op);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  virtual bool isTemporary() const;
   virtual int getLocalEffects() const;
   virtual bool isLiteralString() const;
   virtual std::string getLiteralString() const;

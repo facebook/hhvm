@@ -72,6 +72,24 @@ ExpressionPtr BinaryOpExpression::clone() {
   return exp;
 }
 
+bool BinaryOpExpression::isTemporary() const {
+  switch (m_op) {
+  case '+':
+  case '-':
+  case '*':
+  case '/':
+  case T_SL:
+  case T_SR:
+  case T_BOOLEAN_OR:
+  case T_BOOLEAN_AND:
+  case T_LOGICAL_OR:
+  case T_LOGICAL_AND:
+  case T_INSTANCEOF:
+    return true;
+  }
+  return false;
+}
+
 bool BinaryOpExpression::isLiteralString() const {
   if (m_op == '.') {
     return m_exp1->isLiteralString() && m_exp2->isLiteralString();
@@ -703,6 +721,7 @@ static bool castIfNeeded(TypePtr top, TypePtr arg,
 
 void BinaryOpExpression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                                         int state) {
+  if (hasCPPTemp() || isScalar()) return;
   if (m_op == '.' && (state & FixOrder)) {
     if (m_exp1) m_exp1->preOutputStash(cg, ar, state);
     if (m_exp2) m_exp2->preOutputStash(cg, ar, state);
@@ -766,6 +785,7 @@ static int outputConcatExprs(CodeGenerator *cg, AnalysisResultPtr ar,
   }
   if (cg) {
     bool is_void = !exp->getActualType();
+    bool close = false;
     if (buf) {
       exp->preOutputCPP(*cg, ar, 0);
       if (!is_void) {
@@ -774,12 +794,13 @@ static int outputConcatExprs(CodeGenerator *cg, AnalysisResultPtr ar,
       is_void = false;
     } else if (is_void) {
       if (exp->hasCPPTemp() || !exp->hasEffect()) {
-        cg->printf("\"\"");
-        return 1;
+        cg->printf("(id");
+        close = true;
       }
       cg->printf("(");
     }
     exp->outputCPP(*cg, ar);
+    if (close) cg->printf(")");
     if (is_void) {
       cg->printf(",\"\")");
     }

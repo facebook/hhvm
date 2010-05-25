@@ -65,8 +65,7 @@ vector<string> Option::DynamicClassPostfixes;
 set<string> Option::DynamicInvokeFunctions;
 set<string> Option::VolatileClasses;
 
-set<string> Option::HotFunctions;
-set<string> Option::ColdFunctions;
+map<string, string> Option::FunctionSections;
 
 #if defined(HPHP_OSS)
 string Option::IdPrefix = "___";
@@ -302,8 +301,7 @@ void Option::Load(Hdf &config) {
   config["DynamicMethodPrefix"].get(DynamicMethodPrefixes);
   config["DynamicInvokeFunctions"].get(DynamicInvokeFunctions);
   config["VolatileClasses"].get(VolatileClasses);
-  config["HotFunctions"].get(HotFunctions);
-  config["ColdFunctions"].get(ColdFunctions);
+  config["FunctionSections"].get(FunctionSections);
 
   ScalarArrayFileCount = config["ScalarArrayFileCount"].getByte(1);
   if (ScalarArrayFileCount <= 0) ScalarArrayFileCount = 1;

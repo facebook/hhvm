@@ -160,8 +160,7 @@ public:
   /**
    * Names of hot and cold functions to be marked in sources.
    */
-  static std::set<std::string> HotFunctions;
-  static std::set<std::string> ColdFunctions;
+  static std::map<std::string, std::string> FunctionSections;
 
   /**
    * A somewhat unique prefix for system identifiers.

@@ -96,11 +96,6 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
     }
   }
   while (t) {
-    if (t->flags & PseudoMain) {
-      // TODO should we generate require_once for pseudo mains?
-      t = t->m_prev;
-      continue;
-    }
     Array frame = Array::Create();
 
     if (t->m_prev) {
@@ -111,25 +106,30 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
       frame.set("line", t->m_prev->line);
     }
 
-    const char *c = strstr(t->m_name, "::");
-    if (c) {
-      frame.set("function", String(c + 2));
-      frame.set("class", String(t->m_class));
-      if (!t->m_object.isNull()) {
-        frame.set("object", t->m_object);
-        frame.set("type", "->");
+    if (t->flags & PseudoMain) {
+      frame.set("function", "include");
+      frame.set("args", Array::Create(t->getFileName()));
+    } else {
+      const char *c = strstr(t->m_name, "::");
+      if (c) {
+        frame.set("function", String(c + 2));
+        frame.set("class", String(t->m_class));
+        if (!t->m_object.isNull()) {
+          frame.set("object", t->m_object);
+          frame.set("type", "->");
+        } else {
+          frame.set("type", "::");
+        }
       } else {
-        frame.set("type", "::");
+        frame.set("function", t->m_name);
       }
-    } else {
-      frame.set("function", t->m_name);
-    }
 
-    Array args = t->getArgs();
-    if (!args.isNull()) {
-      frame.set("args", args);
-    } else {
-      frame.set("args", Array::Create());
+      Array args = t->getArgs();
+      if (!args.isNull()) {
+        frame.set("args", args);
+      } else {
+        frame.set("args", Array::Create());
+      }
     }
 
     bt.append(frame);

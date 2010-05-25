@@ -449,6 +449,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   FunctionScopePtr funcScope = m_funcScope.lock();
   ClassScopePtr scope = ar->getClassScope();
   string origFuncName;
+  string funcSection;
   ar->pushScope(funcScope);
 
   if (outputFFI(cg, ar)) return;
@@ -512,13 +513,12 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
       origFuncName = std::string(scope->getOriginalName()) +
                      "::" + m_originalName;
-      if (Option::HotFunctions.find(origFuncName) !=
-          Option::HotFunctions.end()) {
-        cg.printf(" __attribute((__section__(\".text.hot\")))");
-      } else if (Option::ColdFunctions.find(origFuncName) !=
-                 Option::ColdFunctions.end()) {
-        cg.printf(" __attribute((__section__(\".text.cold\")))");
+      funcSection = Option::FunctionSections[origFuncName];
+      if (!funcSection.empty()) {
+        cg.printf(" __attribute__ ((section (\".text.%s\")))",
+                  funcSection.c_str());
       }
+
       if (m_name == "__lval") {
         cg.printf(" &%s%s::___lval(",
                   Option::ClassPrefix, scope->getId().c_str());
@@ -538,13 +538,11 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       funcScope->outputCPPParamsDecl(cg, ar, m_params, false);
       cg.indentBegin(") {\n");
       if (m_modifiers->isStatic()) {
-        cg.printf("STATIC_METHOD_INJECTION(%s, %s::%s);\n",
-                  scope->getOriginalName(), scope->getOriginalName(),
-                  m_originalName.c_str());
+        cg.printf("STATIC_METHOD_INJECTION(%s, %s);\n",
+                  scope->getOriginalName(), origFuncName.c_str());
       } else {
-        cg.printf("INSTANCE_METHOD_INJECTION(%s, %s::%s);\n",
-                  scope->getOriginalName(), scope->getOriginalName(),
-                  m_originalName.c_str());
+        cg.printf("INSTANCE_METHOD_INJECTION(%s, %s);\n",
+                  scope->getOriginalName(), origFuncName.c_str());
       }
       if (Option::GenRTTIProfileData && m_params) {
         for (int i = 0; i < m_params->getCount(); i++) {

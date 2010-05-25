@@ -32,7 +32,7 @@ f('libxml_disable_entity_loader', Boolean,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c('SimpleXMLElement', null, array('ArrayAccess'),
+c('SimpleXMLElement', null, array('ArrayAccess', 'IteratorAggregate'),
   array(
     m(PublicMethod, '__construct', NULL,
       array('data' => String,
@@ -49,6 +49,7 @@ c('SimpleXMLElement', null, array('ArrayAccess'),
             'newvalue' => Variant)),
     m(PublicMethod, 'offsetUnset', NULL,
       array('index' => Variant)),
+    m(PublicMethod, 'getIterator', Variant),
     m(PublicMethod, 'xpath', Variant,
       array('path' => String)),
     m(PublicMethod, 'registerXPathNamespace', Boolean,
@@ -92,13 +93,15 @@ c('SimpleXMLElement', null, array('ArrayAccess'),
   "  xmlNodePtr m_node;\n".
   "  Array m_children;\n".
   "  Array m_attributes;\n".
+  "  String m_text_node_name;\n".
   "  bool m_is_text;\n".
-  "  virtual Array o_toArray() const;\n".
-  "  virtual Array o_toIterArray(const char *context);\n".
-  "  virtual Variant &___lval(Variant v_name);\n".
-  " private:\n".
   "  bool m_is_attribute;\n".
   "  bool m_is_children;\n".
+  "  bool m_is_root;\n".
+  "  virtual Array o_toArray() const;\n".
+  "  virtual int64 o_toInt64() const;\n".
+  "  virtual Variant &___lval(Variant v_name);\n".
+  " private:\n".
   "  xmlXPathContextPtr m_xpath;"
   );
 
@@ -106,3 +109,26 @@ c('LibXMLError', null, array(),
   array(m(PublicMethod, '__construct')),
   array(), // constants
   "");
+
+c('SimpleXMLElementIterator', null,
+  array('Iterator', 'Sweepable' => 'internal'),
+  array(
+    m(PublicMethod, '__construct', null),
+    m(PublicMethod, 'current', Variant),
+    m(PublicMethod, 'key',     Variant),
+    m(PublicMethod, 'next',    Variant),
+    m(PublicMethod, 'rewind',  Variant),
+    m(PublicMethod, 'valid',   Variant),
+  ),
+  // Constants
+  array(),
+  // Internal fields
+  "\n".
+  "public:\n".
+  "  void reset_iterator(c_simplexmlelement *parent);\n".
+  "\n".
+  "  c_simplexmlelement *m_parent;\n".
+  "  ArrayIter *m_iter1;\n".
+  "  ArrayIter *m_iter2;\n".
+  "  Array      m_temp;"
+ );

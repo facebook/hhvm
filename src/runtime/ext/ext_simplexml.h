@@ -43,6 +43,7 @@ class c_simplexmlelement : public ExtObjectData {
  public:
   BEGIN_CLASS_MAP(simplexmlelement)
   PARENT_CLASS(arrayaccess)
+  PARENT_CLASS(iteratoraggregate)
   END_CLASS_MAP(simplexmlelement)
   DECLARE_CLASS(simplexmlelement, SimpleXMLElement, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
@@ -56,6 +57,7 @@ class c_simplexmlelement : public ExtObjectData {
   public: Variant t_offsetget(CVarRef index);
   public: void t_offsetset(CVarRef index, CVarRef newvalue);
   public: void t_offsetunset(CVarRef index);
+  public: Variant t_getiterator();
   public: Variant t_xpath(CStrRef path);
   public: bool t_registerxpathnamespace(CStrRef prefix, CStrRef ns);
   public: Variant t_asxml(CStrRef filename = "");
@@ -84,13 +86,15 @@ class c_simplexmlelement : public ExtObjectData {
   xmlNodePtr m_node;
   Array m_children;
   Array m_attributes;
+  String m_text_node_name;
   bool m_is_text;
-  virtual Array o_toArray() const;
-  virtual Array o_toIterArray(const char *context, bool getRef = false);
-  virtual Variant &___lval(Variant v_name);
- private:
   bool m_is_attribute;
   bool m_is_children;
+  bool m_is_root;
+  virtual Array o_toArray() const;
+  virtual int64 o_toInt64() const;
+  virtual Variant &___lval(Variant v_name);
+ private:
   xmlXPathContextPtr m_xpath;
 };
 
@@ -118,6 +122,45 @@ class c_libxmlerror : public ExtObjectData {
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: virtual void destruct();
 
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class SimpleXMLElementIterator
+
+FORWARD_DECLARE_CLASS(simplexmlelementiterator);
+class c_simplexmlelementiterator : public ExtObjectData, public Sweepable {
+ public:
+  BEGIN_CLASS_MAP(simplexmlelementiterator)
+  PARENT_CLASS(iterator)
+  END_CLASS_MAP(simplexmlelementiterator)
+  DECLARE_CLASS(simplexmlelementiterator, SimpleXMLElementIterator, ObjectData)
+  DECLARE_INVOKES_FROM_EVAL
+  ObjectData* dynCreate(CArrRef params, bool init = true);
+
+  // need to implement
+  public: c_simplexmlelementiterator();
+  public: ~c_simplexmlelementiterator();
+  public: void t___construct();
+  public: Variant t_current();
+  public: Variant t_key();
+  public: Variant t_next();
+  public: Variant t_rewind();
+  public: Variant t_valid();
+  public: Variant t___destruct();
+
+  // implemented by HPHP
+  public: c_simplexmlelementiterator *create();
+  public: void dynConstruct(CArrRef Params);
+  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
+  public: virtual void destruct();
+
+public:
+  void reset_iterator(c_simplexmlelement *parent);
+
+  c_simplexmlelement *m_parent;
+  ArrayIter *m_iter1;
+  ArrayIter *m_iter2;
+  Array      m_temp;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

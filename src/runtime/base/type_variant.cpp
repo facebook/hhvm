@@ -1478,6 +1478,7 @@ ArrayIterPtr Variant::begin(const char *context /* = NULL */) const {
     }
     while (obj->o_instanceof("iteratoraggregate")) {
       Variant iterator = obj->o_invoke("getiterator", Array(), -1);
+      if (!iterator.isObject()) break;
       if (iterator.instanceof("iterator")) {
         return new ObjectArrayIter(iterator.getObjectData(), &iterator);
       }

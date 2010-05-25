@@ -111,6 +111,11 @@ static c_simplexmlelement *create_text(CObjRef doc, xmlNodePtr node,
   elem->m_doc = doc;
   elem->m_node = node->parent; // assign to parent, not node
   elem->m_children.set(0, value);
+  const char *name = (char *)node->name;
+  if (name) {
+    int namelen = xmlStrlen(node->name);
+    elem->m_text_node_name = String(name, namelen, CopyString);
+  }
   elem->m_is_text = true;
   elem->m_attributes = collect_attributes(node->parent, ns, is_prefix);
   return elem;
@@ -237,8 +242,11 @@ Variant f_simplexml_load_string(CStrRef data,
   if (!doc) {
     return false;
   }
-  return Object(create_element(Object(NEW(XmlDocWrapper)(doc)),
-                               root, ns, is_prefix));
+  c_simplexmlelement *ret = create_element(Object(NEW(XmlDocWrapper)(doc)),
+                                           root, ns, is_prefix);
+  ret->m_is_children = true;
+  ret->m_is_root = true;
+  return Object(ret);
 }
 
 Variant f_simplexml_load_file(CStrRef filename,
@@ -254,7 +262,7 @@ Variant f_simplexml_load_file(CStrRef filename,
 
 c_simplexmlelement::c_simplexmlelement()
     : m_node(NULL), m_is_text(false), m_is_attribute(false),
-      m_is_children(false), m_xpath(NULL) {
+      m_is_children(false), m_is_root(false), m_xpath(NULL) {
   m_children = Array::Create();
 }
 
@@ -442,6 +450,7 @@ Object c_simplexmlelement::t_children(CStrRef ns /* = "" */,
   elem->m_doc = m_doc;
   elem->m_node = m_node;
   elem->m_is_children = true;
+  elem->m_is_text = m_is_text;
   if (ns.empty()) {
     elem->m_children = m_children;
   } else {
@@ -477,7 +486,7 @@ Object c_simplexmlelement::t_children(CStrRef ns /* = "" */,
 }
 
 String c_simplexmlelement::t_getname() {
-  if (m_node && (!m_is_children || m_is_text)) {
+  if (m_node && (!m_is_children || m_is_root || m_is_text)) {
     int namelen = xmlStrlen(m_node->name);
     return String((char*)m_node->name, namelen, CopyString);
   }
@@ -735,67 +744,19 @@ Array c_simplexmlelement::o_toArray() const {
   return m_children;
 }
 
-Array c_simplexmlelement::o_toIterArray(const char *context,
-                                        bool getRef /* = false */) {
-  if (getRef) {
-    // same error in PHP
-    throw FatalErrorException("An iterator cannot be used with "
-                              "foreach by reference");
+int64 c_simplexmlelement::o_toInt64() const {
+  Variant prop;
+  ArrayIter iter(m_children);
+  if (iter) {
+    prop = iter.second();
   }
-  if (m_is_attribute) {
-    return m_attributes;
-  }
-  if (!m_is_children) {
-    c_simplexmlelement *elem = NEW(c_simplexmlelement)();
-    elem->m_doc = m_doc;
-    elem->m_node = m_node;
-    elem->m_children = m_children;
-    elem->m_attributes = m_attributes;
-    elem->m_is_text = true;
-    elem->m_is_children = true;
-    return CREATE_VECTOR1(Object(elem));
-  }
-  if (m_is_text) {
-    return Array::Create();
-  }
+  return prop.toString().toInt64();
+}
 
-  Array objs;
-  for (ArrayIter iter(m_children); iter; ++iter) {
-    if (iter.second().isObject()) {
-      c_simplexmlelement *elem = iter.second().toObject().
-        getTyped<c_simplexmlelement>();
-      if (elem->m_is_text) {
-        c_simplexmlelement *e = NEW(c_simplexmlelement)();
-        e->m_doc = elem->m_doc;
-        e->m_node = elem->m_node;
-        e->m_children = elem->m_children;
-        e->m_attributes = elem->m_attributes;
-        e->m_is_text = true;
-        e->m_is_children = true;
-        objs.set(iter.first(), Object(e));
-      } else {
-        objs.set(iter.first(), iter.second());
-      }
-    } else if (iter.second().isArray()) {
-      for (ArrayIter iter2(iter.second()); iter2; ++iter2) {
-        c_simplexmlelement *elem = iter2.second().toObject().
-          getTyped<c_simplexmlelement>();
-        if (elem->m_is_text) {
-          c_simplexmlelement *e = NEW(c_simplexmlelement)();
-          e->m_doc = elem->m_doc;
-          e->m_node = elem->m_node;
-          e->m_children = elem->m_children;
-          e->m_attributes = elem->m_attributes;
-          e->m_is_text = true;
-          e->m_is_children = true;
-          objs.append(Object(e));
-        } else {
-          objs.append(iter2.second());
-        }
-      }
-    }
-  }
-  return objs;
+Variant c_simplexmlelement::t_getiterator() {
+  c_simplexmlelementiterator *iter = NEW(c_simplexmlelementiterator)();
+  iter->reset_iterator(this);
+  return Object(iter);
 }
 
 Variant c_simplexmlelement::t___destruct() {
@@ -836,6 +797,139 @@ void c_simplexmlelement::t_offsetunset(CVarRef index) {
     return;
   }
   m_attributes.remove(index);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+c_simplexmlelementiterator::c_simplexmlelementiterator()
+    : m_parent(NULL), m_iter1(NULL), m_iter2(NULL) {
+}
+
+c_simplexmlelementiterator::~c_simplexmlelementiterator() {
+  delete m_iter1;
+  delete m_iter2;
+}
+
+void c_simplexmlelementiterator::reset_iterator(c_simplexmlelement *parent) {
+  delete m_iter1; m_iter1 = NULL;
+  delete m_iter2; m_iter2 = NULL;
+  m_parent = parent;
+
+  if (m_parent->m_is_attribute) {
+    m_iter1 = new ArrayIter(m_parent->m_attributes);
+    return;
+  }
+  // When I'm not an artificial node created by calling children(), iteration
+  // is on myself, not on m_children.
+  if (!m_parent->m_is_children) {
+    c_simplexmlelement *elem = NEW(c_simplexmlelement)();
+    elem->m_doc = m_parent->m_doc;
+    elem->m_node = m_parent->m_node;
+    elem->m_children = m_parent->m_children;
+    elem->m_attributes = m_parent->m_attributes;
+    elem->m_text_node_name = m_parent->m_text_node_name;
+
+    // hacky way of preventing infinite recursion
+    elem->m_is_text = true;
+    elem->m_is_children = true;
+
+    String name = elem->m_text_node_name;
+    if (name.empty()) name = elem->t_getname();
+    m_temp = CREATE_MAP1(name, Object(elem));
+
+    m_iter1 = new ArrayIter(m_temp);
+    return;
+  }
+  if (m_parent->m_is_text) {
+    return;
+  }
+
+  m_iter1 = new ArrayIter(m_parent->m_children);
+  if (!m_iter1->end() && m_iter1->second().isArray()) {
+    m_iter2 = new ArrayIter(m_iter1->second());
+  }
+}
+
+void c_simplexmlelementiterator::t___construct() {
+}
+
+Variant c_simplexmlelementiterator::t___destruct() {
+  return null;
+}
+
+Variant c_simplexmlelementiterator::t_current() {
+  if (m_iter1 == NULL) return null;
+  if (m_parent->m_is_attribute || !m_parent->m_is_children) {
+    return m_iter1->second();
+  }
+
+  ArrayIter *iter = m_iter2;
+  if (iter == NULL && m_iter1->second().isObject()) {
+    iter = m_iter1;
+  }
+
+  if (iter) {
+    c_simplexmlelement *elem = iter->second().toObject().
+      getTyped<c_simplexmlelement>();
+    if (elem->m_is_text) {
+      c_simplexmlelement *e = NEW(c_simplexmlelement)();
+      e->m_doc = elem->m_doc;
+      e->m_node = elem->m_node;
+      e->m_children = elem->m_children;
+      e->m_attributes = elem->m_attributes;
+      e->m_is_text = true;
+      e->m_is_children = true;
+      return Object(e);
+    }
+    return iter->second();
+  }
+
+  ASSERT(false);
+  return null;
+}
+
+Variant c_simplexmlelementiterator::t_key() {
+  if (m_iter1) {
+    return m_iter1->first();
+  }
+  return null;
+}
+
+Variant c_simplexmlelementiterator::t_next() {
+  if (m_iter1 == NULL) return null;
+  if (m_parent->m_is_attribute || !m_parent->m_is_children) {
+    m_iter1->next();
+    return null;
+  }
+
+  if (m_iter2) {
+    m_iter2->next();
+    if (!m_iter2->end()) {
+      return null;
+    }
+    delete m_iter2; m_iter2 = NULL;
+  }
+  m_iter1->next();
+  while (!m_iter1->end()) {
+    if (m_iter1->second().isArray()) {
+      m_iter2 = new ArrayIter(m_iter1->second());
+      break;
+    }
+    if (m_iter1->second().isObject()) {
+      break;
+    }
+    m_iter1->next();
+  }
+  return null;
+}
+
+Variant c_simplexmlelementiterator::t_rewind() {
+  reset_iterator(m_parent);
+  return null;
+}
+
+Variant c_simplexmlelementiterator::t_valid() {
+  return m_iter1 && !m_iter1->end();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

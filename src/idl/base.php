@@ -217,7 +217,7 @@ function c($name, $parent = null, $interfaces = array(),
   $interface_bases = array();
   if ($interfaces) {
     foreach ($interfaces as $clsname => $attr) {
-      if (empty($clsname)) {
+      if (!is_string($clsname)) {
         $interface_bases[] = $attr;
       } else if ($attr == 'internal') {
         $internal_bases[] = $clsname;

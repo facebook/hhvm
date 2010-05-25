@@ -7182,6 +7182,339 @@ Variant cw_domentityreference$os_constant(const char *s) {
 Variant cw_domentityreference$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
   return c_domentityreference::os_invoke(c, s, params, -1, fatal);
 }
+Object co_simplexmlelementiterator(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_simplexmlelementiterator)())->dynCreate(params, init));
+}
+Variant c_simplexmlelementiterator::os_getInit(const char *s, int64 hash) {
+  return c_ObjectData::os_getInit(s, hash);
+}
+Variant c_simplexmlelementiterator::os_get(const char *s, int64 hash) {
+  return c_ObjectData::os_get(s, hash);
+}
+Variant &c_simplexmlelementiterator::os_lval(const char *s, int64 hash) {
+  return c_ObjectData::os_lval(s, hash);
+}
+void c_simplexmlelementiterator::o_get(Array &props) const {
+  c_ObjectData::o_get(props);
+}
+bool c_simplexmlelementiterator::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_simplexmlelementiterator::o_existsPublic(prop, phash);
+}
+bool c_simplexmlelementiterator::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+bool c_simplexmlelementiterator::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+Variant c_simplexmlelementiterator::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+  return c_simplexmlelementiterator::o_getPublic(prop, phash, error);
+}
+Variant c_simplexmlelementiterator::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+  return c_ObjectData::o_getPublic(s, hash, error);
+}
+Variant c_simplexmlelementiterator::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+  return o_getPublic(s, hash, error);
+}
+Variant c_simplexmlelementiterator::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+  return c_simplexmlelementiterator::o_setPublic(prop, phash, v, forInit);
+}
+Variant c_simplexmlelementiterator::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+  return c_ObjectData::o_setPublic(s, hash, v, forInit);
+}
+Variant c_simplexmlelementiterator::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+  return o_setPublic(s, hash, v, forInit);
+}
+Variant& c_simplexmlelementiterator::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+  return c_simplexmlelementiterator::o_lvalPublic(prop, phash);
+}
+Variant& c_simplexmlelementiterator::o_lvalPublic(CStrRef s, int64 hash) {
+  return c_ObjectData::o_lvalPublic(s, hash);
+}
+Variant& c_simplexmlelementiterator::o_lvalPrivate(CStrRef s, int64 hash) {
+  return o_lvalPublic(s, hash);
+}
+Variant c_simplexmlelementiterator::os_constant(const char *s) {
+  return c_ObjectData::os_constant(s);
+}
+IMPLEMENT_CLASS(simplexmlelementiterator)
+c_simplexmlelementiterator *c_simplexmlelementiterator::create() {
+  CountableHelper h(this);
+  init();
+  t___construct();
+  return this;
+}
+ObjectData *c_simplexmlelementiterator::dynCreate(CArrRef params, bool construct /* = true */) {
+  init();
+  if (construct) {
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
+    (t___construct());
+  }
+  return this;
+}
+void c_simplexmlelementiterator::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
+  (t___construct());
+}
+void c_simplexmlelementiterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  (t___construct(), null);
+}
+void c_simplexmlelementiterator::destruct() {
+  if (!inCtorDtor()) {
+    incRefCount();
+    try {
+      t___destruct();
+    } catch (...) { handle_destructor_exception();}
+  }
+}
+ObjectData *c_simplexmlelementiterator::cloneImpl() {
+  c_simplexmlelementiterator *obj = NEW(c_simplexmlelementiterator)();
+  cloneSet(obj);
+  return obj;
+}
+void c_simplexmlelementiterator::cloneSet(c_simplexmlelementiterator *clone) {
+  ObjectData::cloneSet(clone);
+}
+Variant c_simplexmlelementiterator::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 15) {
+    case 1:
+      HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("key", 0, 1);
+        return (t_key());
+      }
+      break;
+    case 3:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        return (t___destruct());
+      }
+      break;
+    case 4:
+      HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("valid", 0, 1);
+        return (t_valid());
+      }
+      break;
+    case 8:
+      HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("next", 0, 1);
+        return (t_next());
+      }
+      break;
+    case 10:
+      HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
+        return (t_rewind());
+      }
+      break;
+    case 12:
+      HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("current", 0, 1);
+        return (t_current());
+      }
+      break;
+    case 15:
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
+        return (t___construct(), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
+}
+Variant c_simplexmlelementiterator::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 15) {
+    case 1:
+      HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("key", 0, 1);
+        return (t_key());
+      }
+      break;
+    case 3:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        return (t___destruct());
+      }
+      break;
+    case 4:
+      HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("valid", 0, 1);
+        return (t_valid());
+      }
+      break;
+    case 8:
+      HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("next", 0, 1);
+        return (t_next());
+      }
+      break;
+    case 10:
+      HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
+        return (t_rewind());
+      }
+      break;
+    case 12:
+      HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("current", 0, 1);
+        return (t_current());
+      }
+      break;
+    case 15:
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
+        return (t___construct(), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+}
+Variant c_simplexmlelementiterator::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
+}
+Variant c_simplexmlelementiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 15) {
+    case 1:
+      HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("key", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_key());
+      }
+      break;
+    case 3:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___destruct());
+      }
+      break;
+    case 4:
+      HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("valid", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_valid());
+      }
+      break;
+    case 8:
+      HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("next", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_next());
+      }
+      break;
+    case 10:
+      HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_rewind());
+      }
+      break;
+    case 12:
+      HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("current", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_current());
+      }
+      break;
+    case 15:
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_simplexmlelementiterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+Variant cw_simplexmlelementiterator$os_getInit(const char *s) {
+  return c_simplexmlelementiterator::os_getInit(s, -1);
+}
+Variant cw_simplexmlelementiterator$os_get(const char *s) {
+  return c_simplexmlelementiterator::os_get(s, -1);
+}
+Variant &cw_simplexmlelementiterator$os_lval(const char *s) {
+  return c_simplexmlelementiterator::os_lval(s, -1);
+}
+Variant cw_simplexmlelementiterator$os_constant(const char *s) {
+  return c_simplexmlelementiterator::os_constant(s);
+}
+Variant cw_simplexmlelementiterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
+  return c_simplexmlelementiterator::os_invoke(c, s, params, -1, fatal);
+}
 Object co_datetimezone(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_datetimezone)())->dynCreate(params, init));
 }
@@ -13041,6 +13374,12 @@ Variant c_simplexmlelement::o_invoke(const char *s, CArrRef params, int64 hash, 
         return (t_offsetexists(params[0]));
       }
       break;
+    case 3:
+      HASH_GUARD(0x570B2E1232A12503LL, getiterator) {
+        if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
+        return (t_getiterator());
+      }
+      break;
     case 15:
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
@@ -13178,6 +13517,12 @@ Variant c_simplexmlelement::o_invoke_few_args(const char *s, int64 hash, int cou
       HASH_GUARD(0x3E6BCFB9742FC700LL, offsetexists) {
         if (count != 1) return throw_wrong_arguments("offsetexists", count, 1, 1, 1);
         return (t_offsetexists(a0));
+      }
+      break;
+    case 3:
+      HASH_GUARD(0x570B2E1232A12503LL, getiterator) {
+        if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
+        return (t_getiterator());
       }
       break;
     case 15:
@@ -13333,6 +13678,20 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
           (*it)->eval(env);
         }
         return (t_offsetexists(a0));
+      }
+      break;
+    case 3:
+      HASH_GUARD(0x570B2E1232A12503LL, getiterator) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getiterator());
       }
       break;
     case 15:
@@ -26058,6 +26417,9 @@ Variant get_builtin_class_var_init(const char *s, const char *var) {
     case 30:
       HASH_GET_CLASS_VAR_INIT(0x3DB8FB455A602A1ELL, datetime);
       break;
+    case 43:
+      HASH_GET_CLASS_VAR_INIT(0x7E66D362EAB5BF2BLL, simplexmlelementiterator);
+      break;
     case 49:
       HASH_GET_CLASS_VAR_INIT(0x7A394042E7488231LL, filteriterator);
       break;
@@ -26274,6 +26636,9 @@ Object create_builtin_object(const char *s, CArrRef params, bool init /* = true 
     case 30:
       HASH_CREATE_OBJECT(0x3DB8FB455A602A1ELL, datetime);
       break;
+    case 43:
+      HASH_CREATE_OBJECT(0x7E66D362EAB5BF2BLL, simplexmlelementiterator);
+      break;
     case 49:
       HASH_CREATE_OBJECT(0x7A394042E7488231LL, filteriterator);
       break;
@@ -26489,6 +26854,9 @@ Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef 
       break;
     case 30:
       HASH_INVOKE_STATIC_METHOD(0x3DB8FB455A602A1ELL, datetime);
+      break;
+    case 43:
+      HASH_INVOKE_STATIC_METHOD(0x7E66D362EAB5BF2BLL, simplexmlelementiterator);
       break;
     case 49:
       HASH_INVOKE_STATIC_METHOD(0x7A394042E7488231LL, filteriterator);
@@ -26711,6 +27079,9 @@ Variant get_builtin_static_property(const char *s, const char *prop) {
     case 30:
       HASH_GET_STATIC_PROPERTY(0x3DB8FB455A602A1ELL, datetime);
       break;
+    case 43:
+      HASH_GET_STATIC_PROPERTY(0x7E66D362EAB5BF2BLL, simplexmlelementiterator);
+      break;
     case 49:
       HASH_GET_STATIC_PROPERTY(0x7A394042E7488231LL, filteriterator);
       break;
@@ -26927,6 +27298,9 @@ Variant *get_builtin_static_property_lv(const char *s, const char *prop) {
     case 30:
       HASH_GET_STATIC_PROPERTY_LV(0x3DB8FB455A602A1ELL, datetime);
       break;
+    case 43:
+      HASH_GET_STATIC_PROPERTY_LV(0x7E66D362EAB5BF2BLL, simplexmlelementiterator);
+      break;
     case 49:
       HASH_GET_STATIC_PROPERTY_LV(0x7A394042E7488231LL, filteriterator);
       break;
@@ -27142,6 +27516,9 @@ Variant get_builtin_class_constant(const char *s, const char *constant, bool fat
       break;
     case 30:
       HASH_GET_CLASS_CONSTANT(0x3DB8FB455A602A1ELL, datetime);
+      break;
+    case 43:
+      HASH_GET_CLASS_CONSTANT(0x7E66D362EAB5BF2BLL, simplexmlelementiterator);
       break;
     case 49:
       HASH_GET_CLASS_CONSTANT(0x7A394042E7488231LL, filteriterator);

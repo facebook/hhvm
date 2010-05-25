@@ -54,11 +54,13 @@ install: $(EXT) lists
 	$(V)touch ../compiler/builtin_symbols.cpp
 	$(V)cp test_ext_$<.h test_ext_$<.cpp ../test/
 	$(REPO_ADD) ../test/test_ext_$<.h ../test/test_ext_$<.cpp
+	$(V)php ../../bin/license.php
 
 # run this to add or remove a function from an existing idl file
 update: $(EXT) lists
 	$(V)cp $<.inc ../system/
 	$(V)touch ../compiler/builtin_symbols.cpp
+	$(V)php ../../bin/license.php
 
 remove:
 	@echo 'Removing extension index...'

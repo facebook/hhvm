@@ -101,6 +101,7 @@ static int fb_serialized_size(CVarRef thing, int depth, int *bytes) {
   case KindOfInt64:     *bytes = 1 + INT_SIZE(thing.toInt64()); break;
   case KindOfDouble:    *bytes = 9; break;     /* type + sizeof(double) */
   case LiteralString:
+  case KindOfStaticString:
   case KindOfString:
     {
       int len = thing.toString().size();
@@ -200,6 +201,7 @@ static bool fb_serialize_into_buffer(CVarRef thing, char *buff, int *pos) {
     (*pos) += 8;
     break;
   case LiteralString:
+  case KindOfStaticString:
   case KindOfString:
     fb_serialize_string_into_buffer(thing.toString(), buff, pos);
     break;

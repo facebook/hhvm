@@ -29,6 +29,7 @@ public:
 
   Variant key() const {
     switch (m_type) {
+    case KindOfStaticString:
     case KindOfString:
       return Variant(m_data.pstr);
     case KindOfInt64:
@@ -58,7 +59,7 @@ public:
     return m_data.num;
   }
   StringData *getStringData() const {
-    ASSERT(m_type == KindOfString);
+    ASSERT(m_type == KindOfString || m_type == KindOfStaticString);
     return m_data.pstr;
   }
   litstr getLiteralString() const {

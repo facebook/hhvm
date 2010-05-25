@@ -63,6 +63,7 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized)
       break;
     }
   case LiteralString:
+  case KindOfStaticString:
   case KindOfString:
     {
       String s = source.toString();
@@ -300,6 +301,7 @@ ThreadSharedVariantToIntMap::const_iterator
 ThreadSharedVariant::lookup(CVarRef key) {
   ThreadSharedVariantToIntMap::const_iterator it;
   switch (key.getType()) {
+  case KindOfStaticString:
   case KindOfString: {
     ThreadSharedVariant svk(key.getStringData());
     it = map().find(&svk);

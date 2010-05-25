@@ -322,7 +322,7 @@ public:
   friend class StringUtil;
   friend class LiteralStringInitializer;
 
-  StaticString() { m_px = &m_data; m_px->setStatic(); }
+  StaticString() { }
   StaticString(litstr s);
   StaticString(litstr s, int length); // binary string
   StaticString(std::string s);

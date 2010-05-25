@@ -471,6 +471,7 @@ Variant Array::rvalAt(CVarRef key, int64 prehash /* = -1 */,
   case LiteralString:
     key.escalateString();
     // fall through
+  case KindOfStaticString:
   case KindOfString: {
     int64 n;
     if (key.m_data.pstr->isStrictlyInteger(n)) {

@@ -115,8 +115,8 @@ class Variant {
   Variant(double  v) : _count(0), m_type(KindOfDouble ) { m_data.dbl = v;}
   Variant(litstr  v) : _count(0), m_type(LiteralString) { m_data.str = v;}
 
-  Variant(const std::string & stds);
-  Variant(const StaticString & ss);
+  Variant(const std::string & v);
+  Variant(const StaticString & v);
 
   Variant(CStrRef v);
   Variant(CArrRef v);
@@ -150,12 +150,12 @@ class Variant {
    * prove that m_type will have a certain value at a given point in time
    */
   const String & asCStrRef() const {
-    ASSERT(m_type == KindOfString);
+    ASSERT(m_type == KindOfString || m_type == KindOfStaticString);
     return *(const String*)(this);
   }
 
   String & asStrRef() {
-    ASSERT(m_type == KindOfString);
+    ASSERT(m_type == KindOfString || m_type == KindOfStaticString);
     return *(String*)(this);
   }
 
@@ -205,7 +205,9 @@ class Variant {
   }
   bool isString() const {
     DataType type = getType();
-    return type == LiteralString || type == KindOfString;
+    return type == LiteralString ||
+           type == KindOfStaticString ||
+           type == KindOfString;
   }
   bool isInteger() const;
   bool isNumeric(bool checkString = false) const;
@@ -762,7 +764,7 @@ class Variant {
     return m_type == KindOfVariant ? m_data.pvar->m_data.str : m_data.str;
   }
   StringData *getStringData() const {
-    ASSERT(getType() == KindOfString);
+    ASSERT(getType() == KindOfString || getType() == KindOfStaticString);
     return m_type == KindOfVariant ? m_data.pvar->m_data.pstr : m_data.pstr;
   }
   ArrayData *getArrayData() const {
@@ -956,7 +958,8 @@ class Variant {
     if (isNull() ||
         (m_type == KindOfBoolean && !toBoolean()) ||
         (m_type == LiteralString && !*getLiteralString()) ||
-        (m_type == KindOfString && getStringData()->empty())) {
+        (m_type == KindOfString && getStringData()->empty()) ||
+        (m_type == KindOfStaticString && getStringData()->empty())) {
       unset();
       set(toArray());
     }

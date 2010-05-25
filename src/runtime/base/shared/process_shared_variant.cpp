@@ -56,6 +56,7 @@ ProcessSharedVariant::ProcessSharedVariant(CVarRef source,
       break;
     }
   case LiteralString:
+  case KindOfStaticString:
   case KindOfString:
     {
       String s = source.toString();

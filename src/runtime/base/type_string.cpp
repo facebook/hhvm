@@ -663,11 +663,15 @@ StaticString& StaticString::operator=(const StaticString &str) {
   // should never use a StaticString on the left-hand side of
   // assignment. A StaticString can only be initialized by a
   // StaticString constructor or StaticString::init().
+  ASSERT(false);
   return *this;
 }
 
 void StaticString::init(litstr s, int length) {
   m_data.assign(s, length, AttachLiteral);
+  ASSERT(!m_px);
+  String::operator=(&m_data);
+  m_px->setStatic();
 }
 
 StringSet StaticString::s_stringSet;

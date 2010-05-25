@@ -323,13 +323,13 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
           // cannot be declared as a class variable (var $val), $this->val
           // refers to a non-static class variable and has to use get/lval.
           uint64 hash = hash_string(propName);
+          int stringId;
           cg.printf("%s(", func.c_str());
-          int stringId = ar->getLiteralStringId(propName);
           if (Option::PrecomputeLiteralStrings &&
-              stringId >= 0 &&
               cg.getOutput() != CodeGenerator::SystemCPP &&
               cg.getContext() != CodeGenerator::CppConstantsDecl &&
-              cg.getContext() != CodeGenerator::CppClassConstantsImpl) {
+              cg.getContext() != CodeGenerator::CppClassConstantsImpl &&
+              (stringId = ar->getLiteralStringId(propName)) >= 0) {
             cg.printf("LITSTR(%d, \"%s\")", stringId, propName);
           } else {
             cg.printf("\"%s\"", propName);
@@ -362,13 +362,13 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
         cg.printf(op);
       }
       uint64 hash = hash_string(propName);
+      int stringId;
       cg.printf("%s(", func.c_str());
-      int stringId = ar->getLiteralStringId(propName);
       if (Option::PrecomputeLiteralStrings &&
-          stringId >= 0 &&
           cg.getOutput() != CodeGenerator::SystemCPP &&
           cg.getContext() != CodeGenerator::CppConstantsDecl &&
-          cg.getContext() != CodeGenerator::CppClassConstantsImpl) {
+          cg.getContext() != CodeGenerator::CppClassConstantsImpl &&
+          (stringId = ar->getLiteralStringId(propName)) >= 0) {
         cg.printf("LITSTR(%d, \"%s\")", stringId, propName);
       } else {
         cg.printf("\"%s\"", propName);

@@ -276,6 +276,7 @@ class HphpMap {
         hash = hash_string(d, strlen(d));
       }
       break;
+    case KindOfStaticString:
     case KindOfString:
       {
         StringData *st = s.getStringData();
@@ -305,9 +306,11 @@ class HphpMap {
       }
       break;
     case LiteralString:
+    case KindOfStaticString:
     case KindOfString:
       switch (t2) {
       case LiteralString:
+      case KindOfStaticString:
       case KindOfString:
         break;
       default:

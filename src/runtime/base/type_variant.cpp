@@ -48,20 +48,16 @@ Variant::Variant(CStrRef v) : _count(0), m_type(KindOfString) {
 
 Variant::Variant(const std::string & v) : _count(0), m_type(KindOfString) {
   StringData *s = NEW(StringData)(v.c_str(), v.size(), CopyString);
-  if (s) {
-    m_data.pstr = s;
-    s->incRefCount();
-  } else {
-    m_data.num = 0;
-    m_type = KindOfNull;
-  }
+  ASSERT(s);
+  m_data.pstr = s;
+  s->incRefCount();
 }
 
-Variant::Variant(const StaticString & v) : _count(0), m_type(KindOfString) {
+Variant::Variant(const StaticString & v) :
+  _count(0), m_type(KindOfStaticString) {
   StringData *s = v.get();
   if (s) {
     m_data.pstr = s;
-    s->incRefCount();
   } else {
     m_data.num = 0;
     m_type = KindOfNull;
@@ -481,6 +477,7 @@ DataType Variant::toNumeric(int64 &ival, double &dval,
       }
     }
     break;
+  case KindOfStaticString:
   case KindOfString:
     if (checkString) {
       return m_data.pstr->toNumeric(ival, dval);
@@ -1311,6 +1308,7 @@ Variant Variant::operator~() const {
   case KindOfDouble:
     return ~(int64)(toDouble());
   case LiteralString:
+  case KindOfStaticString:
   case KindOfString:
     return ~toString();
   default:
@@ -1389,6 +1387,7 @@ Variant &Variant::operator++() {
   case KindOfInt64:  set(toInt64() + 1);  break;
   case KindOfDouble: set(toDouble() + 1); break;
   case LiteralString:
+  case KindOfStaticString:
   case KindOfString:
     {
       String s = toString();
@@ -1433,6 +1432,7 @@ Variant &Variant::operator--() {
   case KindOfInt64:  set(toInt64() - 1);  break;
   case KindOfDouble: set(toDouble() - 1); break;
   case LiteralString:
+  case KindOfStaticString:
   case KindOfString:
     {
       String s = toString();
@@ -1528,6 +1528,7 @@ bool Variant::toBooleanHelper() const {
   case KindOfNull:    return false;
   case KindOfDouble:  return m_data.dbl != 0;
   case LiteralString: return StringData(m_data.str).toBoolean();
+  case KindOfStaticString:
   case KindOfString:  return m_data.pstr->toBoolean();
   case KindOfArray:   return !m_data.parr->empty();
   case KindOfObject:  return m_data.pobj != NULL;
@@ -1546,6 +1547,7 @@ int64 Variant::toInt64Helper(int base /* = 10 */) const {
     return (m_data.dbl > LONG_MAX) ? (uint64)m_data.dbl : (int64)m_data.dbl;
   }
   case LiteralString: return StringData(m_data.str).toInt64(base);
+  case KindOfStaticString:
   case KindOfString:  return m_data.pstr->toInt64(base);
   case KindOfArray:   return m_data.parr->empty() ? 0 : 1;
   case KindOfObject:  return m_data.pobj ? m_data.pobj->o_toInt64() : 0;
@@ -1562,6 +1564,7 @@ double Variant::toDouble() const {
   case KindOfNull:    return 0.0;
   case KindOfDouble:  return m_data.dbl;
   case LiteralString: return StringData(m_data.str).toDouble();
+  case KindOfStaticString:
   case KindOfString:  return m_data.pstr->toDouble();
   case KindOfVariant: return m_data.pvar->toDouble();
   default:
@@ -1576,6 +1579,7 @@ String Variant::toString() const {
   case KindOfBoolean: return m_data.num ? "1" : "";
   case KindOfDouble:  return m_data.dbl;
   case LiteralString: return m_data.str;
+  case KindOfStaticString:
   case KindOfString:  return m_data.pstr;
   case KindOfArray:   return "Array";
   case KindOfObject:  return m_data.pobj->t___tostring();
@@ -1591,6 +1595,7 @@ Array Variant::toArray() const {
   case KindOfNull:    return Array::Create();
   case KindOfInt64:   return Array::Create(m_data.num);
   case LiteralString: return Array::Create(m_data.str);
+  case KindOfStaticString:
   case KindOfString:  return Array::Create(String(m_data.pstr));
   case KindOfArray:   return m_data.parr;
   case KindOfObject:  return m_data.pobj->o_toArray();
@@ -1615,6 +1620,7 @@ Object Variant::toObject() const {
   case KindOfInt64:
   case KindOfDouble:
   case LiteralString:
+  case KindOfStaticString:
   case KindOfString:
     {
       c_stdclass *obj = NEW(c_stdclass)();
@@ -1630,7 +1636,7 @@ Object Variant::toObject() const {
 }
 
 Variant Variant::toKey() const {
-  if (m_type == KindOfString) {
+  if (m_type == KindOfString || m_type == KindOfStaticString) {
     int64 n;
     if (m_data.pstr->isStrictlyInteger(n)) {
       return n;
@@ -1771,6 +1777,7 @@ bool Variant::same(CVarRef v2) const {
     }
     break;
   case LiteralString:
+  case KindOfStaticString:
   case KindOfString:
     return v2.isString() && equal(v2);
   case KindOfArray:
@@ -1798,6 +1805,7 @@ bool Variant::same(CVarRef v2) const {
   case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
   case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
   case LiteralString:                                           \
+  case KindOfStaticString:                                      \
   case KindOfString:  return HPHP::reverse(v2, toString());     \
   case KindOfArray:   return HPHP::reverse(v2, toArray());      \
   case KindOfObject:  return HPHP::reverse(v2, toObject());     \
@@ -1818,6 +1826,7 @@ bool Variant::same(CVarRef v2) const {
   case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
   case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
   case LiteralString:                                           \
+  case KindOfStaticString:                                      \
   case KindOfString:  return HPHP::reverse(v2, toString());     \
   case KindOfArray:   return HPHP::reverse(v2, toArray());      \
   case KindOfObject:  return HPHP::reverse(v2, toObject());     \
@@ -1841,6 +1850,7 @@ bool Variant::same(CVarRef v2) const {
   case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
   case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
   case LiteralString:                                           \
+  case KindOfStaticString:                                      \
   case KindOfString:  return HPHP::reverse(v2, toString());     \
   case KindOfArray:                                             \
     if (v2.is(KindOfArray)) {                                   \
@@ -1866,6 +1876,7 @@ bool Variant::same(CVarRef v2) const {
   case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
   case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
   case LiteralString:                                           \
+  case KindOfStaticString:                                      \
   case KindOfString:  return HPHP::reverse(v2, toString());     \
   case KindOfArray:   return toArray().forward(v2);             \
   case KindOfObject:  return HPHP::reverse(v2, toObject());     \
@@ -1961,6 +1972,7 @@ Variant Variant::rvalAtHelper(int64 offset, int64 prehash /* = -1 */,
   case LiteralString:
     escalateString();
     // fall through
+  case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar((int)offset);
   case KindOfObject:
@@ -1990,6 +2002,7 @@ Variant Variant::rvalAt(litstr offset, int64 prehash /* = -1 */,
   case LiteralString:
     escalateString();
     // fall through
+  case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar(String(offset).toInt32());
   case KindOfObject:
@@ -2018,6 +2031,7 @@ Variant Variant::rvalAt(CStrRef offset, int64 prehash /* = -1 */,
   case LiteralString:
     escalateString();
     // fall through
+  case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar(offset.toInt32());
   case KindOfObject:
@@ -2048,6 +2062,7 @@ Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
     case LiteralString:
       offset.escalateString();
       // fall through
+    case KindOfStaticString:
     case KindOfString: {
       int64 n;
       if (offset.m_data.pstr->isStrictlyInteger(n)) {
@@ -2077,6 +2092,7 @@ Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
   case LiteralString:
     escalateString();
     // fall through
+  case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar(offset.toInt32());
   case KindOfObject:
@@ -2235,6 +2251,7 @@ Variant Variant::refvalAtImpl(CStrRef key, int64 prehash /* = -1 */,
   if (is(KindOfArray) || isNull() ||
       (is(KindOfBoolean) && !toBoolean()) ||
       (is(LiteralString) && !*getLiteralString()) ||
+      (is(KindOfStaticString) && getStringData()->empty()) ||
       (is(KindOfString) && getStringData()->empty())) {
     return ref(lvalAt(key, prehash, false, isString));
   } else {
@@ -2414,6 +2431,7 @@ ObjectOffset Variant::o_lval(CStrRef propName, int64 prehash /*= -1 */) {
       m_data.pvar->set(key, v);                                         \
       break;                                                            \
     case LiteralString:                                                 \
+    case KindOfStaticString:                                            \
     case KindOfString:                                                  \
       {                                                                 \
         String s = toString();                                          \
@@ -2524,6 +2542,7 @@ CVarRef Variant::append(CVarRef v) {
     }
     break;
   case LiteralString:
+  case KindOfStaticString:
   case KindOfString:
     if (toString().empty()) {
       set(ArrayData::Create(v));
@@ -2629,6 +2648,7 @@ void Variant::serialize(VariableSerializer *serializer,
     serializer->write(m_data.dbl);          break;
   case LiteralString:
     serializer->write(m_data.str);          break;
+  case KindOfStaticString:
   case KindOfString:
     serializer->write(m_data.pstr->data(),
                       m_data.pstr->size(), isArrayKey);
@@ -2837,6 +2857,7 @@ Variant Variant::share(bool save) const {
   case KindOfInt64:   return m_data.num;
   case KindOfDouble:  return m_data.dbl;
   case LiteralString: return m_data.str;
+  case KindOfStaticString:
   case KindOfString:
     return String(m_data.pstr->data(), m_data.pstr->size(), CopyString);
   case KindOfArray:
@@ -2876,6 +2897,7 @@ const char *Variant::getTypeString(DataType type) {
   case KindOfInt64:   return "KindOfInt64";
   case KindOfDouble:  return "KindOfDouble";
   case LiteralString: return "LiteralString";
+  case KindOfStaticString:  return "KindOfStaticString";
   case KindOfString:  return "KindOfString";
   case KindOfArray:   return "KindOfArray";
   case KindOfObject:  return "KindOfObject";

@@ -128,13 +128,14 @@ enum DataType {
   KindOfInt32   = 4,
   KindOfInt64   = 5,
   KindOfDouble  = 6,
-  LiteralString = 7,
-  KindOfString  = 8,
-  KindOfArray   = 9,
-  KindOfObject  = 10,
-  KindOfVariant = 11,
+  KindOfStaticString  = 7,
+  LiteralString = 8,
+  KindOfString  = 9,
+  KindOfArray   = 10,
+  KindOfObject  = 11,
+  KindOfVariant = 12,
 
-  MaxNumDataTypes = 12, // marker, not a valid type
+  MaxNumDataTypes = 13, // marker, not a valid type
 };
 
 inline int getDataTypeIndex(DataType t) {
@@ -231,7 +232,7 @@ class RequestInjection {
 public:
   RequestInjection(ThreadInfo *info) {
     RequestInjectionData &p = info->m_reqInjectionData;
-    if (SegFaulting) pauseAndExit(); 
+    if (SegFaulting) pauseAndExit();
     if (p.timedout) throw_request_timeout_exception(info);
     if (p.memExceeded) throw_memory_exceeded_exception(info);
     if (p.signaled) f_pcntl_signal_dispatch();

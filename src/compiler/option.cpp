@@ -177,6 +177,8 @@ bool Option::AllVolatile = false;
 std::string Option::FlibDirectory;
 StringBag Option::OptionStrings;
 
+bool Option::GenerateSourceInfo = false;
+
 ///////////////////////////////////////////////////////////////////////////////
 // load from a PHP file
 
@@ -315,6 +317,8 @@ void Option::Load(Hdf &config) {
   EnableEval = (EvalLevel)config["EnableEval"].getByte(0);
   AllDynamic = config["AllDynamic"].getBool();
   AllVolatile = config["AllVolatile"].getBool();
+
+  GenerateSourceInfo = config["GenerateSourceInfo"].getBool(false);
 
   OnLoad();
 }

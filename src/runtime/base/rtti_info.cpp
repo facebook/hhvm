@@ -24,7 +24,6 @@
 #include <runtime/base/runtime_error.h>
 #include <util/lock.h>
 #include <util/util.h>
-#include <compiler/option.h>
 
 using namespace std;
 

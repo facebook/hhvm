@@ -301,6 +301,7 @@ public:
   static bool FlattenInvoke;
   static int InlineFunctionThreshold;
   static bool ControlEvalOrder;
+  static bool GenerateSourceInfo;
 
 private:
   /**

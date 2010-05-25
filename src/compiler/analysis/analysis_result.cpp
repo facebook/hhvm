@@ -1169,9 +1169,13 @@ void AnalysisResult::outputCPPClassMapFile() {
 
 void AnalysisResult::recordSourceInfo(const std::string &fileline,
                                       LocationPtr loc) {
-  // we only need one to one mapping, and there doesn't seem to be a need
-  // to display multiple PHP file locations for one C++ frame
-  m_sourceInfos[fileline] = loc;
+  // With FrameInjection, there is normally no need to generate the source info
+  // map, so to save memory.
+  if (Option::GenerateSourceInfo) {
+    // we only need one to one mapping, and there doesn't seem to be a need
+    // to display multiple PHP file locations for one C++ frame
+    m_sourceInfos[fileline] = loc;
+  }
 }
 
 void AnalysisResult::recordClassSource(const std::string &clsname,

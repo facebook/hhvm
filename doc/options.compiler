@@ -137,7 +137,6 @@ to generate or split up scalar arrays, so we can compile them faster. For
 large project with a lot of scalar arrays, use a higher value. Then each file
 is smaller. When using distcc, normally it finishes compilation faster.
 
-
 = ScalarArrayOverflowLimit
 
 Default is 2000. Some scalar arrays can become extremely large when nested
@@ -165,6 +164,13 @@ safer HTML templating. For more information, search XHP.
 = FlibDirectory
 
 Facebook specific. Ignore.
+
+= GenerateSourceInfo
+
+Default is false. Source info is a map from locations in C++ files to those in
+PHP files. It can be used to translate C++ stacktrace to more readable PHP
+stacktrace. When FrameInjection enabled, there is no need to do stacktrace
+translation any more, so this option is by default set to false to save space.
 
 = DynamicFunctionPrefix
 

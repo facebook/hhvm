@@ -21,6 +21,7 @@
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/constant_table.h>
 #include <compiler/expression/assignment_expression.h>
+#include <compiler/expression/scalar_expression.h>
 #include <compiler/option.h>
 
 using namespace HPHP;
@@ -151,7 +152,14 @@ void ClassConstant::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                 scope->getId().c_str(),
                 var->getName().c_str());
       cg.printf(isString ? "(" : " = ");
-      value->outputCPP(cg, ar);
+      ScalarExpressionPtr scalarExp =
+        dynamic_pointer_cast<ScalarExpression>(value);
+      if (isString && scalarExp) {
+        cg.printf("LITSTR_INIT(%s)",
+                  scalarExp->getCPPLiteralString().c_str());
+      } else {
+        value->outputCPP(cg, ar);
+      }
       cg.printf(isString ? ");\n" : ";\n");
       value->outputCPPEnd(cg, ar);
       break;

@@ -728,10 +728,8 @@ void Parser::onFunction(Token &out, Token &ref, Token &name, Token &params,
   out.reset();
   FunctionStatementPtr func = peekFunc();
   ASSERT(func);
-  func->init(ref.num,
-             params->params(),
-             stmt->getStmtList(),
-             m_hasCallToGetArgs);
+  StatementListStatementPtr body = stmt->getStmtList();
+  func->init(ref.num, params->params(), body, m_hasCallToGetArgs);
   out->stmt() = func;
   popFunc();
 }
@@ -753,19 +751,21 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
   out->params().push_back(p);
 }
 
-void Parser::onClassStart(Token &name, Token *parent) {
-  pushClass(NEW_STMT(Class, name.getText(), parent ? parent->getText() : "",
-                     m_scanner.getDocComment()));
+void Parser::onClassStart(int type, Token &name, Token *parent) {
+  ClassStatementPtr cs = NEW_STMT(Class, name.getText(),
+      parent ? parent->getText() : "", m_scanner.getDocComment());
+  pushClass(cs);
+  int mod = 0;
+  if (type == T_ABSTRACT) mod = ClassStatement::Abstract;
+  else if (type == T_FINAL) mod = ClassStatement::Final;
+  else if (type == T_INTERFACE) mod = ClassStatement::Interface;
+  cs->setModifiers(mod);
 }
 
-void Parser::onClass(Token &out, Token &type, Token &bases) {
+void Parser::onClass(Token &out, Token &bases) {
   out.reset();
   ClassStatementPtr cs = peekClass();
   popClass();
-  int mod = 0;
-  if (type.num == T_ABSTRACT) mod = ClassStatement::Abstract;
-  else if (type.num == T_FINAL) mod = ClassStatement::Final;
-  cs->setModifiers(mod);
   std::vector<String> &interfaceNames = bases->strings();
   cs->addBases(interfaceNames);
   cs->finish();
@@ -776,7 +776,6 @@ void Parser::onInterface(Token &out, Token &bases) {
   out.reset();
   ClassStatementPtr cs = peekClass();
   popClass();
-  cs->setModifiers(ClassStatement::Interface);
   std::vector<String> &interfaceNames = bases->strings();
   cs->addBases(interfaceNames);
   out->stmt() = cs;
@@ -913,13 +912,15 @@ void Parser::saveParseTree(Token &tree) {
   }
 }
 
+void Parser::onStatementListStart(Token &out) {
+  out.reset();
+  out->stmt() = NEW_STMT0(StatementList);
+}
+
 void Parser::addStatement(Token &out, Token &stmts, Token &new_stmt) {
   out.reset();
-  if (!stmts->stmt()) {
-    out->stmt() = NEW_STMT0(StatementList);
-  } else {
-    out->stmt() = stmts->stmt();
-  }
+  ASSERT(stmts->stmt());
+  out->stmt() = stmts->stmt();
   ASSERT(out->getStmtList());
   if (new_stmt->stmt()) {
     out->getStmtList()->add(new_stmt->stmt());

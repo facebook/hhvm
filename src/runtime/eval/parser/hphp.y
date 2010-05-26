@@ -128,7 +128,7 @@ start:
 top_statement_list:
     top_statement_list
     top_statement                      { _p->addStatement($$,$1,$2);}
-  |                                    { $$.reset();}
+  |                                    { _p->onStatementListStart($$);}
 ;
 top_statement:
     statement                          { $$ = $1;}
@@ -154,7 +154,7 @@ hphp_declare:
 inner_statement_list:
     inner_statement_list
     inner_statement                    { _p->addStatement($$,$1,$2);}
-  |                                    { $$.reset();}
+  |                                    { _p->onStatementListStart($$);}
 ;
 inner_statement:
     statement                          { $$ = $1;}
@@ -269,11 +269,12 @@ function_declaration_statement:
 
 class_declaration_statement:
     class_entry_type T_STRING
-    extends_from                       { _p->onClassStart($2, &$3);}
+    extends_from                       { _p->onClassStart($1.num, $2, &$3);}
     implements_list '{'
-    class_statement_list '}'           { _p->onClass($$,$1,$5);}
+    class_statement_list '}'           { _p->onClass($$,$5);}
 
-| T_INTERFACE T_STRING                 { _p->onClassStart($2, NULL);}
+| T_INTERFACE T_STRING                 { _p->onClassStart(T_INTERFACE, $2,
+                                        NULL);}
     interface_extends_list '{'
     class_statement_list '}'           { _p->onInterface($$,$4);}
 ;

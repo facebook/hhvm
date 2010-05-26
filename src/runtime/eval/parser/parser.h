@@ -111,8 +111,8 @@ public:
                   Token &stmt);
   void onParam(Token &out, Token *params, Token &type, Token &var,
                bool ref, Token *defValue);
-  void onClassStart(Token &name, Token *parent);
-  void onClass(Token &out, Token &type, Token &bases);
+  void onClassStart(int type, Token &name, Token *parent);
+  void onClass(Token &out, Token &bases);
   void onInterface(Token &out, Token &bases);
   void onInterfaceName(Token &out, Token *names, Token &name);
   void onClassVariableStart(Token &mods);
@@ -122,6 +122,7 @@ public:
   void onMethod(Token &modifiers, Token &ref, Token &name, Token &params,
                 Token &stmt);
   void onMemberModifier(Token &out, Token *modifiers, Token &modifier);
+  void onStatementListStart(Token &out);
   void addStatement(Token &out, Token &stmts, Token &new_stmt);
   void finishStatement(Token &out, Token &stmts);
   void onBlock(Token &out, Token &stmts);

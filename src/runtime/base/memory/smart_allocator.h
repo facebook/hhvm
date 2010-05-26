@@ -158,6 +158,7 @@ public:
    * allocator for easy access during alloc/free time.
    */
   void registerStats(MemoryUsageStats *stats) { m_stats = stats;}
+  MemoryUsageStats & getStats() { return *m_stats; }
 
   int getItemSize() const { return m_itemSize;}
   int getItemCount() const { return m_itemCount;}
@@ -166,6 +167,8 @@ public:
    * Allocation/deallocation of object memory.
    */
   void *alloc();
+  void *allocHelper() __attribute__((noinline));
+  void checkMemUsage() __attribute__((noinline));
   void dealloc(void *obj);
   bool isValid(void *obj) const;
 

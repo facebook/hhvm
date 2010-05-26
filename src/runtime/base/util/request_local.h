@@ -37,6 +37,82 @@ namespace HPHP {
  *   };
  *   static RequestLocal<MyRequestLocalClass> s_data;
  */
+
+#if defined(USE_GCC_FAST_TLS)
+
+template<typename T>
+struct RequestLocal {
+  T *get() const {
+    if (m_node.m_p == NULL) {
+      const_cast<RequestLocal<T>*>(this)->createKey();
+    }
+    if (!m_node.m_p->getInited()) {
+      m_node.m_p->setInited(true);
+      m_node.m_p->requestInit();
+      // this registration makes sure m_p->requestShutdown() will be called
+      g_context->registerRequestEventHandler(m_node.m_p);
+    }
+    return m_node.m_p;
+  }
+
+  void createKey() __attribute__((noinline));
+
+  void reset() {
+    delete m_node.m_p;
+    m_node.m_p = NULL;
+  }
+
+  static void OnThreadExit(void * p) {
+    ThreadLocalNode<T> * pNode = (ThreadLocalNode<T>*)p;
+    delete pNode->m_p;
+    pNode->m_p = NULL;
+  }
+
+  T *operator->() const {
+    return get();
+  }
+
+  T &operator*() const {
+    return *get();
+  }
+
+  ThreadLocalNode<T> m_node;
+};
+
+template<typename T>
+void RequestLocal<T>::createKey() {
+  if (m_node.m_delete_fn == NULL) {
+    m_node.m_delete_fn = RequestLocal<T>::OnThreadExit;
+    m_node.m_next = ThreadLocalManager::s_manager.getTop();
+    ThreadLocalManager::s_manager.setTop((void*)(&m_node));
+  }
+  if (m_node.m_p == NULL) {
+    m_node.m_p = new T();
+  }
+}
+
+#define DECLARE_REQUEST_LOCAL(T,f) \
+  __attribute__((tls_model ("initial-exec"))) __thread \
+    RequestLocal<T> f
+
+#define IMPLEMENT_REQUEST_LOCAL(T,f) \
+  __attribute__((tls_model ("initial-exec"))) __thread \
+    RequestLocal<T> f = { { NULL, NULL, NULL } }
+
+#define DECLARE_STATIC_REQUEST_LOCAL(T,f) \
+  static __attribute__((tls_model ("initial-exec"))) __thread \
+    RequestLocal<T> f
+
+#define IMPLEMENT_STATIC_REQUEST_LOCAL(T,f) \
+  static __attribute__((tls_model ("initial-exec"))) __thread \
+    RequestLocal<T> f = { { NULL, NULL, NULL } }
+
+#define DECLARE_EXTERN_REQUEST_LOCAL(T,f) \
+  extern __attribute__((tls_model ("initial-exec"))) __thread \
+    RequestLocal<T> f
+
+#else // defined(USE_GCC_FAST_TLS)
+
 template<typename T>
 class RequestLocal {
 public:
@@ -101,6 +177,10 @@ private:
 #define DECLARE_EXTERN_REQUEST_LOCAL(T,f)    \
   extern DECLARE_THREAD_LOCAL(T,f ## __tl);  \
   extern RequestLocal<T> f
+
+#endif // defined(USE_GCC_FAST_TLS)
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

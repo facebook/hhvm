@@ -80,13 +80,14 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
   ASSERT(itemCount);
   ASSERT(itemSize);
 
+  registerStats(&MemoryManager::TheMemoryManager()->getStats());
+  ASSERT(m_stats);
+
   m_colMax = m_itemSize * m_itemCount;
   m_blocks.push_back((char *)malloc(m_colMax));
-  if (m_stats) {
-    m_stats->alloc += m_colMax;
-    if (m_stats->alloc > m_stats->peakAlloc) {
-      m_stats->peakAlloc = m_stats->alloc;
-    }
+  m_stats->alloc += m_colMax;
+  if (m_stats->alloc > m_stats->peakAlloc) {
+    m_stats->peakAlloc = m_stats->alloc;
   }
 
   if (nameEnum < 0) {
@@ -117,23 +118,16 @@ SmartAllocatorImpl::~SmartAllocatorImpl() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// two most important methods
+// four most important methods
 
 void *SmartAllocatorImpl::alloc() {
-  if (m_stats) {
-    m_stats->usage += m_itemSize;
-    if (m_stats->usage > m_stats->peakUsage) {
-      int64 prevPeakUsage = m_stats->peakUsage;
-      m_stats->peakUsage = m_stats->usage;
-      int64 maxBytes = g_context->getRequestMemoryMaxBytes();
-      if (maxBytes > 0 && m_stats->peakUsage > maxBytes &&
-          prevPeakUsage <= maxBytes) {
-        ThreadInfo::s_threadInfo->m_reqInjectionData.memExceeded = true;
-      }
-    }
+  ASSERT(m_stats);
+  m_stats->usage += m_itemSize;
+  if (m_stats->usage > m_stats->peakUsage) {
+    checkMemUsage();
   }
-
-  if (m_freelist.size() > 0) {
+  if (m_stats->usage <= m_stats->peakUsage && m_freelist.size() > 0) {
+    // Fast path
 #ifdef SMART_ALLOCATOR_STACKTRACE
     m_st_allocs.operator[](m_freelist.back());
 #endif
@@ -141,6 +135,11 @@ void *SmartAllocatorImpl::alloc() {
     m_freelist.pop_back();
     return ret;
   }
+  // Slow path
+  return allocHelper();
+}
+
+void *SmartAllocatorImpl::allocHelper() {
   if (m_col >= m_colMax) {
     if (m_allocatedBlocks == 0) {
       // used up the last batch
@@ -153,11 +152,9 @@ void *SmartAllocatorImpl::alloc() {
       m_allocatedBlocks--;
     }
 
-    if (m_stats) {
-      m_stats->alloc += m_colMax;
-      if (m_stats->alloc > m_stats->peakAlloc) {
-        m_stats->peakAlloc = m_stats->alloc;
-      }
+    m_stats->alloc += m_colMax;
+    if (m_stats->alloc > m_stats->peakAlloc) {
+      m_stats->peakAlloc = m_stats->alloc;
     }
 
     m_row++;
@@ -173,6 +170,16 @@ void *SmartAllocatorImpl::alloc() {
   return ret;
 }
 
+void SmartAllocatorImpl::checkMemUsage() {
+  int64 prevPeakUsage = m_stats->peakUsage;
+  m_stats->peakUsage = m_stats->usage;
+  int64 maxBytes = g_context->getRequestMemoryMaxBytes();
+  if (maxBytes > 0 && m_stats->peakUsage > maxBytes &&
+      prevPeakUsage <= maxBytes) {
+    ThreadInfo::s_threadInfo->m_reqInjectionData.memExceeded = true;
+  }
+}
+
 void SmartAllocatorImpl::dealloc(void *obj) {
   if (obj) {
     ASSERT(isValid(obj));
@@ -181,9 +188,8 @@ void SmartAllocatorImpl::dealloc(void *obj) {
     m_st_deallocs.operator[](obj);
 #endif
 
-    if (m_stats) {
-      m_stats->usage -= m_itemSize;
-    }
+    ASSERT(m_stats);
+    m_stats->usage -= m_itemSize;
   }
 }
 

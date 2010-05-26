@@ -98,7 +98,7 @@ bool TestCppBase::TestSmartAllocator() {
   int iMax = 1000000;
   int64 time1, time2;
   {
-    IMPLEMENT_THREAD_LOCAL(SomeClassAlloc, allocator);
+    static IMPLEMENT_THREAD_LOCAL(SomeClassAlloc, allocator);
 
     Timer t;
     for (int i = 0; i < iMax; i++) {

@@ -45,7 +45,7 @@ void MemoryManager::resetStats() {
 void MemoryManager::add(SmartAllocatorImpl *allocator) {
   ASSERT(allocator);
   m_smartAllocators.push_back(allocator);
-  allocator->registerStats(&m_stats);
+  ASSERT(&allocator->getStats() == &m_stats);
 
   /**
    * If a SmartAllocator is registered later than checkpoint, there must be no

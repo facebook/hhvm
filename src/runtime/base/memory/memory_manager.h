@@ -118,7 +118,7 @@ public:
   /**
    * Find out how much memory we have used so far.
    */
-  const MemoryUsageStats &getStats() { return m_stats;}
+  MemoryUsageStats &getStats() { return m_stats;}
 
   /**
    * Called during session starts to reset all usage stats.

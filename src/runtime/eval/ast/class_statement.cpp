@@ -290,14 +290,9 @@ void ClassStatement::addMethod(MethodStatementPtr m) {
                 m_name.c_str(), m->name().c_str(),
                 m->loc()->file, m->loc()->line1);
   }
-  if (m->isAbstract()) {
+  if (m->getModifiers() & Abstract) {
     if (m->getModifiers() & Private) {
       raise_error("Cannot declare abstract %s::%s() private in %s on line %d",
-                  m_name.c_str(), m->name().c_str(),
-                  m->loc()->file, m->loc()->line1);
-    }
-    if (m->getModifiers() & Static) {
-      raise_error("Cannot declare abstract %s::%s() static in %s on line %d",
                   m_name.c_str(), m->name().c_str(),
                   m->loc()->file, m->loc()->line1);
     }
@@ -311,12 +306,10 @@ void ClassStatement::addMethod(MethodStatementPtr m) {
                   m_name.c_str(), m->name().c_str(),
                   m->loc()->file, m->loc()->line1);
     }
-  } else {
-    if (!m->hasBody()) {
-      raise_error("Non-abstract %s::%s() must contain body in %s on line %d",
-                  m_name.c_str(), m->name().c_str(),
-                  m->loc()->file, m->loc()->line1);
-    }
+  } else if (!(m_modifiers & Interface) && !m->hasBody()) {
+    raise_error("Non-abstract %s::%s() must contain body in %s on line %d",
+        m_name.c_str(), m->name().c_str(),
+        m->loc()->file, m->loc()->line1);
   }
 
   m_methods[m->lname().c_str()] = m;

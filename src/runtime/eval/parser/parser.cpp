@@ -790,19 +790,17 @@ void Parser::onInterfaceName(Token &out, Token *names, Token &name) {
 }
 
 void Parser::onClassVariableStart(Token &mods) {
-  ClassStatementPtr cs = peekClass();
-  cs->setModifiers(mods.num);
+  m_classVarMods = mods.num;
 }
 
 void Parser::onClassVariable(Token &name, Token *val) {
   ClassStatementPtr cs = peekClass();
-  int mod = cs->getModifiers();
   ExpressionPtr v;
   if (val) {
     v = (*val)->exp();
   }
   cs->addVariable(ClassVariablePtr(
-    new ClassVariable(this, name.getText(), mod, v,
+    new ClassVariable(this, name.getText(), m_classVarMods, v,
                       m_scanner.getDocComment(), cs.get())));
 }
 

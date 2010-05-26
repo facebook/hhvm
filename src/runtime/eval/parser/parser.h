@@ -177,6 +177,7 @@ private:
   std::stack<ClassStatementPtr> m_classes;
   std::stack<FunctionStatementPtr> m_funcs;
   std::vector<StaticStatementPtr> &m_staticStatements;
+  int m_classVarMods;
 
   // parser output
   StatementPtr m_tree;

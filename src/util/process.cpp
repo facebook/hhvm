@@ -365,6 +365,40 @@ void Process::GetProcessId(const std::string &cmd, std::vector<pid_t> &pids,
   }
 }
 
+std::string Process::GetCommandLine(pid_t pid) {
+  string name = "/proc/" + boost::lexical_cast<string>((long long)pid) +
+    "/cmdline";
+
+  string cmdline;
+  FILE * f = fopen(name.c_str(), "r");
+  if (f) {
+    FileReader::readString(f, cmdline);
+    fclose(f);
+  }
+
+  string converted;
+  for (unsigned int i = 0; i < cmdline.size(); i++) {
+    char ch = cmdline[i];
+    converted += ch ? ch : ' ';
+  }
+  return converted;
+}
+
+bool Process::CommandStartsWith(pid_t pid, const std::string &cmd) {
+  if (!cmd.empty()) {
+    std::string cmdline = GetCommandLine(pid);
+    if (cmdline.length() >= cmd.length() &&
+        cmdline.substr(0, cmd.length()) == cmd) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Process::IsUnderGDB() {
+  return CommandStartsWith(GetParentProcessId(), "gdb ");
+}
+
 int Process::GetProcessRSS(pid_t pid) {
   string name = "/proc/" + boost::lexical_cast<string>((long long)pid) +
     "/status";

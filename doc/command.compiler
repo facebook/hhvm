@@ -193,7 +193,7 @@ This sets a configuration option on the command line. STRING should be
 a line of HDF, e.g. Section.Name=Value. The options settable are the same
 as those set by --config or --db-config.
 
-= --log=INT (default: -1)
+= -l, --log=INT (default: -1)
 
 This sets the level of logging output to standard out. The Levels are:
 -1: If the target is run, then none, else the same as 3.

@@ -93,12 +93,26 @@ public:
   }
 
   /**
+   * Process identifier.
+   */
+  static pid_t GetParentProcessId() {
+    return getppid();
+  }
+
+  /**
    * Search for a process by command line. If matchAll is false, only binary
    * file's name, not the whole path + command line options, will be matched.
    */
   static pid_t GetProcessId(const std::string &cmd, bool matchAll = false);
   static void GetProcessId(const std::string &cmd, std::vector<pid_t> &pids,
                            bool matchAll = false);
+
+  /**
+   * Get command line with a process ID.
+   */
+  static std::string GetCommandLine(pid_t pid);
+  static bool CommandStartsWith(pid_t pid, const std::string &cmd);
+  static bool IsUnderGDB();
 
   /**
    * Get memory usage in MB by a process.

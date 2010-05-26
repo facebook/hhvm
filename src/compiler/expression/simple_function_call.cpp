@@ -213,22 +213,14 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         varName = name->getIdentifier();
         if (!varName.empty()) {
           ar->getFileScope()->declareConstant(ar, varName);
-        }
-      }
-      // handling define("CONSTANT", ...);
-      if (m_params && m_params->getCount() >= 2) {
-        ScalarExpressionPtr name =
-          dynamic_pointer_cast<ScalarExpression>((*m_params)[0]);
-        string varName;
-        if (name) {
-          varName = name->getIdentifier();
-          if (!varName.empty()) {
+
+          // handling define("CONSTANT", ...);
+          if (m_params && m_params->getCount() >= 2) {
             ExpressionPtr value = (*m_params)[1];
-            ConstantTablePtr constants =
-              ar->findConstantDeclarer(varName)->getConstants();
+            BlockScopePtr block = ar->findConstantDeclarer(varName);
+            ConstantTablePtr constants = block->getConstants();
             if (constants != ar->getConstants()) {
               constants->add(varName, NEW_TYPE(Some), value, ar, self);
-
               if (name->hasHphpNote("Dynamic")) {
                 constants->setDynamic(ar, varName);
               }
@@ -510,8 +502,13 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
           ar->getDependencyGraph()->
             addParent(DependencyGraph::KindOfConstant,
                       ar->getName(), varName, self);
-          ConstantTablePtr constants =
-            ar->findConstantDeclarer(varName)->getConstants();
+          BlockScopePtr block = ar->findConstantDeclarer(varName);
+          if (!block) {
+            ar->getFileScope()->declareConstant(ar, varName);
+            block = ar->findConstantDeclarer(varName);
+            ASSERT(block);
+          }
+          ConstantTablePtr constants = block->getConstants();
           if (constants != ar->getConstants()) {
             if (value && !value->isScalar()) {
               constants->setDynamic(ar, varName);

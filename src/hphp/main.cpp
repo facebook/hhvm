@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
     Timer totalTimer(Timer::WallTime, "running hphp");
     createOutputDirectory(po);
     if (ret == 0) {
-      if (!po.nofork) {
+      if (!po.nofork && !Process::IsUnderGDB()) {
         int pid = fork();
         if (pid == 0) {
           ret = process(po);
@@ -260,7 +260,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     ("config-value,v", value<vector<string> >(&po.confStrings)->composing(),
      "individual configuration string in a format of name=value, where "
      "name can be any valid configuration for a config file")
-    ("log",
+    ("log,l",
      value<int>(&po.logLevel)->default_value(-1),
      "-1: (default); 0: no logging; 1: errors only; 2: warnings and errors; "
      "3: informational as well; 4: really verbose.")

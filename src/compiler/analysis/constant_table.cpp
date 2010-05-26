@@ -75,7 +75,6 @@ void ConstantTable::setDynamic(AnalysisResultPtr ar, const std::string &name) {
 
 void ConstantTable::setValue(AnalysisResultPtr ar, const std::string &name,
                              ExpressionPtr value) {
-  ASSERT(m_values.find(name) != m_values.end());
   m_values[name] = value;
 }
 

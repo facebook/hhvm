@@ -874,7 +874,8 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     cg.indentBegin("Variant %s%s::doCall(Variant v_name, Variant "
                    "v_arguments, bool fatal) {\n",
                    Option::ClassPrefix, clsName);
-    cg.printf("return t___call(v_name, v_arguments);\n");
+    cg.printf("return t___call(v_name, !v_arguments.isNull() ? "
+              "v_arguments : Variant(Array::Create()));\n");
     cg.indentEnd("}\n");
   }
 

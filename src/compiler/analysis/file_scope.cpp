@@ -141,7 +141,8 @@ void FileScope::declareConstant(AnalysisResultPtr ar, const string &name) {
   }
 }
 
-void FileScope::addConstant(const string &name, TypePtr type, ExpressionPtr value,
+void FileScope::addConstant(const string &name, TypePtr type,
+                            ExpressionPtr value,
                             AnalysisResultPtr ar, ConstructPtr con) {
   BlockScopePtr f = ar->findConstantDeclarer(name);
   cout << "Add constant " << name << " in " << f->getName() << endl;

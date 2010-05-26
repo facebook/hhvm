@@ -414,6 +414,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestConstantFunction);
   RUN_TEST(TestDefined);
   RUN_TEST(TestSimpleXML);
+  RUN_TEST(TestXML);
   RUN_TEST(TestDOMDocument);
   RUN_TEST(TestFile);
   RUN_TEST(TestDirectory);
@@ -2800,6 +2801,16 @@ bool TestCodeRun::TestClassMethod() {
 }
 
 bool TestCodeRun::TestObjectMagicMethod() {
+  MVCR("<?php\n"
+       "class Test {\n"
+       "  public function __call($name, $args) {\n"
+       "    var_dump($args);\n"
+       "  }\n"
+       "}\n"
+       "$test = new Test();\n"
+       "$test->test();\n"
+      );
+
   MVCR("<?php class A {"
       "  private $foo, $bar; "
       "  function __construct() { $this->foo = 1; $this->bar = 2;} "
@@ -8469,6 +8480,8 @@ bool TestCodeRun::TestConcat() {
 }
 
 bool TestCodeRun::TestConstant() {
+  MVCR("<?php define('A', 'B'); define('A_'.A, 'B'); var_dump(A, A_B);");
+
   MVCR("<?php "
       "define('AAA', true);"
       "define('BBB', false);"
@@ -9092,6 +9105,31 @@ bool TestCodeRun::TestSimpleXML() {
   MVCR("<?php $a = simplexml_load_string('<?xml version=\"1.0\" encoding=\"utf-8\"?><?mso-application progid=\"Excel.Sheet\"?><node><subnode><subsubnode>test</subsubnode></subnode></node>');"
       "var_dump((string)($a->subnode->subsubnode[0]));"
       );
+  return true;
+}
+
+bool TestCodeRun::TestXML() {
+  MVCR(
+    "<?php\n"
+    "class xml {\n"
+    "  var $parser;\n"
+    "  function xml() {\n"
+    "    $this->parser = xml_parser_create();\n"
+    "    xml_set_object($this->parser, $this);\n"
+    "    xml_set_element_handler($this->parser, 'tag_open', 'tag_close');\n"
+    "    xml_set_character_data_handler($this->parser, 'cdata');\n"
+    "  }\n"
+    "  function parse($data) { xml_parse($this->parser, $data);}\n"
+    "  function tag_open($parser, $tag, $attributes) {\n"
+    "    var_dump($tag, $attributes);\n"
+    "  }\n"
+    "  function cdata($parser, $cdata) { var_dump($cdata);}\n"
+    "  function tag_close($parser, $tag){ var_dump($tag);}\n"
+    "}\n"
+    "\n"
+    "$xml_parser = new xml();\n"
+    "$xml_parser->parse('<A ID=\"hallo\">PHP</A>');\n"
+  );
   return true;
 }
 

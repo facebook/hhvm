@@ -198,8 +198,8 @@ bool VirtualHost::rewriteURL(CStrRef host, String &url, bool &qsa,
       }
       Variant ret = preg_match(it->pattern.c_str(), subject);
       if (!ret.same(it->negate ? 0 : 1)) {
-          passed = false;
-          break;
+        passed = false;
+        break;
       }
     }
     if (!passed) continue;

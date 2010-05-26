@@ -317,6 +317,9 @@ Variant EvalObjectData::doCall(Variant v_name, Variant v_arguments,
                                bool fatal) {
   const MethodStatement *ms = getMethodStatement("__call");
   if (ms) {
+    if (v_arguments.isNull()) {
+      v_arguments = Array::Create();
+    }
     return ms->invokeInstance(Object(root),
                               CREATE_VECTOR2(v_name, v_arguments), false);
   } else {

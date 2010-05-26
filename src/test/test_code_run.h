@@ -148,6 +148,7 @@ class TestCodeRun : public TestBase {
   bool TestThrift();
   bool TestCreateFunction();
   bool TestSimpleXML();
+  bool TestXML();
   bool TestDOMDocument();
   bool TestDirectory();
   bool TestFile();

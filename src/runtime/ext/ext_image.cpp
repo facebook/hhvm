@@ -97,7 +97,7 @@ public:
 #ifdef IM_MEMORY_CHECK
       void *ptr = malloc(sizeof(ln) + sizeof(size) + bytes);
       if (!ptr) return NULL;
-      memset(ptr, 0, sizeof(ln) + sizeof(size) + bytes); 
+      memset(ptr, 0, sizeof(ln) + sizeof(size) + bytes);
       memcpy(ptr, &ln, sizeof(ln));
       memcpy((char*)ptr + sizeof(ln), &bytes, sizeof(bytes));
       m_mallocSize += bytes;
@@ -159,7 +159,7 @@ public:
     void *sizePtr = (char *)ptr - sizeof(size);
     size_t oldSize = 0;
     if (ptr) memcpy(&oldSize, sizePtr, sizeof(oldSize));
-    int diff = size - oldSize; 
+    int diff = size - oldSize;
     void *tmp;
 
 #ifdef IM_MEMORY_CHECK
@@ -3254,15 +3254,12 @@ Variant f_imagegrabscreen() {
 
 Variant f_imagerotate(CObjRef source_image, double angle, int bgd_color,
                      int ignore_transparent /* = 0 */) {
-  throw NotSupportedException(__func__, "gdImageRotate does not exist");
-/*
   gdImagePtr im_src = source_image.getTyped<Image>()->get();
   if (!im_src) return false;
   gdImagePtr im_dst = gdImageRotate(im_src, angle, bgd_color,
                                     ignore_transparent);
   if (!im_dst) return false;
   return Object(new Image(im_dst));
-*/
 }
 
 bool f_imagesettile(CObjRef image, CObjRef tile) {
@@ -5525,7 +5522,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index,
   size_t realloc_size = (image_info->info_list[section_index].count+1) *
                         sizeof(image_info_data);
   list = (image_info_data*)
-    IM_REALLOC(image_info->info_list[section_index].list, realloc_size); 
+    IM_REALLOC(image_info->info_list[section_index].list, realloc_size);
   CHECK_ALLOC(list, realloc_size);
   image_info->info_list[section_index].list = list;
 
@@ -7270,8 +7267,8 @@ static int exif_read_file(image_info_type *ImageInfo, String FileName,
   PHP_STRDUP(ImageInfo->decode_unicode_be, "UCS-2BE");
   PHP_STRDUP(ImageInfo->decode_unicode_le, "UCS-2LE");
   PHP_STRDUP(ImageInfo->encode_jis,        "");
-  PHP_STRDUP(ImageInfo->decode_jis_be,     "JIS"); 
-  PHP_STRDUP(ImageInfo->decode_jis_le,     "JIS"); 
+  PHP_STRDUP(ImageInfo->decode_jis_be,     "JIS");
+  PHP_STRDUP(ImageInfo->decode_jis_le,     "JIS");
 
   ImageInfo->ifd_nesting_level = 0;
 

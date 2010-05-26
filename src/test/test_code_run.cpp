@@ -10240,6 +10240,13 @@ bool TestCodeRun::TestExtImage() {
       "} else {"
       "  echo 'No thumbnail available';"
       "}");
+  MVCR("<?php "
+      "$filename = 'test/images/simpletext.jpg';"
+      "$degrees = 90;"
+      "header('Content-type: image/jpeg');"
+      "$source = imagecreatefromjpeg($filename);"
+      "$rotate = imagerotate($source, $degrees, 0);"
+      "imagejpeg($rotate);");
   return true;
 }
 

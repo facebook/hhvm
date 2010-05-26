@@ -651,24 +651,9 @@ void FunctionScope::OutputCPPDynamicInvokeCount(CodeGenerator &cg) {
   cg.printf("int count __attribute__((__unused__)) = params.size();\n");
 }
 
-void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
-                                           AnalysisResultPtr ar,
-                                           const char *funcPrefix,
-                                           const char *name,
-                                           bool voidWrapperOff /* = false */,
-                                           bool fewArgs /* = false */,
-                                           bool ret /* = true */,
-                                           const char *extraArg /* = NULL */,
-                                           bool constructor /* = false */) {
-  const char *voidWrapper = (m_returnType || voidWrapperOff) ? "" : ", null";
-  const char *retrn = ret ? "return " : "";
-  int maxParam = fewArgs ? (m_maxParam > Option::InvokeFewArgsCount ?
-                            Option::InvokeFewArgsCount : m_maxParam)
-    : m_maxParam;
+void FunctionScope::outputCPPInvokeArgCountCheck(CodeGenerator &cg,
+    AnalysisResultPtr ar, bool ret, bool constructor) {
   bool variable = isVariableArgument();
-
-  ASSERT(m_minParam >= 0);
-
   // system function has different handling of argument counts
   bool system = (m_system || m_sep ||
                  cg.getOutput() == CodeGenerator::SystemCPP);
@@ -705,6 +690,27 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
               " %sthrow_toomany_arguments(\"%s\", %d%s);\n",
               m_maxParam, sysret, fullname.c_str(), m_maxParam, level);
   }
+}
+
+void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
+                                           AnalysisResultPtr ar,
+                                           const char *funcPrefix,
+                                           const char *name,
+                                           bool voidWrapperOff /* = false */,
+                                           bool fewArgs /* = false */,
+                                           bool ret /* = true */,
+                                           const char *extraArg /* = NULL */,
+                                           bool constructor /* = false */) {
+  const char *voidWrapper = (m_returnType || voidWrapperOff) ? "" : ", null";
+  const char *retrn = ret ? "return " : "";
+  int maxParam = fewArgs ? (m_maxParam > Option::InvokeFewArgsCount ?
+                            Option::InvokeFewArgsCount : m_maxParam)
+    : m_maxParam;
+  bool variable = isVariableArgument();
+
+  ASSERT(m_minParam >= 0);
+
+  outputCPPInvokeArgCountCheck(cg, ar, ret, constructor);
 
   if (variable || getOptionalParamCount()) {
     if (!fewArgs || m_minParam < Option::InvokeFewArgsCount) {
@@ -829,11 +835,9 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
 }
 
 void FunctionScope::outputCPPEvalInvoke(CodeGenerator &cg,
-                                        AnalysisResultPtr ar,
-                                        const char *funcPrefix,
-                                        const char *name,
-                                        const char *extraArg /* = NULL */,
-                                        bool ret /* = true */) {
+    AnalysisResultPtr ar, const char *funcPrefix, const char *name,
+    const char *extraArg /* = NULL */, bool ret /* = true */,
+    bool constructor /* = false */) {
   const char *voidWrapper = m_returnType  ? "" : ", null";
   const char *retrn = ret ? "return " : "";
   int maxParam = m_maxParam;
@@ -850,6 +854,8 @@ void FunctionScope::outputCPPEvalInvoke(CodeGenerator &cg,
   if (variable) {
     callss << "count";
   }
+
+
   bool preArgs = variable || extraArg;
   // Build temps
   for (int i = 0; i < m_maxParam; i++) {
@@ -857,6 +863,8 @@ void FunctionScope::outputCPPEvalInvoke(CodeGenerator &cg,
   }
   cg.printf("const std::vector<Eval::ExpressionPtr> &params = "
             "caller->params();\n");
+  FunctionScope::OutputCPPDynamicInvokeCount(cg);
+  outputCPPInvokeArgCountCheck(cg, ar, ret, constructor);
   cg.printf("std::vector<Eval::ExpressionPtr>::const_iterator it = "
             "params.begin();\n");
   cg.indentBegin("do {\n");
@@ -891,7 +899,6 @@ void FunctionScope::outputCPPEvalInvoke(CodeGenerator &cg,
   cg.indentEnd("}\n");
 
   if (variable || getOptionalParamCount()) {
-    cg.printf("int count = params.size();\n");
     cg.printf("if (count <= %d) ", m_minParam);
   }
 

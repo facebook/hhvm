@@ -270,8 +270,8 @@ public:
                               const char *extraArg = NULL,
                               bool constructor = false);
   void outputCPPEvalInvoke(CodeGenerator &cg, AnalysisResultPtr ar,
-                           const char *funcPrefix, const char *name,
-                           const char *extraArg = NULL, bool ret = true);
+      const char *funcPrefix, const char *name, const char *extraArg = NULL,
+      bool ret = true, bool constructor = false);
 
   /**
    * ...so ClassStatement can call them for classes that don't have
@@ -384,6 +384,9 @@ private:
   int m_callTempCountMax;
   int m_callTempCountCurrent;
   StatementPtr m_stmtCloned; // cloned method body stmt
+
+  void outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
+      bool ret, bool constructor);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

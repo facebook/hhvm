@@ -279,6 +279,8 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x488B59A7AC1AD281LL, getbacktrace) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("pear_error::getbacktrace", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -288,7 +290,6 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_getbacktrace(), null);
         else return (t_getbacktrace(a0), null);
       }
@@ -297,6 +298,8 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x4394241AA92AEB44LL, adduserinfo) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("pear_error::adduserinfo", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -312,6 +315,8 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 6:
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("pear_error::gettype", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -324,6 +329,8 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 12:
       HASH_GUARD(0x337CF323F97137ACLL, getmode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("pear_error::getmode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -336,6 +343,8 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("pear_error::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -348,6 +357,8 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 17:
       HASH_GUARD(0x2E87870339147BF1LL, getcallback) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("pear_error::getcallback", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -360,6 +371,8 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("pear_error::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -372,6 +385,8 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 19:
       HASH_GUARD(0x05CF5B3C831C4053LL, getuserinfo) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("pear_error::getuserinfo", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -382,6 +397,8 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       HASH_GUARD(0x6271FDA592D5EF53LL, tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("pear_error::tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -399,6 +416,8 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 5) return throw_toomany_arguments("pear_error::pear_error", 5, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -420,7 +439,6 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_pear_error(), null);
         else if (count == 1) return (t_pear_error(a0), null);
         else if (count == 2) return (t_pear_error(a0, a1), null);
@@ -432,6 +450,8 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 27:
       HASH_GUARD(0x74E7C543C0FD73FBLL, getdebuginfo) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("pear_error::getdebuginfo", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);

@@ -304,6 +304,8 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
     case 0:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -316,6 +318,8 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
     case 1:
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -328,6 +332,8 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
     case 2:
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -340,6 +346,8 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
     case 4:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -350,6 +358,8 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -362,6 +372,8 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -374,6 +386,8 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
     case 8:
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -384,6 +398,8 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       }
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -396,6 +412,8 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
     case 13:
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -406,6 +424,8 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       }
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -418,6 +438,8 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
     case 15:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -430,6 +452,8 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
     case 16:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -442,6 +466,8 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
     case 24:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1205,6 +1231,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1218,6 +1246,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x40C7B30DCB439C8FLL, hasproperty) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1233,6 +1263,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1245,6 +1277,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1258,6 +1292,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x21820E7AA4733998LL, hasmethod) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1273,6 +1309,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 27:
       HASH_GUARD(0x0F1AD0A8EC4C229BLL, getdefaultproperties) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1285,6 +1323,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 30:
       HASH_GUARD(0x1BC5F3D87676509ELL, isinterface) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1297,6 +1337,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 34:
       HASH_GUARD(0x323D9BCB05797B22LL, getstaticproperties) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1310,6 +1352,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x030CE1D6142F8C29LL, isinstance) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1323,6 +1367,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       HASH_GUARD(0x1D6B8CA358B49929LL, getextensionname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1336,6 +1382,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x16BA16CE6488AAAALL, getmethods) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1345,12 +1393,13 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_getmethods());
         else return (t_getmethods(a0));
       }
       HASH_GUARD(0x226F6E80CECD3CAALL, getconstructor) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1361,6 +1410,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       HASH_GUARD(0x24596BE6D21F7CAALL, getinterfacenames) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1375,6 +1426,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1387,12 +1440,13 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_getstaticpropertyvalue(a0));
         else return (t_getstaticpropertyvalue(a0, a1));
       }
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1405,6 +1459,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 48:
       HASH_GUARD(0x30A86FCA01FE7030LL, newinstance) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1412,7 +1467,6 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           vargs.append((*it)->eval(env));
         }
-        int count = params.size();
         if (count <= 0) return (t_newinstance(count));
         return (t_newinstance(count,vargs));
       }
@@ -1421,6 +1475,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x3DB53E1FBD3C0734LL, getconstant) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1437,6 +1493,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x0D81ECE253A3B5B6LL, getmethod) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1452,6 +1510,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 55:
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1464,6 +1524,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 59:
       HASH_GUARD(0x25D24435915E6E3BLL, getextension) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1476,6 +1538,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 60:
       HASH_GUARD(0x0D8AAD6BA2BBCD3CLL, isinstantiable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1489,6 +1553,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x54C2DC04C4A62B3FLL, hasconstant) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1504,6 +1570,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 67:
       HASH_GUARD(0x67C15E3D98C00B43LL, getinterfaces) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1516,6 +1584,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 68:
       HASH_GUARD(0x1EB679C3602F4B44LL, getproperties) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1529,6 +1599,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x0FD73627FB023047LL, getproperty) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1544,6 +1616,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1556,6 +1630,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 78:
       HASH_GUARD(0x7D5A57B5370B68CELL, isiterateable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1568,6 +1644,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 79:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1580,6 +1658,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 85:
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1593,6 +1673,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1608,6 +1690,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 100:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1620,6 +1704,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 101:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1633,6 +1719,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x2735DCC254EE5C66LL, newinstanceargs) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1650,6 +1738,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1668,6 +1758,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 112:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1682,6 +1774,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1700,6 +1794,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 114:
       HASH_GUARD(0x74F7FEDE16957472LL, getparentclass) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1712,6 +1808,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 120:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1725,6 +1823,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x28DC702215C7D6FBLL, implementsinterface) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1741,6 +1841,8 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x373333991926C97ELL, issubclassof) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1766,6 +1868,8 @@ Variant c_reflectionobject::os_invoke_from_eval(const char *c, const char *s, Ev
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1999,6 +2103,8 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2011,6 +2117,8 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2021,6 +2129,8 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2033,6 +2143,8 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2043,6 +2155,8 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2055,6 +2169,8 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2069,6 +2185,8 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2081,13 +2199,14 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2337,6 +2456,8 @@ void c_reflectionclass::dynConstruct(CArrRef params) {
 void c_reflectionclass::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -2891,6 +3012,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2904,6 +3027,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x40C7B30DCB439C8FLL, hasproperty) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2919,6 +3044,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2931,6 +3058,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2944,6 +3073,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x21820E7AA4733998LL, hasmethod) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2959,6 +3090,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 27:
       HASH_GUARD(0x0F1AD0A8EC4C229BLL, getdefaultproperties) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2971,6 +3104,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 30:
       HASH_GUARD(0x1BC5F3D87676509ELL, isinterface) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2983,6 +3118,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 34:
       HASH_GUARD(0x323D9BCB05797B22LL, getstaticproperties) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2996,6 +3133,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x030CE1D6142F8C29LL, isinstance) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3009,6 +3148,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       HASH_GUARD(0x1D6B8CA358B49929LL, getextensionname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3022,6 +3163,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x16BA16CE6488AAAALL, getmethods) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3031,12 +3174,13 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_getmethods());
         else return (t_getmethods(a0));
       }
       HASH_GUARD(0x226F6E80CECD3CAALL, getconstructor) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3047,6 +3191,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       HASH_GUARD(0x24596BE6D21F7CAALL, getinterfacenames) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3061,6 +3207,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3073,12 +3221,13 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_getstaticpropertyvalue(a0));
         else return (t_getstaticpropertyvalue(a0, a1));
       }
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3091,6 +3240,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 48:
       HASH_GUARD(0x30A86FCA01FE7030LL, newinstance) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3098,7 +3248,6 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         for (; it != params.end(); ++it) {
           vargs.append((*it)->eval(env));
         }
-        int count = params.size();
         if (count <= 0) return (t_newinstance(count));
         return (t_newinstance(count,vargs));
       }
@@ -3107,6 +3256,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x3DB53E1FBD3C0734LL, getconstant) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3123,6 +3274,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x0D81ECE253A3B5B6LL, getmethod) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3138,6 +3291,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 55:
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3150,6 +3305,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 59:
       HASH_GUARD(0x25D24435915E6E3BLL, getextension) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3162,6 +3319,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 60:
       HASH_GUARD(0x0D8AAD6BA2BBCD3CLL, isinstantiable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3175,6 +3334,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x54C2DC04C4A62B3FLL, hasconstant) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3190,6 +3351,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 67:
       HASH_GUARD(0x67C15E3D98C00B43LL, getinterfaces) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3202,6 +3365,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 68:
       HASH_GUARD(0x1EB679C3602F4B44LL, getproperties) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3215,6 +3380,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x0FD73627FB023047LL, getproperty) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3230,6 +3397,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3242,6 +3411,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 78:
       HASH_GUARD(0x7D5A57B5370B68CELL, isiterateable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3254,6 +3425,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 79:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3266,6 +3439,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 85:
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3279,6 +3454,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3294,6 +3471,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 100:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3306,6 +3485,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 101:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3319,6 +3500,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x2735DCC254EE5C66LL, newinstanceargs) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3336,6 +3519,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionclass::test", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3356,6 +3541,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3374,6 +3561,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 112:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3388,6 +3577,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3406,6 +3597,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 114:
       HASH_GUARD(0x74F7FEDE16957472LL, getparentclass) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3418,6 +3611,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 120:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3431,6 +3626,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x28DC702215C7D6FBLL, implementsinterface) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3445,6 +3642,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x5E82B850BB90B0FBLL, fetch) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::fetch", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3461,6 +3660,8 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x373333991926C97ELL, issubclassof) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3486,6 +3687,8 @@ Variant c_reflectionclass::os_invoke_from_eval(const char *c, const char *s, Eva
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4336,6 +4539,8 @@ void c_reflectionextension::dynConstruct(CArrRef params) {
 void c_reflectionextension::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -4519,6 +4724,8 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
     case 2:
       HASH_GUARD(0x0113D73FC859EDC2LL, getclasses) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getclasses", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4531,6 +4738,8 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4545,6 +4754,8 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4563,6 +4774,8 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
     case 15:
       HASH_GUARD(0x652BDFA6E22F17AFLL, getfunctions) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getfunctions", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4575,6 +4788,8 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4587,6 +4802,8 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
     case 20:
       HASH_GUARD(0x5CE2786E11341594LL, getclassnames) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getclassnames", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4599,6 +4816,8 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
     case 21:
       HASH_GUARD(0x306B5F4D1D03D335LL, getinientries) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getinientries", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4609,6 +4828,8 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getconstants", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4621,6 +4842,8 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
     case 22:
       HASH_GUARD(0x7521E8833BE3D316LL, getversion) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getversion", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4634,6 +4857,8 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4647,6 +4872,8 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       HASH_GUARD(0x0F2EF58F157D479FLL, info) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::info", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4669,6 +4896,8 @@ Variant c_reflectionextension::os_invoke_from_eval(const char *c, const char *s,
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4966,6 +5195,8 @@ void c_reflectionmethod::dynConstructFromEval(Eval::VariableEnvironment &env, co
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -5361,6 +5592,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x3FCE192CF6199942LL, invoke) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1) return throw_missing_arguments("reflectionmethod::invoke", count+1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5371,7 +5604,6 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           vargs.append((*it)->eval(env));
         }
-        int count = params.size();
         if (count <= 1) return (t_invoke(count, a0));
         return (t_invoke(count, a0,vargs));
       }
@@ -5381,6 +5613,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionmethod::invokeargs", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5397,6 +5631,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5409,6 +5645,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 7:
       HASH_GUARD(0x51A20EA0E327F607LL, isdestructor) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isdestructor", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5421,6 +5659,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 13:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5433,6 +5673,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 15:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5445,6 +5687,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5457,6 +5701,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getmodifiers", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5469,6 +5715,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 25:
       HASH_GUARD(0x7A15DC56E8CC0B19LL, isstatic) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isstatic", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5483,6 +5731,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5501,6 +5751,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 32:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5513,6 +5765,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 33:
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5525,6 +5779,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 34:
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getclosure", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5537,6 +5793,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 35:
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getdeclaringclass", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5549,6 +5807,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 36:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5561,6 +5821,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 37:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5573,6 +5835,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 40:
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5583,6 +5847,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5596,6 +5862,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5617,6 +5885,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 42:
       HASH_GUARD(0x2D7209A590477CEALL, isprotected) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprotected", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5629,6 +5899,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 45:
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5641,6 +5913,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 46:
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isfinal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5653,6 +5927,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 47:
       HASH_GUARD(0x37AAE0845E2F636FLL, isprivate) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprivate", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5665,6 +5941,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 48:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5677,6 +5955,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 55:
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isabstract", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5689,6 +5969,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 56:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5701,6 +5983,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 58:
       HASH_GUARD(0x654B5F965C5CAC7ALL, isconstructor) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isconstructor", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5713,6 +5997,8 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 60:
       HASH_GUARD(0x2820F10358723B7CLL, ispublic) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::ispublic", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5736,6 +6022,8 @@ Variant c_reflectionmethod::os_invoke_from_eval(const char *c, const char *s, Ev
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6116,6 +6404,8 @@ void c_reflectionproperty::dynConstructFromEval(Eval::VariableEnvironment &env, 
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -6353,6 +6643,8 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 2:
       HASH_GUARD(0x791E9751F5B8C5A2LL, setaccessible) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::setaccessible", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6366,6 +6658,8 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x56879BCEB40997E3LL, getvalue) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("reflectionproperty::getvalue", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6375,12 +6669,13 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_getvalue());
         else return (t_getvalue(a0));
       }
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdeclaringclass", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6393,6 +6688,8 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6408,6 +6705,8 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6429,6 +6728,8 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 10:
       HASH_GUARD(0x2D7209A590477CEALL, isprotected) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprotected", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6441,6 +6742,8 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 15:
       HASH_GUARD(0x37AAE0845E2F636FLL, isprivate) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprivate", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6453,6 +6756,8 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6465,6 +6770,8 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getmodifiers", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6477,6 +6784,8 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 21:
       HASH_GUARD(0x384A52597AB11F15LL, isdefault) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isdefault", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6489,6 +6798,8 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionproperty::setvalue", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6507,6 +6818,8 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 24:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdoccomment", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6519,6 +6832,8 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 25:
       HASH_GUARD(0x7A15DC56E8CC0B19LL, isstatic) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isstatic", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6531,6 +6846,8 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 28:
       HASH_GUARD(0x2820F10358723B7CLL, ispublic) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::ispublic", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6545,6 +6862,8 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6574,6 +6893,8 @@ Variant c_reflectionproperty::os_invoke_from_eval(const char *c, const char *s, 
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6865,6 +7186,8 @@ void c_reflectionfunction::dynConstruct(CArrRef params) {
 void c_reflectionfunction::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -7133,6 +7456,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 2:
       HASH_GUARD(0x3FCE192CF6199942LL, invoke) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7140,7 +7464,6 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
         for (; it != params.end(); ++it) {
           vargs.append((*it)->eval(env));
         }
-        int count = params.size();
         if (count <= 0) return (t_invoke(count));
         return (t_invoke(count,vargs));
       }
@@ -7149,6 +7472,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x3235AF57F23103C4LL, invokeargs) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionfunction::invokeargs", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7162,6 +7487,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7174,6 +7501,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 13:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7186,6 +7515,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 15:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7198,6 +7529,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunction::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7211,6 +7544,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7226,6 +7561,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 32:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7238,6 +7575,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 33:
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7250,6 +7589,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 34:
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7262,6 +7603,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 36:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7274,6 +7617,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 37:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7286,6 +7631,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 40:
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7296,6 +7643,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7308,6 +7657,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7326,6 +7677,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 45:
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7338,6 +7691,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 48:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7350,6 +7705,8 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 56:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7372,6 +7729,8 @@ Variant c_reflectionfunction::os_invoke_from_eval(const char *c, const char *s, 
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7596,6 +7955,8 @@ void c_reflectionparameter::dynConstructFromEval(Eval::VariableEnvironment &env,
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -7805,6 +8166,8 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 3:
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdeclaringclass", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7817,6 +8180,8 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7832,6 +8197,8 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7851,6 +8218,8 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       HASH_GUARD(0x4044F1EEBF3BB8C8LL, getposition) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getposition", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7863,6 +8232,8 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 9:
       HASH_GUARD(0x4F51DA0B633E9909LL, getclass) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getclass", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7873,6 +8244,8 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       HASH_GUARD(0x24ED05F4504C4C09LL, allowsnull) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::allowsnull", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7885,6 +8258,8 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 12:
       HASH_GUARD(0x27C482A6C7951E0CLL, getdefaultvalue) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdefaultvalue", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7897,6 +8272,8 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 17:
       HASH_GUARD(0x13E3F304BDD89FB1LL, ispassedbyreference) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::ispassedbyreference", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7909,6 +8286,8 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 18:
       HASH_GUARD(0x6E34805C91257C92LL, isdefaultvalueavailable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isdefaultvalueavailable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7921,6 +8300,8 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7933,6 +8314,8 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 21:
       HASH_GUARD(0x2D6EF48BBAB22735LL, isoptional) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isoptional", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7945,6 +8328,8 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 29:
       HASH_GUARD(0x5A9CE40C0F25871DLL, isarray) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isarray", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7959,6 +8344,8 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7988,6 +8375,8 @@ Variant c_reflectionparameter::os_invoke_from_eval(const char *c, const char *s,
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;

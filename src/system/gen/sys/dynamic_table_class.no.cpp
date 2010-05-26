@@ -290,6 +290,8 @@ void c_pdoexception::dynConstruct(CArrRef params) {
 }
 void c_pdoexception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -445,6 +447,8 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -457,6 +461,8 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -469,6 +475,8 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -481,6 +489,8 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -493,6 +503,8 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -503,6 +515,8 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -515,6 +529,8 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -527,6 +543,8 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -539,6 +557,8 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -649,6 +669,8 @@ void c_domdocumentfragment::dynConstruct(CArrRef params) {
 }
 void c_domdocumentfragment::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -964,6 +986,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -980,6 +1004,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -998,7 +1024,6 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_c14n());
         else if (count == 1) return (t_c14n(a0));
         else if (count == 2) return (t_c14n(a0, a1));
@@ -1011,6 +1036,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1030,6 +1057,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1044,6 +1073,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1060,6 +1091,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1069,7 +1102,6 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_clonenode());
         else return (t_clonenode(a0));
       }
@@ -1079,6 +1111,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1097,6 +1131,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1109,6 +1145,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1122,6 +1160,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1136,6 +1176,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1151,6 +1193,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1164,6 +1208,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1180,6 +1226,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1196,6 +1244,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1211,6 +1261,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1222,6 +1274,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x1E44C8E8C1920931LL, appendxml) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appendxml", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1239,6 +1293,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1251,12 +1307,13 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_insertbefore(a0));
         else return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1274,6 +1331,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1295,7 +1354,6 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_c14nfile(a0));
         else if (count == 2) return (t_c14nfile(a0, a1));
         else if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -1308,6 +1366,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1324,6 +1384,8 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1437,6 +1499,8 @@ void c_domtext::dynConstruct(CArrRef params) {
 void c_domtext::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 1) throw_toomany_arguments("__construct", 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -1446,7 +1510,6 @@ void c_domtext::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval:
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 0) (t___construct(), null);
   else (t___construct(a0), null);
 }
@@ -1830,6 +1893,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1846,6 +1911,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1864,7 +1931,6 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_c14n());
         else if (count == 1) return (t_c14n(a0));
         else if (count == 2) return (t_c14n(a0, a1));
@@ -1877,6 +1943,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1896,6 +1964,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1910,6 +1980,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1926,6 +1998,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1935,7 +2009,6 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_clonenode());
         else return (t_clonenode(a0));
       }
@@ -1945,6 +2018,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1963,6 +2038,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1975,6 +2052,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1993,6 +2072,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2006,6 +2087,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2020,6 +2103,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2033,6 +2118,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       HASH_GUARD(0x28FBAB4F0F6C02DDLL, iswhitespaceinelementcontent) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2046,6 +2133,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2055,7 +2144,6 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else return (t___construct(a0), null);
       }
@@ -2064,6 +2152,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2080,6 +2170,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2096,6 +2188,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2112,6 +2206,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2127,6 +2223,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2141,6 +2239,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2161,6 +2261,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2173,12 +2275,13 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_insertbefore(a0));
         else return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2194,6 +2297,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2220,6 +2325,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2241,7 +2348,6 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_c14nfile(a0));
         else if (count == 2) return (t_c14nfile(a0, a1));
         else if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -2253,6 +2359,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x714D38308D8212B7LL, splittext) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("splittext", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2270,6 +2378,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2286,6 +2396,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2300,6 +2412,8 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2417,6 +2531,8 @@ void c_domcdatasection::dynConstruct(CArrRef params) {
 void c_domcdatasection::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -2803,6 +2919,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2819,6 +2937,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2837,7 +2957,6 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_c14n());
         else if (count == 1) return (t_c14n(a0));
         else if (count == 2) return (t_c14n(a0, a1));
@@ -2850,6 +2969,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2869,6 +2990,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2883,6 +3006,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2899,6 +3024,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2908,7 +3035,6 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_clonenode());
         else return (t_clonenode(a0));
       }
@@ -2918,6 +3044,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2936,6 +3064,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2948,6 +3078,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2966,6 +3098,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2979,6 +3113,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2993,6 +3129,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3006,6 +3144,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       HASH_GUARD(0x28FBAB4F0F6C02DDLL, iswhitespaceinelementcontent) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3019,6 +3159,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3035,6 +3177,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3051,6 +3195,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3067,6 +3213,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3083,6 +3231,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3098,6 +3248,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3112,6 +3264,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3132,6 +3286,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3144,12 +3300,13 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_insertbefore(a0));
         else return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3165,6 +3322,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3191,6 +3350,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3212,7 +3373,6 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_c14nfile(a0));
         else if (count == 2) return (t_c14nfile(a0, a1));
         else if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -3224,6 +3384,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x714D38308D8212B7LL, splittext) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("splittext", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3241,6 +3403,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3257,6 +3421,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3271,6 +3437,8 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3387,6 +3555,8 @@ void c_domdocumenttype::dynConstruct(CArrRef params) {
 }
 void c_domdocumenttype::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -3697,6 +3867,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3713,6 +3885,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3731,7 +3905,6 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_c14n());
         else if (count == 1) return (t_c14n(a0));
         else if (count == 2) return (t_c14n(a0, a1));
@@ -3744,6 +3917,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3763,6 +3938,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3777,6 +3954,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3793,6 +3972,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3802,7 +3983,6 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_clonenode());
         else return (t_clonenode(a0));
       }
@@ -3812,6 +3992,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3830,6 +4012,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3842,6 +4026,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3855,6 +4041,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3869,6 +4057,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3884,6 +4074,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3897,6 +4089,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3913,6 +4107,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3929,6 +4125,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3944,6 +4142,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3958,6 +4158,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3970,12 +4172,13 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_insertbefore(a0));
         else return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3993,6 +4196,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4014,7 +4219,6 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_c14nfile(a0));
         else if (count == 2) return (t_c14nfile(a0, a1));
         else if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -4027,6 +4231,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4043,6 +4249,8 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4155,6 +4363,8 @@ void c_sqlite3stmt::dynConstructFromEval(Eval::VariableEnvironment &env, const E
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) throw_wrong_arguments("__construct", count, 2, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -4324,6 +4534,8 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 0:
       HASH_GUARD(0x340A51AE22A924E0LL, reset) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reset", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4336,6 +4548,8 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 1:
       HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("close", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4351,6 +4565,8 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4366,7 +4582,6 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 2) return (t_bindvalue(a0, a1));
         else return (t_bindvalue(a0, a1, a2));
       }
@@ -4374,6 +4589,8 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 7:
       HASH_GUARD(0x31DA235C5A226667LL, clear) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("clear", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4386,6 +4603,8 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 14:
       HASH_GUARD(0x187C7F43EB57714ELL, execute) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("execute", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4398,6 +4617,8 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 19:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4413,6 +4634,8 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 3) return throw_wrong_arguments("bindparam", count, 2, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4428,7 +4651,6 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 2) return (t_bindparam(a0, ref(a1)));
         else return (t_bindparam(a0, ref(a1), a2));
       }
@@ -4436,6 +4658,8 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 23:
       HASH_GUARD(0x72FA987001E93357LL, paramcount) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("paramcount", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4450,6 +4674,8 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4566,6 +4792,8 @@ void c_domnodelist::dynConstruct(CArrRef params) {
 }
 void c_domnodelist::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -4684,6 +4912,8 @@ Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4694,6 +4924,8 @@ Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       HASH_GUARD(0x570B2E1232A12503LL, getiterator) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4708,6 +4940,8 @@ Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4727,6 +4961,8 @@ Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x0A41DBE0830902C6LL, item) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4742,6 +4978,8 @@ Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4753,6 +4991,8 @@ Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4892,6 +5132,8 @@ void c_normalizer::dynConstruct(CArrRef params) {
 }
 void c_normalizer::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -5016,6 +5258,8 @@ Variant c_normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5028,7 +5272,6 @@ Variant c_normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (ti_normalize(o_getClassName(), a0));
         else return (ti_normalize(o_getClassName(), a0, a1));
       }
@@ -5036,6 +5279,8 @@ Variant c_normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5050,6 +5295,8 @@ Variant c_normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5062,7 +5309,6 @@ Variant c_normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (ti_isnormalized(o_getClassName(), a0));
         else return (ti_isnormalized(o_getClassName(), a0, a1));
       }
@@ -5070,6 +5316,8 @@ Variant c_normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 7:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5092,6 +5340,8 @@ Variant c_normalizer::os_invoke_from_eval(const char *c, const char *s, Eval::Va
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5104,7 +5354,6 @@ Variant c_normalizer::os_invoke_from_eval(const char *c, const char *s, Eval::Va
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (ti_isnormalized(c, a0));
         else return (ti_isnormalized(c, a0, a1));
       }
@@ -5114,6 +5363,8 @@ Variant c_normalizer::os_invoke_from_eval(const char *c, const char *s, Eval::Va
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5126,7 +5377,6 @@ Variant c_normalizer::os_invoke_from_eval(const char *c, const char *s, Eval::Va
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (ti_normalize(c, a0));
         else return (ti_normalize(c, a0, a1));
       }
@@ -5229,6 +5479,8 @@ void c_domcharacterdata::dynConstruct(CArrRef params) {
 }
 void c_domcharacterdata::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -5595,6 +5847,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5611,6 +5865,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5629,7 +5885,6 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_c14n());
         else if (count == 1) return (t_c14n(a0));
         else if (count == 2) return (t_c14n(a0, a1));
@@ -5642,6 +5897,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5661,6 +5918,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5675,6 +5934,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5691,6 +5952,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5700,7 +5963,6 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_clonenode());
         else return (t_clonenode(a0));
       }
@@ -5710,6 +5972,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5728,6 +5992,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5740,6 +6006,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5758,6 +6026,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5771,6 +6041,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5785,6 +6057,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5800,6 +6074,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5813,6 +6089,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5829,6 +6107,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5845,6 +6125,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5861,6 +6143,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5876,6 +6160,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5890,6 +6176,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5910,6 +6198,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5922,12 +6212,13 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_insertbefore(a0));
         else return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5943,6 +6234,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5969,6 +6262,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5990,7 +6285,6 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_c14nfile(a0));
         else if (count == 2) return (t_c14nfile(a0, a1));
         else if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -6003,6 +6297,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6019,6 +6315,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6033,6 +6331,8 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6150,6 +6450,8 @@ void c_domentityreference::dynConstruct(CArrRef params) {
 void c_domentityreference::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -6460,6 +6762,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6476,6 +6780,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6494,7 +6800,6 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_c14n());
         else if (count == 1) return (t_c14n(a0));
         else if (count == 2) return (t_c14n(a0, a1));
@@ -6507,6 +6812,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6526,6 +6833,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6540,6 +6849,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6556,6 +6867,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6565,7 +6878,6 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_clonenode());
         else return (t_clonenode(a0));
       }
@@ -6575,6 +6887,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6593,6 +6907,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6605,6 +6921,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6618,6 +6936,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6632,6 +6952,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6648,6 +6970,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6664,6 +6988,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6680,6 +7006,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6696,6 +7024,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6711,6 +7041,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6725,6 +7057,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6737,12 +7071,13 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_insertbefore(a0));
         else return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6760,6 +7095,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6781,7 +7118,6 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_c14nfile(a0));
         else if (count == 2) return (t_c14nfile(a0, a1));
         else if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -6794,6 +7130,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6810,6 +7148,8 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6964,6 +7304,8 @@ void c_datetimezone::dynConstruct(CArrRef params) {
 void c_datetimezone::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -7115,6 +7457,8 @@ Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 3:
       HASH_GUARD(0x6D7CD16BBA93D063LL, listidentifiers) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7125,6 +7469,8 @@ Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7137,6 +7483,8 @@ Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 4:
       HASH_GUARD(0x63D3CF3884CE93F4LL, gettransitions) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("gettransitions", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7149,6 +7497,8 @@ Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7161,6 +7511,8 @@ Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 8:
       HASH_GUARD(0x2D0CCAB16C3ED068LL, listabbreviations) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7174,6 +7526,8 @@ Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       HASH_GUARD(0x68DB66F60B55BD0BLL, getoffset) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("getoffset", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7190,6 +7544,8 @@ Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7213,6 +7569,8 @@ Variant c_datetimezone::os_invoke_from_eval(const char *c, const char *s, Eval::
     case 0:
       HASH_GUARD(0x2D0CCAB16C3ED068LL, listabbreviations) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7225,6 +7583,8 @@ Variant c_datetimezone::os_invoke_from_eval(const char *c, const char *s, Eval::
     case 3:
       HASH_GUARD(0x6D7CD16BBA93D063LL, listidentifiers) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7332,6 +7692,8 @@ void c_domnodeiterator::dynConstruct(CArrRef params) {
 }
 void c_domnodeiterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -7467,6 +7829,8 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 1:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("key", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7479,6 +7843,8 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7491,6 +7857,8 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 4:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("valid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7503,6 +7871,8 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 8:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("next", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7515,6 +7885,8 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 10:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7527,6 +7899,8 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 12:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("current", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7539,6 +7913,8 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7649,6 +8025,8 @@ void c_domimplementation::dynConstruct(CArrRef params) {
 }
 void c_domimplementation::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -7767,6 +8145,8 @@ Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 3) return throw_toomany_arguments("createdocumenttype", 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7782,7 +8162,6 @@ Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_createdocumenttype());
         else if (count == 1) return (t_createdocumenttype(a0));
         else if (count == 2) return (t_createdocumenttype(a0, a1));
@@ -7790,6 +8169,8 @@ Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7802,6 +8183,8 @@ Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("hasfeature", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7823,6 +8206,8 @@ Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 3) return throw_toomany_arguments("createdocument", 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7838,7 +8223,6 @@ Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_createdocument());
         else if (count == 1) return (t_createdocument(a0));
         else if (count == 2) return (t_createdocument(a0, a1));
@@ -7848,6 +8232,8 @@ Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7969,6 +8355,8 @@ void c_soapheader::dynConstructFromEval(Eval::VariableEnvironment &env, const Ev
   Variant a3;
   Variant a4;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 5) throw_wrong_arguments("__construct", count, 2, 5, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -7990,7 +8378,6 @@ void c_soapheader::dynConstructFromEval(Eval::VariableEnvironment &env, const Ev
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 2) (t___construct(a0, a1), null);
   else if (count == 3) (t___construct(a0, a1, a2), null);
   else if (count == 4) (t___construct(a0, a1, a2, a3), null);
@@ -8065,6 +8452,8 @@ Variant c_soapheader::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8080,6 +8469,8 @@ Variant c_soapheader::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 5) return throw_wrong_arguments("__construct", count, 2, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8101,7 +8492,6 @@ Variant c_soapheader::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 2) return (t___construct(a0, a1), null);
         else if (count == 3) return (t___construct(a0, a1, a2), null);
         else if (count == 4) return (t___construct(a0, a1, a2, a3), null);
@@ -8209,6 +8599,8 @@ void c_domnotation::dynConstruct(CArrRef params) {
 }
 void c_domnotation::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -8519,6 +8911,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8535,6 +8929,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8553,7 +8949,6 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_c14n());
         else if (count == 1) return (t_c14n(a0));
         else if (count == 2) return (t_c14n(a0, a1));
@@ -8566,6 +8961,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8585,6 +8982,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8599,6 +8998,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8615,6 +9016,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8624,7 +9027,6 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_clonenode());
         else return (t_clonenode(a0));
       }
@@ -8634,6 +9036,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8652,6 +9056,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8664,6 +9070,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8677,6 +9085,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8691,6 +9101,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8706,6 +9118,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8719,6 +9133,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8735,6 +9151,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8751,6 +9169,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8766,6 +9186,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8780,6 +9202,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8792,12 +9216,13 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_insertbefore(a0));
         else return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8815,6 +9240,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8836,7 +9263,6 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_c14nfile(a0));
         else if (count == 2) return (t_c14nfile(a0, a1));
         else if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -8849,6 +9275,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8865,6 +9293,8 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8978,6 +9408,8 @@ void c_domcomment::dynConstruct(CArrRef params) {
 void c_domcomment::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 1) throw_toomany_arguments("__construct", 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -8987,7 +9419,6 @@ void c_domcomment::dynConstructFromEval(Eval::VariableEnvironment &env, const Ev
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 0) (t___construct(), null);
   else (t___construct(a0), null);
 }
@@ -9348,6 +9779,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9364,6 +9797,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9382,7 +9817,6 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_c14n());
         else if (count == 1) return (t_c14n(a0));
         else if (count == 2) return (t_c14n(a0, a1));
@@ -9395,6 +9829,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9414,6 +9850,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9428,6 +9866,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9444,6 +9884,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9453,7 +9895,6 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_clonenode());
         else return (t_clonenode(a0));
       }
@@ -9463,6 +9904,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9481,6 +9924,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9493,6 +9938,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9511,6 +9958,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9524,6 +9973,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9538,6 +9989,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9554,6 +10007,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9563,7 +10018,6 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else return (t___construct(a0), null);
       }
@@ -9572,6 +10026,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9588,6 +10044,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9604,6 +10062,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9620,6 +10080,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9635,6 +10097,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9649,6 +10113,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9669,6 +10135,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9681,12 +10149,13 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_insertbefore(a0));
         else return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9702,6 +10171,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9728,6 +10199,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9749,7 +10222,6 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_c14nfile(a0));
         else if (count == 2) return (t_c14nfile(a0, a1));
         else if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -9762,6 +10234,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9778,6 +10252,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9792,6 +10268,8 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9908,6 +10386,8 @@ void c_sqlite3::dynConstruct(CArrRef params) {
 }
 void c_sqlite3::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -10183,6 +10663,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 1:
       HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("close", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10195,6 +10677,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 2:
       HASH_GUARD(0x6081F282094466C2LL, lasterrormsg) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("lasterrormsg", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10209,6 +10693,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 3 || count > 4) return throw_wrong_arguments("openblob", count, 3, 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -10227,7 +10713,6 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 3) return (t_openblob(a0, a1, a2));
         else return (t_openblob(a0, a1, a2, a3));
       }
@@ -10239,6 +10724,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 3 || count > 4) return throw_wrong_arguments("createaggregate", count, 3, 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -10257,7 +10744,6 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 3) return (t_createaggregate(a0, a1, a2));
         else return (t_createaggregate(a0, a1, a2, a3));
       }
@@ -10268,6 +10754,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 3) return throw_wrong_arguments("open", count, 1, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -10283,7 +10771,6 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_open(a0), null);
         else if (count == 2) return (t_open(a0, a1), null);
         else return (t_open(a0, a1, a2), null);
@@ -10292,6 +10779,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 10:
       HASH_GUARD(0x632B468FC2FCAB0ALL, lasterrorcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("lasterrorcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10305,6 +10794,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x4F1D1ED7B087208CLL, exec) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -10323,6 +10814,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 3) return throw_wrong_arguments("createfunction", count, 2, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -10338,7 +10831,6 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 2) return (t_createfunction(a0, a1));
         else return (t_createfunction(a0, a1, a2));
       }
@@ -10346,6 +10838,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 25:
       HASH_GUARD(0x64D2BDB189B02819LL, changes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("changes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10358,6 +10852,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10371,6 +10867,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x1B3CDE890A487664LL, loadextension) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("loadextension", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -10386,6 +10884,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 38:
       HASH_GUARD(0x5024F08DB0FDCBE6LL, lastinsertrowid) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("lastinsertrowid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10398,6 +10898,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 42:
       HASH_GUARD(0x5AE41239FF63D86ALL, version) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("version", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10412,6 +10914,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("querysingle", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -10424,7 +10928,6 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_querysingle(a0));
         else return (t_querysingle(a0, a1));
       }
@@ -10433,6 +10936,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x540020AE4BA591AFLL, prepare) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("prepare", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -10448,6 +10953,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 51:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10461,6 +10968,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x607C4C73BB251635LL, escapestring) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("escapestring", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -10477,6 +10986,8 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x356758D4414DA377LL, query) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -10594,6 +11105,8 @@ void c_domattr::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval:
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -10606,7 +11119,6 @@ void c_domattr::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval:
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 1) (t___construct(a0), null);
   else (t___construct(a0, a1), null);
 }
@@ -10922,6 +11434,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10938,6 +11452,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -10956,7 +11472,6 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_c14n());
         else if (count == 1) return (t_c14n(a0));
         else if (count == 2) return (t_c14n(a0, a1));
@@ -10969,6 +11484,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -10988,6 +11505,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11002,6 +11521,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11018,6 +11539,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11027,7 +11550,6 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_clonenode());
         else return (t_clonenode(a0));
       }
@@ -11037,6 +11559,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11055,6 +11579,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -11067,6 +11593,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -11080,6 +11608,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11094,6 +11624,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11111,6 +11643,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11123,7 +11657,6 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
@@ -11132,6 +11665,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11148,6 +11683,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11161,6 +11698,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       HASH_GUARD(0x30A9329415D17F24LL, isid) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("isid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -11174,6 +11713,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11189,6 +11730,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -11203,6 +11746,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11215,12 +11760,13 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_insertbefore(a0));
         else return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -11238,6 +11784,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11259,7 +11807,6 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_c14nfile(a0));
         else if (count == 2) return (t_c14nfile(a0, a1));
         else if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -11272,6 +11819,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11288,6 +11837,8 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -11412,6 +11963,8 @@ void c_soapvar::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval:
   Variant a4;
   Variant a5;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 6) throw_wrong_arguments("__construct", count, 2, 6, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -11436,7 +11989,6 @@ void c_soapvar::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval:
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 2) (t___construct(a0, a1), null);
   else if (count == 3) (t___construct(a0, a1, a2), null);
   else if (count == 4) (t___construct(a0, a1, a2, a3), null);
@@ -11514,6 +12066,8 @@ Variant c_soapvar::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -11530,6 +12084,8 @@ Variant c_soapvar::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a4;
         Variant a5;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11554,7 +12110,6 @@ Variant c_soapvar::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 2) return (t___construct(a0, a1), null);
         else if (count == 3) return (t___construct(a0, a1, a2), null);
         else if (count == 4) return (t___construct(a0, a1, a2, a3), null);
@@ -11663,6 +12218,8 @@ void c_domnamednodemap::dynConstruct(CArrRef params) {
 }
 void c_domnamednodemap::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -11805,6 +12362,8 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -11815,6 +12374,8 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       HASH_GUARD(0x570B2E1232A12503LL, getiterator) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -11829,6 +12390,8 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11848,6 +12411,8 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x0A41DBE0830902C6LL, item) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11864,6 +12429,8 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x5D3CEC627F9ADC3ALL, getnameditem) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("getnameditem", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11881,6 +12448,8 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("getnameditemns", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -11899,6 +12468,8 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -11910,6 +12481,8 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12023,6 +12596,8 @@ void c_sqlite3result::dynConstruct(CArrRef params) {
 }
 void c_sqlite3result::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -12172,6 +12747,8 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
     case 0:
       HASH_GUARD(0x340A51AE22A924E0LL, reset) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reset", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -12184,6 +12761,8 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -12196,6 +12775,8 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
     case 6:
       HASH_GUARD(0x4C7702FC22784996LL, numcolumns) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("numcolumns", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -12209,6 +12790,8 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x696EFC04EE7E47F8LL, columnname) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("columnname", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12225,6 +12808,8 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x59F73C4DEF1C3A6BLL, fetcharray) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("fetcharray", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12234,7 +12819,6 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_fetcharray());
         else return (t_fetcharray(a0));
       }
@@ -12242,6 +12826,8 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
     case 12:
       HASH_GUARD(0x32A58B0CE493957CLL, finalize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("finalize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -12255,6 +12841,8 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x42EDB5CA009D8C6DLL, columntype) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("columntype", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12270,6 +12858,8 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -12393,6 +12983,8 @@ void c_simplexmlelement::dynConstructFromEval(Eval::VariableEnvironment &env, co
   Variant a3;
   Variant a4;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 5) throw_wrong_arguments("__construct", count, 1, 5, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -12414,7 +13006,6 @@ void c_simplexmlelement::dynConstructFromEval(Eval::VariableEnvironment &env, co
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 1) (t___construct(a0), null);
   else if (count == 2) (t___construct(a0, a1), null);
   else if (count == 3) (t___construct(a0, a1, a2), null);
@@ -12730,6 +13321,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x3E6BCFB9742FC700LL, offsetexists) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("offsetexists", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12746,6 +13339,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12761,6 +13356,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -12776,6 +13373,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 3) return throw_wrong_arguments("addchild", count, 1, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12791,7 +13390,6 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_addchild(a0));
         else if (count == 2) return (t_addchild(a0, a1));
         else return (t_addchild(a0, a1, a2));
@@ -12802,6 +13400,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12823,6 +13423,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 3) return throw_wrong_arguments("addattribute", count, 1, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12838,7 +13440,6 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_addattribute(a0), null);
         else if (count == 2) return (t_addattribute(a0, a1), null);
         else return (t_addattribute(a0, a1, a2), null);
@@ -12848,6 +13449,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x61D11ECEF4404498LL, offsetget) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("offsetget", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12864,6 +13467,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x0817454F196A9A1BLL, xpath) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("xpath", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12878,6 +13483,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x04FB7028C9A2079BLL, __unset) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__unset", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12895,6 +13502,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("attributes", 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12907,7 +13516,6 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_attributes());
         else if (count == 1) return (t_attributes(a0));
         else return (t_attributes(a0, a1));
@@ -12921,6 +13529,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 5) return throw_wrong_arguments("__construct", count, 1, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12942,7 +13552,6 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t___construct(a0), null);
         else if (count == 2) return (t___construct(a0, a1), null);
         else if (count == 3) return (t___construct(a0, a1, a2), null);
@@ -12953,6 +13562,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 37:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -12966,6 +13577,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x6D9D75B7E3B40FA6LL, getnamespaces) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("getnamespaces", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12975,13 +13588,14 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_getnamespaces());
         else return (t_getnamespaces(a0));
       }
       HASH_GUARD(0x5C09D9345FD864A6LL, asxml) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("asxml", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -12991,7 +13605,6 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_asxml());
         else return (t_asxml(a0));
       }
@@ -13001,6 +13614,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("children", 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13013,7 +13628,6 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_children());
         else if (count == 1) return (t_children(a0));
         else return (t_children(a0, a1));
@@ -13023,6 +13637,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x0D08AA5F0B2F34F1LL, getdocnamespaces) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("getdocnamespaces", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13032,7 +13648,6 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_getdocnamespaces());
         else return (t_getdocnamespaces(a0));
       }
@@ -13040,6 +13655,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 51:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -13054,6 +13671,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("offsetset", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13073,6 +13692,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x08329980E6369ABALL, offsetunset) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("offsetunset", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13090,6 +13711,8 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("registerxpathnamespace", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13210,6 +13833,8 @@ void c_domprocessinginstruction::dynConstructFromEval(Eval::VariableEnvironment 
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -13222,7 +13847,6 @@ void c_domprocessinginstruction::dynConstructFromEval(Eval::VariableEnvironment 
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 1) (t___construct(a0), null);
   else (t___construct(a0, a1), null);
 }
@@ -13530,6 +14154,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -13546,6 +14172,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13564,7 +14192,6 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_c14n());
         else if (count == 1) return (t_c14n(a0));
         else if (count == 2) return (t_c14n(a0, a1));
@@ -13577,6 +14204,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13596,6 +14225,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13610,6 +14241,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13626,6 +14259,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13635,7 +14270,6 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_clonenode());
         else return (t_clonenode(a0));
       }
@@ -13645,6 +14279,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13663,6 +14299,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -13675,6 +14313,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -13688,6 +14328,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13702,6 +14344,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13719,6 +14363,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13731,7 +14377,6 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
@@ -13740,6 +14385,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13756,6 +14403,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13772,6 +14421,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13787,6 +14438,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -13801,6 +14454,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13813,12 +14468,13 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_insertbefore(a0));
         else return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -13836,6 +14492,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13857,7 +14515,6 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_c14nfile(a0));
         else if (count == 2) return (t_c14nfile(a0, a1));
         else if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -13870,6 +14527,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -13886,6 +14545,8 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -13996,6 +14657,8 @@ void c_pdostatement::dynConstruct(CArrRef params) {
 }
 void c_pdostatement::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -14360,6 +15023,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 3) return throw_toomany_arguments("fetchall", 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -14375,7 +15040,6 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_fetchall());
         else if (count == 1) return (t_fetchall(a0));
         else if (count == 2) return (t_fetchall(a0, a1));
@@ -14388,6 +15052,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -14403,7 +15069,6 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 2) return (t_bindvalue(a0, a1));
         else return (t_bindvalue(a0, a1, a2));
       }
@@ -14411,6 +15076,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 5:
       HASH_GUARD(0x75A2E23098C65C05LL, closecursor) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("closecursor", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -14423,6 +15090,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 7:
       HASH_GUARD(0x6D0664CC2372F2C7LL, errorcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -14437,6 +15106,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -14456,6 +15127,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       HASH_GUARD(0x187C7F43EB57714ELL, execute) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("execute", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -14465,7 +15138,6 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_execute());
         else return (t_execute(a0));
       }
@@ -14473,6 +15145,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 15:
       HASH_GUARD(0x32A381ECDC91918FLL, columncount) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("columncount", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -14485,6 +15159,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 18:
       HASH_GUARD(0x31A8917EC4F2A252LL, nextrowset) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("nextrowset", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -14502,6 +15178,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 5) return throw_wrong_arguments("bindparam", count, 2, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -14523,7 +15201,6 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 2) return (t_bindparam(a0, ref(a1)));
         else if (count == 3) return (t_bindparam(a0, ref(a1), a2));
         else if (count == 4) return (t_bindparam(a0, ref(a1), a2, a3));
@@ -14534,6 +15211,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       HASH_GUARD(0x5C38814410C5FFD9LL, fetchcolumn) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("fetchcolumn", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -14543,7 +15222,6 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_fetchcolumn());
         else return (t_fetchcolumn(a0));
       }
@@ -14551,6 +15229,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 26:
       HASH_GUARD(0x0D43A7148903299ALL, rowcount) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("rowcount", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -14563,6 +15243,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 28:
       HASH_GUARD(0x4389F50CAA085CDCLL, __wakeup) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -14580,6 +15262,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 5) return throw_wrong_arguments("bindcolumn", count, 2, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -14601,7 +15285,6 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 2) return (t_bindcolumn(a0, ref(a1)));
         else if (count == 3) return (t_bindcolumn(a0, ref(a1), a2));
         else if (count == 4) return (t_bindcolumn(a0, ref(a1), a2, a3));
@@ -14611,6 +15294,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("fetchobject", 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -14623,7 +15308,6 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_fetchobject());
         else if (count == 1) return (t_fetchobject(a0));
         else return (t_fetchobject(a0, a1));
@@ -14632,6 +15316,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 30:
       HASH_GUARD(0x1DDD412E7F04605ELL, errorinfo) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -14644,6 +15330,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -14657,6 +15345,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       HASH_GUARD(0x78C9BF8620136861LL, setfetchmode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1) return throw_missing_arguments("setfetchmode", count+1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -14667,7 +15357,6 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         for (; it != params.end(); ++it) {
           vargs.append((*it)->eval(env));
         }
-        int count = params.size();
         if (count <= 1) return (t_setfetchmode(count, a0));
         return (t_setfetchmode(count, a0,vargs));
       }
@@ -14675,6 +15364,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 34:
       HASH_GUARD(0x699F5A1E3BD7B2A2LL, debugdumpparams) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("debugdumpparams", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -14688,6 +15379,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -14703,6 +15396,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 45:
       HASH_GUARD(0x61D1244DDADBC02DLL, __sleep) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -14715,6 +15410,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 51:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -14728,6 +15425,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       HASH_GUARD(0x5B6B980006E717FBLL, getcolumnmeta) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("getcolumnmeta", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -14744,6 +15443,8 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 3) return throw_toomany_arguments("fetch", 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -14759,7 +15460,6 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_fetch());
         else if (count == 1) return (t_fetch(a0));
         else if (count == 2) return (t_fetch(a0, a1));
@@ -14871,6 +15571,8 @@ void c_soapclient::dynConstructFromEval(Eval::VariableEnvironment &env, const Ev
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -14883,7 +15585,6 @@ void c_soapclient::dynConstructFromEval(Eval::VariableEnvironment &env, const Ev
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 1) (t___construct(a0), null);
   else (t___construct(a0, a1), null);
 }
@@ -15101,6 +15802,8 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 4:
       HASH_GUARD(0x5C5C1E24A140F6E4LL, __getlastrequest) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__getlastrequest", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -15113,6 +15816,8 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 12:
       HASH_GUARD(0x3648EE7D3B37DE8CLL, __getlastrequestheaders) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__getlastrequestheaders", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -15125,6 +15830,8 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__call", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -15143,6 +15850,8 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 17:
       HASH_GUARD(0x1365B3105FC59871LL, __getfunctions) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__getfunctions", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -15155,6 +15864,8 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 19:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -15167,6 +15878,8 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 20:
       HASH_GUARD(0x3CA9145031035A54LL, __getlastresponse) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__getlastresponse", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -15184,6 +15897,8 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 4 || count > 5) return throw_wrong_arguments("__dorequest", count, 4, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -15205,7 +15920,6 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 4) return (t___dorequest(a0, a1, a2, a3));
         else return (t___dorequest(a0, a1, a2, a3, a4));
       }
@@ -15213,6 +15927,8 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("__setcookie", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -15225,12 +15941,13 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t___setcookie(a0));
         else return (t___setcookie(a0, a1));
       }
       HASH_GUARD(0x628D398E7604B9D5LL, __gettypes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__gettypes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -15248,6 +15965,8 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 5) return throw_wrong_arguments("__soapcall", count, 2, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -15269,7 +15988,6 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 2) return (t___soapcall(a0, a1));
         else if (count == 3) return (t___soapcall(a0, a1, a2));
         else if (count == 4) return (t___soapcall(a0, a1, a2, a3));
@@ -15279,6 +15997,8 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 26:
       HASH_GUARD(0x0C94657A58A82CFALL, __getlastresponseheaders) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__getlastresponseheaders", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -15292,6 +16012,8 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x14842228D5E335BBLL, __setsoapheaders) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("__setsoapheaders", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -15301,7 +16023,6 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___setsoapheaders());
         else return (t___setsoapheaders(a0));
       }
@@ -15310,6 +16031,8 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x232D13904DBC36FFLL, __setlocation) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("__setlocation", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -15319,7 +16042,6 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___setlocation());
         else return (t___setlocation(a0));
       }
@@ -15327,6 +16049,8 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -15339,7 +16063,6 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
@@ -15447,6 +16170,8 @@ void c_soapparam::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) throw_wrong_arguments("__construct", count, 2, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -15524,6 +16249,8 @@ Variant c_soapparam::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -15536,6 +16263,8 @@ Variant c_soapparam::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -15694,6 +16423,8 @@ void c_datetime::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 2) throw_toomany_arguments("__construct", 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -15706,7 +16437,6 @@ void c_datetime::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 0) (t___construct(), null);
   else if (count == 1) (t___construct(a0), null);
   else (t___construct(a0, a1), null);
@@ -15875,6 +16605,8 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       HASH_GUARD(0x65A9B2950F080587LL, modify) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("modify", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -15893,6 +16625,8 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("setdate", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -15912,6 +16646,8 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       HASH_GUARD(0x68DB66F60B55BD0BLL, getoffset) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getoffset", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -15924,6 +16660,8 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
     case 12:
       HASH_GUARD(0x688601F33BE7716CLL, gettimezone) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("gettimezone", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -15936,6 +16674,8 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
     case 19:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -15951,6 +16691,8 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 3) return throw_wrong_arguments("setisodate", count, 2, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -15966,7 +16708,6 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 2) return (t_setisodate(a0, a1));
         else return (t_setisodate(a0, a1, a2));
       }
@@ -15977,6 +16718,8 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 3) return throw_wrong_arguments("settime", count, 2, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -15992,13 +16735,14 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 2) return (t_settime(a0, a1));
         else return (t_settime(a0, a1, a2));
       }
       HASH_GUARD(0x3B576E558B957CB8LL, settimezone) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("settimezone", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -16015,6 +16759,8 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       HASH_GUARD(0x1B6DDAF6AAF8CA9BLL, format) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("format", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -16032,6 +16778,8 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -16044,7 +16792,6 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
@@ -16393,6 +17140,8 @@ void c_pdo::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::Fun
   Variant a2;
   Variant a3;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 4) throw_wrong_arguments("__construct", count, 1, 4, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -16411,7 +17160,6 @@ void c_pdo::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::Fun
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 1) (t___construct(a0), null);
   else if (count == 2) (t___construct(a0, a1), null);
   else if (count == 3) (t___construct(a0, a1, a2), null);
@@ -16676,6 +17424,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
     case 7:
       HASH_GUARD(0x6D0664CC2372F2C7LL, errorcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -16690,6 +17440,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -16709,6 +17461,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       HASH_GUARD(0x4F1D1ED7B087208CLL, exec) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -16724,6 +17478,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
     case 14:
       HASH_GUARD(0x7FF4D594AC38340ELL, getavailabledrivers) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -16737,6 +17493,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       HASH_GUARD(0x25466EABBA2D7C12LL, lastinsertid) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("lastinsertid", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -16746,7 +17504,6 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_lastinsertid());
         else return (t_lastinsertid(a0));
       }
@@ -16754,6 +17511,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
     case 28:
       HASH_GUARD(0x4389F50CAA085CDCLL, __wakeup) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -16766,6 +17525,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
     case 30:
       HASH_GUARD(0x1DDD412E7F04605ELL, errorinfo) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -16782,6 +17543,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 4) return throw_wrong_arguments("__construct", count, 1, 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -16800,7 +17563,6 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t___construct(a0), null);
         else if (count == 2) return (t___construct(a0, a1), null);
         else if (count == 3) return (t___construct(a0, a1, a2), null);
@@ -16810,6 +17572,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
     case 36:
       HASH_GUARD(0x24D23BE465E3F324LL, commit) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("commit", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -16823,6 +17587,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -16838,6 +17604,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
     case 45:
       HASH_GUARD(0x61D1244DDADBC02DLL, __sleep) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -16852,6 +17620,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("quote", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -16864,7 +17634,6 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_quote(a0));
         else return (t_quote(a0, a1));
       }
@@ -16874,6 +17643,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("prepare", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -16886,7 +17657,6 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_prepare(a0));
         else return (t_prepare(a0, a1));
       }
@@ -16894,6 +17664,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
     case 51:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -16906,6 +17678,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
     case 54:
       HASH_GUARD(0x374B46BC6D79EC36LL, rollback) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("rollback", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -16919,6 +17693,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       HASH_GUARD(0x356758D4414DA377LL, query) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -16934,6 +17710,8 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
     case 59:
       HASH_GUARD(0x0DE392135C33E23BLL, begintransaction) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("begintransaction", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -17044,6 +17822,8 @@ void c_domentity::dynConstruct(CArrRef params) {
 }
 void c_domentity::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -17354,6 +18134,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -17370,6 +18152,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -17388,7 +18172,6 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_c14n());
         else if (count == 1) return (t_c14n(a0));
         else if (count == 2) return (t_c14n(a0, a1));
@@ -17401,6 +18184,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -17420,6 +18205,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -17434,6 +18221,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -17450,6 +18239,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -17459,7 +18250,6 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_clonenode());
         else return (t_clonenode(a0));
       }
@@ -17469,6 +18259,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -17487,6 +18279,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -17499,6 +18293,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -17512,6 +18308,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -17526,6 +18324,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -17541,6 +18341,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -17554,6 +18356,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -17570,6 +18374,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -17586,6 +18392,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -17601,6 +18409,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -17615,6 +18425,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -17627,12 +18439,13 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_insertbefore(a0));
         else return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -17650,6 +18463,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -17671,7 +18486,6 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_c14nfile(a0));
         else if (count == 2) return (t_c14nfile(a0, a1));
         else if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -17684,6 +18498,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -17700,6 +18516,8 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -17810,6 +18628,8 @@ void c_xmlwriter::dynConstruct(CArrRef params) {
 }
 void c_xmlwriter::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -18410,6 +19230,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x1EBCBEA66B6B0982LL, writecdata) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("writecdata", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18428,6 +19250,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 3) return throw_wrong_arguments("startdtd", count, 1, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18443,7 +19267,6 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_startdtd(a0));
         else if (count == 2) return (t_startdtd(a0, a1));
         else return (t_startdtd(a0, a1, a2));
@@ -18456,6 +19279,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 4) return throw_wrong_arguments("writedtd", count, 1, 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18474,7 +19299,6 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_writedtd(a0));
         else if (count == 2) return (t_writedtd(a0, a1));
         else if (count == 3) return (t_writedtd(a0, a1, a2));
@@ -18484,6 +19308,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 14:
       HASH_GUARD(0x119CC9E7C3E7EF0ELL, openmemory) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("openmemory", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -18496,6 +19322,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 16:
       HASH_GUARD(0x0A7FE14C41766610LL, endcdata) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("endcdata", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -18509,6 +19337,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x75F8C992981A4093LL, writecomment) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("writecomment", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18523,6 +19353,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x5A7AE5A26994FF13LL, startattribute) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("startattribute", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18540,6 +19372,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("writeelement", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18552,7 +19386,6 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_writeelement(a0));
         else return (t_writeelement(a0, a1));
       }
@@ -18561,6 +19394,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x4D26D167066BB11DLL, text) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("text", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18576,6 +19411,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 32:
       HASH_GUARD(0x7DF0368A44C01B20LL, startcdata) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("startcdata", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -18588,6 +19425,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 33:
       HASH_GUARD(0x5D49A460168D5C21LL, endpi) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("endpi", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -18602,6 +19441,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("writedtdattlist", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18621,6 +19462,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x0DEAF425F1AD73ABLL, setindentstring) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("setindentstring", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18636,6 +19479,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 47:
       HASH_GUARD(0x78A7A5D96EF2F4AFLL, endelement) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("endelement", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -18648,6 +19493,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 53:
       HASH_GUARD(0x75B357D89DDE6EB5LL, endcomment) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("endcomment", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -18661,6 +19508,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x4B0F1F6361A59C37LL, writeraw) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("writeraw", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18679,6 +19528,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 3) return throw_toomany_arguments("startdocument", 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18694,7 +19545,6 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_startdocument());
         else if (count == 1) return (t_startdocument(a0));
         else if (count == 2) return (t_startdocument(a0, a1));
@@ -18705,6 +19555,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x0D155D1E5C6641BALL, outputmemory) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("outputmemory", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18714,7 +19566,6 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_outputmemory());
         else return (t_outputmemory(a0));
       }
@@ -18723,6 +19574,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x1FBE635680ADB7BELL, openuri) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("openuri", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18738,6 +19591,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 68:
       HASH_GUARD(0x275896BFD7A77144LL, enddtd) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("enddtd", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -18756,6 +19611,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a4;
         Variant a5;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 6) return throw_wrong_arguments("writedtdentity", count, 2, 6, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18780,7 +19637,6 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 2) return (t_writedtdentity(a0, a1));
         else if (count == 3) return (t_writedtdentity(a0, a1, a2));
         else if (count == 4) return (t_writedtdentity(a0, a1, a2, a3));
@@ -18791,6 +19647,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 71:
       HASH_GUARD(0x017687FD7029CCC7LL, enddtdelement) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("enddtdelement", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -18805,6 +19663,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("writeattribute", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18821,6 +19681,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       HASH_GUARD(0x7C43ECE80FF886CBLL, endattribute) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("endattribute", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -18836,6 +19698,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("startattributens", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18859,6 +19723,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("writedtdelement", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18881,6 +19747,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 4) return throw_wrong_arguments("writeattributens", count, 4, 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18905,6 +19773,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 86:
       HASH_GUARD(0x4520735705A382D6LL, enddtdentity) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("enddtdentity", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -18917,6 +19787,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("writepi", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18939,6 +19811,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 3 || count > 4) return throw_wrong_arguments("writeelementns", count, 3, 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18957,7 +19831,6 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 3) return (t_writeelementns(a0, a1, a2));
         else return (t_writeelementns(a0, a1, a2, a3));
       }
@@ -18966,6 +19839,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x390B6C01AE7C4159LL, startpi) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("startpi", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -18981,6 +19856,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 92:
       HASH_GUARD(0x0DC5AC1E0A2F63DCLL, enddocument) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("enddocument", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -18995,6 +19872,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("startdtdentity", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -19013,6 +19892,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -19026,6 +19907,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x55BFFBE5717EFD62LL, startelement) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("startelement", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -19042,6 +19925,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x349B7446B5EE65E5LL, setindent) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("setindent", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -19060,6 +19945,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("startelementns", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -19082,6 +19969,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x0CBB10FA542B7D70LL, startdtdattlist) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("startdtdattlist", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -19097,6 +19986,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 113:
       HASH_GUARD(0x496175DBD52E1771LL, enddtdattlist) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("enddtdattlist", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -19109,6 +20000,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 115:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -19122,6 +20015,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x451436438EBA2AF8LL, startdtdelement) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("startdtdelement", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -19138,6 +20033,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x6A3D9F8EDB005E7ALL, flush) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("flush", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -19147,7 +20044,6 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_flush());
         else return (t_flush(a0));
       }
@@ -19155,6 +20051,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 126:
       HASH_GUARD(0x3174CCE00BFB9FFELL, fullendelement) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("fullendelement", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -19167,6 +20065,8 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 127:
       HASH_GUARD(0x6A8CC27A7F0466FFLL, startcomment) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("startcomment", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -19283,6 +20183,8 @@ void c_domexception::dynConstructFromEval(Eval::VariableEnvironment &env, const 
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 2) throw_toomany_arguments("__construct", 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -19295,7 +20197,6 @@ void c_domexception::dynConstructFromEval(Eval::VariableEnvironment &env, const 
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 0) (t___construct(), null);
   else if (count == 1) (t___construct(a0), null);
   else (t___construct(a0, a1), null);
@@ -19451,6 +20352,8 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -19463,6 +20366,8 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -19475,6 +20380,8 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -19487,6 +20394,8 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -19499,6 +20408,8 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -19509,6 +20420,8 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -19521,6 +20434,8 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -19533,6 +20448,8 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
     case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -19547,6 +20464,8 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -19559,7 +20478,6 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
@@ -19667,6 +20585,8 @@ void c_domxpath::dynConstruct(CArrRef params) {
 void c_domxpath::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -19819,6 +20739,8 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       HASH_GUARD(0x144FADF6B374AB82LL, registerphpfunctions) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("registerphpfunctions", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -19828,7 +20750,6 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_registerphpfunctions());
         else return (t_registerphpfunctions(a0));
       }
@@ -19836,6 +20757,8 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -19850,6 +20773,8 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -19870,6 +20795,8 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("query", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -19882,7 +20809,6 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_query(a0));
         else return (t_query(a0, a1));
       }
@@ -19892,6 +20818,8 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("registernamespace", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -19911,6 +20839,8 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -19926,6 +20856,8 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("evaluate", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -19938,13 +20870,14 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_evaluate(a0));
         else return (t_evaluate(a0, a1));
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -20062,6 +20995,8 @@ void c_soapserver::dynConstructFromEval(Eval::VariableEnvironment &env, const Ev
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -20074,7 +21009,6 @@ void c_soapserver::dynConstructFromEval(Eval::VariableEnvironment &env, const Ev
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 1) (t___construct(a0), null);
   else (t___construct(a0, a1), null);
 }
@@ -20260,6 +21194,8 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 5) return throw_wrong_arguments("fault", count, 2, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -20281,7 +21217,6 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 2) return (t_fault(a0, a1), null);
         else if (count == 3) return (t_fault(a0, a1, a2), null);
         else if (count == 4) return (t_fault(a0, a1, a2, a3), null);
@@ -20292,6 +21227,8 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x5E77DD94E0A69328LL, setpersistence) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("setpersistence", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -20307,6 +21244,8 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 15:
       HASH_GUARD(0x652BDFA6E22F17AFLL, getfunctions) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getfunctions", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -20320,6 +21259,8 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x5C4CA333F4541532LL, handle) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("handle", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -20329,7 +21270,6 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_handle(), null);
         else return (t_handle(a0), null);
       }
@@ -20337,6 +21277,8 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 19:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -20350,6 +21292,8 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x597B151CC4F70834LL, setclass) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1) return throw_missing_arguments("setclass", count+1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -20360,7 +21304,6 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           vargs.append((*it)->eval(env));
         }
-        int count = params.size();
         if (count <= 1) return (t_setclass(count, a0), null);
         return (t_setclass(count, a0,vargs), null);
       }
@@ -20369,6 +21312,8 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x559622F84FE626B9LL, setobject) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("setobject", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -20385,6 +21330,8 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x278B0E6CCA74963ELL, addsoapheader) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("addsoapheader", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -20401,6 +21348,8 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x48B5852A397D2D9FLL, addfunction) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("addfunction", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -20416,6 +21365,8 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -20428,7 +21379,6 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
@@ -20534,6 +21484,8 @@ void c_domnode::dynConstruct(CArrRef params) {
 }
 void c_domnode::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -20844,6 +21796,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 3:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -20860,6 +21814,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -20878,7 +21834,6 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_c14n());
         else if (count == 1) return (t_c14n(a0));
         else if (count == 2) return (t_c14n(a0, a1));
@@ -20891,6 +21846,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -20910,6 +21867,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -20924,6 +21883,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -20940,6 +21901,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -20949,7 +21912,6 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_clonenode());
         else return (t_clonenode(a0));
       }
@@ -20959,6 +21921,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -20977,6 +21941,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -20989,6 +21955,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 26:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -21002,6 +21970,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -21016,6 +21986,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -21031,6 +22003,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -21044,6 +22018,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -21060,6 +22036,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -21076,6 +22054,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -21091,6 +22071,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -21105,6 +22087,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -21117,12 +22101,13 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_insertbefore(a0));
         else return (t_insertbefore(a0, a1));
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -21140,6 +22125,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -21161,7 +22148,6 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_c14nfile(a0));
         else if (count == 2) return (t_c14nfile(a0, a1));
         else if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -21174,6 +22160,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -21190,6 +22178,8 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -21306,6 +22296,8 @@ void c_domdocument::dynConstructFromEval(Eval::VariableEnvironment &env, const E
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 2) throw_toomany_arguments("__construct", 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -21318,7 +22310,6 @@ void c_domdocument::dynConstructFromEval(Eval::VariableEnvironment &env, const E
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 0) (t___construct(), null);
   else if (count == 1) (t___construct(a0), null);
   else (t___construct(a0, a1), null);
@@ -21982,6 +22973,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x515FE7746601E385LL, getelementbyid) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("getelementbyid", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22001,6 +22994,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22019,7 +23014,6 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_c14n());
         else if (count == 1) return (t_c14n(a0));
         else if (count == 2) return (t_c14n(a0, a1));
@@ -22029,6 +23023,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x142A28F8CE4A4E8ALL, xinclude) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("xinclude", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22038,7 +23034,6 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_xinclude());
         else return (t_xinclude(a0));
       }
@@ -22047,6 +23042,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x0D128C363EBF7F0DLL, createcdatasection) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("createcdatasection", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22064,6 +23061,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22083,6 +23082,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22099,6 +23100,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x69C6F7D584EC5011LL, schemavalidatesource) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("schemavalidatesource", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22115,6 +23118,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22124,7 +23129,6 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_clonenode());
         else return (t_clonenode(a0));
       }
@@ -22134,6 +23138,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("save", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22146,7 +23152,6 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_save(a0));
         else return (t_save(a0, a1));
       }
@@ -22156,6 +23161,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22174,6 +23181,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("createattributens", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22192,6 +23201,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -22205,6 +23216,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x1A78385D7CD10A1CLL, relaxngvalidate) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("relaxngvalidate", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22221,6 +23234,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x1B0F4D437C8404A2LL, loadhtml) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("loadhtml", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22236,6 +23251,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("createelement", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22248,7 +23265,6 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_createelement(a0));
         else return (t_createelement(a0, a1));
       }
@@ -22257,6 +23273,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x1304C35F6E006FACLL, relaxngvalidatesource) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("relaxngvalidatesource", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22271,6 +23289,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x2BFDE9CF0FE9A82CLL, createattribute) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("createattribute", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22288,6 +23308,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("importnode", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22300,13 +23322,14 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_importnode(a0));
         else return (t_importnode(a0, a1));
       }
       HASH_GUARD(0x5FE94CA513F14AAFLL, loadhtmlfile) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("loadhtmlfile", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22322,6 +23345,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -22334,6 +23359,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("loadxml", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22346,7 +23373,6 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_loadxml(a0));
         else return (t_loadxml(a0, a1));
       }
@@ -22355,6 +23381,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x7A9C4709CAD09832LL, createentityreference) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("createentityreference", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22372,6 +23400,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22384,7 +23414,6 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_insertbefore(a0));
         else return (t_insertbefore(a0, a1));
       }
@@ -22392,6 +23421,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 55:
       HASH_GUARD(0x1CA408E02262F737LL, validate) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("validate", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -22404,6 +23435,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 67:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -22417,6 +23450,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x29C79E90C6FCC0C7LL, createcomment) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("createcomment", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22433,6 +23468,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x7EB8C68BABDC5648LL, schemavalidate) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("schemavalidate", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22449,6 +23486,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x3FFA3F55ECAB93CALL, getelementsbytagname) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22464,6 +23503,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22483,6 +23524,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x35C0FF513ED3054DLL, savehtmlfile) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("savehtmlfile", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22499,6 +23542,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22514,6 +23559,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 83:
       HASH_GUARD(0x21F3F1C9058310D3LL, savehtml) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("savehtml", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -22526,6 +23573,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 90:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -22539,6 +23588,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22553,6 +23604,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22570,6 +23623,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22582,7 +23637,6 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
@@ -22591,6 +23645,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("load", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22603,7 +23659,6 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_load(a0));
         else return (t_load(a0, a1));
       }
@@ -22612,6 +23667,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22628,6 +23685,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22645,6 +23704,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("savexml", 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22657,7 +23718,6 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_savexml());
         else if (count == 1) return (t_savexml(a0));
         else return (t_savexml(a0, a1));
@@ -22666,6 +23726,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 106:
       HASH_GUARD(0x0AC931EAB2FE3D6ALL, normalizedocument) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("normalizedocument", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -22681,6 +23743,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 3) return throw_wrong_arguments("createelementns", count, 2, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22696,7 +23760,6 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 2) return (t_createelementns(a0, a1));
         else return (t_createelementns(a0, a1, a2));
       }
@@ -22706,6 +23769,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("createprocessinginstruction", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22718,7 +23783,6 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_createprocessinginstruction(a0));
         else return (t_createprocessinginstruction(a0, a1));
       }
@@ -22727,6 +23791,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22742,6 +23808,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 115:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -22756,6 +23824,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("registernodeclass", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22777,6 +23847,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22798,7 +23870,6 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_c14nfile(a0));
         else if (count == 2) return (t_c14nfile(a0, a1));
         else if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -22809,6 +23880,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 120:
       HASH_GUARD(0x44FD8C24F4EA46F8LL, createdocumentfragment) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("createdocumentfragment", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -22823,6 +23896,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22839,6 +23914,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -22852,6 +23929,8 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x6056A5BB9855D7FBLL, createtextnode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("createtextnode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -22965,6 +24044,8 @@ void c_libxmlerror::dynConstruct(CArrRef params) {
 }
 void c_libxmlerror::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
@@ -23036,6 +24117,8 @@ Variant c_libxmlerror::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 3:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -23046,6 +24129,8 @@ Variant c_libxmlerror::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -23170,6 +24255,8 @@ void c_soapfault::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   Variant a4;
   Variant a5;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 6) throw_wrong_arguments("__construct", count, 2, 6, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -23194,7 +24281,6 @@ void c_soapfault::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 2) (t___construct(a0, a1), null);
   else if (count == 3) (t___construct(a0, a1, a2), null);
   else if (count == 4) (t___construct(a0, a1, a2, a3), null);
@@ -23356,6 +24442,8 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -23368,6 +24456,8 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -23380,6 +24470,8 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -23392,6 +24484,8 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -23404,6 +24498,8 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -23414,6 +24510,8 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -23426,6 +24524,8 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -23438,6 +24538,8 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -23456,6 +24558,8 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a4;
         Variant a5;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -23480,7 +24584,6 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 2) return (t___construct(a0, a1), null);
         else if (count == 3) return (t___construct(a0, a1, a2), null);
         else if (count == 4) return (t___construct(a0, a1, a2, a3), null);
@@ -23596,6 +24699,8 @@ void c_domelement::dynConstructFromEval(Eval::VariableEnvironment &env, const Ev
   Variant a1;
   Variant a2;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 3) throw_wrong_arguments("__construct", count, 1, 3, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -23611,7 +24716,6 @@ void c_domelement::dynConstructFromEval(Eval::VariableEnvironment &env, const Ev
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 1) (t___construct(a0), null);
   else if (count == 2) (t___construct(a0, a1), null);
   else (t___construct(a0, a1, a2), null);
@@ -24134,6 +25238,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24152,7 +25258,6 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_c14n());
         else if (count == 1) return (t_c14n(a0));
         else if (count == 2) return (t_c14n(a0, a1));
@@ -24163,6 +25268,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24183,6 +25290,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24202,6 +25311,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24219,6 +25330,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("removeattributens", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24240,6 +25353,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("setidattributens", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24262,6 +25377,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24271,7 +25388,6 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t_clonenode());
         else return (t_clonenode(a0));
       }
@@ -24281,6 +25397,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24301,6 +25419,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("setidattribute", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24319,6 +25439,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 24:
       HASH_GUARD(0x58F8D846AF9E5D18LL, getlineno) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -24331,6 +25453,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("getattributenodens", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24351,6 +25475,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("getattributens", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24370,6 +25496,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24386,6 +25514,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x47B96C0FC62E1E2FLL, removeattribute) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removeattribute", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24401,6 +25531,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 49:
       HASH_GUARD(0x3CFA6EECF6F5AEB1LL, hasattributes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -24415,6 +25547,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24427,7 +25561,6 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_insertbefore(a0));
         else return (t_insertbefore(a0, a1));
       }
@@ -24435,6 +25568,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 67:
       HASH_GUARD(0x69797649716AE343LL, getnodepath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -24448,6 +25583,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x3FFA3F55ECAB93CALL, getelementsbytagname) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24463,6 +25600,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24481,6 +25620,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("setidattributenode", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24500,6 +25641,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24516,6 +25659,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x482E3873306253D1LL, setattributenodens) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("setattributenodens", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24533,6 +25678,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("hasattributens", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24554,6 +25701,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("setattributens", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24575,6 +25724,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 90:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -24588,6 +25739,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x606827EF5CF34C5CLL, setattributenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("setattributenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24604,6 +25757,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24618,6 +25773,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24636,6 +25793,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 3) return throw_wrong_arguments("__construct", count, 1, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24651,7 +25810,6 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t___construct(a0), null);
         else if (count == 2) return (t___construct(a0, a1), null);
         else return (t___construct(a0, a1, a2), null);
@@ -24661,6 +25819,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24677,6 +25837,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24693,6 +25855,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x1BFDB4272EA150EALL, removeattributenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("removeattributenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24709,6 +25873,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x6471DF8BB944FFECLL, hasattribute) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("hasattribute", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24725,6 +25891,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24740,6 +25908,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
     case 115:
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -24757,6 +25927,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24778,7 +25950,6 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 1) return (t_c14nfile(a0));
         else if (count == 2) return (t_c14nfile(a0, a1));
         else if (count == 3) return (t_c14nfile(a0, a1, a2));
@@ -24791,6 +25962,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -24807,6 +25980,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -24820,6 +25995,8 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x343DF562BB5AB1FELL, getattributenode) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("getattributenode", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;

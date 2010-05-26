@@ -200,6 +200,8 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -212,6 +214,8 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -222,6 +226,8 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -234,6 +240,8 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -244,6 +252,8 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -256,6 +266,8 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -270,6 +282,8 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -282,13 +296,14 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -500,6 +515,8 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -512,6 +529,8 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -522,6 +541,8 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -534,6 +555,8 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -544,6 +567,8 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -556,6 +581,8 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -570,6 +597,8 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -582,13 +611,14 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -800,6 +830,8 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -812,6 +844,8 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -822,6 +856,8 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -834,6 +870,8 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -844,6 +882,8 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -856,6 +896,8 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -870,6 +912,8 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -882,13 +926,14 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1100,6 +1145,8 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1112,6 +1159,8 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1122,6 +1171,8 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1134,6 +1185,8 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1144,6 +1197,8 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1156,6 +1211,8 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1170,6 +1227,8 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1182,13 +1241,14 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1400,6 +1460,8 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1412,6 +1474,8 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1422,6 +1486,8 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1434,6 +1500,8 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1444,6 +1512,8 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1456,6 +1526,8 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1470,6 +1542,8 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1482,13 +1556,14 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1700,6 +1775,8 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1712,6 +1789,8 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1722,6 +1801,8 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1734,6 +1815,8 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1744,6 +1827,8 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1756,6 +1841,8 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1770,6 +1857,8 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1782,13 +1871,14 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2000,6 +2090,8 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2012,6 +2104,8 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2022,6 +2116,8 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2034,6 +2130,8 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2044,6 +2142,8 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2056,6 +2156,8 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2070,6 +2172,8 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2082,13 +2186,14 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2300,6 +2405,8 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2312,6 +2419,8 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2322,6 +2431,8 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2334,6 +2445,8 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2344,6 +2457,8 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2356,6 +2471,8 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2370,6 +2487,8 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2382,13 +2501,14 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2600,6 +2720,8 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2612,6 +2734,8 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2622,6 +2746,8 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2634,6 +2760,8 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2644,6 +2772,8 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2656,6 +2786,8 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2670,6 +2802,8 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2682,13 +2816,14 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2900,6 +3035,8 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2912,6 +3049,8 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2922,6 +3061,8 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2934,6 +3075,8 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2944,6 +3087,8 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2956,6 +3101,8 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2970,6 +3117,8 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2982,13 +3131,14 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3204,6 +3354,8 @@ void c_exception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 2) throw_toomany_arguments("exception::__construct", 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -3216,7 +3368,6 @@ void c_exception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 0) (t___construct(), null);
   else if (count == 1) (t___construct(a0), null);
   else (t___construct(a0, a1), null);
@@ -3348,6 +3499,8 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3360,6 +3513,8 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3370,6 +3525,8 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3382,6 +3539,8 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3392,6 +3551,8 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3404,6 +3565,8 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3418,6 +3581,8 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3430,13 +3595,14 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3753,6 +3919,8 @@ void c_errorexception::dynConstructFromEval(Eval::VariableEnvironment &env, cons
   Variant a3;
   Variant a4;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 5) throw_toomany_arguments("errorexception::__construct", 5, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -3774,7 +3942,6 @@ void c_errorexception::dynConstructFromEval(Eval::VariableEnvironment &env, cons
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  int count = params.size();
   if (count <= 0) (t___construct(), null);
   else if (count == 1) (t___construct(a0), null);
   else if (count == 2) (t___construct(a0, a1), null);
@@ -3932,6 +4099,8 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3944,6 +4113,8 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3956,6 +4127,8 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3968,6 +4141,8 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3980,6 +4155,8 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3992,6 +4169,8 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4004,6 +4183,8 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4021,6 +4202,8 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 5) return throw_toomany_arguments("errorexception::__construct", 5, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4042,7 +4225,6 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else if (count == 2) return (t___construct(a0, a1), null);
@@ -4052,6 +4234,8 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       HASH_GUARD(0x4B378D0258AF461FLL, getseverity) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("errorexception::getseverity", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4292,6 +4476,8 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4304,6 +4490,8 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4314,6 +4502,8 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4326,6 +4516,8 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4336,6 +4528,8 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4348,6 +4542,8 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4362,6 +4558,8 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4374,13 +4572,14 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4592,6 +4791,8 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4604,6 +4805,8 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4614,6 +4817,8 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4626,6 +4831,8 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4636,6 +4843,8 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4648,6 +4857,8 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4662,6 +4873,8 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4674,13 +4887,14 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4892,6 +5106,8 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 2:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4904,6 +5120,8 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 3:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4914,6 +5132,8 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4926,6 +5146,8 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4936,6 +5158,8 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4948,6 +5172,8 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 14:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4962,6 +5188,8 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4974,13 +5202,14 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        int count = params.size();
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);

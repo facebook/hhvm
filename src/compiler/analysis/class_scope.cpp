@@ -1044,7 +1044,8 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
       }
     }
     if (forEval) {
-      func->outputCPPEvalInvoke(cg, ar, prefix, name, extra);
+      func->outputCPPEvalInvoke(cg, ar, prefix, name, extra, true,
+          func->isConstructor(self));
     } else {
       func->outputCPPDynamicInvoke(cg, ar, prefix, name, false, fewArgs,
                                    true, extra, func->isConstructor(self));

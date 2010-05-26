@@ -157,6 +157,8 @@ void c_directory::dynConstruct(CArrRef params) {
 void c_directory::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("directory::__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -249,6 +251,8 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 1:
       HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("directory::close", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -259,6 +263,8 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       HASH_GUARD(0x1F479267E49EF301LL, read) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("directory::read", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -271,6 +277,8 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 2:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("directory::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -284,6 +292,8 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("directory::__construct", count, 1, 1, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;

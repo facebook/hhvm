@@ -130,6 +130,7 @@ TypePtr Expression::propagateTypes(AnalysisResultPtr ar, TypePtr inType) {
 
   while (e) {
     ret = Type::Inferred(ar, ret, e->m_actualType);
+    assert(ret);
     e = e->m_canonPtr;
   }
 

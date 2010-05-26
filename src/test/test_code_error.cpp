@@ -599,3 +599,12 @@ bool TestCodeError::TestBadPassByReference() {
       "                $ar[1], SORT_NUMERIC, SORT_DESC);");
   return true;
 }
+
+bool TestCodeError::TestBadArgumentType() {
+  VE(BadArgumentType,
+     "<?php "
+     "function foo(array $a) { }"
+     "foo(0);");
+
+  return true;
+}

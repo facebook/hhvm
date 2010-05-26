@@ -22,6 +22,7 @@
 #include <compiler/statement/statement_list.h>
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/variable_table.h>
+#include <compiler/parser/parser.h>
 #include <util/logger.h>
 #include <compiler/option.h>
 #include <compiler/statement/method_statement.h>
@@ -61,7 +62,7 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
     m_variables->forceVariants(ar);
     setReturnType(ar, Type::Variant);
   }
-  setParamCounts(minParam, maxParam);
+  setParamCounts(ar, minParam, maxParam);
 
   if (m_refReturn) {
     m_returnType = Type::Variant;
@@ -135,13 +136,15 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
   m_dynamic = Option::IsDynamicFunction(method, m_name);
 }
 
-void FunctionScope::setParamCounts(int minParam, int maxParam) {
+void FunctionScope::setParamCounts(AnalysisResultPtr ar, int minParam,
+                                   int maxParam) {
   m_minParam = minParam;
   m_maxParam = maxParam;
   ASSERT(m_minParam >= 0 && m_maxParam >= m_minParam);
   if (m_maxParam > 0) {
     m_paramNames.resize(m_maxParam);
     m_paramTypes.resize(m_maxParam);
+    m_paramTypeSpecs.resize(m_maxParam);
     m_refs.resize(m_maxParam);
 
     if (m_stmt) {
@@ -154,6 +157,7 @@ void FunctionScope::setParamCounts(int minParam, int maxParam) {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*params)[i]);
         m_paramNames[i] = param->getName();
+        m_paramTypeSpecs[i] = param->getTypeSpec(ar);
       }
     }
   }
@@ -320,6 +324,16 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
       param->clearContext(Expression::NoRefWrapper);
     }
     if (i < m_maxParam) {
+      if (m_paramTypeSpecs[i] && ar->isFirstPass()) {
+        if (!Type::Inferred(ar, expType, m_paramTypeSpecs[i])) {
+          const char *file = m_stmt->getLocation()->file;
+          Logger::Error("%s: parameter %d of %s requires %s, called with %s",
+                        file, i, m_name.c_str(),
+                        m_paramTypeSpecs[i]->toString().c_str(),
+                        expType->toString().c_str());
+          ar->getCodeError()->record(CodeError::BadArgumentType, m_stmt);
+        }
+      }
       TypePtr paramType = getParamType(i);
       if (canSetParamType) {
         paramType = setParamType(ar, i, expType);
@@ -344,12 +358,14 @@ TypePtr FunctionScope::setParamType(AnalysisResultPtr ar, int index,
                                     TypePtr type) {
   ASSERT(index >= 0 && index < (int)m_paramTypes.size());
   TypePtr paramType = m_paramTypes[index];
+
   if (!paramType) paramType = NEW_TYPE(Some);
   type = Type::Coerce(ar, paramType, type);
   if (type && !Type::SameType(paramType, type)) {
     ar->incNewlyInferred();
     if (!ar->isFirstPass()) {
-      Logger::Verbose("Corrected paramter type %s -> %s",
+      Logger::Verbose("Corrected type of parameter %d of %s: %s -> %s",
+                      index, m_name.c_str(),
                       paramType->toString().c_str(), type->toString().c_str());
     }
   }
@@ -456,6 +472,47 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   for (int i = 0; i < m_callTempCountMax; i++) {
     cg.printf("Variant %s%d;\n", Option::EvalOrderTempPrefix, i);
   }
+
+  ExpressionListPtr params =
+    dynamic_pointer_cast<MethodStatement>(getStmt())->getParams();
+
+  /* Typecheck parameters */
+  for (size_t i = 0; i < m_paramTypes.size(); i++) {
+    TypePtr specType = m_paramTypeSpecs[i];
+    if (!specType)
+      continue;
+    if (specType->is(Type::KindOfSome) || specType->is(Type::KindOfAny)
+      || specType->is(Type::KindOfVariant))
+      continue;
+
+    /* If there's any possible runtime conflict, this will be turned into
+     * a Variant; if it hasn't been, then we don't need to worry */
+    if (!getParamType(i)->is(Type::KindOfVariant))
+      continue;
+
+    ParameterExpressionPtr param =
+      dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+
+    /* Insert runtime checks. */
+    if (specType->is(Type::KindOfArray)) {
+      cg.printf("if(!%s%s.isArray())\n",
+                Option::VariablePrefix, param->getName().c_str());
+      cg.printf("  throw_unexpected_argument_type(%d,\"%s\",\"array\",%s%s);\n",
+                i, m_name.c_str(),
+                Option::VariablePrefix, param->getName().c_str());
+    } else if (specType->is(Type::KindOfObject)) {
+      cg.printf("if(!%s%s.instanceof(\"%s\"))\n", Option::VariablePrefix,
+                param->getName().c_str(), specType->getName().c_str());
+      cg.printf("  throw_unexpected_argument_type(%d,\"%s\",\"%s\",%s%s);\n",
+                i, m_name.c_str(), specType->getName().c_str(),
+                Option::VariablePrefix, param->getName().c_str());
+    } else {
+      Logger::Error("parameter %d of %s: improper type hint %s",
+                    i, m_name.c_str(), specType->toString().c_str());
+      return;
+    }
+  }
+
   BlockScope::outputCPP(cg, ar);
 }
 

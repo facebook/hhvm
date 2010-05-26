@@ -109,10 +109,7 @@ ExpressionPtr ParameterExpression::postOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
-TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                        bool coerce) {
-  ASSERT(type->is(Type::KindOfSome) || type->is(Type::KindOfAny));
-
+TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar) {
   TypePtr ret;
   if (m_type.empty() || m_defaultValue) {
     ret = NEW_TYPE(Some);
@@ -130,13 +127,21 @@ TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       ret = Type::CreateObjectType(m_type);
     }
   }
-  if (m_defaultValue) {
-    ret = m_defaultValue->inferAndCheck(ar, ret, false);
-  }
-
   // we still want the above to run, so to record errors and infer defaults
   if (m_ref) {
     ret = Type::Variant;
+  }
+
+  return ret;
+}
+
+TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
+                                        bool coerce) {
+  ASSERT(type->is(Type::KindOfSome) || type->is(Type::KindOfAny));
+  TypePtr ret = getTypeSpec(ar);
+
+  if (m_defaultValue && !m_ref) {
+    ret = m_defaultValue->inferAndCheck(ar, ret, false);
   }
 
   // parameters are like variables, but we need to remember these are

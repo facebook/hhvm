@@ -43,6 +43,7 @@ public:
 
   void rename(const std::string &name) { m_name = name;}
   ExpressionPtr defaultValue() { return m_defaultValue; }
+  TypePtr getTypeSpec(AnalysisResultPtr ar);
 private:
   std::string m_type;
   std::string m_name;

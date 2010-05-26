@@ -230,7 +230,7 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
 
   string lowered = Util::toLower(name);
   FunctionScopePtr f(new FunctionScope(false, lowered, reference));
-  f->setParamCounts(minParam, maxParam);
+  f->setParamCounts(ar, minParam, maxParam);
   if (retType != Type::KindOfVoid) {
     f->setReturnType(ar, Type::GetType(retType));
   }

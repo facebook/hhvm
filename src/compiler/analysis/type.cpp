@@ -343,9 +343,8 @@ bool Type::IsCoercionNeeded(AnalysisResultPtr ar, TypePtr t1, TypePtr t2) {
   return !Type::IsLegalCast(ar, t1, t2);
 }
 
-/* 
-   We have inferred type1 and type2 as the actual types for the same
-   expression. 
+/* We have inferred type1 and type2 as the actual types for the same
+   expression.
    Assert that the types are compatible (it cant be both a string and
    an integer, for example), and return the combined type.
 */
@@ -355,90 +354,62 @@ TypePtr Type::Inferred(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {
   KindOf k1 = type1->m_kindOf;
   KindOf k2 = type2->m_kindOf;
 
+  /* This relation is symmetric. Simplify logic by enforcing k1 < k2 */
+  if (k1 > k2) return Type::Inferred(ar, type2, type1);
+
   if (k1 == k2) return type1;
 
-  if (k1 == KindOfAny) return type2;
   if (k2 == KindOfAny) return type1;
-
-  if (k1 == KindOfSome) return type2;
   if (k2 == KindOfSome) return type1;
-
   if (k1 == KindOfVariant) return type2;
   if (k2 == KindOfVariant) return type1;
 
+
   if (k1 <= KindOfDouble) {
-    assert(k2 <= KindOfDouble ||
-           k2 == KindOfNumeric ||
-           k2 == KindOfPrimitive ||
-           k2 == KindOfPlusOperand);
-    return type1;
-  }
-  if (k2 <= KindOfDouble) {
-    assert(k1 == KindOfNumeric ||
-           k1 == KindOfPrimitive ||
-           k1 == KindOfPlusOperand);
-    return type2;
+    if (k2 <= KindOfDouble ||
+        k2 == KindOfNumeric ||
+        k2 == KindOfPrimitive ||
+        k2 == KindOfPlusOperand)
+      return type1;
   }
 
-  assert(k1 != KindOfObject && k2 != KindOfObject);
+  if (k2 <= KindOfDouble) {
+    if (k1 == KindOfNumeric ||
+           k1 == KindOfPrimitive ||
+           k1 == KindOfPlusOperand)
+      return type2;
+  }
 
   if (k1 == KindOfArray) {
-    assert(k2 == KindOfSequence ||
-           k2 == KindOfPlusOperand);
-    return type1;
-  }
-  if (k2 == KindOfArray) {
-    assert(k1 == KindOfSequence || 
-           k1 == KindOfPlusOperand);
-    return type2;
+    if (k2 == KindOfSequence ||
+        k2 == KindOfPlusOperand)
+      return type1;
   }
 
   if (k1 == KindOfString) {
-    assert(k2 == KindOfPrimitive ||
-           k2 == KindOfSequence);
-    return type1;
-  }
-  if (k2 == KindOfString) {
-    assert(k1 == KindOfPrimitive ||
-           k1 == KindOfSequence);
-    return type2;
+    if (k2 == KindOfPrimitive ||
+        k2 == KindOfSequence)
+      return type1;
   }
 
   if (k1 == KindOfNumeric) {
-    assert(k2 == KindOfPrimitive ||
-           k2 == KindOfPlusOperand);
-    return type1;
-  }
-  if (k2 == KindOfNumeric) {
-    assert(k1 == KindOfPrimitive ||
-           k1 == KindOfPlusOperand);
-    return type2;
+    if (k2 == KindOfPrimitive ||
+        k2 == KindOfPlusOperand)
+      return type1;
   }
 
   if (k1 == KindOfPrimitive) {
     if (k2 == KindOfPlusOperand) {
       return Type::GetType(Type::KindOfNumeric);
-    } else {
-      assert(k2 == KindOfSequence);
+    } else if (k2 == KindOfSequence) {
       return Type::String;
     }
   }
-  if (k2 == KindOfPrimitive) {
-    if (k1 == KindOfPlusOperand) {
-      return Type::GetType(Type::KindOfNumeric);
-    } else {
-      assert(k1 == KindOfSequence);
-      return Type::String;
-    }
-  }
-    
-  if (k1 == KindOfPlusOperand) {
-    assert(k2 == KindOfSequence);
+
+  if (k1 == KindOfPlusOperand && k2 == KindOfSequence)
     return Type::Array;
-  }
-  assert(k2 == KindOfPlusOperand);
-  assert(k1 == KindOfSequence);
-  return Type::Array;
+
+  return TypePtr();
 }
 
 TypePtr Type::Coerce(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {

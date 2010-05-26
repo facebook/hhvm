@@ -104,6 +104,9 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
         frame.set("file", file);
       }
       frame.set("line", t->m_prev->line);
+    } else if (t->flags & PseudoMain) {
+      // Stop at top, don't include top file
+      break;
     }
 
     if (t->flags & PseudoMain) {

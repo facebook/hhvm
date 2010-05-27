@@ -93,10 +93,11 @@ c('SimpleXMLElement', null, array('ArrayAccess', 'IteratorAggregate'),
   "  xmlNodePtr m_node;\n".
   "  Array m_children;\n".
   "  Array m_attributes;\n".
-  "  String m_text_node_name;\n".
   "  bool m_is_text;\n".
+  "  bool m_free_text;\n".
   "  bool m_is_attribute;\n".
   "  bool m_is_children;\n".
+  "  bool m_is_property;\n".
   "  bool m_is_root;\n".
   "  virtual Array o_toArray() const;\n".
   "  virtual int64 o_toInt64() const;\n".
@@ -130,5 +131,5 @@ c('SimpleXMLElementIterator', null,
   "  c_simplexmlelement *m_parent;\n".
   "  ArrayIter *m_iter1;\n".
   "  ArrayIter *m_iter2;\n".
-  "  Array      m_temp;"
+  "  Object     m_temp;"
  );

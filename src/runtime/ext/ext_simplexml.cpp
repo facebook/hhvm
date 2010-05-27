@@ -106,17 +106,13 @@ static void add_property(Array &properties, xmlNodePtr node, Object value) {
 
 static c_simplexmlelement *create_text(CObjRef doc, xmlNodePtr node,
                                        CStrRef value, CStrRef ns,
-                                       bool is_prefix) {
+                                       bool is_prefix, bool free_text) {
   c_simplexmlelement *elem = NEW(c_simplexmlelement)();
   elem->m_doc = doc;
   elem->m_node = node->parent; // assign to parent, not node
   elem->m_children.set(0, value);
-  const char *name = (char *)node->name;
-  if (name) {
-    int namelen = xmlStrlen(node->name);
-    elem->m_text_node_name = String(name, namelen, CopyString);
-  }
   elem->m_is_text = true;
+  elem->m_free_text = free_text;
   elem->m_attributes = collect_attributes(node->parent, ns, is_prefix);
   return elem;
 }
@@ -151,7 +147,7 @@ static Array create_children(CObjRef doc, xmlNodePtr root,
           add_property
             (properties, root,
              create_text(doc, node, node_list_to_string(root->doc, node),
-                         ns, is_prefix));
+                         ns, is_prefix, true));
         }
         continue;
       }
@@ -162,7 +158,7 @@ static Array create_children(CObjRef doc, xmlNodePtr root,
       Object sub;
       if (child && child->type == XML_TEXT_NODE && !xmlIsBlankNode(child)) {
         sub = create_text(doc, child, node_list_to_string(root->doc, child),
-                          ns, is_prefix);
+                          ns, is_prefix, false);
       } else {
         sub = create_element(doc, node, ns, is_prefix);
       }
@@ -244,7 +240,6 @@ Variant f_simplexml_load_string(CStrRef data,
   }
   c_simplexmlelement *ret = create_element(Object(NEW(XmlDocWrapper)(doc)),
                                            root, ns, is_prefix);
-  ret->m_is_children = true;
   ret->m_is_root = true;
   return Object(ret);
 }
@@ -261,8 +256,9 @@ Variant f_simplexml_load_file(CStrRef filename,
 // SimpleXMLElement
 
 c_simplexmlelement::c_simplexmlelement()
-    : m_node(NULL), m_is_text(false), m_is_attribute(false),
-      m_is_children(false), m_is_root(false), m_xpath(NULL) {
+    : m_node(NULL), m_is_text(false), m_free_text(false),
+      m_is_attribute(false), m_is_children(false), m_is_property(false),
+      m_is_root(false), m_xpath(NULL) {
   m_children = Array::Create();
 }
 
@@ -449,8 +445,9 @@ Object c_simplexmlelement::t_children(CStrRef ns /* = "" */,
   c_simplexmlelement *elem = NEW(c_simplexmlelement)();
   elem->m_doc = m_doc;
   elem->m_node = m_node;
-  elem->m_is_children = true;
   elem->m_is_text = m_is_text;
+  elem->m_free_text = m_free_text;
+  elem->m_is_children = true;
   if (ns.empty()) {
     elem->m_children = m_children;
   } else {
@@ -486,14 +483,15 @@ Object c_simplexmlelement::t_children(CStrRef ns /* = "" */,
 }
 
 String c_simplexmlelement::t_getname() {
-  if (m_node && (!m_is_children || m_is_root || m_is_text)) {
+  if (m_is_children) {
+    Variant first;
+    ArrayIter iter(m_children);
+    if (iter) {
+      return iter.first();
+    }
+  } else if (m_node) {
     int namelen = xmlStrlen(m_node->name);
     return String((char*)m_node->name, namelen, CopyString);
-  }
-  ArrayIter iter(m_children);
-  if (iter && iter.second().isObject()) {
-    return iter.second().toObject().getTyped<c_simplexmlelement>()->
-      t_getname();
   }
   return String();
 }
@@ -632,7 +630,19 @@ Variant &c_simplexmlelement::___lval(Variant v_name) {
 }
 
 Variant c_simplexmlelement::t___get(Variant name) {
-  return m_children[name];
+  Variant ret = m_children[name];
+  if (ret.isObject()) {
+    c_simplexmlelement *elem = ret.toObject().getTyped<c_simplexmlelement>();
+    c_simplexmlelement *e = NEW(c_simplexmlelement)();
+    e->m_doc = elem->m_doc;
+    e->m_node = elem->m_node;
+    e->m_children = elem->m_children;
+    e->m_attributes = elem->m_attributes;
+    e->m_is_text = elem->m_is_text;
+    e->m_is_property = true;
+    return e;
+  }
+  return ret;
 }
 
 Variant c_simplexmlelement::t___unset(Variant name) {
@@ -819,29 +829,33 @@ void c_simplexmlelementiterator::reset_iterator(c_simplexmlelement *parent) {
     m_iter1 = new ArrayIter(m_parent->m_attributes);
     return;
   }
-  // When I'm not an artificial node created by calling children(), iteration
-  // is on myself, not on m_children.
-  if (!m_parent->m_is_children) {
-    c_simplexmlelement *elem = NEW(c_simplexmlelement)();
-    elem->m_doc = m_parent->m_doc;
-    elem->m_node = m_parent->m_node;
-    elem->m_children = m_parent->m_children;
-    elem->m_attributes = m_parent->m_attributes;
-    elem->m_text_node_name = m_parent->m_text_node_name;
 
-    // hacky way of preventing infinite recursion
-    elem->m_is_text = true;
-    elem->m_is_children = true;
+  // When I'm a node like $node->name, we iterate through all my siblings with
+  // same name of mine.
+  if (m_parent->m_is_property) {
+    String name = m_parent->t_getname();
+    m_parent = create_element(m_parent->m_doc, m_parent->m_node->parent,
+                              "", false);
+    Variant children = m_parent->m_children[name];
+    m_parent->m_children = CREATE_MAP1(name, children);
 
-    String name = elem->m_text_node_name;
-    if (name.empty()) name = elem->t_getname();
-    m_temp = CREATE_MAP1(name, Object(elem));
-
-    m_iter1 = new ArrayIter(m_temp);
-    return;
+    m_temp = m_parent;
+    // fall through
   }
+
   if (m_parent->m_is_text) {
     return;
+  }
+
+  if (m_parent->m_children.size() == 1) {
+    ArrayIter iter(m_parent->m_children);
+    if (iter.second().isObject()) {
+      c_simplexmlelement *elem = iter.second().toObject().
+        getTyped<c_simplexmlelement>();
+      if (elem->m_is_text && elem->m_free_text) {
+        return;
+      }
+    }
   }
 
   m_iter1 = new ArrayIter(m_parent->m_children);
@@ -859,7 +873,7 @@ Variant c_simplexmlelementiterator::t___destruct() {
 
 Variant c_simplexmlelementiterator::t_current() {
   if (m_iter1 == NULL) return null;
-  if (m_parent->m_is_attribute || !m_parent->m_is_children) {
+  if (m_parent->m_is_attribute) {
     return m_iter1->second();
   }
 
@@ -869,18 +883,6 @@ Variant c_simplexmlelementiterator::t_current() {
   }
 
   if (iter) {
-    c_simplexmlelement *elem = iter->second().toObject().
-      getTyped<c_simplexmlelement>();
-    if (elem->m_is_text) {
-      c_simplexmlelement *e = NEW(c_simplexmlelement)();
-      e->m_doc = elem->m_doc;
-      e->m_node = elem->m_node;
-      e->m_children = elem->m_children;
-      e->m_attributes = elem->m_attributes;
-      e->m_is_text = true;
-      e->m_is_children = true;
-      return Object(e);
-    }
     return iter->second();
   }
 
@@ -897,7 +899,7 @@ Variant c_simplexmlelementiterator::t_key() {
 
 Variant c_simplexmlelementiterator::t_next() {
   if (m_iter1 == NULL) return null;
-  if (m_parent->m_is_attribute || !m_parent->m_is_children) {
+  if (m_parent->m_is_attribute) {
     m_iter1->next();
     return null;
   }

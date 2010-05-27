@@ -86,10 +86,11 @@ class c_simplexmlelement : public ExtObjectData {
   xmlNodePtr m_node;
   Array m_children;
   Array m_attributes;
-  String m_text_node_name;
   bool m_is_text;
+  bool m_free_text;
   bool m_is_attribute;
   bool m_is_children;
+  bool m_is_property;
   bool m_is_root;
   virtual Array o_toArray() const;
   virtual int64 o_toInt64() const;
@@ -160,7 +161,7 @@ public:
   c_simplexmlelement *m_parent;
   ArrayIter *m_iter1;
   ArrayIter *m_iter2;
-  Array      m_temp;
+  Object     m_temp;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

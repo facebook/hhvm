@@ -101,7 +101,6 @@ include_directories("${HPHP_HOME}/src/third_party/libmbfl/mbfl")
 include_directories("${HPHP_HOME}/src/third_party/libmbfl/filter")
 
 # ICU
-
 find_package(ICU REQUIRED)
 if (ICU_FOUND)
 	if (ICU_VERSION VERSION_LESS "4.2")
@@ -144,13 +143,16 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIR})
 
-#oniguruma
+# oniguruma
 find_package(ONIGURUMA REQUIRED)
 include_directories(${ONIGURUMA_INCLUDE_DIRS})
 
+# LDAP
+find_package(Ldap REQUIRED)
+include_directories(${LDAP_INCLUDE_DIR})
+
 #LINK_LIBS = -lpthread $(BFD_LIBS) -lrt -lstdc++ -lresolv
 #-lcrypto -lcrypt
-
 
 FIND_LIBRARY (CAP_LIB cap)
 
@@ -203,7 +205,10 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
 	target_link_libraries(${target} ${Mcrypt_LIB})
 	target_link_libraries(${target} ${GD_LIBRARY})
-	
+
+	target_link_libraries(${target} ${LDAP_LIBRARIES})
+	target_link_libraries(${target} ${LBER_LIBRARIES})
+
 	target_link_libraries(${target} timelib)
 	target_link_libraries(${target} sqlite3)
 	target_link_libraries(${target} xhp)

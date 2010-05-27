@@ -33,7 +33,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct RuntimeInfo {
-  std::set<InvocationHandler> invocation_handlers;
   hphp_const_char_imap<const char*> renamed_functions;
   hphp_const_char_iset unmapped_functions;
 };
@@ -130,13 +129,6 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
 
 Variant invoke_failed(const char *func, CArrRef params, int64 hash,
                       bool fatal /* = true */) {
-  std::set<InvocationHandler> &invocation_handlers =
-    s_runtime_info->invocation_handlers;
-  for (std::set<InvocationHandler>::iterator it = invocation_handlers.begin();
-        it != invocation_handlers.end(); ++it) {
-    Variant retval;
-    if ((*it)(retval, func, params, hash)) return retval;
-  }
   if (fatal) {
     throw InvalidFunctionCallException(func);
   } else {
@@ -273,12 +265,6 @@ void throw_unexpected_argument_type(int argNum, const char *fnName,
   raise_recoverable_error
     ("Argument %d passed to %s must be an instance of %s, %s given",
      argNum, fnName, expected, otype);
-}
-
-void register_invocation_handler(InvocationHandler fn) {
-  std::set<InvocationHandler> &invocation_handlers =
-    s_runtime_info->invocation_handlers;
-  invocation_handlers.insert(fn);
 }
 
 Object f_clone(Object obj) {

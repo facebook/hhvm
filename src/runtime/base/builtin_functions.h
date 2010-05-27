@@ -535,9 +535,7 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params);
 
 /**
  * Fallback when a dynamic function call fails to find a user function
- * matching the name. This will attempt to call a system function first,
- * and attempt to resolve the function via any registered invocation
- * handlers (via register_invocation_handler). If no handlers are able to
+ * matching the name.  If no handlers are able to
  * invoke the function, throw an InvalidFunctionCallException.
  */
 Variant invoke_failed(const char *func, CArrRef params, int64 hash,
@@ -545,21 +543,6 @@ Variant invoke_failed(const char *func, CArrRef params, int64 hash,
 
 Variant o_invoke_failed(const char *cls, const char *meth,
                         bool fatal = true);
-
-/**
- * Invocation handlers attempt to call the named function with the passed
- * parameters. They return true if the function was found and called, or
- * false if the function could not be found. They should only throw
- * exceptions if the function was found but an error occured during its
- * execution.
- */
-typedef bool(*InvocationHandler)(Variant& /*retval*/, const char* /*func*/,
-                                 CArrRef /*params*/, int64 /*hash*/);
-
-/**
- * Register an invocation hander for use with invoke_system.
- */
-void register_invocation_handler(InvocationHandler fn);
 
 /**
  * When fatal coding errors are transformed to this function call.

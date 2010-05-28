@@ -79,6 +79,10 @@ void EncapsListExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
+void EncapsListExpression::stripConcat() {
+  m_exps->stripConcat();
+}
+
 ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_exps);
   if (m_type != '`' && m_type != '\'' && m_exps) {
@@ -124,7 +128,7 @@ TypePtr EncapsListExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 
 bool EncapsListExpression::canonCompare(ExpressionPtr e) const {
   if (!Expression::canonCompare(e)) return false;
-  EncapsListExpressionPtr el = 
+  EncapsListExpressionPtr el =
     static_pointer_cast<EncapsListExpression>(e);
 
   return m_type == el->m_type;

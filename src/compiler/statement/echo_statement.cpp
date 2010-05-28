@@ -75,11 +75,13 @@ void EchoStatement::setNthKid(int n, ConstructPtr cp) {
 
 StatementPtr EchoStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_exp);
+  m_exp->stripConcat();
   return StatementPtr();
 }
 
 StatementPtr EchoStatement::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_exp);
+  m_exp->stripConcat();
   return StatementPtr();
 }
 

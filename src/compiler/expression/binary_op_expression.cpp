@@ -15,13 +15,16 @@
 */
 
 #include <compiler/expression/binary_op_expression.h>
+#include <compiler/expression/unary_op_expression.h>
 #include <compiler/parser/hphp.tab.hpp>
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/expression/constant_expression.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/comparisons.h>
+#include <runtime/base/zend/zend_string.h>
 #include <compiler/expression/expression_list.h>
+#include <compiler/expression/encaps_list_expression.h>
 #include <compiler/expression/simple_function_call.h>
 #include <compiler/expression/simple_variable.h>
 #include <compiler/statement/loop_statement.h>
@@ -743,103 +746,145 @@ static const char *stringBufferPrefix(AnalysisResultPtr ar, ExpressionPtr var) {
   return 0;
 }
 
-static void outputStringBufExprs(const char *temp, const char *prefix,
-                                 const char *name, ExpressionPtr exp,
-                                 CodeGenerator &cg, AnalysisResultPtr ar,
-                                 int depth, const char *sep) {
-  if (!exp->hasCPPTemp() && exp->is(Expression::KindOfBinaryOpExpression)) {
-    BinaryOpExpressionPtr b = static_pointer_cast<BinaryOpExpression>(exp);
-    if (b->getOp() == '.') {
-      if (!depth) cg.printf("(");
-      outputStringBufExprs(temp, prefix, name, b->getExp1(),
-                           cg, ar, depth + 1, sep);
-      cg.printf(sep);
-      outputStringBufExprs(temp, prefix, name, b->getExp2(),
-                           cg, ar, depth + 1, sep);
-      if (!depth) cg.printf(")");
-      return;
-    }
-  }
-  if (sep[0] != ',') exp->preOutputCPP(cg, ar, 0);
-  if (exp->getActualType()) {
-    cg.printf("StringBufferAppend(%s,%s%s,", temp, prefix, name);
-  } else {
-    cg.printf("(");
-  }
-  exp->outputCPP(cg, ar);
-  cg.printf(")");
+static std::string stringBufferName(const char *temp, const char *prefix,
+                                    const char *name)
+{
+  return std::string(temp) + "_sbuf_" + prefix + name;
 }
 
-static int outputConcatExprs(CodeGenerator *cg, AnalysisResultPtr ar,
-                             ExpressionPtr exp,
-                             const char *sep = ", ", const char *buf = 0) {
-  int count = 0;
-  if (!exp->hasCPPTemp() && exp->is(Expression::KindOfBinaryOpExpression)) {
-    BinaryOpExpressionPtr b = static_pointer_cast<BinaryOpExpression>(exp);
-    if (b->getOp() == '.') {
-      count = outputConcatExprs(cg, ar,  b->getExp1(), sep, buf);
-      if (cg) cg->printf(sep);
-      count += outputConcatExprs(cg, ar, b->getExp2(), sep, buf);
-      return count;
+int BinaryOpExpression::getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
+                                      bool &hasVoid, bool &hasLitStr) {
+  if (!exp->hasCPPTemp()) {
+    if (exp->is(Expression::KindOfUnaryOpExpression)) {
+      UnaryOpExpressionPtr u = static_pointer_cast<UnaryOpExpression>(exp);
+      if (u->getOp() == '(') {
+        return getConcatList(ev, u->getExpression(), hasVoid, hasLitStr);
+      }
+    } else if (exp->is(Expression::KindOfBinaryOpExpression)) {
+      BinaryOpExpressionPtr b = static_pointer_cast<BinaryOpExpression>(exp);
+      if (b->getOp() == '.') {
+        return getConcatList(ev, b->getExp1(), hasVoid, hasLitStr) +
+          getConcatList(ev, b->getExp2(), hasVoid, hasLitStr);
+      }
+    } else if (exp->is(Expression::KindOfEncapsListExpression)) {
+      EncapsListExpressionPtr e =
+        static_pointer_cast<EncapsListExpression>(exp);
+      ExpressionListPtr el = e->getExpressions();
+      int num = 0;
+      for (int i = 0, s = el->getCount(); i < s; i++) {
+        ExpressionPtr exp = (*el)[i];
+        num += getConcatList(ev, exp, hasVoid, hasLitStr);
+      }
+      return num;
     }
   }
-  if (cg) {
-    bool is_void = !exp->getActualType();
-    bool close = false;
-    if (buf) {
-      exp->preOutputCPP(*cg, ar, 0);
-      if (!is_void) {
-        cg->printf("%s_buf += ", buf);
-      }
-      is_void = false;
-    } else if (is_void) {
-      if (exp->hasCPPTemp() || !exp->hasEffect()) {
-        cg->printf("(id");
-        close = true;
-      }
-      cg->printf("(");
-    }
-    exp->outputCPP(*cg, ar);
-    if (close) cg->printf(")");
-    if (is_void) {
-      cg->printf(",\"\")");
-    }
+
+  ev.push_back(exp);
+  bool isVoid = !exp->getActualType();
+  hasVoid |= isVoid;
+  hasLitStr |= exp->isLiteralString();
+  return isVoid ? 0 : 1;
+}
+
+static void outputStringExpr(CodeGenerator &cg, AnalysisResultPtr ar,
+                             ExpressionPtr exp, bool asLitStr) {
+  if (asLitStr && exp->isLiteralString()) {
+    const std::string &s = exp->getLiteralString();
+    char *enc = string_cplus_escape(s.c_str());
+    cg.printf("\"%s\", %d", enc, s.size());
+    free(enc);
+    return;
   }
-  return 1;
+
+  bool close = false;
+  if ((exp->hasContext(Expression::LValue) &&
+       (!exp->getActualType()->is(Type::KindOfString) ||
+        (exp->getImplementedType() &&
+         !exp->getImplementedType()->is(Type::KindOfString))))
+      ||
+      !exp->getType()->is(Type::KindOfString)) {
+    cg.printf("toString(");
+    close = true;
+  }
+  exp->outputCPP(cg, ar);
+  if (close) cg.printf(")");
+}
+
+static void outputStringBufExprs(ExpressionPtrVec &ev,
+                                 CodeGenerator &cg, AnalysisResultPtr ar) {
+  for (size_t i = 0; i < ev.size(); i++) {
+    ExpressionPtr exp = ev[i];
+    cg.printf(".add(");
+    outputStringExpr(cg, ar, exp, true);
+    cg.printf(")");
+  }
 }
 
 bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                       int state) {
   bool effect2 = m_exp2->hasEffect();
   const char *prefix = 0;
-  int num = 0;
   if (effect2 || m_exp1->hasEffect()) {
     ExpressionPtr self = static_pointer_cast<Expression>(shared_from_this());
+    ExpressionPtrVec ev;
+    bool hasVoid = false, hasLitStr = false;
+    int numConcat = 0;
+    bool ok = false;
     if (m_op == '.') {
-      num = outputConcatExprs(0, ar, self);
+      numConcat = getConcatList(ev, self, hasVoid, hasLitStr);
+      ok = hasVoid || hasLitStr || numConcat > MAX_CONCAT_ARGS;
     } else if (effect2 && m_op == T_CONCAT_EQUAL) {
       prefix = stringBufferPrefix(ar, m_exp1);
+      ok = prefix;
+      if (!ok) {
+        if (m_exp1->is(KindOfSimpleVariable)) {
+          ok = true;
+          ev.push_back(m_exp1);
+          numConcat++;
+        }
+      }
+      numConcat += getConcatList(ev, m_exp2, hasVoid, hasLitStr);
     }
-    if (num > MAX_CONCAT_ARGS || prefix) {
+    if (ok) {
       if (!ar->inExpression()) return true;
 
       ar->wrapExpressionBegin(cg);
+      std::string buf;
       if (prefix) {
         SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(m_exp1));
-        outputStringBufExprs(Option::TempPrefix, prefix,
-                             sv->getName().c_str(), m_exp2, cg, ar, 1, ";\n");
+        buf = stringBufferName(Option::TempPrefix, prefix,
+                               sv->getName().c_str());
         m_cppTemp = "/**/";
+      } else if (numConcat) {
+        buf = m_cppTemp = genCPPTemp(cg, ar);
+        buf += "_buf";
+        cg.printf("StringBuffer %s;\n", buf.c_str());
       } else {
-        std::string tmp = genCPPTemp(cg, ar);
-        cg.printf("StringBuffer %s_buf;\n", tmp.c_str());
-        outputConcatExprs(&cg, ar, self, ";\n", tmp.c_str());
-        cg.printf(";\n");
-        cg.printf("CStrRef %s(%s_buf.detach())",
-                  tmp.c_str(), tmp.c_str());
-        m_cppTemp = tmp;
+        m_cppTemp = "\"\"";
       }
 
-      cg.printf(";\n");
+      for (size_t i = 0; i < ev.size(); i++) {
+        ExpressionPtr exp = ev[i];
+        bool is_void = !exp->getActualType();
+        exp->preOutputCPP(cg, ar, 0);
+        if (!is_void) {
+          cg.printf("%s.append(", buf.c_str());
+          outputStringExpr(cg, ar, exp, true);
+          cg.printf(")");
+        } else {
+          exp->outputCPP(cg, ar);
+        }
+        cg.printf(";\n");
+      }
+
+      if (numConcat && !prefix) {
+        cg.printf("CStrRef %s(%s.detach());\n",
+                  m_cppTemp.c_str(), buf.c_str());
+        if (m_op == T_CONCAT_EQUAL) {
+          m_exp1->outputCPP(cg, ar);
+          cg.printf(" = %s;\n", m_cppTemp.c_str());
+        }
+      }
       return true;
     }
   }
@@ -892,8 +937,12 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   case T_CONCAT_EQUAL:
     if (const char *prefix = stringBufferPrefix(ar, m_exp1)) {
       SimpleVariablePtr sv = static_pointer_cast<SimpleVariable>(m_exp1);
-      outputStringBufExprs(Option::TempPrefix, prefix,
-                           sv->getName().c_str(), m_exp2, cg, ar, 0, ", ");
+      ExpressionPtrVec ev;
+      bool hasVoid = false, hasLitStr = false;
+      getConcatList(ev, m_exp2, hasVoid, hasLitStr);
+      cg.printf("%s", stringBufferName(Option::TempPrefix, prefix,
+                                       sv->getName().c_str()).c_str());
+      outputStringBufExprs(ev, cg, ar);
       return;
     }
     cg.printf("concat_assign");
@@ -901,23 +950,27 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   case '.':
     {
       ExpressionPtr self = static_pointer_cast<Expression>(shared_from_this());
-      int num = outputConcatExprs(0, ar, self);
-      assert(num >= 2);
-      if (num <= MAX_CONCAT_ARGS) {
+      ExpressionPtrVec ev;
+      bool hasVoid = false, hasLitStr = false;
+      int num = getConcatList(ev, self, hasVoid, hasLitStr);
+      assert(!hasVoid);
+      if (num <= MAX_CONCAT_ARGS && !hasLitStr) {
+        assert(num >= 2);
         if (num == 2) {
           cg.printf("concat(");
         } else {
           cg.printf("concat%d(", num);
         }
-        outputConcatExprs(&cg, ar, self);
+        for (size_t i = 0; i < ev.size(); i++) {
+          ExpressionPtr exp = ev[i];
+          if (i) cg.printf(", ");
+          outputStringExpr(cg, ar, exp, false);
+        }
         cg.printf(")");
       } else {
-        while (num--) {
-          cg.printf("(");
-        }
-        cg.printf("StringBuffer() += ");
-        outputConcatExprs(&cg, ar, self, ") += ");
-        cg.printf(").detach()");
+        cg.printf("StringBuffer()");
+        outputStringBufExprs(ev, cg, ar);
+        cg.printf(".detach()");
       }
     }
     return;

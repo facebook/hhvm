@@ -4165,7 +4165,7 @@ String c_exception::t_gettraceasstring() {
     LOOP_COUNTER(8);
     Variant map9 = t_gettrace();
     {
-      DeclareStringBuffer(tmp,v_s,512);
+      StringBuffer tmp_sbuf_v_s(512);
       for (ArrayIterPtr iter10 = map9.begin("exception"); !iter10->end(); iter10->next()) {
         LOOP_COUNTER_CHECK(8);
         iter10->second(v_frame);
@@ -4174,13 +4174,13 @@ String c_exception::t_gettraceasstring() {
             continue;
           }
           {
-            StringBufferAppend(tmp,v_s,"#");
-            StringBufferAppend(tmp,v_s,toString(v_i));
-            StringBufferAppend(tmp,v_s," ");
-            StringBufferAppend(tmp,v_s,toString(v_frame.rvalAt("file", 0x08C19339767C0884LL, true, true)));
-            StringBufferAppend(tmp,v_s,"(");
-            StringBufferAppend(tmp,v_s,toString(v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true)));
-            StringBufferAppend(tmp,v_s,"): ");
+            tmp_sbuf_v_s.append("#", 1);
+            tmp_sbuf_v_s.append(toString(v_i));
+            tmp_sbuf_v_s.append(" ", 1);
+            tmp_sbuf_v_s.append(toString(v_frame.rvalAt("file", 0x08C19339767C0884LL, true, true)));
+            tmp_sbuf_v_s.append("(", 1);
+            tmp_sbuf_v_s.append(toString(v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true)));
+            tmp_sbuf_v_s.append("): ", 3);
             Variant tmp11;
             if (isset(v_frame, "class", 0x45397FE5C82CBD12LL, true)) {
               String tmp12((toString(v_frame.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
@@ -4188,18 +4188,18 @@ String c_exception::t_gettraceasstring() {
             } else {
               tmp11 = ("");
             }
-            StringBufferAppend(tmp,v_s,toString((tmp11)));
-            StringBufferAppend(tmp,v_s,toString(v_frame.rvalAt("function", 0x736D912A52413931LL, true, true)));
-            StringBufferAppend(tmp,v_s,"()\n");
+            tmp_sbuf_v_s.append(toString(tmp11));
+            tmp_sbuf_v_s.append(toString(v_frame.rvalAt("function", 0x736D912A52413931LL, true, true)));
+            tmp_sbuf_v_s.append("()\n", 3);
             ;
           }
           v_i++;
         }
       }
-      StringBufferDetach(tmp, v_s);
+      concat_assign(v_s, tmp_sbuf_v_s);
     }
   }
-  concat_assign(v_s, concat3("#", toString(v_i), " {main}"));
+  concat_assign(v_s, StringBuffer().add("#", 1).add(toString(v_i)).add(" {main}", 7).detach());
   return v_s;
 } /* function */
 /* SRC: classes/exception.php line 75 */

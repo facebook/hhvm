@@ -126,13 +126,16 @@ ExpressionPtr IncludeExpression::preOptimize(AnalysisResultPtr ar) {
 
 ExpressionPtr IncludeExpression::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_exp);
-  if (!Option::KeepStatementsWithNoEffect && !m_include.empty()) {
+  if (!m_include.empty()) {
     FileScopePtr fs = ar->findFileScope(m_include, false);
-    if (fs && !fs->hasImpl(ar)) {
-      return ScalarExpressionPtr
-               (new ScalarExpression(getLocation(),
-                                     Expression::KindOfScalarExpression,
-                                     1));
+    if (fs) {
+      if (!Option::KeepStatementsWithNoEffect && !fs->hasImpl(ar)) {
+        return ScalarExpressionPtr
+          (new ScalarExpression(getLocation(),
+                                Expression::KindOfScalarExpression,
+                                1));
+      }
+      m_exp.reset();
     }
   }
   return ExpressionPtr();

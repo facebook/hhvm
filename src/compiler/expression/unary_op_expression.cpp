@@ -27,6 +27,8 @@
 #include <compiler/analysis/variable_table.h>
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/expression/constant_expression.h>
+#include <compiler/expression/binary_op_expression.h>
+#include <compiler/expression/encaps_list_expression.h>
 #include <runtime/base/builtin_functions.h>
 #include <compiler/parser/parser.h>
 
@@ -290,6 +292,11 @@ ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultPtr ar) {
   }
 
   ar->postOptimize(m_exp);
+  if (m_op == T_PRINT && m_exp->is(KindOfEncapsListExpression)) {
+    EncapsListExpressionPtr e = static_pointer_cast<EncapsListExpression>
+      (m_exp);
+    e->stripConcat();
+  }
 
   ar->setInsideScalarArray(insideScalarArray);
   return ExpressionPtr();
@@ -565,6 +572,24 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       this->preOutputStash(cg, ar, state);
       m_silencer = s;
       cg.printf("%s%d.disable();\n", Option::SilencerPrefix, m_silencer);
+      return true;
+    }
+  } else if (m_op == T_PRINT && m_exp) {
+    ExpressionPtrVec ev;
+    bool hasVoid = false, hasLit = false;
+    if (BinaryOpExpression::getConcatList(ev, m_exp, hasVoid, hasLit) > 1 ||
+        hasVoid || hasLit) {
+
+      if (!ar->inExpression()) return true;
+      ar->wrapExpressionBegin(cg);
+      for (int i = 0, s = ev.size(); i < s; i++) {
+        ExpressionPtr e = ev[i];
+        e->preOutputCPP(cg, ar, 0);
+        cg.printf("print(");
+        e->outputCPP(cg, ar);
+        cg.printf(");\n");
+      }
+      m_cppTemp = "1";
       return true;
     }
   }

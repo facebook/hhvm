@@ -79,6 +79,8 @@ public:
   StringBuffer &operator+=(char c)    { append(c); return *this;}
   StringBuffer &operator+=(litstr  s) { append(s); return *this;}
   StringBuffer &operator+=(CStrRef s) { append(s); return *this;}
+  StringBuffer &add(const char *s, int len) { append(s, len); return *this; }
+  StringBuffer &add(CStrRef s)        { append(s); return *this; }
 
   /**
    * Write data.
@@ -103,23 +105,6 @@ private:
 
   void grow(int minSize);
 };
-
-#if !defined(HPHP_AUTO_SBUFFER) || HPHP_AUTO_SBUFFER
-#define StringBufferName(prefix,name) prefix##_sbuf_##name
-#define DeclareStringBuffer(prefix,name,size) \
-  StringBuffer StringBufferName(prefix,name)(size)
-#define StringBufferAppend(prefix,name,value) \
-  StringBufferName(prefix,name).append(value)
-#define StringBufferDetach(prefix,name) \
-  concat_assign(name, StringBufferName(prefix,name).detach())
-
-#else
-
-#define DeclareStringBuffer(prefix,name,size)
-#define StringBufferAppend(prefix,name,value) concat_assign(name, value)
-#define StringBufferDetach(prefix,name)
-
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 }

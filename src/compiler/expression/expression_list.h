@@ -58,6 +58,7 @@ public:
   ExpressionPtr &operator[](int index);
 
   void getStrings(std::vector<std::string> &strings);
+  void stripConcat();
 
   void markParam(int p, bool noRefWrapper);
   void markParams(bool noRefWrapper);

@@ -17,6 +17,8 @@
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/expression/simple_variable.h>
+#include <compiler/expression/unary_op_expression.h>
+#include <compiler/expression/binary_op_expression.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/expression/array_pair_expression.h>
 #include <compiler/analysis/function_scope.h>
@@ -145,6 +147,29 @@ bool ExpressionList::getScalarValue(Variant &value) {
   }
   value = Array(init.create());
   return true;
+}
+
+void ExpressionList::stripConcat() {
+  ExpressionList &el = *this;
+  for (int i = 0, s = el.getCount(); i < s; ) {
+    ExpressionPtr &e = el[i];
+    if (e->is(Expression::KindOfUnaryOpExpression)) {
+      UnaryOpExpressionPtr u(boost::static_pointer_cast<UnaryOpExpression>(e));
+      if (u->getOp() == '(') {
+        e = u->getExpression();
+      }
+    }
+    if (e->is(Expression::KindOfBinaryOpExpression)) {
+      BinaryOpExpressionPtr b
+        (boost::static_pointer_cast<BinaryOpExpression>(e));
+      if (b->getOp() == '.') {
+        e = b->getExp1();
+        el.insertElement(b->getExp2(), i + 1);
+        continue;
+      }
+    }
+    i++;
+  }
 }
 
 void ExpressionList::setOutputCount(int count) {

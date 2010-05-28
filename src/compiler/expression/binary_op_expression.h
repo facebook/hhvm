@@ -51,6 +51,9 @@ public:
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                     int state);
 
+  static int getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
+                           bool &hasVoid, bool &hasLitStr);
+
 private:
   ExpressionPtr simplifyLogical(AnalysisResultPtr ar);
   ExpressionPtr simplifyArithmetic(AnalysisResultPtr ar);

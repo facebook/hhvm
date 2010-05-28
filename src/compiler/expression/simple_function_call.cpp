@@ -881,9 +881,9 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
       ScalarExpressionPtr name =
         dynamic_pointer_cast<ScalarExpression>((*m_params)[0]);
       string varName;
+      ExpressionPtr value = (*m_params)[1];
       if (name) {
         varName = name->getIdentifier();
-        ExpressionPtr value = (*m_params)[1];
         if (varName.empty()) {
           cg.printf("throw_fatal(\"bad define\")");
         } else if (m_dynamicConstant) {
@@ -905,7 +905,15 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
           }
         }
       } else {
+        bool close = false;
+        if (value->hasEffect()) {
+          cg.printf("(id(");
+          value->outputCPP(cg, ar);
+          cg.printf("),");
+          close = true;
+        }
         cg.printf("throw_fatal(\"bad define\")");
+        if (close) cg.printf(")");
       }
       if (linemap) cg.printf(")");
       return;

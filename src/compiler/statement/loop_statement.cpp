@@ -42,7 +42,7 @@ void LoopStatement::cppDeclareBufs(CodeGenerator &cg, AnalysisResultPtr ar) {
            end = m_string_bufs.end(); it != end; ++it) {
       const char *prefix =
         ar->getScope()->getVariables()->getVariablePrefix(ar, *it);
-      cg.printf("DeclareStringBuffer(%s,%s%s,512);\n",
+      cg.printf("StringBuffer %s_sbuf_%s%s(512);\n",
                 Option::TempPrefix, prefix, it->c_str());
     }
     m_outer = ar->getLoopStatement();
@@ -61,8 +61,10 @@ void LoopStatement::cppEndBufs(CodeGenerator &cg, AnalysisResultPtr ar) {
       const char *prefix =
         ar->getScope()->getVariables()->getVariablePrefix(ar, *it);
 
-      cg.printf("StringBufferDetach(%s, %s%s);\n",
-                Option::TempPrefix, prefix, it->c_str());
+      cg.printf("concat_assign(%s%s, %s_sbuf_%s%s);\n",
+                prefix, it->c_str(),
+                Option::Option::TempPrefix,
+                prefix, it->c_str());
     }
     cg.indentEnd("}\n");
   }

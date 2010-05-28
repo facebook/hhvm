@@ -72,7 +72,8 @@ class ArrayInit {
 public:
   ArrayInit(ssize_t n, bool isVector = false, bool keepRef = false);
   ~ArrayInit() {
-    ASSERT(m_data == NULL);
+    // In case an exception interrupts the initialization.
+    if (m_data) m_data->release();
   }
 
   ArrayInit &set(int p, CVarRef v) {

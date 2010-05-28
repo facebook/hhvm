@@ -1221,6 +1221,13 @@ bool TestCodeRun::TestArrayInit() {
        "$obj = new MyClass();\n"
        "$arr = array($obj => 1);\n"
        "var_dump($arr);\n");
+  MVCR("<?php\n"
+       "function f() { throw new Exception(); }\n"
+       "function test() {\n"
+       "  $a = array(1, f(), 2, f(), 3);\n"
+       "  var_dump($a);\n"
+       "}\n"
+       "try { test(); } catch (Exception $e) { }\n");
 
   return true;
 }

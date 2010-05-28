@@ -31,6 +31,7 @@ testing and some alternative PHP implementation.
 - dangling_server_proxy_old_request
 - dangling_server_proxy_new_request
 
+- pagelet_server_is_enabled
 - pagelet_server_task_start
 - pagelet_server_task_status
 - pagelet_server_task_result
@@ -61,3 +62,12 @@ testing and some alternative PHP implementation.
 - xhprof_disable
 - xhprof_sample_enable
 - xhprof_sample_disable
+
+<h2>New Server Variables</h2>
+
+$_SERVER['THREAD_TYPE'] can be:
+
+- REQUEST
+- PAGELET
+- XBOX
+- RPC

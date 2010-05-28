@@ -100,6 +100,10 @@ bool f_dangling_server_proxy_new_request(CStrRef host) {
 ///////////////////////////////////////////////////////////////////////////////
 // Pagelet Server
 
+bool f_pagelet_server_is_enabled() {
+  return PageletServer::Enabled();
+}
+
 Object f_pagelet_server_task_start(CStrRef url,
                                    CArrRef headers /* = null_array */,
                                    CStrRef post_data /* = null_string */) {

@@ -72,6 +72,7 @@ public:
 
   enum ThreadType {
     RequestThread,
+    PageletThread,
     XboxThread,
     RpcThread,
   };

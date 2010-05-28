@@ -34,6 +34,8 @@ public:
   PageletTransport(CStrRef url, CArrRef headers, CStrRef postData,
                    CStrRef remoteHost)
     : m_refCount(0), m_done(false), m_code(0) {
+    m_threadType = PageletThread;
+
     m_url.append(url.data(), url.size());
     m_remoteHost.append(remoteHost.data(), remoteHost.size());
 
@@ -211,6 +213,10 @@ IMPLEMENT_OBJECT_ALLOCATION(PageletTask);
 // implementing PageletServer
 
 static JobQueueDispatcher<PageletTransport*, PageletWorker> *s_dispatcher;
+
+bool PageletServer::Enabled() {
+  return RuntimeOption::PageletServerThreadCount > 0;
+}
 
 void PageletServer::Restart() {
   if (s_dispatcher) {

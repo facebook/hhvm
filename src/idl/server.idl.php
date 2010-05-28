@@ -11,6 +11,8 @@ f('dangling_server_proxy_new_request', Boolean,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+f('pagelet_server_is_enabled', Boolean);
+
 f('pagelet_server_task_start', Resource,
   array('url' => String,
         'headers' => array(StringMap, 'null_array'),

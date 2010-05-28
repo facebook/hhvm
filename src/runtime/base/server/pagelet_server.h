@@ -24,6 +24,7 @@ namespace HPHP {
 
 class PageletServer {
 public:
+  static bool Enabled();
   static void Restart();
 
   /**

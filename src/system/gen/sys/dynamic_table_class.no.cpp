@@ -15964,7 +15964,7 @@ void c_soapclient::cloneSet(c_soapclient *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_soapclient::doCall(Variant v_name, Variant v_arguments, bool fatal) {
-  return t___call(v_name, v_arguments);
+  return t___call(v_name, !v_arguments.isNull() ? v_arguments : Variant(Array::Create()));
 }
 Variant c_soapclient::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();

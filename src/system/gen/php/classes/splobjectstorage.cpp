@@ -27,6 +27,18 @@ namespace HPHP {
 /* preface finishes */
 /* SRC: classes/splobjectstorage.php line 3 */
 Variant c_splobjectstorage::os_getInit(const char *s, int64 hash) {
+  DECLARE_SYSTEM_GLOBALS(g);
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 3) {
+    case 1:
+      HASH_RETURN(0x1EA489BB64FC2CB1LL, 
+                  SystemScalarArrays::ssa_[0], storage);
+      HASH_RETURN(0x440D5888C0FF3081LL, 
+                  0LL, index);
+      break;
+    default:
+      break;
+  }
   return c_ObjectData::os_getInit(s, hash);
 }
 Variant c_splobjectstorage::os_get(const char *s, int64 hash) {

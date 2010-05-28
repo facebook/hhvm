@@ -35,6 +35,11 @@ inline bool x_dangling_server_proxy_new_request(CStrRef host) {
   return f_dangling_server_proxy_new_request(host);
 }
 
+inline bool x_pagelet_server_is_enabled() {
+  FUNCTION_INJECTION_BUILTIN(pagelet_server_is_enabled);
+  return f_pagelet_server_is_enabled();
+}
+
 inline Object x_pagelet_server_task_start(CStrRef url, CArrRef headers = null_array, CStrRef post_data = null_string) {
   FUNCTION_INJECTION_BUILTIN(pagelet_server_task_start);
   return f_pagelet_server_task_start(url, headers, post_data);

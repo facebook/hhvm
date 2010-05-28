@@ -1747,6 +1747,12 @@ Variant i_pos(CArrRef params) {
   if (count != 1) return throw_wrong_arguments("pos", count, 1, 1, 1);
   return (f_pos(ref(const_cast<Array&>(params).lvalAt(0))));
 }
+Variant i_pagelet_server_is_enabled(CArrRef params) {
+  FUNCTION_INJECTION(pagelet_server_is_enabled);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("pagelet_server_is_enabled", 0, 1);
+  return (f_pagelet_server_is_enabled());
+}
 Variant i_imagecolorexactalpha(CArrRef params) {
   FUNCTION_INJECTION(imagecolorexactalpha);
   int count __attribute__((__unused__)) = params.size();
@@ -17278,6 +17284,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x1FFD204252F60F63LL, magicksetimageprofile);
       break;
     case 3940:
+      HASH_INVOKE(0x41EF51E62AD3DF64LL, pagelet_server_is_enabled);
       HASH_INVOKE(0x280051555A21DF64LL, rename);
       break;
     case 3942:
@@ -22947,6 +22954,18 @@ Variant ei_pos(Eval::VariableEnvironment &env, const Eval::FunctionCallExpressio
     (*it)->eval(env);
   }
   return (x_pos(ref(a0)));
+}
+Variant ei_pagelet_server_is_enabled(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("pagelet_server_is_enabled", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_pagelet_server_is_enabled());
 }
 Variant ei_imagecolorexactalpha(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -61970,6 +61989,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x1FFD204252F60F63LL, magicksetimageprofile);
       break;
     case 3940:
+      HASH_INVOKE_FROM_EVAL(0x41EF51E62AD3DF64LL, pagelet_server_is_enabled);
       HASH_INVOKE_FROM_EVAL(0x280051555A21DF64LL, rename);
       break;
     case 3942:

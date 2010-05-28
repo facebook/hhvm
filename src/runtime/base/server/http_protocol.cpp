@@ -256,6 +256,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   case Transport::RequestThread:
     server.set("THREAD_TYPE", "REQUEST");
     break;
+  case Transport::PageletThread:
+    server.set("THREAD_TYPE", "PAGELET");
+    break;
   case Transport::XboxThread:
     server.set("THREAD_TYPE", "XBOX");
     break;

@@ -2249,10 +2249,14 @@ const int64 q_reflectionclass_IS_FINAL = 64LL;
 Variant c_reflectionclass::os_getInit(const char *s, int64 hash) {
   DECLARE_SYSTEM_GLOBALS(g);
   if (hash < 0) hash = hash_string(s);
-  switch (hash & 1) {
+  switch (hash & 3) {
     case 0:
       HASH_RETURN(0x0BCDB293DC3CBDDCLL, 
                   null, name);
+      break;
+    case 2:
+      HASH_RETURN(0x59E9384E33988B3ELL, 
+                  null, info);
       break;
     default:
       break;
@@ -4372,6 +4376,20 @@ Variant c_reflectionclass::t_getextensionname() {
 } /* function */
 /* SRC: classes/reflection.php line 736 */
 Variant c_reflectionextension::os_getInit(const char *s, int64 hash) {
+  DECLARE_SYSTEM_GLOBALS(g);
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 3) {
+    case 0:
+      HASH_RETURN(0x0BCDB293DC3CBDDCLL, 
+                  null, name);
+      break;
+    case 2:
+      HASH_RETURN(0x59E9384E33988B3ELL, 
+                  null, info);
+      break;
+    default:
+      break;
+  }
   return c_ObjectData::os_getInit(s, hash);
 }
 Variant c_reflectionextension::os_get(const char *s, int64 hash) {

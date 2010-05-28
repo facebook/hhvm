@@ -29,6 +29,20 @@ namespace HPHP {
 /* preface finishes */
 /* SRC: classes/iterator.php line 70 */
 Variant c_arrayiterator::os_getInit(const char *s, int64 hash) {
+  DECLARE_SYSTEM_GLOBALS(g);
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 3) {
+    case 0:
+      HASH_RETURN(0x1776D8467CB08D68LL, 
+                  null, arr);
+      break;
+    case 1:
+      HASH_RETURN(0x6AFDA85728FAE70DLL, 
+                  null, flags);
+      break;
+    default:
+      break;
+  }
   return c_ObjectData::os_getInit(s, hash);
 }
 Variant c_arrayiterator::os_get(const char *s, int64 hash) {
@@ -1018,6 +1032,16 @@ bool c_arrayiterator::t_valid() {
 } /* function */
 /* SRC: classes/iterator.php line 279 */
 Variant c_appenditerator::os_getInit(const char *s, int64 hash) {
+  DECLARE_SYSTEM_GLOBALS(g);
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 1) {
+    case 0:
+      HASH_RETURN(0x1F6E21DFD4AF8244LL, 
+                  null, iterators);
+      break;
+    default:
+      break;
+  }
   return c_ObjectData::os_getInit(s, hash);
 }
 Variant c_appenditerator::os_get(const char *s, int64 hash) {
@@ -1188,7 +1212,7 @@ void c_appenditerator::cloneSet(c_appenditerator *clone) {
   ObjectData::cloneSet(clone);
 }
 Variant c_appenditerator::doCall(Variant v_name, Variant v_arguments, bool fatal) {
-  return t___call(v_name, v_arguments);
+  return t___call(v_name, !v_arguments.isNull() ? v_arguments : Variant(Array::Create()));
 }
 Variant c_appenditerator::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();

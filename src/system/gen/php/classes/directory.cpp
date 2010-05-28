@@ -354,21 +354,13 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
 Variant c_directory::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_directory$os_getInit(const char *s) {
-  return c_directory::os_getInit(s, -1);
-}
-Variant cw_directory$os_get(const char *s) {
-  return c_directory::os_get(s, -1);
-}
-Variant &cw_directory$os_lval(const char *s) {
-  return c_directory::os_lval(s, -1);
-}
-Variant cw_directory$os_constant(const char *s) {
-  return c_directory::os_constant(s);
-}
-Variant cw_directory$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_directory::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_directory = {
+  c_directory::os_getInit,
+  c_directory::os_get,
+  c_directory::os_lval,
+  c_directory::os_invoke,
+  c_directory::os_constant,
+};
 void c_directory::init() {
   m_path = null;
   m_handle = null;

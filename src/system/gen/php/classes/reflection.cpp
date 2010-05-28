@@ -525,21 +525,13 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
 Variant c_reflectionfunctionabstract::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_reflectionfunctionabstract$os_getInit(const char *s) {
-  return c_reflectionfunctionabstract::os_getInit(s, -1);
-}
-Variant cw_reflectionfunctionabstract$os_get(const char *s) {
-  return c_reflectionfunctionabstract::os_get(s, -1);
-}
-Variant &cw_reflectionfunctionabstract$os_lval(const char *s) {
-  return c_reflectionfunctionabstract::os_lval(s, -1);
-}
-Variant cw_reflectionfunctionabstract$os_constant(const char *s) {
-  return c_reflectionfunctionabstract::os_constant(s);
-}
-Variant cw_reflectionfunctionabstract$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_reflectionfunctionabstract::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_reflectionfunctionabstract = {
+  c_reflectionfunctionabstract::os_getInit,
+  c_reflectionfunctionabstract::os_get,
+  c_reflectionfunctionabstract::os_lval,
+  c_reflectionfunctionabstract::os_invoke,
+  c_reflectionfunctionabstract::os_constant,
+};
 void c_reflectionfunctionabstract::init() {
   m_info = null;
 }
@@ -1970,21 +1962,13 @@ Variant c_reflectionobject::os_invoke_from_eval(const char *c, const char *s, Ev
   }
   return c_reflectionclass::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_reflectionobject$os_getInit(const char *s) {
-  return c_reflectionobject::os_getInit(s, -1);
-}
-Variant cw_reflectionobject$os_get(const char *s) {
-  return c_reflectionobject::os_get(s, -1);
-}
-Variant &cw_reflectionobject$os_lval(const char *s) {
-  return c_reflectionobject::os_lval(s, -1);
-}
-Variant cw_reflectionobject$os_constant(const char *s) {
-  return c_reflectionobject::os_constant(s);
-}
-Variant cw_reflectionobject$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_reflectionobject::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_reflectionobject = {
+  c_reflectionobject::os_getInit,
+  c_reflectionobject::os_get,
+  c_reflectionobject::os_lval,
+  c_reflectionobject::os_invoke,
+  c_reflectionobject::os_constant,
+};
 void c_reflectionobject::init() {
   c_reflectionclass::init();
 }
@@ -2344,21 +2328,13 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
 Variant c_reflectionexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_reflectionexception$os_getInit(const char *s) {
-  return c_reflectionexception::os_getInit(s, -1);
-}
-Variant cw_reflectionexception$os_get(const char *s) {
-  return c_reflectionexception::os_get(s, -1);
-}
-Variant &cw_reflectionexception$os_lval(const char *s) {
-  return c_reflectionexception::os_lval(s, -1);
-}
-Variant cw_reflectionexception$os_constant(const char *s) {
-  return c_reflectionexception::os_constant(s);
-}
-Variant cw_reflectionexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_reflectionexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_reflectionexception = {
+  c_reflectionexception::os_getInit,
+  c_reflectionexception::os_get,
+  c_reflectionexception::os_lval,
+  c_reflectionexception::os_invoke,
+  c_reflectionexception::os_constant,
+};
 void c_reflectionexception::init() {
   c_exception::init();
 }
@@ -3873,21 +3849,13 @@ Variant c_reflectionclass::os_invoke_from_eval(const char *c, const char *s, Eva
   }
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_reflectionclass$os_getInit(const char *s) {
-  return c_reflectionclass::os_getInit(s, -1);
-}
-Variant cw_reflectionclass$os_get(const char *s) {
-  return c_reflectionclass::os_get(s, -1);
-}
-Variant &cw_reflectionclass$os_lval(const char *s) {
-  return c_reflectionclass::os_lval(s, -1);
-}
-Variant cw_reflectionclass$os_constant(const char *s) {
-  return c_reflectionclass::os_constant(s);
-}
-Variant cw_reflectionclass$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_reflectionclass::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_reflectionclass = {
+  c_reflectionclass::os_getInit,
+  c_reflectionclass::os_get,
+  c_reflectionclass::os_lval,
+  c_reflectionclass::os_invoke,
+  c_reflectionclass::os_constant,
+};
 void c_reflectionclass::init() {
   m_name = null;
   m_info = null;
@@ -5136,21 +5104,13 @@ Variant c_reflectionextension::os_invoke_from_eval(const char *c, const char *s,
   }
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_reflectionextension$os_getInit(const char *s) {
-  return c_reflectionextension::os_getInit(s, -1);
-}
-Variant cw_reflectionextension$os_get(const char *s) {
-  return c_reflectionextension::os_get(s, -1);
-}
-Variant &cw_reflectionextension$os_lval(const char *s) {
-  return c_reflectionextension::os_lval(s, -1);
-}
-Variant cw_reflectionextension$os_constant(const char *s) {
-  return c_reflectionextension::os_constant(s);
-}
-Variant cw_reflectionextension$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_reflectionextension::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_reflectionextension = {
+  c_reflectionextension::os_getInit,
+  c_reflectionextension::os_get,
+  c_reflectionextension::os_lval,
+  c_reflectionextension::os_invoke,
+  c_reflectionextension::os_constant,
+};
 void c_reflectionextension::init() {
   m_name = null;
   m_info = null;
@@ -6305,21 +6265,13 @@ Variant c_reflectionmethod::os_invoke_from_eval(const char *c, const char *s, Ev
   }
   return c_reflectionfunctionabstract::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_reflectionmethod$os_getInit(const char *s) {
-  return c_reflectionmethod::os_getInit(s, -1);
-}
-Variant cw_reflectionmethod$os_get(const char *s) {
-  return c_reflectionmethod::os_get(s, -1);
-}
-Variant &cw_reflectionmethod$os_lval(const char *s) {
-  return c_reflectionmethod::os_lval(s, -1);
-}
-Variant cw_reflectionmethod$os_constant(const char *s) {
-  return c_reflectionmethod::os_constant(s);
-}
-Variant cw_reflectionmethod$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_reflectionmethod::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_reflectionmethod = {
+  c_reflectionmethod::os_getInit,
+  c_reflectionmethod::os_get,
+  c_reflectionmethod::os_lval,
+  c_reflectionmethod::os_invoke,
+  c_reflectionmethod::os_constant,
+};
 void c_reflectionmethod::init() {
   c_reflectionfunctionabstract::init();
   m_name = null;
@@ -7214,21 +7166,13 @@ Variant c_reflectionproperty::os_invoke_from_eval(const char *c, const char *s, 
   }
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_reflectionproperty$os_getInit(const char *s) {
-  return c_reflectionproperty::os_getInit(s, -1);
-}
-Variant cw_reflectionproperty$os_get(const char *s) {
-  return c_reflectionproperty::os_get(s, -1);
-}
-Variant &cw_reflectionproperty$os_lval(const char *s) {
-  return c_reflectionproperty::os_lval(s, -1);
-}
-Variant cw_reflectionproperty$os_constant(const char *s) {
-  return c_reflectionproperty::os_constant(s);
-}
-Variant cw_reflectionproperty$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_reflectionproperty::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_reflectionproperty = {
+  c_reflectionproperty::os_getInit,
+  c_reflectionproperty::os_get,
+  c_reflectionproperty::os_lval,
+  c_reflectionproperty::os_invoke,
+  c_reflectionproperty::os_constant,
+};
 void c_reflectionproperty::init() {
   m_info = null;
   m_name = null;
@@ -8087,21 +8031,13 @@ Variant c_reflectionfunction::os_invoke_from_eval(const char *c, const char *s, 
   }
   return c_reflectionfunctionabstract::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_reflectionfunction$os_getInit(const char *s) {
-  return c_reflectionfunction::os_getInit(s, -1);
-}
-Variant cw_reflectionfunction$os_get(const char *s) {
-  return c_reflectionfunction::os_get(s, -1);
-}
-Variant &cw_reflectionfunction$os_lval(const char *s) {
-  return c_reflectionfunction::os_lval(s, -1);
-}
-Variant cw_reflectionfunction$os_constant(const char *s) {
-  return c_reflectionfunction::os_constant(s);
-}
-Variant cw_reflectionfunction$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_reflectionfunction::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_reflectionfunction = {
+  c_reflectionfunction::os_getInit,
+  c_reflectionfunction::os_get,
+  c_reflectionfunction::os_lval,
+  c_reflectionfunction::os_invoke,
+  c_reflectionfunction::os_constant,
+};
 void c_reflectionfunction::init() {
   c_reflectionfunctionabstract::init();
 }
@@ -8776,21 +8712,13 @@ Variant c_reflectionparameter::os_invoke_from_eval(const char *c, const char *s,
   }
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_reflectionparameter$os_getInit(const char *s) {
-  return c_reflectionparameter::os_getInit(s, -1);
-}
-Variant cw_reflectionparameter$os_get(const char *s) {
-  return c_reflectionparameter::os_get(s, -1);
-}
-Variant &cw_reflectionparameter$os_lval(const char *s) {
-  return c_reflectionparameter::os_lval(s, -1);
-}
-Variant cw_reflectionparameter$os_constant(const char *s) {
-  return c_reflectionparameter::os_constant(s);
-}
-Variant cw_reflectionparameter$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_reflectionparameter::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_reflectionparameter = {
+  c_reflectionparameter::os_getInit,
+  c_reflectionparameter::os_get,
+  c_reflectionparameter::os_lval,
+  c_reflectionparameter::os_invoke,
+  c_reflectionparameter::os_constant,
+};
 void c_reflectionparameter::init() {
   m_info = null;
 }

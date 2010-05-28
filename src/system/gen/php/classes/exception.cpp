@@ -361,21 +361,13 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
 Variant c_unexpectedvalueexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_runtimeexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_unexpectedvalueexception$os_getInit(const char *s) {
-  return c_unexpectedvalueexception::os_getInit(s, -1);
-}
-Variant cw_unexpectedvalueexception$os_get(const char *s) {
-  return c_unexpectedvalueexception::os_get(s, -1);
-}
-Variant &cw_unexpectedvalueexception$os_lval(const char *s) {
-  return c_unexpectedvalueexception::os_lval(s, -1);
-}
-Variant cw_unexpectedvalueexception$os_constant(const char *s) {
-  return c_unexpectedvalueexception::os_constant(s);
-}
-Variant cw_unexpectedvalueexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_unexpectedvalueexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_unexpectedvalueexception = {
+  c_unexpectedvalueexception::os_getInit,
+  c_unexpectedvalueexception::os_get,
+  c_unexpectedvalueexception::os_lval,
+  c_unexpectedvalueexception::os_invoke,
+  c_unexpectedvalueexception::os_constant,
+};
 void c_unexpectedvalueexception::init() {
   c_runtimeexception::init();
 }
@@ -716,21 +708,13 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
 Variant c_overflowexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_runtimeexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_overflowexception$os_getInit(const char *s) {
-  return c_overflowexception::os_getInit(s, -1);
-}
-Variant cw_overflowexception$os_get(const char *s) {
-  return c_overflowexception::os_get(s, -1);
-}
-Variant &cw_overflowexception$os_lval(const char *s) {
-  return c_overflowexception::os_lval(s, -1);
-}
-Variant cw_overflowexception$os_constant(const char *s) {
-  return c_overflowexception::os_constant(s);
-}
-Variant cw_overflowexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_overflowexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_overflowexception = {
+  c_overflowexception::os_getInit,
+  c_overflowexception::os_get,
+  c_overflowexception::os_lval,
+  c_overflowexception::os_invoke,
+  c_overflowexception::os_constant,
+};
 void c_overflowexception::init() {
   c_runtimeexception::init();
 }
@@ -1071,21 +1055,13 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
 Variant c_outofboundsexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_runtimeexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_outofboundsexception$os_getInit(const char *s) {
-  return c_outofboundsexception::os_getInit(s, -1);
-}
-Variant cw_outofboundsexception$os_get(const char *s) {
-  return c_outofboundsexception::os_get(s, -1);
-}
-Variant &cw_outofboundsexception$os_lval(const char *s) {
-  return c_outofboundsexception::os_lval(s, -1);
-}
-Variant cw_outofboundsexception$os_constant(const char *s) {
-  return c_outofboundsexception::os_constant(s);
-}
-Variant cw_outofboundsexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_outofboundsexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_outofboundsexception = {
+  c_outofboundsexception::os_getInit,
+  c_outofboundsexception::os_get,
+  c_outofboundsexception::os_lval,
+  c_outofboundsexception::os_invoke,
+  c_outofboundsexception::os_constant,
+};
 void c_outofboundsexception::init() {
   c_runtimeexception::init();
 }
@@ -1426,21 +1402,13 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
 Variant c_logicexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_logicexception$os_getInit(const char *s) {
-  return c_logicexception::os_getInit(s, -1);
-}
-Variant cw_logicexception$os_get(const char *s) {
-  return c_logicexception::os_get(s, -1);
-}
-Variant &cw_logicexception$os_lval(const char *s) {
-  return c_logicexception::os_lval(s, -1);
-}
-Variant cw_logicexception$os_constant(const char *s) {
-  return c_logicexception::os_constant(s);
-}
-Variant cw_logicexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_logicexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_logicexception = {
+  c_logicexception::os_getInit,
+  c_logicexception::os_get,
+  c_logicexception::os_lval,
+  c_logicexception::os_invoke,
+  c_logicexception::os_constant,
+};
 void c_logicexception::init() {
   c_exception::init();
 }
@@ -1781,21 +1749,13 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
 Variant c_rangeexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_runtimeexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_rangeexception$os_getInit(const char *s) {
-  return c_rangeexception::os_getInit(s, -1);
-}
-Variant cw_rangeexception$os_get(const char *s) {
-  return c_rangeexception::os_get(s, -1);
-}
-Variant &cw_rangeexception$os_lval(const char *s) {
-  return c_rangeexception::os_lval(s, -1);
-}
-Variant cw_rangeexception$os_constant(const char *s) {
-  return c_rangeexception::os_constant(s);
-}
-Variant cw_rangeexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_rangeexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_rangeexception = {
+  c_rangeexception::os_getInit,
+  c_rangeexception::os_get,
+  c_rangeexception::os_lval,
+  c_rangeexception::os_invoke,
+  c_rangeexception::os_constant,
+};
 void c_rangeexception::init() {
   c_runtimeexception::init();
 }
@@ -2136,21 +2096,13 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
 Variant c_invalidargumentexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_logicexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_invalidargumentexception$os_getInit(const char *s) {
-  return c_invalidargumentexception::os_getInit(s, -1);
-}
-Variant cw_invalidargumentexception$os_get(const char *s) {
-  return c_invalidargumentexception::os_get(s, -1);
-}
-Variant &cw_invalidargumentexception$os_lval(const char *s) {
-  return c_invalidargumentexception::os_lval(s, -1);
-}
-Variant cw_invalidargumentexception$os_constant(const char *s) {
-  return c_invalidargumentexception::os_constant(s);
-}
-Variant cw_invalidargumentexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_invalidargumentexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_invalidargumentexception = {
+  c_invalidargumentexception::os_getInit,
+  c_invalidargumentexception::os_get,
+  c_invalidargumentexception::os_lval,
+  c_invalidargumentexception::os_invoke,
+  c_invalidargumentexception::os_constant,
+};
 void c_invalidargumentexception::init() {
   c_logicexception::init();
 }
@@ -2491,21 +2443,13 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
 Variant c_underflowexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_runtimeexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_underflowexception$os_getInit(const char *s) {
-  return c_underflowexception::os_getInit(s, -1);
-}
-Variant cw_underflowexception$os_get(const char *s) {
-  return c_underflowexception::os_get(s, -1);
-}
-Variant &cw_underflowexception$os_lval(const char *s) {
-  return c_underflowexception::os_lval(s, -1);
-}
-Variant cw_underflowexception$os_constant(const char *s) {
-  return c_underflowexception::os_constant(s);
-}
-Variant cw_underflowexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_underflowexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_underflowexception = {
+  c_underflowexception::os_getInit,
+  c_underflowexception::os_get,
+  c_underflowexception::os_lval,
+  c_underflowexception::os_invoke,
+  c_underflowexception::os_constant,
+};
 void c_underflowexception::init() {
   c_runtimeexception::init();
 }
@@ -2846,21 +2790,13 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
 Variant c_outofrangeexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_logicexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_outofrangeexception$os_getInit(const char *s) {
-  return c_outofrangeexception::os_getInit(s, -1);
-}
-Variant cw_outofrangeexception$os_get(const char *s) {
-  return c_outofrangeexception::os_get(s, -1);
-}
-Variant &cw_outofrangeexception$os_lval(const char *s) {
-  return c_outofrangeexception::os_lval(s, -1);
-}
-Variant cw_outofrangeexception$os_constant(const char *s) {
-  return c_outofrangeexception::os_constant(s);
-}
-Variant cw_outofrangeexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_outofrangeexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_outofrangeexception = {
+  c_outofrangeexception::os_getInit,
+  c_outofrangeexception::os_get,
+  c_outofrangeexception::os_lval,
+  c_outofrangeexception::os_invoke,
+  c_outofrangeexception::os_constant,
+};
 void c_outofrangeexception::init() {
   c_logicexception::init();
 }
@@ -3201,21 +3137,13 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
 Variant c_badmethodcallexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_badfunctioncallexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_badmethodcallexception$os_getInit(const char *s) {
-  return c_badmethodcallexception::os_getInit(s, -1);
-}
-Variant cw_badmethodcallexception$os_get(const char *s) {
-  return c_badmethodcallexception::os_get(s, -1);
-}
-Variant &cw_badmethodcallexception$os_lval(const char *s) {
-  return c_badmethodcallexception::os_lval(s, -1);
-}
-Variant cw_badmethodcallexception$os_constant(const char *s) {
-  return c_badmethodcallexception::os_constant(s);
-}
-Variant cw_badmethodcallexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_badmethodcallexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_badmethodcallexception = {
+  c_badmethodcallexception::os_getInit,
+  c_badmethodcallexception::os_get,
+  c_badmethodcallexception::os_lval,
+  c_badmethodcallexception::os_invoke,
+  c_badmethodcallexception::os_constant,
+};
 void c_badmethodcallexception::init() {
   c_badfunctioncallexception::init();
 }
@@ -3556,21 +3484,13 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
 Variant c_runtimeexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_runtimeexception$os_getInit(const char *s) {
-  return c_runtimeexception::os_getInit(s, -1);
-}
-Variant cw_runtimeexception$os_get(const char *s) {
-  return c_runtimeexception::os_get(s, -1);
-}
-Variant &cw_runtimeexception$os_lval(const char *s) {
-  return c_runtimeexception::os_lval(s, -1);
-}
-Variant cw_runtimeexception$os_constant(const char *s) {
-  return c_runtimeexception::os_constant(s);
-}
-Variant cw_runtimeexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_runtimeexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_runtimeexception = {
+  c_runtimeexception::os_getInit,
+  c_runtimeexception::os_get,
+  c_runtimeexception::os_lval,
+  c_runtimeexception::os_invoke,
+  c_runtimeexception::os_constant,
+};
 void c_runtimeexception::init() {
   c_exception::init();
 }
@@ -4050,21 +3970,13 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
 Variant c_exception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_exception$os_getInit(const char *s) {
-  return c_exception::os_getInit(s, -1);
-}
-Variant cw_exception$os_get(const char *s) {
-  return c_exception::os_get(s, -1);
-}
-Variant &cw_exception$os_lval(const char *s) {
-  return c_exception::os_lval(s, -1);
-}
-Variant cw_exception$os_constant(const char *s) {
-  return c_exception::os_constant(s);
-}
-Variant cw_exception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_exception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_exception = {
+  c_exception::os_getInit,
+  c_exception::os_get,
+  c_exception::os_lval,
+  c_exception::os_invoke,
+  c_exception::os_constant,
+};
 void c_exception::init() {
   m_message = "Unknown exception";
   m_code = 0LL;
@@ -4723,21 +4635,13 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
 Variant c_errorexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_errorexception$os_getInit(const char *s) {
-  return c_errorexception::os_getInit(s, -1);
-}
-Variant cw_errorexception$os_get(const char *s) {
-  return c_errorexception::os_get(s, -1);
-}
-Variant &cw_errorexception$os_lval(const char *s) {
-  return c_errorexception::os_lval(s, -1);
-}
-Variant cw_errorexception$os_constant(const char *s) {
-  return c_errorexception::os_constant(s);
-}
-Variant cw_errorexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_errorexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_errorexception = {
+  c_errorexception::os_getInit,
+  c_errorexception::os_get,
+  c_errorexception::os_lval,
+  c_errorexception::os_invoke,
+  c_errorexception::os_constant,
+};
 void c_errorexception::init() {
   c_exception::init();
   m_severity = null;
@@ -5107,21 +5011,13 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
 Variant c_badfunctioncallexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_logicexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_badfunctioncallexception$os_getInit(const char *s) {
-  return c_badfunctioncallexception::os_getInit(s, -1);
-}
-Variant cw_badfunctioncallexception$os_get(const char *s) {
-  return c_badfunctioncallexception::os_get(s, -1);
-}
-Variant &cw_badfunctioncallexception$os_lval(const char *s) {
-  return c_badfunctioncallexception::os_lval(s, -1);
-}
-Variant cw_badfunctioncallexception$os_constant(const char *s) {
-  return c_badfunctioncallexception::os_constant(s);
-}
-Variant cw_badfunctioncallexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_badfunctioncallexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_badfunctioncallexception = {
+  c_badfunctioncallexception::os_getInit,
+  c_badfunctioncallexception::os_get,
+  c_badfunctioncallexception::os_lval,
+  c_badfunctioncallexception::os_invoke,
+  c_badfunctioncallexception::os_constant,
+};
 void c_badfunctioncallexception::init() {
   c_logicexception::init();
 }
@@ -5462,21 +5358,13 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
 Variant c_lengthexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_logicexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_lengthexception$os_getInit(const char *s) {
-  return c_lengthexception::os_getInit(s, -1);
-}
-Variant cw_lengthexception$os_get(const char *s) {
-  return c_lengthexception::os_get(s, -1);
-}
-Variant &cw_lengthexception$os_lval(const char *s) {
-  return c_lengthexception::os_lval(s, -1);
-}
-Variant cw_lengthexception$os_constant(const char *s) {
-  return c_lengthexception::os_constant(s);
-}
-Variant cw_lengthexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_lengthexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_lengthexception = {
+  c_lengthexception::os_getInit,
+  c_lengthexception::os_get,
+  c_lengthexception::os_lval,
+  c_lengthexception::os_invoke,
+  c_lengthexception::os_constant,
+};
 void c_lengthexception::init() {
   c_logicexception::init();
 }
@@ -5817,21 +5705,13 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
 Variant c_domainexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_logicexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domainexception$os_getInit(const char *s) {
-  return c_domainexception::os_getInit(s, -1);
-}
-Variant cw_domainexception$os_get(const char *s) {
-  return c_domainexception::os_get(s, -1);
-}
-Variant &cw_domainexception$os_lval(const char *s) {
-  return c_domainexception::os_lval(s, -1);
-}
-Variant cw_domainexception$os_constant(const char *s) {
-  return c_domainexception::os_constant(s);
-}
-Variant cw_domainexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domainexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domainexception = {
+  c_domainexception::os_getInit,
+  c_domainexception::os_get,
+  c_domainexception::os_lval,
+  c_domainexception::os_invoke,
+  c_domainexception::os_constant,
+};
 void c_domainexception::init() {
   c_logicexception::init();
 }

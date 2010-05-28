@@ -252,44 +252,44 @@ do { \
   if (hash == code && !strcasecmp(s, #f)) return o_i_ ## id(params)
 #define HASH_INVOKE_STATIC_METHOD(code, f)                              \
   if (hash == code && !strcasecmp(s, #f))                               \
-    return cw_ ## f ## $os_invoke(#f, method, params, fatal)
+    return cw_ ## f.os_invoke(#f, method, params, -1, fatal)
 #define HASH_INVOKE_STATIC_METHOD_VOLATILE(code, f)                     \
   if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(cw_ ## f ## $os_invoke(#f, method, params, fatal))
+    return CLASS_CHECK(cw_ ## f.os_invoke(#f, method, params, -1, fatal))
 #define HASH_INVOKE_STATIC_METHOD_REDECLARED(code, f)                   \
   if (hash == code && !strcasecmp(s, #f))                               \
     return CLASS_CHECK(g->cso_ ## f->os_invoke(#f, method, params, -1, fatal))
 #define HASH_GET_STATIC_PROPERTY(code, f)                               \
-  if (hash == code && !strcasecmp(s, #f)) return cw_ ## f ## $os_get(prop)
+  if (hash == code && !strcasecmp(s, #f)) return cw_ ## f.os_get(prop, -1)
 #define HASH_GET_STATIC_PROPERTY_VOLATILE(code, f)                      \
   if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(cw_ ## f ## $os_get(prop))
+    return CLASS_CHECK(cw_ ## f.os_get(prop, -1))
 #define HASH_GET_STATIC_PROPERTY_REDECLARED(code, f)                    \
   if (hash == code && !strcasecmp(s, #f))                               \
     return CLASS_CHECK(g->cso_ ## f->os_get(prop, -1))
 #define HASH_GET_STATIC_PROPERTY_LV(code, f)                            \
-  if (hash == code && !strcasecmp(s, #f)) return &cw_ ## f ## $os_lval(prop)
+  if (hash == code && !strcasecmp(s, #f)) return &cw_ ## f.os_lval(prop, -1)
 #define HASH_GET_STATIC_PROPERTY_LV_VOLATILE(code, f)                   \
   if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(&cw_ ## f ## $os_lval(prop))
+    return CLASS_CHECK(&cw_ ## f.os_lval(prop, -1))
 #define HASH_GET_STATIC_PROPERTY_LV_REDECLARED(code, f)                 \
   if (hash == code && !strcasecmp(s, #f))                               \
     return CLASS_CHECK(&g->cso_ ## f->os_lval(prop, -1))
 #define HASH_GET_CLASS_CONSTANT(code, f)                                \
   if (hash == code && !strcasecmp(s, #f))                               \
-    return cw_ ## f ## $os_constant(constant)
+    return cw_ ## f.os_constant(constant)
 #define HASH_GET_CLASS_CONSTANT_VOLATILE(code, f)                       \
   if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(cw_ ## f ## $os_constant(constant))
+    return CLASS_CHECK(cw_ ## f.os_constant(constant))
 #define HASH_GET_CLASS_CONSTANT_REDECLARED(code, f)                     \
   if (hash == code && !strcasecmp(s, #f))                               \
     return CLASS_CHECK(g->cso_ ## f->os_constant(constant))
 #define HASH_GET_CLASS_VAR_INIT(code, f)                                \
   if (hash == code && !strcasecmp(s, #f))                               \
-    return cw_ ## f ## $os_getInit(var)
+    return cw_ ## f.os_getInit(var, -1)
 #define HASH_GET_CLASS_VAR_INIT_VOLATILE(code, f)                       \
   if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(cw_ ## f ## $os_getInit(var))
+    return CLASS_CHECK(cw_ ## f.os_getInit(var, -1))
 #define HASH_GET_CLASS_VAR_INIT_REDECLARED(code, f)                     \
   if (hash == code && !strcasecmp(s, #f))                               \
     return CLASS_CHECK(g->cso_ ## f->os_getInit(var))

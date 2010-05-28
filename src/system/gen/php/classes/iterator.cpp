@@ -912,21 +912,13 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
 Variant c_arrayiterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_arrayiterator$os_getInit(const char *s) {
-  return c_arrayiterator::os_getInit(s, -1);
-}
-Variant cw_arrayiterator$os_get(const char *s) {
-  return c_arrayiterator::os_get(s, -1);
-}
-Variant &cw_arrayiterator$os_lval(const char *s) {
-  return c_arrayiterator::os_lval(s, -1);
-}
-Variant cw_arrayiterator$os_constant(const char *s) {
-  return c_arrayiterator::os_constant(s);
-}
-Variant cw_arrayiterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_arrayiterator::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_arrayiterator = {
+  c_arrayiterator::os_getInit,
+  c_arrayiterator::os_get,
+  c_arrayiterator::os_lval,
+  c_arrayiterator::os_invoke,
+  c_arrayiterator::os_constant,
+};
 void c_arrayiterator::init() {
   m_arr = null;
   m_flags = null;
@@ -1566,21 +1558,13 @@ Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
 Variant c_appenditerator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_appenditerator$os_getInit(const char *s) {
-  return c_appenditerator::os_getInit(s, -1);
-}
-Variant cw_appenditerator$os_get(const char *s) {
-  return c_appenditerator::os_get(s, -1);
-}
-Variant &cw_appenditerator$os_lval(const char *s) {
-  return c_appenditerator::os_lval(s, -1);
-}
-Variant cw_appenditerator$os_constant(const char *s) {
-  return c_appenditerator::os_constant(s);
-}
-Variant cw_appenditerator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_appenditerator::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_appenditerator = {
+  c_appenditerator::os_getInit,
+  c_appenditerator::os_get,
+  c_appenditerator::os_lval,
+  c_appenditerator::os_invoke,
+  c_appenditerator::os_constant,
+};
 void c_appenditerator::init() {
   m_iterators = null;
 }
@@ -2922,21 +2906,13 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
 Variant c_recursivedirectoryiterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_directoryiterator::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_recursivedirectoryiterator$os_getInit(const char *s) {
-  return c_recursivedirectoryiterator::os_getInit(s, -1);
-}
-Variant cw_recursivedirectoryiterator$os_get(const char *s) {
-  return c_recursivedirectoryiterator::os_get(s, -1);
-}
-Variant &cw_recursivedirectoryiterator$os_lval(const char *s) {
-  return c_recursivedirectoryiterator::os_lval(s, -1);
-}
-Variant cw_recursivedirectoryiterator$os_constant(const char *s) {
-  return c_recursivedirectoryiterator::os_constant(s);
-}
-Variant cw_recursivedirectoryiterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_recursivedirectoryiterator::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_recursivedirectoryiterator = {
+  c_recursivedirectoryiterator::os_getInit,
+  c_recursivedirectoryiterator::os_get,
+  c_recursivedirectoryiterator::os_lval,
+  c_recursivedirectoryiterator::os_invoke,
+  c_recursivedirectoryiterator::os_constant,
+};
 void c_recursivedirectoryiterator::init() {
   c_directoryiterator::init();
 }
@@ -4111,21 +4087,13 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
 Variant c_directoryiterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_splfileinfo::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_directoryiterator$os_getInit(const char *s) {
-  return c_directoryiterator::os_getInit(s, -1);
-}
-Variant cw_directoryiterator$os_get(const char *s) {
-  return c_directoryiterator::os_get(s, -1);
-}
-Variant &cw_directoryiterator$os_lval(const char *s) {
-  return c_directoryiterator::os_lval(s, -1);
-}
-Variant cw_directoryiterator$os_constant(const char *s) {
-  return c_directoryiterator::os_constant(s);
-}
-Variant cw_directoryiterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_directoryiterator::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_directoryiterator = {
+  c_directoryiterator::os_getInit,
+  c_directoryiterator::os_get,
+  c_directoryiterator::os_lval,
+  c_directoryiterator::os_invoke,
+  c_directoryiterator::os_constant,
+};
 void c_directoryiterator::init() {
   c_splfileinfo::init();
 }
@@ -4577,21 +4545,13 @@ Variant c_recursiveiteratoriterator::o_invoke_from_eval(const char *s, Eval::Var
 Variant c_recursiveiteratoriterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_recursiveiteratoriterator$os_getInit(const char *s) {
-  return c_recursiveiteratoriterator::os_getInit(s, -1);
-}
-Variant cw_recursiveiteratoriterator$os_get(const char *s) {
-  return c_recursiveiteratoriterator::os_get(s, -1);
-}
-Variant &cw_recursiveiteratoriterator$os_lval(const char *s) {
-  return c_recursiveiteratoriterator::os_lval(s, -1);
-}
-Variant cw_recursiveiteratoriterator$os_constant(const char *s) {
-  return c_recursiveiteratoriterator::os_constant(s);
-}
-Variant cw_recursiveiteratoriterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_recursiveiteratoriterator::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_recursiveiteratoriterator = {
+  c_recursiveiteratoriterator::os_getInit,
+  c_recursiveiteratoriterator::os_get,
+  c_recursiveiteratoriterator::os_lval,
+  c_recursiveiteratoriterator::os_invoke,
+  c_recursiveiteratoriterator::os_constant,
+};
 void c_recursiveiteratoriterator::init() {
 }
 /* SRC: classes/iterator.php line 35 */
@@ -4751,21 +4711,13 @@ Variant c_filteriterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
 Variant c_filteriterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_filteriterator$os_getInit(const char *s) {
-  return c_filteriterator::os_getInit(s, -1);
-}
-Variant cw_filteriterator$os_get(const char *s) {
-  return c_filteriterator::os_get(s, -1);
-}
-Variant &cw_filteriterator$os_lval(const char *s) {
-  return c_filteriterator::os_lval(s, -1);
-}
-Variant cw_filteriterator$os_constant(const char *s) {
-  return c_filteriterator::os_constant(s);
-}
-Variant cw_filteriterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_filteriterator::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_filteriterator = {
+  c_filteriterator::os_getInit,
+  c_filteriterator::os_get,
+  c_filteriterator::os_lval,
+  c_filteriterator::os_invoke,
+  c_filteriterator::os_constant,
+};
 void c_filteriterator::init() {
 }
 Object co_arrayiterator(CArrRef params, bool init /* = true */) {

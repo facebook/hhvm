@@ -502,21 +502,13 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
 Variant c_splobjectstorage::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_splobjectstorage$os_getInit(const char *s) {
-  return c_splobjectstorage::os_getInit(s, -1);
-}
-Variant cw_splobjectstorage$os_get(const char *s) {
-  return c_splobjectstorage::os_get(s, -1);
-}
-Variant &cw_splobjectstorage$os_lval(const char *s) {
-  return c_splobjectstorage::os_lval(s, -1);
-}
-Variant cw_splobjectstorage$os_constant(const char *s) {
-  return c_splobjectstorage::os_constant(s);
-}
-Variant cw_splobjectstorage$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_splobjectstorage::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_splobjectstorage = {
+  c_splobjectstorage::os_getInit,
+  c_splobjectstorage::os_get,
+  c_splobjectstorage::os_lval,
+  c_splobjectstorage::os_invoke,
+  c_splobjectstorage::os_constant,
+};
 void c_splobjectstorage::init() {
   m_storage = SystemScalarArrays::ssa_[0];
   m_index = 0LL;

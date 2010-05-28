@@ -250,6 +250,16 @@ protected: ObjectData *root;
 
 };
 
+// Callback structure for functions related to static methods
+struct ObjectStaticCallbacks {
+  Variant (*os_getInit)(const char *s, int64 hash);
+  Variant (*os_get)(const char *s, int64 hash);
+  Variant &(*os_lval)(const char *s, int64 hash);
+  Variant (*os_invoke)(const char *c, const char *s,
+                           CArrRef params, int64 hash, bool fatal);
+  Variant (*os_constant)(const char *s);
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // Calculate item sizes for object allocators
 

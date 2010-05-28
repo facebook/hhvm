@@ -1817,21 +1817,13 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
 Variant c_splfileobject::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_splfileinfo::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_splfileobject$os_getInit(const char *s) {
-  return c_splfileobject::os_getInit(s, -1);
-}
-Variant cw_splfileobject$os_get(const char *s) {
-  return c_splfileobject::os_get(s, -1);
-}
-Variant &cw_splfileobject$os_lval(const char *s) {
-  return c_splfileobject::os_lval(s, -1);
-}
-Variant cw_splfileobject$os_constant(const char *s) {
-  return c_splfileobject::os_constant(s);
-}
-Variant cw_splfileobject$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_splfileobject::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_splfileobject = {
+  c_splfileobject::os_getInit,
+  c_splfileobject::os_get,
+  c_splfileobject::os_lval,
+  c_splfileobject::os_invoke,
+  c_splfileobject::os_constant,
+};
 void c_splfileobject::init() {
   c_splfileinfo::init();
 }
@@ -2927,21 +2919,13 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
 Variant c_splfileinfo::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_splfileinfo$os_getInit(const char *s) {
-  return c_splfileinfo::os_getInit(s, -1);
-}
-Variant cw_splfileinfo$os_get(const char *s) {
-  return c_splfileinfo::os_get(s, -1);
-}
-Variant &cw_splfileinfo$os_lval(const char *s) {
-  return c_splfileinfo::os_lval(s, -1);
-}
-Variant cw_splfileinfo$os_constant(const char *s) {
-  return c_splfileinfo::os_constant(s);
-}
-Variant cw_splfileinfo$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_splfileinfo::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_splfileinfo = {
+  c_splfileinfo::os_getInit,
+  c_splfileinfo::os_get,
+  c_splfileinfo::os_lval,
+  c_splfileinfo::os_invoke,
+  c_splfileinfo::os_constant,
+};
 void c_splfileinfo::init() {
 }
 /* SRC: classes/splfile.php line 5 */

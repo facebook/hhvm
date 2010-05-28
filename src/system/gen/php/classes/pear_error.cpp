@@ -509,21 +509,13 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
 Variant c_pear_error::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_pear_error$os_getInit(const char *s) {
-  return c_pear_error::os_getInit(s, -1);
-}
-Variant cw_pear_error$os_get(const char *s) {
-  return c_pear_error::os_get(s, -1);
-}
-Variant &cw_pear_error$os_lval(const char *s) {
-  return c_pear_error::os_lval(s, -1);
-}
-Variant cw_pear_error$os_constant(const char *s) {
-  return c_pear_error::os_constant(s);
-}
-Variant cw_pear_error$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_pear_error::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_pear_error = {
+  c_pear_error::os_getInit,
+  c_pear_error::os_get,
+  c_pear_error::os_lval,
+  c_pear_error::os_invoke,
+  c_pear_error::os_constant,
+};
 void c_pear_error::init() {
 }
 /* SRC: classes/pear_error.php line 4 */

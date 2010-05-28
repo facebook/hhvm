@@ -27,191 +27,43 @@ namespace HPHP {
 
 
 // Class Invoke Tables
-Variant cw_reflectionfunctionabstract$os_getInit(const char *s);
-Variant cw_reflectionfunctionabstract$os_get(const char *s);
-Variant &cw_reflectionfunctionabstract$os_lval(const char *s);
-Variant cw_reflectionfunctionabstract$os_constant(const char *s);
-Variant cw_reflectionfunctionabstract$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_reflectionobject$os_getInit(const char *s);
-Variant cw_reflectionobject$os_get(const char *s);
-Variant &cw_reflectionobject$os_lval(const char *s);
-Variant cw_reflectionobject$os_constant(const char *s);
-Variant cw_reflectionobject$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_splfileobject$os_getInit(const char *s);
-Variant cw_splfileobject$os_get(const char *s);
-Variant &cw_splfileobject$os_lval(const char *s);
-Variant cw_splfileobject$os_constant(const char *s);
-Variant cw_splfileobject$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_unexpectedvalueexception$os_getInit(const char *s);
-Variant cw_unexpectedvalueexception$os_get(const char *s);
-Variant &cw_unexpectedvalueexception$os_lval(const char *s);
-Variant cw_unexpectedvalueexception$os_constant(const char *s);
-Variant cw_unexpectedvalueexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_stdclass$os_getInit(const char *s);
-Variant cw_stdclass$os_get(const char *s);
-Variant &cw_stdclass$os_lval(const char *s);
-Variant cw_stdclass$os_constant(const char *s);
-Variant cw_stdclass$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_reflectionexception$os_getInit(const char *s);
-Variant cw_reflectionexception$os_get(const char *s);
-Variant &cw_reflectionexception$os_lval(const char *s);
-Variant cw_reflectionexception$os_constant(const char *s);
-Variant cw_reflectionexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_overflowexception$os_getInit(const char *s);
-Variant cw_overflowexception$os_get(const char *s);
-Variant &cw_overflowexception$os_lval(const char *s);
-Variant cw_overflowexception$os_constant(const char *s);
-Variant cw_overflowexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_splfileinfo$os_getInit(const char *s);
-Variant cw_splfileinfo$os_get(const char *s);
-Variant &cw_splfileinfo$os_lval(const char *s);
-Variant cw_splfileinfo$os_constant(const char *s);
-Variant cw_splfileinfo$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_arrayiterator$os_getInit(const char *s);
-Variant cw_arrayiterator$os_get(const char *s);
-Variant &cw_arrayiterator$os_lval(const char *s);
-Variant cw_arrayiterator$os_constant(const char *s);
-Variant cw_arrayiterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_appenditerator$os_getInit(const char *s);
-Variant cw_appenditerator$os_get(const char *s);
-Variant &cw_appenditerator$os_lval(const char *s);
-Variant cw_appenditerator$os_constant(const char *s);
-Variant cw_appenditerator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_outofboundsexception$os_getInit(const char *s);
-Variant cw_outofboundsexception$os_get(const char *s);
-Variant &cw_outofboundsexception$os_lval(const char *s);
-Variant cw_outofboundsexception$os_constant(const char *s);
-Variant cw_outofboundsexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_logicexception$os_getInit(const char *s);
-Variant cw_logicexception$os_get(const char *s);
-Variant &cw_logicexception$os_lval(const char *s);
-Variant cw_logicexception$os_constant(const char *s);
-Variant cw_logicexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_rangeexception$os_getInit(const char *s);
-Variant cw_rangeexception$os_get(const char *s);
-Variant &cw_rangeexception$os_lval(const char *s);
-Variant cw_rangeexception$os_constant(const char *s);
-Variant cw_rangeexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_splobjectstorage$os_getInit(const char *s);
-Variant cw_splobjectstorage$os_get(const char *s);
-Variant &cw_splobjectstorage$os_lval(const char *s);
-Variant cw_splobjectstorage$os_constant(const char *s);
-Variant cw_splobjectstorage$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_invalidargumentexception$os_getInit(const char *s);
-Variant cw_invalidargumentexception$os_get(const char *s);
-Variant &cw_invalidargumentexception$os_lval(const char *s);
-Variant cw_invalidargumentexception$os_constant(const char *s);
-Variant cw_invalidargumentexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_reflectionclass$os_getInit(const char *s);
-Variant cw_reflectionclass$os_get(const char *s);
-Variant &cw_reflectionclass$os_lval(const char *s);
-Variant cw_reflectionclass$os_constant(const char *s);
-Variant cw_reflectionclass$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_underflowexception$os_getInit(const char *s);
-Variant cw_underflowexception$os_get(const char *s);
-Variant &cw_underflowexception$os_lval(const char *s);
-Variant cw_underflowexception$os_constant(const char *s);
-Variant cw_underflowexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_reflectionextension$os_getInit(const char *s);
-Variant cw_reflectionextension$os_get(const char *s);
-Variant &cw_reflectionextension$os_lval(const char *s);
-Variant cw_reflectionextension$os_constant(const char *s);
-Variant cw_reflectionextension$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_outofrangeexception$os_getInit(const char *s);
-Variant cw_outofrangeexception$os_get(const char *s);
-Variant &cw_outofrangeexception$os_lval(const char *s);
-Variant cw_outofrangeexception$os_constant(const char *s);
-Variant cw_outofrangeexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_reflectionmethod$os_getInit(const char *s);
-Variant cw_reflectionmethod$os_get(const char *s);
-Variant &cw_reflectionmethod$os_lval(const char *s);
-Variant cw_reflectionmethod$os_constant(const char *s);
-Variant cw_reflectionmethod$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_badmethodcallexception$os_getInit(const char *s);
-Variant cw_badmethodcallexception$os_get(const char *s);
-Variant &cw_badmethodcallexception$os_lval(const char *s);
-Variant cw_badmethodcallexception$os_constant(const char *s);
-Variant cw_badmethodcallexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_pear_error$os_getInit(const char *s);
-Variant cw_pear_error$os_get(const char *s);
-Variant &cw_pear_error$os_lval(const char *s);
-Variant cw_pear_error$os_constant(const char *s);
-Variant cw_pear_error$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_reflectionproperty$os_getInit(const char *s);
-Variant cw_reflectionproperty$os_get(const char *s);
-Variant &cw_reflectionproperty$os_lval(const char *s);
-Variant cw_reflectionproperty$os_constant(const char *s);
-Variant cw_reflectionproperty$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw___php_incomplete_class$os_getInit(const char *s);
-Variant cw___php_incomplete_class$os_get(const char *s);
-Variant &cw___php_incomplete_class$os_lval(const char *s);
-Variant cw___php_incomplete_class$os_constant(const char *s);
-Variant cw___php_incomplete_class$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_runtimeexception$os_getInit(const char *s);
-Variant cw_runtimeexception$os_get(const char *s);
-Variant &cw_runtimeexception$os_lval(const char *s);
-Variant cw_runtimeexception$os_constant(const char *s);
-Variant cw_runtimeexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_exception$os_getInit(const char *s);
-Variant cw_exception$os_get(const char *s);
-Variant &cw_exception$os_lval(const char *s);
-Variant cw_exception$os_constant(const char *s);
-Variant cw_exception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_reflectionfunction$os_getInit(const char *s);
-Variant cw_reflectionfunction$os_get(const char *s);
-Variant &cw_reflectionfunction$os_lval(const char *s);
-Variant cw_reflectionfunction$os_constant(const char *s);
-Variant cw_reflectionfunction$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_errorexception$os_getInit(const char *s);
-Variant cw_errorexception$os_get(const char *s);
-Variant &cw_errorexception$os_lval(const char *s);
-Variant cw_errorexception$os_constant(const char *s);
-Variant cw_errorexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_recursivedirectoryiterator$os_getInit(const char *s);
-Variant cw_recursivedirectoryiterator$os_get(const char *s);
-Variant &cw_recursivedirectoryiterator$os_lval(const char *s);
-Variant cw_recursivedirectoryiterator$os_constant(const char *s);
-Variant cw_recursivedirectoryiterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_directoryiterator$os_getInit(const char *s);
-Variant cw_directoryiterator$os_get(const char *s);
-Variant &cw_directoryiterator$os_lval(const char *s);
-Variant cw_directoryiterator$os_constant(const char *s);
-Variant cw_directoryiterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_badfunctioncallexception$os_getInit(const char *s);
-Variant cw_badfunctioncallexception$os_get(const char *s);
-Variant &cw_badfunctioncallexception$os_lval(const char *s);
-Variant cw_badfunctioncallexception$os_constant(const char *s);
-Variant cw_badfunctioncallexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_lengthexception$os_getInit(const char *s);
-Variant cw_lengthexception$os_get(const char *s);
-Variant &cw_lengthexception$os_lval(const char *s);
-Variant cw_lengthexception$os_constant(const char *s);
-Variant cw_lengthexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_domainexception$os_getInit(const char *s);
-Variant cw_domainexception$os_get(const char *s);
-Variant &cw_domainexception$os_lval(const char *s);
-Variant cw_domainexception$os_constant(const char *s);
-Variant cw_domainexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_recursiveiteratoriterator$os_getInit(const char *s);
-Variant cw_recursiveiteratoriterator$os_get(const char *s);
-Variant &cw_recursiveiteratoriterator$os_lval(const char *s);
-Variant cw_recursiveiteratoriterator$os_constant(const char *s);
-Variant cw_recursiveiteratoriterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_directory$os_getInit(const char *s);
-Variant cw_directory$os_get(const char *s);
-Variant &cw_directory$os_lval(const char *s);
-Variant cw_directory$os_constant(const char *s);
-Variant cw_directory$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_filteriterator$os_getInit(const char *s);
-Variant cw_filteriterator$os_get(const char *s);
-Variant &cw_filteriterator$os_lval(const char *s);
-Variant cw_filteriterator$os_constant(const char *s);
-Variant cw_filteriterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
-Variant cw_reflectionparameter$os_getInit(const char *s);
-Variant cw_reflectionparameter$os_get(const char *s);
-Variant &cw_reflectionparameter$os_lval(const char *s);
-Variant cw_reflectionparameter$os_constant(const char *s);
-Variant cw_reflectionparameter$os_invoke(const char *c, const char *s, CArrRef params, bool fatal = true);
+extern struct ObjectStaticCallbacks cw_reflectionfunctionabstract;
+extern struct ObjectStaticCallbacks cw_reflectionobject;
+extern struct ObjectStaticCallbacks cw_splfileobject;
+extern struct ObjectStaticCallbacks cw_unexpectedvalueexception;
+extern struct ObjectStaticCallbacks cw_stdclass;
+extern struct ObjectStaticCallbacks cw_reflectionexception;
+extern struct ObjectStaticCallbacks cw_overflowexception;
+extern struct ObjectStaticCallbacks cw_splfileinfo;
+extern struct ObjectStaticCallbacks cw_arrayiterator;
+extern struct ObjectStaticCallbacks cw_appenditerator;
+extern struct ObjectStaticCallbacks cw_outofboundsexception;
+extern struct ObjectStaticCallbacks cw_logicexception;
+extern struct ObjectStaticCallbacks cw_rangeexception;
+extern struct ObjectStaticCallbacks cw_splobjectstorage;
+extern struct ObjectStaticCallbacks cw_invalidargumentexception;
+extern struct ObjectStaticCallbacks cw_reflectionclass;
+extern struct ObjectStaticCallbacks cw_underflowexception;
+extern struct ObjectStaticCallbacks cw_reflectionextension;
+extern struct ObjectStaticCallbacks cw_outofrangeexception;
+extern struct ObjectStaticCallbacks cw_reflectionmethod;
+extern struct ObjectStaticCallbacks cw_badmethodcallexception;
+extern struct ObjectStaticCallbacks cw_pear_error;
+extern struct ObjectStaticCallbacks cw_reflectionproperty;
+extern struct ObjectStaticCallbacks cw___php_incomplete_class;
+extern struct ObjectStaticCallbacks cw_runtimeexception;
+extern struct ObjectStaticCallbacks cw_exception;
+extern struct ObjectStaticCallbacks cw_reflectionfunction;
+extern struct ObjectStaticCallbacks cw_errorexception;
+extern struct ObjectStaticCallbacks cw_recursivedirectoryiterator;
+extern struct ObjectStaticCallbacks cw_directoryiterator;
+extern struct ObjectStaticCallbacks cw_badfunctioncallexception;
+extern struct ObjectStaticCallbacks cw_lengthexception;
+extern struct ObjectStaticCallbacks cw_domainexception;
+extern struct ObjectStaticCallbacks cw_recursiveiteratoriterator;
+extern struct ObjectStaticCallbacks cw_directory;
+extern struct ObjectStaticCallbacks cw_filteriterator;
+extern struct ObjectStaticCallbacks cw_reflectionparameter;
 Object co_pdoexception(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_pdoexception)())->dynCreate(params, init));
 }
@@ -616,21 +468,13 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
 Variant c_pdoexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_pdoexception$os_getInit(const char *s) {
-  return c_pdoexception::os_getInit(s, -1);
-}
-Variant cw_pdoexception$os_get(const char *s) {
-  return c_pdoexception::os_get(s, -1);
-}
-Variant &cw_pdoexception$os_lval(const char *s) {
-  return c_pdoexception::os_lval(s, -1);
-}
-Variant cw_pdoexception$os_constant(const char *s) {
-  return c_pdoexception::os_constant(s);
-}
-Variant cw_pdoexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_pdoexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_pdoexception = {
+  c_pdoexception::os_getInit,
+  c_pdoexception::os_get,
+  c_pdoexception::os_lval,
+  c_pdoexception::os_invoke,
+  c_pdoexception::os_constant,
+};
 Object co_domdocumentfragment(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domdocumentfragment)())->dynCreate(params, init));
 }
@@ -1483,21 +1327,13 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
 Variant c_domdocumentfragment::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_domnode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domdocumentfragment$os_getInit(const char *s) {
-  return c_domdocumentfragment::os_getInit(s, -1);
-}
-Variant cw_domdocumentfragment$os_get(const char *s) {
-  return c_domdocumentfragment::os_get(s, -1);
-}
-Variant &cw_domdocumentfragment$os_lval(const char *s) {
-  return c_domdocumentfragment::os_lval(s, -1);
-}
-Variant cw_domdocumentfragment$os_constant(const char *s) {
-  return c_domdocumentfragment::os_constant(s);
-}
-Variant cw_domdocumentfragment$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domdocumentfragment::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domdocumentfragment = {
+  c_domdocumentfragment::os_getInit,
+  c_domdocumentfragment::os_get,
+  c_domdocumentfragment::os_lval,
+  c_domdocumentfragment::os_invoke,
+  c_domdocumentfragment::os_constant,
+};
 Object co_domtext(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domtext)())->dynCreate(params, init));
 }
@@ -2557,21 +2393,13 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
 Variant c_domtext::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_domcharacterdata::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domtext$os_getInit(const char *s) {
-  return c_domtext::os_getInit(s, -1);
-}
-Variant cw_domtext$os_get(const char *s) {
-  return c_domtext::os_get(s, -1);
-}
-Variant &cw_domtext$os_lval(const char *s) {
-  return c_domtext::os_lval(s, -1);
-}
-Variant cw_domtext$os_constant(const char *s) {
-  return c_domtext::os_constant(s);
-}
-Variant cw_domtext$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domtext::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domtext = {
+  c_domtext::os_getInit,
+  c_domtext::os_get,
+  c_domtext::os_lval,
+  c_domtext::os_invoke,
+  c_domtext::os_constant,
+};
 Object co_domcdatasection(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domcdatasection)())->dynCreate(params, init));
 }
@@ -3622,21 +3450,13 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
 Variant c_domcdatasection::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_domtext::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domcdatasection$os_getInit(const char *s) {
-  return c_domcdatasection::os_getInit(s, -1);
-}
-Variant cw_domcdatasection$os_get(const char *s) {
-  return c_domcdatasection::os_get(s, -1);
-}
-Variant &cw_domcdatasection$os_lval(const char *s) {
-  return c_domcdatasection::os_lval(s, -1);
-}
-Variant cw_domcdatasection$os_constant(const char *s) {
-  return c_domcdatasection::os_constant(s);
-}
-Variant cw_domcdatasection$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domcdatasection::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domcdatasection = {
+  c_domcdatasection::os_getInit,
+  c_domcdatasection::os_get,
+  c_domcdatasection::os_lval,
+  c_domcdatasection::os_invoke,
+  c_domcdatasection::os_constant,
+};
 Object co_domdocumenttype(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domdocumenttype)())->dynCreate(params, init));
 }
@@ -4468,21 +4288,13 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
 Variant c_domdocumenttype::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_domnode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domdocumenttype$os_getInit(const char *s) {
-  return c_domdocumenttype::os_getInit(s, -1);
-}
-Variant cw_domdocumenttype$os_get(const char *s) {
-  return c_domdocumenttype::os_get(s, -1);
-}
-Variant &cw_domdocumenttype$os_lval(const char *s) {
-  return c_domdocumenttype::os_lval(s, -1);
-}
-Variant cw_domdocumenttype$os_constant(const char *s) {
-  return c_domdocumenttype::os_constant(s);
-}
-Variant cw_domdocumenttype$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domdocumenttype::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domdocumenttype = {
+  c_domdocumenttype::os_getInit,
+  c_domdocumenttype::os_get,
+  c_domdocumenttype::os_lval,
+  c_domdocumenttype::os_invoke,
+  c_domdocumenttype::os_constant,
+};
 Object co_sqlite3stmt(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_sqlite3stmt)())->dynCreate(params, init));
 }
@@ -4939,21 +4751,13 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
 Variant c_sqlite3stmt::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_sqlite3stmt$os_getInit(const char *s) {
-  return c_sqlite3stmt::os_getInit(s, -1);
-}
-Variant cw_sqlite3stmt$os_get(const char *s) {
-  return c_sqlite3stmt::os_get(s, -1);
-}
-Variant &cw_sqlite3stmt$os_lval(const char *s) {
-  return c_sqlite3stmt::os_lval(s, -1);
-}
-Variant cw_sqlite3stmt$os_constant(const char *s) {
-  return c_sqlite3stmt::os_constant(s);
-}
-Variant cw_sqlite3stmt$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_sqlite3stmt::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_sqlite3stmt = {
+  c_sqlite3stmt::os_getInit,
+  c_sqlite3stmt::os_get,
+  c_sqlite3stmt::os_lval,
+  c_sqlite3stmt::os_invoke,
+  c_sqlite3stmt::os_constant,
+};
 Object co_domnodelist(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domnodelist)())->dynCreate(params, init));
 }
@@ -5293,21 +5097,13 @@ Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
 Variant c_domnodelist::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domnodelist$os_getInit(const char *s) {
-  return c_domnodelist::os_getInit(s, -1);
-}
-Variant cw_domnodelist$os_get(const char *s) {
-  return c_domnodelist::os_get(s, -1);
-}
-Variant &cw_domnodelist$os_lval(const char *s) {
-  return c_domnodelist::os_lval(s, -1);
-}
-Variant cw_domnodelist$os_constant(const char *s) {
-  return c_domnodelist::os_constant(s);
-}
-Variant cw_domnodelist$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domnodelist::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domnodelist = {
+  c_domnodelist::os_getInit,
+  c_domnodelist::os_get,
+  c_domnodelist::os_lval,
+  c_domnodelist::os_invoke,
+  c_domnodelist::os_constant,
+};
 Object co_normalizer(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_normalizer)())->dynCreate(params, init));
 }
@@ -5712,21 +5508,13 @@ Variant c_normalizer::os_invoke_from_eval(const char *c, const char *s, Eval::Va
   }
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_normalizer$os_getInit(const char *s) {
-  return c_normalizer::os_getInit(s, -1);
-}
-Variant cw_normalizer$os_get(const char *s) {
-  return c_normalizer::os_get(s, -1);
-}
-Variant &cw_normalizer$os_lval(const char *s) {
-  return c_normalizer::os_lval(s, -1);
-}
-Variant cw_normalizer$os_constant(const char *s) {
-  return c_normalizer::os_constant(s);
-}
-Variant cw_normalizer$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_normalizer::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_normalizer = {
+  c_normalizer::os_getInit,
+  c_normalizer::os_get,
+  c_normalizer::os_lval,
+  c_normalizer::os_invoke,
+  c_normalizer::os_constant,
+};
 Object co_domcharacterdata(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domcharacterdata)())->dynCreate(params, init));
 }
@@ -6722,21 +6510,13 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
 Variant c_domcharacterdata::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_domnode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domcharacterdata$os_getInit(const char *s) {
-  return c_domcharacterdata::os_getInit(s, -1);
-}
-Variant cw_domcharacterdata$os_get(const char *s) {
-  return c_domcharacterdata::os_get(s, -1);
-}
-Variant &cw_domcharacterdata$os_lval(const char *s) {
-  return c_domcharacterdata::os_lval(s, -1);
-}
-Variant cw_domcharacterdata$os_constant(const char *s) {
-  return c_domcharacterdata::os_constant(s);
-}
-Variant cw_domcharacterdata$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domcharacterdata::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domcharacterdata = {
+  c_domcharacterdata::os_getInit,
+  c_domcharacterdata::os_get,
+  c_domcharacterdata::os_lval,
+  c_domcharacterdata::os_invoke,
+  c_domcharacterdata::os_constant,
+};
 Object co_domentityreference(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domentityreference)())->dynCreate(params, init));
 }
@@ -7573,21 +7353,13 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
 Variant c_domentityreference::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_domnode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domentityreference$os_getInit(const char *s) {
-  return c_domentityreference::os_getInit(s, -1);
-}
-Variant cw_domentityreference$os_get(const char *s) {
-  return c_domentityreference::os_get(s, -1);
-}
-Variant &cw_domentityreference$os_lval(const char *s) {
-  return c_domentityreference::os_lval(s, -1);
-}
-Variant cw_domentityreference$os_constant(const char *s) {
-  return c_domentityreference::os_constant(s);
-}
-Variant cw_domentityreference$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domentityreference::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domentityreference = {
+  c_domentityreference::os_getInit,
+  c_domentityreference::os_get,
+  c_domentityreference::os_lval,
+  c_domentityreference::os_invoke,
+  c_domentityreference::os_constant,
+};
 Object co_simplexmlelementiterator(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_simplexmlelementiterator)())->dynCreate(params, init));
 }
@@ -7946,21 +7718,13 @@ Variant c_simplexmlelementiterator::o_invoke_from_eval(const char *s, Eval::Vari
 Variant c_simplexmlelementiterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_simplexmlelementiterator$os_getInit(const char *s) {
-  return c_simplexmlelementiterator::os_getInit(s, -1);
-}
-Variant cw_simplexmlelementiterator$os_get(const char *s) {
-  return c_simplexmlelementiterator::os_get(s, -1);
-}
-Variant &cw_simplexmlelementiterator$os_lval(const char *s) {
-  return c_simplexmlelementiterator::os_lval(s, -1);
-}
-Variant cw_simplexmlelementiterator$os_constant(const char *s) {
-  return c_simplexmlelementiterator::os_constant(s);
-}
-Variant cw_simplexmlelementiterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_simplexmlelementiterator::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_simplexmlelementiterator = {
+  c_simplexmlelementiterator::os_getInit,
+  c_simplexmlelementiterator::os_get,
+  c_simplexmlelementiterator::os_lval,
+  c_simplexmlelementiterator::os_invoke,
+  c_simplexmlelementiterator::os_constant,
+};
 Object co_datetimezone(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_datetimezone)())->dynCreate(params, init));
 }
@@ -8422,21 +8186,13 @@ Variant c_datetimezone::os_invoke_from_eval(const char *c, const char *s, Eval::
   }
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_datetimezone$os_getInit(const char *s) {
-  return c_datetimezone::os_getInit(s, -1);
-}
-Variant cw_datetimezone$os_get(const char *s) {
-  return c_datetimezone::os_get(s, -1);
-}
-Variant &cw_datetimezone$os_lval(const char *s) {
-  return c_datetimezone::os_lval(s, -1);
-}
-Variant cw_datetimezone$os_constant(const char *s) {
-  return c_datetimezone::os_constant(s);
-}
-Variant cw_datetimezone$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_datetimezone::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_datetimezone = {
+  c_datetimezone::os_getInit,
+  c_datetimezone::os_get,
+  c_datetimezone::os_lval,
+  c_datetimezone::os_invoke,
+  c_datetimezone::os_constant,
+};
 Object co_domnodeiterator(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domnodeiterator)())->dynCreate(params, init));
 }
@@ -8795,21 +8551,13 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
 Variant c_domnodeiterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domnodeiterator$os_getInit(const char *s) {
-  return c_domnodeiterator::os_getInit(s, -1);
-}
-Variant cw_domnodeiterator$os_get(const char *s) {
-  return c_domnodeiterator::os_get(s, -1);
-}
-Variant &cw_domnodeiterator$os_lval(const char *s) {
-  return c_domnodeiterator::os_lval(s, -1);
-}
-Variant cw_domnodeiterator$os_constant(const char *s) {
-  return c_domnodeiterator::os_constant(s);
-}
-Variant cw_domnodeiterator$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domnodeiterator::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domnodeiterator = {
+  c_domnodeiterator::os_getInit,
+  c_domnodeiterator::os_get,
+  c_domnodeiterator::os_lval,
+  c_domnodeiterator::os_invoke,
+  c_domnodeiterator::os_constant,
+};
 Object co_domimplementation(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domimplementation)())->dynCreate(params, init));
 }
@@ -9154,21 +8902,13 @@ Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
 Variant c_domimplementation::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domimplementation$os_getInit(const char *s) {
-  return c_domimplementation::os_getInit(s, -1);
-}
-Variant cw_domimplementation$os_get(const char *s) {
-  return c_domimplementation::os_get(s, -1);
-}
-Variant &cw_domimplementation$os_lval(const char *s) {
-  return c_domimplementation::os_lval(s, -1);
-}
-Variant cw_domimplementation$os_constant(const char *s) {
-  return c_domimplementation::os_constant(s);
-}
-Variant cw_domimplementation$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domimplementation::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domimplementation = {
+  c_domimplementation::os_getInit,
+  c_domimplementation::os_get,
+  c_domimplementation::os_lval,
+  c_domimplementation::os_invoke,
+  c_domimplementation::os_constant,
+};
 Object co_soapheader(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapheader)())->dynCreate(params, init));
 }
@@ -9449,21 +9189,13 @@ Variant c_soapheader::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
 Variant c_soapheader::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_soapheader$os_getInit(const char *s) {
-  return c_soapheader::os_getInit(s, -1);
-}
-Variant cw_soapheader$os_get(const char *s) {
-  return c_soapheader::os_get(s, -1);
-}
-Variant &cw_soapheader$os_lval(const char *s) {
-  return c_soapheader::os_lval(s, -1);
-}
-Variant cw_soapheader$os_constant(const char *s) {
-  return c_soapheader::os_constant(s);
-}
-Variant cw_soapheader$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_soapheader::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_soapheader = {
+  c_soapheader::os_getInit,
+  c_soapheader::os_get,
+  c_soapheader::os_lval,
+  c_soapheader::os_invoke,
+  c_soapheader::os_constant,
+};
 Object co_domnotation(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domnotation)())->dynCreate(params, init));
 }
@@ -10295,21 +10027,13 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
 Variant c_domnotation::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_domnode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domnotation$os_getInit(const char *s) {
-  return c_domnotation::os_getInit(s, -1);
-}
-Variant cw_domnotation$os_get(const char *s) {
-  return c_domnotation::os_get(s, -1);
-}
-Variant &cw_domnotation$os_lval(const char *s) {
-  return c_domnotation::os_lval(s, -1);
-}
-Variant cw_domnotation$os_constant(const char *s) {
-  return c_domnotation::os_constant(s);
-}
-Variant cw_domnotation$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domnotation::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domnotation = {
+  c_domnotation::os_getInit,
+  c_domnotation::os_get,
+  c_domnotation::os_lval,
+  c_domnotation::os_invoke,
+  c_domnotation::os_constant,
+};
 Object co_domcomment(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domcomment)())->dynCreate(params, init));
 }
@@ -11316,21 +11040,13 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
 Variant c_domcomment::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_domcharacterdata::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domcomment$os_getInit(const char *s) {
-  return c_domcomment::os_getInit(s, -1);
-}
-Variant cw_domcomment$os_get(const char *s) {
-  return c_domcomment::os_get(s, -1);
-}
-Variant &cw_domcomment$os_lval(const char *s) {
-  return c_domcomment::os_lval(s, -1);
-}
-Variant cw_domcomment$os_constant(const char *s) {
-  return c_domcomment::os_constant(s);
-}
-Variant cw_domcomment$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domcomment::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domcomment = {
+  c_domcomment::os_getInit,
+  c_domcomment::os_get,
+  c_domcomment::os_lval,
+  c_domcomment::os_invoke,
+  c_domcomment::os_constant,
+};
 Object co_sqlite3(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_sqlite3)())->dynCreate(params, init));
 }
@@ -12071,21 +11787,13 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
 Variant c_sqlite3::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_sqlite3$os_getInit(const char *s) {
-  return c_sqlite3::os_getInit(s, -1);
-}
-Variant cw_sqlite3$os_get(const char *s) {
-  return c_sqlite3::os_get(s, -1);
-}
-Variant &cw_sqlite3$os_lval(const char *s) {
-  return c_sqlite3::os_lval(s, -1);
-}
-Variant cw_sqlite3$os_constant(const char *s) {
-  return c_sqlite3::os_constant(s);
-}
-Variant cw_sqlite3$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_sqlite3::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_sqlite3 = {
+  c_sqlite3::os_getInit,
+  c_sqlite3::os_get,
+  c_sqlite3::os_lval,
+  c_sqlite3::os_invoke,
+  c_sqlite3::os_constant,
+};
 Object co_domattr(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domattr)())->dynCreate(params, init));
 }
@@ -12959,21 +12667,13 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
 Variant c_domattr::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_domnode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domattr$os_getInit(const char *s) {
-  return c_domattr::os_getInit(s, -1);
-}
-Variant cw_domattr$os_get(const char *s) {
-  return c_domattr::os_get(s, -1);
-}
-Variant &cw_domattr$os_lval(const char *s) {
-  return c_domattr::os_lval(s, -1);
-}
-Variant cw_domattr$os_constant(const char *s) {
-  return c_domattr::os_constant(s);
-}
-Variant cw_domattr$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domattr::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domattr = {
+  c_domattr::os_getInit,
+  c_domattr::os_get,
+  c_domattr::os_lval,
+  c_domattr::os_invoke,
+  c_domattr::os_constant,
+};
 Object co_soapvar(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapvar)())->dynCreate(params, init));
 }
@@ -13268,21 +12968,13 @@ Variant c_soapvar::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
 Variant c_soapvar::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_soapvar$os_getInit(const char *s) {
-  return c_soapvar::os_getInit(s, -1);
-}
-Variant cw_soapvar$os_get(const char *s) {
-  return c_soapvar::os_get(s, -1);
-}
-Variant &cw_soapvar$os_lval(const char *s) {
-  return c_soapvar::os_lval(s, -1);
-}
-Variant cw_soapvar$os_constant(const char *s) {
-  return c_soapvar::os_constant(s);
-}
-Variant cw_soapvar$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_soapvar::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_soapvar = {
+  c_soapvar::os_getInit,
+  c_soapvar::os_get,
+  c_soapvar::os_lval,
+  c_soapvar::os_invoke,
+  c_soapvar::os_constant,
+};
 Object co_domnamednodemap(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domnamednodemap)())->dynCreate(params, init));
 }
@@ -13686,21 +13378,13 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
 Variant c_domnamednodemap::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domnamednodemap$os_getInit(const char *s) {
-  return c_domnamednodemap::os_getInit(s, -1);
-}
-Variant cw_domnamednodemap$os_get(const char *s) {
-  return c_domnamednodemap::os_get(s, -1);
-}
-Variant &cw_domnamednodemap$os_lval(const char *s) {
-  return c_domnamednodemap::os_lval(s, -1);
-}
-Variant cw_domnamednodemap$os_constant(const char *s) {
-  return c_domnamednodemap::os_constant(s);
-}
-Variant cw_domnamednodemap$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domnamednodemap::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domnamednodemap = {
+  c_domnamednodemap::os_getInit,
+  c_domnamednodemap::os_get,
+  c_domnamednodemap::os_lval,
+  c_domnamednodemap::os_invoke,
+  c_domnamednodemap::os_constant,
+};
 Object co_sqlite3result(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_sqlite3result)())->dynCreate(params, init));
 }
@@ -14100,21 +13784,13 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
 Variant c_sqlite3result::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_sqlite3result$os_getInit(const char *s) {
-  return c_sqlite3result::os_getInit(s, -1);
-}
-Variant cw_sqlite3result$os_get(const char *s) {
-  return c_sqlite3result::os_get(s, -1);
-}
-Variant &cw_sqlite3result$os_lval(const char *s) {
-  return c_sqlite3result::os_lval(s, -1);
-}
-Variant cw_sqlite3result$os_constant(const char *s) {
-  return c_sqlite3result::os_constant(s);
-}
-Variant cw_sqlite3result$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_sqlite3result::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_sqlite3result = {
+  c_sqlite3result::os_getInit,
+  c_sqlite3result::os_get,
+  c_sqlite3result::os_lval,
+  c_sqlite3result::os_invoke,
+  c_sqlite3result::os_constant,
+};
 Object co_simplexmlelement(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_simplexmlelement)())->dynCreate(params, init));
 }
@@ -15025,21 +14701,13 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
 Variant c_simplexmlelement::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_simplexmlelement$os_getInit(const char *s) {
-  return c_simplexmlelement::os_getInit(s, -1);
-}
-Variant cw_simplexmlelement$os_get(const char *s) {
-  return c_simplexmlelement::os_get(s, -1);
-}
-Variant &cw_simplexmlelement$os_lval(const char *s) {
-  return c_simplexmlelement::os_lval(s, -1);
-}
-Variant cw_simplexmlelement$os_constant(const char *s) {
-  return c_simplexmlelement::os_constant(s);
-}
-Variant cw_simplexmlelement$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_simplexmlelement::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_simplexmlelement = {
+  c_simplexmlelement::os_getInit,
+  c_simplexmlelement::os_get,
+  c_simplexmlelement::os_lval,
+  c_simplexmlelement::os_invoke,
+  c_simplexmlelement::os_constant,
+};
 Object co_domprocessinginstruction(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domprocessinginstruction)())->dynCreate(params, init));
 }
@@ -15893,21 +15561,13 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
 Variant c_domprocessinginstruction::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_domnode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domprocessinginstruction$os_getInit(const char *s) {
-  return c_domprocessinginstruction::os_getInit(s, -1);
-}
-Variant cw_domprocessinginstruction$os_get(const char *s) {
-  return c_domprocessinginstruction::os_get(s, -1);
-}
-Variant &cw_domprocessinginstruction$os_lval(const char *s) {
-  return c_domprocessinginstruction::os_lval(s, -1);
-}
-Variant cw_domprocessinginstruction$os_constant(const char *s) {
-  return c_domprocessinginstruction::os_constant(s);
-}
-Variant cw_domprocessinginstruction$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domprocessinginstruction::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domprocessinginstruction = {
+  c_domprocessinginstruction::os_getInit,
+  c_domprocessinginstruction::os_get,
+  c_domprocessinginstruction::os_lval,
+  c_domprocessinginstruction::os_invoke,
+  c_domprocessinginstruction::os_constant,
+};
 Object co_pdostatement(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_pdostatement)())->dynCreate(params, init));
 }
@@ -16843,21 +16503,13 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
 Variant c_pdostatement::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_pdostatement$os_getInit(const char *s) {
-  return c_pdostatement::os_getInit(s, -1);
-}
-Variant cw_pdostatement$os_get(const char *s) {
-  return c_pdostatement::os_get(s, -1);
-}
-Variant &cw_pdostatement$os_lval(const char *s) {
-  return c_pdostatement::os_lval(s, -1);
-}
-Variant cw_pdostatement$os_constant(const char *s) {
-  return c_pdostatement::os_constant(s);
-}
-Variant cw_pdostatement$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_pdostatement::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_pdostatement = {
+  c_pdostatement::os_getInit,
+  c_pdostatement::os_get,
+  c_pdostatement::os_lval,
+  c_pdostatement::os_invoke,
+  c_pdostatement::os_constant,
+};
 Object co_soapclient(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapclient)())->dynCreate(params, init));
 }
@@ -17484,21 +17136,13 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
 Variant c_soapclient::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_soapclient$os_getInit(const char *s) {
-  return c_soapclient::os_getInit(s, -1);
-}
-Variant cw_soapclient$os_get(const char *s) {
-  return c_soapclient::os_get(s, -1);
-}
-Variant &cw_soapclient$os_lval(const char *s) {
-  return c_soapclient::os_lval(s, -1);
-}
-Variant cw_soapclient$os_constant(const char *s) {
-  return c_soapclient::os_constant(s);
-}
-Variant cw_soapclient$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_soapclient::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_soapclient = {
+  c_soapclient::os_getInit,
+  c_soapclient::os_get,
+  c_soapclient::os_lval,
+  c_soapclient::os_invoke,
+  c_soapclient::os_constant,
+};
 Object co_soapparam(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapparam)())->dynCreate(params, init));
 }
@@ -17737,21 +17381,13 @@ Variant c_soapparam::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
 Variant c_soapparam::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_soapparam$os_getInit(const char *s) {
-  return c_soapparam::os_getInit(s, -1);
-}
-Variant cw_soapparam$os_get(const char *s) {
-  return c_soapparam::os_get(s, -1);
-}
-Variant &cw_soapparam$os_lval(const char *s) {
-  return c_soapparam::os_lval(s, -1);
-}
-Variant cw_soapparam$os_constant(const char *s) {
-  return c_soapparam::os_constant(s);
-}
-Variant cw_soapparam$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_soapparam::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_soapparam = {
+  c_soapparam::os_getInit,
+  c_soapparam::os_get,
+  c_soapparam::os_lval,
+  c_soapparam::os_invoke,
+  c_soapparam::os_constant,
+};
 Object co_datetime(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_datetime)())->dynCreate(params, init));
 }
@@ -18294,21 +17930,13 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
 Variant c_datetime::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_datetime$os_getInit(const char *s) {
-  return c_datetime::os_getInit(s, -1);
-}
-Variant cw_datetime$os_get(const char *s) {
-  return c_datetime::os_get(s, -1);
-}
-Variant &cw_datetime$os_lval(const char *s) {
-  return c_datetime::os_lval(s, -1);
-}
-Variant cw_datetime$os_constant(const char *s) {
-  return c_datetime::os_constant(s);
-}
-Variant cw_datetime$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_datetime::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_datetime = {
+  c_datetime::os_getInit,
+  c_datetime::os_get,
+  c_datetime::os_lval,
+  c_datetime::os_invoke,
+  c_datetime::os_constant,
+};
 Object co_pdo(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_pdo)())->dynCreate(params, init));
 }
@@ -19248,21 +18876,13 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
 Variant c_pdo::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_pdo$os_getInit(const char *s) {
-  return c_pdo::os_getInit(s, -1);
-}
-Variant cw_pdo$os_get(const char *s) {
-  return c_pdo::os_get(s, -1);
-}
-Variant &cw_pdo$os_lval(const char *s) {
-  return c_pdo::os_lval(s, -1);
-}
-Variant cw_pdo$os_constant(const char *s) {
-  return c_pdo::os_constant(s);
-}
-Variant cw_pdo$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_pdo::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_pdo = {
+  c_pdo::os_getInit,
+  c_pdo::os_get,
+  c_pdo::os_lval,
+  c_pdo::os_invoke,
+  c_pdo::os_constant,
+};
 Object co_domentity(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domentity)())->dynCreate(params, init));
 }
@@ -20094,21 +19714,13 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
 Variant c_domentity::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_domnode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domentity$os_getInit(const char *s) {
-  return c_domentity::os_getInit(s, -1);
-}
-Variant cw_domentity$os_get(const char *s) {
-  return c_domentity::os_get(s, -1);
-}
-Variant &cw_domentity$os_lval(const char *s) {
-  return c_domentity::os_lval(s, -1);
-}
-Variant cw_domentity$os_constant(const char *s) {
-  return c_domentity::os_constant(s);
-}
-Variant cw_domentity$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domentity::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domentity = {
+  c_domentity::os_getInit,
+  c_domentity::os_get,
+  c_domentity::os_lval,
+  c_domentity::os_invoke,
+  c_domentity::os_constant,
+};
 Object co_xmlwriter(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_xmlwriter)())->dynCreate(params, init));
 }
@@ -21683,21 +21295,13 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
 Variant c_xmlwriter::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_xmlwriter$os_getInit(const char *s) {
-  return c_xmlwriter::os_getInit(s, -1);
-}
-Variant cw_xmlwriter$os_get(const char *s) {
-  return c_xmlwriter::os_get(s, -1);
-}
-Variant &cw_xmlwriter$os_lval(const char *s) {
-  return c_xmlwriter::os_lval(s, -1);
-}
-Variant cw_xmlwriter$os_constant(const char *s) {
-  return c_xmlwriter::os_constant(s);
-}
-Variant cw_xmlwriter$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_xmlwriter::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_xmlwriter = {
+  c_xmlwriter::os_getInit,
+  c_xmlwriter::os_get,
+  c_xmlwriter::os_lval,
+  c_xmlwriter::os_invoke,
+  c_xmlwriter::os_constant,
+};
 Object co_domexception(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domexception)())->dynCreate(params, init));
 }
@@ -22130,21 +21734,13 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
 Variant c_domexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domexception$os_getInit(const char *s) {
-  return c_domexception::os_getInit(s, -1);
-}
-Variant cw_domexception$os_get(const char *s) {
-  return c_domexception::os_get(s, -1);
-}
-Variant &cw_domexception$os_lval(const char *s) {
-  return c_domexception::os_lval(s, -1);
-}
-Variant cw_domexception$os_constant(const char *s) {
-  return c_domexception::os_constant(s);
-}
-Variant cw_domexception$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domexception::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domexception = {
+  c_domexception::os_getInit,
+  c_domexception::os_get,
+  c_domexception::os_lval,
+  c_domexception::os_invoke,
+  c_domexception::os_constant,
+};
 Object co_domxpath(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domxpath)())->dynCreate(params, init));
 }
@@ -22577,21 +22173,13 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
 Variant c_domxpath::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domxpath$os_getInit(const char *s) {
-  return c_domxpath::os_getInit(s, -1);
-}
-Variant cw_domxpath$os_get(const char *s) {
-  return c_domxpath::os_get(s, -1);
-}
-Variant &cw_domxpath$os_lval(const char *s) {
-  return c_domxpath::os_lval(s, -1);
-}
-Variant cw_domxpath$os_constant(const char *s) {
-  return c_domxpath::os_constant(s);
-}
-Variant cw_domxpath$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domxpath::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domxpath = {
+  c_domxpath::os_getInit,
+  c_domxpath::os_get,
+  c_domxpath::os_lval,
+  c_domxpath::os_invoke,
+  c_domxpath::os_constant,
+};
 Object co_soapserver(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapserver)())->dynCreate(params, init));
 }
@@ -23110,21 +22698,13 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
 Variant c_soapserver::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_soapserver$os_getInit(const char *s) {
-  return c_soapserver::os_getInit(s, -1);
-}
-Variant cw_soapserver$os_get(const char *s) {
-  return c_soapserver::os_get(s, -1);
-}
-Variant &cw_soapserver$os_lval(const char *s) {
-  return c_soapserver::os_lval(s, -1);
-}
-Variant cw_soapserver$os_constant(const char *s) {
-  return c_soapserver::os_constant(s);
-}
-Variant cw_soapserver$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_soapserver::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_soapserver = {
+  c_soapserver::os_getInit,
+  c_soapserver::os_get,
+  c_soapserver::os_lval,
+  c_soapserver::os_invoke,
+  c_soapserver::os_constant,
+};
 Object co_domnode(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domnode)())->dynCreate(params, init));
 }
@@ -23956,21 +23536,13 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
 Variant c_domnode::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domnode$os_getInit(const char *s) {
-  return c_domnode::os_getInit(s, -1);
-}
-Variant cw_domnode$os_get(const char *s) {
-  return c_domnode::os_get(s, -1);
-}
-Variant &cw_domnode$os_lval(const char *s) {
-  return c_domnode::os_lval(s, -1);
-}
-Variant cw_domnode$os_constant(const char *s) {
-  return c_domnode::os_constant(s);
-}
-Variant cw_domnode$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domnode::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domnode = {
+  c_domnode::os_getInit,
+  c_domnode::os_get,
+  c_domnode::os_lval,
+  c_domnode::os_invoke,
+  c_domnode::os_constant,
+};
 Object co_domdocument(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domdocument)())->dynCreate(params, init));
 }
@@ -25750,21 +25322,13 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
 Variant c_domdocument::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_domnode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domdocument$os_getInit(const char *s) {
-  return c_domdocument::os_getInit(s, -1);
-}
-Variant cw_domdocument$os_get(const char *s) {
-  return c_domdocument::os_get(s, -1);
-}
-Variant &cw_domdocument$os_lval(const char *s) {
-  return c_domdocument::os_lval(s, -1);
-}
-Variant cw_domdocument$os_constant(const char *s) {
-  return c_domdocument::os_constant(s);
-}
-Variant cw_domdocument$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domdocument::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domdocument = {
+  c_domdocument::os_getInit,
+  c_domdocument::os_get,
+  c_domdocument::os_lval,
+  c_domdocument::os_invoke,
+  c_domdocument::os_constant,
+};
 Object co_libxmlerror(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_libxmlerror)())->dynCreate(params, init));
 }
@@ -25987,21 +25551,13 @@ Variant c_libxmlerror::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
 Variant c_libxmlerror::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_libxmlerror$os_getInit(const char *s) {
-  return c_libxmlerror::os_getInit(s, -1);
-}
-Variant cw_libxmlerror$os_get(const char *s) {
-  return c_libxmlerror::os_get(s, -1);
-}
-Variant &cw_libxmlerror$os_lval(const char *s) {
-  return c_libxmlerror::os_lval(s, -1);
-}
-Variant cw_libxmlerror$os_constant(const char *s) {
-  return c_libxmlerror::os_constant(s);
-}
-Variant cw_libxmlerror$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_libxmlerror::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_libxmlerror = {
+  c_libxmlerror::os_getInit,
+  c_libxmlerror::os_get,
+  c_libxmlerror::os_lval,
+  c_libxmlerror::os_invoke,
+  c_libxmlerror::os_constant,
+};
 Object co_soapfault(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapfault)())->dynCreate(params, init));
 }
@@ -26478,21 +26034,13 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
 Variant c_soapfault::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_soapfault$os_getInit(const char *s) {
-  return c_soapfault::os_getInit(s, -1);
-}
-Variant cw_soapfault$os_get(const char *s) {
-  return c_soapfault::os_get(s, -1);
-}
-Variant &cw_soapfault$os_lval(const char *s) {
-  return c_soapfault::os_lval(s, -1);
-}
-Variant cw_soapfault$os_constant(const char *s) {
-  return c_soapfault::os_constant(s);
-}
-Variant cw_soapfault$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_soapfault::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_soapfault = {
+  c_soapfault::os_getInit,
+  c_soapfault::os_get,
+  c_soapfault::os_lval,
+  c_soapfault::os_invoke,
+  c_soapfault::os_constant,
+};
 Object co_domelement(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domelement)())->dynCreate(params, init));
 }
@@ -27936,21 +27484,13 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
 Variant c_domelement::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_domnode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_domelement$os_getInit(const char *s) {
-  return c_domelement::os_getInit(s, -1);
-}
-Variant cw_domelement$os_get(const char *s) {
-  return c_domelement::os_get(s, -1);
-}
-Variant &cw_domelement$os_lval(const char *s) {
-  return c_domelement::os_lval(s, -1);
-}
-Variant cw_domelement$os_constant(const char *s) {
-  return c_domelement::os_constant(s);
-}
-Variant cw_domelement$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_domelement::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_domelement = {
+  c_domelement::os_getInit,
+  c_domelement::os_get,
+  c_domelement::os_lval,
+  c_domelement::os_invoke,
+  c_domelement::os_constant,
+};
 Variant get_builtin_class_var_init(const char *s, const char *var) {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = hash_string_i(s);

@@ -948,50 +948,27 @@ void ClassScope::outputCPPStaticMethodWrappers(CodeGenerator &cg,
 void ClassScope::outputCPPGlobalTableWrappersDecl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
   string id = getId();
-  cg.printf("Variant %s%s$os_getInit(const char *s);\n",
-            Option::ClassWrapperFunctionPrefix, id.c_str());
-  cg.printf("Variant %s%s$os_get(const char *s);\n",
-            Option::ClassWrapperFunctionPrefix, id.c_str());
-  cg.printf("Variant &%s%s$os_lval(const char *s);\n",
-            Option::ClassWrapperFunctionPrefix, id.c_str());
-  cg.printf("Variant %s%s$os_constant(const char *s);\n",
-            Option::ClassWrapperFunctionPrefix, id.c_str());
-  cg.printf("Variant %s%s$os_invoke(const char *c, const char *s, "
-            "CArrRef params, bool fatal = true);\n",
+  cg.printf("extern struct ObjectStaticCallbacks %s%s;\n",
             Option::ClassWrapperFunctionPrefix, id.c_str());
 }
 
 void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
   string id = getId();
-
-  cg.indentBegin("Variant %s%s$os_getInit(const char *s) {\n",
+  cg.indentBegin("struct ObjectStaticCallbacks %s%s = {\n",
                  Option::ClassWrapperFunctionPrefix, id.c_str());
-  cg.printf("return %s%s::os_getInit(s, -1);\n",
-            Option::ClassPrefix, id.c_str());
-  cg.indentEnd("}\n");
-
-  cg.indentBegin("Variant %s%s$os_get(const char *s) {\n",
-                 Option::ClassWrapperFunctionPrefix, id.c_str());
-  cg.printf("return %s%s::os_get(s, -1);\n", Option::ClassPrefix, id.c_str());
-  cg.indentEnd("}\n");
-
-  cg.indentBegin("Variant &%s%s$os_lval(const char *s) {\n",
-                Option::ClassWrapperFunctionPrefix, id.c_str());
-  cg.printf("return %s%s::os_lval(s, -1);\n", Option::ClassPrefix, id.c_str());
-  cg.indentEnd("}\n");
-
-  cg.indentBegin("Variant %s%s$os_constant(const char *s) {\n",
-                Option::ClassWrapperFunctionPrefix, id.c_str());
-  cg.printf("return %s%s::os_constant(s);\n", Option::ClassPrefix, id.c_str());
-  cg.indentEnd("}\n");
-
-  cg.indentBegin("Variant %s%s$os_invoke(const char *c, const char *s, "
-                 "CArrRef params, bool fatal /* = true */) {\n",
-                 Option::ClassWrapperFunctionPrefix, id.c_str());
-  cg.printf("return %s%s::os_invoke(c, s, params, -1, fatal);\n",
-            Option::ClassPrefix, id.c_str());
-  cg.indentEnd("}\n");
+  // This order must match the one in object_data.h
+  cg.printf("%s%s::%sgetInit,\n", Option::ClassPrefix, id.c_str(),
+            Option::ObjectStaticPrefix);
+  cg.printf("%s%s::%sget,\n", Option::ClassPrefix, id.c_str(),
+            Option::ObjectStaticPrefix);
+  cg.printf("%s%s::%slval,\n", Option::ClassPrefix, id.c_str(),
+            Option::ObjectStaticPrefix);
+  cg.printf("%s%s::%sinvoke,\n", Option::ClassPrefix, id.c_str(),
+            Option::ObjectStaticPrefix);
+  cg.printf("%s%s::%sconstant,\n", Option::ClassPrefix, id.c_str(),
+            Option::ObjectStaticPrefix);
+  cg.indentEnd("};\n");
 }
 
 void ClassScope::addFunction(AnalysisResultPtr ar,

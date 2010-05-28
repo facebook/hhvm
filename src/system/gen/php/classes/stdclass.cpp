@@ -142,21 +142,13 @@ Variant c_stdclass::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
 Variant c_stdclass::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw_stdclass$os_getInit(const char *s) {
-  return c_stdclass::os_getInit(s, -1);
-}
-Variant cw_stdclass$os_get(const char *s) {
-  return c_stdclass::os_get(s, -1);
-}
-Variant &cw_stdclass$os_lval(const char *s) {
-  return c_stdclass::os_lval(s, -1);
-}
-Variant cw_stdclass$os_constant(const char *s) {
-  return c_stdclass::os_constant(s);
-}
-Variant cw_stdclass$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c_stdclass::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw_stdclass = {
+  c_stdclass::os_getInit,
+  c_stdclass::os_get,
+  c_stdclass::os_lval,
+  c_stdclass::os_invoke,
+  c_stdclass::os_constant,
+};
 void c_stdclass::init() {
 }
 /* SRC: classes/stdclass.php line 8 */
@@ -277,21 +269,13 @@ Variant c___php_incomplete_class::o_invoke_from_eval(const char *s, Eval::Variab
 Variant c___php_incomplete_class::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-Variant cw___php_incomplete_class$os_getInit(const char *s) {
-  return c___php_incomplete_class::os_getInit(s, -1);
-}
-Variant cw___php_incomplete_class$os_get(const char *s) {
-  return c___php_incomplete_class::os_get(s, -1);
-}
-Variant &cw___php_incomplete_class$os_lval(const char *s) {
-  return c___php_incomplete_class::os_lval(s, -1);
-}
-Variant cw___php_incomplete_class$os_constant(const char *s) {
-  return c___php_incomplete_class::os_constant(s);
-}
-Variant cw___php_incomplete_class$os_invoke(const char *c, const char *s, CArrRef params, bool fatal /* = true */) {
-  return c___php_incomplete_class::os_invoke(c, s, params, -1, fatal);
-}
+struct ObjectStaticCallbacks cw___php_incomplete_class = {
+  c___php_incomplete_class::os_getInit,
+  c___php_incomplete_class::os_get,
+  c___php_incomplete_class::os_lval,
+  c___php_incomplete_class::os_invoke,
+  c___php_incomplete_class::os_constant,
+};
 void c___php_incomplete_class::init() {
 }
 Object co_stdclass(CArrRef params, bool init /* = true */) {

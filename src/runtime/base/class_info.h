@@ -92,6 +92,7 @@ public:
     const char *name;
     const char *docComment;
     const ClassInfo *owner;
+    bool isVisible(const ClassInfo *context) const;
   };
 
   typedef hphp_const_char_imap<ClassInfo*> ClassMap;

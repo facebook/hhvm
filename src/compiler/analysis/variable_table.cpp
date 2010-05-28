@@ -1379,7 +1379,7 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
   cg.indentBegin("Variant %s%s::%sgetInit(const char *s, int64 hash) {\n",
                  Option::ClassPrefix, cls, Option::ObjectStaticPrefix);
   gdec = outputCPPJumpTable(cg, ar, NULL, false, false, EitherStatic,
-                            JumpReturnInit);
+                            JumpReturnInit, EitherPrivate);
   if (!gdec && dynamicObject == 1) cg.printDeclareGlobals();
   cg.printf("return %s%s%s%s%sgetInit(s, hash);\n", gl, cprefix,
              parent, op, Option::ObjectStaticPrefix);
@@ -1512,7 +1512,7 @@ void VariableTable::outputCPPPropertyOp(CodeGenerator &cg, AnalysisResultPtr ar,
         ret, Option::ClassPrefix, cls,
         Option::ObjectPrefix, op, argsDec, cnst ? " const" : "");
     outputCPPJumpTable(cg, ar, Option::PropertyPrefix, false, varOnly,
-        NonStatic, type, false);
+        NonStatic, type);
     cg.printf("return %s%s::%s%sPublic(s, hash%s);\n",
         Option::ClassPrefix, parent, Option::ObjectPrefix, op, args);
     cg.indentEnd("}\n");
@@ -1522,7 +1522,7 @@ void VariableTable::outputCPPPropertyOp(CodeGenerator &cg, AnalysisResultPtr ar,
       ret, Option::ClassPrefix, cls, Option::ObjectPrefix, op, argsDec,
       cnst ? " const" : "");
   outputCPPJumpTable(cg, ar, Option::PropertyPrefix, false, varOnly, NonStatic,
-      type, true);
+      type, Private);
   if (!dynamicObject) {
     // Fall back to public
     cg.printf("return %s%sPublic(s, hash%s);\n",
@@ -1535,11 +1535,9 @@ void VariableTable::outputCPPPropertyOp(CodeGenerator &cg, AnalysisResultPtr ar,
 }
 
 bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
-                                       const char *prefix, bool defineHash,
-                                       bool variantOnly,
-                                       StaticSelection staticVar,
-                                       JumpTableType type /* = JumpReturn */,
-                                       bool onlyPrivate /* = false */) {
+      const char *prefix, bool defineHash, bool variantOnly,
+      StaticSelection staticVar, JumpTableType type /* = JumpReturn */,
+      PrivateSelection privateVar /* = NonPrivate */) {
   vector<const char *> strings;
   hphp_const_char_map<ssize_t> varIdx;
   strings.reserve(m_symbols.size());
@@ -1548,7 +1546,9 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
     const string &name = m_symbols[i];
     bool stat = isStatic(name);
     if (!stat && (isInherited(name) || definedByParent(ar, name))) continue;
-    if (!stat && onlyPrivate != isPrivate(name)) continue;
+    if (!stat &&
+        (isPrivate(name) && privateVar == NonPrivate ||
+         !isPrivate(name) && privateVar == Private)) continue;
 
     if ((!variantOnly || Type::SameType(getFinalType(name), Type::Variant)) &&
         (staticVar & (stat ? Static : NonStatic))) {

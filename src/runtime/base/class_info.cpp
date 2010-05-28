@@ -463,6 +463,17 @@ bool ClassInfo::hasConstant(const char *name) const {
   return constants.find(name) != constants.end();
 }
 
+bool ClassInfo::PropertyInfo::isVisible(const ClassInfo *context) const {
+  if ((attribute & ClassInfo::IsPublic) || context == owner) return true;
+  if (!context) return false;
+  if (attribute & ClassInfo::IsProtected) {
+    return owner->derivesFrom(context->getName(), false) ||
+           context->derivesFrom(owner->getName(), false);
+  }
+  ASSERT(attribute & ClassInfo::IsPrivate);
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // load functions
 

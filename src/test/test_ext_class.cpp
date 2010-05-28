@@ -42,7 +42,7 @@ bool TestExtClass::RunTests(const std::string &which) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// test classes are all in g_class_map defined in test_ext_function.cpp
+// test classes are all in g_class_map defined in test_externals.cpp
 
 bool TestExtClass::test_get_declared_classes() {
   Array classes = f_get_declared_classes();
@@ -76,7 +76,7 @@ bool TestExtClass::test_get_class_methods() {
 
 bool TestExtClass::test_get_class_vars() {
   Array properties = f_get_class_vars("TEst");
-  VS(properties, CREATE_MAP3("foo", null, "prop", null, "bar", null));
+  VS(properties, CREATE_MAP1("foo", null));
   return Count(true);
 }
 

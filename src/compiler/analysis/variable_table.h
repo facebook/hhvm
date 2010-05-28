@@ -243,6 +243,12 @@ private:
     EitherStatic = 3
   };
 
+  enum PrivateSelection {
+    NonPrivate = 1,
+    Private = 2,
+    EitherPrivate = 3
+  };
+
   int m_attribute;
   std::map<std::string, int> m_parameters;
   std::set<std::string> m_protected;
@@ -302,7 +308,7 @@ private:
                           const char *prefix, bool defineHash,
                           bool variantOnly, StaticSelection staticVar,
                           JumpTableType type = JumpReturn,
-                          bool onlyPrivate = false);
+                          PrivateSelection privateVar = NonPrivate);
   void outputCPPPrivateSelector(CodeGenerator &cg, AnalysisResultPtr ar,
       const char *op, const char *args);
   void outputCPPPropertyOp(CodeGenerator &cg, AnalysisResultPtr ar,

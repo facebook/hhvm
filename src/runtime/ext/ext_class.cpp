@@ -78,19 +78,24 @@ Array f_get_class_methods(CVarRef class_or_object) {
 Array f_get_class_vars(CStrRef class_name) {
   ClassInfo::PropertyVec properties;
   ClassInfo::GetClassProperties(properties, class_name);
+  const char *context = FrameInjection::GetClassName(true);
+  const ClassInfo *cls = NULL;
+  if (context && context[0]) {
+    cls = ClassInfo::FindClass(context);
+  }
 
   Array ret = Array::Create();
   // PHP has instance variables appear before static variables...
   for (unsigned int i = 0; i < properties.size(); i++) {
-    // TODO: this function is sensitive to context, doh'
-    if (!(properties[i]->attribute & ClassInfo::IsStatic)) {
+    if (!(properties[i]->attribute & ClassInfo::IsStatic) &&
+        properties[i]->isVisible(cls)) {
       ret.set(properties[i]->name,
               get_class_var_init(class_name.c_str(), properties[i]->name));
     }
   }
   for (unsigned int i = 0; i < properties.size(); i++) {
-    // TODO: this function is sensitive to context, doh'
-    if (properties[i]->attribute & ClassInfo::IsStatic) {
+    if (properties[i]->attribute & ClassInfo::IsStatic &&
+        properties[i]->isVisible(cls)) {
       ret.set(properties[i]->name,
               get_static_property(class_name.c_str(), properties[i]->name));
     }

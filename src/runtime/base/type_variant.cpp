@@ -411,6 +411,7 @@ void Variant::split() {
   switch (m_type) {
   case KindOfVariant: m_data.pvar->split();     break;
   // copy-on-write
+  case KindOfStaticString:  set(m_data.pstr->copy()); break;
   case KindOfString:  set(m_data.pstr->copy()); break;
   case KindOfArray:   set(m_data.parr->copy()); break;
   default:
@@ -1649,9 +1650,9 @@ Variant Variant::toKey() const {
     return "";
   case LiteralString:
     {
-      escalateString();
       int64 n;
-      if (m_data.pstr->isStrictlyInteger(n)) {
+      StringData *sk = toString().get();
+      if (sk->isStrictlyInteger(n)) {
         return n;
       } else {
         return *this;
@@ -1970,8 +1971,7 @@ Variant Variant::rvalAtHelper(int64 offset, int64 prehash /* = -1 */,
                               bool error /* = false */) const {
   switch (m_type) {
   case LiteralString:
-    escalateString();
-    // fall through
+    return toString().get()->getChar((int)offset);
   case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar((int)offset);
@@ -2000,8 +2000,7 @@ Variant Variant::rvalAt(litstr offset, int64 prehash /* = -1 */,
   }
   switch (m_type) {
   case LiteralString:
-    escalateString();
-    // fall through
+    return toString().get()->getChar(String(offset).toInt32());
   case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar(String(offset).toInt32());
@@ -2029,8 +2028,7 @@ Variant Variant::rvalAt(CStrRef offset, int64 prehash /* = -1 */,
   }
   switch (m_type) {
   case LiteralString:
-    escalateString();
-    // fall through
+    return toString().get()->getChar(offset.toInt32());
   case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar(offset.toInt32());
@@ -2059,9 +2057,15 @@ Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
       return m_data.parr->get(offset.m_data.num, prehash, error);
     case KindOfDouble:
       return m_data.parr->get((int64)offset.m_data.dbl, prehash, error);
-    case LiteralString:
-      offset.escalateString();
-      // fall through
+    case LiteralString: {
+      String soffset = offset.toString();
+      int64 n;
+      if (soffset.get()->isStrictlyInteger(n)) {
+        return m_data.parr->get(n, prehash, error);
+      } else {
+        return m_data.parr->get(soffset, prehash, error);
+      }
+    }
     case KindOfStaticString:
     case KindOfString: {
       int64 n;
@@ -2090,8 +2094,7 @@ Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
   }
   switch (m_type) {
   case LiteralString:
-    escalateString();
-    // fall through
+    return toString().get()->getChar(offset.toInt32());
   case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar(offset.toInt32());

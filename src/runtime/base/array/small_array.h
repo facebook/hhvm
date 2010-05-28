@@ -150,6 +150,7 @@ private:
     b.prev = m_nListTail;
     b.next = ArrayData::invalid_index;
     m_nListTail = p;
+    if (m_pos < 0) m_pos = p;
     if (b.prev >= 0) m_arBuckets[(int)b.prev].next = p;
     if (m_nNumOfElements == 0) m_nListHead = m_pos = p;
   }

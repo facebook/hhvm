@@ -751,14 +751,18 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
   if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
     ServerStats::Log("sql.query", 1);
 
+    // removing comments, which can be wrong actually if some string field's
+    // value has /* or */ in it.
+    String q = f_preg_replace("/\\/\\*.*?\\*\\//", " ", query).toString();
+
     Variant matches;
-    f_preg_match("/^(?:(?:\\/\\*.*?\\*\\/)|\\(|\\s)*(?:"
-                 "(insert).*?\\s+(?:into\\s+)?([^\\s]+)|"
-                 "(update|set|show)\\s+([^\\s]+)|"
-                 "(replace).*?\\s+into\\s+([^\\s]+)|"
-                 "(delete).*?\\s+from\\s+([^\\s]+)|"
-                 "(select).*?[\\s`]+from\\s+([^\\s]+))/is",
-                 query, ref(matches));
+    f_preg_match("/^(?:\\(|\\s)*(?:"
+                 "(insert).*?\\s+(?:into\\s+)?([^\\s\\(,]+)|"
+                 "(update|set|show)\\s+([^\\s\\(,]+)|"
+                 "(replace).*?\\s+into\\s+([^\\s\\(,]+)|"
+                 "(delete).*?\\s+from\\s+([^\\s\\(,]+)|"
+                 "(select).*?[\\s`]+from\\s+([^\\s\\(,]+))/is",
+                 q, ref(matches));
     int size = matches.toArray().size();
     if (size > 2) {
       string verb = Util::toLower(matches[size - 2].toString().data());
@@ -769,6 +773,14 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
       ServerStats::Log(string("sql.query.") + table + "." + verb, 1);
       if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {
         MySqlStats::Record(verb, rconn->m_in_transaction, table);
+        if (verb == "update") {
+          f_preg_match("([^\\s,]+)\\s*=\\s*([^\\s,]+)[\\+\\-]",
+                       q, ref(matches));
+          size = matches.toArray().size();
+          if (size > 2 && same(matches[1], matches[2])) {
+            MySqlStats::Record("incdec", rconn->m_in_transaction, table);
+          }
+        }
       }
     } else {
       f_preg_match("/^(?:(?:\\/\\*.*?\\*\\/)|\\(|\\s)*"

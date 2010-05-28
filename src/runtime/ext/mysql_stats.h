@@ -36,6 +36,7 @@ public:
     // transactional: statements inside begin/commit
     T_INSERT,
     T_UPDATE,
+    T_INCDEC,
     T_DELETE,
     T_REPLACE,
     T_SELECT,
@@ -43,6 +44,7 @@ public:
     // non-transactional
     N_INSERT,
     N_UPDATE,
+    N_INCDEC,
     N_DELETE,
     N_REPLACE,
     N_SELECT,

@@ -36,11 +36,13 @@ void MySqlStats::Init() {
   s_verbs["t_rollback"] = T_ROLLBACK;
   s_verbs["t_insert"  ] = T_INSERT;
   s_verbs["t_update"  ] = T_UPDATE;
+  s_verbs["t_incdec"  ] = T_INCDEC;
   s_verbs["t_delete"  ] = T_DELETE;
   s_verbs["t_replace" ] = T_REPLACE;
   s_verbs["t_select"  ] = T_SELECT;
   s_verbs["n_insert"  ] = N_INSERT;
   s_verbs["n_update"  ] = N_UPDATE;
+  s_verbs["t_incdec"  ] = T_INCDEC;
   s_verbs["n_delete"  ] = N_DELETE;
   s_verbs["n_replace" ] = N_REPLACE;
   s_verbs["n_select"  ] = N_SELECT;
@@ -51,11 +53,13 @@ void MySqlStats::Init() {
   s_verb_names[T_ROLLBACK] = "rollback";
   s_verb_names[T_INSERT  ] = "t_insert";
   s_verb_names[T_UPDATE  ] = "t_update";
+  s_verb_names[T_INCDEC  ] = "t_incdec";
   s_verb_names[T_DELETE  ] = "t_delete";
   s_verb_names[T_REPLACE ] = "t_replace";
   s_verb_names[T_SELECT  ] = "t_select";
   s_verb_names[N_INSERT  ] = "n_insert";
   s_verb_names[N_UPDATE  ] = "n_update";
+  s_verb_names[N_INCDEC  ] = "n_incdec";
   s_verb_names[N_DELETE  ] = "n_delete";
   s_verb_names[N_REPLACE ] = "n_replace";
   s_verb_names[N_SELECT  ] = "n_select";
@@ -85,6 +89,8 @@ void MySqlStats::Record(const std::string &verb,
                         bool inTransaction /* = false */,
                         const std::string &table /* = "" */) {
   Verb v = Translate(verb, inTransaction);
+  if (v == UNKNOWN) return;
+
   string ltable = Util::toLower(table);
 
   Lock lock(s_mutex);
@@ -109,11 +115,17 @@ std::string MySqlStats::ReportStats() {
     string table = iter->first;
     if (table.empty()) {
       table = "x";
+    } else {
+      char ch = table[0];
+      if (ch >= '0' && ch <= '9') {
+        table = "TABLE_" + table; // so XML will like it
+      }
     }
     out << "<" << table << ">\n";
     Stats &stats = *iter->second;
     for (int i = 0; i < VERB_COUNT; i++) {
       const char *name = Translate((Verb)i);
+      ASSERT(name);
       out << "  <" << name << ">";
       out << stats.actions[i];
       out << "</" << name << ">\n";

@@ -100,10 +100,10 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
 
     if (t->m_prev) {
       String file = t->m_prev->getFileName();
-      if (!file.empty()) {
+      if (!file.empty() && t->m_prev->line) {
         frame.set("file", file, -1, true);
+        frame.set("line", t->m_prev->line, -1, true);
       }
-      frame.set("line", t->m_prev->line, -1, true);
     } else if (t->flags & PseudoMain) {
       // Stop at top, don't include top file
       break;

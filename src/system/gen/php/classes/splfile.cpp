@@ -115,16 +115,14 @@ Variant c_splfileobject::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 7) {
     case 2:
-      HASH_RETURN(0x54B2A676B563E232LL, q_splfileobject_SKIP_EMPTY, SKIP_EMPTY);
+      HASH_RETURN(0x54B2A676B562E232LL, q_splfileobject_SKIP_EMPTY, SKIP_EMPTY);
       break;
     case 3:
       HASH_RETURN(0x23519E830A6DEC13LL, q_splfileobject_READ_CSV, READ_CSV);
       break;
     case 4:
-      HASH_RETURN(0x05ABC27224BDAC64LL, q_splfileobject_DROP_NEW_LINE, DROP_NEW_LINE);
-      break;
-    case 6:
-      HASH_RETURN(0x6ABD9DCA7D94431ELL, q_splfileobject_READ_AHEAD, READ_AHEAD);
+      HASH_RETURN(0x05ABC27224BCAC64LL, q_splfileobject_DROP_NEW_LINE, DROP_NEW_LINE);
+      HASH_RETURN(0x1250F99C672AB2C4LL, q_splfileobject_READ_AHEAD, READ_AHEAD);
       break;
     default:
       break;

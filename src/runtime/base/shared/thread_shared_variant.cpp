@@ -286,15 +286,12 @@ void ThreadSharedVariant::loadElems(ArrayData *&elems) {
   SharedVariant** ks = keys();
   SharedVariant** vs = vals();
   uint count = map().size();
-  if (count == 0 && RuntimeOption::UseZendArray) {
-    elems = StaticEmptyZendArray::Get()->copy();
-    return;
-  }
   ArrayInit ai(count);
   for (uint i = 0; i < count; i++) {
-    ai.set(i, ks[i]->toLocal(), vs[i]->toLocal());
+    ai.set(i, ks[i]->toLocal(), vs[i]->toLocal(), -1, true);
   }
   elems = ai.create();
+  if (elems->isStatic()) elems = elems->copy();
 }
 
 ThreadSharedVariantToIntMap::const_iterator

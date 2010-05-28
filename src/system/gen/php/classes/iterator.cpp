@@ -37,8 +37,8 @@ Variant c_arrayiterator::os_getInit(const char *s, int64 hash) {
       HASH_RETURN(0x1776D8467CB08D68LL, 
                   null, arr);
       break;
-    case 1:
-      HASH_RETURN(0x6AFDA85728FAE70DLL, 
+    case 2:
+      HASH_RETURN(0x436A4C853F65B422LL, 
                   null, flags);
       break;
     default:
@@ -59,8 +59,8 @@ Variant &c_arrayiterator::os_lval(const char *s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_arrayiterator
 void c_arrayiterator::o_get(Array &props) const {
-  if (isInitialized(m_arr)) props.set(String("\0arrayiterator\0arr", 18, CopyString), m_arr.isReferenced() ? ref(m_arr) : m_arr, 0x1471C1F71CBA9942LL, true);
-  if (isInitialized(m_flags)) props.set(String("\0arrayiterator\0flags", 20, CopyString), m_flags.isReferenced() ? ref(m_flags) : m_flags, 0x3CBA9B8A231C6685LL, true);
+  if (isInitialized(m_arr)) props.set(String("\0arrayiterator\0arr", 18, CopyString), m_arr.isReferenced() ? ref(m_arr) : m_arr, 0x6CDE66253326681DLL, true);
+  if (isInitialized(m_flags)) props.set(String("\0arrayiterator\0flags", 20, CopyString), m_flags.isReferenced() ? ref(m_flags) : m_flags, 0x644DF75C0CB1D76BLL, true);
   c_ObjectData::o_get(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_arrayiterator
@@ -92,8 +92,8 @@ Variant c_arrayiterator::o_getPrivate(CStrRef s, int64 hash, bool error /* = tru
       HASH_RETURN_STRING(0x1776D8467CB08D68LL, m_arr,
                          arr, 3);
       break;
-    case 1:
-      HASH_RETURN_STRING(0x6AFDA85728FAE70DLL, m_flags,
+    case 2:
+      HASH_RETURN_STRING(0x436A4C853F65B422LL, m_flags,
                          flags, 5);
       break;
     default:
@@ -129,8 +129,8 @@ bool c_arrayiterator::o_existsPrivate(CStrRef s, int64 hash) const {
     case 0:
       HASH_EXISTS_STRING(0x1776D8467CB08D68LL, arr, 3);
       break;
-    case 1:
-      HASH_EXISTS_STRING(0x6AFDA85728FAE70DLL, flags, 5);
+    case 2:
+      HASH_EXISTS_STRING(0x436A4C853F65B422LL, flags, 5);
       break;
     default:
       break;
@@ -166,8 +166,8 @@ Variant c_arrayiterator::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool for
       HASH_SET_STRING(0x1776D8467CB08D68LL, m_arr,
                       arr, 3);
       break;
-    case 1:
-      HASH_SET_STRING(0x6AFDA85728FAE70DLL, m_flags,
+    case 2:
+      HASH_SET_STRING(0x436A4C853F65B422LL, m_flags,
                       flags, 5);
       break;
     default:
@@ -204,8 +204,8 @@ Variant& c_arrayiterator::o_lvalPrivate(CStrRef s, int64 hash) {
       HASH_RETURN_STRING(0x1776D8467CB08D68LL, m_arr,
                          arr, 3);
       break;
-    case 1:
-      HASH_RETURN_STRING(0x6AFDA85728FAE70DLL, m_flags,
+    case 2:
+      HASH_RETURN_STRING(0x436A4C853F65B422LL, m_flags,
                          flags, 5);
       break;
     default:
@@ -1077,7 +1077,7 @@ Variant c_appenditerator::os_getInit(const char *s, int64 hash) {
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
-      HASH_RETURN(0x1F6E21DFD4AF8244LL, 
+      HASH_RETURN(0x47017DB1BE43329ALL, 
                   null, iterators);
       break;
     default:
@@ -1098,7 +1098,7 @@ Variant &c_appenditerator::os_lval(const char *s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_appenditerator
 void c_appenditerator::o_get(Array &props) const {
-  if (isInitialized(m_iterators)) props.set(String("\0appenditerator\0iterators", 25, CopyString), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, 0x370B757E55B4993DLL, true);
+  if (isInitialized(m_iterators)) props.set(String("\0appenditerator\0iterators", 25, CopyString), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, 0x370B757E55B5993DLL, true);
   c_ObjectData::o_get(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_appenditerator
@@ -1127,7 +1127,7 @@ Variant c_appenditerator::o_getPrivate(CStrRef s, int64 hash, bool error /* = tr
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 1) {
     case 0:
-      HASH_RETURN_STRING(0x1F6E21DFD4AF8244LL, m_iterators,
+      HASH_RETURN_STRING(0x47017DB1BE43329ALL, m_iterators,
                          iterators, 9);
       break;
     default:
@@ -1161,7 +1161,7 @@ bool c_appenditerator::o_existsPrivate(CStrRef s, int64 hash) const {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 1) {
     case 0:
-      HASH_EXISTS_STRING(0x1F6E21DFD4AF8244LL, iterators, 9);
+      HASH_EXISTS_STRING(0x47017DB1BE43329ALL, iterators, 9);
       break;
     default:
       break;
@@ -1194,7 +1194,7 @@ Variant c_appenditerator::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool fo
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 1) {
     case 0:
-      HASH_SET_STRING(0x1F6E21DFD4AF8244LL, m_iterators,
+      HASH_SET_STRING(0x47017DB1BE43329ALL, m_iterators,
                       iterators, 9);
       break;
     default:
@@ -1228,7 +1228,7 @@ Variant& c_appenditerator::o_lvalPrivate(CStrRef s, int64 hash) {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 1) {
     case 0:
-      HASH_RETURN_STRING(0x1F6E21DFD4AF8244LL, m_iterators,
+      HASH_RETURN_STRING(0x47017DB1BE43329ALL, m_iterators,
                          iterators, 9);
       break;
     default:
@@ -1759,23 +1759,21 @@ Variant& c_recursivedirectoryiterator::o_lvalPrivate(CStrRef s, int64 hash) {
 Variant c_recursivedirectoryiterator::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 15) {
-    case 0:
-      HASH_RETURN(0x4A34A9DA11ED8F50LL, q_recursivedirectoryiterator_KEY_AS_FILENAME, KEY_AS_FILENAME);
-      break;
     case 1:
-      HASH_RETURN(0x6AA4D24FB118FCF1LL, q_recursivedirectoryiterator_KEY_AS_PATHNAME, KEY_AS_PATHNAME);
+      HASH_RETURN(0x6AA4D24FB119FCF1LL, q_recursivedirectoryiterator_KEY_AS_PATHNAME, KEY_AS_PATHNAME);
       break;
     case 4:
-      HASH_RETURN(0x0F0DCA1A52157D84LL, q_recursivedirectoryiterator_NEW_CURRENT_AND_KEY, NEW_CURRENT_AND_KEY);
-      break;
-    case 5:
-      HASH_RETURN(0x29191B08277C8E85LL, q_recursivedirectoryiterator_CURRENT_AS_SELF, CURRENT_AS_SELF);
+      HASH_RETURN(0x0F0DCA1A52147D84LL, q_recursivedirectoryiterator_NEW_CURRENT_AND_KEY, NEW_CURRENT_AND_KEY);
       break;
     case 6:
-      HASH_RETURN(0x5C823ED8BD51E7F6LL, q_recursivedirectoryiterator_CURRENT_AS_FILEINFO, CURRENT_AS_FILEINFO);
+      HASH_RETURN(0x05C4C37A5B7D4F66LL, q_recursivedirectoryiterator_CURRENT_AS_PATHNAME, CURRENT_AS_PATHNAME);
+      break;
+    case 9:
+      HASH_RETURN(0x04159AAAA6E656D9LL, q_recursivedirectoryiterator_CURRENT_AS_FILEINFO, CURRENT_AS_FILEINFO);
+      HASH_RETURN(0x71C805ABFB82F8A9LL, q_recursivedirectoryiterator_KEY_AS_FILENAME, KEY_AS_FILENAME);
       break;
     case 15:
-      HASH_RETURN(0x2D581F4C45121E5FLL, q_recursivedirectoryiterator_CURRENT_AS_PATHNAME, CURRENT_AS_PATHNAME);
+      HASH_RETURN(0x50AC76DA11127DEFLL, q_recursivedirectoryiterator_CURRENT_AS_SELF, CURRENT_AS_SELF);
       break;
     default:
       break;
@@ -4267,15 +4265,17 @@ Variant& c_recursiveiteratoriterator::o_lvalPrivate(CStrRef s, int64 hash) {
 Variant c_recursiveiteratoriterator::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 7) {
-    case 1:
-      HASH_RETURN(0x618BE0B31B5C1FD1LL, q_recursiveiteratoriterator_CHILD_FIRST, CHILD_FIRST);
+    case 0:
+      HASH_RETURN(0x091F3C8504F1CEF8LL, q_recursiveiteratoriterator_CHILD_FIRST, CHILD_FIRST);
       break;
     case 4:
-      HASH_RETURN(0x181DAA5BC4B24F6CLL, q_recursiveiteratoriterator_LEAVES_ONLY, LEAVES_ONLY);
-      HASH_RETURN(0x7F32D13555655AA4LL, q_recursiveiteratoriterator_CATCH_GET_CHILD, CATCH_GET_CHILD);
+      HASH_RETURN(0x7F32D13555645AA4LL, q_recursiveiteratoriterator_CATCH_GET_CHILD, CATCH_GET_CHILD);
       break;
     case 5:
-      HASH_RETURN(0x0822A034E83D2285LL, q_recursiveiteratoriterator_SELF_FIRST, SELF_FIRST);
+      HASH_RETURN(0x3FB1062DAE470035LL, q_recursiveiteratoriterator_LEAVES_ONLY, LEAVES_ONLY);
+      break;
+    case 6:
+      HASH_RETURN(0x608F4462FEA8F3DELL, q_recursiveiteratoriterator_SELF_FIRST, SELF_FIRST);
       break;
     default:
       break;

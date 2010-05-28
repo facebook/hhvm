@@ -16,6 +16,7 @@
 */
 
 #include <runtime/base/array/zend_array.h>
+#include <runtime/base/array/array_init.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/runtime_error.h>
 #include <util/hash.h>
@@ -197,22 +198,33 @@ Variant ZendArray::current() const {
 
 Variant ZendArray::each() {
   if (m_pos) {
-    Array ret;
+    ArrayInit init(4, false);
     Bucket *p = reinterpret_cast<Bucket *>(m_pos);
     Variant key = getKey(m_pos);
     Variant value = getValue(m_pos);
-    ret.set(1, value);
-    ret.set("value", value);
-    ret.set(0, key);
-    ret.set("key", key);
+    init.set(0, 1, value);
+    init.set(1, "value", value, -1, true);
+    init.set(2, 0, key);
+    init.set(3, "key", key, -1, true);
     m_pos = (ssize_t)p->pListNext;
-    return ret;
+    return Array(init.create());
   }
   return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // lookups
+
+static bool hit_string_key(const ZendArray::Bucket *p, const char *k, int len,
+                           int64 hash) {
+  if (!p->key) return false;
+  const char *data = p->key->data();
+  return data == k || p->h == hash && p->key->size() == len && (
+#ifdef USE_MURMUR
+         len < 8 ||
+#endif
+         memcmp(data, k, len) == 0);
+}
 
 ZendArray::Bucket *ZendArray::find(int64 h) const {
   for (Bucket *p = m_arBuckets[h & m_nTableMask]; p; p = p->pNext) {
@@ -233,11 +245,7 @@ ZendArray::Bucket *ZendArray::find(const char *k, int len,
     }
   }
   for (Bucket *p = m_arBuckets[prehash & m_nTableMask]; p; p = p->pNext) {
-    if (p->key && (p->key->data() == k ||
-        p->h == prehash && p->key->size() == len &&
-        memcmp(p->key->data(), k, len) == 0)) {
-      return p;
-    }
+    if (hit_string_key(p, k, len, prehash)) return p;
   }
   return NULL;
 }
@@ -267,10 +275,7 @@ ZendArray::Bucket ** ZendArray::findForErase(const char *k, int len,
   Bucket ** ret = &(m_arBuckets[prehash & m_nTableMask]);
   Bucket * p = *ret;
   while (p) {
-    if (p->key && p->h == prehash && p->key->size() == len &&
-        memcmp(p->key->data(), k, len) == 0) {
-      return ret;
-    }
+    if (hit_string_key(p, k, len, prehash)) return ret;
     ret = &(p->pNext);
     p = *ret;
   }
@@ -280,18 +285,11 @@ ZendArray::Bucket ** ZendArray::findForErase(const char *k, int len,
 ZendArray::Bucket ** ZendArray::findForErase(Bucket * bucketPtr) const {
   if (bucketPtr == NULL)
     return NULL;
-  int64 h;
-  if (bucketPtr->key) {
-    h = hash_string(bucketPtr->key->data(), bucketPtr->key->size());
-  } else {
-    h = bucketPtr->h;
-  }
+  int64 h = bucketPtr->h;
   Bucket ** ret = &(m_arBuckets[h & m_nTableMask]);
   Bucket * p = *ret;
   while (p) {
-    if (p == bucketPtr) {
-      return ret;
-    }
+    if (p == bucketPtr) return ret;
     ret = &(p->pNext);
     p = *ret;
   }
@@ -446,14 +444,13 @@ do {                                                                    \
 
 void ZendArray::resize() {
   int curSize = m_nTableSize * sizeof(Bucket *);
+  // No need to use calloc() or memset(), as rehash() is going to clear
+  // m_arBuckets any way.
   if (m_linear) {
-    Bucket **t = (Bucket **)calloc(m_nTableSize << 1, sizeof(Bucket *));
-    memcpy(t, m_arBuckets, curSize);
-    m_arBuckets = t;
+    m_arBuckets = (Bucket **)malloc(curSize << 1);
     m_linear = false;
   } else {
     m_arBuckets = (Bucket **)realloc(m_arBuckets, curSize << 1);
-    memset((char*)m_arBuckets + curSize, 0, curSize);
   }
   m_nTableSize <<= 1;
   m_nTableMask = m_nTableSize - 1;
@@ -793,9 +790,10 @@ ArrayData *ZendArray::lval(CVarRef k, Variant *&ret, bool copy,
                            bool checkExist /* = false */) {
   if (k.isNumeric()) {
     return lval(k.toInt64(), ret, copy, prehash, checkExist);
+  } if (k.is(LiteralString)) {
+    return lval(k.getLiteralString(), ret, copy, prehash, checkExist);
   } else {
-    String key = k.toString();
-    return lval(key, ret, copy, prehash, checkExist);
+    return lval(k.toString(), ret, copy, prehash, checkExist);
   }
 }
 

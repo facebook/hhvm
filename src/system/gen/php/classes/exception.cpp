@@ -3580,19 +3580,17 @@ Variant c_exception::os_getInit(const char *s, int64 hash) {
   DECLARE_SYSTEM_GLOBALS(g);
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
-    case 3:
-      HASH_RETURN(0x612E37678CE7DB5BLL, 
-                  null, file);
-      break;
     case 4:
-      HASH_RETURN(0x5B2CD7DDAB7A1DECLL, 
-                  0LL, code);
-      HASH_RETURN(0x21093C71DDF8728CLL, 
+      HASH_RETURN(0x08C19339767C0884LL, 
+                  null, file);
+      HASH_RETURN(0x21093C71DDF9728CLL, 
                   null, line);
       break;
     case 7:
-      HASH_RETURN(0x3EAA4B97155366DFLL, 
+      HASH_RETURN(0x3EAA4B97155266DFLL, 
                   "Unknown exception", message);
+      HASH_RETURN(0x33997C0BC1E6CC87LL, 
+                  0LL, code);
       break;
     default:
       break;
@@ -3612,10 +3610,10 @@ Variant &c_exception::os_lval(const char *s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_exception
 void c_exception::o_get(Array &props) const {
-  if (isInitialized(m_message)) props.set("message", m_message.isReferenced() ? ref(m_message) : m_message, 0x3EAA4B97155366DFLL, true);
-  if (isInitialized(m_code)) props.set("code", m_code.isReferenced() ? ref(m_code) : m_code, 0x5B2CD7DDAB7A1DECLL, true);
-  if (isInitialized(m_file)) props.set("file", m_file.isReferenced() ? ref(m_file) : m_file, 0x612E37678CE7DB5BLL, true);
-  if (isInitialized(m_line)) props.set("line", m_line.isReferenced() ? ref(m_line) : m_line, 0x21093C71DDF8728CLL, true);
+  if (isInitialized(m_message)) props.set("message", m_message.isReferenced() ? ref(m_message) : m_message, 0x3EAA4B97155266DFLL, true);
+  if (isInitialized(m_code)) props.set("code", m_code.isReferenced() ? ref(m_code) : m_code, 0x33997C0BC1E6CC87LL, true);
+  if (isInitialized(m_file)) props.set("file", m_file.isReferenced() ? ref(m_file) : m_file, 0x08C19339767C0884LL, true);
+  if (isInitialized(m_line)) props.set("line", m_line.isReferenced() ? ref(m_line) : m_line, 0x21093C71DDF9728CLL, true);
   c_ObjectData::o_get(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_exception
@@ -3628,19 +3626,17 @@ Variant c_exception::o_get(CStrRef prop, int64 phash, bool error /* = true */, c
 Variant c_exception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 7) {
-    case 3:
-      HASH_RETURN_STRING(0x612E37678CE7DB5BLL, m_file,
-                         file, 4);
-      break;
     case 4:
-      HASH_RETURN_STRING(0x5B2CD7DDAB7A1DECLL, m_code,
-                         code, 4);
-      HASH_RETURN_STRING(0x21093C71DDF8728CLL, m_line,
+      HASH_RETURN_STRING(0x08C19339767C0884LL, m_file,
+                         file, 4);
+      HASH_RETURN_STRING(0x21093C71DDF9728CLL, m_line,
                          line, 4);
       break;
     case 7:
-      HASH_RETURN_STRING(0x3EAA4B97155366DFLL, m_message,
+      HASH_RETURN_STRING(0x3EAA4B97155266DFLL, m_message,
                          message, 7);
+      HASH_RETURN_STRING(0x33997C0BC1E6CC87LL, m_code,
+                         code, 4);
       break;
     default:
       break;
@@ -3662,15 +3658,13 @@ bool c_exception::o_exists(CStrRef prop, int64 phash, const char *context /* = N
 bool c_exception::o_existsPublic(CStrRef s, int64 hash) const {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 7) {
-    case 3:
-      HASH_EXISTS_STRING(0x612E37678CE7DB5BLL, file, 4);
-      break;
     case 4:
-      HASH_EXISTS_STRING(0x5B2CD7DDAB7A1DECLL, code, 4);
-      HASH_EXISTS_STRING(0x21093C71DDF8728CLL, line, 4);
+      HASH_EXISTS_STRING(0x08C19339767C0884LL, file, 4);
+      HASH_EXISTS_STRING(0x21093C71DDF9728CLL, line, 4);
       break;
     case 7:
-      HASH_EXISTS_STRING(0x3EAA4B97155366DFLL, message, 7);
+      HASH_EXISTS_STRING(0x3EAA4B97155266DFLL, message, 7);
+      HASH_EXISTS_STRING(0x33997C0BC1E6CC87LL, code, 4);
       break;
     default:
       break;
@@ -3692,19 +3686,17 @@ Variant c_exception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /*
 Variant c_exception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 7) {
-    case 3:
-      HASH_SET_STRING(0x612E37678CE7DB5BLL, m_file,
-                      file, 4);
-      break;
     case 4:
-      HASH_SET_STRING(0x5B2CD7DDAB7A1DECLL, m_code,
-                      code, 4);
-      HASH_SET_STRING(0x21093C71DDF8728CLL, m_line,
+      HASH_SET_STRING(0x08C19339767C0884LL, m_file,
+                      file, 4);
+      HASH_SET_STRING(0x21093C71DDF9728CLL, m_line,
                       line, 4);
       break;
     case 7:
-      HASH_SET_STRING(0x3EAA4B97155366DFLL, m_message,
+      HASH_SET_STRING(0x3EAA4B97155266DFLL, m_message,
                       message, 7);
+      HASH_SET_STRING(0x33997C0BC1E6CC87LL, m_code,
+                      code, 4);
       break;
     default:
       break;
@@ -3726,19 +3718,17 @@ Variant& c_exception::o_lval(CStrRef prop, int64 phash, const char *context /* =
 Variant& c_exception::o_lvalPublic(CStrRef s, int64 hash) {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 7) {
-    case 3:
-      HASH_RETURN_STRING(0x612E37678CE7DB5BLL, m_file,
-                         file, 4);
-      break;
     case 4:
-      HASH_RETURN_STRING(0x5B2CD7DDAB7A1DECLL, m_code,
-                         code, 4);
-      HASH_RETURN_STRING(0x21093C71DDF8728CLL, m_line,
+      HASH_RETURN_STRING(0x08C19339767C0884LL, m_file,
+                         file, 4);
+      HASH_RETURN_STRING(0x21093C71DDF9728CLL, m_line,
                          line, 4);
       break;
     case 7:
-      HASH_RETURN_STRING(0x3EAA4B97155366DFLL, m_message,
+      HASH_RETURN_STRING(0x3EAA4B97155266DFLL, m_message,
                          message, 7);
+      HASH_RETURN_STRING(0x33997C0BC1E6CC87LL, m_code,
+                         code, 4);
       break;
     default:
       break;
@@ -4092,29 +4082,29 @@ void c_exception::t___construct(Variant v_message //  = ""
 
   (m_message = v_message);
   (m_code = v_code);
-  (o_lval("trace", 0x0253015494C9CE77LL) = x_debug_backtrace());
+  (o_lval("trace", 0x0253015494C8CE77LL) = x_debug_backtrace());
   LOOP_COUNTER(1);
   {
-    while (!(empty(o_get("trace", 0x0253015494C9CE77LL, false)))) {
+    while (!(empty(o_get("trace", 0x0253015494C8CE77LL, false)))) {
       LOOP_COUNTER_CHECK(1);
       {
         {
-          Variant tmp2((o_get("trace", 0x0253015494C9CE77LL).rvalAt(0LL, 0x77CFA1EEF01BCA90LL, true)));
+          Variant tmp2((o_get("trace", 0x0253015494C8CE77LL).rvalAt(0LL, 0x77CFA1EEF01BCA90LL, true)));
           (v_top = tmp2);
         }
         {
           bool tmp3;
           {
-            bool tmp4 = (empty(v_top, "class", 0x45397FE5C82DBD12LL, true));
+            bool tmp4 = (empty(v_top, "class", 0x45397FE5C82CBD12LL, true));
             if (!tmp4) {
-              bool tmp5 = (toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52403931LL, true, true)), "__construct")));
+              bool tmp5 = (toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true)), "__construct")));
               if (tmp5) {
-                String tmp6((toString(v_top.rvalAt("function", 0x736D912A52403931LL, true, true))));
-                tmp5 = (toBoolean(x_strcasecmp(tmp6, toString(v_top.rvalAt("class", 0x45397FE5C82DBD12LL, true, true)))));
+                String tmp6((toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true))));
+                tmp5 = (toBoolean(x_strcasecmp(tmp6, toString(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)))));
               }
               tmp4 = ((tmp5));
             }
-            tmp3 = (tmp4 || (toBoolean(x_strcasecmp(toString(v_top.rvalAt("class", 0x45397FE5C82DBD12LL, true, true)), "exception")) && !(x_is_subclass_of(v_top.rvalAt("class", 0x45397FE5C82DBD12LL, true, true), "exception"))));
+            tmp3 = (tmp4 || (toBoolean(x_strcasecmp(toString(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)), "exception")) && !(x_is_subclass_of(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true), "exception"))));
           }
           if (tmp3) {
             {
@@ -4123,17 +4113,17 @@ void c_exception::t___construct(Variant v_message //  = ""
           }
         }
         {
-          const Variant &tmp7((x_array_shift(ref(lval(o_lval("trace", 0x0253015494C9CE77LL))))));
+          const Variant &tmp7((x_array_shift(ref(lval(o_lval("trace", 0x0253015494C8CE77LL))))));
           (v_frame = tmp7);
         }
       }
     }
   }
-  if (isset(v_frame, "file", 0x612E37678CE7DB5BLL, true)) {
-    (m_file = v_frame.rvalAt("file", 0x612E37678CE7DB5BLL, true, true));
+  if (isset(v_frame, "file", 0x08C19339767C0884LL, true)) {
+    (m_file = v_frame.rvalAt("file", 0x08C19339767C0884LL, true, true));
   }
-  if (isset(v_frame, "line", 0x21093C71DDF8728CLL, true)) {
-    (m_line = v_frame.rvalAt("line", 0x21093C71DDF8728CLL, true, true));
+  if (isset(v_frame, "line", 0x21093C71DDF9728CLL, true)) {
+    (m_line = v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true));
   }
   gasInCtor(oldInCtor);
 } /* function */
@@ -4160,7 +4150,7 @@ Variant c_exception::t_getline() {
 /* SRC: classes/exception.php line 52 */
 Variant c_exception::t_gettrace() {
   INSTANCE_METHOD_INJECTION(Exception, Exception::getTrace);
-  return o_get("trace", 0x0253015494C9CE77LL);
+  return o_get("trace", 0x0253015494C8CE77LL);
 } /* function */
 /* SRC: classes/exception.php line 57 */
 String c_exception::t_gettraceasstring() {
@@ -4187,19 +4177,19 @@ String c_exception::t_gettraceasstring() {
             StringBufferAppend(tmp,v_s,"#");
             StringBufferAppend(tmp,v_s,toString(v_i));
             StringBufferAppend(tmp,v_s," ");
-            StringBufferAppend(tmp,v_s,toString(v_frame.rvalAt("file", 0x612E37678CE7DB5BLL, true, true)));
+            StringBufferAppend(tmp,v_s,toString(v_frame.rvalAt("file", 0x08C19339767C0884LL, true, true)));
             StringBufferAppend(tmp,v_s,"(");
-            StringBufferAppend(tmp,v_s,toString(v_frame.rvalAt("line", 0x21093C71DDF8728CLL, true, true)));
+            StringBufferAppend(tmp,v_s,toString(v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true)));
             StringBufferAppend(tmp,v_s,"): ");
             Variant tmp11;
-            if (isset(v_frame, "class", 0x45397FE5C82DBD12LL, true)) {
-              String tmp12((toString(v_frame.rvalAt("class", 0x45397FE5C82DBD12LL, true, true))));
-              tmp11 = (concat(tmp12, toString(v_frame.rvalAt("type", 0x508FC7C8724A760ALL, true, true))));
+            if (isset(v_frame, "class", 0x45397FE5C82CBD12LL, true)) {
+              String tmp12((toString(v_frame.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
+              tmp11 = (concat(tmp12, toString(v_frame.rvalAt("type", 0x508FC7C8724B760ALL, true, true))));
             } else {
               tmp11 = ("");
             }
             StringBufferAppend(tmp,v_s,toString((tmp11)));
-            StringBufferAppend(tmp,v_s,toString(v_frame.rvalAt("function", 0x736D912A52403931LL, true, true)));
+            StringBufferAppend(tmp,v_s,toString(v_frame.rvalAt("function", 0x736D912A52413931LL, true, true)));
             StringBufferAppend(tmp,v_s,"()\n");
             ;
           }

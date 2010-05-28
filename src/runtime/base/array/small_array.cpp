@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include <runtime/base/array/small_array.h>
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/array/zend_array.h>
@@ -56,6 +57,7 @@ Variant SmallArray::getKey(ssize_t pos) const {
   if (b.kind == IntKey) {
     return b.h;
   }
+  ASSERT(b.key);
   return b.key;
 }
 
@@ -140,6 +142,7 @@ Variant SmallArray::key() const {
     if (b.kind == IntKey) {
       return b.h;
     }
+    ASSERT(b.key);
     return b.key;
   }
   return null;
@@ -209,9 +212,9 @@ CVarRef SmallArray::endRef() {
 
 // The find() function can always find a slot, as the load is never 100%.
 int SmallArray::find(int64 h) const {
-  int ret = ArrayData::invalid_index;
   int start = int_ihash(h);
   if (m_nNumOfElements == 0) return start;
+  int ret = ArrayData::invalid_index;
   for (int i = start; i < SARR_TABLE_SIZE; i++) {
     const Bucket &b = m_arBuckets[i];
     if (b.kind == IntKey && b.h == h) return i;
@@ -228,9 +231,9 @@ int SmallArray::find(int64 h) const {
 // The find() function can always find a slot, as the load is never 100%.
 int SmallArray::find(const char *k, int len) const {
   int prehash = str_ohash(k, len);
-  int ret = ArrayData::invalid_index;
   int start = str_ihash(prehash);
   if (m_nNumOfElements == 0) return start;
+  int ret = ArrayData::invalid_index;
   for (int i = start; i < SARR_TABLE_SIZE; i++) {
     const Bucket &b = m_arBuckets[i];
     if (b.kind == StrKey &&
@@ -384,7 +387,6 @@ ArrayData *SmallArray::escalate() {
     if (b.kind == IntKey) {
       ret->set(b.h, b.data, false);
     } else {
-      ASSERT(b.kind == StrKey);
       int64 hash = hash_string(b.key->data(), b.key->size());
       ret->set(String(b.key), b.data, false, hash);
     }
@@ -413,9 +415,9 @@ SmallArray::Bucket *SmallArray::addKey(int p, litstr key, int len) {
          m_nNumOfElements < SARR_SIZE);
   Bucket &b = m_arBuckets[p];
   b.kind = StrKey;
+  b.h = str_ohash(key, len);
   b.key = NEW(StringData)(key, len, AttachLiteral);
   b.key->incRefCount();
-  b.h = str_ohash(key, len);
 
   connect_to_global_dllist(p, b);
   m_nNumOfElements++;
@@ -425,15 +427,17 @@ SmallArray::Bucket *SmallArray::addKey(int p, litstr key, int len) {
 SmallArray::Bucket *SmallArray::addKey(int p, StringData *key) {
   ASSERT(p >= 0 && p < SARR_TABLE_SIZE && m_arBuckets[p].kind == Empty &&
          m_nNumOfElements < SARR_SIZE);
+  const char *k = key->data();
+  int len = key->size();
   Bucket &b = m_arBuckets[p];
   b.kind = StrKey;
+  b.h = str_ohash(k, len);
   if (key->isShared()) {
-    b.key = NEW(StringData)(key->data(), key->size(), CopyString);
+    b.key = NEW(StringData)(k, len, CopyString);
   } else {
     b.key = key;
   }
   b.key->incRefCount();
-  b.h = str_ohash(key->data(), key->size());
 
   connect_to_global_dllist(p, b);
   m_nNumOfElements++;
@@ -566,9 +570,10 @@ ArrayData *SmallArray::lval(CVarRef k, Variant *&ret, bool copy,
                             bool checkExist /* = false */) {
   if (k.isNumeric()) {
     return lval(k.toInt64(), ret, copy, prehash, checkExist);
+  } else if (k.is(LiteralString)) {
+    return lval(k.getLiteralString(), ret, copy, prehash, checkExist);
   } else {
-    String key = k.toString();
-    return lval(key, ret, copy, prehash, checkExist);
+    return lval(k.toString(), ret, copy, prehash, checkExist);
   }
 }
 
@@ -753,8 +758,8 @@ ArrayData *SmallArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
         if (key.isNumeric()) {
           add(key.toInt64(), value);
         } else {
-          String skey = key.toString();
-          add(skey.get(), -1, value);
+          String strkey = key.toString();
+          add(strkey.get(), -1, value);
         }
       }
     } else {
@@ -766,8 +771,8 @@ ArrayData *SmallArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
         if (key.isNumeric()) {
           nextInsert(value);
         } else {
-          String skey = key.toString();
-          set(skey, value, false);
+          String strkey = key.toString();
+          set(strkey, value, false);
         }
       }
     }
@@ -778,8 +783,8 @@ ArrayData *SmallArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
         if (key.isNumeric()) {
           add(key.toInt64(), it.second());
         } else {
-          String skey = key.toString();
-          add(skey.get(), -1, it.second());
+          String strkey = key.toString();
+          add(strkey.get(), -1, it.second());
         }
       }
     } else {
@@ -789,8 +794,8 @@ ArrayData *SmallArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
         if (key.isNumeric()) {
           nextInsert(it.second());
         } else {
-          String skey = key.toString();
-          set(skey, it.second(), false);
+          String strkey = key.toString();
+          set(strkey, it.second(), false);
         }
       }
     }
@@ -837,8 +842,9 @@ ArrayData *SmallArray::prepend(CVarRef v, bool copy) {
 // delete
 
 void SmallArray::erase(Bucket *pb) {
-  if (pb->kind == StrKey) {
+  if (pb->key) {
     if (pb->key->decRefCount() == 0) DELETE(StringData)(pb->key);
+    pb->key = NULL;
   }
   pb->kind = Empty;
   pb->data.unset();
@@ -965,9 +971,7 @@ ArrayData *SmallArray::dequeue(Variant &value) {
 void SmallArray::onSetStatic() {
   for (int p = m_nListHead; p >= 0; ) {
     Bucket &b = m_arBuckets[p];
-    if (b.kind == StrKey) {
-      b.key->setStatic();
-    }
+    if (b.key) b.key->setStatic();
     b.data.setStatic();
     p = b.next;
   }

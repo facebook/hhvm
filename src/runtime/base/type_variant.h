@@ -718,6 +718,17 @@ class Variant {
   void remove(CStrRef key, int64 prehash = -1);
   void remove(CVarRef key, int64 prehash = -1);
 
+  void weakRemove(litstr key, int64 prehash = -1) {
+    if (is(KindOfArray) ||
+        (is(KindOfObject) && getObjectData()->o_instanceof("arrayaccess"))) {
+      remove(key, prehash);
+    }
+    if (isString()) {
+      raise_error("Cannot unset string offsets");
+      return;
+    }
+  }
+
   template<typename T>
   void weakRemove(const T &key, int64 prehash = -1) {
     if (is(KindOfArray) ||

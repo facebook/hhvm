@@ -80,13 +80,15 @@ inline long long hash_string(const char *arKey, int nKeyLength) {
   case 2: h ^= (unsigned long long)(data2[1]) << 8;
   case 1: h ^= (unsigned long long)(data2[0]);
           h *= m;
+          h &= 0x7fffffffffffffff;
   };
 
   h ^= h >> r;
   h *= m;
+  h &= 0x7fffffffffffffff;
   h ^= h >> r;
 
-  return h & 0x7fffffffffffffff;
+  return h;
 }
 
 inline long long hash_string_i(const char *arKey, int nKeyLength) {

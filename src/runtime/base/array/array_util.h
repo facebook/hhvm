@@ -183,7 +183,6 @@ public:
   static void InitScalarArrays(Array arrs[], int nArrs,
                                const char *scalarArrayData,
                                int scalarArrayDataSize);
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

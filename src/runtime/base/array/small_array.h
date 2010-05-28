@@ -123,24 +123,18 @@ public:
     StringData *key;
     Variant     data;
 
-    Bucket() : kind(Empty) { }
-    Bucket(const Bucket &other) : kind(other.kind) {
-      if (kind == IntKey) {
+    Bucket() : kind(Empty), key(NULL) { }
+    Bucket(const Bucket &other) : kind(other.kind), key(other.key) {
+      if (kind != Empty) {
         prev = other.prev; next = other.next;
         h = other.h;
         if (other.data.isReferenced()) other.data.setContagious();
         data = other.data;
-      } else if (kind == StrKey) {
-        prev = other.prev; next = other.next;
-        h = other.h;
-        key = other.key;
-        key->incRefCount();
-        if (other.data.isReferenced()) other.data.setContagious();
-        data = other.data;
+        if (key) key->incRefCount();
       }
     }
     ~Bucket() {
-      if (kind == StrKey && key->decRefCount() == 0) DELETE(StringData)(key);
+      if (key && key->decRefCount() == 0) DELETE(StringData)(key);
     }
   };
 
@@ -159,15 +153,14 @@ private:
     return k[0] ^ k[len - 1] ^ k[len >> 1];
   }
 
-  // This needs to be called before updating m_nNumOfElements!
   void connect_to_global_dllist(int p, Bucket &b) {
     ASSERT(p >= 0 && p < SARR_TABLE_SIZE);
     b.prev = m_nListTail;
     b.next = ArrayData::invalid_index;
     m_nListTail = p;
-    if (m_pos < 0) m_pos = p;
     if (b.prev >= 0) m_arBuckets[(int)b.prev].next = p;
-    if (m_nNumOfElements == 0) m_nListHead = m_pos = p;
+    if (m_nListHead < 0) m_nListHead = p;
+    if (m_pos < 0) m_pos = p;
   }
 
   inline int find(int64 h) const;

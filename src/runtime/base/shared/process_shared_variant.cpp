@@ -225,15 +225,12 @@ void ProcessSharedVariant::loadElems(ArrayData *&elems) {
   const SharedMemoryVector<SharedVariant*>& ks = keys();
   const SharedMemoryVector<SharedVariant*>& vs = vals();
   uint count = ks.size();
-  if (count == 0 && RuntimeOption::UseZendArray) {
-    elems = StaticEmptyZendArray::Get()->copy();
-    return;
-  }
   ArrayInit ai(count);
   for (uint i = 0; i < count; i++) {
-    ai.set(i, getPtr(ks[i])->toLocal(), getPtr(vs[i])->toLocal());
+    ai.set(i, getPtr(ks[i])->toLocal(), getPtr(vs[i])->toLocal(), -1, true);
   }
   elems = ai.create();
+  if (elems->isStatic()) elems = elems->copy();
 }
 
 ProcessSharedVariantToIntMap::const_iterator

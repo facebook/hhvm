@@ -16,9 +16,8 @@
 #ifndef __ARRAY_INIT_H__
 #define __ARRAY_INIT_H__
 
-#include <runtime/base/array/zend_array.h>
-#include <runtime/base/array/vector_variant.h>
-#include <runtime/base/array/map_variant.h>
+#include <runtime/base/array/array_data.h>
+#include <runtime/base/complex_types.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

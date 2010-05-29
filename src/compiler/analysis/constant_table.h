@@ -95,10 +95,17 @@ public:
   void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar,
                          bool last = true);
 
+  /**
+   * Whether or not we need to generate a jump table.
+   */
+  bool hasJumpTable() const { return !m_emptyJumpTable;}
+
 protected:
   std::set<std::string> m_dynamic; // non-scalar or redeclared or marked up
 
 private:
+  bool m_emptyJumpTable;
+
   ClassScopePtr findParent(AnalysisResultPtr ar, const std::string &name);
   void outputCPPConstantSymbol(CodeGenerator &cg, AnalysisResultPtr ar,
                                const std::string &name);

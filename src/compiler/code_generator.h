@@ -134,6 +134,8 @@ public:
   void namespaceEnd();
   void headerBegin(const std::string &file);
   void headerEnd(const std::string &file);
+  void ifdefBegin(bool ifdef, const char *fmt, ...);
+  void ifdefEnd(const char *fmt, ...);
   void printInclude(const std::string &file);
   void printDeclareGlobals();
   void printStartOfJumpTable(int tableSize);

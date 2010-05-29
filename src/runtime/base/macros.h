@@ -94,47 +94,49 @@ namespace HPHP {
 #define INVOKE_FEW_ARGS_PASS_ARGS INVOKE_FEW_ARGS_PASS6
 #define INVOKE_FEW_ARGS_IMPL_ARGS INVOKE_FEW_ARGS_IMPL6
 
-#define INVOKE_FEW_ARGS_DECL \
-  virtual Variant o_invoke_few_args(const char *s, int64 h, int count,  \
-                                  INVOKE_FEW_ARGS_DECL_ARGS);
-
-#define DECLARE_INSTANCE_PROP_OPS \
-  virtual bool o_exists(CStrRef s, int64 hash, const char *context = NULL) \
-    const; \
-  bool o_existsPrivate(CStrRef s, int64 hash) const; \
-  virtual void o_get(Array &props) const; \
-  virtual Variant o_get(CStrRef s, int64 hash, bool error = true, \
-      const char *context = NULL); \
-  Variant o_getPrivate(CStrRef s, int64 hash, bool error = true); \
-  virtual Variant o_set(CStrRef s, int64 hash, CVarRef v, \
-      bool forInit = false, const char *context = NULL); \
-  Variant o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit); \
-  virtual Variant &o_lval(CStrRef s, int64 hash, \
-      const char *context = NULL); \
-  Variant &o_lvalPrivate(CStrRef s, int64 hash); \
-
-#define DECLARE_INSTANCE_PUBLIC_PROP_OPS \
-  virtual bool o_existsPublic(CStrRef s, int64 hash) const; \
-  virtual Variant o_getPublic(CStrRef s, int64 hash, bool error = true); \
-  virtual Variant o_setPublic(CStrRef s, int64 hash, CVarRef v, \
-      bool forInit); \
-  virtual Variant &o_lvalPublic(CStrRef s, int64 hash); \
-
-#define DECLARE_CLASS(cls, originalName, parent)                        \
-  DECLARE_OBJECT_ALLOCATION(c_##cls);                                   \
+#define DECLARE_STATIC_PROP_OPS                                         \
   public:                                                               \
-  DECLARE_INSTANCE_PROP_OPS                                             \
-  DECLARE_INSTANCE_PUBLIC_PROP_OPS                                      \
   static void os_static_initializer();                                  \
   static Variant os_getInit(const char *s, int64 hash);                 \
   static Variant os_get(const char *s, int64 hash);                     \
   static Variant &os_lval(const char *s, int64 hash);                   \
   static Variant os_constant(const char *s);                            \
+
+#define DECLARE_INSTANCE_PROP_OPS                                       \
+  public:                                                               \
+  virtual bool o_exists(CStrRef s, int64 hash,                          \
+                        const char *context = NULL) const;              \
+  bool o_existsPrivate(CStrRef s, int64 hash) const;                    \
+  virtual void o_get(Array &props) const;                               \
+  virtual Variant o_get(CStrRef s, int64 hash, bool error = true,       \
+                        const char *context = NULL);                    \
+  Variant o_getPrivate(CStrRef s, int64 hash, bool error = true);       \
+  virtual Variant o_set(CStrRef s, int64 hash, CVarRef v,               \
+                        bool forInit = false,                           \
+                        const char *context = NULL);                    \
+  Variant o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit); \
+  virtual Variant &o_lval(CStrRef s, int64 hash,                        \
+                          const char *context = NULL);                  \
+  Variant &o_lvalPrivate(CStrRef s, int64 hash);                        \
+
+#define DECLARE_INSTANCE_PUBLIC_PROP_OPS                                \
+  public:                                                               \
+  virtual bool o_existsPublic(CStrRef s, int64 hash) const;             \
+  virtual Variant o_getPublic(CStrRef s, int64 hash,                    \
+                              bool error = true);                       \
+  virtual Variant o_setPublic(CStrRef s, int64 hash, CVarRef v,         \
+                              bool forInit);                            \
+  virtual Variant &o_lvalPublic(CStrRef s, int64 hash);                 \
+
+#define DECLARE_COMMON_INVOKES                                          \
   static Variant os_invoke(const char *c, const char *s,                \
                            CArrRef ps, int64 h, bool f = true);         \
-  virtual const char *o_getClassName() const { return #originalName;}   \
   virtual Variant o_invoke(const char *s, CArrRef ps, int64 h,          \
-                           bool f =true);                               \
+                           bool f = true);                              \
+  virtual Variant o_invoke_few_args(const char *s, int64 h, int count,  \
+                                    INVOKE_FEW_ARGS_DECL_ARGS);         \
+
+#define DECLARE_INVOKE_EX(cls, parent)                                  \
   virtual Variant o_invoke_ex(const char *clsname, const char *s,       \
                               CArrRef ps, int64 h, bool f = true) {     \
     if (clsname && strcasecmp(clsname, #cls) == 0) {                    \
@@ -142,26 +144,8 @@ namespace HPHP {
     }                                                                   \
     return c_##parent::o_invoke_ex(clsname, s, ps, h, f);               \
   }                                                                     \
-  INVOKE_FEW_ARGS_DECL;                                                 \
-  protected:                                                            \
-  ObjectData *cloneImpl();                                              \
-  void cloneSet(c_##cls *cl);                                           \
-  public:                                                               \
 
-#define DECLARE_DYNAMIC_CLASS(cls, originalName)                        \
-  DECLARE_OBJECT_ALLOCATION(c_##cls);                                   \
-  public:                                                               \
-  DECLARE_INSTANCE_PROP_OPS                                             \
-  static void os_static_initializer();                                  \
-  static Variant os_getInit(const char *s, int64 hash);                 \
-  static Variant os_get(const char *s, int64 hash);                     \
-  static Variant &os_lval(const char *s, int64 hash);                   \
-  static Variant os_invoke(const char *c, const char *s,                \
-                           CArrRef ps, int64 h, bool f = true);         \
-  static Variant os_constant(const char *s);                            \
-  virtual const char *o_getClassName() const { return #originalName;}   \
-  virtual Variant o_invoke(const char *s, CArrRef ps, int64 h,          \
-                           bool f = true);                              \
+#define DECLARE_DYNAMIC_INVOKE_EX(cls, parent)                          \
   virtual Variant o_invoke_ex(const char *clsname, const char *s,       \
                               CArrRef ps, int64 h, bool f = true) {     \
     if (clsname && strcasecmp(clsname, #cls) == 0) {                    \
@@ -169,10 +153,30 @@ namespace HPHP {
     }                                                                   \
     return parent->o_invoke_ex(clsname, s, ps, h, f);                   \
   }                                                                     \
-  INVOKE_FEW_ARGS_DECL;                                                 \
+
+#define DECLARE_CLASS_COMMON(cls, originalName, parent) \
+  DECLARE_OBJECT_ALLOCATION(c_##cls);                                   \
   protected:                                                            \
   ObjectData *cloneImpl();                                              \
   void cloneSet(c_##cls *cl);                                           \
+  public:                                                               \
+  virtual const char *o_getClassName() const { return #originalName;}   \
+
+#define DECLARE_CLASS(cls, originalName, parent)                        \
+  DECLARE_CLASS_COMMON(cls, originalName, parent)                       \
+  DECLARE_STATIC_PROP_OPS                                               \
+  DECLARE_INSTANCE_PROP_OPS                                             \
+  DECLARE_INSTANCE_PUBLIC_PROP_OPS                                      \
+  DECLARE_COMMON_INVOKES                                                \
+  DECLARE_INVOKE_EX(cls, parent)                                        \
+  public:                                                               \
+
+#define DECLARE_DYNAMIC_CLASS(cls, originalName)                        \
+  DECLARE_CLASS_COMMON(cls, originalName, parent)                       \
+  DECLARE_STATIC_PROP_OPS                                               \
+  DECLARE_INSTANCE_PROP_OPS                                             \
+  DECLARE_COMMON_INVOKES                                                \
+  DECLARE_DYNAMIC_INVOKE_EX(cls, parent)                                \
   public:                                                               \
 
 #define DECLARE_INVOKES_FROM_EVAL                                       \
@@ -187,20 +191,24 @@ namespace HPHP {
                              int64 hash,                                \
                              bool fatal /* = true */);
 
-#define DECLARE_ROOT \
-  Variant o_root_invoke(const char *s, CArrRef ps, int64 h, bool f = true) { \
-    return root->o_invoke(s, ps, h, f); \
-  } \
-  Variant o_root_invoke_few_args(const char *s, int64 h, int count, \
-                          INVOKE_FEW_ARGS_DECL_ARGS) {\
-    return root->o_invoke_few_args(s, h, count, INVOKE_FEW_ARGS_PASS_ARGS); \
+#define DECLARE_ROOT                                                    \
+  Variant o_root_invoke(const char *s, CArrRef ps, int64 h,             \
+                        bool f = true) {                                \
+    return root->o_invoke(s, ps, h, f);                                 \
+  }                                                                     \
+  Variant o_root_invoke_few_args(const char *s, int64 h, int count,     \
+                                 INVOKE_FEW_ARGS_DECL_ARGS) {           \
+    return root->o_invoke_few_args(s, h, count,                         \
+                                   INVOKE_FEW_ARGS_PASS_ARGS);          \
   }
 
-#define CLASS_CHECK(exp)                        \
-  (checkClassExists(s, g), (exp))
+#define CLASS_CHECK(exp) (checkClassExists(s, g), (exp))
 
 #define IMPLEMENT_CLASS(cls)                                            \
   IMPLEMENT_OBJECT_ALLOCATION(c_##cls);                                 \
+
+//////////////////////////////////////////////////////////////////////////////
+// jump table entries
 
 #define HASH_GUARD(code, f)                                             \
   if (hash == code && !strcasecmp(s, #f))

@@ -47,6 +47,9 @@ private:
   int m_type;
   std::string m_parent;
 
+  void outputCPPClassDecl(CodeGenerator &cg, AnalysisResultPtr ar,
+                          const char *clsName, const char *originalName,
+                          const char *parent);
   void outputJavaFFIConstructor(CodeGenerator &cg, AnalysisResultPtr ar,
                                 FunctionScopePtr cons);
   void outputJavaFFICPPCreator(CodeGenerator &cg, AnalysisResultPtr ar,

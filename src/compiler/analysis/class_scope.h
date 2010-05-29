@@ -72,6 +72,11 @@ public:
     IndirectFromRedeclared
   };
 
+  enum JumpTableName {
+    JumpTableInvoke,
+    JumpTableStaticInvoke
+  };
+
 public:
   ClassScope(KindOf kindOf, const std::string &name,
              const std::string &parent,
@@ -315,6 +320,18 @@ public:
                                        AnalysisResultPtr ar,
                                        const std::string &origName);
   static void OutputVolatileCheckEnd(CodeGenerator &cg);
+
+
+  /**
+   * Whether or not the specified jump table is empty.
+   */
+  bool hasAllJumpTables() const {
+    return m_emptyJumpTables.empty();
+  }
+  bool hasJumpTable(JumpTableName name) const {
+    return m_emptyJumpTables.find(name) == m_emptyJumpTables.end();
+  }
+
 protected:
   void findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,
                             bool staticOnly, std::vector<const char *> &funcs);
@@ -331,6 +348,8 @@ private:
   Derivation m_derivesFromRedeclaring;
   std::set<std::string> m_missingMethods;
   bool m_sep;
+
+  std::set<JumpTableName> m_emptyJumpTables;
 
   static void outputCPPClassJumpTable
   (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,

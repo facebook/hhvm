@@ -176,6 +176,18 @@ void CodeGenerator::headerEnd(const std::string &file) {
   printf("#endif // __GENERATED_%s__\n", formatted.c_str());
 }
 
+void CodeGenerator::ifdefBegin(bool ifdef, const char *fmt, ...) {
+  printf(ifdef ? "#ifdef " : "#ifndef ");
+  va_list ap; va_start(ap, fmt); print(fmt, ap); va_end(ap);
+  printf("\n");
+}
+
+void CodeGenerator::ifdefEnd(const char *fmt, ...) {
+  printf("#endif // ");
+  va_list ap; va_start(ap, fmt); print(fmt, ap); va_end(ap);
+  printf("\n");
+}
+
 void CodeGenerator::printInclude(const std::string &file) {
   ASSERT(!file.empty());
 

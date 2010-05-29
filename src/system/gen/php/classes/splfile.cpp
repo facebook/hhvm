@@ -30,54 +30,87 @@ const int64 q_splfileobject_DROP_NEW_LINE = 1LL;
 const int64 q_splfileobject_READ_AHEAD = 2LL;
 const int64 q_splfileobject_SKIP_EMPTY = 6LL;
 const int64 q_splfileobject_READ_CSV = 8LL;
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_splfileobject
 Variant c_splfileobject::os_getInit(const char *s, int64 hash) {
   return c_splfileinfo::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_splfileobject
 Variant c_splfileobject::os_get(const char *s, int64 hash) {
   return c_splfileinfo::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splfileobject
 Variant &c_splfileobject::os_lval(const char *s, int64 hash) {
   return c_splfileinfo::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileobject
 void c_splfileobject::o_get(Array &props) const {
   c_splfileinfo::o_get(props);
 }
-bool c_splfileobject::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_splfileobject::o_existsPublic(prop, phash);
-}
-bool c_splfileobject::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_splfileinfo::o_existsPublic(s, hash);
-}
-bool c_splfileobject::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_get_splfileobject
 Variant c_splfileobject::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_splfileobject::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileobject
 Variant c_splfileobject::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_splfileinfo::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileobject
 Variant c_splfileobject::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_splfileobject
+bool c_splfileobject::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_splfileobject::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splfileobject
+bool c_splfileobject::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_splfileinfo::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileobject
+bool c_splfileobject::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_set_splfileobject
 Variant c_splfileobject::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_splfileobject::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileobject
 Variant c_splfileobject::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_splfileinfo::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileobject
 Variant c_splfileobject::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_splfileobject
 Variant& c_splfileobject::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_splfileobject::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splfileobject
 Variant& c_splfileobject::o_lvalPublic(CStrRef s, int64 hash) {
   return c_splfileinfo::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_splfileobject
 Variant& c_splfileobject::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_splfileobject
 Variant c_splfileobject::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 7) {
@@ -98,6 +131,7 @@ Variant c_splfileobject::os_constant(const char *s) {
   }
   return c_splfileinfo::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_splfileobject
 IMPLEMENT_CLASS(splfileobject)
 c_splfileobject *c_splfileobject::create(Variant v_filename, Variant v_open_mode //  = "r"
 , Variant v_use_include_path //  = false
@@ -168,6 +202,7 @@ ObjectData *c_splfileobject::cloneImpl() {
 void c_splfileobject::cloneSet(c_splfileobject *clone) {
   c_splfileinfo::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileobject
 Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -514,6 +549,8 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
   }
   return c_splfileinfo::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileobject
 Variant c_splfileobject::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {
@@ -859,10 +896,13 @@ Variant c_splfileobject::o_invoke_few_args(const char *s, int64 hash, int count,
   }
   return c_splfileinfo::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileobject
 Variant c_splfileobject::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_splfileinfo::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileobject
 Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {
@@ -1956,57 +1996,91 @@ bool c_splfileobject::t_valid() {
   return x_hphp_splfileobject_valid(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 3 */
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_splfileinfo
 Variant c_splfileinfo::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_splfileinfo
 Variant c_splfileinfo::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splfileinfo
 Variant &c_splfileinfo::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileinfo
 void c_splfileinfo::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_splfileinfo::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_splfileinfo::o_existsPublic(prop, phash);
-}
-bool c_splfileinfo::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_splfileinfo::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_get_splfileinfo
 Variant c_splfileinfo::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_splfileinfo::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileinfo
 Variant c_splfileinfo::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileinfo
 Variant c_splfileinfo::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_splfileinfo
+bool c_splfileinfo::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_splfileinfo::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splfileinfo
+bool c_splfileinfo::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileinfo
+bool c_splfileinfo::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_set_splfileinfo
 Variant c_splfileinfo::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_splfileinfo::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileinfo
 Variant c_splfileinfo::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileinfo
 Variant c_splfileinfo::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_splfileinfo
 Variant& c_splfileinfo::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_splfileinfo::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splfileinfo
 Variant& c_splfileinfo::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_splfileinfo
 Variant& c_splfileinfo::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_splfileinfo
 Variant c_splfileinfo::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_splfileinfo
 IMPLEMENT_CLASS(splfileinfo)
 c_splfileinfo *c_splfileinfo::create(Variant v_file_name) {
   CountableHelper h(this);
@@ -2053,6 +2127,7 @@ ObjectData *c_splfileinfo::cloneImpl() {
 void c_splfileinfo::cloneSet(c_splfileinfo *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileinfo
 Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -2230,6 +2305,8 @@ Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool 
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileinfo
 Variant c_splfileinfo::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -2406,10 +2483,13 @@ Variant c_splfileinfo::o_invoke_few_args(const char *s, int64 hash, int count, C
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileinfo
 Variant c_splfileinfo::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileinfo
 Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {

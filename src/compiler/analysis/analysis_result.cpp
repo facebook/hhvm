@@ -1076,18 +1076,6 @@ void AnalysisResult::outputAllCPP(CodeGenerator &cg) {
   getVariables()->outputCPP(cg, ar);
   getVariables()->clearAttribute(VariableTable::ForceGlobal);
 
-  cg.setContext(CodeGenerator::CppForwardDeclaration);
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    pushScope(fs);
-    fs->outputCPPForwardDeclarations(cg, ar);
-    popScope();
-  }
-  cg.setContext(CodeGenerator::CppDeclaration);
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    pushScope(fs);
-    fs->outputCPPDeclarations(cg, ar);
-    popScope();
-  }
   cg.setContext(CodeGenerator::CppImplementation);
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
     pushScope(fs);
@@ -1098,6 +1086,18 @@ void AnalysisResult::outputAllCPP(CodeGenerator &cg) {
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
     pushScope(fs);
     fs->outputCPPPseudoMain(cg, ar);
+    popScope();
+  }
+  cg.setContext(CodeGenerator::CppForwardDeclaration);
+  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+    pushScope(fs);
+    fs->outputCPPForwardDeclarations(cg, ar);
+    popScope();
+  }
+  cg.setContext(CodeGenerator::CppDeclaration);
+  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+    pushScope(fs);
+    fs->outputCPPDeclarations(cg, ar);
     popScope();
   }
   cg.namespaceEnd();

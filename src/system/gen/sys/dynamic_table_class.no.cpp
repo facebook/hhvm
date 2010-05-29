@@ -215,57 +215,91 @@ Variant cw_reflectionparameter$os_invoke(const char *c, const char *s, CArrRef p
 Object co_pdoexception(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_pdoexception)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_pdoexception
 Variant c_pdoexception::os_getInit(const char *s, int64 hash) {
   return c_exception::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_pdoexception
 Variant c_pdoexception::os_get(const char *s, int64 hash) {
   return c_exception::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_pdoexception
 Variant &c_pdoexception::os_lval(const char *s, int64 hash) {
   return c_exception::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_pdoexception
 void c_pdoexception::o_get(Array &props) const {
   c_exception::o_get(props);
 }
-bool c_pdoexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_pdoexception::o_existsPublic(prop, phash);
-}
-bool c_pdoexception::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_exception::o_existsPublic(s, hash);
-}
-bool c_pdoexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_get_pdoexception
 Variant c_pdoexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_pdoexception::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_pdoexception
 Variant c_pdoexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_exception::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_pdoexception
 Variant c_pdoexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_pdoexception
+bool c_pdoexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_pdoexception::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_pdoexception
+bool c_pdoexception::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_exception::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_pdoexception
+bool c_pdoexception::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_set_pdoexception
 Variant c_pdoexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_pdoexception::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_pdoexception
 Variant c_pdoexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_exception::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_pdoexception
 Variant c_pdoexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_pdoexception
 Variant& c_pdoexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_pdoexception::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_pdoexception
 Variant& c_pdoexception::o_lvalPublic(CStrRef s, int64 hash) {
   return c_exception::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_pdoexception
 Variant& c_pdoexception::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_pdoexception
 Variant c_pdoexception::os_constant(const char *s) {
   return c_exception::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_pdoexception
 IMPLEMENT_CLASS(pdoexception)
 c_pdoexception *c_pdoexception::create() {
   CountableHelper h(this);
@@ -316,6 +350,7 @@ ObjectData *c_pdoexception::cloneImpl() {
 void c_pdoexception::cloneSet(c_pdoexception *clone) {
   c_exception::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pdoexception
 Variant c_pdoexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -377,6 +412,8 @@ Variant c_pdoexception::o_invoke(const char *s, CArrRef params, int64 hash, bool
   }
   return c_exception::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pdoexception
 Variant c_pdoexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -437,10 +474,13 @@ Variant c_pdoexception::o_invoke_few_args(const char *s, int64 hash, int count, 
   }
   return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdoexception
 Variant c_pdoexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_exception::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdoexception
 Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -594,57 +634,91 @@ Variant cw_pdoexception$os_invoke(const char *c, const char *s, CArrRef params, 
 Object co_domdocumentfragment(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domdocumentfragment)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domdocumentfragment
 Variant c_domdocumentfragment::os_getInit(const char *s, int64 hash) {
   return c_domnode::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domdocumentfragment
 Variant c_domdocumentfragment::os_get(const char *s, int64 hash) {
   return c_domnode::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domdocumentfragment
 Variant &c_domdocumentfragment::os_lval(const char *s, int64 hash) {
   return c_domnode::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domdocumentfragment
 void c_domdocumentfragment::o_get(Array &props) const {
   c_domnode::o_get(props);
 }
-bool c_domdocumentfragment::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domdocumentfragment::o_existsPublic(prop, phash);
-}
-bool c_domdocumentfragment::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_domnode::o_existsPublic(s, hash);
-}
-bool c_domdocumentfragment::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domdocumentfragment
 Variant c_domdocumentfragment::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domdocumentfragment::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domdocumentfragment
 Variant c_domdocumentfragment::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_domnode::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domdocumentfragment
 Variant c_domdocumentfragment::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domdocumentfragment
+bool c_domdocumentfragment::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domdocumentfragment::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domdocumentfragment
+bool c_domdocumentfragment::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_domnode::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domdocumentfragment
+bool c_domdocumentfragment::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domdocumentfragment
 Variant c_domdocumentfragment::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domdocumentfragment::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domdocumentfragment
 Variant c_domdocumentfragment::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_domnode::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domdocumentfragment
 Variant c_domdocumentfragment::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domdocumentfragment
 Variant& c_domdocumentfragment::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domdocumentfragment::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domdocumentfragment
 Variant& c_domdocumentfragment::o_lvalPublic(CStrRef s, int64 hash) {
   return c_domnode::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domdocumentfragment
 Variant& c_domdocumentfragment::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domdocumentfragment
 Variant c_domdocumentfragment::os_constant(const char *s) {
   return c_domnode::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domdocumentfragment
 IMPLEMENT_CLASS(domdocumentfragment)
 c_domdocumentfragment *c_domdocumentfragment::create() {
   CountableHelper h(this);
@@ -695,6 +769,7 @@ ObjectData *c_domdocumentfragment::cloneImpl() {
 void c_domdocumentfragment::cloneSet(c_domdocumentfragment *clone) {
   c_domnode::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumentfragment
 Variant c_domdocumentfragment::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -836,6 +911,8 @@ Variant c_domdocumentfragment::o_invoke(const char *s, CArrRef params, int64 has
   }
   return c_domnode::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumentfragment
 Variant c_domdocumentfragment::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -976,10 +1053,13 @@ Variant c_domdocumentfragment::o_invoke_few_args(const char *s, int64 hash, int 
   }
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocumentfragment
 Variant c_domdocumentfragment::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocumentfragment
 Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -1421,57 +1501,91 @@ Variant cw_domdocumentfragment$os_invoke(const char *c, const char *s, CArrRef p
 Object co_domtext(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domtext)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domtext
 Variant c_domtext::os_getInit(const char *s, int64 hash) {
   return c_domcharacterdata::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domtext
 Variant c_domtext::os_get(const char *s, int64 hash) {
   return c_domcharacterdata::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domtext
 Variant &c_domtext::os_lval(const char *s, int64 hash) {
   return c_domcharacterdata::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domtext
 void c_domtext::o_get(Array &props) const {
   c_domcharacterdata::o_get(props);
 }
-bool c_domtext::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domtext::o_existsPublic(prop, phash);
-}
-bool c_domtext::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_domcharacterdata::o_existsPublic(s, hash);
-}
-bool c_domtext::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domtext
 Variant c_domtext::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domtext::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domtext
 Variant c_domtext::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_domcharacterdata::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domtext
 Variant c_domtext::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domtext
+bool c_domtext::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domtext::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domtext
+bool c_domtext::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_domcharacterdata::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domtext
+bool c_domtext::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domtext
 Variant c_domtext::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domtext::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domtext
 Variant c_domtext::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_domcharacterdata::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domtext
 Variant c_domtext::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domtext
 Variant& c_domtext::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domtext::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domtext
 Variant& c_domtext::o_lvalPublic(CStrRef s, int64 hash) {
   return c_domcharacterdata::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domtext
 Variant& c_domtext::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domtext
 Variant c_domtext::os_constant(const char *s) {
   return c_domcharacterdata::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domtext
 IMPLEMENT_CLASS(domtext)
 c_domtext *c_domtext::create(String a0) {
   CountableHelper h(this);
@@ -1532,6 +1646,7 @@ void c_domtext::cloneSet(c_domtext *clone) {
 Variant c_domtext::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domtext
 Variant c_domtext::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -1708,6 +1823,8 @@ Variant c_domtext::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
   }
   return c_domcharacterdata::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domtext
 Variant c_domtext::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -1883,10 +2000,13 @@ Variant c_domtext::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
   }
   return c_domcharacterdata::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domtext
 Variant c_domtext::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_domcharacterdata::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domtext
 Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -2455,57 +2575,91 @@ Variant cw_domtext$os_invoke(const char *c, const char *s, CArrRef params, bool 
 Object co_domcdatasection(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domcdatasection)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domcdatasection
 Variant c_domcdatasection::os_getInit(const char *s, int64 hash) {
   return c_domtext::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domcdatasection
 Variant c_domcdatasection::os_get(const char *s, int64 hash) {
   return c_domtext::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domcdatasection
 Variant &c_domcdatasection::os_lval(const char *s, int64 hash) {
   return c_domtext::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domcdatasection
 void c_domcdatasection::o_get(Array &props) const {
   c_domtext::o_get(props);
 }
-bool c_domcdatasection::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domcdatasection::o_existsPublic(prop, phash);
-}
-bool c_domcdatasection::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_domtext::o_existsPublic(s, hash);
-}
-bool c_domcdatasection::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domcdatasection
 Variant c_domcdatasection::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domcdatasection::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domcdatasection
 Variant c_domcdatasection::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_domtext::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domcdatasection
 Variant c_domcdatasection::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domcdatasection
+bool c_domcdatasection::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domcdatasection::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domcdatasection
+bool c_domcdatasection::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_domtext::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domcdatasection
+bool c_domcdatasection::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domcdatasection
 Variant c_domcdatasection::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domcdatasection::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domcdatasection
 Variant c_domcdatasection::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_domtext::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domcdatasection
 Variant c_domcdatasection::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domcdatasection
 Variant& c_domcdatasection::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domcdatasection::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domcdatasection
 Variant& c_domcdatasection::o_lvalPublic(CStrRef s, int64 hash) {
   return c_domtext::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domcdatasection
 Variant& c_domcdatasection::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domcdatasection
 Variant c_domcdatasection::os_constant(const char *s) {
   return c_domtext::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domcdatasection
 IMPLEMENT_CLASS(domcdatasection)
 c_domcdatasection *c_domcdatasection::create(String a0) {
   CountableHelper h(this);
@@ -2560,6 +2714,7 @@ ObjectData *c_domcdatasection::cloneImpl() {
 void c_domcdatasection::cloneSet(c_domcdatasection *clone) {
   c_domtext::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domcdatasection
 Variant c_domcdatasection::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -2735,6 +2890,8 @@ Variant c_domcdatasection::o_invoke(const char *s, CArrRef params, int64 hash, b
   }
   return c_domtext::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domcdatasection
 Variant c_domcdatasection::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -2909,10 +3066,13 @@ Variant c_domcdatasection::o_invoke_few_args(const char *s, int64 hash, int coun
   }
   return c_domtext::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcdatasection
 Variant c_domcdatasection::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_domtext::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcdatasection
 Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -3480,57 +3640,91 @@ Variant cw_domcdatasection$os_invoke(const char *c, const char *s, CArrRef param
 Object co_domdocumenttype(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domdocumenttype)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domdocumenttype
 Variant c_domdocumenttype::os_getInit(const char *s, int64 hash) {
   return c_domnode::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domdocumenttype
 Variant c_domdocumenttype::os_get(const char *s, int64 hash) {
   return c_domnode::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domdocumenttype
 Variant &c_domdocumenttype::os_lval(const char *s, int64 hash) {
   return c_domnode::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domdocumenttype
 void c_domdocumenttype::o_get(Array &props) const {
   c_domnode::o_get(props);
 }
-bool c_domdocumenttype::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domdocumenttype::o_existsPublic(prop, phash);
-}
-bool c_domdocumenttype::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_domnode::o_existsPublic(s, hash);
-}
-bool c_domdocumenttype::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domdocumenttype
 Variant c_domdocumenttype::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domdocumenttype::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domdocumenttype
 Variant c_domdocumenttype::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_domnode::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domdocumenttype
 Variant c_domdocumenttype::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domdocumenttype
+bool c_domdocumenttype::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domdocumenttype::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domdocumenttype
+bool c_domdocumenttype::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_domnode::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domdocumenttype
+bool c_domdocumenttype::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domdocumenttype
 Variant c_domdocumenttype::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domdocumenttype::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domdocumenttype
 Variant c_domdocumenttype::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_domnode::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domdocumenttype
 Variant c_domdocumenttype::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domdocumenttype
 Variant& c_domdocumenttype::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domdocumenttype::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domdocumenttype
 Variant& c_domdocumenttype::o_lvalPublic(CStrRef s, int64 hash) {
   return c_domnode::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domdocumenttype
 Variant& c_domdocumenttype::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domdocumenttype
 Variant c_domdocumenttype::os_constant(const char *s) {
   return c_domnode::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domdocumenttype
 IMPLEMENT_CLASS(domdocumenttype)
 c_domdocumenttype *c_domdocumenttype::create() {
   CountableHelper h(this);
@@ -3584,6 +3778,7 @@ void c_domdocumenttype::cloneSet(c_domdocumenttype *clone) {
 Variant c_domdocumenttype::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumenttype
 Variant c_domdocumenttype::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -3721,6 +3916,8 @@ Variant c_domdocumenttype::o_invoke(const char *s, CArrRef params, int64 hash, b
   }
   return c_domnode::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumenttype
 Variant c_domdocumenttype::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -3857,10 +4054,13 @@ Variant c_domdocumenttype::o_invoke_few_args(const char *s, int64 hash, int coun
   }
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocumenttype
 Variant c_domdocumenttype::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocumenttype
 Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -4286,57 +4486,91 @@ Variant cw_domdocumenttype$os_invoke(const char *c, const char *s, CArrRef param
 Object co_sqlite3stmt(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_sqlite3stmt)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_sqlite3stmt
 Variant c_sqlite3stmt::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_sqlite3stmt
 Variant c_sqlite3stmt::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_sqlite3stmt
 Variant &c_sqlite3stmt::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_sqlite3stmt
 void c_sqlite3stmt::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_sqlite3stmt::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_sqlite3stmt::o_existsPublic(prop, phash);
-}
-bool c_sqlite3stmt::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_sqlite3stmt::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_get_sqlite3stmt
 Variant c_sqlite3stmt::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_sqlite3stmt::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_sqlite3stmt
 Variant c_sqlite3stmt::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_sqlite3stmt
 Variant c_sqlite3stmt::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_sqlite3stmt
+bool c_sqlite3stmt::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_sqlite3stmt::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_sqlite3stmt
+bool c_sqlite3stmt::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_sqlite3stmt
+bool c_sqlite3stmt::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_set_sqlite3stmt
 Variant c_sqlite3stmt::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_sqlite3stmt::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_sqlite3stmt
 Variant c_sqlite3stmt::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_sqlite3stmt
 Variant c_sqlite3stmt::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_sqlite3stmt
 Variant& c_sqlite3stmt::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_sqlite3stmt::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_sqlite3stmt
 Variant& c_sqlite3stmt::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_sqlite3stmt
 Variant& c_sqlite3stmt::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_sqlite3stmt
 Variant c_sqlite3stmt::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_sqlite3stmt
 IMPLEMENT_CLASS(sqlite3stmt)
 c_sqlite3stmt *c_sqlite3stmt::create(Object a0, String a1) {
   CountableHelper h(this);
@@ -4395,6 +4629,7 @@ ObjectData *c_sqlite3stmt::cloneImpl() {
 void c_sqlite3stmt::cloneSet(c_sqlite3stmt *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3stmt
 Variant c_sqlite3stmt::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -4460,6 +4695,8 @@ Variant c_sqlite3stmt::o_invoke(const char *s, CArrRef params, int64 hash, bool 
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3stmt
 Variant c_sqlite3stmt::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -4524,10 +4761,13 @@ Variant c_sqlite3stmt::o_invoke_few_args(const char *s, int64 hash, int count, C
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_sqlite3stmt
 Variant c_sqlite3stmt::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_sqlite3stmt
 Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -4717,57 +4957,91 @@ Variant cw_sqlite3stmt$os_invoke(const char *c, const char *s, CArrRef params, b
 Object co_domnodelist(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domnodelist)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domnodelist
 Variant c_domnodelist::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domnodelist
 Variant c_domnodelist::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domnodelist
 Variant &c_domnodelist::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domnodelist
 void c_domnodelist::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_domnodelist::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domnodelist::o_existsPublic(prop, phash);
-}
-bool c_domnodelist::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_domnodelist::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domnodelist
 Variant c_domnodelist::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domnodelist::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domnodelist
 Variant c_domnodelist::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domnodelist
 Variant c_domnodelist::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domnodelist
+bool c_domnodelist::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domnodelist::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domnodelist
+bool c_domnodelist::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domnodelist
+bool c_domnodelist::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domnodelist
 Variant c_domnodelist::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domnodelist::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domnodelist
 Variant c_domnodelist::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domnodelist
 Variant c_domnodelist::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domnodelist
 Variant& c_domnodelist::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domnodelist::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domnodelist
 Variant& c_domnodelist::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domnodelist
 Variant& c_domnodelist::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domnodelist
 Variant c_domnodelist::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domnodelist
 IMPLEMENT_CLASS(domnodelist)
 c_domnodelist *c_domnodelist::create() {
   CountableHelper h(this);
@@ -4821,6 +5095,7 @@ void c_domnodelist::cloneSet(c_domnodelist *clone) {
 Variant c_domnodelist::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnodelist
 Variant c_domnodelist::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -4862,6 +5137,8 @@ Variant c_domnodelist::o_invoke(const char *s, CArrRef params, int64 hash, bool 
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnodelist
 Variant c_domnodelist::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -4902,10 +5179,13 @@ Variant c_domnodelist::o_invoke_few_args(const char *s, int64 hash, int count, C
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnodelist
 Variant c_domnodelist::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnodelist
 Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -5031,54 +5311,87 @@ Variant cw_domnodelist$os_invoke(const char *c, const char *s, CArrRef params, b
 Object co_normalizer(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_normalizer)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_normalizer
 Variant c_normalizer::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_normalizer
 Variant c_normalizer::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_normalizer
 Variant &c_normalizer::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_normalizer
 void c_normalizer::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_normalizer::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_normalizer::o_existsPublic(prop, phash);
-}
-bool c_normalizer::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_normalizer::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_get_normalizer
 Variant c_normalizer::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_normalizer::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_normalizer
 Variant c_normalizer::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_normalizer
 Variant c_normalizer::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_normalizer
+bool c_normalizer::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_normalizer::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_normalizer
+bool c_normalizer::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_normalizer
+bool c_normalizer::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_set_normalizer
 Variant c_normalizer::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_normalizer::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_normalizer
 Variant c_normalizer::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_normalizer
 Variant c_normalizer::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_normalizer
 Variant& c_normalizer::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_normalizer::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_normalizer
 Variant& c_normalizer::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_normalizer
 Variant& c_normalizer::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_normalizer
 Variant c_normalizer::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 31) {
@@ -5108,6 +5421,7 @@ Variant c_normalizer::os_constant(const char *s) {
   }
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_normalizer
 IMPLEMENT_CLASS(normalizer)
 c_normalizer *c_normalizer::create() {
   CountableHelper h(this);
@@ -5158,6 +5472,7 @@ ObjectData *c_normalizer::cloneImpl() {
 void c_normalizer::cloneSet(c_normalizer *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_normalizer
 Variant c_normalizer::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -5193,6 +5508,8 @@ Variant c_normalizer::o_invoke(const char *s, CArrRef params, int64 hash, bool f
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_normalizer
 Variant c_normalizer::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 7) {
@@ -5227,6 +5544,8 @@ Variant c_normalizer::o_invoke_few_args(const char *s, int64 hash, int count, CV
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_normalizer
 Variant c_normalizer::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -5250,6 +5569,7 @@ Variant c_normalizer::os_invoke(const char *c, const char *s, CArrRef params, in
   }
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_normalizer
 Variant c_normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 7) {
@@ -5404,57 +5724,91 @@ Variant cw_normalizer$os_invoke(const char *c, const char *s, CArrRef params, bo
 Object co_domcharacterdata(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domcharacterdata)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domcharacterdata
 Variant c_domcharacterdata::os_getInit(const char *s, int64 hash) {
   return c_domnode::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domcharacterdata
 Variant c_domcharacterdata::os_get(const char *s, int64 hash) {
   return c_domnode::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domcharacterdata
 Variant &c_domcharacterdata::os_lval(const char *s, int64 hash) {
   return c_domnode::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domcharacterdata
 void c_domcharacterdata::o_get(Array &props) const {
   c_domnode::o_get(props);
 }
-bool c_domcharacterdata::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domcharacterdata::o_existsPublic(prop, phash);
-}
-bool c_domcharacterdata::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_domnode::o_existsPublic(s, hash);
-}
-bool c_domcharacterdata::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domcharacterdata
 Variant c_domcharacterdata::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domcharacterdata::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domcharacterdata
 Variant c_domcharacterdata::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_domnode::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domcharacterdata
 Variant c_domcharacterdata::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domcharacterdata
+bool c_domcharacterdata::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domcharacterdata::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domcharacterdata
+bool c_domcharacterdata::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_domnode::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domcharacterdata
+bool c_domcharacterdata::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domcharacterdata
 Variant c_domcharacterdata::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domcharacterdata::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domcharacterdata
 Variant c_domcharacterdata::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_domnode::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domcharacterdata
 Variant c_domcharacterdata::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domcharacterdata
 Variant& c_domcharacterdata::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domcharacterdata::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domcharacterdata
 Variant& c_domcharacterdata::o_lvalPublic(CStrRef s, int64 hash) {
   return c_domnode::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domcharacterdata
 Variant& c_domcharacterdata::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domcharacterdata
 Variant c_domcharacterdata::os_constant(const char *s) {
   return c_domnode::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domcharacterdata
 IMPLEMENT_CLASS(domcharacterdata)
 c_domcharacterdata *c_domcharacterdata::create() {
   CountableHelper h(this);
@@ -5508,6 +5862,7 @@ void c_domcharacterdata::cloneSet(c_domcharacterdata *clone) {
 Variant c_domcharacterdata::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domcharacterdata
 Variant c_domcharacterdata::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -5673,6 +6028,8 @@ Variant c_domcharacterdata::o_invoke(const char *s, CArrRef params, int64 hash, 
   }
   return c_domnode::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domcharacterdata
 Variant c_domcharacterdata::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -5837,10 +6194,13 @@ Variant c_domcharacterdata::o_invoke_few_args(const char *s, int64 hash, int cou
   }
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcharacterdata
 Variant c_domcharacterdata::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcharacterdata
 Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -6374,57 +6734,91 @@ Variant cw_domcharacterdata$os_invoke(const char *c, const char *s, CArrRef para
 Object co_domentityreference(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domentityreference)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domentityreference
 Variant c_domentityreference::os_getInit(const char *s, int64 hash) {
   return c_domnode::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domentityreference
 Variant c_domentityreference::os_get(const char *s, int64 hash) {
   return c_domnode::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domentityreference
 Variant &c_domentityreference::os_lval(const char *s, int64 hash) {
   return c_domnode::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domentityreference
 void c_domentityreference::o_get(Array &props) const {
   c_domnode::o_get(props);
 }
-bool c_domentityreference::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domentityreference::o_existsPublic(prop, phash);
-}
-bool c_domentityreference::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_domnode::o_existsPublic(s, hash);
-}
-bool c_domentityreference::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domentityreference
 Variant c_domentityreference::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domentityreference::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domentityreference
 Variant c_domentityreference::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_domnode::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domentityreference
 Variant c_domentityreference::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domentityreference
+bool c_domentityreference::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domentityreference::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domentityreference
+bool c_domentityreference::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_domnode::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domentityreference
+bool c_domentityreference::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domentityreference
 Variant c_domentityreference::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domentityreference::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domentityreference
 Variant c_domentityreference::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_domnode::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domentityreference
 Variant c_domentityreference::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domentityreference
 Variant& c_domentityreference::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domentityreference::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domentityreference
 Variant& c_domentityreference::o_lvalPublic(CStrRef s, int64 hash) {
   return c_domnode::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domentityreference
 Variant& c_domentityreference::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domentityreference
 Variant c_domentityreference::os_constant(const char *s) {
   return c_domnode::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domentityreference
 IMPLEMENT_CLASS(domentityreference)
 c_domentityreference *c_domentityreference::create(String a0) {
   CountableHelper h(this);
@@ -6479,6 +6873,7 @@ ObjectData *c_domentityreference::cloneImpl() {
 void c_domentityreference::cloneSet(c_domentityreference *clone) {
   c_domnode::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domentityreference
 Variant c_domentityreference::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -6616,6 +7011,8 @@ Variant c_domentityreference::o_invoke(const char *s, CArrRef params, int64 hash
   }
   return c_domnode::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domentityreference
 Variant c_domentityreference::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -6752,10 +7149,13 @@ Variant c_domentityreference::o_invoke_few_args(const char *s, int64 hash, int c
   }
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domentityreference
 Variant c_domentityreference::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domentityreference
 Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -7185,57 +7585,91 @@ Variant cw_domentityreference$os_invoke(const char *c, const char *s, CArrRef pa
 Object co_simplexmlelementiterator(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_simplexmlelementiterator)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_simplexmlelementiterator
 Variant c_simplexmlelementiterator::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_simplexmlelementiterator
 Variant c_simplexmlelementiterator::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_simplexmlelementiterator
 Variant &c_simplexmlelementiterator::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_simplexmlelementiterator
 void c_simplexmlelementiterator::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_simplexmlelementiterator::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_simplexmlelementiterator::o_existsPublic(prop, phash);
-}
-bool c_simplexmlelementiterator::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_simplexmlelementiterator::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_simplexmlelementiterator
 Variant c_simplexmlelementiterator::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_simplexmlelementiterator::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_simplexmlelementiterator
 Variant c_simplexmlelementiterator::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_simplexmlelementiterator
 Variant c_simplexmlelementiterator::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_simplexmlelementiterator
+bool c_simplexmlelementiterator::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_simplexmlelementiterator::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_simplexmlelementiterator
+bool c_simplexmlelementiterator::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_simplexmlelementiterator
+bool c_simplexmlelementiterator::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_simplexmlelementiterator
 Variant c_simplexmlelementiterator::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_simplexmlelementiterator::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_simplexmlelementiterator
 Variant c_simplexmlelementiterator::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_simplexmlelementiterator
 Variant c_simplexmlelementiterator::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_simplexmlelementiterator
 Variant& c_simplexmlelementiterator::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_simplexmlelementiterator::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_simplexmlelementiterator
 Variant& c_simplexmlelementiterator::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_simplexmlelementiterator
 Variant& c_simplexmlelementiterator::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_simplexmlelementiterator
 Variant c_simplexmlelementiterator::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_simplexmlelementiterator
 IMPLEMENT_CLASS(simplexmlelementiterator)
 c_simplexmlelementiterator *c_simplexmlelementiterator::create() {
   CountableHelper h(this);
@@ -7286,6 +7720,7 @@ ObjectData *c_simplexmlelementiterator::cloneImpl() {
 void c_simplexmlelementiterator::cloneSet(c_simplexmlelementiterator *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_simplexmlelementiterator
 Variant c_simplexmlelementiterator::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -7337,6 +7772,8 @@ Variant c_simplexmlelementiterator::o_invoke(const char *s, CArrRef params, int6
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_simplexmlelementiterator
 Variant c_simplexmlelementiterator::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -7387,10 +7824,13 @@ Variant c_simplexmlelementiterator::o_invoke_few_args(const char *s, int64 hash,
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_simplexmlelementiterator
 Variant c_simplexmlelementiterator::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_simplexmlelementiterator
 Variant c_simplexmlelementiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -7518,54 +7958,87 @@ Variant cw_simplexmlelementiterator$os_invoke(const char *c, const char *s, CArr
 Object co_datetimezone(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_datetimezone)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_datetimezone
 Variant c_datetimezone::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_datetimezone
 Variant c_datetimezone::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_datetimezone
 Variant &c_datetimezone::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_datetimezone
 void c_datetimezone::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_datetimezone::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_datetimezone::o_existsPublic(prop, phash);
-}
-bool c_datetimezone::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_datetimezone::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_get_datetimezone
 Variant c_datetimezone::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_datetimezone::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_datetimezone
 Variant c_datetimezone::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_datetimezone
 Variant c_datetimezone::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_datetimezone
+bool c_datetimezone::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_datetimezone::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_datetimezone
+bool c_datetimezone::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_datetimezone
+bool c_datetimezone::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_set_datetimezone
 Variant c_datetimezone::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_datetimezone::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_datetimezone
 Variant c_datetimezone::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_datetimezone
 Variant c_datetimezone::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_datetimezone
 Variant& c_datetimezone::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_datetimezone::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_datetimezone
 Variant& c_datetimezone::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_datetimezone
 Variant& c_datetimezone::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_datetimezone
 Variant c_datetimezone::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 31) {
@@ -7612,6 +8085,7 @@ Variant c_datetimezone::os_constant(const char *s) {
   }
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_datetimezone
 IMPLEMENT_CLASS(datetimezone)
 c_datetimezone *c_datetimezone::create(String a0) {
   CountableHelper h(this);
@@ -7666,6 +8140,7 @@ ObjectData *c_datetimezone::cloneImpl() {
 void c_datetimezone::cloneSet(c_datetimezone *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_datetimezone
 Variant c_datetimezone::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -7715,6 +8190,8 @@ Variant c_datetimezone::o_invoke(const char *s, CArrRef params, int64 hash, bool
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_datetimezone
 Variant c_datetimezone::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -7763,6 +8240,8 @@ Variant c_datetimezone::o_invoke_few_args(const char *s, int64 hash, int count, 
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_datetimezone
 Variant c_datetimezone::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -7784,6 +8263,7 @@ Variant c_datetimezone::os_invoke(const char *c, const char *s, CArrRef params, 
   }
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_datetimezone
 Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -7950,57 +8430,91 @@ Variant cw_datetimezone$os_invoke(const char *c, const char *s, CArrRef params, 
 Object co_domnodeiterator(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domnodeiterator)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domnodeiterator
 Variant c_domnodeiterator::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domnodeiterator
 Variant c_domnodeiterator::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domnodeiterator
 Variant &c_domnodeiterator::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domnodeiterator
 void c_domnodeiterator::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_domnodeiterator::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domnodeiterator::o_existsPublic(prop, phash);
-}
-bool c_domnodeiterator::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_domnodeiterator::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domnodeiterator
 Variant c_domnodeiterator::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domnodeiterator::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domnodeiterator
 Variant c_domnodeiterator::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domnodeiterator
 Variant c_domnodeiterator::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domnodeiterator
+bool c_domnodeiterator::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domnodeiterator::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domnodeiterator
+bool c_domnodeiterator::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domnodeiterator
+bool c_domnodeiterator::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domnodeiterator
 Variant c_domnodeiterator::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domnodeiterator::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domnodeiterator
 Variant c_domnodeiterator::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domnodeiterator
 Variant c_domnodeiterator::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domnodeiterator
 Variant& c_domnodeiterator::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domnodeiterator::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domnodeiterator
 Variant& c_domnodeiterator::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domnodeiterator
 Variant& c_domnodeiterator::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domnodeiterator
 Variant c_domnodeiterator::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domnodeiterator
 IMPLEMENT_CLASS(domnodeiterator)
 c_domnodeiterator *c_domnodeiterator::create() {
   CountableHelper h(this);
@@ -8051,6 +8565,7 @@ ObjectData *c_domnodeiterator::cloneImpl() {
 void c_domnodeiterator::cloneSet(c_domnodeiterator *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnodeiterator
 Variant c_domnodeiterator::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -8102,6 +8617,8 @@ Variant c_domnodeiterator::o_invoke(const char *s, CArrRef params, int64 hash, b
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnodeiterator
 Variant c_domnodeiterator::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -8152,10 +8669,13 @@ Variant c_domnodeiterator::o_invoke_few_args(const char *s, int64 hash, int coun
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnodeiterator
 Variant c_domnodeiterator::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnodeiterator
 Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -8283,57 +8803,91 @@ Variant cw_domnodeiterator$os_invoke(const char *c, const char *s, CArrRef param
 Object co_domimplementation(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domimplementation)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domimplementation
 Variant c_domimplementation::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domimplementation
 Variant c_domimplementation::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domimplementation
 Variant &c_domimplementation::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domimplementation
 void c_domimplementation::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_domimplementation::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domimplementation::o_existsPublic(prop, phash);
-}
-bool c_domimplementation::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_domimplementation::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domimplementation
 Variant c_domimplementation::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domimplementation::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domimplementation
 Variant c_domimplementation::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domimplementation
 Variant c_domimplementation::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domimplementation
+bool c_domimplementation::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domimplementation::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domimplementation
+bool c_domimplementation::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domimplementation
+bool c_domimplementation::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domimplementation
 Variant c_domimplementation::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domimplementation::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domimplementation
 Variant c_domimplementation::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domimplementation
 Variant c_domimplementation::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domimplementation
 Variant& c_domimplementation::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domimplementation::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domimplementation
 Variant& c_domimplementation::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domimplementation
 Variant& c_domimplementation::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domimplementation
 Variant c_domimplementation::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domimplementation
 IMPLEMENT_CLASS(domimplementation)
 c_domimplementation *c_domimplementation::create() {
   CountableHelper h(this);
@@ -8384,6 +8938,7 @@ ObjectData *c_domimplementation::cloneImpl() {
 void c_domimplementation::cloneSet(c_domimplementation *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domimplementation
 Variant c_domimplementation::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -8425,6 +8980,8 @@ Variant c_domimplementation::o_invoke(const char *s, CArrRef params, int64 hash,
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domimplementation
 Variant c_domimplementation::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -8465,10 +9022,13 @@ Variant c_domimplementation::o_invoke_few_args(const char *s, int64 hash, int co
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domimplementation
 Variant c_domimplementation::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domimplementation
 Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -8602,57 +9162,91 @@ Variant cw_domimplementation$os_invoke(const char *c, const char *s, CArrRef par
 Object co_soapheader(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapheader)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_soapheader
 Variant c_soapheader::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_soapheader
 Variant c_soapheader::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapheader
 Variant &c_soapheader::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_soapheader
 void c_soapheader::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_soapheader::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_soapheader::o_existsPublic(prop, phash);
-}
-bool c_soapheader::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_soapheader::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_get_soapheader
 Variant c_soapheader::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_soapheader::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_soapheader
 Variant c_soapheader::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_soapheader
 Variant c_soapheader::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_soapheader
+bool c_soapheader::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_soapheader::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_soapheader
+bool c_soapheader::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_soapheader
+bool c_soapheader::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_set_soapheader
 Variant c_soapheader::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_soapheader::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_soapheader
 Variant c_soapheader::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_soapheader
 Variant c_soapheader::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_soapheader
 Variant& c_soapheader::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_soapheader::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_soapheader
 Variant& c_soapheader::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_soapheader
 Variant& c_soapheader::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_soapheader
 Variant c_soapheader::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_soapheader
 IMPLEMENT_CLASS(soapheader)
 c_soapheader *c_soapheader::create(String a0, String a1, Variant a2, bool a3, Variant a4) {
   CountableHelper h(this);
@@ -8732,6 +9326,7 @@ ObjectData *c_soapheader::cloneImpl() {
 void c_soapheader::cloneSet(c_soapheader *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapheader
 Variant c_soapheader::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -8754,6 +9349,8 @@ Variant c_soapheader::o_invoke(const char *s, CArrRef params, int64 hash, bool f
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapheader
 Variant c_soapheader::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 3) {
@@ -8775,10 +9372,13 @@ Variant c_soapheader::o_invoke_few_args(const char *s, int64 hash, int count, CV
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapheader
 Variant c_soapheader::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapheader
 Variant c_soapheader::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 3) {
@@ -8857,57 +9457,91 @@ Variant cw_soapheader$os_invoke(const char *c, const char *s, CArrRef params, bo
 Object co_domnotation(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domnotation)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domnotation
 Variant c_domnotation::os_getInit(const char *s, int64 hash) {
   return c_domnode::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domnotation
 Variant c_domnotation::os_get(const char *s, int64 hash) {
   return c_domnode::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domnotation
 Variant &c_domnotation::os_lval(const char *s, int64 hash) {
   return c_domnode::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domnotation
 void c_domnotation::o_get(Array &props) const {
   c_domnode::o_get(props);
 }
-bool c_domnotation::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domnotation::o_existsPublic(prop, phash);
-}
-bool c_domnotation::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_domnode::o_existsPublic(s, hash);
-}
-bool c_domnotation::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domnotation
 Variant c_domnotation::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domnotation::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domnotation
 Variant c_domnotation::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_domnode::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domnotation
 Variant c_domnotation::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domnotation
+bool c_domnotation::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domnotation::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domnotation
+bool c_domnotation::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_domnode::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domnotation
+bool c_domnotation::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domnotation
 Variant c_domnotation::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domnotation::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domnotation
 Variant c_domnotation::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_domnode::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domnotation
 Variant c_domnotation::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domnotation
 Variant& c_domnotation::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domnotation::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domnotation
 Variant& c_domnotation::o_lvalPublic(CStrRef s, int64 hash) {
   return c_domnode::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domnotation
 Variant& c_domnotation::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domnotation
 Variant c_domnotation::os_constant(const char *s) {
   return c_domnode::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domnotation
 IMPLEMENT_CLASS(domnotation)
 c_domnotation *c_domnotation::create() {
   CountableHelper h(this);
@@ -8961,6 +9595,7 @@ void c_domnotation::cloneSet(c_domnotation *clone) {
 Variant c_domnotation::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnotation
 Variant c_domnotation::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -9098,6 +9733,8 @@ Variant c_domnotation::o_invoke(const char *s, CArrRef params, int64 hash, bool 
   }
   return c_domnode::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnotation
 Variant c_domnotation::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -9234,10 +9871,13 @@ Variant c_domnotation::o_invoke_few_args(const char *s, int64 hash, int count, C
   }
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnotation
 Variant c_domnotation::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnotation
 Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -9663,57 +10303,91 @@ Variant cw_domnotation$os_invoke(const char *c, const char *s, CArrRef params, b
 Object co_domcomment(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domcomment)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domcomment
 Variant c_domcomment::os_getInit(const char *s, int64 hash) {
   return c_domcharacterdata::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domcomment
 Variant c_domcomment::os_get(const char *s, int64 hash) {
   return c_domcharacterdata::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domcomment
 Variant &c_domcomment::os_lval(const char *s, int64 hash) {
   return c_domcharacterdata::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domcomment
 void c_domcomment::o_get(Array &props) const {
   c_domcharacterdata::o_get(props);
 }
-bool c_domcomment::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domcomment::o_existsPublic(prop, phash);
-}
-bool c_domcomment::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_domcharacterdata::o_existsPublic(s, hash);
-}
-bool c_domcomment::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domcomment
 Variant c_domcomment::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domcomment::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domcomment
 Variant c_domcomment::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_domcharacterdata::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domcomment
 Variant c_domcomment::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domcomment
+bool c_domcomment::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domcomment::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domcomment
+bool c_domcomment::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_domcharacterdata::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domcomment
+bool c_domcomment::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domcomment
 Variant c_domcomment::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domcomment::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domcomment
 Variant c_domcomment::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_domcharacterdata::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domcomment
 Variant c_domcomment::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domcomment
 Variant& c_domcomment::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domcomment::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domcomment
 Variant& c_domcomment::o_lvalPublic(CStrRef s, int64 hash) {
   return c_domcharacterdata::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domcomment
 Variant& c_domcomment::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domcomment
 Variant c_domcomment::os_constant(const char *s) {
   return c_domcharacterdata::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domcomment
 IMPLEMENT_CLASS(domcomment)
 c_domcomment *c_domcomment::create(String a0) {
   CountableHelper h(this);
@@ -9771,6 +10445,7 @@ ObjectData *c_domcomment::cloneImpl() {
 void c_domcomment::cloneSet(c_domcomment *clone) {
   c_domcharacterdata::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domcomment
 Variant c_domcomment::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -9937,6 +10612,8 @@ Variant c_domcomment::o_invoke(const char *s, CArrRef params, int64 hash, bool f
   }
   return c_domcharacterdata::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domcomment
 Variant c_domcomment::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -10102,10 +10779,13 @@ Variant c_domcomment::o_invoke_few_args(const char *s, int64 hash, int count, CV
   }
   return c_domcharacterdata::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcomment
 Variant c_domcomment::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_domcharacterdata::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcomment
 Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -10644,57 +11324,91 @@ Variant cw_domcomment$os_invoke(const char *c, const char *s, CArrRef params, bo
 Object co_sqlite3(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_sqlite3)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_sqlite3
 Variant c_sqlite3::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_sqlite3
 Variant c_sqlite3::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_sqlite3
 Variant &c_sqlite3::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_sqlite3
 void c_sqlite3::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_sqlite3::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_sqlite3::o_existsPublic(prop, phash);
-}
-bool c_sqlite3::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_sqlite3::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_get_sqlite3
 Variant c_sqlite3::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_sqlite3::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_sqlite3
 Variant c_sqlite3::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_sqlite3
 Variant c_sqlite3::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_sqlite3
+bool c_sqlite3::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_sqlite3::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_sqlite3
+bool c_sqlite3::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_sqlite3
+bool c_sqlite3::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_set_sqlite3
 Variant c_sqlite3::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_sqlite3::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_sqlite3
 Variant c_sqlite3::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_sqlite3
 Variant c_sqlite3::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_sqlite3
 Variant& c_sqlite3::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_sqlite3::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_sqlite3
 Variant& c_sqlite3::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_sqlite3
 Variant& c_sqlite3::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_sqlite3
 Variant c_sqlite3::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_sqlite3
 IMPLEMENT_CLASS(sqlite3)
 c_sqlite3 *c_sqlite3::create() {
   CountableHelper h(this);
@@ -10745,6 +11459,7 @@ ObjectData *c_sqlite3::cloneImpl() {
 void c_sqlite3::cloneSet(c_sqlite3 *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3
 Variant c_sqlite3::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -10866,6 +11581,8 @@ Variant c_sqlite3::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3
 Variant c_sqlite3::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -10986,10 +11703,13 @@ Variant c_sqlite3::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_sqlite3
 Variant c_sqlite3::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_sqlite3
 Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -11359,57 +12079,91 @@ Variant cw_sqlite3$os_invoke(const char *c, const char *s, CArrRef params, bool 
 Object co_domattr(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domattr)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domattr
 Variant c_domattr::os_getInit(const char *s, int64 hash) {
   return c_domnode::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domattr
 Variant c_domattr::os_get(const char *s, int64 hash) {
   return c_domnode::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domattr
 Variant &c_domattr::os_lval(const char *s, int64 hash) {
   return c_domnode::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domattr
 void c_domattr::o_get(Array &props) const {
   c_domnode::o_get(props);
 }
-bool c_domattr::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domattr::o_existsPublic(prop, phash);
-}
-bool c_domattr::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_domnode::o_existsPublic(s, hash);
-}
-bool c_domattr::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domattr
 Variant c_domattr::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domattr::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domattr
 Variant c_domattr::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_domnode::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domattr
 Variant c_domattr::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domattr
+bool c_domattr::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domattr::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domattr
+bool c_domattr::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_domnode::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domattr
+bool c_domattr::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domattr
 Variant c_domattr::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domattr::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domattr
 Variant c_domattr::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_domnode::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domattr
 Variant c_domattr::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domattr
 Variant& c_domattr::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domattr::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domattr
 Variant& c_domattr::o_lvalPublic(CStrRef s, int64 hash) {
   return c_domnode::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domattr
 Variant& c_domattr::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domattr
 Variant c_domattr::os_constant(const char *s) {
   return c_domnode::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domattr
 IMPLEMENT_CLASS(domattr)
 c_domattr *c_domattr::create(String a0, String a1) {
   CountableHelper h(this);
@@ -11474,6 +12228,7 @@ void c_domattr::cloneSet(c_domattr *clone) {
 Variant c_domattr::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domattr
 Variant c_domattr::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -11616,6 +12371,8 @@ Variant c_domattr::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
   }
   return c_domnode::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domattr
 Variant c_domattr::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -11757,10 +12514,13 @@ Variant c_domattr::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
   }
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domattr
 Variant c_domattr::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domattr
 Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -12207,57 +12967,91 @@ Variant cw_domattr$os_invoke(const char *c, const char *s, CArrRef params, bool 
 Object co_soapvar(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapvar)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_soapvar
 Variant c_soapvar::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_soapvar
 Variant c_soapvar::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapvar
 Variant &c_soapvar::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_soapvar
 void c_soapvar::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_soapvar::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_soapvar::o_existsPublic(prop, phash);
-}
-bool c_soapvar::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_soapvar::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_get_soapvar
 Variant c_soapvar::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_soapvar::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_soapvar
 Variant c_soapvar::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_soapvar
 Variant c_soapvar::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_soapvar
+bool c_soapvar::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_soapvar::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_soapvar
+bool c_soapvar::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_soapvar
+bool c_soapvar::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_set_soapvar
 Variant c_soapvar::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_soapvar::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_soapvar
 Variant c_soapvar::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_soapvar
 Variant c_soapvar::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_soapvar
 Variant& c_soapvar::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_soapvar::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_soapvar
 Variant& c_soapvar::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_soapvar
 Variant& c_soapvar::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_soapvar
 Variant c_soapvar::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_soapvar
 IMPLEMENT_CLASS(soapvar)
 c_soapvar *c_soapvar::create(Variant a0, Variant a1, String a2, String a3, String a4, String a5) {
   CountableHelper h(this);
@@ -12344,6 +13138,7 @@ ObjectData *c_soapvar::cloneImpl() {
 void c_soapvar::cloneSet(c_soapvar *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapvar
 Variant c_soapvar::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -12367,6 +13162,8 @@ Variant c_soapvar::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapvar
 Variant c_soapvar::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 3) {
@@ -12389,10 +13186,13 @@ Variant c_soapvar::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapvar
 Variant c_soapvar::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapvar
 Variant c_soapvar::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 3) {
@@ -12476,57 +13276,91 @@ Variant cw_soapvar$os_invoke(const char *c, const char *s, CArrRef params, bool 
 Object co_domnamednodemap(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domnamednodemap)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domnamednodemap
 Variant c_domnamednodemap::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domnamednodemap
 Variant c_domnamednodemap::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domnamednodemap
 Variant &c_domnamednodemap::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domnamednodemap
 void c_domnamednodemap::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_domnamednodemap::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domnamednodemap::o_existsPublic(prop, phash);
-}
-bool c_domnamednodemap::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_domnamednodemap::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domnamednodemap
 Variant c_domnamednodemap::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domnamednodemap::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domnamednodemap
 Variant c_domnamednodemap::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domnamednodemap
 Variant c_domnamednodemap::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domnamednodemap
+bool c_domnamednodemap::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domnamednodemap::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domnamednodemap
+bool c_domnamednodemap::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domnamednodemap
+bool c_domnamednodemap::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domnamednodemap
 Variant c_domnamednodemap::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domnamednodemap::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domnamednodemap
 Variant c_domnamednodemap::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domnamednodemap
 Variant c_domnamednodemap::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domnamednodemap
 Variant& c_domnamednodemap::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domnamednodemap::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domnamednodemap
 Variant& c_domnamednodemap::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domnamednodemap
 Variant& c_domnamednodemap::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domnamednodemap
 Variant c_domnamednodemap::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domnamednodemap
 IMPLEMENT_CLASS(domnamednodemap)
 c_domnamednodemap *c_domnamednodemap::create() {
   CountableHelper h(this);
@@ -12580,6 +13414,7 @@ void c_domnamednodemap::cloneSet(c_domnamednodemap *clone) {
 Variant c_domnamednodemap::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnamednodemap
 Variant c_domnamednodemap::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -12633,6 +13468,8 @@ Variant c_domnamednodemap::o_invoke(const char *s, CArrRef params, int64 hash, b
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnamednodemap
 Variant c_domnamednodemap::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -12685,10 +13522,13 @@ Variant c_domnamednodemap::o_invoke_few_args(const char *s, int64 hash, int coun
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnamednodemap
 Variant c_domnamednodemap::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnamednodemap
 Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -12854,57 +13694,91 @@ Variant cw_domnamednodemap$os_invoke(const char *c, const char *s, CArrRef param
 Object co_sqlite3result(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_sqlite3result)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_sqlite3result
 Variant c_sqlite3result::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_sqlite3result
 Variant c_sqlite3result::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_sqlite3result
 Variant &c_sqlite3result::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_sqlite3result
 void c_sqlite3result::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_sqlite3result::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_sqlite3result::o_existsPublic(prop, phash);
-}
-bool c_sqlite3result::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_sqlite3result::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_get_sqlite3result
 Variant c_sqlite3result::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_sqlite3result::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_sqlite3result
 Variant c_sqlite3result::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_sqlite3result
 Variant c_sqlite3result::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_sqlite3result
+bool c_sqlite3result::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_sqlite3result::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_sqlite3result
+bool c_sqlite3result::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_sqlite3result
+bool c_sqlite3result::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_set_sqlite3result
 Variant c_sqlite3result::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_sqlite3result::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_sqlite3result
 Variant c_sqlite3result::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_sqlite3result
 Variant c_sqlite3result::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_sqlite3result
 Variant& c_sqlite3result::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_sqlite3result::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_sqlite3result
 Variant& c_sqlite3result::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_sqlite3result
 Variant& c_sqlite3result::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_sqlite3result
 Variant c_sqlite3result::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_sqlite3result
 IMPLEMENT_CLASS(sqlite3result)
 c_sqlite3result *c_sqlite3result::create() {
   CountableHelper h(this);
@@ -12955,6 +13829,7 @@ ObjectData *c_sqlite3result::cloneImpl() {
 void c_sqlite3result::cloneSet(c_sqlite3result *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3result
 Variant c_sqlite3result::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -13013,6 +13888,8 @@ Variant c_sqlite3result::o_invoke(const char *s, CArrRef params, int64 hash, boo
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3result
 Variant c_sqlite3result::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -13070,10 +13947,13 @@ Variant c_sqlite3result::o_invoke_few_args(const char *s, int64 hash, int count,
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_sqlite3result
 Variant c_sqlite3result::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_sqlite3result
 Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -13228,57 +14108,91 @@ Variant cw_sqlite3result$os_invoke(const char *c, const char *s, CArrRef params,
 Object co_simplexmlelement(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_simplexmlelement)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_simplexmlelement
 Variant c_simplexmlelement::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_simplexmlelement
 Variant c_simplexmlelement::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_simplexmlelement
 Variant &c_simplexmlelement::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_simplexmlelement
 void c_simplexmlelement::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_simplexmlelement::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_simplexmlelement::o_existsPublic(prop, phash);
-}
-bool c_simplexmlelement::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_simplexmlelement::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_get_simplexmlelement
 Variant c_simplexmlelement::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_simplexmlelement::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_simplexmlelement
 Variant c_simplexmlelement::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_simplexmlelement
 Variant c_simplexmlelement::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_simplexmlelement
+bool c_simplexmlelement::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_simplexmlelement::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_simplexmlelement
+bool c_simplexmlelement::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_simplexmlelement
+bool c_simplexmlelement::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_set_simplexmlelement
 Variant c_simplexmlelement::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_simplexmlelement::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_simplexmlelement
 Variant c_simplexmlelement::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_simplexmlelement
 Variant c_simplexmlelement::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_simplexmlelement
 Variant& c_simplexmlelement::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_simplexmlelement::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_simplexmlelement
 Variant& c_simplexmlelement::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_simplexmlelement
 Variant& c_simplexmlelement::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_simplexmlelement
 Variant c_simplexmlelement::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_simplexmlelement
 IMPLEMENT_CLASS(simplexmlelement)
 c_simplexmlelement *c_simplexmlelement::create(String a0, int64 a1, bool a2, String a3, bool a4) {
   CountableHelper h(this);
@@ -13364,6 +14278,7 @@ void c_simplexmlelement::cloneSet(c_simplexmlelement *clone) {
 Variant c_simplexmlelement::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_simplexmlelement
 Variant c_simplexmlelement::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -13510,6 +14425,8 @@ Variant c_simplexmlelement::o_invoke(const char *s, CArrRef params, int64 hash, 
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_simplexmlelement
 Variant c_simplexmlelement::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -13655,10 +14572,13 @@ Variant c_simplexmlelement::o_invoke_few_args(const char *s, int64 hash, int cou
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_simplexmlelement
 Variant c_simplexmlelement::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_simplexmlelement
 Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -14113,57 +15033,91 @@ Variant cw_simplexmlelement$os_invoke(const char *c, const char *s, CArrRef para
 Object co_domprocessinginstruction(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domprocessinginstruction)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domprocessinginstruction
 Variant c_domprocessinginstruction::os_getInit(const char *s, int64 hash) {
   return c_domnode::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domprocessinginstruction
 Variant c_domprocessinginstruction::os_get(const char *s, int64 hash) {
   return c_domnode::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domprocessinginstruction
 Variant &c_domprocessinginstruction::os_lval(const char *s, int64 hash) {
   return c_domnode::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domprocessinginstruction
 void c_domprocessinginstruction::o_get(Array &props) const {
   c_domnode::o_get(props);
 }
-bool c_domprocessinginstruction::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domprocessinginstruction::o_existsPublic(prop, phash);
-}
-bool c_domprocessinginstruction::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_domnode::o_existsPublic(s, hash);
-}
-bool c_domprocessinginstruction::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domprocessinginstruction
 Variant c_domprocessinginstruction::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domprocessinginstruction::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domprocessinginstruction
 Variant c_domprocessinginstruction::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_domnode::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domprocessinginstruction
 Variant c_domprocessinginstruction::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domprocessinginstruction
+bool c_domprocessinginstruction::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domprocessinginstruction::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domprocessinginstruction
+bool c_domprocessinginstruction::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_domnode::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domprocessinginstruction
+bool c_domprocessinginstruction::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domprocessinginstruction
 Variant c_domprocessinginstruction::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domprocessinginstruction::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domprocessinginstruction
 Variant c_domprocessinginstruction::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_domnode::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domprocessinginstruction
 Variant c_domprocessinginstruction::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domprocessinginstruction
 Variant& c_domprocessinginstruction::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domprocessinginstruction::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domprocessinginstruction
 Variant& c_domprocessinginstruction::o_lvalPublic(CStrRef s, int64 hash) {
   return c_domnode::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domprocessinginstruction
 Variant& c_domprocessinginstruction::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domprocessinginstruction
 Variant c_domprocessinginstruction::os_constant(const char *s) {
   return c_domnode::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domprocessinginstruction
 IMPLEMENT_CLASS(domprocessinginstruction)
 c_domprocessinginstruction *c_domprocessinginstruction::create(String a0, String a1) {
   CountableHelper h(this);
@@ -14228,6 +15182,7 @@ void c_domprocessinginstruction::cloneSet(c_domprocessinginstruction *clone) {
 Variant c_domprocessinginstruction::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domprocessinginstruction
 Variant c_domprocessinginstruction::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -14366,6 +15321,8 @@ Variant c_domprocessinginstruction::o_invoke(const char *s, CArrRef params, int6
   }
   return c_domnode::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domprocessinginstruction
 Variant c_domprocessinginstruction::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -14503,10 +15460,13 @@ Variant c_domprocessinginstruction::o_invoke_few_args(const char *s, int64 hash,
   }
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domprocessinginstruction
 Variant c_domprocessinginstruction::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domprocessinginstruction
 Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -14941,57 +15901,91 @@ Variant cw_domprocessinginstruction$os_invoke(const char *c, const char *s, CArr
 Object co_pdostatement(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_pdostatement)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_pdostatement
 Variant c_pdostatement::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_pdostatement
 Variant c_pdostatement::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_pdostatement
 Variant &c_pdostatement::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_pdostatement
 void c_pdostatement::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_pdostatement::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_pdostatement::o_existsPublic(prop, phash);
-}
-bool c_pdostatement::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_pdostatement::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_get_pdostatement
 Variant c_pdostatement::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_pdostatement::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_pdostatement
 Variant c_pdostatement::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_pdostatement
 Variant c_pdostatement::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_pdostatement
+bool c_pdostatement::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_pdostatement::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_pdostatement
+bool c_pdostatement::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_pdostatement
+bool c_pdostatement::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_set_pdostatement
 Variant c_pdostatement::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_pdostatement::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_pdostatement
 Variant c_pdostatement::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_pdostatement
 Variant c_pdostatement::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_pdostatement
 Variant& c_pdostatement::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_pdostatement::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_pdostatement
 Variant& c_pdostatement::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_pdostatement
 Variant& c_pdostatement::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_pdostatement
 Variant c_pdostatement::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_pdostatement
 IMPLEMENT_CLASS(pdostatement)
 c_pdostatement *c_pdostatement::create() {
   CountableHelper h(this);
@@ -15042,6 +16036,7 @@ ObjectData *c_pdostatement::cloneImpl() {
 void c_pdostatement::cloneSet(c_pdostatement *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pdostatement
 Variant c_pdostatement::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -15203,6 +16198,8 @@ Variant c_pdostatement::o_invoke(const char *s, CArrRef params, int64 hash, bool
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pdostatement
 Variant c_pdostatement::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -15369,10 +16366,13 @@ Variant c_pdostatement::o_invoke_few_args(const char *s, int64 hash, int count, 
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdostatement
 Variant c_pdostatement::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdostatement
 Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -15851,57 +16851,91 @@ Variant cw_pdostatement$os_invoke(const char *c, const char *s, CArrRef params, 
 Object co_soapclient(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapclient)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_soapclient
 Variant c_soapclient::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_soapclient
 Variant c_soapclient::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapclient
 Variant &c_soapclient::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_soapclient
 void c_soapclient::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_soapclient::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_soapclient::o_existsPublic(prop, phash);
-}
-bool c_soapclient::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_soapclient::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_get_soapclient
 Variant c_soapclient::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_soapclient::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_soapclient
 Variant c_soapclient::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_soapclient
 Variant c_soapclient::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_soapclient
+bool c_soapclient::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_soapclient::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_soapclient
+bool c_soapclient::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_soapclient
+bool c_soapclient::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_set_soapclient
 Variant c_soapclient::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_soapclient::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_soapclient
 Variant c_soapclient::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_soapclient
 Variant c_soapclient::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_soapclient
 Variant& c_soapclient::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_soapclient::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_soapclient
 Variant& c_soapclient::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_soapclient
 Variant& c_soapclient::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_soapclient
 Variant c_soapclient::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_soapclient
 IMPLEMENT_CLASS(soapclient)
 c_soapclient *c_soapclient::create(Variant a0, Array a1) {
   CountableHelper h(this);
@@ -15966,6 +17000,7 @@ void c_soapclient::cloneSet(c_soapclient *clone) {
 Variant c_soapclient::doCall(Variant v_name, Variant v_arguments, bool fatal) {
   return t___call(v_name, !v_arguments.isNull() ? v_arguments : Variant(Array::Create()));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapclient
 Variant c_soapclient::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -16059,6 +17094,8 @@ Variant c_soapclient::o_invoke(const char *s, CArrRef params, int64 hash, bool f
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapclient
 Variant c_soapclient::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -16151,10 +17188,13 @@ Variant c_soapclient::o_invoke_few_args(const char *s, int64 hash, int count, CV
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapclient
 Variant c_soapclient::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapclient
 Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -16452,57 +17492,91 @@ Variant cw_soapclient$os_invoke(const char *c, const char *s, CArrRef params, bo
 Object co_soapparam(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapparam)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_soapparam
 Variant c_soapparam::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_soapparam
 Variant c_soapparam::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapparam
 Variant &c_soapparam::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_soapparam
 void c_soapparam::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_soapparam::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_soapparam::o_existsPublic(prop, phash);
-}
-bool c_soapparam::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_soapparam::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_get_soapparam
 Variant c_soapparam::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_soapparam::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_soapparam
 Variant c_soapparam::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_soapparam
 Variant c_soapparam::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_soapparam
+bool c_soapparam::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_soapparam::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_soapparam
+bool c_soapparam::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_soapparam
+bool c_soapparam::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_set_soapparam
 Variant c_soapparam::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_soapparam::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_soapparam
 Variant c_soapparam::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_soapparam
 Variant c_soapparam::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_soapparam
 Variant& c_soapparam::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_soapparam::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_soapparam
 Variant& c_soapparam::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_soapparam
 Variant& c_soapparam::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_soapparam
 Variant c_soapparam::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_soapparam
 IMPLEMENT_CLASS(soapparam)
 c_soapparam *c_soapparam::create(Variant a0, String a1) {
   CountableHelper h(this);
@@ -16561,6 +17635,7 @@ ObjectData *c_soapparam::cloneImpl() {
 void c_soapparam::cloneSet(c_soapparam *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapparam
 Variant c_soapparam::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -16580,6 +17655,8 @@ Variant c_soapparam::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapparam
 Variant c_soapparam::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 3) {
@@ -16598,10 +17675,13 @@ Variant c_soapparam::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapparam
 Variant c_soapparam::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapparam
 Variant c_soapparam::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 3) {
@@ -16665,54 +17745,87 @@ Variant cw_soapparam$os_invoke(const char *c, const char *s, CArrRef params, boo
 Object co_datetime(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_datetime)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_datetime
 Variant c_datetime::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_datetime
 Variant c_datetime::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_datetime
 Variant &c_datetime::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_datetime
 void c_datetime::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_datetime::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_datetime::o_existsPublic(prop, phash);
-}
-bool c_datetime::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_datetime::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_get_datetime
 Variant c_datetime::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_datetime::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_datetime
 Variant c_datetime::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_datetime
 Variant c_datetime::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_datetime
+bool c_datetime::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_datetime::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_datetime
+bool c_datetime::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_datetime
+bool c_datetime::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_set_datetime
 Variant c_datetime::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_datetime::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_datetime
 Variant c_datetime::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_datetime
 Variant c_datetime::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_datetime
 Variant& c_datetime::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_datetime::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_datetime
 Variant& c_datetime::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_datetime
 Variant& c_datetime::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_datetime
 Variant c_datetime::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 31) {
@@ -16752,6 +17865,7 @@ Variant c_datetime::os_constant(const char *s) {
   }
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_datetime
 IMPLEMENT_CLASS(datetime)
 c_datetime *c_datetime::create(String a0, Object a1) {
   CountableHelper h(this);
@@ -16816,6 +17930,7 @@ ObjectData *c_datetime::cloneImpl() {
 void c_datetime::cloneSet(c_datetime *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_datetime
 Variant c_datetime::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -16885,6 +18000,8 @@ Variant c_datetime::o_invoke(const char *s, CArrRef params, int64 hash, bool fat
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_datetime
 Variant c_datetime::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -16953,10 +18070,13 @@ Variant c_datetime::o_invoke_few_args(const char *s, int64 hash, int count, CVar
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_datetime
 Variant c_datetime::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_datetime
 Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -17182,54 +18302,87 @@ Variant cw_datetime$os_invoke(const char *c, const char *s, CArrRef params, bool
 Object co_pdo(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_pdo)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_pdo
 Variant c_pdo::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_pdo
 Variant c_pdo::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_pdo
 Variant &c_pdo::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_pdo
 void c_pdo::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_pdo::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_pdo::o_existsPublic(prop, phash);
-}
-bool c_pdo::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_pdo::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_get_pdo
 Variant c_pdo::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_pdo::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_pdo
 Variant c_pdo::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_pdo
 Variant c_pdo::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_pdo
+bool c_pdo::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_pdo::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_pdo
+bool c_pdo::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_pdo
+bool c_pdo::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_set_pdo
 Variant c_pdo::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_pdo::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_pdo
 Variant c_pdo::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_pdo
 Variant c_pdo::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_pdo
 Variant& c_pdo::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_pdo::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_pdo
 Variant& c_pdo::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_pdo
 Variant& c_pdo::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_pdo
 Variant c_pdo::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 255) {
@@ -17465,6 +18618,7 @@ Variant c_pdo::os_constant(const char *s) {
   }
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_pdo
 IMPLEMENT_CLASS(pdo)
 c_pdo *c_pdo::create(String a0, String a1, String a2, Array a3) {
   CountableHelper h(this);
@@ -17540,6 +18694,7 @@ ObjectData *c_pdo::cloneImpl() {
 void c_pdo::cloneSet(c_pdo *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pdo
 Variant c_pdo::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -17657,6 +18812,8 @@ Variant c_pdo::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pdo
 Variant c_pdo::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -17773,10 +18930,13 @@ Variant c_pdo::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdo
 Variant c_pdo::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdo
 Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -18106,57 +19266,91 @@ Variant cw_pdo$os_invoke(const char *c, const char *s, CArrRef params, bool fata
 Object co_domentity(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domentity)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domentity
 Variant c_domentity::os_getInit(const char *s, int64 hash) {
   return c_domnode::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domentity
 Variant c_domentity::os_get(const char *s, int64 hash) {
   return c_domnode::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domentity
 Variant &c_domentity::os_lval(const char *s, int64 hash) {
   return c_domnode::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domentity
 void c_domentity::o_get(Array &props) const {
   c_domnode::o_get(props);
 }
-bool c_domentity::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domentity::o_existsPublic(prop, phash);
-}
-bool c_domentity::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_domnode::o_existsPublic(s, hash);
-}
-bool c_domentity::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domentity
 Variant c_domentity::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domentity::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domentity
 Variant c_domentity::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_domnode::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domentity
 Variant c_domentity::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domentity
+bool c_domentity::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domentity::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domentity
+bool c_domentity::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_domnode::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domentity
+bool c_domentity::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domentity
 Variant c_domentity::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domentity::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domentity
 Variant c_domentity::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_domnode::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domentity
 Variant c_domentity::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domentity
 Variant& c_domentity::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domentity::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domentity
 Variant& c_domentity::o_lvalPublic(CStrRef s, int64 hash) {
   return c_domnode::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domentity
 Variant& c_domentity::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domentity
 Variant c_domentity::os_constant(const char *s) {
   return c_domnode::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domentity
 IMPLEMENT_CLASS(domentity)
 c_domentity *c_domentity::create() {
   CountableHelper h(this);
@@ -18210,6 +19404,7 @@ void c_domentity::cloneSet(c_domentity *clone) {
 Variant c_domentity::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domentity
 Variant c_domentity::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -18347,6 +19542,8 @@ Variant c_domentity::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
   }
   return c_domnode::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domentity
 Variant c_domentity::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -18483,10 +19680,13 @@ Variant c_domentity::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   }
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domentity
 Variant c_domentity::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domentity
 Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -18912,57 +20112,91 @@ Variant cw_domentity$os_invoke(const char *c, const char *s, CArrRef params, boo
 Object co_xmlwriter(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_xmlwriter)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_xmlwriter
 Variant c_xmlwriter::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_xmlwriter
 Variant c_xmlwriter::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_xmlwriter
 Variant &c_xmlwriter::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_xmlwriter
 void c_xmlwriter::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_xmlwriter::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_xmlwriter::o_existsPublic(prop, phash);
-}
-bool c_xmlwriter::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_xmlwriter::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_get_xmlwriter
 Variant c_xmlwriter::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_xmlwriter::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_xmlwriter
 Variant c_xmlwriter::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_xmlwriter
 Variant c_xmlwriter::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_xmlwriter
+bool c_xmlwriter::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_xmlwriter::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_xmlwriter
+bool c_xmlwriter::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_xmlwriter
+bool c_xmlwriter::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_set_xmlwriter
 Variant c_xmlwriter::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_xmlwriter::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_xmlwriter
 Variant c_xmlwriter::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_xmlwriter
 Variant c_xmlwriter::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_xmlwriter
 Variant& c_xmlwriter::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_xmlwriter::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_xmlwriter
 Variant& c_xmlwriter::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_xmlwriter
 Variant& c_xmlwriter::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_xmlwriter
 Variant c_xmlwriter::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_xmlwriter
 IMPLEMENT_CLASS(xmlwriter)
 c_xmlwriter *c_xmlwriter::create() {
   CountableHelper h(this);
@@ -19013,6 +20247,7 @@ ObjectData *c_xmlwriter::cloneImpl() {
 void c_xmlwriter::cloneSet(c_xmlwriter *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_xmlwriter
 Variant c_xmlwriter::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -19296,6 +20531,8 @@ Variant c_xmlwriter::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_xmlwriter
 Variant c_xmlwriter::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {
@@ -19578,10 +20815,13 @@ Variant c_xmlwriter::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_xmlwriter
 Variant c_xmlwriter::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_xmlwriter
 Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {
@@ -20461,57 +21701,91 @@ Variant cw_xmlwriter$os_invoke(const char *c, const char *s, CArrRef params, boo
 Object co_domexception(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domexception)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domexception
 Variant c_domexception::os_getInit(const char *s, int64 hash) {
   return c_exception::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domexception
 Variant c_domexception::os_get(const char *s, int64 hash) {
   return c_exception::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domexception
 Variant &c_domexception::os_lval(const char *s, int64 hash) {
   return c_exception::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domexception
 void c_domexception::o_get(Array &props) const {
   c_exception::o_get(props);
 }
-bool c_domexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domexception::o_existsPublic(prop, phash);
-}
-bool c_domexception::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_exception::o_existsPublic(s, hash);
-}
-bool c_domexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domexception
 Variant c_domexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domexception::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domexception
 Variant c_domexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_exception::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domexception
 Variant c_domexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domexception
+bool c_domexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domexception::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domexception
+bool c_domexception::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_exception::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domexception
+bool c_domexception::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domexception
 Variant c_domexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domexception::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domexception
 Variant c_domexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_exception::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domexception
 Variant c_domexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domexception
 Variant& c_domexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domexception::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domexception
 Variant& c_domexception::o_lvalPublic(CStrRef s, int64 hash) {
   return c_exception::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domexception
 Variant& c_domexception::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domexception
 Variant c_domexception::os_constant(const char *s) {
   return c_exception::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domexception
 IMPLEMENT_CLASS(domexception)
 c_domexception *c_domexception::create(String a0, int64 a1) {
   CountableHelper h(this);
@@ -20576,6 +21850,7 @@ ObjectData *c_domexception::cloneImpl() {
 void c_domexception::cloneSet(c_domexception *clone) {
   c_exception::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domexception
 Variant c_domexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -20639,6 +21914,8 @@ Variant c_domexception::o_invoke(const char *s, CArrRef params, int64 hash, bool
   }
   return c_exception::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domexception
 Variant c_domexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -20701,10 +21978,13 @@ Variant c_domexception::o_invoke_few_args(const char *s, int64 hash, int count, 
   }
   return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domexception
 Variant c_domexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_exception::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domexception
 Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -20868,57 +22148,91 @@ Variant cw_domexception$os_invoke(const char *c, const char *s, CArrRef params, 
 Object co_domxpath(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domxpath)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domxpath
 Variant c_domxpath::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domxpath
 Variant c_domxpath::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domxpath
 Variant &c_domxpath::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domxpath
 void c_domxpath::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_domxpath::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domxpath::o_existsPublic(prop, phash);
-}
-bool c_domxpath::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_domxpath::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domxpath
 Variant c_domxpath::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domxpath::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domxpath
 Variant c_domxpath::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domxpath
 Variant c_domxpath::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domxpath
+bool c_domxpath::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domxpath::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domxpath
+bool c_domxpath::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domxpath
+bool c_domxpath::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domxpath
 Variant c_domxpath::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domxpath::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domxpath
 Variant c_domxpath::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domxpath
 Variant c_domxpath::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domxpath
 Variant& c_domxpath::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domxpath::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domxpath
 Variant& c_domxpath::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domxpath
 Variant& c_domxpath::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domxpath
 Variant c_domxpath::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domxpath
 IMPLEMENT_CLASS(domxpath)
 c_domxpath *c_domxpath::create(Variant a0) {
   CountableHelper h(this);
@@ -20976,6 +22290,7 @@ void c_domxpath::cloneSet(c_domxpath *clone) {
 Variant c_domxpath::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domxpath
 Variant c_domxpath::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -21032,6 +22347,8 @@ Variant c_domxpath::o_invoke(const char *s, CArrRef params, int64 hash, bool fat
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domxpath
 Variant c_domxpath::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -21087,10 +22404,13 @@ Variant c_domxpath::o_invoke_few_args(const char *s, int64 hash, int count, CVar
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domxpath
 Variant c_domxpath::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domxpath
 Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 15) {
@@ -21275,57 +22595,91 @@ Variant cw_domxpath$os_invoke(const char *c, const char *s, CArrRef params, bool
 Object co_soapserver(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapserver)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_soapserver
 Variant c_soapserver::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_soapserver
 Variant c_soapserver::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapserver
 Variant &c_soapserver::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_soapserver
 void c_soapserver::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_soapserver::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_soapserver::o_existsPublic(prop, phash);
-}
-bool c_soapserver::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_soapserver::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_get_soapserver
 Variant c_soapserver::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_soapserver::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_soapserver
 Variant c_soapserver::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_soapserver
 Variant c_soapserver::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_soapserver
+bool c_soapserver::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_soapserver::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_soapserver
+bool c_soapserver::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_soapserver
+bool c_soapserver::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_set_soapserver
 Variant c_soapserver::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_soapserver::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_soapserver
 Variant c_soapserver::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_soapserver
 Variant c_soapserver::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_soapserver
 Variant& c_soapserver::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_soapserver::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_soapserver
 Variant& c_soapserver::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_soapserver
 Variant& c_soapserver::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_soapserver
 Variant c_soapserver::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_soapserver
 IMPLEMENT_CLASS(soapserver)
 c_soapserver *c_soapserver::create(Variant a0, Array a1) {
   CountableHelper h(this);
@@ -21387,6 +22741,7 @@ ObjectData *c_soapserver::cloneImpl() {
 void c_soapserver::cloneSet(c_soapserver *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapserver
 Variant c_soapserver::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -21460,6 +22815,8 @@ Variant c_soapserver::o_invoke(const char *s, CArrRef params, int64 hash, bool f
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapserver
 Variant c_soapserver::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -21538,10 +22895,13 @@ Variant c_soapserver::o_invoke_few_args(const char *s, int64 hash, int count, CV
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapserver
 Variant c_soapserver::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapserver
 Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -21768,57 +23128,91 @@ Variant cw_soapserver$os_invoke(const char *c, const char *s, CArrRef params, bo
 Object co_domnode(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domnode)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domnode
 Variant c_domnode::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domnode
 Variant c_domnode::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domnode
 Variant &c_domnode::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domnode
 void c_domnode::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_domnode::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domnode::o_existsPublic(prop, phash);
-}
-bool c_domnode::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_domnode::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domnode
 Variant c_domnode::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domnode::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domnode
 Variant c_domnode::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domnode
 Variant c_domnode::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domnode
+bool c_domnode::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domnode::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domnode
+bool c_domnode::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domnode
+bool c_domnode::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domnode
 Variant c_domnode::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domnode::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domnode
 Variant c_domnode::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domnode
 Variant c_domnode::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domnode
 Variant& c_domnode::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domnode::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domnode
 Variant& c_domnode::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domnode
 Variant& c_domnode::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domnode
 Variant c_domnode::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domnode
 IMPLEMENT_CLASS(domnode)
 c_domnode *c_domnode::create() {
   CountableHelper h(this);
@@ -21872,6 +23266,7 @@ void c_domnode::cloneSet(c_domnode *clone) {
 Variant c_domnode::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnode
 Variant c_domnode::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -22009,6 +23404,8 @@ Variant c_domnode::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnode
 Variant c_domnode::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -22145,10 +23542,13 @@ Variant c_domnode::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnode
 Variant c_domnode::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnode
 Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 63) {
@@ -22574,57 +23974,91 @@ Variant cw_domnode$os_invoke(const char *c, const char *s, CArrRef params, bool 
 Object co_domdocument(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domdocument)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domdocument
 Variant c_domdocument::os_getInit(const char *s, int64 hash) {
   return c_domnode::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domdocument
 Variant c_domdocument::os_get(const char *s, int64 hash) {
   return c_domnode::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domdocument
 Variant &c_domdocument::os_lval(const char *s, int64 hash) {
   return c_domnode::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domdocument
 void c_domdocument::o_get(Array &props) const {
   c_domnode::o_get(props);
 }
-bool c_domdocument::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domdocument::o_existsPublic(prop, phash);
-}
-bool c_domdocument::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_domnode::o_existsPublic(s, hash);
-}
-bool c_domdocument::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domdocument
 Variant c_domdocument::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domdocument::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domdocument
 Variant c_domdocument::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_domnode::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domdocument
 Variant c_domdocument::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domdocument
+bool c_domdocument::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domdocument::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domdocument
+bool c_domdocument::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_domnode::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domdocument
+bool c_domdocument::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domdocument
 Variant c_domdocument::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domdocument::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domdocument
 Variant c_domdocument::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_domnode::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domdocument
 Variant c_domdocument::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domdocument
 Variant& c_domdocument::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domdocument::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domdocument
 Variant& c_domdocument::o_lvalPublic(CStrRef s, int64 hash) {
   return c_domnode::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domdocument
 Variant& c_domdocument::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domdocument
 Variant c_domdocument::os_constant(const char *s) {
   return c_domnode::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domdocument
 IMPLEMENT_CLASS(domdocument)
 c_domdocument *c_domdocument::create(String a0, String a1) {
   CountableHelper h(this);
@@ -22692,6 +24126,7 @@ void c_domdocument::cloneSet(c_domdocument *clone) {
 Variant c_domdocument::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domdocument
 Variant c_domdocument::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -23007,6 +24442,8 @@ Variant c_domdocument::o_invoke(const char *s, CArrRef params, int64 hash, bool 
   }
   return c_domnode::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domdocument
 Variant c_domdocument::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {
@@ -23321,10 +24758,13 @@ Variant c_domdocument::o_invoke_few_args(const char *s, int64 hash, int count, C
   }
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocument
 Variant c_domdocument::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocument
 Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {
@@ -24328,57 +25768,91 @@ Variant cw_domdocument$os_invoke(const char *c, const char *s, CArrRef params, b
 Object co_libxmlerror(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_libxmlerror)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_libxmlerror
 Variant c_libxmlerror::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_libxmlerror
 Variant c_libxmlerror::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_libxmlerror
 Variant &c_libxmlerror::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_libxmlerror
 void c_libxmlerror::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_libxmlerror::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_libxmlerror::o_existsPublic(prop, phash);
-}
-bool c_libxmlerror::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_libxmlerror::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_get_libxmlerror
 Variant c_libxmlerror::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_libxmlerror::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_libxmlerror
 Variant c_libxmlerror::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_libxmlerror
 Variant c_libxmlerror::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_libxmlerror
+bool c_libxmlerror::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_libxmlerror::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_libxmlerror
+bool c_libxmlerror::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_libxmlerror
+bool c_libxmlerror::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_set_libxmlerror
 Variant c_libxmlerror::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_libxmlerror::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_libxmlerror
 Variant c_libxmlerror::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_libxmlerror
 Variant c_libxmlerror::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_libxmlerror
 Variant& c_libxmlerror::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_libxmlerror::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_libxmlerror
 Variant& c_libxmlerror::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_libxmlerror
 Variant& c_libxmlerror::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_libxmlerror
 Variant c_libxmlerror::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_libxmlerror
 IMPLEMENT_CLASS(libxmlerror)
 c_libxmlerror *c_libxmlerror::create() {
   CountableHelper h(this);
@@ -24429,6 +25903,7 @@ ObjectData *c_libxmlerror::cloneImpl() {
 void c_libxmlerror::cloneSet(c_libxmlerror *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_libxmlerror
 Variant c_libxmlerror::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -24448,6 +25923,8 @@ Variant c_libxmlerror::o_invoke(const char *s, CArrRef params, int64 hash, bool 
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_libxmlerror
 Variant c_libxmlerror::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 3) {
@@ -24466,10 +25943,13 @@ Variant c_libxmlerror::o_invoke_few_args(const char *s, int64 hash, int count, C
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_libxmlerror
 Variant c_libxmlerror::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_libxmlerror
 Variant c_libxmlerror::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 3) {
@@ -24525,57 +26005,91 @@ Variant cw_libxmlerror$os_invoke(const char *c, const char *s, CArrRef params, b
 Object co_soapfault(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapfault)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_soapfault
 Variant c_soapfault::os_getInit(const char *s, int64 hash) {
   return c_exception::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_soapfault
 Variant c_soapfault::os_get(const char *s, int64 hash) {
   return c_exception::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapfault
 Variant &c_soapfault::os_lval(const char *s, int64 hash) {
   return c_exception::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_soapfault
 void c_soapfault::o_get(Array &props) const {
   c_exception::o_get(props);
 }
-bool c_soapfault::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_soapfault::o_existsPublic(prop, phash);
-}
-bool c_soapfault::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_exception::o_existsPublic(s, hash);
-}
-bool c_soapfault::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_get_soapfault
 Variant c_soapfault::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_soapfault::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_soapfault
 Variant c_soapfault::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_exception::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_soapfault
 Variant c_soapfault::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_soapfault
+bool c_soapfault::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_soapfault::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_soapfault
+bool c_soapfault::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_exception::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_soapfault
+bool c_soapfault::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_set_soapfault
 Variant c_soapfault::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_soapfault::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_soapfault
 Variant c_soapfault::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_exception::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_soapfault
 Variant c_soapfault::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_soapfault
 Variant& c_soapfault::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_soapfault::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_soapfault
 Variant& c_soapfault::o_lvalPublic(CStrRef s, int64 hash) {
   return c_exception::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_soapfault
 Variant& c_soapfault::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_soapfault
 Variant c_soapfault::os_constant(const char *s) {
   return c_exception::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_soapfault
 IMPLEMENT_CLASS(soapfault)
 c_soapfault *c_soapfault::create(Variant a0, String a1, String a2, Variant a3, String a4, Variant a5) {
   CountableHelper h(this);
@@ -24662,6 +26176,7 @@ ObjectData *c_soapfault::cloneImpl() {
 void c_soapfault::cloneSet(c_soapfault *clone) {
   c_exception::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapfault
 Variant c_soapfault::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -24727,6 +26242,8 @@ Variant c_soapfault::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
   }
   return c_exception::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapfault
 Variant c_soapfault::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -24791,10 +26308,13 @@ Variant c_soapfault::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   }
   return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapfault
 Variant c_soapfault::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_exception::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapfault
 Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -24976,57 +26496,91 @@ Variant cw_soapfault$os_invoke(const char *c, const char *s, CArrRef params, boo
 Object co_domelement(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domelement)())->dynCreate(params, init));
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domelement
 Variant c_domelement::os_getInit(const char *s, int64 hash) {
   return c_domnode::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domelement
 Variant c_domelement::os_get(const char *s, int64 hash) {
   return c_domnode::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domelement
 Variant &c_domelement::os_lval(const char *s, int64 hash) {
   return c_domnode::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domelement
 void c_domelement::o_get(Array &props) const {
   c_domnode::o_get(props);
 }
-bool c_domelement::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_domelement::o_existsPublic(prop, phash);
-}
-bool c_domelement::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_domnode::o_existsPublic(s, hash);
-}
-bool c_domelement::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_get_domelement
 Variant c_domelement::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domelement::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domelement
 Variant c_domelement::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_domnode::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domelement
 Variant c_domelement::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_domelement
+bool c_domelement::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_domelement::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domelement
+bool c_domelement::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_domnode::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domelement
+bool c_domelement::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_set_domelement
 Variant c_domelement::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_domelement::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domelement
 Variant c_domelement::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_domnode::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domelement
 Variant c_domelement::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_domelement
 Variant& c_domelement::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_domelement::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domelement
 Variant& c_domelement::o_lvalPublic(CStrRef s, int64 hash) {
   return c_domnode::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domelement
 Variant& c_domelement::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domelement
 Variant c_domelement::os_constant(const char *s) {
   return c_domnode::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domelement
 IMPLEMENT_CLASS(domelement)
 c_domelement *c_domelement::create(String a0, String a1, String a2) {
   CountableHelper h(this);
@@ -25098,6 +26652,7 @@ void c_domelement::cloneSet(c_domelement *clone) {
 Variant c_domelement::doGet(Variant v_name, bool error) {
   return t___get(v_name);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domelement
 Variant c_domelement::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -25341,6 +26896,8 @@ Variant c_domelement::o_invoke(const char *s, CArrRef params, int64 hash, bool f
   }
   return c_domnode::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domelement
 Variant c_domelement::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {
@@ -25583,10 +27140,13 @@ Variant c_domelement::o_invoke_few_args(const char *s, int64 hash, int count, CV
   }
   return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domelement
 Variant c_domelement::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_domnode::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domelement
 Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 127) {

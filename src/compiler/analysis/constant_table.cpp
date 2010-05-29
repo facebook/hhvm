@@ -34,7 +34,7 @@ using namespace boost;
 ///////////////////////////////////////////////////////////////////////////////
 
 ConstantTable::ConstantTable(BlockScope &blockScope)
-  : SymbolTable(blockScope) {
+    : SymbolTable(blockScope), m_emptyJumpTable(false) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -292,7 +292,9 @@ void ConstantTable::outputCPPJumpTable(CodeGenerator &cg,
       strings.push_back(s.c_str());
     }
   }
-  if (!strings.empty()) {
+
+  m_emptyJumpTable = strings.empty();
+  if (!m_emptyJumpTable) {
     if (hasDynamic) {
       if (needsGlobals) {
         cg.printDeclareGlobals();

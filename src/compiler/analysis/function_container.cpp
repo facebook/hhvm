@@ -193,7 +193,7 @@ void FunctionContainer::outputCPPJumpTableEvalSupport
 
 void FunctionContainer::outputCPPJumpTable(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
-  string parent  = "invoke_failed";
+  string parent = "invoke_failed";
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
 
   vector<const char *> funcs;
@@ -240,7 +240,8 @@ void FunctionContainer::outputCPPEvalInvokeTable(CodeGenerator &cg,
   if (generate) {
     if (needGlobals) cg.printDeclareGlobals();
 
-    for (JumpTable fit(cg, funcs, true, true, false); fit.ready(); fit.next()) {
+    for (JumpTable fit(cg, funcs, true, true, false); fit.ready();
+         fit.next()) {
       const char *name = fit.key();
       StringToFunctionScopePtrVecMap::const_iterator iterFuncs =
         m_functions.find(name);

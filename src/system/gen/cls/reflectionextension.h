@@ -28,7 +28,51 @@ class c_reflectionextension : public ExtObjectData {
   BEGIN_CLASS_MAP(reflectionextension)
     PARENT_CLASS(reflector)
   END_CLASS_MAP(reflectionextension)
-  DECLARE_CLASS(reflectionextension, ReflectionExtension, ObjectData)
+  DECLARE_CLASS_COMMON(reflectionextension, ReflectionExtension, ObjectData)
+  DECLARE_INVOKE_EX(reflectionextension, ObjectData)
+
+  // DECLARE_STATIC_PROP_OPS
+  public:
+  static void os_static_initializer();
+  static Variant os_getInit(const char *s, int64 hash);
+  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_reflectionextension 1
+  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionextension 1
+  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_reflectionextension 1
+
+  // DECLARE_INSTANCE_PROP_OPS
+  public:
+  virtual bool o_exists(CStrRef s, int64 hash,
+                        const char *context = NULL) const;
+  bool o_existsPrivate(CStrRef s, int64 hash) const;
+  virtual void o_get(Array &props) const;
+  virtual Variant o_get(CStrRef s, int64 hash, bool error = true,
+                        const char *context = NULL);
+  Variant o_getPrivate(CStrRef s, int64 hash, bool error = true);
+  virtual Variant o_set(CStrRef s, int64 hash, CVarRef v,
+                        bool forInit = false,
+                        const char *context = NULL);
+  Variant o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit);
+  virtual Variant &o_lval(CStrRef s, int64 hash,
+                          const char *context = NULL);
+  Variant &o_lvalPrivate(CStrRef s, int64 hash);
+
+  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
+  public:
+  #define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionextension 1
+  #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionextension 1
+  #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionextension 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionextension 1
+
+  // DECLARE_COMMON_INVOKE
+  static Variant os_invoke(const char *c, const char *s,
+                           CArrRef ps, int64 h, bool f = true);
+  virtual Variant o_invoke(const char *s, CArrRef ps, int64 h,
+                           bool f = true);
+  virtual Variant o_invoke_few_args(const char *s, int64 h,
+                                    int count,
+                                    INVOKE_FEW_ARGS_DECL_ARGS);
+
+  public:
   DECLARE_INVOKES_FROM_EVAL
   void init();
   public: Variant m_name;

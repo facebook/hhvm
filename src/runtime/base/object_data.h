@@ -144,19 +144,18 @@ class ObjectData : public Countable {
   virtual Array o_toIterArray(const char *context, bool getRef = false);
   virtual Array o_getDynamicProperties() const;
   virtual bool o_exists(CStrRef s, int64 hash,
-      const char *context = NULL) const;
+                        const char *context = NULL) const;
   virtual bool o_existsPublic(CStrRef s, int64 hash) const;
   virtual void o_get(Array &props) const {}
   virtual Variant o_get(CStrRef s, int64 hash, bool error = true,
-      const char *context = NULL);
+                        const char *context = NULL);
   virtual Variant o_getPublic(CStrRef s, int64 hash, bool error = true);
   virtual Variant o_getUnchecked(CStrRef s, int64 hash,
-      const char *context = NULL);
+                                 const char *context = NULL);
   virtual Variant o_set(CStrRef s, int64 hash, CVarRef v, bool forInit = false,
-      const char *context = NULL);
+                        const char *context = NULL);
   virtual Variant o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit);
-  virtual Variant &o_lval(CStrRef s, int64 hash,
-      const char *context = NULL);
+  virtual Variant &o_lval(CStrRef s, int64 hash, const char *context = NULL);
   virtual Variant &o_lvalPublic(CStrRef s, int64 hash);
   void o_set(const Array properties);
 

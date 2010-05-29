@@ -26,7 +26,46 @@ namespace HPHP {
 class c___php_incomplete_class : public ExtObjectData {
   BEGIN_CLASS_MAP(__php_incomplete_class)
   END_CLASS_MAP(__php_incomplete_class)
-  DECLARE_CLASS(__php_incomplete_class, __PHP_Incomplete_Class, ObjectData)
+  DECLARE_CLASS_COMMON(__php_incomplete_class, __PHP_Incomplete_Class, ObjectData)
+  DECLARE_INVOKE_EX(__php_incomplete_class, ObjectData)
+
+  // DECLARE_STATIC_PROP_OPS
+  public:
+  static void os_static_initializer();
+  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT___php_incomplete_class 1
+  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET___php_incomplete_class 1
+  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL___php_incomplete_class 1
+  #define OMIT_JUMP_TABLE_CLASS_CONSTANT___php_incomplete_class 1
+
+  // DECLARE_INSTANCE_PROP_OPS
+  public:
+  virtual bool o_exists(CStrRef s, int64 hash,
+                        const char *context = NULL) const;
+  bool o_existsPrivate(CStrRef s, int64 hash) const;
+  virtual void o_get(Array &props) const;
+  virtual Variant o_get(CStrRef s, int64 hash, bool error = true,
+                        const char *context = NULL);
+  Variant o_getPrivate(CStrRef s, int64 hash, bool error = true);
+  virtual Variant o_set(CStrRef s, int64 hash, CVarRef v,
+                        bool forInit = false,
+                        const char *context = NULL);
+  Variant o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit);
+  virtual Variant &o_lval(CStrRef s, int64 hash,
+                          const char *context = NULL);
+  Variant &o_lvalPrivate(CStrRef s, int64 hash);
+
+  // DECLARE_INSTANCE_PUBLIC_PROP_OPS
+  public:
+  #define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC___php_incomplete_class 1
+  #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC___php_incomplete_class 1
+  #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC___php_incomplete_class 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC___php_incomplete_class 1
+
+  // DECLARE_COMMON_INVOKE
+  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE___php_incomplete_class 1
+  #define OMIT_JUMP_TABLE_CLASS_INVOKE___php_incomplete_class 1
+
+  public:
   DECLARE_INVOKES_FROM_EVAL
   void init();
 };

@@ -76,6 +76,34 @@ public:
     JumpReturnInit
   };
 
+  enum JumpTableName {
+    JumpTableGlobalGetImpl,
+    JumpTableGlobalExists,
+    JumpTableGlobalGetIndex,
+
+    JumpTableLocalGetImpl,
+    JumpTableLocalExists,
+
+    JumpTableClassStaticGetInit,
+    JumpTableClassStaticGet,
+    JumpTableClassStaticLval,
+
+    // this order is significant in outputCPPPropertyOp()
+    JumpTableClassGetArray,
+    JumpTableClassGet,
+    JumpTableClassGetPublic,
+    JumpTableClassGetPrivate,
+    JumpTableClassExists,
+    JumpTableClassExistsPublic,
+    JumpTableClassExistsPrivate,
+    JumpTableClassSet,
+    JumpTableClassSetPublic,
+    JumpTableClassSetPrivate,
+    JumpTableClassLval,
+    JumpTableClassLvalPublic,
+    JumpTableClassLvalPrivate,
+  };
+
 public:
   VariableTable(BlockScope &blockScope);
   ~VariableTable();
@@ -236,6 +264,16 @@ public:
     m_hookHandler = hookHandler;
   }
 
+  /**
+   * Whether or not the specified jump table is empty.
+   */
+  bool hasAllJumpTables() const {
+    return m_emptyJumpTables.empty();
+  }
+  bool hasJumpTable(JumpTableName name) const {
+    return m_emptyJumpTables.find(name) == m_emptyJumpTables.end();
+  }
+
 private:
   enum StaticSelection {
     NonStatic = 1,
@@ -266,6 +304,8 @@ private:
   std::set<std::string> m_needed;       // needed even though not referenced
   StringToConstructPtrMap m_staticInitVal; // static stmt variable init value
   StringToConstructPtrMap m_clsInitVal; // class variable init value
+
+  std::set<JumpTableName> m_emptyJumpTables;
 
   /**
    * These are static variables collected from different local scopes,
@@ -308,13 +348,15 @@ private:
                           const char *prefix, bool defineHash,
                           bool variantOnly, StaticSelection staticVar,
                           JumpTableType type = JumpReturn,
-                          PrivateSelection privateVar = NonPrivate);
-  void outputCPPPrivateSelector(CodeGenerator &cg, AnalysisResultPtr ar,
-      const char *op, const char *args);
+                          PrivateSelection privateVar = NonPrivate,
+                          bool *declaredGlobals = NULL);
+  bool outputCPPPrivateSelector(CodeGenerator &cg, AnalysisResultPtr ar,
+                                const char *op, const char *args);
   void outputCPPPropertyOp(CodeGenerator &cg, AnalysisResultPtr ar,
       const char *cls, const char *parent, const char *op, const char *argsDec,
       const char *args, const char *ret, bool cnst, JumpTableType type,
-      bool varOnly, ClassScope::Derivation dynamicObject);
+      bool varOnly, ClassScope::Derivation dynamicObject,
+      JumpTableName jtname);
 
   // hook
   static void (*m_hookHandler)(AnalysisResultPtr ar,

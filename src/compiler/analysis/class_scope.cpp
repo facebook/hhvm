@@ -399,7 +399,7 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (!isUserClass()) attribute |= ClassInfo::IsSystem;
   if (isRedeclaring()) attribute |= ClassInfo::IsRedeclared;
   if (isVolatile()) attribute |= ClassInfo::IsVolatile;
-  if (isInterface()) attribute |= ClassInfo::IsInterface | ClassInfo::IsAbstract;
+  if (isInterface()) attribute |= ClassInfo::IsInterface|ClassInfo::IsAbstract;
   if (m_kindOf == KindOfAbstractClass) attribute |= ClassInfo::IsAbstract;
   if (m_kindOf == KindOfFinalClass) attribute |= ClassInfo::IsFinal;
   if (!m_docComment.empty()) attribute |= ClassInfo::HasDocComment;
@@ -646,7 +646,8 @@ void ClassScope::outputCPPInvokeStaticMethodImpl
     cg.indentEnd("}\n");
     cg.indentEnd("}\n");
   }
-  outputCPPClassJumpTable(cg, classScopes, classes, "HASH_INVOKE_STATIC_METHOD");
+  outputCPPClassJumpTable(cg, classScopes, classes,
+                          "HASH_INVOKE_STATIC_METHOD");
 
   // There should be invoke_failed for static methods...
   if (!system) {
@@ -680,7 +681,8 @@ void ClassScope::outputCPPGetStaticPropertyImpl
               "return r;\n");
     cg.indentEnd("}\n");
   }
-  outputCPPClassJumpTable(cg, classScopes, classes, "HASH_GET_STATIC_PROPERTY");
+  outputCPPClassJumpTable(cg, classScopes, classes,
+                          "HASH_GET_STATIC_PROPERTY");
   if (!system) {
     cg.printf("return get_builtin_static_property(s, prop);\n");
   } else {
@@ -699,7 +701,8 @@ void ClassScope::outputCPPGetStaticPropertyImpl
               "return r;\n");
     cg.indentEnd("}\n");
   }
-  outputCPPClassJumpTable(cg, classScopes, classes, "HASH_GET_STATIC_PROPERTY_LV");
+  outputCPPClassJumpTable(cg, classScopes, classes,
+                          "HASH_GET_STATIC_PROPERTY_LV");
   if (!system) {
     cg.printf("return get_builtin_static_property_lv(s, prop);\n");
   } else {
@@ -806,20 +809,27 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     // Constant Lookup Table
     getVariables()->outputCPPPropertyTable(cg, ar, parent,
                                            derivesFromRedeclaring());
-    cg.indentBegin("Variant %s%s::%sconstant(const char *s) {\n",
-                   Option::ClassPrefix, clsName, Option::ObjectStaticPrefix);
-    if (dynamicObject) cg.printDeclareGlobals();
-    getConstants()->outputCPPJumpTable(cg, ar, !dynamicObject, false);
+
     // If parent is redeclared, you have to go to their class statics object.
     if (dynamicObject) {
+      cg.indentBegin("Variant %s%s::%sconstant(const char *s) {\n",
+                     Option::ClassPrefix, clsName, Option::ObjectStaticPrefix);
+      cg.printDeclareGlobals();
+      getConstants()->outputCPPJumpTable(cg, ar, !dynamicObject, false);
       cg.printf("return %s->%s%s->%sconstant(s);\n", cg.getGlobals(ar),
                 Option::ClassStaticsObjectPrefix, parent,
                 Option::ObjectStaticPrefix);
+      cg.indentEnd("}\n");
     } else {
+      cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_CONSTANT_%s", clsName);
+      cg.indentBegin("Variant %s%s::%sconstant(const char *s) {\n",
+                     Option::ClassPrefix, clsName, Option::ObjectStaticPrefix);
+      getConstants()->outputCPPJumpTable(cg, ar, !dynamicObject, false);
       cg.printf("return %s%s::%sconstant(s);\n", Option::ClassPrefix, parent,
                 Option::ObjectStaticPrefix);
+      cg.indentEnd("}\n");
+      cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_CONSTANT_%s", clsName);
     }
-    cg.indentEnd("}\n");
 
     cg.printf("IMPLEMENT_CLASS(%s)\n", clsName);
   }
@@ -984,7 +994,8 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
   cg.indentEnd("}\n");
 }
 
-void ClassScope::addFunction(AnalysisResultPtr ar, FunctionScopePtr funcScope) {
+void ClassScope::addFunction(AnalysisResultPtr ar,
+                             FunctionScopePtr funcScope) {
   FunctionScopePtrVec &funcs = m_functions[funcScope->getName()];
   if (funcs.size() == 1) {
     funcs[0]->setRedeclaring(0);
@@ -1060,10 +1071,12 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
                                     bool staticOnly,
                                     bool dynamicObject /* = false */,
                                     bool forEval /* = false */) {
+  string id = getId();
+  const char *clsName = id.c_str();
 
   string scope;
   scope += Option::ClassPrefix;
-  scope += getId();
+  scope += id;
   scope += "::";
   string parent;
   string parentName = m_parent.empty() ? string("ObjectData") : m_parent;
@@ -1133,11 +1146,19 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
   } else {
     // output invoke()
     if (staticOnly) { // os_invoke
+      if (funcs.empty()) {
+        m_emptyJumpTables.insert(JumpTableStaticInvoke);
+      }
+      cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_%s", clsName);
       cg.indentBegin("Variant %s%s"
                      "(const char *c, const char *s, CArrRef params,"
                      " int64 hash, bool fatal) {\n", scope.c_str(),
                      invokeName.c_str());
     } else {
+      if (funcs.empty()) {
+        m_emptyJumpTables.insert(JumpTableInvoke);
+      }
+      cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
       cg.indentBegin("Variant %s%s"
                      "(const char *s, CArrRef params,"
                      " int64 hash, bool fatal) {\n", scope.c_str(),
@@ -1150,23 +1171,28 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
                              forEval);
   if (forEval) {
     if (staticOnly) {
-      cg.printf("return %s(c, s, env, caller, hash, fatal);\n", parent.c_str());
+      cg.printf("return %s(c, s, env, caller, hash, fatal);\n",
+                parent.c_str());
     } else {
       cg.printf("return %s(s, env, caller, hash, fatal);\n", parent.c_str());
     }
+    cg.indentEnd("}\n");
   } else {
     if (staticOnly) {
       cg.printf("return %s(c, s, params, hash, fatal);\n", parent.c_str());
+      cg.indentEnd("}\n");
+      cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_%s", clsName);
     } else {
       cg.printf("return %s(s, params, hash, fatal);\n", parent.c_str());
+      cg.indentEnd("}\n");
+      cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
     }
   }
-  cg.indentEnd("}\n");
 
   if (!staticOnly && !forEval) {
+    cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
     cg.indentBegin("Variant %s%s_few_args(const char *s, int64 hash, "
-                   "int count",
-                   scope.c_str(), invokeName.c_str());
+                   "int count", scope.c_str(), invokeName.c_str());
     for (int i = 0; i < Option::InvokeFewArgsCount; i++) {
       cg.printf(", CVarRef a%d", i);
     }
@@ -1180,6 +1206,7 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
     }
     cg.printf(");\n");
     cg.indentEnd("}\n");
+    cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
   }
 }
 

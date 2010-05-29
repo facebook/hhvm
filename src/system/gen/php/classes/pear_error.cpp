@@ -25,57 +25,91 @@ namespace HPHP {
 /* preface starts */
 /* preface finishes */
 /* SRC: classes/pear_error.php line 3 */
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_pear_error
 Variant c_pear_error::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_pear_error
 Variant c_pear_error::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_pear_error
 Variant &c_pear_error::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_pear_error
 void c_pear_error::o_get(Array &props) const {
   c_ObjectData::o_get(props);
 }
-bool c_pear_error::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  return c_pear_error::o_existsPublic(prop, phash);
-}
-bool c_pear_error::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_pear_error::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_get_pear_error
 Variant c_pear_error::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_pear_error::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_pear_error
 Variant c_pear_error::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_pear_error
 Variant c_pear_error::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_pear_error
+bool c_pear_error::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_pear_error::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_pear_error
+bool c_pear_error::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_pear_error
+bool c_pear_error::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_set_pear_error
 Variant c_pear_error::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   return c_pear_error::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_pear_error
 Variant c_pear_error::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_pear_error
 Variant c_pear_error::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_pear_error
 Variant& c_pear_error::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   return c_pear_error::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_pear_error
 Variant& c_pear_error::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_pear_error
 Variant& c_pear_error::o_lvalPrivate(CStrRef s, int64 hash) {
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_pear_error
 Variant c_pear_error::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_pear_error
 IMPLEMENT_CLASS(pear_error)
 c_pear_error *c_pear_error::create(CStrRef v_message //  = "unknown error"
 , CVarRef v_code //  = null_variant
@@ -111,6 +145,7 @@ ObjectData *c_pear_error::cloneImpl() {
 void c_pear_error::cloneSet(c_pear_error *clone) {
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pear_error
 Variant c_pear_error::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -190,6 +225,8 @@ Variant c_pear_error::o_invoke(const char *s, CArrRef params, int64 hash, bool f
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pear_error
 Variant c_pear_error::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -268,10 +305,13 @@ Variant c_pear_error::o_invoke_few_args(const char *s, int64 hash, int count, CV
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pear_error
 Variant c_pear_error::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pear_error
 Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {

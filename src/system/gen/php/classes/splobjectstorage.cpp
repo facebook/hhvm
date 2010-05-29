@@ -26,6 +26,7 @@ namespace HPHP {
 /* preface starts */
 /* preface finishes */
 /* SRC: classes/splobjectstorage.php line 3 */
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_splobjectstorage
 Variant c_splobjectstorage::os_getInit(const char *s, int64 hash) {
   DECLARE_SYSTEM_GLOBALS(g);
   if (hash < 0) hash = hash_string(s);
@@ -41,45 +42,25 @@ Variant c_splobjectstorage::os_getInit(const char *s, int64 hash) {
   }
   return c_ObjectData::os_getInit(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_splobjectstorage
 Variant c_splobjectstorage::os_get(const char *s, int64 hash) {
   return c_ObjectData::os_get(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splobjectstorage
 Variant &c_splobjectstorage::os_lval(const char *s, int64 hash) {
   return c_ObjectData::os_lval(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_splobjectstorage
 void c_splobjectstorage::o_get(Array &props) const {
   if (isInitialized(m_storage)) props.set(String("\0splobjectstorage\0storage", 25, CopyString), m_storage.isReferenced() ? ref(m_storage) : m_storage, 0x360C5717AFE5B19ALL, true);
   props.set(String("\0splobjectstorage\0index", 23, CopyString), m_index, 0x46B37B8DC73E4D83LL, true);
   c_ObjectData::o_get(props);
 }
-bool c_splobjectstorage::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
-  const char *s = context;
-  if (!s) { context = s = FrameInjection::GetClassName(false); }
-  int64 hash = hash_string_i(s);
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD(0x5BA243B9FBA7A64FLL, splobjectstorage) { return o_existsPrivate(prop, phash); }
-      break;
-    default:
-      break;
-  }
-  return c_splobjectstorage::o_existsPublic(prop, phash);
-}
-bool c_splobjectstorage::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-bool c_splobjectstorage::o_existsPrivate(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
-  switch (hash & 3) {
-    case 1:
-      HASH_EXISTS_STRING(0x1EA489BB64FC2CB1LL, storage, 7);
-      HASH_EXISTS_STRING(0x440D5888C0FF3081LL, index, 5);
-      break;
-    default:
-      break;
-  }
-  return o_existsPublic(s, hash);
-}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_get_splobjectstorage
 Variant c_splobjectstorage::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   const char *s = context;
   if (!s) { context = s = FrameInjection::GetClassName(false); }
@@ -93,9 +74,13 @@ Variant c_splobjectstorage::o_get(CStrRef prop, int64 phash, bool error /* = tru
   }
   return c_splobjectstorage::o_getPublic(prop, phash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splobjectstorage
 Variant c_splobjectstorage::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splobjectstorage
 Variant c_splobjectstorage::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 3) {
@@ -110,6 +95,42 @@ Variant c_splobjectstorage::o_getPrivate(CStrRef s, int64 hash, bool error /* = 
   }
   return o_getPublic(s, hash, error);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_splobjectstorage
+bool c_splobjectstorage::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  const char *s = context;
+  if (!s) { context = s = FrameInjection::GetClassName(false); }
+  int64 hash = hash_string_i(s);
+  switch (hash & 1) {
+    case 1:
+      HASH_GUARD(0x5BA243B9FBA7A64FLL, splobjectstorage) { return o_existsPrivate(prop, phash); }
+      break;
+    default:
+      break;
+  }
+  return c_splobjectstorage::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splobjectstorage
+bool c_splobjectstorage::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splobjectstorage
+bool c_splobjectstorage::o_existsPrivate(CStrRef s, int64 hash) const {
+  if (hash < 0) hash = hash_string(s.data(), s.length());
+  switch (hash & 3) {
+    case 1:
+      HASH_EXISTS_STRING(0x1EA489BB64FC2CB1LL, storage, 7);
+      HASH_EXISTS_STRING(0x440D5888C0FF3081LL, index, 5);
+      break;
+    default:
+      break;
+  }
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_set_splobjectstorage
 Variant c_splobjectstorage::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
   const char *s = context;
   if (!s) { context = s = FrameInjection::GetClassName(false); }
@@ -123,9 +144,13 @@ Variant c_splobjectstorage::o_set(CStrRef prop, int64 phash, CVarRef v, bool for
   }
   return c_splobjectstorage::o_setPublic(prop, phash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splobjectstorage
 Variant c_splobjectstorage::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splobjectstorage
 Variant c_splobjectstorage::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 3) {
@@ -140,6 +165,8 @@ Variant c_splobjectstorage::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool 
   }
   return o_setPublic(s, hash, v, forInit);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_splobjectstorage
 Variant& c_splobjectstorage::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
   const char *s = context;
   if (!s) { context = s = FrameInjection::GetClassName(false); }
@@ -153,9 +180,13 @@ Variant& c_splobjectstorage::o_lval(CStrRef prop, int64 phash, const char *conte
   }
   return c_splobjectstorage::o_lvalPublic(prop, phash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splobjectstorage
 Variant& c_splobjectstorage::o_lvalPublic(CStrRef s, int64 hash) {
   return c_ObjectData::o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_splobjectstorage
 Variant& c_splobjectstorage::o_lvalPrivate(CStrRef s, int64 hash) {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 1) {
@@ -168,9 +199,12 @@ Variant& c_splobjectstorage::o_lvalPrivate(CStrRef s, int64 hash) {
   }
   return o_lvalPublic(s, hash);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_splobjectstorage
 Variant c_splobjectstorage::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_splobjectstorage
 IMPLEMENT_CLASS(splobjectstorage)
 ObjectData *c_splobjectstorage::cloneImpl() {
   c_splobjectstorage *obj = NEW(c_splobjectstorage)();
@@ -182,6 +216,7 @@ void c_splobjectstorage::cloneSet(c_splobjectstorage *clone) {
   clone->m_index = m_index;
   ObjectData::cloneSet(clone);
 }
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splobjectstorage
 Variant c_splobjectstorage::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
@@ -243,6 +278,8 @@ Variant c_splobjectstorage::o_invoke(const char *s, CArrRef params, int64 hash, 
   }
   return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splobjectstorage
 Variant c_splobjectstorage::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
@@ -303,10 +340,13 @@ Variant c_splobjectstorage::o_invoke_few_args(const char *s, int64 hash, int cou
   }
   return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splobjectstorage
 Variant c_splobjectstorage::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splobjectstorage
 Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {

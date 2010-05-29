@@ -367,7 +367,10 @@ bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
-  if (m_class) ar->preOptimize(m_class);
+  if (m_class) {
+    ar->preOptimize(m_class);
+    updateClassName();
+  }
   ar->preOptimize(m_nameExp);
   ar->preOptimize(m_params);
   if (ar->getPhase() != AnalysisResult::SecondPreOptimize) {
@@ -485,6 +488,10 @@ TypePtr SimpleFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
 TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                           bool coerce) {
   reset();
+
+  if (m_class) {
+    m_class->inferAndCheck(ar, Type::String, false);
+  }
 
   ConstructPtr self = shared_from_this();
 

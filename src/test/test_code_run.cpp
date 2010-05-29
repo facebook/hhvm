@@ -156,14 +156,11 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
                           const char *file = "", int line = 0,
                           bool nowarnings = false, const char *subdir = "",
                           bool fastMode = false) {
-  // generate main.php and get PHP's output
-  string expected;
-  if (output) {
-    expected = output;
-  } else {
-    string fullPath = "runtime/tmp";
-    if (subdir && subdir[0]) fullPath = fullPath + "/" + subdir;
-    fullPath += "/main.php";
+  // generate main.php
+  string fullPath = "runtime/tmp";
+  if (subdir && subdir[0]) fullPath = fullPath + "/" + subdir;
+  fullPath += "/main.php";
+  {
     Util::mkdir(fullPath.c_str());
     ofstream f(fullPath.c_str());
     if (!f) {
@@ -174,7 +171,13 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
 
     f << input;
     f.close();
+  }
 
+  // get PHP's output if "output" is NULL
+  string expected;
+  if (output) {
+    expected = output;
+  } else {
     const char *argv1[] = {"", fullPath.c_str(), NULL};
     const char *argv2[] = {"", "-n", fullPath.c_str(), NULL};
     string err;
@@ -273,10 +276,10 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
   return true;
 }
 
-bool TestCodeRun::RecordMulti(const char *input, const char *file, int line,
-                              bool flag) {
+bool TestCodeRun::RecordMulti(const char *input, const char *output,
+                              const char *file, int line, bool flag) {
   size_t i = m_infos.size();
-  m_infos.push_back(VCRInfo(input, NULL, file, line, flag));
+  m_infos.push_back(VCRInfo(input, output, file, line, flag));
 
   if (Option::EnableEval < Option::FullEval) {
     ASSERT(m_infos[i].input);
@@ -433,6 +436,10 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestExtSplFile);
   RUN_TEST(TestExtIterator);
   RUN_TEST(TestExtSoap);
+
+  // PHP 5.3 features
+  RUN_TEST(TestVariableClassName);
+  //RUN_TEST(TestLateStaticBinding); // requires ENABLE_LATE_STATIC_BINDING
 
   RUN_TEST(TestAdHoc);
   return ret;
@@ -10585,6 +10592,112 @@ bool TestCodeRun::TestExtSoap() {
       "       '</ns1:Add>  </SOAP-ENV:Body></SOAP-ENV:Envelope>';"
       "$server->addFunction('Add');"
       "$server->handle($str);");
+  return true;
+}
+
+bool TestCodeRun::TestVariableClassName() {
+  MVCRO(
+    "<?php\n"
+    "class A {\n"
+    "  const C = 123;\n"
+    "  static public $foo = 456;\n"
+    "  public function bar() {\n"
+    "    return 789;\n"
+    "  }\n"
+    "}\n"
+    "$cls = 'a';\n"
+    "\n"
+    "var_dump($cls::C); // ClassConstant\n"
+    "\n"
+    "var_dump($cls::$foo); // StaticMember\n"
+    "$cls::$foo = 'test';\n"
+    "var_dump($cls::$foo); // l-value\n"
+    "\n"
+    "var_dump($cls::bar()); // SimpleFunctionCall\n"
+    "\n"
+    "$func = 'bar';\n"
+    "var_dump($cls::$func()); // DynamicFunctionCall\n",
+
+    "int(123)\n"
+    "int(456)\n"
+    "string(4) \"test\"\n"
+    "int(789)\n"
+    "int(789)\n"
+  );
+
+  MVCRO(
+    "<?php\n"
+    "class B {\n"
+    "  function f4($arguments) {\n"
+    "    var_dump($arguments);\n"
+    "  }\n"
+    "}\n"
+    "class G extends B {\n"
+    "  function f4($a) {\n"
+    "    $b='B';\n"
+    "    $b::f4(5); // __call\n"
+    "  }\n"
+    "}\n"
+    "$g = new G(5);\n"
+    "$g->f4(3);\n",
+
+    "int(5)\n"
+  );
+
+  return true;
+}
+
+bool TestCodeRun::TestLateStaticBinding() {
+  MVCRO(
+    "<?php\n"
+    "class A {\n"
+    "  static public function foo() {\n"
+    "    static::bar();\n"
+    "  }\n"
+    "  public function bar() {\n"
+    "    var_dump(__CLASS__);\n"
+    "  }\n"
+    "  public function foo2() {\n"
+    "    B::foo();    // B always changes 'static'\n"
+    "    self::foo(); // 'self' doesn't change 'static'\n"
+    "  }\n"
+    "}\n"
+    "class B extends A {\n"
+    "  public function bar() {\n"
+    "    var_dump(__CLASS__);\n"
+    "  }\n"
+    "  public function foo3() {\n"
+    "    $this->foo();  // $this changes 'static'\n"
+    "    parent::foo(); // 'parent' doesn't change 'static'\n"
+    "  }\n"
+    "}\n"
+    "\n"
+    "$a = new A();\n"
+    "$b = new B();\n"
+    "\n"
+    "B::foo();   // B\n"
+    "$b->foo();  // B\n"
+    "\n"
+    "$b->foo2(); // BB\n"
+    "$b->foo3(); // BB\n"
+    "\n"
+    "A::foo();   // A\n"
+    "$a->foo();  // A\n"
+    "\n"
+    "$a->foo2(); // BA\n",
+
+    "string(1) \"B\"\n"
+    "string(1) \"B\"\n"
+    "string(1) \"B\"\n"
+    "string(1) \"B\"\n"
+    "string(1) \"B\"\n"
+    "string(1) \"B\"\n"
+    "string(1) \"A\"\n"
+    "string(1) \"A\"\n"
+    "string(1) \"B\"\n"
+    "string(1) \"A\"\n"
+  );
+
   return true;
 }
 

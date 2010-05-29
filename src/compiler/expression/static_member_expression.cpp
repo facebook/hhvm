@@ -38,7 +38,7 @@ StaticMemberExpression::StaticMemberExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr classExp, ExpressionPtr exp)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_class(classExp), m_exp(exp), m_valid(false),
+    StaticClassName(classExp), m_exp(exp), m_valid(false),
     m_dynamicClass(false), m_redeclared(false) {
   if (exp->is(KindOfSimpleVariable)) {
     SimpleVariablePtr s(dynamic_pointer_cast<SimpleVariable>(exp));
@@ -50,18 +50,6 @@ StaticMemberExpression::StaticMemberExpression
   } else {
     assert(exp->is(KindOfDynamicVariable));
     m_exp = dynamic_pointer_cast<DynamicVariable>(exp)->getSubExpression();
-  }
-
-  if (m_class->is(KindOfScalarExpression)) {
-    ScalarExpressionPtr s(dynamic_pointer_cast<ScalarExpression>(m_class));
-    const string &className = s->getString();
-    m_className = Util::toLower(className);
-    if (m_className == "static") {
-      m_className.clear();
-    } else {
-      m_origClassName = className;
-      m_class.reset();
-    }
   }
 }
 
@@ -117,7 +105,10 @@ void StaticMemberExpression::setNthKid(int n, ConstructPtr cp) {
 }
 
 ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultPtr ar) {
-  if (m_class) ar->preOptimize(m_class);
+  if (m_class) {
+    ar->preOptimize(m_class);
+    updateClassName();
+  }
   ar->preOptimize(m_exp);
   return ExpressionPtr();
 }

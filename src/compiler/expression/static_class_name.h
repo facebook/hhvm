@@ -14,39 +14,26 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __STATIC_MEMBER_EXPRESSION_H__
-#define __STATIC_MEMBER_EXPRESSION_H__
+#ifndef __STATIC_CLASS_NAME_H__
+#define __STATIC_CLASS_NAME_H__
 
-#include <compiler/expression/static_class_name.h>
+#include <compiler/expression/expression.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(StaticMemberExpression);
-
-class StaticMemberExpression : public Expression, public StaticClassName {
+class StaticClassName {
 public:
-  StaticMemberExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                         ExpressionPtr classExp, ExpressionPtr exp);
+  StaticClassName(ExpressionPtr classExp);
 
-  DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  virtual int getLocalEffects() const { return NoEffect; }
-  virtual bool isRefable(bool checkError = false) const { return true;}
+protected:
+  ExpressionPtr m_class;
+  std::string m_origClassName;
+  std::string m_className;
 
-  virtual unsigned getCanonHash() const;
-  virtual bool canonCompare(ExpressionPtr e) const;
-  void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
-                      int state);
-private:
-  ExpressionPtr m_exp;
-
-  bool m_valid;
-  std::string m_resolvedClassName;
-
-  bool m_dynamicClass;
-  bool m_redeclared;
+  void updateClassName();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __STATIC_MEMBER_EXPRESSION_H__
+#endif // __STATIC_CLASS_NAME_H__

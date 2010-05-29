@@ -14,39 +14,34 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __STATIC_MEMBER_EXPRESSION_H__
-#define __STATIC_MEMBER_EXPRESSION_H__
-
 #include <compiler/expression/static_class_name.h>
+#include <compiler/expression/scalar_expression.h>
+#include <util/util.h>
+
+using namespace std;
+using namespace boost;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(StaticMemberExpression);
+StaticClassName::StaticClassName(ExpressionPtr classExp)
+    : m_class(classExp) {
+  updateClassName();
+}
 
-class StaticMemberExpression : public Expression, public StaticClassName {
-public:
-  StaticMemberExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                         ExpressionPtr classExp, ExpressionPtr exp);
-
-  DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  virtual int getLocalEffects() const { return NoEffect; }
-  virtual bool isRefable(bool checkError = false) const { return true;}
-
-  virtual unsigned getCanonHash() const;
-  virtual bool canonCompare(ExpressionPtr e) const;
-  void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
-                      int state);
-private:
-  ExpressionPtr m_exp;
-
-  bool m_valid;
-  std::string m_resolvedClassName;
-
-  bool m_dynamicClass;
-  bool m_redeclared;
-};
+void StaticClassName::updateClassName() {
+  if (m_class && m_class->is(Expression::KindOfScalarExpression)) {
+    ScalarExpressionPtr s(dynamic_pointer_cast<ScalarExpression>(m_class));
+    const string &className = s->getString();
+    m_className = Util::toLower(className);
+    if (m_className == "static") {
+      m_className.clear();
+    } else {
+      m_origClassName = className;
+      m_class.reset();
+    }
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __STATIC_MEMBER_EXPRESSION_H__

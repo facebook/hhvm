@@ -425,6 +425,8 @@ TypePtr Type::Coerce(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {
   case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
+    if (type2->m_kindOf == KindOfDouble) return CreateType(KindOfNumeric);
+    // fall through
   case KindOfDouble:
     switch (type2->m_kindOf) {
     case KindOfInt16:

@@ -62,8 +62,7 @@ void LoopStatement::cppEndBufs(CodeGenerator &cg, AnalysisResultPtr ar) {
         ar->getScope()->getVariables()->getVariablePrefix(ar, *it);
 
       cg.printf("StringBufferDetach(%s, %s%s);\n",
-                Option::Option::TempPrefix,
-                prefix, it->c_str());
+                Option::TempPrefix, prefix, it->c_str());
     }
     cg.indentEnd("}\n");
   }

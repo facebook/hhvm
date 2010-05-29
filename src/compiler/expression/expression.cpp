@@ -471,8 +471,8 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
     }
   }
 
-  bool constRef = m_context & (RefValue|RefParameter) ||
-    isTemporary() && !dstType->isPrimitive();
+  bool constRef = (m_context & (RefValue|RefParameter)) ||
+    (isTemporary() && !dstType->isPrimitive());
 
   ar->wrapExpressionBegin(cg);
   if (constRef) {
@@ -480,8 +480,7 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
   }
   dstType->outputCPPDecl(cg, ar);
   std::string t = genCPPTemp(cg, ar);
-  const char *ref = isLvalue || constRef ?
-    "&" : "";
+  const char *ref = (isLvalue || constRef) ? "&" : "";
   /*
     Note that double parens are necessary:
     type_name1 tmp27(type_name2(foo));

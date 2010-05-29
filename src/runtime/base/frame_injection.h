@@ -73,9 +73,9 @@ public:
     }
 
     int64   call(int64   ret) { return ret;}
-    CStrRef call(CStrRef ret) { return ret;}
-    CArrRef call(CArrRef ret) { return ret;}
-    CObjRef call(CObjRef ret) { return ret;}
+    String  call(CStrRef ret) { return ret;}
+    Array   call(CArrRef ret) { return ret;}
+    Object  call(CObjRef ret) { return ret;}
     Variant call(CVarRef ret) { return ref(ret);}
 
   private:

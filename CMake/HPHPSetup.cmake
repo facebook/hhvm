@@ -1,9 +1,9 @@
-include(HPHPFunctions)
-include(HPHPFindLibs)
-
 OPTION(INFINITE_LOOP_DETECTION "Enable Infinite Loop Detection" ON)
 OPTION(INFINITE_RECURSION_DETECTION "Enable Infinite Recursion Detection" ON)
 OPTION(REQUEST_TIMEOUT_DETECTION "Enable Timeout Detection" ON)
+
+include(HPHPFunctions)
+include(HPHPFindLibs)
 
 add_definitions(-D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1)
 

@@ -53,17 +53,10 @@ set(CMAKE_REQUIRED_LIBRARIES)
 find_package(GD REQUIRED)
 
 option(WANT_FB_LIBMCC "want FB Memcache" 0)
-option(WANT_FB_LIBFML "want FB libfbml" 0)
 
 if (WANT_FB_LIBMCC)
 	add_definitions(-DHPHP_WITH_LIBMCC)
 	message(FATAL_ERROR Need to add libmcc and libch for linking)
-else ()
-	# nothing for now
-endif()
-
-if (WANT_FB_LIBFBML)
-	message(FATAL_ERROR Need to find the mozilla stuff for linking)
 else ()
 	# nothing for now
 endif()
@@ -116,9 +109,20 @@ endif (ICU_FOUND)
 FIND_LIBRARY(UNWIND_LIB unwind)
 
 # Google tmalloc
-FIND_LIBRARY(GOOGLE_TCMALLOC_LIB tcmalloc)
-FIND_LIBRARY(GOOGLE_TCMALLOC_MINIMAL_LIB tcmalloc_minimal)
-FIND_LIBRARY(GOOGLE_PROFILER_LIB profiler)
+option(USE_TCMALLOC "Use tcmalloc" ON)
+
+if (USE_TCMALLOC)
+	FIND_LIBRARY(GOOGLE_TCMALLOC_LIB tcmalloc_minimal)
+
+	set(HAVE_TCMALLOC 0)
+	if (GOOGLE_TCMALLOC_LIB STREQUAL "GOOGLE_TCMALLOC_LIB-NOTFOUND")
+		message(STATUS "Skipping TCmalloc")
+	else()
+		message(STATUS "Found tcmalloc: ${GOOGLE_TCMALLOC_LIB}")
+		add_definitions(-DGOOGLE_TCMALLOC=1)
+		set(HAVE_TCMALLOC 1)
+	endif()
+endif()
 
 # tbb libs
 find_package(TBB REQUIRED)
@@ -208,6 +212,10 @@ macro(hphp_link target)
 
 	target_link_libraries(${target} ${LDAP_LIBRARIES})
 	target_link_libraries(${target} ${LBER_LIBRARIES})
+
+	if (USE_TCMALLOC AND HAVE_TCMALLOC)
+		target_link_libraries(${target} ${GOOGLE_TCMALLOC_LIB})
+	endif()
 
 	target_link_libraries(${target} timelib)
 	target_link_libraries(${target} sqlite3)

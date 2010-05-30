@@ -22,6 +22,20 @@ f('call_user_func', Variant,
   array('function' => Variant),
   VariableArguments);
 
+f('call_user_func_array_async', Variant,
+  array('function' => Variant,
+        'params' => VariantVec));
+
+f('call_user_func_async', Variant,
+  array('function' => Variant),
+  VariableArguments);
+
+f('end_user_func_async', Variant,
+  array('handle' => Variant,
+        'strategy' => array(Int32, 'k_GLOBAL_STATE_OVERWRITE'),
+        'resolver' => array(Variant, 'null')),
+  VariableArguments);
+
 f('create_function', String,
   array('args' => String,
         'code' => String));

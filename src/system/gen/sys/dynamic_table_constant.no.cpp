@@ -156,6 +156,7 @@ extern const int64 k_SOCKET_ENOTTY;
 extern const int64 k_LDAP_OPT_PROTOCOL_VERSION;
 extern const int64 k_CURLM_OUT_OF_MEMORY;
 extern const int64 k_SOCKET_EWOULDBLOCK;
+extern const int64 k_GLOBAL_STATE_IGNORE;
 extern const int64 k_DOM_INVALID_STATE_ERR;
 extern const int64 k_CURLOPT_DNS_USE_GLOBAL_CACHE;
 extern const int64 k_U_MISPLACED_ANCHOR_START;
@@ -398,6 +399,7 @@ extern const int64 k_SOCKET_ENOTCONN;
 extern const int64 k_DNS_CNAME;
 extern const int64 k_T_CURLY_OPEN;
 extern const int64 k_U_BRK_UNRECOGNIZED_OPTION;
+extern const int64 k_GLOBAL_STATE_SKIP;
 extern const int64 k_CURLE_OBSOLETE;
 extern const int64 k_IMG_ARC_NOFILL;
 extern const int64 k_U_INVALID_CHAR_FOUND;
@@ -1076,6 +1078,7 @@ extern const int64 k_SOCKET_EUSERS;
 extern const int64 k_CURLOPT_LOW_SPEED_TIME;
 extern const int64 k_PHP_BINARY_READ;
 extern const int64 k_STR_PAD_BOTH;
+extern const int64 k_GLOBAL_STATE_RESOLVE_CONFLICT;
 extern const int64 k_U_REGEX_PROPERTY_SYNTAX;
 extern const int64 k_STREAM_FILTER_ALL;
 extern const int64 k_CURLAUTH_DIGEST;
@@ -1478,6 +1481,7 @@ extern const int64 k_U_VARIABLE_RANGE_EXHAUSTED;
 extern const int64 k_E_ERROR;
 extern const int64 k_INI_USER;
 extern const int64 k_MW_DstCompositeOp;
+extern const int64 k_GLOBAL_STATE_OVERWRITE;
 extern const int64 k_SO_SNDTIMEO;
 extern const int64 k_MW_GrayscaleMatteType;
 extern const int64 k_CURLE_FUNCTION_NOT_FOUND;
@@ -4052,6 +4056,7 @@ Variant get_builtin_constant(CStrRef name) {
       break;
     case 1614:
       HASH_RETURN(0x693E8CE5A4BDB64ELL, k_UPLOAD_ERR_EXTENSION, UPLOAD_ERR_EXTENSION);
+      HASH_RETURN(0x5164419093B0564ELL, k_GLOBAL_STATE_OVERWRITE, GLOBAL_STATE_OVERWRITE);
       break;
     case 1615:
       HASH_RETURN(0x0F0BCFC5B7D9564FLL, k_MW_LineInterlace, MW_LineInterlace);
@@ -4861,6 +4866,7 @@ Variant get_builtin_constant(CStrRef name) {
       break;
     case 2315:
       HASH_RETURN(0x1047DF1F1BF2990BLL, k_MW_ColorSeparationType, MW_ColorSeparationType);
+      HASH_RETURN(0x5E291C9CC8DF090BLL, k_GLOBAL_STATE_SKIP, GLOBAL_STATE_SKIP);
       break;
     case 2317:
       HASH_RETURN(0x49D16BD65199790DLL, k_INI_SCANNER_RAW, INI_SCANNER_RAW);
@@ -6587,6 +6593,7 @@ Variant get_builtin_constant(CStrRef name) {
       break;
     case 3676:
       HASH_RETURN(0x694B7BB67D4D2E5CLL, k_SOCKET_EMULTIHOP, SOCKET_EMULTIHOP);
+      HASH_RETURN(0x3A4CF5F557F4FE5CLL, k_GLOBAL_STATE_RESOLVE_CONFLICT, GLOBAL_STATE_RESOLVE_CONFLICT);
       break;
     case 3677:
       HASH_RETURN(0x2B1364E64F41AE5DLL, k_LOG_WARNING, LOG_WARNING);
@@ -6664,6 +6671,9 @@ Variant get_builtin_constant(CStrRef name) {
       break;
     case 3726:
       HASH_RETURN(0x1740AE3316108E8ELL, k_SIGABRT, SIGABRT);
+      break;
+    case 3728:
+      HASH_RETURN(0x24160D6320D55E90LL, k_GLOBAL_STATE_IGNORE, GLOBAL_STATE_IGNORE);
       break;
     case 3738:
       HASH_RETURN(0x4D0D7C94AB774E9ALL, k_CURLOPT_QUOTE, CURLOPT_QUOTE);

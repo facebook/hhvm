@@ -2710,6 +2710,15 @@ Variant i_libxml_use_internal_errors(CArrRef params) {
   if (count <= 0) return (f_libxml_use_internal_errors());
   return (f_libxml_use_internal_errors(params[0]));
 }
+Variant i_end_user_func_async(CArrRef params) {
+  FUNCTION_INJECTION(end_user_func_async);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1) return throw_missing_arguments("end_user_func_async", count+1, 1);
+  if (count <= 1) return (f_end_user_func_async(count, params[0]));
+  if (count == 2) return (f_end_user_func_async(count, params[0], params[1]));
+  if (count == 3) return (f_end_user_func_async(count, params[0], params[1], params[2]));
+  return (f_end_user_func_async(count,params[0], params[1], params[2], params.slice(3, count - 3, false)));
+}
 Variant i_openssl_get_publickey(CArrRef params) {
   FUNCTION_INJECTION(openssl_get_publickey);
   int count __attribute__((__unused__)) = params.size();
@@ -4970,6 +4979,12 @@ Variant i_fseek(CArrRef params) {
   if (count <= 2) return (f_fseek(params[0], params[1]));
   return (f_fseek(params[0], params[1], params[2]));
 }
+Variant i_call_user_func_array_async(CArrRef params) {
+  FUNCTION_INJECTION(call_user_func_array_async);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("call_user_func_array_async", count, 2, 2, 1);
+  return (f_call_user_func_array_async(params[0], params[1]));
+}
 Variant i_apc_compile_file(CArrRef params) {
   FUNCTION_INJECTION(apc_compile_file);
   int count __attribute__((__unused__)) = params.size();
@@ -5580,6 +5595,13 @@ Variant i_hphp_recursivedirectoryiterator_getchildren(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) return throw_wrong_arguments("hphp_recursivedirectoryiterator_getchildren", count, 1, 1, 1);
   return (f_hphp_recursivedirectoryiterator_getchildren(params[0]));
+}
+Variant i_call_user_func_async(CArrRef params) {
+  FUNCTION_INJECTION(call_user_func_async);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1) return throw_missing_arguments("call_user_func_async", count+1, 1);
+  if (count <= 1) return (f_call_user_func_async(count, params[0]));
+  return (f_call_user_func_async(count,params[0], params.slice(1, count - 1, false)));
 }
 Variant i_drawrender(CArrRef params) {
   FUNCTION_INJECTION(drawrender);
@@ -12581,6 +12603,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 120:
       HASH_INVOKE(0x6B268C26E21C1078LL, arsort);
+      HASH_INVOKE(0x01AE1DE8FA116078LL, call_user_func_array_async);
       break;
     case 121:
       HASH_INVOKE(0x08AA4EA901C9B079LL, session_encode);
@@ -12750,6 +12773,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 267:
       HASH_INVOKE(0x7DE1BEE0C35D010BLL, pcntl_signal);
+      break;
+    case 272:
+      HASH_INVOKE(0x16B481D0DEA32110LL, call_user_func_async);
       break;
     case 273:
       HASH_INVOKE(0x3A9A5D4FEE79A111LL, getmxrr);
@@ -16487,6 +16513,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 3315:
       HASH_INVOKE(0x5C1F75D51C077CF3LL, pixelgetindex);
+      break;
+    case 3317:
+      HASH_INVOKE(0x26729ECB00B8ECF5LL, end_user_func_async);
       break;
     case 3319:
       HASH_INVOKE(0x1C30C8470100ECF7LL, mcrypt_enc_is_block_mode);
@@ -26024,6 +26053,34 @@ Variant ei_libxml_use_internal_errors(Eval::VariableEnvironment &env, const Eval
   if (count <= 0) return (x_libxml_use_internal_errors());
   else return (x_libxml_use_internal_errors(a0));
 }
+Variant ei_end_user_func_async(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1) return throw_missing_arguments("end_user_func_async", count+1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  Array vargs;
+  for (; it != params.end(); ++it) {
+    vargs.append((*it)->eval(env));
+  }
+  if (count <= 1) return (x_end_user_func_async(count, a0));
+  else if (count == 2) return (x_end_user_func_async(count, a0, a1));
+  else if (count == 3) return (x_end_user_func_async(count, a0, a1, a2));
+  return (x_end_user_func_async(count, a0,a1, a2, vargs));
+}
 Variant ei_openssl_get_publickey(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33166,6 +33223,26 @@ Variant ei_fseek(Eval::VariableEnvironment &env, const Eval::FunctionCallExpress
   if (count <= 2) return (x_fseek(a0, a1));
   else return (x_fseek(a0, a1, a2));
 }
+Variant ei_call_user_func_array_async(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("call_user_func_array_async", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_call_user_func_array_async(a0, a1));
+}
 Variant ei_apc_compile_file(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -35245,6 +35322,24 @@ Variant ei_hphp_recursivedirectoryiterator_getchildren(Eval::VariableEnvironment
     (*it)->eval(env);
   }
   return (x_hphp_recursivedirectoryiterator_getchildren(a0));
+}
+Variant ei_call_user_func_async(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1) return throw_missing_arguments("call_user_func_async", count+1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  Array vargs;
+  for (; it != params.end(); ++it) {
+    vargs.append((*it)->eval(env));
+  }
+  if (count <= 1) return (x_call_user_func_async(count, a0));
+  return (x_call_user_func_async(count, a0,vargs));
 }
 Variant ei_drawrender(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -57286,6 +57381,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 120:
       HASH_INVOKE_FROM_EVAL(0x6B268C26E21C1078LL, arsort);
+      HASH_INVOKE_FROM_EVAL(0x01AE1DE8FA116078LL, call_user_func_array_async);
       break;
     case 121:
       HASH_INVOKE_FROM_EVAL(0x08AA4EA901C9B079LL, session_encode);
@@ -57455,6 +57551,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 267:
       HASH_INVOKE_FROM_EVAL(0x7DE1BEE0C35D010BLL, pcntl_signal);
+      break;
+    case 272:
+      HASH_INVOKE_FROM_EVAL(0x16B481D0DEA32110LL, call_user_func_async);
       break;
     case 273:
       HASH_INVOKE_FROM_EVAL(0x3A9A5D4FEE79A111LL, getmxrr);
@@ -61192,6 +61291,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3315:
       HASH_INVOKE_FROM_EVAL(0x5C1F75D51C077CF3LL, pixelgetindex);
+      break;
+    case 3317:
+      HASH_INVOKE_FROM_EVAL(0x26729ECB00B8ECF5LL, end_user_func_async);
       break;
     case 3319:
       HASH_INVOKE_FROM_EVAL(0x1C30C8470100ECF7LL, mcrypt_enc_is_block_mode);

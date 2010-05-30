@@ -1964,5 +1964,9 @@ define('INI_SCANNER_NORMAL', 0);
 define('INI_SCANNER_RAW', 1);
 // HPHP system constants
 define('HPHP_TRIM_CHARLIST', " \n\r\t\v\0");
+define('GLOBAL_STATE_IGNORE', 0);
+define('GLOBAL_STATE_OVERWRITE', 1);
+define('GLOBAL_STATE_SKIP', 2);
+define('GLOBAL_STATE_RESOLVE_CONFLICT', 3);
 define('SID', '');
 define('SID', '');

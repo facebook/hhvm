@@ -28,6 +28,9 @@ bool f_function_exists(CStrRef function_name);
 bool f_is_callable(CVarRef v, bool syntax = false,
                    Variant name = null);
 Variant f_call_user_func(int _argc, CVarRef function, CArrRef _argv = null_array);
+Variant f_call_user_func_array_async(CVarRef function, CArrRef params);
+Variant f_call_user_func_async(int _argc, CVarRef function, CArrRef _argv = null_array);
+Variant f_end_user_func_async(int _argc, CVarRef handle, int strategy = k_GLOBAL_STATE_OVERWRITE, CVarRef resolver = null, CArrRef _argv = null_array);
 String f_create_function(CStrRef args, CStrRef code);
 
 ///////////////////////////////////////////////////////////////////////////////

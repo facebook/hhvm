@@ -64,16 +64,16 @@ look like this,
   $handle = <b>call_user_func_async</b>($func, $param1, $param2, ...);
   // Main thread can now do extra work while the other thread is running.
   do_main_thread_jobs();
-  $ret = <b>end_user_func_async</b>($handle, $options);
+  $ret = <b>end_user_func_async</b>($handle, $strategy, $resolver);
 
 Please note that global states will be duplicated when call_user_func_async()
 is called, so that each thread (the main thread and the new thread) will have
 its own copy of the states. From then on, they never share anything (other than
 APC). When end_user_func_async() is called, the global state of the new
-thread will be "merged" back into main thread's depending on how $options are
+thread will be "merged" back into main thread's depending on how options are
 specified.
 
-$options can be,
+$strategy can be,
 
 (1) GLOBAL_STATE_IGNORE
 
@@ -94,12 +94,11 @@ merged at all.
 (4) GLOBAL_STATE_RESOLVE_CONFLICT
 
 In this case, new thread's modifications of global states will be merged into
-main thread's, and when there is a conflict, a PHP function is called to
+main thread's, and when there is a conflict, a PHP function can be provided to
 resolve the conflict. For example,
 
   $ret = <b>end_user_func_async</b>
-    ($handle, array('strategy' => GLOBAL_STATE_RESOLVE_CONFLICT,
-                    'resolver' => 'my_merge_conflict_resolver'));
+    ($handle, GLOBAL_STATE_RESOLVE_CONFLICT, 'my_merge_conflict_resolver'));
   ...
   function my_merge_conflict_resolver($name, &$value, $new_value) {
     if ($name == 'CACHE') {

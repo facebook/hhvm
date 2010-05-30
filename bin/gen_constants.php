@@ -38,6 +38,10 @@ foreach ($constants as $name => $value) {
 
 print "// HPHP system constants\n";
 print "define('HPHP_TRIM_CHARLIST', \" \\n\\r\\t\\v\\0\");\n";
+print "define('GLOBAL_STATE_IGNORE', 0);\n";
+print "define('GLOBAL_STATE_OVERWRITE', 1);\n";
+print "define('GLOBAL_STATE_SKIP', 2);\n";
+print "define('GLOBAL_STATE_RESOLVE_CONFLICT', 3);\n";
 
 // defining it twice, as session extension uses for dynamic value
 print "define('SID', '');\n";

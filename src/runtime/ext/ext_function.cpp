@@ -101,6 +101,18 @@ Variant f_call_user_func(int _argc, CVarRef function, CArrRef _argv /* = null_ar
   return f_call_user_func_array(function, _argv);
 }
 
+Variant f_call_user_func_array_async(CVarRef function, CArrRef params) {
+  throw NotImplementedException(__func__);
+}
+
+Variant f_call_user_func_async(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
+  throw NotImplementedException(__func__);
+}
+
+Variant f_end_user_func_async(int _argc, CVarRef handle, int strategy /* = k_GLOBAL_STATE_OVERWRITE */, CVarRef resolver /* = null */, CArrRef _argv /* = null_array */) {
+  throw NotImplementedException(__func__);
+}
+
 String f_create_function(CStrRef args, CStrRef code) {
   throw NotSupportedException(__func__, "dynamic coding");
 }

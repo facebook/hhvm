@@ -50,6 +50,21 @@ inline Variant x_call_user_func(int _argc, CVarRef function, CArrRef _argv = nul
   return f_call_user_func(_argc, function, _argv);
 }
 
+inline Variant x_call_user_func_array_async(CVarRef function, CArrRef params) {
+  FUNCTION_INJECTION_BUILTIN(call_user_func_array_async);
+  return f_call_user_func_array_async(function, params);
+}
+
+inline Variant x_call_user_func_async(int _argc, CVarRef function, CArrRef _argv = null_array) {
+  FUNCTION_INJECTION_BUILTIN(call_user_func_async);
+  return f_call_user_func_async(_argc, function, _argv);
+}
+
+inline Variant x_end_user_func_async(int _argc, CVarRef handle, int strategy = k_GLOBAL_STATE_OVERWRITE, CVarRef resolver = null, CArrRef _argv = null_array) {
+  FUNCTION_INJECTION_BUILTIN(end_user_func_async);
+  return f_end_user_func_async(_argc, handle, strategy, resolver, _argv);
+}
+
 inline String x_create_function(CStrRef args, CStrRef code) {
   FUNCTION_INJECTION_BUILTIN(create_function);
   return f_create_function(args, code);

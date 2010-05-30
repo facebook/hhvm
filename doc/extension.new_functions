@@ -49,6 +49,10 @@ testing and some alternative PHP implementation.
 - evhttp_async_post
 - evhttp_recv
 
+- call_user_func_array_async
+- call_user_func_async
+- end_user_func_async
+
 - fb_call_user_func_array_safe
 - fb_call_user_func_safe
 - fb_call_user_func_safe_return

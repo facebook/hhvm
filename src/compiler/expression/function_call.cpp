@@ -37,7 +37,7 @@ FunctionCall::FunctionCall
  ExpressionPtr nameExp, const std::string &name, ExpressionListPtr params,
  ExpressionPtr classExp)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_nameExp(nameExp), m_params(params), m_class(classExp),
+    StaticClassName(classExp), m_nameExp(nameExp), m_params(params),
     m_valid(false), m_validClass(false),
     m_extraArg(0), m_variableArgument(false), m_voidReturn(false),
     m_voidWrapper(false), m_allowVoidReturn(false), m_redeclared(false),
@@ -55,18 +55,6 @@ FunctionCall::FunctionCall
   } else {
     m_origName = name;
     m_name = Util::toLower(name);
-  }
-
-  if (m_class && m_class->is(KindOfScalarExpression)) {
-    ScalarExpressionPtr s(dynamic_pointer_cast<ScalarExpression>(m_class));
-    const string &className = s->getString();
-    m_className = Util::toLower(className);
-    if (m_className == "static") {
-      m_className.clear();
-    } else {
-      m_origClassName = className;
-      m_class.reset();
-    }
   }
 }
 
@@ -119,7 +107,10 @@ void FunctionCall::setNthKid(int n, ConstructPtr cp) {
 }
 
 ExpressionPtr FunctionCall::preOptimize(AnalysisResultPtr ar) {
-  if (m_class) ar->preOptimize(m_class);
+  if (m_class) {
+    ar->preOptimize(m_class);
+    updateClassName();
+  }
   ar->preOptimize(m_nameExp);
   ar->preOptimize(m_params);
   return ExpressionPtr();

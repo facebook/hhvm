@@ -17,7 +17,7 @@
 #ifndef __FUNCTION_CALL_H__
 #define __FUNCTION_CALL_H__
 
-#include <compiler/expression/expression.h>
+#include <compiler/expression/static_class_name.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FunctionCall);
 
-class FunctionCall : public Expression {
+class FunctionCall : public Expression, public StaticClassName {
 public:
   FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETERS, ExpressionPtr nameExp,
                const std::string &name, ExpressionListPtr params,
@@ -51,10 +51,6 @@ protected:
   std::string m_name;
   std::string m_origName;
   ExpressionListPtr m_params;
-
-  ExpressionPtr m_class;
-  std::string m_origClassName;
-  std::string m_className;
 
   // Pointers to the corresponding function scope and class scope for this
   // function call, set during the AnalyzeAll phase. These pointers may be

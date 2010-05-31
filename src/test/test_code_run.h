@@ -162,6 +162,10 @@ class TestCodeRun : public TestBase {
   bool TestExtIterator();
   bool TestExtSoap();
 
+  // PHP 5.3
+  bool TestVariableClassName();
+  bool TestLateStaticBinding();
+
   // debugging purpose
   bool TestAdHoc();
 
@@ -171,7 +175,8 @@ class TestCodeRun : public TestBase {
   bool CleanUp();
   bool GenerateFiles(const char *input, const char *subdir = "");
   bool CompileFiles();
-  bool RecordMulti(const char *input, const char *file, int line, bool flag);
+  bool RecordMulti(const char *input, const char *output, const char *file,
+                   int line, bool flag);
 
   bool MultiVerifyCodeRun();
   bool VerifyCodeRun(const char *input, const char *output,
@@ -185,15 +190,24 @@ class TestCodeRun : public TestBase {
 ///////////////////////////////////////////////////////////////////////////////
 // macros
 
-#define VCR(a) \
+#define VCR(a)                                                          \
   if (!Count(VerifyCodeRun(a,NULL,__FILE__,__LINE__,false))) return false;
 
-#define VCRNW(a) \
+#define VCRO(a, b)                                                      \
+  if (!Count(VerifyCodeRun(a,b,__FILE__,__LINE__,false))) return false;
+
+#define VCRNW(a)                                                        \
   if (!Count(VerifyCodeRun(a,NULL,__FILE__,__LINE__,true))) return false;
 
 // Multi VCR
-#define MVCR(a) if (!RecordMulti(a,__FILE__,__LINE__,false)) return false;
-#define MVCRNW(a) if (!RecordMulti(a,__FILE__,__LINE__,true)) return false;
+#define MVCR(a)                                                         \
+  if (!RecordMulti(a,NULL,__FILE__,__LINE__,false)) return false;
+
+#define MVCRO(a, b)                                                     \
+  if (!RecordMulti(a, b, __FILE__,__LINE__,false)) return false;
+
+#define MVCRNW(a)                                                       \
+  if (!RecordMulti(a,NULL,__FILE__,__LINE__,true)) return false;
 
 ///////////////////////////////////////////////////////////////////////////////
 

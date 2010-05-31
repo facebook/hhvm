@@ -548,13 +548,25 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     }
   }
 
-  if (m_op == '@' && !(state & FixOrder)) {
+  if (m_op == '@') {
     bool inExpression = ar->inExpression();
-    ar->setInExpression(false);
-    if (m_exp->preOutputCPP(cg, ar, state)) {
-      state |= FixOrder;
+    if (!(state & FixOrder)) {
+      ar->setInExpression(false);
+      if (m_exp->preOutputCPP(cg, ar, state)) {
+        state |= FixOrder;
+      }
+      ar->setInExpression(inExpression);
     }
-    ar->setInExpression(inExpression);
+    if (state & FixOrder && inExpression) {
+      cg.printf("%s%d.enable();\n", Option::SilencerPrefix, m_silencer);
+      m_exp->preOutputCPP(cg, ar, 0);
+      int s = m_silencer;
+      m_silencer = -1;
+      this->preOutputStash(cg, ar, state);
+      m_silencer = s;
+      cg.printf("%s%d.disable();\n", Option::SilencerPrefix, m_silencer);
+      return true;
+    }
   }
 
   return Expression::preOutputCPP(cg, ar, state);
@@ -629,9 +641,11 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       }
       break;
     case '@':
-      cg.printf("(%s%d.enable(),%s%d.disable(",
-          Option::SilencerPrefix, m_silencer,
-          Option::SilencerPrefix, m_silencer);
+      if (m_silencer >= 0) {
+        cg.printf("(%s%d.enable(),%s%d.disable(",
+                  Option::SilencerPrefix, m_silencer,
+                  Option::SilencerPrefix, m_silencer);
+      }
       break;
     case T_FILE:
       cg.printf("get_source_filename(\"%s\")", getLocation()->file);
@@ -705,7 +719,9 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       cg.printf(")");
       break;
     case '@':
-      cg.printf("))");
+      if (m_silencer >= 0) {
+        cg.printf("))");
+      }
       break;
     default:
       break;

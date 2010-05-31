@@ -17,7 +17,7 @@
 #ifndef __CLASS_CONSTANT_EXPRESSION_H__
 #define __CLASS_CONSTANT_EXPRESSION_H__
 
-#include <compiler/expression/expression.h>
+#include <compiler/expression/static_class_name.h>
 #include <compiler/analysis/block_scope.h>
 
 namespace HPHP {
@@ -25,7 +25,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ClassConstantExpression);
 
-class ClassConstantExpression : public Expression {
+class ClassConstantExpression : public Expression, public StaticClassName {
 public:
   ClassConstantExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                           ExpressionPtr classExp,
@@ -40,10 +40,6 @@ public:
   virtual bool containsDynamicConstant(AnalysisResultPtr ar) const;
 
 private:
-  ExpressionPtr m_class;
-  std::string m_origClassName;
-  std::string m_className;
-
   std::string m_varName;
   BlockScope *m_defScope;
   bool m_valid;

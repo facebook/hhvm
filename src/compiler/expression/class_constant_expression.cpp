@@ -38,20 +38,8 @@ ClassConstantExpression::ClassConstantExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr classExp, const std::string &varName)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_class(classExp), m_varName(varName), m_valid(false),
+    StaticClassName(classExp), m_varName(varName), m_valid(false),
     m_redeclared(false), m_visited(false) {
-
-  if (m_class->is(KindOfScalarExpression)) {
-    ScalarExpressionPtr s(dynamic_pointer_cast<ScalarExpression>(m_class));
-    const string &className = s->getString();
-    m_className = Util::toLower(className);
-    if (m_className == "static") {
-      m_className.clear();
-    } else {
-      m_origClassName = className;
-      m_class.reset();
-    }
-  }
 }
 
 ExpressionPtr ClassConstantExpression::clone() {
@@ -113,6 +101,7 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
   }
   if (m_class) {
     ar->preOptimize(m_class);
+    updateClassName();
     return ExpressionPtr();
   }
   string currentClsName;

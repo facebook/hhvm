@@ -306,8 +306,6 @@ TypePtr VariableTable::add(const string &name, TypePtr type,
                            ConstructPtr construct,
                            ModifierExpressionPtr modifiers,
                            bool checkError /* = true */) {
-  ASSERT(construct);
-
   if (getAttribute(InsideStaticStatement)) {
     addStaticVariable(name, ar);
     if (ar->needStaticArray(ar->getClassScope())) {

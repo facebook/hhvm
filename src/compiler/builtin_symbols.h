@@ -85,6 +85,7 @@ private:
                                       const std::string &name,
                                       const std::string &soname);
 
+  static TypePtr ParseType(const char **&p);
   static void ParseExtFunctions(AnalysisResultPtr ar, const char **p,
                                 bool sep);
   static void ParseExtConsts(AnalysisResultPtr ar, const char **p, bool sep);

@@ -2,7 +2,7 @@
 
 include_once 'base.php';
 
-p("#include <runtime/ext/ext_simplexml_include.h>");
+pre("#include <runtime/ext/ext_simplexml_include.h>");
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -2,10 +2,10 @@
 
 include_once 'base.php';
 
-p("#include <libxml/tree.h>");
-p("#include <libxml/xmlwriter.h>");
-p("#include <libxml/uri.h>");
-p("#include <runtime/base/file/file.h>");
+pre("#include <libxml/tree.h>");
+pre("#include <libxml/xmlwriter.h>");
+pre("#include <libxml/uri.h>");
+pre("#include <runtime/base/file/file.h>");
 
 ///////////////////////////////////////////////////////////////////////////////
 // function style

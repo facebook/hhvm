@@ -8,16 +8,17 @@ define('Optional',    0x0200);
 define('TypeMask',    0x00FF);
 
 // Defining over public/protected/private/abstract is not only not a good idea, but is also not actually possible.
-define('PublicMethod',      0);
-define('ProtectedMethod',   1);
-define('PrivateMethod',     2);
 define('AbstractMethod',    0x0100);
 define('StaticMethod',      0x0200);
 define('VisibilityMask',    0x00FF);
+define('PublicMethod',      0);
+define('ProtectedMethod',   1);
+define('PrivateMethod',     2);
+define('PublicProperty',    4);
+define('ProtectedProperty', 5);
+define('PrivateProperty',   6);
 
 define('Boolean',      1);
-//define('Byte',         2);
-//define('Int16',        3);
 define('Int32',        4);
 define('Int64',        5);
 define('Double',       6);
@@ -39,8 +40,6 @@ define('Any',         21);
 
 $TYPENAMES = array
   (Boolean     => array('name' => 'bool',        'enum' => 'Boolean',    ),
-   //Byte        => array('name' => 'char',        'enum' => 'Byte',       ),
-   //Int16       => array('name' => 'short',       'enum' => 'Int16',      ),
    Int32       => array('name' => 'int',         'enum' => 'Int32',      ),
    Int64       => array('name' => 'int64',       'enum' => 'Int64',      ),
    Double      => array('name' => 'double',      'enum' => 'Double',     ),
@@ -99,7 +98,7 @@ function idx($arr, $idx, $default=null) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // CPP header preamble
-function p($p) {
+function pre($p) {
   global $preamble;
   if (!isset($preamble)) $preamble = "";
   $preamble .= $p . "\n";
@@ -187,13 +186,17 @@ function m($flags,
   $ret['static'] = $flags & StaticMethod;
   return $ret; //build_function_def($name, $return, $args, $func_flags);
 }
+function p($flags, $name, $type) {
+  return array('name' => $name, 'type' => $type, 'flags' => $flags);
+}
 function ck($name, $type) {
   return array('type' => $type,
                'name' => $name);
 }
 $classes = array();
 function c($name, $parent = null, $interfaces = array(),
-           $methods = array(), $consts = array(), $footer = "") {
+           $methods = array(), $consts = array(), $footer = "",
+           $properties = array()) {
   global $classes;
 
   $have_ctor = false;
@@ -203,7 +206,8 @@ function c($name, $parent = null, $interfaces = array(),
     if ($method['name'] == '__destruct') $have_dtor = true;
   }
 
-  // We don't have the information to autogenerate a ctor def, so make the user do it.
+  // We don't have the information to autogenerate a ctor def,
+  // so make the user do it.
   if (! $have_ctor) {
     printf("ERROR: No constructor defined in IDL for class %s.\n", $name);
     exit(-1);
@@ -231,6 +235,7 @@ function c($name, $parent = null, $interfaces = array(),
                      'extrabases' => $internal_bases,
                      'consts'     => $consts,
                      'methods'    => $methods,
+                     'properties' => $properties,
                      'footer'     => $footer);
 
 }
@@ -256,7 +261,12 @@ function g($name) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation
 
-function typename($type) {
+function typename($type, $prefix = true) {
+  if (is_string($type)) {
+    if ($prefix) return 'sp_' . strtolower($type);
+    return $type;
+  }
+
   global $TYPENAMES;
   $type = $type & TypeMask;
   if ($type !== 0) {
@@ -269,6 +279,10 @@ function typename($type) {
 }
 
 function param_typename($type, $ref) {
+  if (is_string($type)) {
+    return 'sp_' . strtolower($type);
+  }
+
   global $REFNAMES;
   $name = typename($type);
   if ($ref || !isset($REFNAMES[$name])) {
@@ -278,6 +292,10 @@ function param_typename($type, $ref) {
 }
 
 function typeenum($type) {
+  if (is_string($type)) {
+    return 'Void';
+  }
+
   global $TYPENAMES;
   $type = $type & TypeMask;
   if ($type !== 0) {
@@ -286,13 +304,23 @@ function typeenum($type) {
   return 'Void';
 }
 
+function fprintType($f, $type) {
+  if (is_string($type)) {
+    fprintf($f, 'S(999), "%s"', strtolower($type));
+  } else {
+    fprintf($f, 'T(%s)', typeenum($type));
+  }
+}
+
 function generateFuncCPPInclude($func, $f, $newline = true) {
-  fprintf($f, '"%s", T(%s), ', $func['name'],
-          typeenum($func['return']));
-  fprintf($f, 'S(%d), ', idx($func, 'ref') ? 1 : 0);
+  fprintf($f, '"%s", ', $func['name']);
+  fprintType($f, $func['return']);
+  fprintf($f, ', S(%d), ', idx($func, 'ref') ? 1 : 0);
   for ($i = 0; $i < count($func['args']); $i++) {
     $arg = $func['args'][$i];
-    fprintf($f, '"%s", T(%s), ', $arg['name'], typeenum($arg['type']));
+    fprintf($f, '"%s", ', $arg['name']);
+    fprintType($f, $arg['type']);
+    fprintf($f, ', ');
     if (isset($arg['default'])) {
       fprintf($f, '"%s", ', $arg['default_escaped']);
     } else {
@@ -321,6 +349,11 @@ function generateClassCPPInclude($class, $f) {
     fprintf($f, ",");
   }
   fprintf($f, "NULL,");
+  foreach ($class['properties'] as $p) {
+    generatePropertyCPPInclude($p, $f);
+    fprintf($f, ",");
+  }
+  fprintf($f, "NULL,");
   foreach ($class['consts'] as $k) {
     fprintf($f, '"%s", T(%s),', $k['name'], typeenum($k['type']));
   }
@@ -333,6 +366,11 @@ function generateMethodCPPInclude($method, $f) {
           intval(idx($method, 'abstract') == AbstractMethod),
           intval($method['visibility']),
           intval($method['static'] == StaticMethod));
+}
+
+function generatePropertyCPPInclude($property, $f) {
+  fprintf($f, "S(%d), \"%s\", ", $property['flags'], $property['name']);
+  fprintType($f, $property['type']);
 }
 
 function generateFuncArgsCPPHeader($func, $f, $forceRef = false,
@@ -430,6 +468,9 @@ EOT
           );
 
   fprintf($f, "FORWARD_DECLARE_CLASS(%s);\n", $lowername);
+  foreach ($class['properties'] as $p) {
+    generatePropertyCPPForwardDeclarations($p, $f);
+  }
   fprintf($f, "class c_%s", $lowername);
   if ($class['parent']) {
     fprintf($f, " : public c_" . strtolower($class['parent']));
@@ -461,6 +502,15 @@ EOT
   fprintf($f, "  ObjectData* dynCreate(CArrRef params, bool init = true);\n");
 
   fprintf($f, "\n");
+
+  if (!empty($class['properties'])) {
+    fprintf($f, "  // properties\n");
+    foreach ($class['properties'] as $p) {
+      generatePropertyCPPHeader($p, $f);
+    }
+    fprintf($f, "\n");
+  }
+
   fprintf($f, "  // need to implement\n");
   fprintf($f, "  public: c_%s();\n", strtolower($class['name']));
   fprintf($f, "  public: ~c_%s();\n", strtolower($class['name']));
@@ -480,7 +530,7 @@ EOT
 function generateMethodCPPHeader($method, $class, $f) {
   switch ($method['visibility']) {
   case PrivateMethod:
-    $vis = "public";
+    $vis = "private";
     break;
   case ProtectedMethod:
     $vis = "protected";
@@ -494,10 +544,33 @@ function generateMethodCPPHeader($method, $class, $f) {
                         strpos($method['name'], "__") === 0,
                         $method['static']);
   if ($method['name'] == "__call") {
-    fprintf($f, "  public: Variant doCall(Variant v_name, Variant v_arguments,".
-            " bool fatal);\n");
+    fprintf($f, "  public: Variant doCall(Variant v_name, ");
+    fprintf($f, "Variant v_arguments, bool fatal);\n");
   } else if ($method['name'] == "__get") {
     fprintf($f, "  public: Variant doGet(Variant v_name, bool error);\n");
+  }
+}
+
+function generatePropertyCPPHeader($property, $f) {
+  switch ($property['flags']) {
+  case PrivateProperty:
+    $vis = "private";
+    break;
+  case ProtectedProperty:
+    $vis = "protected";
+    break;
+  default:
+    $vis = "public";
+  }
+  fprintf($f, "  %s: ", $vis);
+  fprintf($f, "%s m_%s;\n", typename($property['type']),
+          $property['name']);
+}
+
+function generatePropertyCPPForwardDeclarations($property, $f) {
+  if (is_string($property['type'])) {
+    fprintf($f, "FORWARD_DECLARE_CLASS(%s);\n",
+            typename($property['type'], false));
   }
 }
 
@@ -507,7 +580,10 @@ function generatePreImplemented($method, $class, $f) {
     generateFuncArgsCPPHeader($method, $f, true);
     fprintf($f, ";\n");
     fprintf($f, "  public: void dynConstruct(CArrRef Params);\n");
-    fprintf($f, "  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);\n");
+    fprintf($f, "  public: void dynConstructFromEval");
+    fprintf($f, "(Eval::VariableEnvironment &env,\n");
+    fprintf($f, "                                    ");
+    fprintf($f, "const Eval::FunctionCallExpression *call);\n");
   } else if ($method['name'] == '__destruct') {
     fprintf($f, "  public: virtual void destruct();\n", $class['name']);
   }

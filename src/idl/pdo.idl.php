@@ -2,7 +2,7 @@
 
 require_once 'base.php';
 
-p("#include <runtime/ext/pdo_driver.h>");
+pre("#include <runtime/ext/pdo_driver.h>");
 
 ///////////////////////////////////////////////////////////////////////////////
 

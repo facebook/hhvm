@@ -41,6 +41,8 @@ using namespace boost;
 #define BF_COLUMN_RETURN 1
 #define BF_COLUMN_PARAMS 2
 
+#define CLASS_TYPE 999
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool BuiltinSymbols::Loaded = false;
@@ -128,16 +130,28 @@ void BuiltinSymbols::ParseExtFunctions(AnalysisResultPtr ar, const char **p,
 void BuiltinSymbols::ParseExtConsts(AnalysisResultPtr ar, const char **p,
                                     bool sep) {
   while (*p) {
-    // Parse name
     const char *name = *p++;
-    // Parse type
-    Type::KindOf type = (Type::KindOf)(long)(*p++);
-    s_constants->add(name, Type::GetType(type),
-                     ExpressionPtr(), ar, ConstructPtr());
+    TypePtr type = ParseType(p);
+    s_constants->add(name, type, ExpressionPtr(), ar, ConstructPtr());
     if (sep) {
       s_constants->setSepExtension(name);
     }
   }
+}
+
+TypePtr BuiltinSymbols::ParseType(const char **&p) {
+  const char *clsname = NULL;
+  Type::KindOf ktype = (Type::KindOf)(long)(*p++);
+  if (ktype == CLASS_TYPE) {
+    clsname = *p++;
+  }
+  TypePtr type;
+  if (clsname) {
+    type = Type::CreateObjectType(clsname);
+  } else if (ktype != Type::KindOfVoid) {
+    type = Type::GetType(ktype);
+  }
+  return type;
 }
 
 void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
@@ -182,13 +196,20 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
     ClassScopePtr cl(new ClassScope(ar, string(cname), string(cparent),
                                     ifaces, methods));
     p++;
+    // Parse properties
+    while (*p) {
+      *p++; // TODO, support visibility
+      const char *name = *p++;
+      TypePtr type = ParseType(p);
+      cl->getVariables()->add(name, type, false, ar, ExpressionPtr(),
+                              ModifierExpressionPtr());
+    }
+    p++;
     // Parse consts
     while (*p) {
       const char *name = *p++;
-      // Parse type
-      Type::KindOf type = (Type::KindOf)(long)(*p++);
-      cl->getConstants()->add(name, Type::GetType(type),
-                              ExpressionPtr(), ar, ConstructPtr());
+      TypePtr type = ParseType(p);
+      cl->getConstants()->add(name, type, ExpressionPtr(), ar, ConstructPtr());
     }
     p++;
     cl->setSystem();
@@ -210,15 +231,15 @@ void BuiltinSymbols::ParseExtDynamics(AnalysisResultPtr ar, const char **p,
 FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
                                                   const char** &p) {
   const char *name = *p++;
-  Type::KindOf retType = (Type::KindOf)(long)(*p++);
+  TypePtr retType = ParseType(p);
   bool reference = *p++;
 
   int minParam = -1;
   int maxParam = 0;
   const char **arg = p;
   while (*arg) {
-    /* const char *argName = */ arg++;
-    /* Type::KindOf argType = (Type::KindOf) */ arg++;
+    /* name */ arg++;
+    ParseType(arg);
     const char *argDefault = *arg++;
     /* bool argReference = */ arg++;
     if (argDefault && minParam < 0) {
@@ -231,20 +252,20 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   string lowered = Util::toLower(name);
   FunctionScopePtr f(new FunctionScope(false, lowered, reference));
   f->setParamCounts(ar, minParam, maxParam);
-  if (retType != Type::KindOfVoid) {
-    f->setReturnType(ar, Type::GetType(retType));
+  if (retType) {
+    f->setReturnType(ar, retType);
   }
 
   int index = 0;
   const char *paramName = NULL;
   while ((paramName = *p++ /* argName */)) {
-    Type::KindOf argType = (Type::KindOf)(long)*p++;
+    TypePtr argType = ParseType(p);
     /* const char *argDefault = */ p++;
     bool argReference = *p++;
 
     f->setParamName(index, paramName);
     if (argReference) f->setRefParam(index);
-    f->setParamType(ar, index, Type::GetType(argType));
+    f->setParamType(ar, index, argType);
 
     index++;
   }

@@ -4,7 +4,7 @@ include_once 'base.php';
 
 ///////////////////////////////////////////////////////////////////////////////
 
-p(
+pre(
 <<<END
 #include <system/gen/php/classes/exception.h>
 #include <runtime/ext/soap/soap.h>

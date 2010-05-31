@@ -2,7 +2,7 @@
 
 include_once 'base.php';
 
-p("#include <runtime/ext/ext_domdocument_includes.h>");
+pre("#include <runtime/ext/ext_domdocument_includes.h>");
 
 ///////////////////////////////////////////////////////////////////////////////
 // object methods

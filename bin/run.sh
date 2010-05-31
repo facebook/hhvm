@@ -6,4 +6,4 @@
 cp $HPHP_HOME/bin/CMakeLists.base.txt $1/CMakeLists.txt
 cd $1
 cmake -D PROGRAM_NAME:string=$2 . || exit $?
-make $HPHP_MAKE || exit $?
+make $MAKEOPTS || exit $?

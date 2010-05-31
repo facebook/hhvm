@@ -2461,6 +2461,7 @@ int string_crc32(const char *p, int len) {
 // crypt
 
 #include <unistd.h>
+#include <crypt.h>
 
 static unsigned char itoa64[] =
   "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -2482,9 +2483,20 @@ char *string_crypt(const char *key, const char *salt) {
     salt = random_salt;
   }
 
+#ifdef HAVE_CRYPT_R
+  struct crypt_data buffer;
+  memset(&buffer, 0, sizeof(buffer));
+
+  // in some cases buffer is of type CRYPTD
+  // CRYPTD buffer;
+
+  return strdup(crypt_r(key, salt, &buffer));
+#else
   static Mutex mutex;
   Lock lock(mutex);
+
   return strdup(crypt(key, salt));
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

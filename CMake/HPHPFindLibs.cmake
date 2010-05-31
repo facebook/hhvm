@@ -155,8 +155,11 @@ include_directories(${ONIGURUMA_INCLUDE_DIRS})
 find_package(Ldap REQUIRED)
 include_directories(${LDAP_INCLUDE_DIR})
 
-#LINK_LIBS = -lpthread $(BFD_LIBS) -lrt -lstdc++ -lresolv
-#-lcrypto -lcrypt
+
+FIND_LIBRARY (CRYPT_LIB crypt)
+FIND_LIBRARY (RESOLV_LIB resolv)
+FIND_LIBRARY (RT_LIB rt)
+
 
 FIND_LIBRARY (CAP_LIB cap)
 
@@ -212,6 +215,10 @@ macro(hphp_link target)
 
 	target_link_libraries(${target} ${LDAP_LIBRARIES})
 	target_link_libraries(${target} ${LBER_LIBRARIES})
+
+	target_link_libraries(${target} ${CRYPT_LIB})
+	target_link_libraries(${target} ${RESOLV_LIB})
+	target_link_libraries(${target} ${RT_LIB})
 
 	if (USE_TCMALLOC AND HAVE_TCMALLOC)
 		target_link_libraries(${target} ${GOOGLE_TCMALLOC_LIB})

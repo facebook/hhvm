@@ -380,6 +380,8 @@ bool TestExtMath::test_mt_srand() {
   f_mt_srand();
   f_mt_srand(0);
   f_mt_srand(1);
+
+  VERIFY(f_mt_rand(5, 15) == 11);
   return Count(true);
 }
 

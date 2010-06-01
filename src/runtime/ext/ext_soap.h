@@ -215,10 +215,6 @@ class c_soapfault: public c_exception {
   public: Variant m_detail;
   public: String  m_name;
   public: Variant m_headerfault;
-  private: int64  _dummy;  // HACK: this class must be at least
-                           // 176 bytes or else it causes a
-                           // double-free error during shutdown
-                           // when running 'make slow_tests'
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -225,6 +225,15 @@ namespace HPHP {
 #define HASH_RETURN_STRING(code, name, str, len)                        \
   if (hash == code && s.length() == len &&                              \
       memcmp(s.data(), #str, len) == 0) return name
+#define HASH_RETURN_LITSTR(code, index, name, len)                      \
+do { \
+  const char *s1 = s.data();                                            \
+  const char *s2 = literalStrings[index].data();                        \
+  if ((s1 == s2) ||                                                     \
+      (hash == code && s.length() == len &&                             \
+      memcmp(s1, s2, len) == 0)) return name;                           \
+} while (0)
+
 #define HASH_SET(code, name, str)                                       \
   if (hash == code && strcmp(s, #str) == 0) { name = v; return null;}
 #define HASH_SET_STRING(code, name, str, len)                           \

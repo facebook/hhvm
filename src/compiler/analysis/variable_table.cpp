@@ -1686,11 +1686,21 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
                   hash_string(name), name, idx);
       }
       break;
-    case VariableTable::JumpReturnString:
-      cg.printf("HASH_RETURN_STRING%s(0x%016llXLL, %s,\n",
-          priv, hash_string(name), varName.c_str());
-      cg.printf("                   %s, %d);\n", name, strlen(name));
+    case VariableTable::JumpReturnString: {
+      int stringId;
+      if (Option::PrecomputeLiteralStrings &&
+          ar->getLiteralStringCount() > 0 &&
+          (stringId = ar->getLiteralStringId(name)) >= 0) {
+        cg.printf("HASH_RETURN_LITSTR%s(0x%016llXLL, %d, %s,\n",
+            priv, hash_string(name), stringId, varName.c_str());
+        cg.printf("                   %d);\n", strlen(name));
+      } else {
+        cg.printf("HASH_RETURN_STRING%s(0x%016llXLL, %s,\n",
+            priv, hash_string(name), varName.c_str());
+        cg.printf("                   %s, %d);\n", name, strlen(name));
+      }
       break;
+    }
     case VariableTable::JumpReturnInit:
       ExpressionPtr value =
         dynamic_pointer_cast<Expression>(getClassInitVal(name));

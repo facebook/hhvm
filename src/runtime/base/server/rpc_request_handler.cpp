@@ -161,8 +161,8 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       warmupDoc = RuntimeOption::WarmupDocument;
       reqInitFunc = RuntimeOption::RequestInitFunction;
     }
-    warmupDoc = canonicalize_path(warmupDoc, "", 0);
-    warmupDoc = get_source_filename(warmupDoc.c_str());
+    if (!warmupDoc.empty()) warmupDoc = canonicalize_path(warmupDoc, "", 0);
+    if (!warmupDoc.empty()) warmupDoc = get_source_filename(warmupDoc.c_str());
     bool ret = hphp_invoke(context, rpcFunc, true, params, ref(funcRet),
                            warmupDoc, reqInitFunc, error, errorMsg);
     if (ret) {

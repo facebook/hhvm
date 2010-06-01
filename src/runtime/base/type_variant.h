@@ -989,7 +989,8 @@ class Variant {
     if (is(KindOfArray) || isNull() ||
         (is(KindOfBoolean) && !toBoolean()) ||
         (is(LiteralString) && !*getLiteralString()) ||
-        (is(KindOfString) && getStringData()->empty())) {
+        (is(KindOfString) && getStringData()->empty()) ||
+        (is(KindOfStaticString) && getStringData()->empty())) {
       return ref(lvalAt(key, prehash));
     } else {
       return rvalAt(key, prehash);

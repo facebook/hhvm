@@ -161,6 +161,7 @@ int hphpGetType(HPHP::HphpSession *s, HPHP::Variant *v) {
   case HPHP::KindOfDouble:
     return TypeDouble;
   case HPHP::LiteralString:
+  case HPHP::KindOfStaticString:
   case HPHP::KindOfString:
     return TypeString;
   case HPHP::KindOfArray:

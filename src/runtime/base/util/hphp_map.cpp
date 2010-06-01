@@ -212,6 +212,7 @@ int64 HphpMap::hash(CVarRef s) {
       hash = hash_string(d, strlen(d));
     }
     break;
+  case KindOfStaticString:
   case KindOfString:
     {
       StringData *st = s.getStringData();
@@ -242,9 +243,11 @@ bool HphpMap::same(CVarRef s1, CVarRef s2) {
     }
     break;
   case LiteralString:
+  case KindOfStaticString:
   case KindOfString:
     switch (t2) {
     case LiteralString:
+    case KindOfStaticString:
     case KindOfString:
       break;
     default:

@@ -70,6 +70,9 @@ public:
   void set(CVarRef key, int64 h, int v) {
     m_type = key.getType();
     switch (m_type) {
+    case KindOfStaticString:
+      m_data.pstr = key.getStringData();
+      break;
     case KindOfString:
       m_data.pstr = key.getStringData();
       m_data.pstr->incRefCount();

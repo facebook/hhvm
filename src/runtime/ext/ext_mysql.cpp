@@ -126,9 +126,6 @@ MySQL *MySQL::Get(CVarRef link_identifier) {
   MySQL *mysql = link_identifier.toObject().getTyped<MySQL>
     (!RuntimeOption::ThrowBadTypeExceptions,
      !RuntimeOption::ThrowBadTypeExceptions);
-  if (mysql) {
-    SetDefaultConn(mysql);
-  }
   return mysql;
 }
 
@@ -532,7 +529,6 @@ static Variant php_mysql_do_connect(String server, String username,
     ret = mySQL;
     if (!mySQL->connect(host, port, socket, username, password,
                         client_flags, connect_timeout_ms)) {
-      MySQL::SetDefaultConn(mySQL);
       mySQL->setLastError("mysql_connect");
       return false;
     }
@@ -540,7 +536,6 @@ static Variant php_mysql_do_connect(String server, String username,
     ret = mySQL;
     if (!mySQL->reconnect(host, port, socket, username, password,
                           client_flags, connect_timeout_ms)) {
-      MySQL::SetDefaultConn(mySQL);
       mySQL->setLastError("mysql_connect");
       return false;
     }

@@ -34,19 +34,18 @@ void Util::split(char delimiter, const char *s, vector<string> &out,
                  bool ignoreEmpty /* = false */) {
   ASSERT(s);
 
-  string token;
-  for (const char *p = s; *p; p++) {
+  const char *start = s;
+  const char *p = s;
+  for (; *p; p++) {
     if (*p == delimiter) {
-      if (!ignoreEmpty || !token.empty()) {
-        out.push_back(token);
+      if (!ignoreEmpty || p > start + 1) {
+        out.push_back(string(start, p - start));
       }
-      token.clear();
-    } else {
-      token += *p;
+      start = p + 1;
     }
   }
-  if (!ignoreEmpty || !token.empty()) {
-    out.push_back(token);
+  if (!ignoreEmpty || p > start + 1) {
+    out.push_back(string(start, p - start));
   }
 }
 

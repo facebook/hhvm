@@ -18,6 +18,7 @@
 #define __HPHP_VARIABLE_SERIALIZER_H__
 
 #include <runtime/base/types.h>
+#include <runtime/base/util/string_buffer.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,7 +64,7 @@ public:
   void write(int     v) { write((int64)v);}
   void write(int64   v);
   void write(double  v);
-  void write(litstr  v, int len = -1, bool isArrayKey = false);
+  void write(const char *v, int len = -1, bool isArrayKey = false);
   void write(CStrRef v);
   void write(CArrRef v);
   void write(CObjRef v);
@@ -96,7 +97,7 @@ public:
 private:
   Type m_type;
   int m_option;                  // type specific extra options
-  std::ostream *m_out;
+  StringBuffer *m_buf;
   int m_indent;
   PointerCounterMap m_counts;    // counting seen arrays for recursive levels
   PointerCounterMap m_arrayIds;  // reference ids for objs/arrays
@@ -108,7 +109,6 @@ private:
   int m_objId;                   // for object serialization
   int m_rsrcId;                  // for resource serialization
   int m_maxCount;                // for max recursive levels
-  std::streampos m_initPos;      // Initial position of the output stream
   int64 m_outputLimit;             // Maximum size of output
 
 

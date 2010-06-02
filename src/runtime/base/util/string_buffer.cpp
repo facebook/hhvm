@@ -16,6 +16,7 @@
 
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/file/file.h>
+#include <runtime/base/zend/zend_functions.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -126,14 +127,18 @@ char *StringBuffer::reserve(int size) {
 
 void StringBuffer::append(int n) {
   char buf[12];
-  snprintf(buf, sizeof(buf), "%d", n);
-  append(buf);
+  int is_negative;
+  int len;
+  char *p = conv_10(n, &is_negative, buf + 12, &len);
+  append(p, len);
 }
 
 void StringBuffer::append(int64 n) {
-  char buf[24];
-  snprintf(buf, sizeof(buf), "%lld", n);
-  append(buf);
+  char buf[21];
+  int is_negative;
+  int len;
+  char *p = conv_10(n, &is_negative, buf + 21, &len);
+  append(p, len);
 }
 
 void StringBuffer::append(char ch) {

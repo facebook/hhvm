@@ -31,7 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 VariableSerializer::VariableSerializer(Type type, int option /* = 0 */)
-  : m_type(type), m_option(option), m_out(NULL), m_indent(0),
+  : m_type(type), m_option(option), m_buf(NULL), m_indent(0),
     m_valueCount(0), m_referenced(false), m_refCount(1), m_maxCount(3),
     m_outputLimit(0) {
 }
@@ -52,19 +52,19 @@ void VariableSerializer::setResourceInfo(const char *rsrcName, int rsrcId) {
 }
 
 Variant VariableSerializer::serialize(CVarRef v, bool ret) {
-  std::ostringstream oss;
+  StringBuffer buf;
+  m_buf = &buf;
   if (ret) {
-    m_out = &oss;
     m_outputLimit = RuntimeOption::SerializationSizeLimit;
-  } else {
-    m_out = &g_context->out();
   }
-  m_initPos = m_out->tellp();
   m_valueCount = 1;
-  if (m_type == VarDump && v.isContagious()) *m_out << '&';
+  if (m_type == VarDump && v.isContagious()) m_buf->append('&');
   write(v);
   if (ret) {
-    return String(oss.str()); // TODO: fix this one extra string copy here
+    return m_buf->detach();
+  } else {
+    String str = m_buf->detach();
+    g_context->out().write(str.c_str(), str.size());
   }
   return true;
 }
@@ -74,21 +74,21 @@ Variant VariableSerializer::serialize(CVarRef v, bool ret) {
 void VariableSerializer::write(bool v) {
   switch (m_type) {
   case PrintR:
-    if (v) *m_out << 1;
+    if (v) m_buf->append(1);
     break;
   case VarExport:
   case JSON:
-    *m_out << (v ? "true" : "false");
+    m_buf->append(v ? "true" : "false");
     break;
   case VarDump:
   case DebugDump:
     indent();
-    *m_out << (v ? "bool(true)" : "bool(false)");
+    m_buf->append(v ? "bool(true)" : "bool(false)");
     writeRefCount();
-    *m_out << '\n';
+    m_buf->append('\n');
     break;
   case Serialize:
-    *m_out << "b:" << (v ? 1 : 0) << ';';
+    m_buf->append(v ? "b:1;" : "b:0;");
     break;
   default:
     ASSERT(false);
@@ -102,20 +102,26 @@ void VariableSerializer::write(int64 v) {
   case PrintR:
   case VarExport:
   case JSON:
-    *m_out << v;
+    m_buf->append(v);
     break;
   case VarDump:
     indent();
-    *m_out << "int(" << v << ")\n";
+    m_buf->append("int(");
+    m_buf->append(v);
+    m_buf->append(")\n");
     break;
   case DebugDump:
     indent();
-    *m_out << "long(" << v << ')';
+    m_buf->append("long(");
+    m_buf->append(v);
+    m_buf->append(')');
     writeRefCount();
-    *m_out << '\n';
+    m_buf->append('\n');
     break;
   case Serialize:
-    *m_out << "i:" << v << ';';
+    m_buf->append("i:");
+    m_buf->append(v);
+    m_buf->append(';');
     break;
   default:
     ASSERT(false);
@@ -131,12 +137,12 @@ void VariableSerializer::write(double v) {
       char *buf;
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
       vspprintf(&buf, 0, "%.*k", 14, v);
-      *m_out << buf;
+      m_buf->append(buf);
       free(buf);
     } else {
       // PHP issues a warning: double INF/NAN does not conform to the
       // JSON spec, encoded as 0.
-      *m_out << '0';
+      m_buf->append('0');
     }
     break;
   case VarExport:
@@ -145,7 +151,7 @@ void VariableSerializer::write(double v) {
       char *buf;
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
       vspprintf(&buf, 0, "%.*G", 14, v);
-      *m_out << buf;
+      m_buf->append(buf);
       free(buf);
     }
     break;
@@ -156,26 +162,26 @@ void VariableSerializer::write(double v) {
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
       vspprintf(&buf, 0, "float(%.*G)", 14, v);
       indent();
-      *m_out << buf;
+      m_buf->append(buf);
       free(buf);
       writeRefCount();
-      *m_out << '\n';
+      m_buf->append('\n');
     }
     break;
   case Serialize:
-    *m_out << "d:";
+    m_buf->append("d:");
     if (isnan(v)) {
-      *m_out << "NAN";
+      m_buf->append("NAN");
     } else if (isinf(v)) {
-      *m_out << "INF";
+      m_buf->append("INF");
     } else {
       char *buf;
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
       vspprintf(&buf, 0, "%.*G", 14, v);
-      *m_out << buf;
+      m_buf->append(buf);
       free(buf);
     }
-    *m_out << ';';
+    m_buf->append(';');
     break;
   default:
     ASSERT(false);
@@ -184,38 +190,35 @@ void VariableSerializer::write(double v) {
   checkOutputSize();
 }
 
-void VariableSerializer::write(litstr v, int len /* = -1 */,
+void VariableSerializer::write(const char *v, int len /* = -1 */,
                                bool isArrayKey /* = false */) {
   switch (m_type) {
   case PrintR: {
     if (len < 0) len = strlen(v);
-    const char *p = v;
-    for (int i = 0; i < len; i++) {
-      *m_out << *p++;
-    }
+    m_buf->append(v, len);
     break;
   }
   case VarExport: {
     if (len < 0) len = strlen(v);
-    *m_out << '\'';
+    m_buf->append('\'');
     const char *p = v;
     for (int i = 0; i < len; i++, p++) {
       const char c = *p;
       // adapted from Zend php_var_export and php_addcslashes
       if (c == '\'' || c == '\\' || (!isArrayKey && c == '\0')) {
         if ((unsigned char) c < 32 || (unsigned char) c > 126) {
-          *m_out << '\\';
+          m_buf->append('\\');
           char buffer[4];
           sprintf(buffer, "%03o", (unsigned char)c);
-          *m_out << buffer;
+          m_buf->append(buffer);
           continue;
         } else {
-          *m_out << '\\';
+          m_buf->append('\\');
         }
       }
-      *m_out << c;
+      m_buf->append(c);
     }
-    *m_out << '\'';
+    m_buf->append('\'');
     break;
   }
   case VarDump:
@@ -223,34 +226,36 @@ void VariableSerializer::write(litstr v, int len /* = -1 */,
     if (v == NULL) v = "";
     if (len < 0) len = strlen(v);
     indent();
-    *m_out << "string(" << len << ") \"";
-    const char *p = v;
-    for (int i = 0; i < len; i++) {
-      *m_out << *p++;
-    }
-    *m_out << '"';
+    m_buf->append("string(");
+    m_buf->append(len);
+    m_buf->append(") \"");
+    m_buf->append(v, len);
+    m_buf->append('"');
     writeRefCount();
-    *m_out << '\n';
+    m_buf->append('\n');
     break;
   }
   case Serialize:
     if (len < 0) {
       len = strlen(v);
-      *m_out << "s:" << len << ":\"" << v << "\";";
+      m_buf->append("s:");
+      m_buf->append(len);
+      m_buf->append(":\"");
+      m_buf->append(v);
+      m_buf->append("\";");
     } else {
-      *m_out << "s:" << len << ":\"";
-      const char *p = v;
-      for (int i = 0; i < len; i++) {
-        *m_out << *p++;
-      }
-      *m_out << "\";";
+      m_buf->append("s:");
+      m_buf->append(len);
+      m_buf->append(":\"");
+      m_buf->append(v, len);
+      m_buf->append("\";");
     }
     break;
   case JSON:
     {
       if (len < 0) len = strlen(v);
       char *escaped = string_json_escape(v, len, m_option);
-      *m_out << escaped;
+      m_buf->append(escaped);
       free(escaped);
     }
     break;
@@ -309,20 +314,20 @@ void VariableSerializer::writeNull() {
     // do nothing
     break;
   case VarExport:
-    *m_out << "NULL";
+    m_buf->append("NULL");
     break;
   case VarDump:
   case DebugDump:
     indent();
-    *m_out << "NULL";
+    m_buf->append("NULL");
     writeRefCount();
-    *m_out << '\n';
+    m_buf->append('\n');
     break;
   case Serialize:
-    *m_out << "N;";
+    m_buf->append("N;");
     break;
   case JSON:
-    *m_out << "null";
+    m_buf->append("null");
     break;
   default:
     ASSERT(false);
@@ -335,14 +340,14 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
   setReferenced(false);
   switch (m_type) {
   case PrintR:
-    *m_out << "*RECURSION*";
+    m_buf->append("*RECURSION*");
     break;
   case VarExport:
     throw NestingLevelTooDeepException();
   case VarDump:
   case DebugDump:
     indent();
-    *m_out << "*RECURSION*\n";
+    m_buf->append("*RECURSION*\n");
     break;
   case Serialize:
     {
@@ -350,16 +355,20 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
       ASSERT(iter != m_arrayIds.end());
       int id = iter->second;
       if (isObject) {
-        *m_out << "r:" << id << ";";
+        m_buf->append("r:");
+        m_buf->append(id);
+        m_buf->append(';');
       } else if (wasRef) {
-        *m_out << "R:" << id << ";";
+        m_buf->append("R:");
+        m_buf->append(id);
+        m_buf->append(';');
       } else {
-        *m_out << "N;";
+        m_buf->append("N;");
       }
     }
     break;
   case JSON:
-    *m_out << "null";
+    m_buf->append("null");
     break;
   default:
     ASSERT(false);
@@ -369,7 +378,9 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
 
 void VariableSerializer::writeRefCount() {
   if (m_type == DebugDump) {
-    *m_out << " refcount(" << m_refCount << ')';
+    m_buf->append(" refcount(");
+    m_buf->append(m_refCount);
+    m_buf->append(')');
     m_refCount = 1;
   }
 }
@@ -384,26 +395,28 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
   switch (m_type) {
   case PrintR:
     if (!m_objClass.empty()) {
-      *m_out << m_objClass << " Object\n";
+      m_buf->append(m_objClass);
+      m_buf->append(" Object\n");
     } else {
-      *m_out << "Array\n";
+      m_buf->append("Array\n");
     }
     if (m_indent > 0) {
       m_indent += 4;
       indent();
     }
-    *m_out << "(\n";
+    m_buf->append("(\n");
     m_indent += (info.indent_delta = 4);
     break;
   case VarExport:
     if (m_indent > 0) {
-      *m_out << '\n';
+      m_buf->append('\n');
       indent();
     }
     if (!m_objClass.empty()) {
-      *m_out << m_objClass << "::__set_state(array(\n";
+      m_buf->append(m_objClass);
+      m_buf->append("::__set_state(array(\n");
     } else {
-      *m_out << "array (\n";
+      m_buf->append("array (\n");
     }
     m_indent += (info.indent_delta = 2);
     break;
@@ -411,38 +424,55 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
   case DebugDump:
     indent();
     if (!m_rsrcName.empty()) {
-      *m_out << "resource(" << m_rsrcId << ") of type (" << m_rsrcName << ")\n";
+      m_buf->append("resource(");
+      m_buf->append(m_rsrcId);
+      m_buf->append(") of type (");
+      m_buf->append(m_rsrcName);
+      m_buf->append(")\n");
       break;
     } else if (!m_objClass.empty()) {
-      *m_out << "object(" << m_objClass << ")#" << m_objId << " ";
+      m_buf->append("object(");
+      m_buf->append(m_objClass);
+      m_buf->append(")#");
+      m_buf->append(m_objId);
+      m_buf->append(' ');
     } else {
-      *m_out << "array";
+      m_buf->append("array");
     }
-    *m_out << "(" << size << ")";
+    m_buf->append('(');
+    m_buf->append(size);
+    m_buf->append(')');
 
     // ...so to strictly follow PHP's output
     if (m_type == VarDump) {
-      *m_out << " ";
+      m_buf->append(" ");
     } else {
       writeRefCount();
     }
 
-    *m_out << "{\n";
+    m_buf->append("{\n");
     m_indent += (info.indent_delta = 2);
     break;
   case Serialize:
     if (!m_objClass.empty()) {
-      *m_out << "O:" << m_objClass.size() << ":\"" << m_objClass << "\":"
-             << size << ":{";
+      m_buf->append("O:");
+      m_buf->append((int)m_objClass.size());
+      m_buf->append(":\"");
+      m_buf->append(m_objClass);
+      m_buf->append("\":");
+      m_buf->append(size);
+      m_buf->append(":{");
     } else {
-      *m_out << "a:" << size << ":{";
+      m_buf->append("a:");
+      m_buf->append(size);
+      m_buf->append(":{");
     }
     break;
   case JSON:
     if (info.is_vector) {
-      *m_out << "[";
+      m_buf->append("[");
     } else {
-      *m_out << "{";
+      m_buf->append("{");
     }
     break;
   default:
@@ -474,9 +504,9 @@ void VariableSerializer::writePropertyPrivacy(const char *prop,
   if (!p) return;
   ClassInfo::Attribute a = p->attribute;
   if (a & ClassInfo::IsProtected) {
-    *m_out << ":protected";
+    m_buf->append(":protected");
   } else if (a & ClassInfo::IsPrivate && cls == origCls) {
-    *m_out << ":private";
+    m_buf->append(":private");
   }
 }
 
@@ -531,37 +561,35 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
   switch (m_type) {
   case PrintR: {
     indent();
-    *m_out << '[';
+    m_buf->append('[');
       String keyStr = key.toString();
       const char *p = keyStr;
-      int len  = keyStr.length();
-      for (int i = 0; i < len; i++) {
-        *m_out << *p++;
-      }
+      int len = keyStr.length();
+      m_buf->append(p, len);
       if (info.is_object) writePropertyPrivacy(keyStr.c_str(), cls);
-      *m_out << "] => ";
+      m_buf->append("] => ");
     break;
   }
   case VarExport:
     indent();
     write(key, true);
-    *m_out << " => ";
+    m_buf->append(" => ");
     break;
   case VarDump:
   case DebugDump:
     indent();
     if (key.isNumeric()) {
-      *m_out << '[' << (const char *)key.toString() << "]=>\n";
+      m_buf->append('[');
+      m_buf->append((const char *)key.toString());
+      m_buf->append("]=>\n");
     } else {
-      *m_out << "[\"";
+      m_buf->append("[\"");
       String keyStr = key.toString();
       const char *p = keyStr;
-      int len  = keyStr.length();
-      for (int i = 0; i < len; i++) {
-        *m_out << *p++;
-      }
+      int len = keyStr.length();
+      m_buf->append(p, len);
       if (info.is_object) writePropertyPrivacy(keyStr.c_str(), cls);
-      *m_out << "\"]=>\n";
+      m_buf->append("\"]=>\n");
     }
     break;
   case Serialize:
@@ -573,11 +601,11 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
     break;
   case JSON:
     if (!info.first_element) {
-      *m_out << ",";
+      m_buf->append(",");
     }
     if (!info.is_vector) {
       write(key.toString());
-      *m_out << ":";
+      m_buf->append(":");
     }
     break;
   default:
@@ -596,10 +624,10 @@ void VariableSerializer::writeArrayValue(const ArrayData *arr, CVarRef value) {
   write(value);
   switch (m_type) {
   case PrintR:
-    *m_out << '\n';
+    m_buf->append('\n');
     break;
   case VarExport:
-    *m_out << ",\n";
+    m_buf->append(",\n");
     break;
   default:
     break;
@@ -616,7 +644,7 @@ void VariableSerializer::writeArrayFooter(const ArrayData *arr) {
   switch (m_type) {
   case PrintR:
     indent();
-    *m_out << ")\n";
+    m_buf->append(")\n");
     if (m_indent > 0) {
       m_indent -= 4;
     }
@@ -624,26 +652,26 @@ void VariableSerializer::writeArrayFooter(const ArrayData *arr) {
   case VarExport:
     indent();
     if (info.is_object) {
-      *m_out << "))";
+      m_buf->append("))");
     } else {
-      *m_out << ')';
+      m_buf->append(')');
     }
     break;
   case VarDump:
   case DebugDump:
     if (m_rsrcName.empty()) {
       indent();
-      *m_out << "}\n";
+      m_buf->append("}\n");
     }
     break;
   case Serialize:
-    *m_out << '}';
+    m_buf->append('}');
     break;
   case JSON:
     if (info.is_vector) {
-      *m_out << "]";
+      m_buf->append("]");
     } else {
-      *m_out << "}";
+      m_buf->append("}");
     }
     break;
   default:
@@ -656,27 +684,25 @@ void VariableSerializer::writeArrayFooter(const ArrayData *arr) {
 
 void VariableSerializer::writeSerializableObject(CStrRef clsname,
                                                  CStrRef serialized) {
-  *m_out << "C:" << clsname.size() << ":\"";
-  const char *p = clsname.data();
-  for (int i = 0; i < clsname.size(); i++) {
-    *m_out << *p++;
-  }
-  *m_out << "\":" << serialized.size() << ":{";
-  p = serialized.data();
-  for (int i = 0; i < serialized.size(); i++) {
-    *m_out << *p++;
-  }
-  *m_out << "}";
+  m_buf->append("C:");
+  m_buf->append(clsname.size());
+  m_buf->append(":\"");
+  m_buf->append(clsname.data(), clsname.size());
+  m_buf->append("\":");
+  m_buf->append(serialized.size());
+  m_buf->append(":{");
+  m_buf->append(serialized.data(), serialized.size());
+  m_buf->append('}');
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void VariableSerializer::indent() {
   for (int i = 0; i < m_indent; i++) {
-    *m_out << ' ';
+    m_buf->append(' ');
   }
   if (m_referenced) {
-    if (m_indent > 0) *m_out << '&';
+    if (m_indent > 0) m_buf->append('&');
     m_referenced = false;
   }
 }
@@ -715,7 +741,7 @@ void VariableSerializer::decNestedLevel(void *ptr) {
 }
 
 void VariableSerializer::checkOutputSize() {
-  if (m_outputLimit > 0 && m_out->tellp() - m_initPos > m_outputLimit) {
+  if (m_outputLimit > 0 && m_buf->length() > m_outputLimit) {
     raise_error("Value too large for serialization");
   }
 }

@@ -106,7 +106,7 @@ public:
     return *this;
   }
 
-  void push_back(T t) {
+  void push_back(const T &t) {
     m_size++;
     m_pos++;
     if (m_pos < CHUNK_ITEM_COUNT) {
@@ -119,7 +119,7 @@ public:
     }
   }
 
-  T back() const {
+  T &back() const {
     ASSERT(m_size > 0);
     return ((Chunk *)m_tail)->chunk[m_pos];
   }

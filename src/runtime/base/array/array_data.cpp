@@ -244,6 +244,7 @@ void ArrayData::serialize(VariableSerializer *serializer) const {
     serializer->writeOverflow((void*)this);
   } else {
     serializer->writeArrayHeader(this, size());
+    bool refValue = supportValueRef();
     for (ArrayIter iter(this); iter; ++iter) {
       Variant key(iter.first());
       if (key.isInteger()) {
@@ -251,7 +252,7 @@ void ArrayData::serialize(VariableSerializer *serializer) const {
       } else {
         serializer->writeArrayKey(this, key.toString());
       }
-      if (supportValueRef()) {
+      if (refValue) {
         serializer->writeArrayValue(this, iter.secondRef());
       } else {
         serializer->writeArrayValue(this, iter.second());

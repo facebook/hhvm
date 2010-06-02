@@ -85,7 +85,7 @@ inline bool x_property_exists(CVarRef class_or_object, CStrRef property) {
   return f_property_exists(class_or_object, property);
 }
 
-inline Array x_get_object_vars(CObjRef object) {
+inline Variant x_get_object_vars(CVarRef object) {
   FUNCTION_INJECTION_BUILTIN(get_object_vars);
   return f_get_object_vars(object);
 }

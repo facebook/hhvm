@@ -169,8 +169,11 @@ bool f_property_exists(CVarRef class_or_object, CStrRef property) {
   return false;
 }
 
-Array f_get_object_vars(CObjRef object) {
-  return object->o_toIterArray(FrameInjection::GetClassName(true));
+Variant f_get_object_vars(CVarRef object) {
+  if (object.isObject()) {
+    return object.toObject()->o_toIterArray(FrameInjection::GetClassName(true));
+  }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

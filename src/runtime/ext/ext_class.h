@@ -38,7 +38,7 @@ bool f_is_a(CObjRef object, CStrRef class_name);
 bool f_is_subclass_of(CVarRef class_or_object, CStrRef class_name);
 bool f_method_exists(CVarRef class_or_object, CStrRef method_name);
 bool f_property_exists(CVarRef class_or_object, CStrRef property);
-Array f_get_object_vars(CObjRef object);
+Variant f_get_object_vars(CVarRef object);
 
 ///////////////////////////////////////////////////////////////////////////////
 

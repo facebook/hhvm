@@ -45,8 +45,8 @@ f('property_exists', Boolean,
   array('class_or_object' => Variant,
         'property' => String));
 
-f('get_object_vars', VariantMap,
-  array('object' => Object));
+f('get_object_vars', Variant,
+  array('object' => Variant));
 
 ///////////////////////////////////////////////////////////////////////////////
 

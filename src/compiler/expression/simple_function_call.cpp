@@ -30,6 +30,7 @@
 #include <compiler/option.h>
 #include <compiler/expression/simple_variable.h>
 #include <compiler/parser/parser.h>
+#include <compiler/parser/hphp.tab.hpp>
 #include <runtime/base/complex_types.h>
 
 using namespace HPHP;
@@ -205,25 +206,33 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
     // We need to know the name of the constant so that we can associate it
     // with this file before we do type inference.
-    if (!m_class && m_className.empty() && m_type == DefineFunction) {
+    if (!m_class && m_className.empty() && m_type == DefineFunction &&
+        m_params && m_params->getCount() >= 2) {
+      ExpressionPtr ename = (*m_params)[0];
+      if (ConstantExpressionPtr cname =
+          dynamic_pointer_cast<ConstantExpression>(ename)) {
+
+        ename = ExpressionPtr(
+          new ScalarExpression(cname->getLocation(), KindOfScalarExpression,
+                               T_STRING, cname->getName(), true));
+        m_params->removeElement(0);
+        m_params->insertElement(ename);
+      }
       ScalarExpressionPtr name =
-        dynamic_pointer_cast<ScalarExpression>((*m_params)[0]);
-      string varName;
+        dynamic_pointer_cast<ScalarExpression>(ename);
       if (name) {
-        varName = name->getIdentifier();
+        string varName = name->getIdentifier();
         if (!varName.empty()) {
           ar->getFileScope()->declareConstant(ar, varName);
 
           // handling define("CONSTANT", ...);
-          if (m_params && m_params->getCount() >= 2) {
-            ExpressionPtr value = (*m_params)[1];
-            BlockScopePtr block = ar->findConstantDeclarer(varName);
-            ConstantTablePtr constants = block->getConstants();
-            if (constants != ar->getConstants()) {
-              constants->add(varName, NEW_TYPE(Some), value, ar, self);
-              if (name->hasHphpNote("Dynamic")) {
-                constants->setDynamic(ar, varName);
-              }
+          ExpressionPtr value = (*m_params)[1];
+          BlockScopePtr block = ar->findConstantDeclarer(varName);
+          ConstantTablePtr constants = block->getConstants();
+          if (constants != ar->getConstants()) {
+            constants->add(varName, NEW_TYPE(Some), value, ar, self);
+            if (name->hasHphpNote("Dynamic")) {
+              constants->setDynamic(ar, varName);
             }
           }
         }

@@ -111,18 +111,20 @@ TypePtr ConstantTable::check(const std::string &name, TypePtr type,
   defScope = NULL;
   if (name == "true" || name == "false") {
     actualType = Type::Boolean;
-  } else if (!ar->isFirstPass() && m_values.find(name) == m_values.end()) {
-    actualType = checkBases(name, type, coerce, ar, construct,
-                            bases, defScope);
-    if (defScope) return actualType;
-    ar->getCodeError()->record(CodeError::UseUndeclaredConstant,
-                               construct);
-    if (m_blockScope.is(BlockScope::ClassScope)) {
-      actualType = Type::Variant;
-    } else {
-      actualType = Type::String;
+  } else if (m_values.find(name) == m_values.end()) {
+    if (ar->getPhase() != AnalysisResult::AnalyzeInclude) {
+      actualType = checkBases(name, type, coerce, ar, construct,
+                              bases, defScope);
+      if (defScope) return actualType;
+      ar->getCodeError()->record(CodeError::UseUndeclaredConstant,
+                                 construct);
+      if (m_blockScope.is(BlockScope::ClassScope)) {
+        actualType = Type::Variant;
+      } else {
+        actualType = Type::String;
+      }
+      setType(ar, name, actualType, true);
     }
-    setType(ar, name, actualType, true);
   } else {
     StringToTypePtrMap::const_iterator iter = m_coerced.find(name);
     if (iter != m_coerced.end()) {

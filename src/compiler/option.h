@@ -298,8 +298,10 @@ public:
   static int InvokeFewArgsCount;
   static bool PrecomputeLiteralStrings;
   static bool FlattenInvoke;
+  static bool UseFastInvoke;
   static int InlineFunctionThreshold;
   static bool ControlEvalOrder;
+  static bool GlobalRefParamAnalysis;
   static bool GenerateSourceInfo;
 
 private:

@@ -320,11 +320,6 @@ Variant ObjectData::o_invoke(const char *s, CArrRef params, int64 hash,
   return doRootCall(s, params, fatal);
 }
 
-Variant ObjectData::o_root_invoke(const char *s, CArrRef params, int64 hash,
-                                  bool fatal /* = true */) {
-  return o_invoke(s, params, hash, fatal);
-}
-
 Variant ObjectData::o_invoke_ex(const char *clsname, const char *s,
                                 CArrRef params, int64 hash,
                                 bool fatal /* = true */) {
@@ -403,11 +398,6 @@ Variant ObjectData::o_invoke_few_args(const char *s, int64 hash, int count,
   return null;
 }
 
-Variant ObjectData::o_root_invoke_few_args(const char *s, int64 hash, int count,
-                                           INVOKE_FEW_ARGS_IMPL_ARGS) {
-  return o_invoke_few_args(s, hash, count, INVOKE_FEW_ARGS_PASS_ARGS);
-}
-
 Variant ObjectData::o_invoke_from_eval(const char *s,
                                        Eval::VariableEnvironment &env,
                                        const Eval::FunctionCallExpression *call,
@@ -474,6 +464,33 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
     }
   }
   serializer->decNestedLevel((void*)this);
+}
+
+/**
+ * Currently the o_fast_invoke methods simply forward the parameters to
+ * the o_invoke methods. If fast_invoke* is adopted in the future, we
+ * will provide better implementations for o_fast_invoke that do the use
+ * the o_invoke methods as a crutch.
+ */
+Variant ObjectData::o_fast_invoke(const char *s, int64 hash, int count,
+                                  const Variant ** args,
+                                  bool fatal /* = true */) {
+  if (count >= 0) {
+    Array params = Array::Create();
+    for (int i = 0; i < count; ++i) {
+      params.append(ref(*args[i]));
+    }
+    return ref(o_invoke(s, params, hash, fatal));
+  }
+  ASSERT(count == -1);
+  return ref(o_invoke(s, *args[0], hash, fatal));
+}
+
+Variant ObjectData::o_fast_invoke(const char *s, int64 hash, int count,
+                                  CArrRef args,
+                                  bool fatal /* = true */) {
+  ASSERT(count == -1);
+  return ref(o_invoke(s, args, hash, fatal));
 }
 
 void ObjectData::dump() const {
@@ -587,16 +604,6 @@ String ObjectData::t___tostring() {
 Variant ObjectData::t___clone() {
   // do nothing
   return null;
-}
-
-
-Variant ExtObjectData::o_root_invoke(const char *s, CArrRef ps, int64 h,
-    bool f /* = true */) {
-  return root->o_invoke(s, ps, h, f);
-}
-Variant ExtObjectData::o_root_invoke_few_args(const char *s, int64 h, int count,
-                          INVOKE_FEW_ARGS_IMPL_ARGS) {
-  return root->o_invoke_few_args(s, h, count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

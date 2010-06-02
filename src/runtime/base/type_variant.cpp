@@ -2310,17 +2310,6 @@ Variant Variant::o_invoke(const char *s, CArrRef params, int64 hash) {
   }
 }
 
-Variant Variant::o_root_invoke(const char *s, CArrRef params, int64 hash) {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_root_invoke(s, params, hash);
-  } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_root_invoke(s, params, hash);
-  } else {
-    throw InvalidOperandException(
-        "Call to a member function on a non-object");
-  }
-}
-
 Variant Variant::o_invoke_ex(const char *clsname, const char *s,
                               CArrRef params, int64 hash) {
   if (m_type == KindOfObject) {
@@ -2373,44 +2362,31 @@ Variant Variant::o_invoke_few_args(const char *s, int64 hash, int count,
   }
 }
 
-Variant Variant::o_root_invoke_few_args(const char *s, int64 hash, int count,
-                                        CVarRef a0 /* = null_variant */,
-                                        CVarRef a1 /* = null_variant */,
-                                        CVarRef a2 /* = null_variant */
-#if INVOKE_FEW_ARGS_COUNT > 3
-                                        ,CVarRef a3 /* = null_variant */,
-                                        CVarRef a4 /* = null_variant */,
-                                        CVarRef a5 /* = null_variant */
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 6
-                                        ,CVarRef a6 /* = null_variant */,
-                                        CVarRef a7 /* = null_variant */,
-                                        CVarRef a8 /* = null_variant */,
-                                        CVarRef a9 /* = null_variant */
-#endif
-) {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_root_invoke_few_args(s, hash, count, a0, a1, a2
-#if INVOKE_FEW_ARGS_COUNT > 3
-                                               ,a3, a4, a5
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 6
-                                               ,a6, a7, a8, a9
-#endif
-                                              );
-  } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_root_invoke_few_args(s, hash, count, a0, a1, a2
-#if INVOKE_FEW_ARGS_COUNT > 3
-                                               ,a3, a4, a5
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 6
-                                               ,a6, a7, a8, a9
-#endif
-                                              );
-  } else {
-    throw InvalidOperandException(
-        "Call to a member function on a non-object");
+/**
+ * Currently the o_fast_invoke methods simply forward the parameters to
+ * the o_invoke methods. If fast_invoke* is adopted in the future, we
+ * will provide better implementations for o_fast_invoke that do the use
+ * the o_invoke methods as a crutch.
+ */
+Variant Variant::o_fast_invoke(const char *s, int64 hash, int count,
+                               const Variant ** args,
+                               bool fatal /* = true */) {
+  if (count >= 0) {
+    Array params = Array::Create();
+    for (int i = 0; i < count; ++i) {
+      params.append(ref(*args[i]));
+    }
+    return ref(o_invoke(s, params, hash));
   }
+  ASSERT(count == -1);
+  return ref(o_invoke(s, *args[0], hash));
+}
+
+Variant Variant::o_fast_invoke(const char *s, int64 hash, int count,
+                               CArrRef args,
+                               bool fatal /* = true */) {
+  ASSERT(count == -1);
+  return ref(o_invoke(s, args, hash));
 }
 
 ObjectOffset Variant::o_lval(CStrRef propName, int64 prehash /*= -1 */) {

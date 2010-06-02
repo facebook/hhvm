@@ -36,6 +36,9 @@ public:
   virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                 bool coerce);
 
+  bool preOutputCPP(CodeGenerator &cg,
+                    AnalysisResultPtr ar,
+                    int state);
 private:
   ExpressionPtr m_object;
 
@@ -45,6 +48,7 @@ private:
   bool directVariantProxy(AnalysisResultPtr ar);
   bool canInvokeFewArgs();
   bool m_invokeFewArgsDecision;
+  int m_argvTemp;
   bool m_bindClass;
 };
 

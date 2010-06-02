@@ -188,17 +188,6 @@ namespace HPHP {
                              int64 hash,                                \
                              bool fatal /* = true */);
 
-#define DECLARE_ROOT                                                    \
-  Variant o_root_invoke(const char *s, CArrRef ps, int64 h,             \
-                        bool f = true) {                                \
-    return root->o_invoke(s, ps, h, f);                                 \
-  }                                                                     \
-  Variant o_root_invoke_few_args(const char *s, int64 h, int count,     \
-                                 INVOKE_FEW_ARGS_DECL_ARGS) {           \
-    return root->o_invoke_few_args(s, h, count,                         \
-                                   INVOKE_FEW_ARGS_PASS_ARGS);          \
-  }
-
 #define CLASS_CHECK(exp) (checkClassExists(s, g), (exp))
 
 #define IMPLEMENT_CLASS(cls)                                            \
@@ -381,7 +370,8 @@ do { \
 #define FRAME_INJECTION(c, n) FrameInjection fi(info, #c, #n);
 #define FRAME_INJECTION_FLAGS(c, n, f) \
   FrameInjection fi(info, #c, #n, NULL, f);
-#define FRAME_INJECTION_WITH_THIS(c, n) FrameInjection fi(info, #c, #n, this);
+#define FRAME_INJECTION_WITH_THIS(c, n) \
+  FrameInjection fi(info, #c, #n, getRoot());
 #define LINE(n, e) (set_ln(fi.line, n), e)
 
 // code injected into beginning of every function/method
@@ -443,6 +433,7 @@ do { \
 #define BIND_CLASS_DOT  bindClass(info).
 #define BIND_CLASS_ARROW(T) bindClass<c_##T>(info)->
 #define INVOKE_STATIC_METHOD invoke_static_method_bind
+#define FAST_INVOKE_STATIC_METHOD fast_invoke_static_method_bind
 
 #else
 
@@ -450,6 +441,7 @@ do { \
 #define BIND_CLASS_DOT
 #define BIND_CLASS_ARROW(T)
 #define INVOKE_STATIC_METHOD invoke_static_method
+#define FAST_INVOKE_STATIC_METHOD fast_invoke_static_method
 
 #endif
 

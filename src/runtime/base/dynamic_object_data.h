@@ -60,10 +60,6 @@ class DynamicObjectData : public ObjectData {
                               CArrRef params, int64 hash, bool fatal = true);
   virtual Variant o_invoke_few_args(const char *s, int64 hash, int count,
                                     INVOKE_FEW_ARGS_DECL_ARGS);
-  virtual Variant o_root_invoke(const char *s, CArrRef params, int64 hash,
-                                bool fatal = false);
-  virtual Variant o_root_invoke_few_args(const char *s, int64 hash, int count,
-                                         INVOKE_FEW_ARGS_DECL_ARGS);
 
   virtual Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   virtual Variant doRootCall(Variant v_name, Variant v_arguments, bool fatal);

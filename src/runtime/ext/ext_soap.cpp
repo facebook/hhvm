@@ -467,7 +467,7 @@ static bool do_request(c_soapclient *client, xmlDoc *request,
   if (client->m_trace) {
     client->m_last_request = String((char*)buf, buf_size, CopyString);
   }
-  response = client->o_root_invoke_few_args("__dorequest", -1, 5,
+  response = client->getRoot()->o_invoke_few_args("__dorequest", -1, 5,
       String(buf, buf_size, AttachLiteral),
       String(location, AttachLiteral),
       String(action, AttachLiteral),

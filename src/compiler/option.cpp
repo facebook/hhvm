@@ -167,8 +167,11 @@ bool Option::EnableXHP = false;
 int Option::InvokeFewArgsCount = 6;
 bool Option::PrecomputeLiteralStrings = true;
 bool Option::FlattenInvoke = true;
+bool Option::UseFastInvoke = false;
 int Option::InlineFunctionThreshold = -1;
 bool Option::ControlEvalOrder = true;
+
+bool Option::GlobalRefParamAnalysis = true;
 
 bool Option::AllDynamic = false;
 bool Option::AllVolatile = false;

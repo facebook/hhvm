@@ -954,7 +954,8 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       bool hasVoid = false, hasLitStr = false;
       int num = getConcatList(ev, self, hasVoid, hasLitStr);
       assert(!hasVoid);
-      if (num <= MAX_CONCAT_ARGS && !hasLitStr) {
+      if (num <= MAX_CONCAT_ARGS &&
+          (!hasLitStr || Option::PrecomputeLiteralStrings)) {
         assert(num >= 2);
         if (num == 2) {
           cg.printf("concat(");

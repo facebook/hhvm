@@ -3589,6 +3589,19 @@ bool TestCodeRun::TestUnset() {
       "var_dump($obj);"
       "unset($obj->a, $obj->b);"
       "var_dump($obj);");
+  MVCR("<?php;"
+       "class X {"
+       "  function __construct() { echo 'construct\n'; }"
+       "  function __destruct() { echo 'destruct\n'; }"
+       "}"
+       "function test() {"
+       "  $a = new X;"
+       "  echo 'before unset\n';"
+       "  unset($a);"
+       "  echo 'after unset\n';"
+       "}"
+       "test();");
+
   return true;
 }
 

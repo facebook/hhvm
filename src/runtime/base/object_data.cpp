@@ -504,7 +504,7 @@ Variant ObjectData::doRootCall(Variant v_name, Variant v_arguments, bool fatal) 
 Variant ObjectData::doGet(Variant v_name, bool error) {
   if (error) {
     raise_notice("Undefined property: %s::$%s", o_getClassName(),
-        v_name.toString().data());
+                 v_name.toString().data());
   }
   return null_variant;
 }

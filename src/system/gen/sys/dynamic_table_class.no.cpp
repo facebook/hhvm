@@ -262,7 +262,7 @@ Variant c_pdoexception::o_invoke(const char *s, CArrRef params, int64 hash, bool
     default:
       break;
   }
-  return c_exception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_pdoexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pdoexception
@@ -324,13 +324,13 @@ Variant c_pdoexception::o_invoke_few_args(const char *s, int64 hash, int count, 
     default:
       break;
   }
-  return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_pdoexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdoexception
 Variant c_pdoexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_exception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdoexception
 Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -753,7 +753,7 @@ Variant c_domdocumentfragment::o_invoke(const char *s, CArrRef params, int64 has
     default:
       break;
   }
-  return c_domnode::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumentfragment
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumentfragment
@@ -895,13 +895,13 @@ Variant c_domdocumentfragment::o_invoke_few_args(const char *s, int64 hash, int 
     default:
       break;
   }
-  return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumentfragment
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocumentfragment
 Variant c_domdocumentfragment::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_domnode::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocumentfragment
 Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1657,7 +1657,7 @@ Variant c_domtext::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     default:
       break;
   }
-  return c_domcharacterdata::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domtext
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domtext
@@ -1834,13 +1834,13 @@ Variant c_domtext::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
     default:
       break;
   }
-  return c_domcharacterdata::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domtext
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domtext
 Variant c_domtext::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_domcharacterdata::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domtext
 Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -2716,7 +2716,7 @@ Variant c_domcdatasection::o_invoke(const char *s, CArrRef params, int64 hash, b
     default:
       break;
   }
-  return c_domtext::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domcdatasection
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domcdatasection
@@ -2892,13 +2892,13 @@ Variant c_domcdatasection::o_invoke_few_args(const char *s, int64 hash, int coun
     default:
       break;
   }
-  return c_domtext::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domcdatasection
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcdatasection
 Variant c_domcdatasection::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_domtext::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcdatasection
 Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -3734,7 +3734,7 @@ Variant c_domdocumenttype::o_invoke(const char *s, CArrRef params, int64 hash, b
     default:
       break;
   }
-  return c_domnode::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumenttype
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumenttype
@@ -3872,13 +3872,13 @@ Variant c_domdocumenttype::o_invoke_few_args(const char *s, int64 hash, int coun
     default:
       break;
   }
-  return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumenttype
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocumenttype
 Variant c_domdocumenttype::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_domnode::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocumenttype
 Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -5820,7 +5820,7 @@ Variant c_domcharacterdata::o_invoke(const char *s, CArrRef params, int64 hash, 
     default:
       break;
   }
-  return c_domnode::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domcharacterdata
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domcharacterdata
@@ -5986,13 +5986,13 @@ Variant c_domcharacterdata::o_invoke_few_args(const char *s, int64 hash, int cou
     default:
       break;
   }
-  return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domcharacterdata
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcharacterdata
 Variant c_domcharacterdata::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_domnode::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcharacterdata
 Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -6795,7 +6795,7 @@ Variant c_domentityreference::o_invoke(const char *s, CArrRef params, int64 hash
     default:
       break;
   }
-  return c_domnode::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domentityreference
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domentityreference
@@ -6933,13 +6933,13 @@ Variant c_domentityreference::o_invoke_few_args(const char *s, int64 hash, int c
     default:
       break;
   }
-  return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domentityreference
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domentityreference
 Variant c_domentityreference::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_domnode::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domentityreference
 Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -9473,7 +9473,7 @@ Variant c_domnotation::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     default:
       break;
   }
-  return c_domnode::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnotation
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnotation
@@ -9611,13 +9611,13 @@ Variant c_domnotation::o_invoke_few_args(const char *s, int64 hash, int count, C
     default:
       break;
   }
-  return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnotation
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnotation
 Variant c_domnotation::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_domnode::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnotation
 Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -10344,7 +10344,7 @@ Variant c_domcomment::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     default:
       break;
   }
-  return c_domcharacterdata::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domcomment
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domcomment
@@ -10511,13 +10511,13 @@ Variant c_domcomment::o_invoke_few_args(const char *s, int64 hash, int count, CV
     default:
       break;
   }
-  return c_domcharacterdata::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domcomment
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcomment
 Variant c_domcomment::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_domcharacterdata::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcomment
 Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -12087,7 +12087,7 @@ Variant c_domattr::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     default:
       break;
   }
-  return c_domnode::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domattr
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domattr
@@ -12230,13 +12230,13 @@ Variant c_domattr::o_invoke_few_args(const char *s, int64 hash, int count, CVarR
     default:
       break;
   }
-  return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domattr
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domattr
 Variant c_domattr::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_domnode::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domattr
 Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -14997,7 +14997,7 @@ Variant c_domprocessinginstruction::o_invoke(const char *s, CArrRef params, int6
     default:
       break;
   }
-  return c_domnode::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domprocessinginstruction
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domprocessinginstruction
@@ -15136,13 +15136,13 @@ Variant c_domprocessinginstruction::o_invoke_few_args(const char *s, int64 hash,
     default:
       break;
   }
-  return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domprocessinginstruction
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domprocessinginstruction
 Variant c_domprocessinginstruction::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_domnode::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domprocessinginstruction
 Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -19160,7 +19160,7 @@ Variant c_domentity::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     default:
       break;
   }
-  return c_domnode::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domentity
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domentity
@@ -19298,13 +19298,13 @@ Variant c_domentity::o_invoke_few_args(const char *s, int64 hash, int count, CVa
     default:
       break;
   }
-  return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domentity
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domentity
 Variant c_domentity::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_domnode::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domentity
 Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -21516,7 +21516,7 @@ Variant c_domexception::o_invoke(const char *s, CArrRef params, int64 hash, bool
     default:
       break;
   }
-  return c_exception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domexception
@@ -21580,13 +21580,13 @@ Variant c_domexception::o_invoke_few_args(const char *s, int64 hash, int count, 
     default:
       break;
   }
-  return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domexception
 Variant c_domexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_exception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domexception
 Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -24012,7 +24012,7 @@ Variant c_domdocument::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     default:
       break;
   }
-  return c_domnode::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domdocument
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domdocument
@@ -24328,13 +24328,13 @@ Variant c_domdocument::o_invoke_few_args(const char *s, int64 hash, int count, C
     default:
       break;
   }
-  return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domdocument
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocument
 Variant c_domdocument::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_domnode::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocument
 Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -25796,7 +25796,7 @@ Variant c_soapfault::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     default:
       break;
   }
-  return c_exception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapfault
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapfault
@@ -25862,13 +25862,13 @@ Variant c_soapfault::o_invoke_few_args(const char *s, int64 hash, int count, CVa
     default:
       break;
   }
-  return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapfault
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapfault
 Variant c_soapfault::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_exception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapfault
 Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -26442,7 +26442,7 @@ Variant c_domelement::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     default:
       break;
   }
-  return c_domnode::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domelement
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domelement
@@ -26686,13 +26686,13 @@ Variant c_domelement::o_invoke_few_args(const char *s, int64 hash, int count, CV
     default:
       break;
   }
-  return c_domnode::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domelement
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domelement
 Variant c_domelement::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_domnode::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domelement
 Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

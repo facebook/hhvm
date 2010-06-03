@@ -249,6 +249,24 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
   }
 }
 
+bool ClassScope::needsInvokeParent(AnalysisResultPtr ar,
+                                   bool considerSelf /* = true */) {
+  // check all functions this class has
+  if (considerSelf) {
+    for (StringToFunctionScopePtrVecMap::const_iterator iter =
+           m_functions.begin(); iter != m_functions.end(); ++iter) {
+      if (iter->second.back()->isPrivate()) return true;
+    }
+  }
+
+  // walk up
+  if (!m_parent.empty()) {
+    ClassScopePtr super = ar->findClass(m_parent);
+    return !super || super->isRedeclaring() || super->needsInvokeParent(ar);
+  }
+  return false;
+}
+
 bool ClassScope::derivesFrom(AnalysisResultPtr ar,
                              const std::string &base) const {
   BOOST_FOREACH(std::string base_i, m_bases) {
@@ -1146,6 +1164,13 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
   if (needGlobals) cg.printDeclareGlobals();
   outputCPPMethodInvokeTable(cg, ar, funcs, funcScopes, false, staticOnly,
                              forEval);
+
+  string base = parent;
+  if (Option::FlattenInvoke && !needsInvokeParent(ar, false)) {
+    base = m_derivesFromRedeclaring ? "c_DynamicObjectData" : "c_ObjectData";
+    base += "::" + invokeName;
+  }
+
   if (forEval) {
     if (staticOnly) {
       cg.printf("return %s(c, s, env, caller, hash, fatal);\n",
@@ -1156,11 +1181,11 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
     cg.indentEnd("}\n");
   } else {
     if (staticOnly) {
-      cg.printf("return %s(c, s, params, hash, fatal);\n", parent.c_str());
+      cg.printf("return %s(c, s, params, hash, fatal);\n", base.c_str());
       cg.indentEnd("}\n");
       cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_%s", clsName);
     } else {
-      cg.printf("return %s(s, params, hash, fatal);\n", parent.c_str());
+      cg.printf("return %s(s, params, hash, fatal);\n", base.c_str());
       cg.indentEnd("}\n");
       cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
     }
@@ -1177,7 +1202,7 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
     if (needGlobals) cg.printDeclareGlobals();
     outputCPPMethodInvokeTable(cg, ar, funcs, funcScopes, true, staticOnly,
                                false);
-    cg.printf("return %s_few_args(s, hash, count", parent.c_str());
+    cg.printf("return %s_few_args(s, hash, count", base.c_str());
     for (int i = 0; i < Option::InvokeFewArgsCount; i++) {
       cg.printf(", a%d", i);
     }

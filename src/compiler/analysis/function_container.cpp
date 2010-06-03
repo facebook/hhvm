@@ -193,7 +193,6 @@ void FunctionContainer::outputCPPJumpTableEvalSupport
 
 void FunctionContainer::outputCPPJumpTable(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
-  string parent = "invoke_failed";
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
 
   vector<const char *> funcs;
@@ -220,7 +219,7 @@ void FunctionContainer::outputCPPJumpTable(CodeGenerator &cg,
     }
   }
 
-  cg.printf("return %s(s, params, hash, fatal);\n", parent.c_str());
+  cg.printf("return invoke_failed(s, params, hash, fatal);\n");
   cg.indentEnd("}\n");
 }
 

@@ -2073,7 +2073,7 @@ Variant c_recursivedirectoryiterator::o_invoke(const char *s, CArrRef params, in
     default:
       break;
   }
-  return c_directoryiterator::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_recursivedirectoryiterator
@@ -2314,13 +2314,13 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(const char *s, int64 has
     default:
       break;
   }
-  return c_directoryiterator::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_recursivedirectoryiterator
 Variant c_recursivedirectoryiterator::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_directoryiterator::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_recursivedirectoryiterator
 Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -3340,7 +3340,7 @@ Variant c_directoryiterator::o_invoke(const char *s, CArrRef params, int64 hash,
     default:
       break;
   }
-  return c_splfileinfo::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_directoryiterator
@@ -3556,13 +3556,13 @@ Variant c_directoryiterator::o_invoke_few_args(const char *s, int64 hash, int co
     default:
       break;
   }
-  return c_splfileinfo::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_directoryiterator
 Variant c_directoryiterator::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_splfileinfo::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_directoryiterator
 Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

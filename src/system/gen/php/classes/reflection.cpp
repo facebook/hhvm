@@ -2138,7 +2138,7 @@ Variant c_reflectionexception::o_invoke(const char *s, CArrRef params, int64 has
     default:
       break;
   }
-  return c_exception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionexception
@@ -2192,13 +2192,13 @@ Variant c_reflectionexception::o_invoke_few_args(const char *s, int64 hash, int 
     default:
       break;
   }
-  return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionexception
 Variant c_reflectionexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_exception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionexception
 Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -5622,7 +5622,7 @@ Variant c_reflectionmethod::o_invoke(const char *s, CArrRef params, int64 hash, 
     default:
       break;
   }
-  return c_reflectionfunctionabstract::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionmethod
@@ -5801,7 +5801,7 @@ Variant c_reflectionmethod::o_invoke_few_args(const char *s, int64 hash, int cou
     default:
       break;
   }
-  return c_reflectionfunctionabstract::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionmethod
@@ -5818,7 +5818,7 @@ Variant c_reflectionmethod::os_invoke(const char *c, const char *s, CArrRef para
     default:
       break;
   }
-  return c_reflectionfunctionabstract::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionmethod
 Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -7608,7 +7608,7 @@ Variant c_reflectionfunction::o_invoke(const char *s, CArrRef params, int64 hash
     default:
       break;
   }
-  return c_reflectionfunctionabstract::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunction
@@ -7727,7 +7727,7 @@ Variant c_reflectionfunction::o_invoke_few_args(const char *s, int64 hash, int c
     default:
       break;
   }
-  return c_reflectionfunctionabstract::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionfunction
@@ -7744,7 +7744,7 @@ Variant c_reflectionfunction::os_invoke(const char *c, const char *s, CArrRef pa
     default:
       break;
   }
-  return c_reflectionfunctionabstract::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionfunction
 Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

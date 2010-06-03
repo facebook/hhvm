@@ -169,6 +169,15 @@ public:
                       StringToFunctionScopePtrMap &func,
                       bool collectPrivate = true,
                       bool forInvoke = false);
+
+  /**
+   * Whether or not we can directly call c_ObjectData::o_invoke() when lookup
+   * in this class fails. If false, we need to call parent::o_invoke(), which
+   * may be redeclared or may have private methods that need to check class
+   * context.
+   */
+  bool needsInvokeParent(AnalysisResultPtr ar, bool considerSelf = true);
+
   /*
     void collectProperties(AnalysisResultPtr ar,
     std::set<std::string> &names,

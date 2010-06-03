@@ -171,7 +171,7 @@ Variant c_unexpectedvalueexception::o_invoke(const char *s, CArrRef params, int6
     default:
       break;
   }
-  return c_runtimeexception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_unexpectedvalueexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_unexpectedvalueexception
@@ -225,13 +225,13 @@ Variant c_unexpectedvalueexception::o_invoke_few_args(const char *s, int64 hash,
     default:
       break;
   }
-  return c_runtimeexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_unexpectedvalueexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_unexpectedvalueexception
 Variant c_unexpectedvalueexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_runtimeexception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_unexpectedvalueexception
 Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -518,7 +518,7 @@ Variant c_overflowexception::o_invoke(const char *s, CArrRef params, int64 hash,
     default:
       break;
   }
-  return c_runtimeexception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_overflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_overflowexception
@@ -572,13 +572,13 @@ Variant c_overflowexception::o_invoke_few_args(const char *s, int64 hash, int co
     default:
       break;
   }
-  return c_runtimeexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_overflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_overflowexception
 Variant c_overflowexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_runtimeexception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_overflowexception
 Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -865,7 +865,7 @@ Variant c_outofboundsexception::o_invoke(const char *s, CArrRef params, int64 ha
     default:
       break;
   }
-  return c_runtimeexception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_outofboundsexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofboundsexception
@@ -919,13 +919,13 @@ Variant c_outofboundsexception::o_invoke_few_args(const char *s, int64 hash, int
     default:
       break;
   }
-  return c_runtimeexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_outofboundsexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofboundsexception
 Variant c_outofboundsexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_runtimeexception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofboundsexception
 Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1212,7 +1212,7 @@ Variant c_logicexception::o_invoke(const char *s, CArrRef params, int64 hash, bo
     default:
       break;
   }
-  return c_exception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_logicexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_logicexception
@@ -1266,13 +1266,13 @@ Variant c_logicexception::o_invoke_few_args(const char *s, int64 hash, int count
     default:
       break;
   }
-  return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_logicexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_logicexception
 Variant c_logicexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_exception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_logicexception
 Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1559,7 +1559,7 @@ Variant c_rangeexception::o_invoke(const char *s, CArrRef params, int64 hash, bo
     default:
       break;
   }
-  return c_runtimeexception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_rangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_rangeexception
@@ -1613,13 +1613,13 @@ Variant c_rangeexception::o_invoke_few_args(const char *s, int64 hash, int count
     default:
       break;
   }
-  return c_runtimeexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_rangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_rangeexception
 Variant c_rangeexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_runtimeexception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_rangeexception
 Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1906,7 +1906,7 @@ Variant c_invalidargumentexception::o_invoke(const char *s, CArrRef params, int6
     default:
       break;
   }
-  return c_logicexception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_invalidargumentexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_invalidargumentexception
@@ -1960,13 +1960,13 @@ Variant c_invalidargumentexception::o_invoke_few_args(const char *s, int64 hash,
     default:
       break;
   }
-  return c_logicexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_invalidargumentexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_invalidargumentexception
 Variant c_invalidargumentexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_logicexception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_invalidargumentexception
 Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -2253,7 +2253,7 @@ Variant c_underflowexception::o_invoke(const char *s, CArrRef params, int64 hash
     default:
       break;
   }
-  return c_runtimeexception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_underflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_underflowexception
@@ -2307,13 +2307,13 @@ Variant c_underflowexception::o_invoke_few_args(const char *s, int64 hash, int c
     default:
       break;
   }
-  return c_runtimeexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_underflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_underflowexception
 Variant c_underflowexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_runtimeexception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_underflowexception
 Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -2600,7 +2600,7 @@ Variant c_outofrangeexception::o_invoke(const char *s, CArrRef params, int64 has
     default:
       break;
   }
-  return c_logicexception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_outofrangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofrangeexception
@@ -2654,13 +2654,13 @@ Variant c_outofrangeexception::o_invoke_few_args(const char *s, int64 hash, int 
     default:
       break;
   }
-  return c_logicexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_outofrangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofrangeexception
 Variant c_outofrangeexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_logicexception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofrangeexception
 Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -2947,7 +2947,7 @@ Variant c_badmethodcallexception::o_invoke(const char *s, CArrRef params, int64 
     default:
       break;
   }
-  return c_badfunctioncallexception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_badmethodcallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badmethodcallexception
@@ -3001,13 +3001,13 @@ Variant c_badmethodcallexception::o_invoke_few_args(const char *s, int64 hash, i
     default:
       break;
   }
-  return c_badfunctioncallexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_badmethodcallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badmethodcallexception
 Variant c_badmethodcallexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_badfunctioncallexception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badmethodcallexception
 Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -3294,7 +3294,7 @@ Variant c_runtimeexception::o_invoke(const char *s, CArrRef params, int64 hash, 
     default:
       break;
   }
-  return c_exception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_runtimeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_runtimeexception
@@ -3348,13 +3348,13 @@ Variant c_runtimeexception::o_invoke_few_args(const char *s, int64 hash, int cou
     default:
       break;
   }
-  return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_runtimeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_runtimeexception
 Variant c_runtimeexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_exception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_runtimeexception
 Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -4399,7 +4399,7 @@ Variant c_errorexception::o_invoke(const char *s, CArrRef params, int64 hash, bo
     default:
       break;
   }
-  return c_exception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_errorexception
@@ -4466,13 +4466,13 @@ Variant c_errorexception::o_invoke_few_args(const char *s, int64 hash, int count
     default:
       break;
   }
-  return c_exception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_errorexception
 Variant c_errorexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_exception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_errorexception
 Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -4821,7 +4821,7 @@ Variant c_badfunctioncallexception::o_invoke(const char *s, CArrRef params, int6
     default:
       break;
   }
-  return c_logicexception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_badfunctioncallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badfunctioncallexception
@@ -4875,13 +4875,13 @@ Variant c_badfunctioncallexception::o_invoke_few_args(const char *s, int64 hash,
     default:
       break;
   }
-  return c_logicexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_badfunctioncallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badfunctioncallexception
 Variant c_badfunctioncallexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_logicexception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badfunctioncallexception
 Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -5168,7 +5168,7 @@ Variant c_lengthexception::o_invoke(const char *s, CArrRef params, int64 hash, b
     default:
       break;
   }
-  return c_logicexception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_lengthexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_lengthexception
@@ -5222,13 +5222,13 @@ Variant c_lengthexception::o_invoke_few_args(const char *s, int64 hash, int coun
     default:
       break;
   }
-  return c_logicexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_lengthexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_lengthexception
 Variant c_lengthexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_logicexception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_lengthexception
 Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -5515,7 +5515,7 @@ Variant c_domainexception::o_invoke(const char *s, CArrRef params, int64 hash, b
     default:
       break;
   }
-  return c_logicexception::o_invoke(s, params, hash, fatal);
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domainexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domainexception
@@ -5569,13 +5569,13 @@ Variant c_domainexception::o_invoke_few_args(const char *s, int64 hash, int coun
     default:
       break;
   }
-  return c_logicexception::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domainexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domainexception
 Variant c_domainexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_logicexception::os_invoke(c, s, params, hash, fatal);
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domainexception
 Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

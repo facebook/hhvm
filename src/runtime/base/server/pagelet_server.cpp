@@ -40,14 +40,19 @@ public:
     m_remoteHost.append(remoteHost.data(), remoteHost.size());
 
     for (ArrayIter iter(headers); iter; ++iter) {
+      Variant key = iter.first();
       String header = iter.second();
-      int pos = header.find(": ");
-      if (pos >= 0) {
-        string name = header.substr(0, pos).data();
-        string value = header.substr(pos + 2).data();
-        m_requestHeaders[name].push_back(value);
+      if (key.isString() && !key.toString().empty()) {
+        m_requestHeaders[key.toString().data()].push_back(header.data());
       } else {
-        Logger::Error("throwing away bad header: %s", header.data());
+        int pos = header.find(": ");
+        if (pos >= 0) {
+          string name = header.substr(0, pos).data();
+          string value = header.substr(pos + 2).data();
+          m_requestHeaders[name].push_back(value);
+        } else {
+          Logger::Error("throwing away bad header: %s", header.data());
+        }
       }
     }
 

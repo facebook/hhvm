@@ -171,11 +171,11 @@ String FrameInjection::GetStaticClassName(ThreadInfo *info) {
     if (!t->m_staticClass.empty()) {
       return t->m_staticClass;
     }
-    if (!t->m_callingObject.isNull()) {
-      return t->m_callingObject->o_getClassName();
-    }
     if (!t->m_object.isNull()) {
       return t->m_object->o_getClassName();
+    }
+    if (t != info->m_top && !t->m_callingObject.isNull()) {
+      return t->m_callingObject->o_getClassName();
     }
   }
   return "";

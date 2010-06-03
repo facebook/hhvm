@@ -439,7 +439,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
 
   // PHP 5.3 features
   RUN_TEST(TestVariableClassName);
-  //RUN_TEST(TestLateStaticBinding); // requires ENABLE_LATE_STATIC_BINDING
+  RUN_TEST(TestLateStaticBinding); // requires ENABLE_LATE_STATIC_BINDING
 
   RUN_TEST(TestAdHoc);
   return ret;
@@ -10666,6 +10666,35 @@ bool TestCodeRun::TestVariableClassName() {
 }
 
 bool TestCodeRun::TestLateStaticBinding() {
+  MVCRO(
+    "<?php\n"
+    "class X {\n"
+    "  function f() {\n"
+    "    $y = new Y;\n"
+    "    $y->foo();\n"
+    "    static::g();\n"
+    "    $y->foo();\n"
+    "    self::g();\n"
+    "  }\n"
+    "  static function g() { var_dump(__CLASS__); }\n"
+    "}\n"
+    "class Y extends X {\n"
+    "  static function g() { var_dump(__CLASS__); }\n"
+    "  static function foo() {}\n"
+    "}\n"
+    "function test() {\n"
+    "  $x = new X;\n"
+    "  $y = new Y;\n"
+    "  $x->f();\n"
+    "  $y->f();\n"
+    "}\n"
+    "test();\n",
+    "string(1) \"X\"\n"
+    "string(1) \"X\"\n"
+    "string(1) \"Y\"\n"
+    "string(1) \"X\"\n"
+  );
+
   MVCRO(
     "<?php\n"
     "class A {\n"

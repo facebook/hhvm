@@ -537,12 +537,14 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
       funcScope->outputCPPParamsDecl(cg, ar, m_params, false);
       cg.indentBegin(") {\n");
-      if (m_modifiers->isStatic()) {
-        cg.printf("STATIC_METHOD_INJECTION(%s, %s);\n",
-                  scope->getOriginalName(), origFuncName.c_str());
-      } else {
-        cg.printf("INSTANCE_METHOD_INJECTION(%s, %s);\n",
-                  scope->getOriginalName(), origFuncName.c_str());
+      if (m_stmt->hasBody()) {
+        if (m_modifiers->isStatic()) {
+          cg.printf("STATIC_METHOD_INJECTION(%s, %s);\n",
+                    scope->getOriginalName(), origFuncName.c_str());
+        } else {
+          cg.printf("INSTANCE_METHOD_INJECTION(%s, %s);\n",
+                    scope->getOriginalName(), origFuncName.c_str());
+        }
       }
       if (Option::GenRTTIProfileData && m_params) {
         for (int i = 0; i < m_params->getCount(); i++) {

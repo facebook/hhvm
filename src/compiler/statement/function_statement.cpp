@@ -238,7 +238,9 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg.printf("PSEUDOMAIN_INJECTION(%s);\n",
                   origFuncName.c_str());
       } else {
-        cg.printf("FUNCTION_INJECTION(%s);\n", origFuncName.c_str());
+        if (m_stmt->hasBody()) {
+          cg.printf("FUNCTION_INJECTION(%s);\n", origFuncName.c_str());
+        }
         if (Option::GenRTTIProfileData && m_params) {
           for (int i = 0; i < m_params->getCount(); i++) {
             ParameterExpressionPtr param =

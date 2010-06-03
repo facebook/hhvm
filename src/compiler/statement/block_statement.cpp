@@ -56,6 +56,10 @@ bool BlockStatement::hasImpl() const {
   return m_stmts && m_stmts->hasImpl();
 }
 
+bool BlockStatement::hasBody() const {
+  return m_stmts && m_stmts->hasBody();
+}
+
 bool BlockStatement::hasRetExp() const {
   return m_stmts && m_stmts->hasRetExp();
 }

@@ -31,6 +31,7 @@ public:
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   virtual bool hasDecl() const;
   virtual bool hasImpl() const;
+  virtual bool hasBody() const;
   virtual bool hasRetExp() const;
   virtual void addElement(StatementPtr stmt);
   virtual void insertElement(StatementPtr stmt, int index = 0);

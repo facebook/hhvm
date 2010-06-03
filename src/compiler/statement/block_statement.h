@@ -33,6 +33,7 @@ public:
 
   virtual bool hasDecl() const;
   virtual bool hasImpl() const;
+  virtual bool hasBody() const;
   virtual bool hasRetExp() const;
   virtual int getRecursiveCount() const;
 private:

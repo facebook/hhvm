@@ -100,6 +100,13 @@ bool StatementList::hasImpl() const {
   return false;
 }
 
+bool StatementList::hasBody() const {
+  for (unsigned int i = 0; i < m_stmts.size(); i++) {
+    if (m_stmts[i]->hasBody()) return true;
+  }
+  return false;
+}
+
 bool StatementList::hasRetExp() const {
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     if (m_stmts[i]->hasRetExp()) return true;

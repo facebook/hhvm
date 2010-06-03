@@ -429,7 +429,7 @@ class ReflectionClass implements Reflector {
   }
 
   public function newInstanceArgs($args) {
-    return hphp_create_object($this->name, $args);
+    return hphp_create_object($this->name, array_values($args));
   }
 
   public function getParentClass() {

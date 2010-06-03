@@ -501,10 +501,20 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
     binds it to v; but the temporary gets destroyed at the end of the
     statement.
     So we clear the ref context here, and output the ref when we output the use
-    of the temporary (top of outputCPP, below).
+    of the temporary (top of outputCPP, below), but in that case, we also need
+    to set the lval context, otherwise, rvalAt would be generated for array
+    elements and object properties.
   */
   int save = m_context;
-  m_context &= ~RefValue;
+  if (m_context & RefValue) {
+    m_context &= ~RefValue;
+    if ((is(KindOfArrayElementExpression) ||
+         is(KindOfObjectPropertyExpression)) &&
+        !(m_context & InvokeArgument)) {
+      m_context |= LValue;
+      m_context &= ~NoLValueWrapper;
+    }
+  }
   TypePtr et = m_expectedType;
   TypePtr at = m_actualType;
   TypePtr it = m_implementedType;
@@ -597,7 +607,8 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
                                     AnalysisResultPtr ar,
                                     int state) {
-  if (!(m_context & (LValue | RefValue | ExistContext | UnsetContext)) ||
+  if (!(m_context & (OprLValue | AssignmentLHS | ExistContext |
+                     UnsetContext)) ||
       !(state & FixOrder)) {
     return Expression::preOutputCPP(cg, ar, state);
   }

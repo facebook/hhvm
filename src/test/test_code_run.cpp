@@ -7589,6 +7589,15 @@ bool TestCodeRun::TestEvalOrder() {
 
   MVCR("<?php var_dump($v++, $v++);");
   MVCR("<?php var_dump($v, $v = 0);");
+  MVCR("<?php\n"
+       "function f(&$a, &$b) { $a = 1; $b = 2; return 3; }\n"
+       "class A { }\n"
+       "function test() {\n"
+       "  $a = array(); f($a[0], $a[1]); var_dump($a);\n"
+       "  $a = array(); $a[0] = f($a[1], $a[2]); var_dump($a);\n"
+       "  $a = new A(); f($a->f, $a->g); var_dump($a);\n"
+       "}\n"
+       "test();\n");
 
  return true;
 }

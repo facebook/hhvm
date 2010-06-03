@@ -47,6 +47,9 @@ public:
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
 
 private:
+  void setEffect(Effect effect);
+  void clearEffect(Effect effect);
+
   ExpressionPtr m_object;
   ExpressionPtr m_property;
 

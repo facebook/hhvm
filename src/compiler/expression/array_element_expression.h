@@ -56,7 +56,8 @@ public:
   virtual bool canonCompare(ExpressionPtr e) const;
 
 private:
-  void clearEffects();
+  void setEffect(Effect effect);
+  void clearEffect(Effect effect);
 
   ExpressionPtr m_variable;
   ExpressionPtr m_offset;

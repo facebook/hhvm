@@ -122,12 +122,28 @@ ExpressionPtr ObjectPropertyExpression::postOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
+void ObjectPropertyExpression::setEffect(Effect effect) {
+  if ((m_localEffects & effect) != effect) {
+    recomputeEffects();
+    m_localEffects |= effect;
+  }
+}
+
+void ObjectPropertyExpression::clearEffect(Effect effect) {
+  if (m_localEffects & effect) {
+    recomputeEffects();
+    m_localEffects &= ~effect;
+  }
+}
+
 TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
                                              TypePtr type, bool coerce) {
   m_valid = false;
 
   ConstructPtr self = shared_from_this();
   TypePtr objectType = m_object->inferAndCheck(ar, NEW_TYPE(Object), true);
+
+  if (hasContext(LValue) || hasContext(RefValue)) setEffect(CreateEffect);
 
   if (!m_property->is(Expression::KindOfScalarExpression)) {
     // if dynamic property or method, we have nothing to find out
@@ -141,6 +157,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     // all class variables.
     if (m_context & (LValue | RefValue)) {
       ar->forceClassVariants();
+      setEffect(CreateEffect);
     }
 
     return Type::Variant; // we have to use a variant to hold dynamic value
@@ -163,6 +180,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     if (!cls) {
       if (m_context & (LValue | RefValue)) {
         ar->forceClassVariants(name);
+        setEffect(CreateEffect);
       }
       return Type::Variant;
     }
@@ -173,12 +191,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   const char *accessorName = hasContext(DeepAssignmentLHS) ? "__set" :
     hasContext(ExistContext) ? "__isset" :
     hasContext(UnsetContext) ? "__unset" : "__get";
-  if (!cls->implementsAccessor(ar, accessorName)) {
-    if (m_localEffects & AccessorEffect) {
-      recomputeEffects();
-    }
-    m_localEffects &= ~AccessorEffect;
-  }
+  if (!cls->implementsAccessor(ar, accessorName)) clearEffect(AccessorEffect);
 
   // resolved to this class
   int present = 0;
@@ -218,13 +231,11 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   // get() will return Variant
   if (!m_valid || !m_object->getType()->isSpecificObject()) {
     m_actualType = Type::Variant;
+    if (m_context & (LValue | RefValue)) setEffect(CreateEffect);
     return m_actualType;
   }
 
-  if (m_localEffects & AccessorEffect) {
-    recomputeEffects();
-    m_localEffects &= ~AccessorEffect;
-  }
+  clearEffect(AccessorEffect);
 
   if (ar->getPhase() == AnalysisResult::LastInference) {
     if (!(m_context & ObjectContext)) {

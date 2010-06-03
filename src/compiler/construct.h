@@ -65,6 +65,8 @@ public:
                                  // on its parameters, which it could affect
     CanThrow = 0x80,             // can throw PHP exception
     AccessorEffect = 0x100,      // could contain a getter/setter
+    CreateEffect = 0x200,        // could cause the creation of an array
+                                 // element or an object property
     UnknownEffect = 0x3ff        // anything might happen
   };
 

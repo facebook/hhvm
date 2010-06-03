@@ -162,11 +162,18 @@ ExpressionPtr ArrayElementExpression::postOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
-void ArrayElementExpression::clearEffects() {
-  if (m_localEffects & AccessorEffect) {
+void ArrayElementExpression::setEffect(Effect effect) {
+  if ((m_localEffects & effect) != effect) {
     recomputeEffects();
+    m_localEffects |= effect;
   }
-  m_localEffects &= ~AccessorEffect;
+}
+
+void ArrayElementExpression::clearEffect(Effect effect) {
+  if (m_localEffects & effect) {
+    recomputeEffects();
+    m_localEffects &= ~effect;
+  }
 }
 
 /**
@@ -186,7 +193,7 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
     SimpleVariablePtr var =
       dynamic_pointer_cast<SimpleVariable>(m_variable);
     if (var->getName() == "GLOBALS") {
-      clearEffects();
+      clearEffect(AccessorEffect);
       m_global = true;
       m_dynamicGlobal = true;
       ar->getScope()->getVariables()->
@@ -268,14 +275,16 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
   }
 
   if (varType && Type::SameType(varType, Type::String)) {
-    clearEffects();
+    clearEffect(AccessorEffect);
     m_implementedType.reset();
     return Type::String;
   }
 
   if (varType && Type::SameType(varType, Type::Array)) {
-    clearEffects();
+    clearEffect(AccessorEffect);
   }
+
+  if (hasContext(LValue) || hasContext(RefValue)) setEffect(CreateEffect);
 
   TypePtr ret = propagateTypes(ar, Type::Variant);
   m_implementedType = Type::Variant;

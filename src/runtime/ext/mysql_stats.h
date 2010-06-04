@@ -33,6 +33,14 @@ public:
     T_COMMIT,
     T_ROLLBACK,
 
+    // transactional: statements inside begin/commit AND at least 2 statements
+    X_INSERT,
+    X_UPDATE,
+    X_INCDEC,
+    X_DELETE,
+    X_REPLACE,
+    X_SELECT,
+
     // transactional: statements inside begin/commit
     T_INSERT,
     T_UPDATE,
@@ -53,7 +61,7 @@ public:
   };
 
 public:
-  static void Record(const std::string &verb, bool inTransaction = false,
+  static void Record(const std::string &verb, int xactionCount = 0,
                      const std::string &table = "");
   static std::string ReportStats();
 
@@ -72,7 +80,7 @@ private:
   static StatsMap s_stats;
 
   static void Init();
-  static Verb Translate(const std::string &verb, bool inTransaction);
+  static Verb Translate(const std::string &verb, int xactionCount);
   static const char *Translate(Verb verb);
 };
 

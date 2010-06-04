@@ -223,7 +223,7 @@ static MYSQL *create_new_conn() {
 MySQL::MySQL(const char *host, int port, const char *username,
              const char *password)
     : m_port(port), m_last_error_set(false), m_last_errno(0),
-      m_in_transaction(false) {
+      m_xaction_count(0) {
   if (host) m_host = host;
   if (username) m_username = username;
   if (password) m_password = password;
@@ -248,7 +248,7 @@ void MySQL::close() {
   if (m_conn) {
     m_last_error_set = false;
     m_last_errno = 0;
-    m_in_transaction = false;
+    m_xaction_count = 0;
     m_last_error.clear();
     mysql_close(m_conn);
     m_conn = NULL;
@@ -268,7 +268,7 @@ bool MySQL::connect(CStrRef host, int port, CStrRef socket, CStrRef username,
     ServerStats::Log("sql.conn", 1);
   }
   IOStatusHelper io("mysql::connect", host.data(), port);
-  m_in_transaction = false;
+  m_xaction_count = 0;
   return mysql_real_connect(m_conn, host.data(), username.data(),
                             password.data(), NULL, port,
                             socket.empty() ? NULL : socket.data(),
@@ -308,7 +308,7 @@ bool MySQL::reconnect(CStrRef host, int port, CStrRef socket, CStrRef username,
     ServerStats::Log("sql.reconn_old", 1);
   }
   IOStatusHelper io("mysql::connect", host.data(), port);
-  m_in_transaction = false;
+  m_xaction_count = 0;
   return mysql_real_connect(m_conn, host.data(), username.data(),
                             password.data(), NULL, port, socket.data(),
                             client_flags);
@@ -767,14 +767,18 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
       }
       ServerStats::Log(string("sql.query.") + table + "." + verb, 1);
       if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {
-        MySqlStats::Record(verb, rconn->m_in_transaction, table);
+        MySqlStats::Record(verb, rconn->m_xaction_count, table);
         if (verb == "update") {
           f_preg_match("([^\\s,]+)\\s*=\\s*([^\\s,]+)[\\+\\-]",
                        q, ref(matches));
           size = matches.toArray().size();
           if (size > 2 && same(matches[1], matches[2])) {
-            MySqlStats::Record("incdec", rconn->m_in_transaction, table);
+            MySqlStats::Record("incdec", rconn->m_xaction_count, table);
           }
+        }
+        // we only bump it up when we're in the middle of a transaction
+        if (rconn->m_xaction_count) {
+          ++rconn->m_xaction_count;
         }
       }
     } else {
@@ -784,7 +788,7 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
       size = matches.toArray().size();
       if (size == 2) {
         string verb = Util::toLower(matches[1].toString().data());
-        rconn->m_in_transaction = (verb == "begin");
+        rconn->m_xaction_count = ((verb == "begin") ? 1 : 0);
         ServerStats::Log(string("sql.query.") + verb, 1);
         if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {
           MySqlStats::Record(verb);

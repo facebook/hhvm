@@ -31,32 +31,52 @@ MySqlStats::StatsMap MySqlStats::s_stats;
 
 void MySqlStats::Init() {
   ASSERT(!s_inited);
+
   s_verbs["t_begin"   ] = T_BEGIN;
   s_verbs["t_commit"  ] = T_COMMIT;
   s_verbs["t_rollback"] = T_ROLLBACK;
+
+  s_verbs["x_insert"  ] = X_INSERT;
+  s_verbs["x_update"  ] = X_UPDATE;
+  s_verbs["x_incdec"  ] = X_INCDEC;
+  s_verbs["x_delete"  ] = X_DELETE;
+  s_verbs["x_replace" ] = X_REPLACE;
+  s_verbs["x_select"  ] = X_SELECT;
+
   s_verbs["t_insert"  ] = T_INSERT;
   s_verbs["t_update"  ] = T_UPDATE;
   s_verbs["t_incdec"  ] = T_INCDEC;
   s_verbs["t_delete"  ] = T_DELETE;
   s_verbs["t_replace" ] = T_REPLACE;
   s_verbs["t_select"  ] = T_SELECT;
+
   s_verbs["n_insert"  ] = N_INSERT;
   s_verbs["n_update"  ] = N_UPDATE;
-  s_verbs["t_incdec"  ] = T_INCDEC;
+  s_verbs["n_incdec"  ] = N_INCDEC;
   s_verbs["n_delete"  ] = N_DELETE;
   s_verbs["n_replace" ] = N_REPLACE;
   s_verbs["n_select"  ] = N_SELECT;
 
   s_verb_names[UNKNOWN   ] = "unknown";
+
   s_verb_names[T_BEGIN   ] = "begin";
   s_verb_names[T_COMMIT  ] = "commit";
   s_verb_names[T_ROLLBACK] = "rollback";
+
+  s_verb_names[X_INSERT  ] = "x_insert";
+  s_verb_names[X_UPDATE  ] = "x_update";
+  s_verb_names[X_INCDEC  ] = "x_incdec";
+  s_verb_names[X_DELETE  ] = "x_delete";
+  s_verb_names[X_REPLACE ] = "x_replace";
+  s_verb_names[X_SELECT  ] = "x_select";
+
   s_verb_names[T_INSERT  ] = "t_insert";
   s_verb_names[T_UPDATE  ] = "t_update";
   s_verb_names[T_INCDEC  ] = "t_incdec";
   s_verb_names[T_DELETE  ] = "t_delete";
   s_verb_names[T_REPLACE ] = "t_replace";
   s_verb_names[T_SELECT  ] = "t_select";
+
   s_verb_names[N_INSERT  ] = "n_insert";
   s_verb_names[N_UPDATE  ] = "n_update";
   s_verb_names[N_INCDEC  ] = "n_incdec";
@@ -66,9 +86,9 @@ void MySqlStats::Init() {
 }
 
 MySqlStats::Verb MySqlStats::Translate(const std::string &verb,
-                                       bool inTransaction) {
+                                       int xactionCount) {
   if (!s_inited) Init();
-  string composed = inTransaction ? "t_" : "n_";
+  string composed = xactionCount ? (xactionCount > 1 ? "x_" : "t_") : "n_";
   composed += Util::toLower(verb);
   hphp_string_map<Verb>::const_iterator iter = s_verbs.find(composed);
   if (iter != s_verbs.end()) {
@@ -86,9 +106,9 @@ const char * MySqlStats::Translate(Verb verb) {
 }
 
 void MySqlStats::Record(const std::string &verb,
-                        bool inTransaction /* = false */,
+                        int xactionCount /* = 0 */,
                         const std::string &table /* = "" */) {
-  Verb v = Translate(verb, inTransaction);
+  Verb v = Translate(verb, xactionCount);
   if (v == UNKNOWN) return;
 
   string ltable = Util::toLower(table);

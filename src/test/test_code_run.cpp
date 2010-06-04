@@ -10688,12 +10688,13 @@ bool TestCodeRun::TestLateStaticBinding() {
     "    static::g();\n"
     "    $y->foo();\n"
     "    self::g();\n"
+    "    Y::foo() && static::g();\n"
     "  }\n"
     "  static function g() { var_dump(__CLASS__); }\n"
     "}\n"
     "class Y extends X {\n"
     "  static function g() { var_dump(__CLASS__); }\n"
-    "  static function foo() {}\n"
+    "  static function foo() { return true; }\n"
     "}\n"
     "function test() {\n"
     "  $x = new X;\n"
@@ -10704,8 +10705,10 @@ bool TestCodeRun::TestLateStaticBinding() {
     "test();\n",
     "string(1) \"X\"\n"
     "string(1) \"X\"\n"
+    "string(1) \"X\"\n"
     "string(1) \"Y\"\n"
     "string(1) \"X\"\n"
+    "string(1) \"Y\"\n"
   );
 
   MVCRO(
@@ -10766,7 +10769,7 @@ bool TestCodeRun::TestLateStaticBinding() {
        "  }"
        "var_dump(X::foo());"
        "var_dump(X::bar());"
-       "var_dump(X::baz());");
+       "var_dump(gettype(X::baz()));");
 
   return true;
 }

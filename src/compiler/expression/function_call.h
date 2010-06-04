@@ -46,6 +46,9 @@ public:
 
   void setAllowVoidReturn() { m_allowVoidReturn = true;}
   void setFunctionAndClassScope(FunctionScopePtr fsp, ClassScopePtr csp);
+  bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
+                    int state);
+
 protected:
   ExpressionPtr m_nameExp;
   std::string m_name;

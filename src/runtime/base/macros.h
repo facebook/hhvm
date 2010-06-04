@@ -454,8 +454,7 @@ do { \
 #ifdef ENABLE_LATE_STATIC_BINDING
 
 #define STATIC_CLASS_NAME_CALL(s, exp)                          \
-  (FrameInjection::SetStaticClassName(info, #s),                \
-   FrameInjection::StaticClassNameHelper(info).call(exp))       \
+  (FrameInjection::StaticClassNameHelper(info, #s), exp)           \
 
 #define BIND_CLASS_DOT  bindClass(info).
 #define BIND_CLASS_ARROW(T) bindClass<c_##T>(info)->

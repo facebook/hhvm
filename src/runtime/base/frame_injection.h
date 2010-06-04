@@ -67,20 +67,12 @@ public:
 
   class StaticClassNameHelper {
   public:
-    StaticClassNameHelper(ThreadInfo *info) : m_info(info) {}
+    StaticClassNameHelper(ThreadInfo *info, CStrRef cls) : m_info(info) {
+      FrameInjection::SetStaticClassName(info, cls);
+    }
     ~StaticClassNameHelper() {
       FrameInjection::ResetStaticClassName(m_info);
     }
-
-    bool    call(bool    ret) { return ret;}
-    int     call(int     ret) { return ret;}
-    int64   call(int64   ret) { return ret;}
-    double  call(double  ret) { return ret;}
-    String  call(CStrRef ret) { return ret;}
-    Array   call(CArrRef ret) { return ret;}
-    Object  call(CObjRef ret) { return ret;}
-    Variant call(CVarRef ret) { return ref(ret);}
-
   private:
     ThreadInfo *m_info;
   };

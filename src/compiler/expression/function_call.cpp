@@ -159,6 +159,25 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
   return type;
 }
 
+bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
+                                int state) {
+  if (m_className.empty() ||
+      m_origClassName == "self" ||
+      m_origClassName == "parent") {
+    return Expression::preOutputCPP(cg, ar, state);
+  }
+
+  if (!ar->inExpression()) {
+    return true;
+  }
+  Expression::preOutputCPP(cg, ar, state | FixOrder);
+  if (!(state & FixOrder)) {
+    cg.printf("id(%s);\n", cppTemp().c_str());
+  }
+
+  return true;
+}
+
 void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool staticClassName = false;
   if (!m_className.empty() && m_cppTemp.empty() &&

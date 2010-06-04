@@ -413,7 +413,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       ClassScopePtr parCls;
       if (!m_parent.empty()) parCls = ar->findClass(m_parent);
       cg.printf("class %s%s", Option::ClassPrefix, clsName);
-      if (!m_parent.empty() && classScope->derivesFrom(ar, m_parent)) {
+      if (!m_parent.empty() && classScope->derivesDirectlyFrom(ar, m_parent)) {
         if (!parCls || parCls->isRedeclaring()) {
           cg.printf(" : public DynamicObjectData");
         } else {
@@ -711,7 +711,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
       ClassScopePtr parCls;
       if (!m_parent.empty()) parCls = ar->findClass(m_parent);
-      if (!m_parent.empty() && classScope->derivesFrom(ar, m_parent)
+      if (!m_parent.empty() && classScope->derivesDirectlyFrom(ar, m_parent)
           && parCls && parCls->isUserClass() && !parCls->isRedeclaring()) {
         // system classes are not supported in static FFI translation
         // they shouldn't appear as superclasses as well
@@ -727,7 +727,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
             dynamic_pointer_cast<ScalarExpression>((*m_base)[i]);
           const char *intf = exp->getString().c_str();
           ClassScopePtr intfClassScope = ar->findClass(intf);
-          if (intfClassScope && classScope->derivesFrom(ar, intf)
+          if (intfClassScope && classScope->derivesFrom(ar, intf, false, false)
            && intfClassScope->isUserClass()) {
             if (first) {
               cgCls.printf(" implements ");

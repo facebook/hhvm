@@ -44,7 +44,6 @@ ObjectMethodExpression::ObjectMethodExpression
     m_invokeFewArgsDecision(true), m_bindClass(true) {
   m_object->setContext(Expression::ObjectContext);
   m_object->clearContext(Expression::LValue);
-  m_objTemp = -1;
 }
 
 ExpressionPtr ObjectMethodExpression::clone() {
@@ -81,24 +80,17 @@ ClassScopePtr ObjectMethodExpression::resolveClass(AnalysisResultPtr ar,
 // static analysis functions
 
 void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
-  bool objTempRequired = false;/*m_object->hasEffect() ||
-    (getLocation()->line1 != m_object->getLocation()->line1 &&
-    !m_object->isThis());*/
-  if (objTempRequired && ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    FunctionScopePtr func = ar->getFunctionScope();
-    ASSERT(func);
-    m_objTemp = func->requireCallTemps(1);
-  }
   m_params->analyzeProgram(ar);
   m_object->analyzeProgram(ar);
   m_nameExp->analyzeProgram(ar);
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    FunctionScopePtr func = FunctionScopePtr();
-    if (m_object->isThis() && !m_name.empty()) {
+    FunctionScopePtr func = m_funcScope;
+    if (!func && m_object->isThis() && !m_name.empty()) {
       ClassScopePtr cls = ar->getClassScope();
       if (cls) {
-        func = cls->findFunction(ar, m_name, true, true);
+        m_classScope = cls;
+        m_funcScope = func = cls->findFunction(ar, m_name, true, true);
         if (!func) {
           cls->addMissingMethod(m_name);
         }
@@ -225,44 +217,57 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
     return checkTypesImpl(ar, type, Type::Variant, coerce);
   }
 
-  ClassScopePtr cls;
+  ClassScopePtr cls = m_classScope;
   if (objectType && !objectType->getName().empty()) {
-    // what object-> has told us
-    cls = ar->findClass(objectType->getName());
-    ASSERT(cls);
-  } else {
-    // what ->method has told us
-    cls = resolveClass(ar, m_name);
-    if (!cls) {
-      if (ar->isFirstPass() &&
-          !ar->classMemberExists(m_name, AnalysisResult::MethodName)) {
-        ar->getCodeError()->record(self, CodeError::UnknownObjectMethod, self);
-      }
-
-      setInvokeParams(ar);
-      return checkTypesImpl(ar, type, Type::Variant, coerce);
-    }
-
-    m_object->inferAndCheck(ar, Type::CreateObjectType(cls->getName()), true);
+    cls = ar->findExactClass(objectType->getName());
   }
 
-  FunctionScopePtr func = cls->findFunction(ar, m_name, true, true);
-  if (!func) {
-    if (!cls->hasAttribute(ClassScope::HasUnknownMethodHandler, ar)) {
-      if (ar->classMemberExists(m_name, AnalysisResult::MethodName)) {
-        // TODO: we could try to find out class derivation is present...
-        ar->getCodeError()->record(self, CodeError::DerivedObjectMethod, self);
-        // we have to make sure the method is in invoke list
-        setDynamicByIdentifier(ar, m_name);
-      } else {
+  if (!cls) {
+    if (ar->isFirstPass()) {
+      // call resolveClass to mark functions as dynamic
+      // but we cant do anything else with the result.
+      resolveClass(ar, m_name);
+      if (!ar->classMemberExists(m_name, AnalysisResult::MethodName)) {
         ar->getCodeError()->record(self, CodeError::UnknownObjectMethod, self);
       }
     }
 
-    m_valid = false;
+    m_classScope.reset();
+    m_funcScope.reset();
+
     setInvokeParams(ar);
     return checkTypesImpl(ar, type, Type::Variant, coerce);
   }
+
+  if (m_classScope != cls) {
+    m_classScope = cls;
+    m_funcScope.reset();
+  }
+
+  FunctionScopePtr func = m_funcScope;
+  if (!func) {
+    func = cls->findFunction(ar, m_name, true, true);
+    if (!func) {
+      if (!cls->hasAttribute(ClassScope::HasUnknownMethodHandler, ar)) {
+        if (ar->classMemberExists(m_name, AnalysisResult::MethodName)) {
+          // TODO: we could try to find out class derivation is present...
+          ar->getCodeError()->record(self,
+                                     CodeError::DerivedObjectMethod, self);
+          // we have to make sure the method is in invoke list
+          setDynamicByIdentifier(ar, m_name);
+        } else {
+          ar->getCodeError()->record(self,
+                                     CodeError::UnknownObjectMethod, self);
+        }
+      }
+
+      m_valid = false;
+      setInvokeParams(ar);
+      return checkTypesImpl(ar, type, Type::Variant, coerce);
+    }
+    m_funcScope = func;
+  }
+
   bool valid = true;
   m_bindClass = func->isStatic();
 
@@ -350,33 +355,18 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
     return;
   }
 
-  stringstream objTmp;
-  if (m_objTemp != -1) {
-    // When the receiver is not on the same line as the call itself,
-    // set the line number of call after computing the receiver,
-    // o.w., the call might get the line number of the receiver.
-    cg.printf("(assignCallTemp(%s%d, ", Option::EvalOrderTempPrefix,
-              m_objTemp);
-    m_object->outputCPP(cg, ar);
-    cg.printf("),");
-    objTmp << Option::EvalOrderTempPrefix << m_objTemp;
-  }
-
   bool fewParams = canInvokeFewArgs();
   bool linemap = outputLineMap(cg, ar, true);
 
   if (!isThis) {
     if (directVariantProxy(ar) && !m_object->hasCPPTemp()) {
-      if (m_objTemp == -1) {
-        TypePtr expectedType = m_object->getExpectedType();
-        ASSERT(expectedType->is(Type::KindOfObject));
-        // Clear m_expectedType to avoid type cast (toObject).
-        m_object->setExpectedType(TypePtr());
-        m_object->outputCPP(cg, ar);
-        m_object->setExpectedType(expectedType);
-      } else {
-        cg.printf("%s", objTmp.str().c_str());
-      }
+      TypePtr expectedType = m_object->getExpectedType();
+      ASSERT(expectedType->is(Type::KindOfObject));
+      // Clear m_expectedType to avoid type cast (toObject).
+      m_object->setExpectedType(TypePtr());
+      m_object->outputCPP(cg, ar);
+      m_object->setExpectedType(expectedType);
+
       if (m_bindClass) {
         cg.printf(". BIND_CLASS_DOT ");
       } else {
@@ -394,11 +384,7 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
 
       if (!objType.empty()) {
         cg.printf("AS_CLASS(");
-        if (m_objTemp == -1) {
-          m_object->outputCPP(cg, ar);
-        } else {
-          cg.printf("%s.toObject()", objTmp.str().c_str());
-        }
+        m_object->outputCPP(cg, ar);
         cg.printf(",%s%s)", Option::ClassPrefix, objType.c_str());
         if (m_bindClass) {
           cg.printf("-> BIND_CLASS_ARROW(%s) ", objType.c_str());
@@ -406,11 +392,7 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
           cg.printf("->");
         }
       } else {
-        if (m_objTemp == -1) {
-          m_object->outputCPP(cg, ar);
-        } else {
-          cg.printf("%s.toObject()", objTmp.str().c_str());
-        }
+        m_object->outputCPP(cg, ar);
         if (m_bindClass) {
           cg.printf("-> BIND_CLASS_ARROW(ObjectData) ");
         } else {
@@ -418,11 +400,8 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
         }
       }
     }
-  } else if (m_bindClass) {
-    ClassScopePtr cls = ar->getClassScope();
-    if (cls) {
-      cg.printf(" BIND_CLASS_ARROW(%s) ", cls->getId().c_str());
-    }
+  } else if (m_bindClass && m_classScope) {
+    cg.printf(" BIND_CLASS_ARROW(%s) ", m_classScope->getId().c_str());
   }
 
   if (!m_name.empty()) {
@@ -485,5 +464,4 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
     }
   }
   if (linemap) cg.printf(")");
-  if (m_objTemp != -1) cg.printf(")");
 }

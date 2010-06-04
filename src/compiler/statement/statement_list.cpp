@@ -451,7 +451,7 @@ void StatementList::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         } else if (methodName == "offsetget") {
           ClassScopePtr cls = ar->getClassScope();
           std::string arrayAccess("arrayaccess");
-          if (cls->derivesFrom(ar, arrayAccess)) {
+          if (cls->derivesFrom(ar, arrayAccess, false, false)) {
             FunctionScopePtr funcScope = methodStmt->getFunctionScope();
             std::string name = funcScope->getName();
             funcScope->setName("__offsetget_lval");

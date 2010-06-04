@@ -592,7 +592,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       FunctionScopePtr funcThis = ar->getFunctionScope();
       if (!clsThis ||
           (clsThis->getName() != m_className &&
-           !clsThis->derivesFrom(ar, m_className)) ||
+           !clsThis->derivesFrom(ar, m_className, true, false)) ||
           funcThis->isStatic()) {
         // set the method static to avoid "unknown method" runtime exception
         if (Option::StaticMethodAutoFix && !func->containsThis()) {

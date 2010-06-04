@@ -126,8 +126,8 @@ bool Type::IsLegalCast(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
       if (!to->m_name.empty() && !from->m_name.empty() &&
           to->m_name != from->m_name) {
         ClassScopePtr cls = ar->findClass(from->m_name);
-        if (cls) {
-          return cls->derivesFrom(ar, to->m_name);
+        if (cls && !cls->isRedeclaring()) {
+          return cls->derivesFrom(ar, to->m_name, true, true);
         }
       }
       return true; // we can't really be sure
@@ -443,11 +443,13 @@ TypePtr Type::Coerce(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {
       if (type1->m_name.empty()) return type2;
       if (type2->m_name.empty()) return type1;
       ClassScopePtr cls1 = ar->findClass(type1->m_name);
-      if (cls1 && cls1->derivesFrom(ar, type2->m_name)) {
+      if (cls1 && !cls1->isRedeclaring() &&
+          cls1->derivesFrom(ar, type2->m_name, true, false)) {
         return type2;
       }
       ClassScopePtr cls2 = ar->findClass(type2->m_name);
-      if (cls2 && cls2->derivesFrom(ar, type1->m_name)) {
+      if (cls2 && !cls2->isRedeclaring() &&
+          cls2->derivesFrom(ar, type1->m_name, true, false)) {
         return type1;
       }
     }

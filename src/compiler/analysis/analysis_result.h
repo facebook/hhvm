@@ -271,6 +271,7 @@ public:
                           FindClassBy by = ClassName);
   const ClassScopePtrVec &findClasses(const std::string &className);
   bool classMemberExists(const std::string &name, FindClassBy by);
+  ClassScopePtr findExactClass(const std::string &name);
   bool checkClassPresent(const std::string &name);
   FunctionScopePtr findFunction(const std::string &funcName);
   FunctionScopePtr findHelperFunction(const std::string &funcName);

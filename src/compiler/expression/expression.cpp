@@ -452,10 +452,6 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
   } else {
     killCast = true;
     dstType = srcType;
-    if (isLvalue &&
-        dynamic_cast<FunctionCall*>(this)) {
-      isLvalue = false;
-    }
   }
 
   if (!dstType) {
@@ -473,6 +469,11 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
 
   bool constRef = (m_context & (RefValue|RefParameter)) ||
     (isTemporary() && !dstType->isPrimitive());
+
+  if (isLvalue &&
+      dynamic_cast<FunctionCall*>(this)) {
+    constRef = true;
+  }
 
   ar->wrapExpressionBegin(cg);
   if (constRef) {
@@ -532,6 +533,14 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
   m_context = save;
 
   cg.printf("));\n");
+  if (isLvalue && constRef) {
+    dstType->outputCPPDecl(cg, ar);
+    cg.printf(" &%s_lv = const_cast<", t.c_str());
+    dstType->outputCPPDecl(cg, ar);
+    cg.printf("&>(%s);\n", t.c_str());
+    t += "_lv";
+  }
+
   m_cppTemp = t;
 }
 

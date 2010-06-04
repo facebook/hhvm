@@ -187,7 +187,10 @@ public:
   /**
    * Testing whether this class derives from another.
    */
-  bool derivesFrom(AnalysisResultPtr ar, const std::string &base) const;
+  bool derivesDirectlyFrom(AnalysisResultPtr ar,
+                           const std::string &base) const;
+  bool derivesFrom(AnalysisResultPtr ar, const std::string &base,
+                   bool strict, bool def) const;
 
   /**
    * Look up function by name.

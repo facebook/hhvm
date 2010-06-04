@@ -4774,6 +4774,24 @@ bool TestCodeRun::TestCompilation() {
        "  return $x;"
        "}");
 
+  MVCR("<?php;"
+       "function g() {}"
+       "function test1() {"
+       "  return '' . g();"
+       "}");
+
+  MVCR("<?php;"
+       "function g() {}"
+       "function test1() {"
+       "  return 0 + g();"
+       "}");
+
+  MVCR("<?php;"
+       "function g() {}"
+       "function test1() {"
+       "  return 1 * g();"
+       "}");
+
   return true;
 }
 
@@ -7188,6 +7206,24 @@ bool TestCodeRun::TestRedeclaredClasses() {
   MVCR("<?php "
        "class X extends Y {}"
        "function test() { return new x;}");
+  MVCR("<?php;"
+       "function nop($en,$es){};set_error_handler('nop');"
+       "class X { function bar() { var_dump($this); } }"
+       "if (1) {"
+       "  class U {"
+       "  }"
+       "} else {"
+       "  class U extends X {"
+       "  }"
+       "}"
+       "class V extends U {}"
+       "function test() {"
+       "  $x = new X;"
+       "  $x->bar();"
+       "  $x = new V;"
+       "  $x->bar();"
+       "}"
+       "test();");
 
   return true;
 }

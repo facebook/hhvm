@@ -345,7 +345,7 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) 
             dynamic_pointer_cast<ScalarExpression>((*m_base)[i]);
           const char *intf = exp->getString().c_str();
           ClassScopePtr intfClassScope = ar->findClass(intf);
-          if (intfClassScope && classScope->derivesFrom(ar, intf)
+          if (intfClassScope && classScope->derivesFrom(ar, intf, false, false)
            && intfClassScope->isUserClass()) {
             if (first) {
               cgCls.printf(" extends ");

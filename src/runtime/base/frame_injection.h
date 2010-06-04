@@ -72,7 +72,10 @@ public:
       FrameInjection::ResetStaticClassName(m_info);
     }
 
+    bool    call(bool    ret) { return ret;}
+    int     call(int     ret) { return ret;}
     int64   call(int64   ret) { return ret;}
+    double  call(double  ret) { return ret;}
     String  call(CStrRef ret) { return ret;}
     Array   call(CArrRef ret) { return ret;}
     Object  call(CObjRef ret) { return ret;}

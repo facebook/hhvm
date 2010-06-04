@@ -51,7 +51,24 @@ class StringData {
    * StringData does not formally derive from Countable, however it has a
    * _count field and implements all of the methods from Countable.
    */
-  IMPLEMENT_COUNTABLE_METHODS
+  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+
+  void setStatic() const {
+    _count = (1 << 30);
+    ASSERT(!isShared()); // because we are gonna reuse the space!
+    m_hash = hash_string(data(), size());
+    ASSERT(m_hash >= 0);
+    int64 res;
+    if (is_strictly_integer(m_data, (m_len & LenMask), res)) {
+      m_hash |= (1ull << 63);
+    }
+  }
+  bool isStatic() const { return _count == (1 << 30); }
+
+  int64 getStaticHash() const {
+    ASSERT(!isShared() && isStatic());
+    return m_hash & 0x7fffffffffffffffull;
+  }
 
   StringData() : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
   }
@@ -85,6 +102,7 @@ class StringData {
   bool isNumeric() const;
   bool isInteger() const;
   bool isStrictlyInteger(int64 &res) {
+    if (isStatic() && m_hash >= 0) return false;
     return is_strictly_integer(m_data, (m_len & LenMask), res);
   }
   bool isZero() const { return size() == 1 && m_data[0] == '0'; }
@@ -134,7 +152,10 @@ class StringData {
   mutable int _count;
  private:
   mutable unsigned int m_len;
-  SharedVariant *m_shared;
+  union {
+    SharedVariant *m_shared;
+    mutable int64  m_hash;   // precompute hash codes for static strings
+  };
 
   void releaseData();
 

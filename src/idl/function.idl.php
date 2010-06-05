@@ -36,6 +36,14 @@ f('end_user_func_async', Variant,
         'resolver' => array(Variant, 'null')),
   VariableArguments);
 
+f('forward_static_call_array', Variant,
+  array('function' => Variant,
+        'params' => VariantVec));
+
+f('forward_static_call', Variant,
+  array('function' => Variant),
+  VariableArguments);
+
 f('create_function', String,
   array('args' => String,
         'code' => String));

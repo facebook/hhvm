@@ -453,7 +453,7 @@ do { \
 
 #ifdef ENABLE_LATE_STATIC_BINDING
 
-#define STATIC_CLASS_NAME_CALL(s, exp)                          \
+#define STATIC_CLASS_NAME_CALL(s, exp)                             \
   (FrameInjection::StaticClassNameHelper(info, #s), exp)           \
 
 #define BIND_CLASS_DOT  bindClass(info).

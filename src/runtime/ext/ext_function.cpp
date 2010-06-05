@@ -113,6 +113,25 @@ Variant f_end_user_func_async(int _argc, CVarRef handle, int strategy /* = k_GLO
   throw NotImplementedException(__func__);
 }
 
+Variant f_forward_static_call_array(CVarRef function, CArrRef params) {
+  return f_forward_static_call(0, function, params);
+}
+
+Variant f_forward_static_call(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
+#ifdef ENABLE_LATE_STATIC_BINDING
+  const char *cls = FrameInjection::GetClassName();
+  if (!cls || !*cls) {
+    raise_error("Cannot call forward_static_call() "
+                "when no class scope is active");
+    return null;
+  }
+  FrameInjection::StaticClassNameHelper h(ThreadInfo::s_threadInfo.get(), cls);
+  return f_call_user_func_array(function, _argv);
+#else
+  throw NotSuppportedException(__func__, "ENABLE_LATE_STATIC_BINDING is off");
+#endif
+}
+
 String f_create_function(CStrRef args, CStrRef code) {
   throw NotSupportedException(__func__, "dynamic coding");
 }

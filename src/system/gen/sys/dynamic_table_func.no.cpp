@@ -4291,6 +4291,12 @@ Variant i_socket_write(CArrRef params) {
   if (count <= 2) return (f_socket_write(params[0], params[1]));
   return (f_socket_write(params[0], params[1], params[2]));
 }
+Variant i_forward_static_call_array(CArrRef params) {
+  FUNCTION_INJECTION(forward_static_call_array);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("forward_static_call_array", count, 2, 2, 1);
+  return (f_forward_static_call_array(params[0], params[1]));
+}
 Variant i_stream_bucket_new(CArrRef params) {
   FUNCTION_INJECTION(stream_bucket_new);
   int count __attribute__((__unused__)) = params.size();
@@ -6917,6 +6923,13 @@ Variant i_magickembossimage(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 3) return throw_wrong_arguments("magickembossimage", count, 3, 3, 1);
   return (f_magickembossimage(params[0], params[1], params[2]));
+}
+Variant i_forward_static_call(CArrRef params) {
+  FUNCTION_INJECTION(forward_static_call);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1) return throw_missing_arguments("forward_static_call", count+1, 1);
+  if (count <= 1) return (f_forward_static_call(count, params[0]));
+  return (f_forward_static_call(count,params[0], params.slice(1, count - 1, false)));
 }
 Variant i_gzencode(CArrRef params) {
   FUNCTION_INJECTION(gzencode);
@@ -13374,6 +13387,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x215E0E2EFA7422EDLL, drawgetstrokeantialias);
       break;
     case 750:
+      HASH_INVOKE(0x5D43C0E4868EC2EELL, forward_static_call);
       HASH_INVOKE(0x2884B7B3252B02EELL, imagealphablending);
       break;
     case 752:
@@ -17269,6 +17283,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 3899:
       HASH_INVOKE(0x7EE74F798791CF3BLL, magickedgeimage);
+      break;
+    case 3900:
+      HASH_INVOKE(0x41136A5F28E84F3CLL, forward_static_call_array);
       break;
     case 3903:
       HASH_INVOKE(0x1A9EFDD653DB8F3FLL, pcntl_wstopsig);
@@ -30978,6 +30995,26 @@ Variant ei_socket_write(Eval::VariableEnvironment &env, const Eval::FunctionCall
   if (count <= 2) return (x_socket_write(a0, a1));
   else return (x_socket_write(a0, a1, a2));
 }
+Variant ei_forward_static_call_array(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("forward_static_call_array", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_forward_static_call_array(a0, a1));
+}
 Variant ei_stream_bucket_new(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -39456,6 +39493,24 @@ Variant ei_magickembossimage(Eval::VariableEnvironment &env, const Eval::Functio
     (*it)->eval(env);
   }
   return (x_magickembossimage(a0, a1, a2));
+}
+Variant ei_forward_static_call(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1) return throw_missing_arguments("forward_static_call", count+1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  Array vargs;
+  for (; it != params.end(); ++it) {
+    vargs.append((*it)->eval(env));
+  }
+  if (count <= 1) return (x_forward_static_call(count, a0));
+  return (x_forward_static_call(count, a0,vargs));
 }
 Variant ei_gzencode(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -58152,6 +58207,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x215E0E2EFA7422EDLL, drawgetstrokeantialias);
       break;
     case 750:
+      HASH_INVOKE_FROM_EVAL(0x5D43C0E4868EC2EELL, forward_static_call);
       HASH_INVOKE_FROM_EVAL(0x2884B7B3252B02EELL, imagealphablending);
       break;
     case 752:
@@ -62047,6 +62103,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3899:
       HASH_INVOKE_FROM_EVAL(0x7EE74F798791CF3BLL, magickedgeimage);
+      break;
+    case 3900:
+      HASH_INVOKE_FROM_EVAL(0x41136A5F28E84F3CLL, forward_static_call_array);
       break;
     case 3903:
       HASH_INVOKE_FROM_EVAL(0x1A9EFDD653DB8F3FLL, pcntl_wstopsig);

@@ -10690,6 +10690,33 @@ bool TestCodeRun::TestVariableClassName() {
 bool TestCodeRun::TestLateStaticBinding() {
   MVCRO(
     "<?php\n"
+    "class A {\n"
+    "    const NAME = 'A';\n"
+    "    public static function test() {\n"
+    "        $args = func_get_args();\n"
+    "        echo static::NAME, \" \".join(',', $args).\" \\n\";\n"
+    "    }\n"
+    "}\n"
+    "class B extends A {\n"
+    "    const NAME = 'B';\n"
+    "    public static function test() {\n"
+    "        echo self::NAME, \"\\n\";\n"
+    "        forward_static_call(array('A', 'test'), 'more', 'args');\n"
+    "        forward_static_call( 'test', 'other', 'args');\n"
+    "    }\n"
+    "}\n"
+    "B::test('foo');\n"
+    "function test() {\n"
+    "    $args = func_get_args();\n"
+    "    echo \"C \".join(',', $args).\" \\n\";\n"
+    "}\n",
+    "B\n"
+    "B more,args \n"
+    "C other,args \n"
+  );
+
+  MVCRO(
+    "<?php\n"
     "class X {\n"
     "  function f() {\n"
     "    $y = new Y;\n"

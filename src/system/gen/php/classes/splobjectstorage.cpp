@@ -575,7 +575,10 @@ void c_splobjectstorage::t_attach(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION(SplObjectStorage, SplObjectStorage::attach);
   if (x_is_object(v_obj) && !(t_contains(v_obj))) {
     {
-      m_storage.append((v_obj));
+      {
+        Variant &tmp4((m_storage));
+        tmp4.append((v_obj));
+      }
     }
   }
 } /* function */
@@ -589,12 +592,12 @@ void c_splobjectstorage::t_detach(CVarRef v_obj) {
   if (x_is_object(v_obj)) {
     {
       {
-        LOOP_COUNTER(4);
-        Variant map5 = m_storage;
-        for (ArrayIterPtr iter6 = map5.begin("splobjectstorage"); !iter6->end(); iter6->next()) {
-          LOOP_COUNTER_CHECK(4);
-          iter6->second(v_object);
-          v_idx = iter6->first();
+        LOOP_COUNTER(5);
+        Variant map6 = m_storage;
+        for (ArrayIterPtr iter7 = map6.begin("splobjectstorage"); !iter7->end(); iter7->next()) {
+          LOOP_COUNTER_CHECK(5);
+          iter7->second(v_object);
+          v_idx = iter7->first();
           {
             if (same(v_object, v_obj)) {
               {

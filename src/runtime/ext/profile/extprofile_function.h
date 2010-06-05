@@ -65,6 +65,16 @@ inline Variant x_end_user_func_async(int _argc, CVarRef handle, int strategy = k
   return f_end_user_func_async(_argc, handle, strategy, resolver, _argv);
 }
 
+inline Variant x_forward_static_call_array(CVarRef function, CArrRef params) {
+  FUNCTION_INJECTION_BUILTIN(forward_static_call_array);
+  return f_forward_static_call_array(function, params);
+}
+
+inline Variant x_forward_static_call(int _argc, CVarRef function, CArrRef _argv = null_array) {
+  FUNCTION_INJECTION_BUILTIN(forward_static_call);
+  return f_forward_static_call(_argc, function, _argv);
+}
+
 inline String x_create_function(CStrRef args, CStrRef code) {
   FUNCTION_INJECTION_BUILTIN(create_function);
   return f_create_function(args, code);

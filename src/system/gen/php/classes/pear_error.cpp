@@ -525,50 +525,39 @@ void c_pear_error::t_pear_error(CStrRef v_message //  = "unknown error"
 , CVarRef v_options //  = null_variant
 , CVarRef v_userinfo //  = null_variant
 ) {
-  INSTANCE_METHOD_INJECTION(pear_error, pear_error::pear_error);
   bool oldInCtor = gasInCtor(true);
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/pear_error.php line 8 */
 void c_pear_error::t_adduserinfo(CVarRef v_info) {
-  INSTANCE_METHOD_INJECTION(pear_error, pear_error::addUserInfo);
 } /* function */
 /* SRC: classes/pear_error.php line 9 */
 void c_pear_error::t_getcallback() {
-  INSTANCE_METHOD_INJECTION(pear_error, pear_error::getCallback);
 } /* function */
 /* SRC: classes/pear_error.php line 10 */
 void c_pear_error::t_getcode() {
-  INSTANCE_METHOD_INJECTION(pear_error, pear_error::getCode);
 } /* function */
 /* SRC: classes/pear_error.php line 11 */
 void c_pear_error::t_getmessage() {
-  INSTANCE_METHOD_INJECTION(pear_error, pear_error::getMessage);
 } /* function */
 /* SRC: classes/pear_error.php line 12 */
 void c_pear_error::t_getmode() {
-  INSTANCE_METHOD_INJECTION(pear_error, pear_error::getMode);
 } /* function */
 /* SRC: classes/pear_error.php line 13 */
 void c_pear_error::t_getdebuginfo() {
-  INSTANCE_METHOD_INJECTION(pear_error, pear_error::getDebugInfo);
 } /* function */
 /* SRC: classes/pear_error.php line 14 */
 void c_pear_error::t_gettype() {
-  INSTANCE_METHOD_INJECTION(pear_error, pear_error::getType);
 } /* function */
 /* SRC: classes/pear_error.php line 15 */
 void c_pear_error::t_getuserinfo() {
-  INSTANCE_METHOD_INJECTION(pear_error, pear_error::getUserInfo);
 } /* function */
 /* SRC: classes/pear_error.php line 16 */
 void c_pear_error::t_getbacktrace(CVarRef v_frame //  = null_variant
 ) {
-  INSTANCE_METHOD_INJECTION(pear_error, pear_error::getBacktrace);
 } /* function */
 /* SRC: classes/pear_error.php line 18 */
 void c_pear_error::t_tostring() {
-  INSTANCE_METHOD_INJECTION(pear_error, pear_error::toString);
 } /* function */
 Object co_pear_error(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_pear_error)())->dynCreate(params, init));

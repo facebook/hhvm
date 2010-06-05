@@ -935,12 +935,18 @@ void c_arrayiterator::t___construct(Variant v_array, Variant v_flags //  = 0LL /
 /* SRC: classes/iterator.php line 80 */
 void c_arrayiterator::t_append(CVarRef v_value) {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::append);
-  m_arr.append((v_value));
+  {
+    Variant &tmp1((m_arr));
+    tmp1.append((v_value));
+  }
 } /* function */
 /* SRC: classes/iterator.php line 84 */
 bool c_arrayiterator::t_asort() {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::asort);
-  return x_asort(ref(lval(m_arr)), toInt32(m_flags));
+  {
+    const Variant &tmp2((lval(m_arr)));
+    return x_asort(ref(tmp2), toInt32(m_flags));
+  }
 } /* function */
 /* SRC: classes/iterator.php line 88 */
 int c_arrayiterator::t_count() {
@@ -970,7 +976,10 @@ Variant c_arrayiterator::t_key() {
 /* SRC: classes/iterator.php line 108 */
 bool c_arrayiterator::t_ksort() {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::ksort);
-  return x_ksort(ref(lval(m_arr)), toInt32(m_flags));
+  {
+    const Variant &tmp3((lval(m_arr)));
+    return x_ksort(ref(tmp3), toInt32(m_flags));
+  }
 } /* function */
 /* SRC: classes/iterator.php line 112 */
 Variant c_arrayiterator::t_natcasesort() {
@@ -1007,7 +1016,10 @@ Variant &c_arrayiterator::___offsetget_lval(Variant v_index) {
 /* SRC: classes/iterator.php line 132 */
 Variant c_arrayiterator::t_offsetset(CVarRef v_index, CVarRef v_newval) {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::offsetSet);
-  m_arr.set(v_index, (v_newval));
+  {
+    Variant &tmp4((m_arr));
+    tmp4.set(v_index, (v_newval));
+  }
   return null;
 } /* function */
 /* SRC: classes/iterator.php line 136 */
@@ -1029,9 +1041,9 @@ void c_arrayiterator::t_seek(CVarRef v_position) {
 
   x_reset(ref(lval(m_arr)));
   {
-    LOOP_COUNTER(1);
+    LOOP_COUNTER(5);
     for ((v_i = 0LL); less(v_i, v_position); v_i++) {
-      LOOP_COUNTER_CHECK(1);
+      LOOP_COUNTER_CHECK(5);
       {
         if (!(toBoolean(x_next(ref(lval(m_arr)))))) {
           {
@@ -1050,7 +1062,10 @@ void c_arrayiterator::t_setflags(CVarRef v_flags) {
 /* SRC: classes/iterator.php line 157 */
 bool c_arrayiterator::t_uasort(CVarRef v_cmp_function) {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::uasort);
-  return x_uasort(ref(lval(m_arr)), v_cmp_function);
+  {
+    const Variant &tmp6((lval(m_arr)));
+    return x_uasort(ref(tmp6), v_cmp_function);
+  }
 } /* function */
 /* SRC: classes/iterator.php line 161 */
 bool c_arrayiterator::t_uksort(Variant v_cmp_function) {
@@ -1625,10 +1640,10 @@ void c_appenditerator::t_next() {
     }
   }
   m_iterators. BIND_CLASS_DOT o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);
-  LOOP_COUNTER(2);
+  LOOP_COUNTER(7);
   {
     while (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
-      LOOP_COUNTER_CHECK(2);
+      LOOP_COUNTER_CHECK(7);
       {
         o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
         if (toBoolean(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
@@ -1646,10 +1661,10 @@ Variant c_appenditerator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::__call);
   INCALL_HELPER(v_func);
   {
-    ArrayInit tmp3(2, true);
-    tmp3.set(0, o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0));
-    tmp3.set(1, v_func);
-    return x_call_user_func_array(Array(tmp3), toArray(v_params));
+    ArrayInit tmp8(2, true);
+    tmp8.set(0, o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0));
+    tmp8.set(1, v_func);
+    return x_call_user_func_array(Array(tmp8), toArray(v_params));
   }
 } /* function */
 /* SRC: classes/iterator.php line 209 */

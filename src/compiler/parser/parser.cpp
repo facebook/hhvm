@@ -554,6 +554,9 @@ void Parser::onFunction(Token *out, Token *ref, Token *name, Token *params,
      popComment());
   out->stmt = func;
   func->onParse(m_ar);
+  if (func->ignored()) {
+    out->stmt = NEW_STMT0(StatementList);
+  }
 }
 
 void Parser::onParam(Token *out, Token *params, Token *type, Token *var,
@@ -588,6 +591,9 @@ void Parser::onClass(Token *out, Token *type, Token *name, Token *base,
      popComment(), stmtList);
   out->stmt = cls;
   cls->onParse(m_ar);
+  if (cls->ignored()) {
+    out->stmt = NEW_STMT0(StatementList);
+  }
 }
 
 void Parser::onInterface(Token *out, Token *name, Token *base, Token *stmt) {

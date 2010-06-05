@@ -308,13 +308,6 @@ public:
     return m_magicMethod;
   }
 
-  void setIgnored() {
-    m_ignored = true;
-  }
-  bool isIgnored() const {
-    return m_ignored;
-  }
-
   void setStmtCloned(StatementPtr stmt) {
     m_stmtCloned = stmt;
   }
@@ -374,7 +367,6 @@ private:
   bool m_overriding; // overriding a virtual function
   int m_redeclaring; // multiple definition of the same function
   bool m_volatile; // for function_exists
-  bool m_ignored; // redeclared system functions are ignored automatically
   bool m_pseudoMain;
   bool m_magicMethod;
   bool m_system;

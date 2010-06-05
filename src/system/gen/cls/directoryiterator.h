@@ -39,7 +39,6 @@ class c_directoryiterator : public c_splfileinfo {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_directoryiterator 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_directoryiterator 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_directoryiterator 1

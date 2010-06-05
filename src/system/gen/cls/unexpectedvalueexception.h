@@ -34,7 +34,6 @@ class c_unexpectedvalueexception : public c_runtimeexception {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_unexpectedvalueexception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_unexpectedvalueexception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_unexpectedvalueexception 1

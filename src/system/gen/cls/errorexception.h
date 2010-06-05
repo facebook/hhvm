@@ -33,7 +33,6 @@ class c_errorexception : public c_exception {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   static Variant os_getInit(const char *s, int64 hash);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_errorexception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_errorexception 1

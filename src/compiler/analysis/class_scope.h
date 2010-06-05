@@ -319,7 +319,7 @@ public:
   /**
    * Override function container
    */
-  virtual void addFunction(AnalysisResultPtr ar, FunctionScopePtr funcScope);
+  virtual bool addFunction(AnalysisResultPtr ar, FunctionScopePtr funcScope);
   void outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
                           bool staticOnly, bool dynamicObject = false,
                           bool forEval = false);

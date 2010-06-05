@@ -33,7 +33,6 @@ class c_logicexception : public c_exception {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_logicexception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_logicexception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_logicexception 1

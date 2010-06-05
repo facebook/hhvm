@@ -34,7 +34,6 @@ class c_overflowexception : public c_runtimeexception {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_overflowexception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_overflowexception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_overflowexception 1

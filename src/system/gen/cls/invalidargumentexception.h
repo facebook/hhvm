@@ -34,7 +34,6 @@ class c_invalidargumentexception : public c_logicexception {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_invalidargumentexception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_invalidargumentexception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_invalidargumentexception 1

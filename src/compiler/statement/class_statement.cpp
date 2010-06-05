@@ -45,7 +45,8 @@ ClassStatement::ClassStatement
  int type, const std::string &name, const std::string &parent,
  ExpressionListPtr base, const std::string &docComment, StatementListPtr stmt)
   : InterfaceStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES,
-                       name, base, docComment, stmt), m_type(type) {
+                       name, base, docComment, stmt),
+    m_type(type), m_ignored(false) {
   m_parent = Util::toLower(parent);
 }
 
@@ -80,7 +81,10 @@ void ClassStatement::onParse(AnalysisResultPtr ar) {
                                           bases, m_docComment,
                                           stmt, ar->getFileScope()));
   m_classScope = classScope;
-  ar->getFileScope()->addClass(ar, classScope);
+  if (!ar->getFileScope()->addClass(ar, classScope)) {
+    m_ignored = true;
+    return;
+  }
   ar->recordClassSource(m_name, ar->getFileScope()->getName());
 
   if (m_stmt) {
@@ -272,7 +276,9 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
 
   cg.printSection("DECLARE_STATIC_PROP_OPS");
   cg.printf("public:\n");
-  cg.printf("static void os_static_initializer();\n");
+  if (classScope->needStaticInitializer()) {
+    cg.printf("static void os_static_initializer();\n");
+  }
   if (variables->hasJumpTable(VariableTable::JumpTableClassStaticGetInit)) {
     cg.printf("static Variant os_getInit(const char *s, int64 hash);\n");
   } else {

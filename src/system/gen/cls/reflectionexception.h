@@ -33,7 +33,6 @@ class c_reflectionexception : public c_exception {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_reflectionexception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_reflectionexception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionexception 1

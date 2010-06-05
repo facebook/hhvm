@@ -39,7 +39,6 @@ class c_recursivedirectoryiterator : public c_directoryiterator {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_recursivedirectoryiterator 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_recursivedirectoryiterator 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_recursivedirectoryiterator 1

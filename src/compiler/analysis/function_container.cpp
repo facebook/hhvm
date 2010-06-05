@@ -36,14 +36,14 @@ FunctionContainer::FunctionContainer() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void FunctionContainer::addFunction(AnalysisResultPtr ar,
+bool FunctionContainer::addFunction(AnalysisResultPtr ar,
                                     FunctionScopePtr funcScope) {
   if (ar->declareFunction(funcScope)) {
     m_functions[funcScope->getName()].push_back(funcScope);
-  } else {
-    m_ignoredFunctions.push_back(funcScope);
-    funcScope->setIgnored();
+    return true;
   }
+  m_ignoredFunctions.push_back(funcScope);
+  return false;
 }
 
 void FunctionContainer::countReturnTypes(std::map<std::string, int> &counts) {

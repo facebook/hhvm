@@ -42,7 +42,7 @@ FunctionStatement::FunctionStatement
  StatementListPtr stmt, int attr, const std::string &docComment)
   : MethodStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES,
                     ModifierExpressionPtr(), ref, name, params, stmt, attr,
-                    docComment, false) {
+                    docComment, false), m_ignored(false) {
 }
 
 StatementPtr FunctionStatement::clone() {
@@ -60,7 +60,10 @@ void FunctionStatement::onParse(AnalysisResultPtr ar) {
   // as a function may be declared inside a class's method, yet this function
   // is a global function, not a class method.
   FileScopePtr fileScope = ar->getFileScope();
-  fileScope->addFunction(ar, onParseImpl(ar));
+  if (!fileScope->addFunction(ar, onParseImpl(ar))) {
+    m_ignored = true;
+    return;
+  }
   ar->recordFunctionSource(m_name, fileScope->getName());
 }
 
@@ -80,12 +83,6 @@ void FunctionStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
       ar->getDependencyGraph()->addParent(DependencyGraph::KindOfFunctionCall,
                                           "", m_name, shared_from_this());
     } // else it's pseudoMain or artificial functions we added
-    FunctionScopePtr fs = m_funcScope.lock();
-    if (!isFileLevel() && !fs->isIgnored() &&
-        !fs->isRedeclaring()) {
-      // Dynamic function declaration
-      // fs->setRedeclaring(0);
-    }
   }
   FunctionScopePtr func = ar->getFunctionScope(); // containing function scope
   FunctionScopePtr fs = m_funcScope.lock();

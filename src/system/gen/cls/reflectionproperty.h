@@ -33,7 +33,6 @@ class c_reflectionproperty : public ExtObjectData {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   static Variant os_getInit(const char *s, int64 hash);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_reflectionproperty 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionproperty 1

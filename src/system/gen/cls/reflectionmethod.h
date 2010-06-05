@@ -35,7 +35,6 @@ class c_reflectionmethod : public c_reflectionfunctionabstract {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   static Variant os_getInit(const char *s, int64 hash);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_reflectionmethod 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionmethod 1

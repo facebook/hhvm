@@ -216,7 +216,7 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
     if (sep) {
       cl->setSepExtension();
     }
-    s_classes[cname] = cl;
+    s_classes[cl->getName()] = cl;
   }
 }
 

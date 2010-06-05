@@ -31,7 +31,6 @@ class c_stdclass : public ExtObjectData {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_stdclass 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_stdclass 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_stdclass 1

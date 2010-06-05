@@ -33,7 +33,6 @@ class c_runtimeexception : public c_exception {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_runtimeexception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_runtimeexception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_runtimeexception 1

@@ -61,12 +61,13 @@ void FileScope::setTree(StatementListPtr tree) {
   }
 }
 
-void FileScope::addClass(AnalysisResultPtr ar, ClassScopePtr classScope) {
+bool FileScope::addClass(AnalysisResultPtr ar, ClassScopePtr classScope) {
   if (ar->declareClass(classScope)) {
     m_classes[classScope->getName()].push_back(classScope);
-  } else {
-    m_ignoredClasses.push_back(classScope);
+    return true;
   }
+  m_ignoredClasses.push_back(classScope);
+  return false;
 }
 
 ClassScopePtr FileScope::getClass(const char *name) {

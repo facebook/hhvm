@@ -92,7 +92,7 @@ public:
    * are the only functions a parser calls upon analysis results.
    */
   void setTree(StatementListPtr tree);
-  void addClass(AnalysisResultPtr ar, ClassScopePtr classScope);
+  bool addClass(AnalysisResultPtr ar, ClassScopePtr classScope);
 
   void addDeclare(std::string d) { m_declares.push_back(d); }
   void addSuppressError(CodeError::ErrorType e) {

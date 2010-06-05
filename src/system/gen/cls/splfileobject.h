@@ -41,7 +41,6 @@ class c_splfileobject : public c_splfileinfo {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_splfileobject 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_splfileobject 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splfileobject 1

@@ -43,6 +43,10 @@ public:
 
   // implementing IParseHandler
   virtual void onParse(AnalysisResultPtr ar);
+  bool ignored() const { return m_ignored;}
+
+private:
+  bool m_ignored;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

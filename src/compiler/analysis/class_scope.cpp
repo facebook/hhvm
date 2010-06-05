@@ -1013,7 +1013,7 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
   cg.indentEnd("};\n");
 }
 
-void ClassScope::addFunction(AnalysisResultPtr ar,
+bool ClassScope::addFunction(AnalysisResultPtr ar,
                              FunctionScopePtr funcScope) {
   FunctionScopePtrVec &funcs = m_functions[funcScope->getName()];
   if (funcs.size() == 1) {
@@ -1026,6 +1026,7 @@ void ClassScope::addFunction(AnalysisResultPtr ar,
     funcScope->setRedeclaring(funcs.size());
   }
   funcs.push_back(funcScope);
+  return true;
 }
 
 void ClassScope::findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,

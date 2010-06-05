@@ -34,7 +34,6 @@ class c_domainexception : public c_logicexception {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domainexception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_domainexception 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domainexception 1

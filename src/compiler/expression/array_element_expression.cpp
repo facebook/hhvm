@@ -351,7 +351,6 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
       if (hasContext(UnsetContext)) {
         // do nothing
       } else if (m_context & InvokeArgument) {
-        ASSERT(m_context & RefValue);
         cg.printf(".refvalAt(");
       } else if (m_context & (LValue|RefValue)) {
         cg.printf(".lvalAt(");

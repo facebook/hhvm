@@ -31,7 +31,6 @@ class c___php_incomplete_class : public ExtObjectData {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT___php_incomplete_class 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET___php_incomplete_class 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL___php_incomplete_class 1

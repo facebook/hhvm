@@ -39,6 +39,7 @@ public:
 
   // implementing IParseHandler
   virtual void onParse(AnalysisResultPtr ar);
+  bool ignored() const { return m_ignored;}
 
   virtual std::string getName() const;
   virtual void getAllParents(AnalysisResultPtr ar,
@@ -46,6 +47,7 @@ public:
 private:
   int m_type;
   std::string m_parent;
+  bool m_ignored;
 
   void outputCPPClassDecl(CodeGenerator &cg, AnalysisResultPtr ar,
                           const char *clsName, const char *originalName,

@@ -33,7 +33,6 @@ class c_reflectionparameter : public ExtObjectData {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   static Variant os_getInit(const char *s, int64 hash);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_reflectionparameter 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionparameter 1

@@ -35,7 +35,6 @@ class c_reflectionfunction : public c_reflectionfunctionabstract {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static void os_static_initializer();
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_reflectionfunction 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_reflectionfunction 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionfunction 1

@@ -131,8 +131,9 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
     m_virtual(false), m_overriding(false), m_redeclaring(-1),
     m_volatile(false), m_ignored(false),
     m_pseudoMain(false), m_magicMethod(false), m_system(true),
-    m_inlineable(false), m_sep(false), m_callTempCountMax(0),
-    m_callTempCountCurrent(0) {
+    m_inlineable(false), m_sep(false),
+    m_containsThis(false), m_staticMethodAutoFixed(false),
+    m_callTempCountMax(0), m_callTempCountCurrent(0) {
   m_dynamic = Option::IsDynamicFunction(method, m_name);
 }
 

@@ -1228,10 +1228,12 @@ void AliasManager::stringOptsRecur(StatementPtr s) {
       BreakStatementPtr b = spc(BreakStatement, s);
       int64 depth = b->getDepth();
       if (depth != 1) {
-        int64 s = m_loopInfo.size();
-        if (!depth || depth > s) depth = s;
-        while (depth--) {
-          m_loopInfo[s - depth].m_valid = false;
+        int64 s = m_loopInfo.size() - 1;
+        if (s >= 0) {
+          if (!depth || depth > s) depth = s;
+          while (depth--) {
+            m_loopInfo[s - depth].m_valid = false;
+          }
         }
       }
     }

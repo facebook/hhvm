@@ -5,7 +5,7 @@ using namespace HPHP;
 using namespace HPHP::Eval;
 
 #define YYSTYPE Token
-//#define YYSTYPE_IS_TRIVIAL 1
+#define YYSTYPE_IS_TRIVIAL 1
 #define YLMM_PARSER_CLASS Parser
 #define YLMM_LEX_STATIC
 #define YYERROR_VERBOSE

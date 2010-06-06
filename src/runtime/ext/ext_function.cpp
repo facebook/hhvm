@@ -128,7 +128,7 @@ Variant f_forward_static_call(int _argc, CVarRef function, CArrRef _argv /* = nu
   FrameInjection::StaticClassNameHelper h(ThreadInfo::s_threadInfo.get(), cls);
   return f_call_user_func_array(function, _argv);
 #else
-  throw NotSuppportedException(__func__, "ENABLE_LATE_STATIC_BINDING is off");
+  throw NotSupportedException(__func__, "ENABLE_LATE_STATIC_BINDING is off");
 #endif
 }
 

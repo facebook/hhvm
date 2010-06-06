@@ -2713,11 +2713,10 @@ Variant i_libxml_use_internal_errors(CArrRef params) {
 Variant i_end_user_func_async(CArrRef params) {
   FUNCTION_INJECTION(end_user_func_async);
   int count __attribute__((__unused__)) = params.size();
-  if (count < 1) return throw_missing_arguments("end_user_func_async", count+1, 1);
-  if (count <= 1) return (f_end_user_func_async(count, params[0]));
-  if (count == 2) return (f_end_user_func_async(count, params[0], params[1]));
-  if (count == 3) return (f_end_user_func_async(count, params[0], params[1], params[2]));
-  return (f_end_user_func_async(count,params[0], params[1], params[2], params.slice(3, count - 3, false)));
+  if (count < 1 || count > 3) return throw_wrong_arguments("end_user_func_async", count, 1, 3, 1);
+  if (count <= 1) return (f_end_user_func_async(params[0]));
+  if (count == 2) return (f_end_user_func_async(params[0], params[1]));
+  return (f_end_user_func_async(params[0], params[1], params[2]));
 }
 Variant i_openssl_get_publickey(CArrRef params) {
   FUNCTION_INJECTION(openssl_get_publickey);
@@ -26076,7 +26075,7 @@ Variant ei_end_user_func_async(Eval::VariableEnvironment &env, const Eval::Funct
   Variant a2;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count < 1) return throw_missing_arguments("end_user_func_async", count+1, 1);
+  if (count < 1 || count > 3) return throw_wrong_arguments("end_user_func_async", count, 1, 3, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -26089,14 +26088,12 @@ Variant ei_end_user_func_async(Eval::VariableEnvironment &env, const Eval::Funct
     a2 = (*it)->eval(env);
     it++;
   } while(false);
-  Array vargs;
   for (; it != params.end(); ++it) {
-    vargs.append((*it)->eval(env));
+    (*it)->eval(env);
   }
-  if (count <= 1) return (x_end_user_func_async(count, a0));
-  else if (count == 2) return (x_end_user_func_async(count, a0, a1));
-  else if (count == 3) return (x_end_user_func_async(count, a0, a1, a2));
-  return (x_end_user_func_async(count, a0,a1, a2, vargs));
+  if (count <= 1) return (x_end_user_func_async(a0));
+  else if (count == 2) return (x_end_user_func_async(a0, a1));
+  else return (x_end_user_func_async(a0, a1, a2));
 }
 Variant ei_openssl_get_publickey(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;

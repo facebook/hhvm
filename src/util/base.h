@@ -135,6 +135,7 @@ class hphp_string_map :
 typedef hphp_hash_set<const char *, hphp_hash<const char *>,
                       eqstr> hphp_const_char_set;
 
+typedef hphp_hash_map<void*, void*, pointer_hash<void> > PointerMap;
 typedef hphp_hash_map<void*, int, pointer_hash<void> > PointerCounterMap;
 typedef hphp_hash_set<void*, pointer_hash<void> > PointerSet;
 

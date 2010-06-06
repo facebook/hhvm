@@ -422,6 +422,11 @@ class Array : public SmartPtr<ArrayData> {
   void unserialize(VariableUnserializer *in);
 
   /**
+   * Used by FiberAsyncFunc to copy in the new fiber.
+   */
+  Array fiberCopy();
+
+  /**
    * Memory allocator methods.
    */
   DECLARE_SMART_ALLOCATION_NOCALLBACKS(Array);

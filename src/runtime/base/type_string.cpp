@@ -621,6 +621,13 @@ void String::unserialize(std::istream &in,
   }
 }
 
+String String::fiberCopy() {
+  if (m_px) {
+    return m_px->copy();
+  }
+  return String();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // debugging
 

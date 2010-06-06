@@ -76,6 +76,7 @@ std::string RuntimeOption::ServerPrimaryIP;
 int RuntimeOption::ServerPort;
 int RuntimeOption::ServerThreadCount = 50;
 int RuntimeOption::PageletServerThreadCount = 0;
+int RuntimeOption::FiberCount = 0;
 int RuntimeOption::RequestTimeoutSeconds = 0;
 int RuntimeOption::RequestMemoryMaxBytes = 0;
 int RuntimeOption::ImageMemoryMaxBytes = 0;
@@ -629,6 +630,7 @@ void RuntimeOption::Load(Hdf &config) {
   }
   {
     PageletServerThreadCount = config["PageletServer.ThreadCount"].getInt32(0);
+    FiberCount = config["Fiber.ThreadCount"].getInt32(0);
   }
   {
     Hdf content = config["StaticFile"];

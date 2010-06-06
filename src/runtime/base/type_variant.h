@@ -482,6 +482,11 @@ class Variant {
   Variant share(bool save) const;
 
   /**
+   * Used by FiberAsyncFunc to copy in the new fiber.
+   */
+  Variant fiberCopy();
+
+  /**
    * Debugging functions.
    */
   static const char *getTypeString(DataType type);

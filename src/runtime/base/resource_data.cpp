@@ -26,7 +26,6 @@ String ResourceData::t___tostring() {
 }
 
 ObjectData* ResourceData::cloneImpl() {
-  ASSERT(false);
   return NULL;
 }
 

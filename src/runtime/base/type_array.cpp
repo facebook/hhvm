@@ -754,6 +754,13 @@ void Array::unserialize(VariableUnserializer *unserializer) {
   }
 }
 
+Array Array::fiberCopy() {
+  if (m_px) {
+    return m_px->copy();
+  }
+  return Array();
+}
+
 void Array::dump() {
   if (m_px) {
     m_px->dump();

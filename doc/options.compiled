@@ -457,6 +457,16 @@ A pagelet server is essentially the same as local CURL, except it's more
 efficient. This allows parallel execution of a web page, preparing two panels
 or iframes at the same time.
 
+  Fiber {
+    ThreadCount = 0
+  }
+
+- Fiber Asynchronous Functions
+
+A "fiber" is a sub-thread of a request thread, mainly for implementing
+call_user_func_async(). This thread count specifies totally number of physical
+threads allocated for executing fiber asynchronous function calls.
+
 = Proxy Server
 
   Proxy {

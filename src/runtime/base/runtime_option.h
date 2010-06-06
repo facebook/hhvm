@@ -74,6 +74,7 @@ public:
   static int ServerPort;
   static int ServerThreadCount;
   static int PageletServerThreadCount;
+  static int FiberCount;
   static int RequestTimeoutSeconds;
   static int RequestMemoryMaxBytes;
   static int ImageMemoryMaxBytes;

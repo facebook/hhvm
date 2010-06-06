@@ -22,19 +22,18 @@ f('call_user_func', Variant,
   array('function' => Variant),
   VariableArguments);
 
-f('call_user_func_array_async', Variant,
+f('call_user_func_array_async', Object,
   array('function' => Variant,
         'params' => VariantVec));
 
-f('call_user_func_async', Variant,
+f('call_user_func_async', Object,
   array('function' => Variant),
   VariableArguments);
 
 f('end_user_func_async', Variant,
-  array('handle' => Variant,
+  array('handle' => Object,
         'strategy' => array(Int32, 'k_GLOBAL_STATE_OVERWRITE'),
-        'resolver' => array(Variant, 'null')),
-  VariableArguments);
+        'resolver' => array(Variant, 'null')));
 
 f('forward_static_call_array', Variant,
   array('function' => Variant,

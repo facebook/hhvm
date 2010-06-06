@@ -17,6 +17,7 @@
 
 #include <runtime/ext/ext_function.h>
 #include <runtime/base/class_info.h>
+#include <runtime/base/fiber_async_func.h>
 #include <util/exception.h>
 #include <util/util.h>
 
@@ -101,16 +102,20 @@ Variant f_call_user_func(int _argc, CVarRef function, CArrRef _argv /* = null_ar
   return f_call_user_func_array(function, _argv);
 }
 
-Variant f_call_user_func_array_async(CVarRef function, CArrRef params) {
-  throw NotImplementedException(__func__);
+Object f_call_user_func_array_async(CVarRef function, CArrRef params) {
+  return f_call_user_func_async(0, function, params);
 }
 
-Variant f_call_user_func_async(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
-  throw NotImplementedException(__func__);
+Object f_call_user_func_async(int _argc, CVarRef function,
+                               CArrRef _argv /* = null_array */) {
+  return FiberAsyncFunc::Start(function, _argv);
 }
 
-Variant f_end_user_func_async(int _argc, CVarRef handle, int strategy /* = k_GLOBAL_STATE_OVERWRITE */, CVarRef resolver /* = null */, CArrRef _argv /* = null_array */) {
-  throw NotImplementedException(__func__);
+Variant f_end_user_func_async(CObjRef handle,
+                              int strategy /* = k_GLOBAL_STATE_OVERWRITE */,
+                              CVarRef resolver /* = null */) {
+  return FiberAsyncFunc::Result(handle, (FiberAsyncFunc::Strategy)strategy,
+                                resolver);
 }
 
 Variant f_forward_static_call_array(CVarRef function, CArrRef params) {

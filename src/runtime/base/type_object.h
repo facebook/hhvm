@@ -136,6 +136,11 @@ class Object : public SmartPtr<ObjectData> {
   void serialize(VariableSerializer *serializer) const;
   bool unserialize(std::istream &in);
 
+  /**
+   * Used by FiberAsyncFunc to copy in the new fiber.
+   */
+  Object fiberCopy();
+
  private:
   static void compileTimeAssertions() {
     CT_ASSERT(offsetof(Object, m_px) == offsetof(Value, m_data));

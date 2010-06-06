@@ -265,6 +265,11 @@ public:
                    char delimiter1 = '"');
 
   /**
+   * Used by FiberAsyncFunc to copy in the new fiber.
+   */
+  String fiberCopy();
+
+  /**
    * Debugging
    */
   void dump();

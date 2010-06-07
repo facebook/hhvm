@@ -345,42 +345,12 @@ ExpressionPtr BinaryOpExpression::postOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
-static ExpressionPtr makeIsNull(LocationPtr loc, ExpressionPtr exp) {
-  /* Replace "$x === null" with an is_null call; this requires slightly
-   * less work at runtime. */
-  ExpressionListPtr expList =
-    ExpressionListPtr(new ExpressionList(loc,
-      Expression::KindOfExpressionList));
-  expList->insertElement(exp);
-
-  SimpleFunctionCallPtr call
-    (new SimpleFunctionCall(loc, Expression::KindOfSimpleFunctionCall,
-                            "is_null", expList, ExpressionPtr()));
-
-  call->setValid();
-  call->setActualType(Type::Boolean);
-
-  return call;
-}
-
 ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultPtr ar) {
   ExpressionPtr optExp;
   Variant v1;
   Variant v2;
 
-  if (!m_exp2->getScalarValue(v2)) {
-    if (m_exp1->isScalar() && m_exp1->getScalarValue(v1)) {
-      switch (m_op) {
-        case T_IS_IDENTICAL:
-          if (v1.isNull()) return makeIsNull(getLocation(), m_exp2);
-          break;
-        default:
-          break;
-      }
-    }
-
-    return ExpressionPtr();
-  }
+  if (!m_exp2->getScalarValue(v2)) return ExpressionPtr();
 
   if (m_exp1->isScalar()) {
     if (!m_exp1->getScalarValue(v1)) return ExpressionPtr();
@@ -472,9 +442,6 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultPtr ar) {
     case T_LOGICAL_AND:
       optExp = foldConstRightAssoc(ar);
       if (optExp) return optExp;
-      break;
-    case T_IS_IDENTICAL:
-      if (v2.isNull()) return makeIsNull(getLocation(), m_exp1);
       break;
     default:
       break;

@@ -1651,7 +1651,7 @@ Variant Variant::toKey() const {
     return "";
   case LiteralString:
     {
-      int64 n;
+      int64 n = 0;
       if (toString()->isStrictlyInteger(n)) {
         return n;
       } else {

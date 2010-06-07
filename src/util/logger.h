@@ -66,6 +66,7 @@ public:
   static void Log(const char *type, const Exception &e,
                   const char *file = NULL, int line = 0);
 
+  static void Printf(std::string &msg, const char *fmt, ...);
   static void VSNPrintf(std::string &msg, const char *fmt, va_list ap);
 
   static void OnNewRequest();

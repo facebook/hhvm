@@ -58,6 +58,13 @@ std::string Logger::ExtraHeader;
 int Logger::MaxMessagesPerRequest = -1;
 IMPLEMENT_THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
 
+void Logger::Printf(std::string &msg, const char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  VSNPrintf(msg, fmt, ap);
+  va_end(ap);
+}
+
 void Logger::VSNPrintf(std::string &msg, const char *fmt, va_list ap) {
   int i = 0;
   for (int len = 1024; msg.empty(); len <<= 1) {

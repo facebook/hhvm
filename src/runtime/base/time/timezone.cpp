@@ -20,10 +20,48 @@
 #include <runtime/base/execution_context.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/runtime_error.h>
+#include <util/logger.h>
 
 namespace HPHP {
 
 IMPLEMENT_OBJECT_ALLOCATION(TimeZone);
+///////////////////////////////////////////////////////////////////////////////
+
+class GuessedTimeZone {
+public:
+  std::string m_tzid;
+  std::string m_warning;
+
+  GuessedTimeZone() {
+    time_t the_time = time(0);
+    struct tm tmbuf;
+    struct tm *ta = localtime_r(&the_time, &tmbuf);
+    const char *tzid = NULL;
+    if (ta) {
+      tzid = timelib_timezone_id_from_abbr(ta->tm_zone, ta->tm_gmtoff,
+                                           ta->tm_isdst);
+    }
+    if (!tzid) {
+      tzid = "UTC";
+    }
+    m_tzid = tzid;
+
+#define DATE_TZ_ERRMSG \
+  "It is not safe to rely on the system's timezone settings. Please use " \
+  "the date.timezone setting, the TZ environment variable or the " \
+  "date_default_timezone_set() function. In case you used any of those " \
+  "methods and you are still getting this warning, you most likely " \
+  "misspelled the timezone identifier. "
+
+    Logger::Printf(m_warning, DATE_TZ_ERRMSG
+                   "We selected '%s' for '%s/%.1f/%s' instead",
+                   tzid, ta ? ta->tm_zone : "Unknown",
+                   ta ? (float) (ta->tm_gmtoff / 3600) : 0,
+                   ta ? (ta->tm_isdst ? "DST" : "no DST") : "Unknown");
+  }
+};
+static GuessedTimeZone s_guessed_timezone;
+
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
@@ -84,32 +122,8 @@ String TimeZone::CurrentName() {
   }
 
   /* Try to guess timezone from system information */
-
-  time_t the_time = time(0);
-  struct tm tmbuf;
-  struct tm *ta = localtime_r(&the_time, &tmbuf);
-  const char *tzid = NULL;
-  if (ta) {
-    tzid = timelib_timezone_id_from_abbr(ta->tm_zone, ta->tm_gmtoff,
-                                         ta->tm_isdst);
-  }
-  if (!tzid) {
-    tzid = "UTC";
-  }
-
-#define DATE_TZ_ERRMSG \
-  "It is not safe to rely on the system's timezone settings. Please use " \
-  "the date.timezone setting, the TZ environment variable or the " \
-  "date_default_timezone_set() function. In case you used any of those " \
-  "methods and you are still getting this warning, you most likely " \
-  "misspelled the timezone identifier. "
-
-  raise_strict_warning(DATE_TZ_ERRMSG "We selected '%s' for '%s/%.1f/%s' instead",
-                       tzid, ta ? ta->tm_zone : "Unknown",
-                       ta ? (float) (ta->tm_gmtoff / 3600) : 0,
-                       ta ? (ta->tm_isdst ? "DST" : "no DST") : "Unknown");
-
-  return String(tzid, CopyString);
+  raise_strict_warning(s_guessed_timezone.m_warning);
+  return String(s_guessed_timezone.m_tzid);
 }
 
 SmartObject<TimeZone> TimeZone::Current() {

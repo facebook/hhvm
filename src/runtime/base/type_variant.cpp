@@ -1652,8 +1652,7 @@ Variant Variant::toKey() const {
   case LiteralString:
     {
       int64 n;
-      StringData *sk = toString().get();
-      if (sk->isStrictlyInteger(n)) {
+      if (toString()->isStrictlyInteger(n)) {
         return n;
       } else {
         return *this;

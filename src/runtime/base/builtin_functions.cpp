@@ -52,6 +52,18 @@ bool class_exists(CStrRef class_name, bool autoload /* = true */) {
       CREATE_VECTOR2(class_name, autoload));
 }
 
+Variant getDynamicConstant(CVarRef v, CStrRef name) {
+  if (isInitialized(v)) return v;
+  raise_notice("Use of undefined constant %s -- assumed '%s'.",
+               name.c_str(), name.c_str());
+  return name;
+}
+
+String getUndefinedConstant(CStrRef name) {
+  raise_notice("Use of undefined constant %s -- assumed '%s'.",
+               name.c_str(), name.c_str());
+  return name;
+}
 
 Variant f_call_user_func_array(CVarRef function, CArrRef params) {
   Array param_arr;

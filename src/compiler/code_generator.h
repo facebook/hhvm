@@ -191,6 +191,7 @@ public:
   bool translatePredefined() { return m_translatePredefined; }
   void translatePredefined(bool flag) { m_translatePredefined = flag; }
 
+  int checkLiteralString(const std::string &str, AnalysisResultPtr ar);
 private:
   std::string m_filename;
   Stream m_curStream;

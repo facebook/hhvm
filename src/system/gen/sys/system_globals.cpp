@@ -33,9 +33,6 @@ SystemGlobals::SystemGlobals() : dummy(false),
   run_pm_php$globals$constants_php(false),
   run_pm_php$globals$symbols_php(false) {
 
-  // Dynamic Constants
-  k_SID = "SID";
-
   // Primitive Function/Method Static Variables
 
   // Primitive Class Static Variables

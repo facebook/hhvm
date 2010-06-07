@@ -505,6 +505,10 @@ bool AnalysisResult::isConstantRedeclared(const std::string &constName) {
   return m_constRedeclared.find(constName) != m_constRedeclared.end();
 }
 
+bool AnalysisResult::isSystemConstant(const std::string &constName) {
+  return m_constants->isSystem(constName);
+}
+
 void AnalysisResult::addCallee(StatementPtr stmt) {
   if (m_calleesAdded.find(stmt) == m_calleesAdded.end()) {
     m_callees.push_back(stmt);
@@ -1649,6 +1653,8 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
     }
 
     if (system) {
+      cg.printf("raise_notice(\"Use of undefined constant %%s -- "
+              "assumed '%%s'.\", s, s);\n"),
       cg.printf("return name;\n");
     } else {
       cg.printf("return get_builtin_constant(name);\n");

@@ -40,7 +40,7 @@ using namespace boost;
 ConstantExpression::ConstantExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS, const string &name)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_name(name), m_valid(true), m_dynamic(false), m_visited(false) {
+    m_name(name), m_valid(false), m_dynamic(false), m_visited(false) {
 }
 
 ExpressionPtr ConstantExpression::clone() {
@@ -173,10 +173,12 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 
   // special cases: STDIN, STDOUT, STDERR
   if (m_name == "STDIN" || m_name == "STDOUT" || m_name == "STDERR") {
+    m_valid = true;
     return Type::Variant;
   }
 
   if (m_name == "INF" || m_name == "NAN") {
+    m_valid = true;
     return Type::Double;
   }
 
@@ -184,9 +186,11 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   TypePtr actualType;
   ConstructPtr self = shared_from_this();
   if (lower == "true" || lower == "false") {
+    m_valid = true;
     actualType = Type::Boolean;
   } else if (lower == "null") {
     actualType = Type::Variant;
+    m_valid = true;
   } else {
     BlockScopePtr scope = ar->findConstantDeclarer(m_name);
     if (!scope) {
@@ -198,6 +202,11 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     if (decl) {
       ar->getDependencyGraph()->add(DependencyGraph::KindOfConstant, "",
                                     m_name, self, m_name, decl);
+    }
+    if (!m_valid) {
+      if (ar->isSystemConstant(m_name) || constants->getValue(m_name)) {
+        m_valid = true;
+      }
     }
     BlockScope *defScope = NULL;
     std::vector<std::string> bases;
@@ -245,12 +254,21 @@ void ConstantExpression::outputCPPImpl(CodeGenerator &cg,
     cg.printf("%s", lower.c_str());
   } else if (m_valid) {
     if (m_dynamic) {
-      cg.printf("%s->%s%s", cg.getGlobals(ar), Option::ConstantPrefix,
-                m_name.c_str());
+      int stringId = cg.checkLiteralString(m_name, ar);
+      if (stringId >= 0) {
+        cg.printf("getDynamicConstant(%s->%s%s, LITSTR(%d, \"%s\")",
+                  cg.getGlobals(ar), Option::ConstantPrefix, m_name.c_str(),
+                  stringId, m_name.c_str());
+      } else {
+        cg.printf("getDynamicConstant(%s->%s%s, \"%s\")",
+                  cg.getGlobals(ar), Option::ConstantPrefix, m_name.c_str(),
+                  m_name.c_str());
+      }
     } else {
       cg.printf("%s%s", Option::ConstantPrefix, m_name.c_str());
     }
   } else {
-    cg.printf("\"%s\"", m_name.c_str());
+    cg.printf("getUndefinedConstant(%s%s)",
+              Option::ConstantPrefix, m_name.c_str());
   }
 }

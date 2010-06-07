@@ -870,9 +870,6 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
 
   cg.indentBegin(" {\n");
 
-  cg.printSection("Dynamic Constants");
-  ar->outputCPPDynamicConstantImpl(cg);
-
   cg.printSection("Primitive Function/Method Static Variables");
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
        m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
@@ -1687,10 +1684,8 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       }
       break;
     case VariableTable::JumpReturnString: {
-      int stringId;
-      if (Option::PrecomputeLiteralStrings &&
-          ar->getLiteralStringCount() > 0 &&
-          (stringId = ar->getLiteralStringId(name)) >= 0) {
+      int stringId = cg.checkLiteralString(name, ar);
+      if (stringId >= 0) {
         cg.printf("HASH_RETURN_LITSTR%s(0x%016llXLL, %d, %s,\n",
             priv, hash_string(name), stringId, varName.c_str());
         cg.printf("                   %d);\n", strlen(name));

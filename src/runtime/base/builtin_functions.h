@@ -446,6 +446,8 @@ inline void throw_exception(CObjRef v) { throw v;}
 // isset/unset
 
 inline bool isInitialized(CVarRef v) { return v.isInitialized();}
+Variant getDynamicConstant(CVarRef v, CStrRef name);
+String getUndefinedConstant(CStrRef name);
 
 inline bool isset(CVarRef v) { return !v.isNull();}
 bool isset(CVarRef v, bool    offset, int64 prehash = -1);

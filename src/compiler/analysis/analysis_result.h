@@ -278,6 +278,7 @@ public:
   BlockScopePtr findConstantDeclarer(const std::string &constName);
   bool isConstantDeclared(const std::string &constName);
   bool isConstantRedeclared(const std::string &constName);
+  bool isSystemConstant(const std::string &constName);
   bool isBaseSysRsrcClass(const std::string &className);
   void addNonFinal(const std::string &className);
   bool isNonFinalClass(const std::string &className);

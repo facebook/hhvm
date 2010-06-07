@@ -474,14 +474,10 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_STRING:
   case T_CLASS_C:
   case T_METHOD_C:
-  case T_FUNC_C:
-    if (Option::PrecomputeLiteralStrings &&
-        cg.getOutput() != CodeGenerator::SystemCPP &&
-        m_quoted &&
-        cg.getContext() != CodeGenerator::CppConstantsDecl &&
-        cg.getContext() != CodeGenerator::CppClassConstantsImpl) {
-      int stringId = ar->getLiteralStringId(getLiteralString());
-      ASSERT(stringId >= 0);
+  case T_FUNC_C: {
+    int stringId;
+    if (m_quoted &&
+        (stringId = cg.checkLiteralString(getLiteralString(), ar)) >= 0) {
       cg.printf("LITSTR(%d, ", stringId);
       outputCPPString(cg, ar);
       cg.printf(")");
@@ -489,6 +485,7 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       outputCPPString(cg, ar);
     }
     break;
+  }
   case T_LINE:
     cg.printf("%s", m_translated.c_str());
     break;

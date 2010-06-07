@@ -175,6 +175,23 @@ ExpressionPtr ScalarExpression::preOptimize(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr ScalarExpression::postOptimize(AnalysisResultPtr ar) {
+  switch (m_type) {
+  case T_LINE:
+  case T_LNUMBER:
+    if (m_expectedType && m_expectedType->is(Type::KindOfString)) {
+      Variant &value = getVariant();
+      string svalue(value.toString()->data(), value.toString()->size());
+      ScalarExpressionPtr sc
+        (new ScalarExpression(getLocation(),
+                              Expression::KindOfScalarExpression,
+                              T_STRING, svalue, true));
+      sc->setActualType(Type::String);
+      if (Option::PrecomputeLiteralStrings) ar->addLiteralString(svalue, sc);
+      return sc;
+    }
+  default:
+    break;
+  }
   return ExpressionPtr();
 }
 
@@ -502,7 +519,7 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     break;
   }
   case T_LNUMBER: {
-    Variant v = getVariant();
+    Variant &v = getVariant();
     ASSERT(v.isInteger());
     if (v.toInt64() == LONG_MIN) {
       cg.printf("0x%llxLL", LONG_MIN);

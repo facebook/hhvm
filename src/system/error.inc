@@ -6,7 +6,7 @@
 "error_reporting", T(Int32), S(0), "level", T(Variant), "null", S(0), NULL, S(0), 
 "restore_error_handler", T(Boolean), S(0), NULL, S(0), 
 "restore_exception_handler", T(Boolean), S(0), NULL, S(0), 
-"set_error_handler", T(Variant), S(0), "error_handler", T(Variant), NULL, S(0), "error_types", T(Int32), "0", S(0), NULL, S(0), 
+"set_error_handler", T(Variant), S(0), "error_handler", T(Variant), NULL, S(0), "error_types", T(Int32), "k_E_ALL", S(0), NULL, S(0), 
 "set_exception_handler", T(String), S(0), "exception_handler", T(String), NULL, S(0), NULL, S(0), 
 "hphp_set_error_page", T(Void), S(0), "page", T(String), NULL, S(0), NULL, S(0), 
 "trigger_error", T(Boolean), S(0), "error_msg", T(String), NULL, S(0), "error_type", T(Int32), "k_E_USER_NOTICE", S(0), NULL, S(0), 

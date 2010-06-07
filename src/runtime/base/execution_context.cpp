@@ -49,11 +49,10 @@ public:
     String timezoneDefault;
     Array shutdowns;
     Array ticks;
-    std::vector<Variant> systemExceptionHandlers;
+    std::vector<std::pair<Variant,int> > userErrorHandlers;
     std::vector<Variant> userExceptionHandlers;
     String cwd;
-    bool insideUserHandler;
-    bool insideRaiseError;
+    int errorState;
     Array envs;
   };
   Data *data;
@@ -62,8 +61,7 @@ public:
     data = new Data();
     data->errorReportingLevel = RuntimeOption::RuntimeErrorReportingLevel;
     data->cwd = String(Process::CurrentWorkingDirectory);
-    data->insideUserHandler = false;
-    data->insideRaiseError = false;
+    data->errorState = ExecutionContext::NoError;
   }
   virtual void requestShutdown() {
     delete data;
@@ -111,12 +109,12 @@ String ExecutionContext::getenv(CStrRef name) {
   return String();
 }
 
-void ExecutionContext::setInsideRaiseError(bool yes) {
-  s_request_data->data->insideRaiseError = yes;
+void ExecutionContext::setErrorState(int state) {
+  s_request_data->data->errorState = state;
 }
 
-bool ExecutionContext::isInsideRaiseError() {
-  return s_request_data->data->insideRaiseError;
+int ExecutionContext::getErrorState() {
+  return s_request_data->data->errorState;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -326,13 +324,15 @@ void ExecutionContext::unregisterTickFunction(CVarRef function) {
   throw NotImplementedException(__func__);
 }
 
-Variant ExecutionContext::pushSystemExceptionHandler(CVarRef function) {
+Variant ExecutionContext::pushUserErrorHandler(CVarRef function,
+                                               int error_types) {
   Variant ret;
   RequestData::Data *data = s_request_data->data;
-  if (!data->systemExceptionHandlers.empty()) {
-    ret = data->systemExceptionHandlers.back();
+  if (!data->userErrorHandlers.empty()) {
+    ret = data->userErrorHandlers.back().first;
   }
-  data->systemExceptionHandlers.push_back(function);
+  data->userErrorHandlers.push_back(
+    std::pair<Variant,int>(function, error_types));
   return ret;
 }
 
@@ -346,10 +346,10 @@ Variant ExecutionContext::pushUserExceptionHandler(CVarRef function) {
   return ret;
 }
 
-void ExecutionContext::popSystemExceptionHandler() {
+void ExecutionContext::popUserErrorHandler() {
   RequestData::Data *data = s_request_data->data;
-  if (!data->systemExceptionHandlers.empty()) {
-    data->systemExceptionHandlers.pop_back();
+  if (!data->userErrorHandlers.empty()) {
+    data->userErrorHandlers.pop_back();
   }
 }
 
@@ -421,50 +421,100 @@ void ExecutionContext::onTick() {
   executeFunctions(s_request_data->data->ticks);
 }
 
-bool ExecutionContext::callUserErrorHandler(const Exception &e, int64 errnum,
+bool ExecutionContext::errorNeedsHandling(int errnum,
+                                          bool callUserHandler,
+                                          ErrorThrowMode mode) {
+  if (mode != NeverThrow || (getErrorReportingLevel() & errnum) != 0 ||
+      RuntimeOption::NoSilencer) {
+    return true;
+  }
+  if (callUserHandler) {
+    RequestData::Data *data = s_request_data->data;
+    if (!data->userErrorHandlers.empty() &&
+        (data->userErrorHandlers.back().second & errnum) != 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void ExecutionContext::handleError(const std::string &msg,
+                                   int errnum,
+                                   bool callUserHandler,
+                                   ErrorThrowMode mode,
+                                   const std::string &prefix) {
+  int newErrorState = ErrorRaised;
+  switch (getErrorState()) {
+  case ErrorRaised:
+  case ErrorRaisedByUserHandler:
+    return;
+  case ExecutingUserHandler:
+    newErrorState = ErrorRaisedByUserHandler;
+    break;
+  default:
+    break;
+  }
+  ErrorStateHelper esh(this, newErrorState);
+  ExtendedException ee(msg);
+  recordLastError(ee);
+  bool handled = false;
+  if (callUserHandler) {
+    handled = callUserErrorHandler(ee, errnum, false);
+  }
+  if (mode == AlwaysThrow || (mode == ThrowIfUnhandled && !handled)) {
+    throw FatalErrorException(msg.c_str());
+  }
+  if (!handled &&
+      (RuntimeOption::NoSilencer ||
+       (getErrorReportingLevel() & errnum) != 0)) {
+    Logger::Log(prefix.c_str(), ee);
+  }
+}
+
+bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
                                             bool swallowExceptions) {
-  int errline = 0;
-  String errfile;
-  Array backtrace;
-  const ExtendedException *ee = dynamic_cast<const ExtendedException*>(&e);
-  if (ee) {
-    ArrayPtr arr = ee->getBackTrace();
-    if (arr) {
-      backtrace = *arr;
-      Array top = backtrace.rvalAt(0);
-      if (!top.isNull()) {
-        errfile = top.rvalAt("file");
-        errline = top.rvalAt("line").toInt64();
-      }
-    }
+  switch (getErrorState()) {
+  case ExecutingUserHandler:
+  case ErrorRaisedByUserHandler:
+    return false;
+  default:
+    break;
   }
-  if (backtrace.isNull()) {
-    backtrace = stackTraceToBackTrace(e.getStackTrace());
-  }
-
-  bool retval = false;
   RequestData::Data *data = s_request_data->data;
-  if (!data->systemExceptionHandlers.empty()) {
-    // Avoid calling the user error handler recursively
-    if (!data->insideUserHandler) {
-      data->insideUserHandler = true;
-      try {
-        if (!same(f_call_user_func_array
-                  (data->systemExceptionHandlers.back(),
-                   CREATE_VECTOR6(errnum, String(e.getMessage()), errfile,
-                                  errline, "", backtrace)),
-                  false)) {
-          retval = true;
+  if (!data->userErrorHandlers.empty() &&
+      (data->userErrorHandlers.back().second & errnum) != 0) {
+    int errline = 0;
+    String errfile;
+    Array backtrace;
+    const ExtendedException *ee = dynamic_cast<const ExtendedException*>(&e);
+    if (ee) {
+      ArrayPtr arr = ee->getBackTrace();
+      if (arr) {
+        backtrace = *arr;
+        Array top = backtrace.rvalAt(0);
+        if (!top.isNull()) {
+          errfile = top.rvalAt("file");
+          errline = top.rvalAt("line").toInt64();
         }
-      } catch (...) {
-        data->insideUserHandler = false;
-        if (!swallowExceptions) throw;
       }
-      data->insideUserHandler = false;
+    }
+    if (backtrace.isNull()) {
+      backtrace = stackTraceToBackTrace(e.getStackTrace());
+    }
+    try {
+      ErrorStateHelper esh(this, ExecutingUserHandler);
+      if (!same(f_call_user_func_array
+                (data->userErrorHandlers.back().first,
+                 CREATE_VECTOR6(errnum, String(e.getMessage()), errfile,
+                                errline, "", backtrace)),
+                false)) {
+        return true;
+      }
+    } catch (...) {
+      if (!swallowExceptions) throw;
     }
   }
-
-  return retval;
+  return false;
 }
 
 void ExecutionContext::recordLastError(const Exception &e) {
@@ -479,7 +529,7 @@ void ExecutionContext::onFatalError(const Exception &e) {
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
-    int64 errnum = 1; // E_ERROR
+    int errnum = 1; // E_ERROR
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !RuntimeOption::AlwaysLogUnhandledExceptions) {

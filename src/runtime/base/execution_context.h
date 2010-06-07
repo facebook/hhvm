@@ -52,6 +52,7 @@ protected:
  * Put all global variables here so we can gather them into one thread-local
  * variable for easy access.
  */
+
 class ExecutionContext {
 public:
   enum ConnetionStatus {
@@ -64,6 +65,19 @@ public:
     ShutDown,
     PostSend,
     CleanUp,
+  };
+
+  enum ErrorThrowMode {
+    NeverThrow,
+    ThrowIfUnhandled,
+    AlwaysThrow,
+  };
+
+  enum ErrorState {
+    NoError,
+    ErrorRaised,
+    ExecutingUserHandler,
+    ErrorRaisedByUserHandler,
   };
 
 public:
@@ -101,9 +115,9 @@ public:
                                 ShutdownType type);
   void registerTickFunction(CVarRef function, Array arguments);
   void unregisterTickFunction(CVarRef function);
-  Variant pushSystemExceptionHandler(CVarRef function);
+  Variant pushUserErrorHandler(CVarRef function, int error_types);
   Variant pushUserExceptionHandler(CVarRef function);
-  void popSystemExceptionHandler();
+  void popUserErrorHandler();
   void popUserExceptionHandler();
 
   /**
@@ -115,13 +129,21 @@ public:
   void onShutdownPreSend();
   void onShutdownPostSend();
   void onTick();
-  bool callUserErrorHandler(const Exception &e, int64 errnum,
+  bool errorNeedsHandling(int errnum,
+                          bool callUserHandler,
+                          ErrorThrowMode mode);
+  void handleError(const std::string &msg,
+                   int errnum,
+                   bool callUserHandler,
+                   ErrorThrowMode mode,
+                   const std::string &prefix);
+  bool callUserErrorHandler(const Exception &e, int errnum,
                             bool swallowExceptions);
   void recordLastError(const Exception &e);
   void onFatalError(const Exception &e);
   void onUnhandledException(Object e);
-  void setInsideRaiseError(bool yes);
-  bool isInsideRaiseError();
+  int getErrorState();
+  void setErrorState(int state);
 
   String getLastError();
   int getErrorReportingLevel();
@@ -161,6 +183,21 @@ public:
   // invoke which page on 500 errors
   void setErrorPage(const char *page) { m_errorPage = page ? page : "";}
   const std::string &getErrorPage() const { return m_errorPage;}
+
+  class ErrorStateHelper {
+  public:
+    ErrorStateHelper(ExecutionContext * context, int state) {
+      m_context = context;
+      m_originalState = m_context->getErrorState();
+      m_context->setErrorState(state);
+    }
+    ~ErrorStateHelper() {
+      m_context->setErrorState(m_originalState);
+    }
+  private:
+    ExecutionContext * m_context;
+    int m_originalState;
+  };
 
 private:
   struct OutputBuffer {

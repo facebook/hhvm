@@ -44,18 +44,6 @@ public:
   };
 };
 
-enum ThrowMode {
-  NeverThrow = 0,
-  ThrowIfUnhandled = 1,
-  AlwaysThrow = 2
-};
-
-void raise_error_ex(const std::string &msg,
-                    int64 errnum,
-                    bool callUserHandler,
-                    ThrowMode mode,
-                    const std::string &prefix);
-
 void raise_error(const std::string &msg);
 void raise_error(const char *fmt, ...);
 void raise_recoverable_error(const std::string &msg);

@@ -25,7 +25,7 @@ f('restore_exception_handler', Boolean);
 
 f('set_error_handler', Variant,
   array('error_handler' => Variant,
-        'error_types' => array(Int32, '0')));
+        'error_types' => array(Int32, 'k_E_ALL')));
 
 f('set_exception_handler', String,
   array('exception_handler' => String));

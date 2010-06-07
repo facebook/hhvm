@@ -101,7 +101,7 @@ int f_error_reporting(CVarRef level /* = null */) {
 }
 
 bool f_restore_error_handler() {
-  g_context->popSystemExceptionHandler();
+  g_context->popUserErrorHandler();
   return true;
 }
 
@@ -110,8 +110,9 @@ bool f_restore_exception_handler() {
   return false;
 }
 
-Variant f_set_error_handler(CVarRef error_handler, int error_types /* = 0 */) {
-  return g_context->pushSystemExceptionHandler(error_handler);
+Variant f_set_error_handler(CVarRef error_handler,
+                            int error_types /* = k_E_ALL */) {
+  return g_context->pushUserErrorHandler(error_handler, error_types);
 }
 
 String f_set_exception_handler(CStrRef exception_handler) {
@@ -126,14 +127,17 @@ bool f_trigger_error(CStrRef error_msg,
                      int error_type /* = k_E_USER_NOTICE */) {
   std::string msg = error_msg.data();
   if (error_type == k_E_USER_ERROR) {
-    raise_error_ex(msg, error_type, true, ThrowIfUnhandled,
-                   "HipHop Recoverable error: ");
+    g_context->handleError(msg, error_type, true,
+                       ExecutionContext::ThrowIfUnhandled,
+                       "HipHop Recoverable error: ");
   } else if (error_type == k_E_USER_WARNING) {
-    raise_error_ex(msg, error_type, true, NeverThrow,
-                   "HipHop Warning:  ");
+    g_context->handleError(msg, error_type, true,
+                       ExecutionContext::NeverThrow,
+                       "HipHop Warning:  ");
   } else if (error_type == k_E_USER_NOTICE) {
-    raise_error_ex(msg, error_type, true, NeverThrow,
-                   "HipHop Notice:  ");
+    g_context->handleError(msg, error_type, true,
+                       ExecutionContext::NeverThrow,
+                       "HipHop Notice:  ");
   } else {
     return false;
   }

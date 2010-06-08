@@ -49,6 +49,7 @@ public:
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                     int state);
 
+  FunctionScopePtr getFuncScope() const { return m_funcScope; }
 protected:
   ExpressionPtr m_nameExp;
   std::string m_name;

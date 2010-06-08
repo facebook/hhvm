@@ -1601,7 +1601,7 @@ void c_appenditerator::t_append(p_iterator v_it) {
 /* SRC: classes/iterator.php line 290 */
 Variant c_appenditerator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::getInnerIterator);
-  return m_iterators. BIND_CLASS_DOT o_invoke_few_args("current", 0x5B3A4A72846B21DCLL, 0);
+  return wrap_variant(m_iterators. BIND_CLASS_DOT o_invoke_few_args("current", 0x5B3A4A72846B21DCLL, 0));
 } /* function */
 /* SRC: classes/iterator.php line 294 */
 void c_appenditerator::t_rewind() {

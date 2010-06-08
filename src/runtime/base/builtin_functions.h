@@ -665,6 +665,13 @@ inline CArrRef id(CArrRef v) { return v; }
 inline CObjRef id(CObjRef v) { return v; }
 inline CVarRef id(CVarRef v) { return v; }
 
+/**
+ * For wrapping return values to prevent elision of copy
+ * constructors (which can incorrectly pass through
+ * the contagious bit).
+ */
+inline Variant wrap_variant(CVarRef x) { return x; }
+
 bool function_exists(CStrRef function_name);
 
 /**

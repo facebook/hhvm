@@ -4400,7 +4400,7 @@ Variant c_reflectionclass::t_issubclassof(Variant v_cls) {
   }
   {
     const Object &tmp72((toObject(t_getparentclass())));
-    return tmp72-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args("isSubclassOf", 0x373333991926C97ELL, 1, v_cls);
+    return wrap_variant(tmp72-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args("isSubclassOf", 0x373333991926C97ELL, 1, v_cls));
   }
 } /* function */
 /* SRC: classes/reflection.php line 460 */
@@ -4518,7 +4518,7 @@ Variant c_reflectionclass::t_getextension() {
 /* SRC: classes/reflection.php line 512 */
 Variant c_reflectionclass::t_getextensionname() {
   INSTANCE_METHOD_INJECTION(ReflectionClass, ReflectionClass::getExtensionName);
-  return t_fetch("extension"). BIND_CLASS_DOT o_invoke_few_args("getName", 0x23F51CDECC198965LL, 0);
+  return wrap_variant(t_fetch("extension"). BIND_CLASS_DOT o_invoke_few_args("getName", 0x23F51CDECC198965LL, 0));
 } /* function */
 /* SRC: classes/reflection.php line 736 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_reflectionextension

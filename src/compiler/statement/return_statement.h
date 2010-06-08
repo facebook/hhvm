@@ -30,7 +30,7 @@ public:
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   virtual bool hasRetExp() const { return m_exp; }
-
+  ExpressionPtr getRetExp() const { return m_exp; }
 private:
   ExpressionPtr m_exp;
 };

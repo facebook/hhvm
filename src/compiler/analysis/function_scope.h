@@ -191,6 +191,11 @@ public:
   void setSepExtension() { m_sep = true;}
   bool isSepExtension() const { return m_sep;}
 
+  /* Whether we need to worry about the named return value optimization
+     for this function */
+  void setNRVOFix(bool flag) { m_nrvoFix = flag; }
+  bool getNRVOFix() const { return m_nrvoFix; }
+
   /**
    * What is the inferred type of this function's parameter at specified
    * index. Returns number of extra arguments to put into ArgumentArray.
@@ -377,6 +382,7 @@ private:
   int m_callTempCountMax;
   int m_callTempCountCurrent;
   StatementPtr m_stmtCloned; // cloned method body stmt
+  bool m_nrvoFix;
 
   void outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
       bool ret, bool constructor);

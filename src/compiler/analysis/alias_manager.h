@@ -75,7 +75,7 @@ class AliasInfo {
 
 class AliasManager {
  public:
-  AliasManager() : m_nextID(1), m_changed(false), m_wildRefs(0) {}
+  AliasManager() : m_nextID(1), m_changed(false), m_wildRefs(0), m_nrvoFix(0) {}
  public:
   void clear();
   void beginScope();
@@ -161,6 +161,9 @@ class AliasManager {
   VariableTablePtr      m_variables;
 
   LoopInfoVec           m_loopInfo;
+
+  std::string           m_returnVar;
+  int                   m_nrvoFix;
 
   static bool           s_deadCodeElim;
   static bool           s_localCopyProp;

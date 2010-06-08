@@ -15,6 +15,8 @@
 */
 
 #include <compiler/statement/return_statement.h>
+#include <compiler/expression/unary_op_expression.h>
+#include <compiler/expression/function_call.h>
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/code_error.h>
@@ -76,6 +78,15 @@ void ReturnStatement::setNthKid(int n, ConstructPtr cp) {
 
 StatementPtr ReturnStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_exp);
+  /* HACK: Get rid of "(" to make analyzing return expression easier
+     Should really get rid of "(" everywhere */
+  while (m_exp && m_exp->is(Expression::KindOfUnaryOpExpression)) {
+    UnaryOpExpressionPtr op(static_pointer_cast<UnaryOpExpression>(m_exp));
+    if (op->getOp() != '(') break;
+    ar->incOptCounter();
+    m_exp = op->getExpression();
+  }
+
   return StatementPtr();
 }
 
@@ -130,6 +141,29 @@ void ReturnStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
+static bool checkCopyElision(FunctionScopePtr func, ExpressionPtr exp) {
+  if (!exp->getType()->is(Type::KindOfVariant) || func->isRefReturn()) {
+    return false;
+  }
+
+  TypePtr imp = exp->getImplementedType();
+  if (!imp) imp = exp->getActualType();
+  if (!imp || !imp->is(Type::KindOfVariant)) return false;
+
+  if (func->getNRVOFix() && exp->is(Expression::KindOfSimpleVariable)) {
+    return true;
+  }
+
+  if (FunctionCallPtr fc = dynamic_pointer_cast<FunctionCall>(exp)) {
+    FunctionScopePtr fs = fc->getFuncScope();
+    if (!fs || fs->isRefReturn()) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 void ReturnStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (hasHphpNote("C++")) {
     cg.printf("%s", getEmbedded().c_str());
@@ -149,8 +183,14 @@ void ReturnStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg.printf("return");
 
   if (m_exp) {
+    bool close = false;
     cg.printf(" ");
+    if (checkCopyElision(func, m_exp)) {
+      cg.printf("wrap_variant(");
+      close = true;
+    }
     m_exp->outputCPP(cg, ar);
+    if (close) cg.printf(")");
     cg.printf(";\n");
     m_exp->outputCPPEnd(cg, ar);
   } else if (func &&

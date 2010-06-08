@@ -15,6 +15,7 @@
 */
 
 #include <compiler/analysis/analysis_result.h>
+#include <compiler/analysis/function_scope.h>
 #include <compiler/expression/expression.h>
 #include <compiler/expression/assignment_expression.h>
 #include <compiler/expression/list_assignment.h>
@@ -32,6 +33,7 @@
 #include <compiler/statement/catch_statement.h>
 #include <compiler/statement/method_statement.h>
 #include <compiler/statement/break_statement.h>
+#include <compiler/statement/return_statement.h>
 #include <compiler/statement/loop_statement.h>
 #include <compiler/statement/exp_statement.h>
 #include <compiler/analysis/alias_manager.h>
@@ -75,7 +77,6 @@ bool AliasManager::parseOptimizations(const std::string &optimizations,
       val = opt == "all";
       setDeadCodeElim(val);
       setLocalCopyProp(val);
-      setStringOpts(val);
     } else {
       errs = "Unknown optimization: " + opt;
       return false;
@@ -940,8 +941,8 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs) {
     case Expression::KindOfSimpleVariable:
       {
         const std::string &name = spc(SimpleVariable, e)->getName();
+        AliasInfo &ai = m_aliasInfo[name];
         if (context & Expression::RefValue) {
-          AliasInfo &ai = m_aliasInfo[name];
           ai.addRefLevel(0);
         }
         if (!(context & (Expression::AssignmentLHS |
@@ -997,6 +998,22 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs) {
         m_variables->addUsed(name);
         break;
       }
+    case Statement::KindOfReturnStatement:
+      if (m_nrvoFix >= 0) {
+        ExpressionPtr e = spc(ReturnStatement, s)->getRetExp();
+        if (!e || !e->is(Expression::KindOfSimpleVariable)) {
+          m_nrvoFix = -1;
+        } else {
+          SimpleVariablePtr sv = spc(SimpleVariable, e);
+          const std::string &n = sv->getName();
+          if (!m_nrvoFix) {
+            m_returnVar = n;
+            m_nrvoFix = 1;
+          } else if (m_returnVar != n) {
+            m_nrvoFix = -1;
+          }
+        }
+      }
     default:
       break;
     }
@@ -1016,6 +1033,7 @@ bool AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
     for (int i = params.getCount(); i--; ) {
       ParameterExpressionPtr p = spc(ParameterExpression, params[i]);
       AliasInfo &ai = m_aliasInfo[p->getName()];
+      ai.setIsParam(true);
       if (p->isRef()) {
         ai.setIsRefTo();
       }
@@ -1036,10 +1054,27 @@ bool AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
     canonicalizeRecur(m->getStmts());
   }
 
-  if (!m_changed && doStringOpts() &&
-      ar->getPhase() == AnalysisResult::PostOptimize &&
-      !m_wildRefs) {
-    stringOptsRecur(m->getStmts());
+  if (ar->getPhase() == AnalysisResult::PostOptimize) {
+    if (FunctionScopePtr func = ar->getFunctionScope()) {
+      if (func->isRefReturn()) {
+        m_nrvoFix = -1;
+      } else if (m_nrvoFix > 0) {
+        AliasInfo &ai = m_aliasInfo[m_returnVar];
+        if (!ai.getIsParam() &&
+            (m_wildRefs || ai.getRefLevels() ||
+             (ai.getIsGlobal() && m_variables->needLocalCopy(m_returnVar)))) {
+          // do nothing
+        } else {
+          m_nrvoFix = -1;
+        }
+      }
+
+      func->setNRVOFix(m_nrvoFix > 0);
+    }
+
+    if (!m_changed && doStringOpts() && !m_wildRefs) {
+      stringOptsRecur(m->getStmts());
+    }
   }
 
   return m_changed;

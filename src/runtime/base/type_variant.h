@@ -417,6 +417,16 @@ class Variant {
   Array  toArray  () const;
   Object toObject () const;
   Variant toKey   () const;
+  static int64 ToKey(bool i) { return (int64)i; }
+  static int64 ToKey(char i) { return (int64)i; }
+  static int64 ToKey(short i) { return (int64)i; }
+  static int64 ToKey(int i) { return (int64)i; }
+  static int64 ToKey(int64 i) { return i; }
+  static int64 ToKey(double d) { return (int64)d; }
+  static Variant ToKey(litstr s) { return String(s).toKey(); }
+  static Variant ToKey(CStrRef s) { return s.toKey(); }
+  static Variant ToKey(CVarRef v) { return v.toKey(); }
+
 
   /**
    * Comparisons
@@ -502,41 +512,31 @@ class Variant {
   /**
    * Offset functions
    */
-  Variant rvalAt(bool    offset, int64 prehash = -1,
-                 bool error = false) const {
-    return rvalAt(offset ? 1LL : 0LL, prehash, error);
-  }
-  Variant rvalAt(char    offset, int64 prehash = -1,
-                 bool error = false) const {
+  Variant rvalAt(bool offset, int64 prehash = -1, bool error = false) const;
+  Variant rvalAt(char offset, int64 prehash = -1, bool error = false) const {
     return rvalAt((int64)offset, prehash, error);
   }
-  Variant rvalAt(short   offset, int64 prehash = -1,
-                 bool error = false) const {
+  Variant rvalAt(short offset, int64 prehash = -1, bool error = false) const {
     return rvalAt((int64)offset, prehash, error);
   }
-  Variant rvalAt(int     offset, int64 prehash = -1,
-                 bool error = false) const {
+  Variant rvalAt(int offset, int64 prehash = -1, bool error = false) const {
     return rvalAt((int64)offset, prehash, error);
   }
-  Variant rvalAtHelper(int64   offset, int64 prehash = -1,
-                       bool error = false) const;
-  Variant rvalAt(int64   offset, int64 prehash = -1,
-                 bool error = false) const {
+  Variant rvalAtHelper(int64 offset, int64 prehash = -1,
+      bool error = false) const;
+  Variant rvalAt(int64 offset, int64 prehash = -1, bool error = false) const {
     if (m_type == KindOfArray) {
       return m_data.parr->get(offset, prehash, error);
     }
     return rvalAtHelper(offset, prehash, error);
   }
-  Variant rvalAt(double  offset, int64 prehash = -1,
-                 bool error = false) const {
-    return rvalAt((int64)offset, prehash, error);
-  }
-  Variant rvalAt(litstr  offset, int64 prehash = -1,
-                 bool error = false, bool isString = false) const;
-  Variant rvalAt(CStrRef offset, int64 prehash = -1,
-                 bool error = false, bool isString = false) const;
-  Variant rvalAt(CVarRef offset, int64 prehash = -1,
-                 bool error = false) const;
+  Variant rvalAt(double offset, int64 prehash = -1, bool error = false) const;
+  Variant rvalAt(litstr offset, int64 prehash = -1, bool error = false,
+      bool isString = false) const;
+  Variant rvalAt(CStrRef offset, int64 prehash = -1, bool error = false,
+      bool isString = false) const;
+  Variant rvalAt(CVarRef offset, int64 prehash = -1, bool error = false)
+    const;
 
   const Variant operator[](bool    key) const { return rvalAt(key);}
   const Variant operator[](char    key) const { return rvalAt(key);}
@@ -664,9 +664,7 @@ class Variant {
    * The whole purpose of VariantOffset is to collect "v" parameter to call
    * this function.
    */
-  CVarRef set(bool    key, CVarRef v, int64 prehash = -1) {
-    return set(key ? 1LL : 0LL, v, prehash);
-  }
+  CVarRef set(bool    key, CVarRef v, int64 prehash = -1);
   CVarRef set(char    key, CVarRef v, int64 prehash = -1) {
     return set((int64)key, v, prehash);
   }
@@ -677,9 +675,7 @@ class Variant {
     return set((int64)key, v, prehash);
   }
   CVarRef set(int64 key, CVarRef v, int64 prehash = -1);
-  CVarRef set(double  key, CVarRef v, int64 prehash = -1) {
-    return set((int64)key, v, prehash);
-  }
+  CVarRef set(double  key, CVarRef v, int64 prehash = -1);
   CVarRef set(litstr  key, CVarRef v, int64 prehash = -1,
               bool isString = false);
   CVarRef set(CStrRef key, CVarRef v, int64 prehash = -1,
@@ -697,8 +693,8 @@ class Variant {
       {
         ArrayData *arr = getArrayData();
         if (arr) {
-          ArrayData *escalated = arr->remove(key, (arr->getCount() > 1),
-                                             prehash);
+          ArrayData *escalated = arr->remove(ToKey(key),
+              (arr->getCount() > 1), prehash);
           if (escalated) {
             set(escalated);
           }
@@ -713,12 +709,12 @@ class Variant {
       break;
     }
   }
-  void remove(bool    key, int64 prehash = -1) { remove((int64)key, prehash);}
+  void remove(bool    key, int64 prehash = -1) { removeImpl(key, prehash);}
   void remove(char    key, int64 prehash = -1) { remove((int64)key, prehash);}
   void remove(short   key, int64 prehash = -1) { remove((int64)key, prehash);}
   void remove(int     key, int64 prehash = -1) { remove((int64)key, prehash);}
   void remove(int64   key, int64 prehash = -1) { removeImpl(key, prehash);}
-  void remove(double  key, int64 prehash = -1) { remove((int64)key, prehash);}
+  void remove(double  key, int64 prehash = -1) { removeImpl(key, prehash);}
   void remove(litstr  key, int64 prehash = -1);
   void remove(CStrRef key, int64 prehash = -1);
   void remove(CVarRef key, int64 prehash = -1);
@@ -984,7 +980,7 @@ class Variant {
       Variant *ret = NULL;
       ArrayData *arr = m_data.parr;
       ArrayData *escalated =
-        arr->lval(key, ret, arr->getCount() > 1, prehash, checkExist);
+        arr->lval(ToKey(key), ret, arr->getCount() > 1, prehash, checkExist);
       if (escalated) {
         set(escalated);
       }

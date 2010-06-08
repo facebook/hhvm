@@ -1967,6 +1967,35 @@ void Variant::callOffsetUnset(CVarRef key) {
   getArrayAccess()->o_invoke("offsetunset", Array::Create(key), -1);
 }
 
+#define IMPLEMENT_RVAL_INTEGRAL \
+  if (m_type == KindOfArray) { \
+      return m_data.parr->get((int64)offset, prehash, error); \
+  } \
+  switch (m_type) { \
+  case LiteralString: \
+    return toString().get()->getChar((int)offset); \
+  case KindOfStaticString: \
+  case KindOfString: \
+    return m_data.pstr->getChar((int)offset); \
+  case KindOfObject: \
+    return getArrayAccess()->o_invoke("offsetget", \
+        Array::Create(offset), -1); \
+  case KindOfVariant: \
+    return m_data.pvar->rvalAt(offset, prehash, error); \
+  default: \
+    break; \
+  } \
+  return null_variant;
+
+Variant Variant::rvalAt(bool offset, int64 prehash /* = -1 */,
+    bool error /* = false */) const {
+  IMPLEMENT_RVAL_INTEGRAL
+}
+Variant Variant::rvalAt(double offset, int64 prehash /* = -1 */,
+    bool error /* = false */) const {
+  IMPLEMENT_RVAL_INTEGRAL
+}
+
 Variant Variant::rvalAtHelper(int64 offset, int64 prehash /* = -1 */,
                               bool error /* = false */) const {
   switch (m_type) {
@@ -2163,7 +2192,7 @@ Variant &Variant::lvalAt(litstr  key, int64 prehash /* = -1 */,
     ASSERT(ret);
     return *ret;
   }
-  return lvalAtImpl(String(key).toKey(), prehash, checkExist);
+  return lvalAtImpl(key, prehash, checkExist);
 }
 Variant &Variant::lvalAt(CStrRef key, int64 prehash /* = -1 */,
                          bool    checkExist /* = false */,
@@ -2185,26 +2214,22 @@ Variant &Variant::lvalAt(CStrRef key, int64 prehash /* = -1 */,
     ASSERT(ret);
     return *ret;
   }
-  return lvalAtImpl(key.toKey(), prehash, checkExist);
+  return lvalAtImpl(key, prehash, checkExist);
 }
-Variant &Variant::lvalAt(CVarRef key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */) {
-  Variant k(key.toKey());
-  if (!k.isNull()) {
-    if (m_type == KindOfArray) {
-      Variant *ret = NULL;
-      ArrayData *arr = m_data.parr;
-      ArrayData *escalated = arr->lval(k, ret, arr->getCount() > 1, prehash,
-                                       checkExist);
-      if (escalated) {
-        set(escalated);
-      }
-      ASSERT(ret);
-      return *ret;
+Variant &Variant::lvalAt(CVarRef k, int64 prehash /* = -1 */,
+                         bool checkExist /* = false */) {
+  if (m_type == KindOfArray) {
+    Variant *ret = NULL;
+    ArrayData *arr = m_data.parr;
+    ArrayData *escalated = arr->lval(k.toKey(), ret, arr->getCount() > 1,
+        prehash, checkExist);
+    if (escalated) {
+      set(escalated);
     }
-    return lvalAtImpl(k, prehash, checkExist);
+    ASSERT(ret);
+    return *ret;
   }
-  return lvalBlackHole();
+  return lvalAtImpl(k, prehash, checkExist);
 }
 
 Variant &Variant::lvalInvalid() {
@@ -2412,95 +2437,72 @@ ObjectOffset Variant::o_lval(CStrRef propName, int64 prehash /*= -1 */) {
       escalate();                                                       \
     }                                                                   \
     ArrayData *escalated =                                              \
-      m_data.parr->set(key, v, (m_data.parr->getCount() > 1),           \
+      m_data.parr->set(ToKey(key), v, (m_data.parr->getCount() > 1),    \
                        prehash);                                        \
     if (escalated) {                                                    \
       set(escalated);                                                   \
     }                                                                   \
     return v;                                                           \
   }                                                                     \
-  do {                                                                  \
-    switch (m_type) {                                                   \
-    case KindOfBoolean:                                                 \
-      if (toBoolean()) {                                                \
-        throw_bad_type_exception("not array objects");                  \
-        break;                                                          \
-      }                                                                 \
-      /* Fall through */                                                \
-    case KindOfNull:                                                    \
-      set(ArrayData::Create(key, v));                                   \
-      break;                                                            \
-    case KindOfVariant:                                                 \
-      m_data.pvar->set(key, v);                                         \
-      break;                                                            \
-    case LiteralString:                                                 \
-    case KindOfStaticString:                                            \
-    case KindOfString:                                                  \
-      {                                                                 \
-        String s = toString();                                          \
-        if (s.empty()) {                                                \
-          set(Array::Create(key, v));                                   \
-        } else {                                                        \
-          s.lvalAt(key) = v;                                            \
-          set(s);                                                       \
-        }                                                               \
-        break;                                                          \
-      }                                                                 \
-    case KindOfObject:                                                  \
-      getArrayAccess()->o_invoke("offsetset",                           \
-                                 CREATE_VECTOR2(key, v), -1);           \
-      break;                                                            \
-    default:                                                            \
+  switch (m_type) {                                                     \
+  case KindOfBoolean:                                                   \
+    if (toBoolean()) {                                                  \
       throw_bad_type_exception("not array objects");                    \
       break;                                                            \
     }                                                                   \
-    return v;                                                           \
-  } while (0)                                                           \
+    /* Fall through */                                                  \
+  case KindOfNull:                                                      \
+    set(ArrayData::Create(ToKey(key), v));                                     \
+    break;                                                              \
+  case KindOfVariant:                                                   \
+    m_data.pvar->set(key, v);                                           \
+    break;                                                              \
+  case LiteralString:                                                   \
+  case KindOfStaticString:                                              \
+  case KindOfString:                                                    \
+    {                                                                   \
+      String s = toString();                                            \
+      if (s.empty()) {                                                  \
+        set(Array::Create(ToKey(key), v));                                     \
+      } else {                                                          \
+        s.lvalAt(key) = v;                                              \
+        set(s);                                                         \
+      }                                                                 \
+      break;                                                            \
+    }                                                                   \
+  case KindOfObject:                                                    \
+    getArrayAccess()->o_invoke("offsetset",                             \
+                               CREATE_VECTOR2(key, v), -1);             \
+    break;                                                              \
+  default:                                                              \
+    throw_bad_type_exception("not array objects");                      \
+    break;                                                              \
+  }                                                                     \
+  return v;                                                             \
 
+CVarRef Variant::set(bool key, CVarRef v, int64 prehash /* = -1 */) {
+  IMPLEMENT_SETAT;
+}
 
 CVarRef Variant::set(int64 key, CVarRef v, int64 prehash /* = -1 */) {
   IMPLEMENT_SETAT;
 }
-
-CVarRef Variant::set(litstr k, CVarRef v, int64 prehash /* = -1 */,
-                     bool isString /* = false */) {
-  if (isString) {
-    Variant key(k);
-    IMPLEMENT_SETAT;
-  } else {
-    Variant key(String(k).toKey());
-    IMPLEMENT_SETAT;
-  }
+CVarRef Variant::set(double  key, CVarRef v, int64 prehash /* = -1 */) {
+  IMPLEMENT_SETAT;
 }
 
-CVarRef Variant::set(CStrRef k, CVarRef v, int64 prehash /* = -1 */,
+CVarRef Variant::set(litstr key, CVarRef v, int64 prehash /* = -1 */,
                      bool isString /* = false */) {
-  if (isString) {
-    Variant key(k);
-    IMPLEMENT_SETAT;
-  } else {
-    Variant key(k.toKey());
-    IMPLEMENT_SETAT;
-  }
+  IMPLEMENT_SETAT;
 }
 
-CVarRef Variant::set(CVarRef k, CVarRef v, int64 prehash /* = -1 */) {
-  switch(k.getType()) {
-  case KindOfBoolean:
-  case KindOfByte:
-  case KindOfInt16:
-  case KindOfInt32:
-  case KindOfInt64:
-    return set(k.toInt64(), v, prehash);
-  default:
-    break;
-  }
-  // Trouble cases: Object and Array
-  Variant key = k.toKey();
-  if (!key.isNull()) {
-    IMPLEMENT_SETAT;
-  }
-  return null_variant;
+CVarRef Variant::set(CStrRef key, CVarRef v, int64 prehash /* = -1 */,
+                     bool isString /* = false */) {
+  IMPLEMENT_SETAT;
+}
+
+CVarRef Variant::set(CVarRef key, CVarRef v, int64 prehash /* = -1 */) {
+  IMPLEMENT_SETAT;
 }
 
 CVarRef Variant::append(CVarRef v) {
@@ -2559,15 +2561,14 @@ CVarRef Variant::append(CVarRef v) {
 }
 
 void Variant::remove(litstr  key, int64 prehash /* = -1 */) {
-  removeImpl(String(key).toKey(), prehash);
+  removeImpl(key, prehash);
 }
 void Variant::remove(CStrRef key, int64 prehash /* = -1 */) {
-  removeImpl(key.toKey(), prehash);
+  removeImpl(key, prehash);
 }
 
 void Variant::remove(CVarRef key, int64 prehash /* = -1 */) {
   switch(key.getType()) {
-  case KindOfBoolean:
   case KindOfByte:
   case KindOfInt16:
   case KindOfInt32:
@@ -2578,10 +2579,7 @@ void Variant::remove(CVarRef key, int64 prehash /* = -1 */) {
     break;
   }
   // Trouble cases: Array, Object
-  Variant k(key.toKey());
-  if (!k.isNull()) {
-    removeImpl(k, prehash);
-  }
+  removeImpl(key, prehash);
 }
 
 void Variant::setStatic() const {

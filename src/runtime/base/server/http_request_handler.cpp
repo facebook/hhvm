@@ -244,56 +244,74 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     sourceRootInfo.clear();
   }
 
-  bool error = false;
-  std::string errorMsg = "Internal Server Error";
-  bool ret = hphp_invoke(context, file, false, Array(), null,
-                         RuntimeOption::WarmupDocument,
-                         RuntimeOption::RequestInitFunction,
-                         error, errorMsg);
-
   int code;
-  if (ret) {
-    std::string content = context->getContents();
-    if (cachableDynamicContent && !content.empty()) {
-      ASSERT(transport->getUrl());
-      string key = file + transport->getUrl();
-      DynamicContentCache::TheCache.store(key, content.data(), content.size());
-    }
-    code = 200;
-    transport->sendRaw((void*)content.data(), content.size());
-  } else if (error) {
-    code = 500;
-
-    string errorPage = context->getErrorPage();
-    if (errorPage.empty()) {
-      errorPage = RuntimeOption::ErrorDocument500;
-    }
-    if (!errorPage.empty()) {
-      context->obEndAll();
-      context->obStart();
-      context->obProtect(true);
-      ret = hphp_invoke(context, errorPage, false, Array(), null,
-                        RuntimeOption::WarmupDocument,
-                        RuntimeOption::RequestInitFunction,
-                        error, errorMsg);
-      if (ret) {
-        std::string content = context->getContents();
-        transport->sendRaw((void*)content.data(), content.size());
-      } else {
-        errorPage.clear(); // so we fall back to 500 return
+  bool ret = true;
+  if (!RuntimeOption::ForbiddenFileExtensions.empty()) {
+    size_t pos = file.rfind('.');
+    if (pos != string::npos) {
+      const char *ext = file.c_str() + pos + 1;
+      if (RuntimeOption::ForbiddenFileExtensions.find(ext) !=
+          RuntimeOption::ForbiddenFileExtensions.end()) {
+        code = 403;
+        transport->sendString("Forbidden", 403);
+        ret = false;
       }
     }
-    if (errorPage.empty()) {
-      if (RuntimeOption::ServerErrorMessage) {
-        transport->sendString(errorMsg, 500);
-      } else {
-        transport->sendString(RuntimeOption::FatalErrorMessage, 500);
-      }
-    }
-  } else {
-    code = 404;
-    transport->sendString("Not Found", 404);
   }
+
+  if (ret) {
+    bool error = false;
+    std::string errorMsg = "Internal Server Error";
+    ret = hphp_invoke(context, file, false, Array(), null,
+                      RuntimeOption::WarmupDocument,
+                      RuntimeOption::RequestInitFunction,
+                      error, errorMsg);
+
+    if (ret) {
+      std::string content = context->getContents();
+      if (cachableDynamicContent && !content.empty()) {
+        ASSERT(transport->getUrl());
+        string key = file + transport->getUrl();
+        DynamicContentCache::TheCache.store(key, content.data(),
+                                            content.size());
+      }
+      code = 200;
+      transport->sendRaw((void*)content.data(), content.size());
+    } else if (error) {
+      code = 500;
+
+      string errorPage = context->getErrorPage();
+      if (errorPage.empty()) {
+        errorPage = RuntimeOption::ErrorDocument500;
+      }
+      if (!errorPage.empty()) {
+        context->obEndAll();
+        context->obStart();
+        context->obProtect(true);
+        ret = hphp_invoke(context, errorPage, false, Array(), null,
+                          RuntimeOption::WarmupDocument,
+                          RuntimeOption::RequestInitFunction,
+                          error, errorMsg);
+        if (ret) {
+          std::string content = context->getContents();
+          transport->sendRaw((void*)content.data(), content.size());
+        } else {
+          errorPage.clear(); // so we fall back to 500 return
+        }
+      }
+      if (errorPage.empty()) {
+        if (RuntimeOption::ServerErrorMessage) {
+          transport->sendString(errorMsg, 500);
+        } else {
+          transport->sendString(RuntimeOption::FatalErrorMessage, 500);
+        }
+      }
+    } else {
+      code = 404;
+      transport->sendString("Not Found", 404);
+    }
+  }
+
   transport->onSendEnd();
   ServerStats::LogPage(file, code);
   hphp_context_exit(context, true);

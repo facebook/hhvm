@@ -136,6 +136,7 @@ public:
   static std::vector<std::string> AllowedDirectories;
   static std::set<std::string> AllowedFiles;
   static std::map<std::string, std::string> StaticFileExtensions;
+  static std::set<std::string> ForbiddenFileExtensions;
   static std::set<std::string> StaticFileGenerators;
   static FilesMatchPtrVec FilesMatches;
 

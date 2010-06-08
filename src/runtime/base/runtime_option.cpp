@@ -139,6 +139,7 @@ bool RuntimeOption::SafeFileAccess = false;
 std::vector<std::string> RuntimeOption::AllowedDirectories;
 std::set<std::string> RuntimeOption::AllowedFiles;
 std::map<std::string, std::string> RuntimeOption::StaticFileExtensions;
+std::set<std::string> RuntimeOption::ForbiddenFileExtensions;
 std::set<std::string> RuntimeOption::StaticFileGenerators;
 FilesMatchPtrVec RuntimeOption::FilesMatches;
 
@@ -519,6 +520,8 @@ void RuntimeOption::Load(Hdf &config) {
     }
     RuntimeOption::AllowedDirectories.push_back(UploadTmpDir);
     server["AllowedFiles"].get(AllowedFiles);
+
+    server["ForbiddenFileExtensions"].get(ForbiddenFileExtensions);
 
     EnableMemoryManager = server["EnableMemoryManager"].getBool(true);
     CheckMemory = server["CheckMemory"].getBool();

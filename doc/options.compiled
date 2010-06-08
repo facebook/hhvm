@@ -255,6 +255,11 @@ These control static content's response headers.
       * = specific file to allow
     }
 
+    # files with these extensions cannot be executed
+    ForbiddenFileExtensions {
+      * = ...
+    }
+
     APC {
       EnableApc = true
       UseSharedMemory = false

@@ -342,101 +342,9 @@ static void init_entity_table() {
   EntityMap["lt"] = "<";
   EntityMap["gt"] = ">";
   EntityMap["amp"] = "&";
-  EntityMap["nbsp"] = "\xA0";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-// Returns a positive integer specifying the length of the next
-// character in bytes on success, or returns 0 on failure.
-inline static int get_next_char_len(const unsigned char * str,
-                                    int str_len,
-                                    int start_pos) {
-  int pos = start_pos;
-  unsigned short this_char = str[pos++];
-  unsigned long utf = 0;
-  int stat = 0;
-  int more = 1;
-  /* unpack utf-8 encoding into a wide char.
-   * Code stolen from the mbstring extension */
-  do {
-    if (this_char < 0x80) {
-      if (stat) {
-        /* we didn't finish the UTF sequence correctly */
-        return 0;
-      }
-      return pos - start_pos;
-    } else if (this_char < 0xc0) {
-      switch (stat) {
-      case 0x10:  /* 2, 2nd */
-      case 0x21:  /* 3, 3rd */
-      case 0x32:  /* 4, 4th */
-      case 0x43:  /* 5, 5th */
-      case 0x54:  /* 6, 6th */
-        /* last byte in sequence */
-        more = 0;
-        utf |= (this_char & 0x3f);
-        this_char = (unsigned short)utf;
-        break;
-      case 0x20:  /* 3, 2nd */
-      case 0x31:  /* 4, 3rd */
-      case 0x42:  /* 5, 4th */
-      case 0x53:  /* 6, 5th */
-        /* penultimate char */
-        utf |= ((this_char & 0x3f) << 6);
-        stat++;
-        break;
-      case 0x30:  /* 4, 2nd */
-      case 0x41:  /* 5, 3rd */
-      case 0x52:  /* 6, 4th */
-        utf |= ((this_char & 0x3f) << 12);
-        stat++;
-        break;
-      case 0x40:  /* 5, 2nd */
-      case 0x51:
-        utf |= ((this_char & 0x3f) << 18);
-        stat++;
-        break;
-      case 0x50:  /* 6, 2nd */
-        utf |= ((this_char & 0x3f) << 24);
-        stat++;
-        break;
-      default:
-        /* invalid */
-        return 0;
-      }
-    }
-    /* lead byte */
-    else if (this_char < 0xe0) {
-      stat = 0x10;    /* 2 byte */
-      utf = (this_char & 0x1f) << 6;
-      if (str_len - pos < 1) return 0;
-    } else if (this_char < 0xf0) {
-      stat = 0x20;    /* 3 byte */
-      utf = (this_char & 0xf) << 12;
-      if (str_len - pos < 2) return 0;
-    } else if (this_char < 0xf8) {
-      stat = 0x30;    /* 4 byte */
-      utf = (this_char & 0x7) << 18;
-      if (str_len - pos < 3) return 0;
-    } else if (this_char < 0xfc) {
-      stat = 0x40;    /* 5 byte */
-      utf = (this_char & 0x3) << 24;
-      if (str_len - pos < 4) return 0;
-    } else if (this_char < 0xfe) {
-      stat = 0x50;    /* 6 byte */
-      utf = (this_char & 0x1) << 30;
-      if (str_len - pos < 5) return 0;
-    } else {
-      /* invalid; bail */
-      return 0;
-    }
-    if (more) {
-      this_char = str[pos++];
-    }
-  } while (more);
-  return pos - start_pos;
-}
 
 char *string_html_encode(const char *input, int &len, bool encode_double_quote,
                          bool encode_single_quote) {
@@ -461,25 +369,7 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
    */
   char *ret = (char *)malloc(len * 6 + 1);
   char *q = ret;
-  const char *p = input;
-  while (*p) {
-    // If the current character is a multi-byte character, we should
-    // copy it without performing any substituions. This is necessary
-    // because we don't want to replace "\xA0" with "&nbsp;" if "\xA0"
-    // is part of a multi-byte character.
-    int charsize = get_next_char_len((const unsigned char*)input,
-                                     len,
-                                     p-input);
-    if (charsize > 1) {
-      for (int i = 0; i < charsize; ++i) {
-        *q = *p;
-        q++;
-        p++;
-      }
-      continue;
-    }
-    // If the current character is a single-byte character, check if
-    // there is an applicable substitutions to perform
+  for (const char *p = input; *p; p++) {
     char c = *p;
     switch (c) {
     case '"':
@@ -505,14 +395,10 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
     case '&':
       *q++ = '&'; *q++ = 'a'; *q++ = 'm'; *q++ = 'p'; *q++ = ';';
       break;
-    case '\xA0':
-      *q++ = '&'; *q++ = 'n'; *q++ = 'b'; *q++ = 's'; *q++ = 'p'; *q++ = ';';
-      break;
     default:
       *q++ = c;
       break;
     }
-    ++p;
   }
   *q = 0;
   len = q - ret;

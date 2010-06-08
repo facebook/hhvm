@@ -25,21 +25,7 @@ TIME_CHECK_INCLUDE("stdint.h")
 TIME_CHECK_INCLUDE("string.h")
 TIME_CHECK_INCLUDE("stdlib.h")
 TIME_CHECK_INCLUDE("locale.h")
-
-CHECK_TYPE_SIZE("long" HAVE_LONG)
-if (NOT ${HAVE_LONG} EQUAL 8)
-	message(SEND_ERROR "long must be 8 bytes in size")
-endif()
-
-CHECK_TYPE_SIZE("int" HAVE_INT)
-if (NOT ${HAVE_INT} EQUAL 4)
-	message(SEND_ERROR "long must be 4 bytes in size")
-endif()
-
-CHECK_TYPE_SIZE("int" HAVE_INT)
-if (NOT ${HAVE_INT} EQUAL 4)
-	message(SEND_ERROR "long must be 4 bytes in size")
-endif()
+TIME_CHECK_INCLUDE("limits.h")
 
 CHECK_TYPE_SIZE("int32_t" HAVE_INT32_T)
 CHECK_TYPE_SIZE("uint32_t" HAVE_UINT32_T)

@@ -6,3 +6,9 @@
 #cmakedefine WORDS_BIGENDIAN 1
 #cmakedefine HAVE_SETLOCALE 1
 #cmakedefine HAVE_LIMITS_H
+#cmakedefine HAVE_INT32_T 1
+#cmakedefine HAVE_UINT32_T 1
+#cmakedefine HAVE_STRTOLL 1
+#cmakedefine HAVE_ATOLL 1
+#cmakedefine HAVE_STRFTIME 1
+#cmakedefine HAVE_SETLOCALE 1

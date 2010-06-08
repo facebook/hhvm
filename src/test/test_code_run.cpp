@@ -1230,6 +1230,17 @@ bool TestCodeRun::TestArray() {
        "test(array(1));"
        "test(array(1,2,3,4,5,6,7,8,9));");
 
+  MVCR("<?php "
+      "function foo() {"
+      "  $a = array();"
+      "  $a[] = '1.1';"
+      "  $a[] = '2.2';"
+      "  $a[] = '3.3';"
+      "  var_dump(array_sum($a));"
+      "  var_dump(array_product($a));"
+      "}"
+      "foo();");
+
   return true;
 }
 

@@ -39,7 +39,7 @@ c('PDO', null, array('Sweepable' => 'internal'),
             'paramtype' => array(Int64, 'q_pdo_PARAM_STR'))),
     m(PublicMethod, '__wakeup', Variant),
     m(PublicMethod, '__sleep', Variant),
-    m(PublicMethod, 'getAvailableDrivers', StringVec),
+    m(PublicMethod | StaticMethod, 'getAvailableDrivers', StringVec),
   ),
   array(
     ck("PARAM_BOOL",               Int64),

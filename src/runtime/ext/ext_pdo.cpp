@@ -1469,8 +1469,8 @@ Variant c_pdo::t___sleep() {
   return null;
 }
 
-Array c_pdo::t_getavailabledrivers() {
-  INSTANCE_METHOD_INJECTION(pdo, pdo::getavailabledrivers);
+Array c_pdo::ti_getavailabledrivers(const char* cls) {
+  STATIC_METHOD_INJECTION(pdo, pdo::getavailabledrivers);
   return f_pdo_drivers();
 }
 

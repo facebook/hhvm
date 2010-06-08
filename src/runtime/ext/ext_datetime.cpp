@@ -60,6 +60,7 @@ c_datetime::~c_datetime() {
 
 void c_datetime::t___construct(CStrRef time /*= "now"*/,
                                CObjRef timezone /*= null_object*/) {
+  INSTANCE_METHOD_INJECTION(datetime, datetime::__construct);
   m_dt = NEW(DateTime)(TimeStamp::Current());
   if (!time.empty()) {
     m_dt->fromString(time, c_datetimezone::unwrap(timezone));
@@ -67,14 +68,17 @@ void c_datetime::t___construct(CStrRef time /*= "now"*/,
 }
 
 String c_datetime::t_format(CStrRef format) {
+  INSTANCE_METHOD_INJECTION(datetime, datetime::format);
   return m_dt->toString(format, false);
 }
 
 int64 c_datetime::t_getoffset() {
+  INSTANCE_METHOD_INJECTION(datetime, datetime::getoffset);
   return m_dt->offset();
 }
 
 Variant c_datetime::t_gettimezone() {
+  INSTANCE_METHOD_INJECTION(datetime, datetime::gettimezone);
   SmartObject<TimeZone> tz = m_dt->timezone();
   if (tz->isValid()) {
     return c_datetimezone::wrap(tz);
@@ -83,31 +87,37 @@ Variant c_datetime::t_gettimezone() {
 }
 
 Object c_datetime::t_modify(CStrRef modify) {
+  INSTANCE_METHOD_INJECTION(datetime, datetime::modify);
   m_dt->modify(modify);
   return this;
 }
 
 Object c_datetime::t_setdate(int64 year, int64 month, int64 day) {
+  INSTANCE_METHOD_INJECTION(datetime, datetime::setdate);
   m_dt->setDate(year, month, day);
   return this;
 }
 
 Object c_datetime::t_setisodate(int64 year, int64 week, int64 day /*= 1*/) {
+  INSTANCE_METHOD_INJECTION(datetime, datetime::setisodate);
   m_dt->setISODate(year, week, day);
   return this;
 }
 
 Object c_datetime::t_settime(int64 hour, int64 minute, int64 second /*= 0*/) {
+  INSTANCE_METHOD_INJECTION(datetime, datetime::settime);
   m_dt->setTime(hour, minute, second);
   return this;
 }
 
 Object c_datetime::t_settimezone(CObjRef timezone) {
+  INSTANCE_METHOD_INJECTION(datetime, datetime::settimezone);
   m_dt->setTimezone(c_datetimezone::unwrap(timezone));
   return this;
 }
 
 Variant c_datetime::t___destruct() {
+  INSTANCE_METHOD_INJECTION(datetime, datetime::__destruct);
   return null;
 }
 
@@ -118,32 +128,39 @@ c_datetimezone::~c_datetimezone() {
 }
 
 void c_datetimezone::t___construct(CStrRef timezone) {
+  INSTANCE_METHOD_INJECTION(datetimezone, datetimezone::__construct);
   m_tz = NEW(TimeZone)(timezone);
 }
 
 String c_datetimezone::t_getname() {
+  INSTANCE_METHOD_INJECTION(datetimezone, datetimezone::getname);
   return m_tz->name();
 }
 
 int64 c_datetimezone::t_getoffset(CObjRef datetime) {
+  INSTANCE_METHOD_INJECTION(datetimezone, datetimezone::getoffset);
   bool error;
   int64 ts = c_datetime::unwrap(datetime)->toTimeStamp(error);
   return m_tz->offset(ts);
 }
 
 Array c_datetimezone::t_gettransitions() {
+  INSTANCE_METHOD_INJECTION(datetimezone, datetimezone::gettransitions);
   return m_tz->transitions();
 }
 
 Array c_datetimezone::ti_listabbreviations(const char* cls) {
+  STATIC_METHOD_INJECTION(datetimezone, datetimezone::listabbreviations);
   return TimeZone::GetAbbreviations();
 }
 
 Array c_datetimezone::ti_listidentifiers(const char* cls) {
+  STATIC_METHOD_INJECTION(datetimezone, datetimezone::listidentifiers);
   return TimeZone::GetNames();
 }
 
 Variant c_datetimezone::t___destruct() {
+  INSTANCE_METHOD_INJECTION(datetimezone, datetimezone::__destruct);
   return null;
 }
 

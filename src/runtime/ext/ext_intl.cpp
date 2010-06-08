@@ -74,6 +74,7 @@ void c_normalizer::t___construct() {
 }
 
 Variant c_normalizer::t___destruct() {
+  INSTANCE_METHOD_INJECTION(normalizer, normalizer::__destruct);
   return null;
 }
 
@@ -81,6 +82,7 @@ Variant c_normalizer::t___destruct() {
 
 Variant c_normalizer::ti_isnormalized(const char* cls , CStrRef input,
                                       int64 form /* = q_normalizer_FORM_C */) {
+  STATIC_METHOD_INJECTION(normalizer, normalizer::isnormalized);
   s_intl_error->clear();
 
   switch (form) {
@@ -128,6 +130,7 @@ Variant c_normalizer::ti_isnormalized(const char* cls , CStrRef input,
 
 Variant c_normalizer::ti_normalize(const char* cls , CStrRef input,
                                    int64 form /* = q_normalizer_FORM_C */) {
+  STATIC_METHOD_INJECTION(normalizer, normalizer::normalize);
   s_intl_error->clear();
 
   int expansion_factor = 1;

@@ -306,18 +306,37 @@ String StringUtil::RegExEncode(CStrRef input) {
   return String(ret, len, AttachString);
 }
 
-String StringUtil::HtmlEncode(CStrRef input, QuoteStyle quoteStyle) {
+String StringUtil::HtmlEncode(CStrRef input, QuoteStyle quoteStyle,
+                              const char *charset, bool nbsp) {
   if (input.empty()) return input;
+
+  ASSERT(charset);
+  bool utf8 = true;
+  if (strcasecmp(charset, "ISO-8859-1") == 0) {
+    utf8 = false;
+  } else if (strcasecmp(charset, "UTF-8")) {
+    throw NotImplementedException(charset);
+  }
+
   int len = input.size();
   char *ret = string_html_encode(input, len, quoteStyle != NoQuotes,
-                                 quoteStyle == BothQuotes);
+                                 quoteStyle == BothQuotes, utf8, nbsp);
   return String(ret, len, AttachString);
 }
 
-String StringUtil::HtmlDecode(CStrRef input) {
+String StringUtil::HtmlDecode(CStrRef input, const char *charset, bool nbsp) {
   if (input.empty()) return input;
+
+  ASSERT(charset);
+  bool utf8 = true;
+  if (strcasecmp(charset, "ISO-8859-1") == 0) {
+    utf8 = false;
+  } else if (strcasecmp(charset, "UTF-8")) {
+    throw NotImplementedException(charset);
+  }
+
   int len = input.size();
-  char *ret = string_html_decode(input, len);
+  char *ret = string_html_decode(input, len, utf8, nbsp);
   return String(ret, len, AttachString);
 }
 

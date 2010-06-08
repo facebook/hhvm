@@ -26,7 +26,7 @@ namespace HPHP {
 /**
  * Major departures from Zend:
  *
- * 1. We are only supporting UTF-8 encoding. So, dropped charset parameters.
+ * 1. We are only supporting UTF-8 and ISO-8859-1 encoding.
  *    Major reason for this is because the original get_next_char() bothers me,
  *    sacrificing performance for some character sets that people rarely used
  *    or that people shouldn't use. UTF-8 should really be the standard string
@@ -47,8 +47,8 @@ namespace HPHP {
  */
 
 char *string_html_encode(const char *input, int &len, bool encode_double_quote,
-                         bool encode_single_quote);
-char *string_html_decode(const char *input, int &len);
+                         bool encode_single_quote, bool utf8, bool nbsp);
+char *string_html_decode(const char *input, int &len, bool utf8, bool nbsp);
 Array string_get_html_translation_table(int which, int quote_style);
 
 ///////////////////////////////////////////////////////////////////////////////

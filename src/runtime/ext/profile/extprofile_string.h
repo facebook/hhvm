@@ -180,12 +180,12 @@ inline Variant x_wordwrap(CStrRef str, int width = 75, CStrRef wordbreak = "\n",
   return f_wordwrap(str, width, wordbreak, cut);
 }
 
-inline String x_html_entity_decode(CStrRef str, int quote_style = k_ENT_COMPAT, CStrRef charset = "") {
+inline String x_html_entity_decode(CStrRef str, int quote_style = k_ENT_COMPAT, CStrRef charset = "ISO-8859-1") {
   FUNCTION_INJECTION_BUILTIN(html_entity_decode);
   return f_html_entity_decode(str, quote_style, charset);
 }
 
-inline String x_htmlentities(CStrRef str, int quote_style = k_ENT_COMPAT, CStrRef charset = "", bool double_encode = true) {
+inline String x_htmlentities(CStrRef str, int quote_style = k_ENT_COMPAT, CStrRef charset = "ISO-8859-1", bool double_encode = true) {
   FUNCTION_INJECTION_BUILTIN(htmlentities);
   return f_htmlentities(str, quote_style, charset, double_encode);
 }
@@ -195,7 +195,7 @@ inline String x_htmlspecialchars_decode(CStrRef str, int quote_style = k_ENT_COM
   return f_htmlspecialchars_decode(str, quote_style);
 }
 
-inline String x_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT, CStrRef charset = "", bool double_encode = true) {
+inline String x_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT, CStrRef charset = "ISO-8859-1", bool double_encode = true) {
   FUNCTION_INJECTION_BUILTIN(htmlspecialchars);
   return f_htmlspecialchars(str, quote_style, charset, double_encode);
 }

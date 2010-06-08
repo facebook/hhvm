@@ -110,12 +110,12 @@ f('wordwrap', Variant,
 f('html_entity_decode', String,
   array('str' => String,
         'quote_style' => array(Int32, 'k_ENT_COMPAT'),
-        'charset' => array(String, '""')));
+        'charset' => array(String, '"ISO-8859-1"')));
 
 f('htmlentities', String,
   array('str' => String,
         'quote_style' => array(Int32, 'k_ENT_COMPAT'),
-        'charset' => array(String, '""'),
+        'charset' => array(String, '"ISO-8859-1"'),
         'double_encode' => array(Boolean, 'true')));
 
 f('htmlspecialchars_decode', String,
@@ -125,7 +125,7 @@ f('htmlspecialchars_decode', String,
 f('htmlspecialchars', String,
   array('str' => String,
         'quote_style' => array(Int32, 'k_ENT_COMPAT'),
-        'charset' => array(String, '""'),
+        'charset' => array(String, '"ISO-8859-1"'),
         'double_encode' => array(Boolean, 'true')));
 
 f('quoted_printable_encode', String,

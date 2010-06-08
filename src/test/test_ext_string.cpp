@@ -432,6 +432,11 @@ bool TestExtString::test_html_entity_decode() {
   String a = f_htmlentities(orig);
   VS(a, "I'll &quot;walk&quot; the &lt;b&gt;dog&lt;/b&gt; now");
   VS(f_html_entity_decode(a), orig);
+
+  VS(f_bin2hex(f_html_entity_decode("&nbsp;", 3)), "a0");
+  VS(f_bin2hex(f_html_entity_decode("&nbsp;", 3, "")), "c2a0");
+  VS(f_bin2hex(f_html_entity_decode("&nbsp;", 3, "UTF-8")), "c2a0");
+
   return Count(true);
 }
 
@@ -440,18 +445,32 @@ bool TestExtString::test_htmlentities() {
   VS(f_htmlentities(str), "A 'quote' is &lt;b&gt;bold&lt;/b&gt;");
   VS(f_htmlentities(str, k_ENT_QUOTES),
      "A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;");
+
+  VS(f_htmlentities("\xA0", k_ENT_COMPAT), "&nbsp;");
+  VS(f_htmlentities("\xc2\xA0", k_ENT_COMPAT, ""), "&nbsp;");
+  VS(f_htmlentities("\xc2\xA0", k_ENT_COMPAT, "UTF-8"), "&nbsp;");
+
   return Count(true);
 }
 
 bool TestExtString::test_htmlspecialchars_decode() {
   String str = "<p>this -&gt; &quot;</p>";
   VS(f_htmlspecialchars_decode(str), "<p>this -> \"</p>");
+
+  VS(f_htmlspecialchars_decode("&lt;"), "<");
+  VS(f_htmlspecialchars_decode("&nbsp;"), "&nbsp;");
+
   return Count(true);
 }
 
 bool TestExtString::test_htmlspecialchars() {
   VS(f_htmlspecialchars("<a href='test'>Test</a>", k_ENT_QUOTES),
      "&lt;a href=&#039;test&#039;&gt;Test&lt;/a&gt;");
+
+  VS(f_bin2hex(f_htmlspecialchars("\xA0", k_ENT_COMPAT)), "a0");
+  VS(f_bin2hex(f_htmlspecialchars("\xc2\xA0", k_ENT_COMPAT, "")), "c2a0");
+  VS(f_bin2hex(f_htmlspecialchars("\xc2\xA0", k_ENT_COMPAT, "UTF-8")), "c2a0");
+
   return Count(true);
 }
 

@@ -347,7 +347,7 @@ static void init_entity_table() {
 ///////////////////////////////////////////////////////////////////////////////
 
 char *string_html_encode(const char *input, int &len, bool encode_double_quote,
-                         bool encode_single_quote) {
+                         bool encode_single_quote, bool utf8, bool nbsp) {
   ASSERT(input);
   if (!*input) {
     return NULL;
@@ -395,6 +395,21 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
     case '&':
       *q++ = '&'; *q++ = 'a'; *q++ = 'm'; *q++ = 'p'; *q++ = ';';
       break;
+    case '\xc2':
+      if (nbsp && utf8 && *(p+1) == '\xa0') {
+        *q++ = '&'; *q++ = 'n'; *q++ = 'b'; *q++ = 's'; *q++ = 'p'; *q++ = ';';
+        p++;
+      } else {
+        *q++ = c;
+      }
+      break;
+    case '\xa0':
+      if (nbsp && !utf8) {
+        *q++ = '&'; *q++ = 'n'; *q++ = 'b'; *q++ = 's'; *q++ = 'p'; *q++ = ';';
+      } else {
+        *q++ = c;
+      }
+      break;
     default:
       *q++ = c;
       break;
@@ -435,7 +450,7 @@ inline static void decode_entity(char *entity) {
   memcpy(entity, s.c_str(), s.length() + 1);
 }
 
-char *string_html_decode(const char *input, int &len) {
+char *string_html_decode(const char *input, int &len, bool utf8, bool nbsp) {
   ASSERT(input);
   if (!*input) {
     return NULL;
@@ -470,9 +485,24 @@ char *string_html_decode(const char *input, int &len) {
           char buf[16];
           memcpy(buf, p, l);
           buf[l] = '\0';
-          decode_entity(buf);
-          l = strlen(buf);
-          memcpy(q, buf, l);
+          if (strcmp(buf, "nbsp") == 0) {
+            if (nbsp) {
+              if (utf8) {
+                l = 2;
+                *q = '\xc2'; *(q+1) = '\xa0';
+              } else {
+                l = 1;
+                *q = '\xa0';
+              }
+            } else {
+              l = 6;
+              memcpy(q, "&nbsp;", l);
+            }
+          } else {
+            decode_entity(buf);
+            l = strlen(buf);
+            memcpy(q, buf, l);
+          }
           p = t;
           q += l;
         }

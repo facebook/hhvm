@@ -132,26 +132,34 @@ inline Variant f_wordwrap(CStrRef str, int width = 75, CStrRef wordbreak = "\n",
 // encoding/decoding
 
 inline String f_html_entity_decode(CStrRef str, int quote_style = k_ENT_COMPAT,
-                                   CStrRef charset = "") {
+                                   CStrRef charset = "ISO-8859-1") {
   // dropping quote_style parameter, as I don't see why decoding needs to check
-  // dropping charset parameter and see runtime/base/zend_html.h
-  return StringUtil::HtmlDecode(str);
+  const char *scharset = charset.data();
+  if (!*scharset) scharset = "UTF-8";
+  return StringUtil::HtmlDecode(str, scharset, true);
 }
 inline String f_htmlentities(CStrRef str, int quote_style = k_ENT_COMPAT,
-                             CStrRef charset = "", bool double_encode = true) {
-  // dropping charset and double_encode parameters and see runtime/base/zend_html.h
-  return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style);
+                             CStrRef charset = "ISO-8859-1",
+                             bool double_encode = true) {
+  // dropping double_encode parameters and see runtime/base/zend_html.h
+  const char *scharset = charset.data();
+  if (!*scharset) scharset = "UTF-8";
+  return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,
+                                scharset, true);
 }
 inline String f_htmlspecialchars_decode(CStrRef str,
                                         int quote_style = k_ENT_COMPAT) {
   // dropping quote_style parameter, as I don't see why decoding needs to check
-  return StringUtil::HtmlDecode(str);
+  return StringUtil::HtmlDecode(str, "UTF-8", false);
 }
 inline String f_htmlspecialchars(CStrRef str, int quote_style = k_ENT_COMPAT,
-                                 CStrRef charset = "",
+                                 CStrRef charset = "ISO-8859-1",
                                  bool double_encode = true) {
-  // dropping charset and double_encode parameters and see runtime/base/zend_html.h
-  return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style);
+  // dropping double_encode parameters and see runtime/base/zend_html.h
+  const char *scharset = charset.data();
+  if (!*scharset) scharset = "UTF-8";
+  return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,
+                                scharset, false);
 }
 inline String f_quoted_printable_encode(CStrRef str) {
   return StringUtil::QuotedPrintableEncode(str);

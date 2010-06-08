@@ -15,6 +15,7 @@
 */
 
 #include <test/test_base.h>
+#include <sys/param.h>
 #include <compiler/option.h>
 #include <test/test.h>
 #include <runtime/base/complex_types.h>
@@ -23,6 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
+char TestBase::error_buffer[MAXPATHLEN];
+
 TestBase::TestBase() {
   Option::GenerateCPPComments = false;
   Option::GenerateCPPNameSpace = false;
@@ -30,12 +33,19 @@ TestBase::TestBase() {
 }
 
 bool TestBase::Count(bool result) {
-  if (result) Test::s_passed++;
+  if (result) {
+    Test::s_passed++;
+    pass_count++;
+  } else {
+    fail_count++;
+  }
+
   Test::s_total++;
   return result;
 }
 
 bool TestBase::CountSkip() {
+  skip_count++;
   Test::s_skipped++;
   Test::s_total++;
   return true;

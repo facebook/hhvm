@@ -28,6 +28,8 @@ int Test::s_skipped = 0;
 
 bool Test::s_quiet = false;
 
+TestLogger Test::logger;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool Test::RunTests(std::string &suite, std::string &which, std::string &set) {
@@ -41,7 +43,15 @@ bool Test::RunTests(std::string &suite, std::string &which, std::string &set) {
     suite = suite.substr(0, pos);
   }
 
+  if (!logger.initializeRun()) {
+    printf("WARNING: couldn't initialize test logging\n");
+  }
+
   RunTestsImpl(allPassed, suite, which, set);
+
+  if (!logger.finishRun()) {
+    printf("WARNING: couldn't finish test logging\n");
+  }
 
   if (s_skipped) {
     printf("%d/%d unit tests skipped.\n", s_skipped, s_total);
@@ -56,4 +66,45 @@ bool Test::RunTests(std::string &suite, std::string &which, std::string &set) {
   printf("ERROR: %d/%d unit tests failed.\n", s_total - s_passed - s_skipped,
          s_total);
   return false;
+}
+
+bool Test::logTestResults(std::string name, std::string details, int pass,
+                          int fail, int skip) {
+  if (!logger.doLog()) {
+    return true;
+  }
+
+  long seconds  = finish.tv_sec  - start.tv_sec;
+  long useconds = finish.tv_usec - start.tv_usec;
+  long mseconds = ((seconds) * 1000 + useconds / 1000.0) + 0.5; // round up
+
+  char summary[100];
+  sprintf(summary, "PASSED (%d)", pass);
+  std::string status  = "passed";
+
+  if (skip > 0) {
+    sprintf(summary, "SKIPPED (%d)", skip);
+  }
+
+  if (fail > 0) {
+    status = "failed";
+    sprintf(summary, "FAILED (%d)", fail);
+  }
+
+  ArrayInit data(8, false);
+  data.set(0, "type",         "hphp");
+  data.set(1, "name",         name);
+  data.set(2, "contacts",     null_array);
+  data.set(3, "endedTime",    time(NULL));
+  data.set(4, "durationSecs", mseconds / 1000.0);
+  data.set(5, "status",       status);
+  data.set(6, "summary",      std::string(summary));
+  data.set(7, "details",      details);
+
+  if (!logger.logTest(Array(data.create()))) {
+    printf("WARNING: Logging %s failed\n", name.c_str());
+    return false;
+  }
+
+  return true;
 }

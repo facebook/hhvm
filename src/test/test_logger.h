@@ -14,39 +14,35 @@
    +----------------------------------------------------------------------+
 */
 
-#include <test/test.h>
-#include <util/logger.h>
-#include <runtime/base/program_functions.h>
-#include <dlfcn.h>
+#ifndef __TEST_LOGGER_H__
+#define __TEST_LOGGER_H__
 
-using namespace HPHP;
-using namespace std;
+#include <runtime/base/base_includes.h>
+#include <runtime/ext/ext_variable.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int main(int argc, char **argv) {
-  string suite, which, set;
-  void (*compiler_hook_initialize)();
-  compiler_hook_initialize =
-    (void (*)())dlsym(NULL, "compiler_hook_initialize");
-  if (compiler_hook_initialize) compiler_hook_initialize();
-  if (argc >= 2) suite = argv[1];
-  if (argc >= 3) which = argv[2];
-  if (argc >= 4) set   = argv[3];
-  if (argc >= 5) {
-    if (strcmp(argv[4], "quiet") == 0) {
-      Test::s_quiet = true;
-    } else {
-      Logger::LogLevel = (Logger::LogLevelType)atoi(argv[4]);
-    }
-  }
+class TestLogger {
 
-  Test::logger.log_url = NULL;
-  if (argc >= 6) {
-    Test::logger.log_url = argv[5];
-  }
+public:
+  char* log_url;
 
-  hphp_process_init();
-  Test test;
-  return test.RunTests(suite, which, set) ? 0 : -1;
-}
+  TestLogger() {}
+
+  bool initializeRun();
+  bool logTest(HPHP::Array testInfo);
+  bool finishRun();
+  bool doLog();
+
+protected:
+  int  run_id;
+
+private:
+  int getOutput(const char *cmd, std::string &buf);
+  HPHP::Array postData(HPHP::Array arr);
+  std::string getRepoRoot();
+  std::string getSVNRevision();
+  std::string getGitRevision();
+};
+
+#endif // __TEST_LOGGER_H__

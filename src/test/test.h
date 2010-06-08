@@ -18,6 +18,8 @@
 #define __TEST_H__
 
 #include <compiler/hphp.h>
+#include <test/test_logger.h>
+#include <test/test_base.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -27,15 +29,21 @@ public:
   static int s_passed;
   static int s_skipped;
   static bool s_quiet; // less printf, good for nightly unit test runs
+  static TestLogger logger;
 
 public:
   Test() {}
 
   bool RunTests(std::string &suite, std::string &which, std::string &set);
 
+  bool logTestResults(std::string name, std::string details, int pass,
+                      int fail, int skip);
+
 private:
   void RunTestsImpl(bool &allPassed, std::string &suite, std::string &which,
                     std::string &set);
+
+  struct timeval start, finish;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,6 +54,11 @@ private:
       printf(#name "......\n\n");                                       \
     }                                                                   \
     name test;                                                          \
+    test.pass_count = 0;                                                \
+    test.fail_count = 0;                                                \
+    test.skip_count = 0;                                                \
+    test.error_messages = "";                                           \
+    gettimeofday(&start, NULL);                                         \
     if (test.RunTests(which)) {                                         \
       if (!s_quiet) {                                                   \
         printf("\n" #name " OK\n\n");                                   \
@@ -54,6 +67,10 @@ private:
       printf("\n" #name " #####>>> FAILED <<< #####\n\n");              \
       allPassed = false;                                                \
     }                                                                   \
+    gettimeofday(&finish, NULL);                                        \
+                                                                        \
+    logTestResults(#name, test.error_messages, test.pass_count,         \
+                   test.fail_count, test.skip_count);                   \
   }                                                                     \
 
 #ifdef SEP_EXTENSION

@@ -35,6 +35,11 @@ class TestBase {
   virtual bool RunTests(const std::string &which) = 0;
   virtual bool postTest() { return true; }
 
+  int fail_count;
+  int skip_count;
+  int pass_count;
+  std::string error_messages;
+
  protected:
   bool Count(bool result);
   bool CountSkip();
@@ -44,6 +49,8 @@ class TestBase {
   bool VerifyClose(const char *exp1, const char *exp2,
                    double v1, double v2);
   bool array_value_exists(CVarRef var, CVarRef value);
+
+  static char error_buffer[];
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,25 +68,31 @@ class TestBase {
   }                                                                     \
   fflush(0)
 
+#define LOG_TEST_ERROR(...)                                             \
+  sprintf(TestBase::error_buffer, __VA_ARGS__);                         \
+  printf("%s\n", TestBase::error_buffer);                               \
+  error_messages += "\n\n";                                             \
+  error_messages += TestBase::error_buffer;                             \
+
 #define SKIP(reason)                                                    \
-  printf("%s skipped [" #reason "]\n", __FUNCTION__);                   \
+  LOG_TEST_ERROR("%s skipped [" #reason "]", __FUNCTION__);             \
   return CountSkip();                                                   \
 
 #define VERIFY(exp)                                                     \
   if (!(exp)) {                                                         \
-    printf("%s:%d: [" #exp "] is false\n", __FILE__, __LINE__);         \
+    LOG_TEST_ERROR("%s:%d: [" #exp "] is false", __FILE__, __LINE__);   \
     return Count(false);                                                \
   }                                                                     \
 
 #define VS(e1, e2)                                                      \
   if (!VerifySame(#e1, #e2, e1, e2)) {                                  \
-    printf("%s:%d: VerifySame failed.\n", __FILE__, __LINE__);          \
+    LOG_TEST_ERROR("%s:%d: VerifySame failed.", __FILE__, __LINE__);    \
     return Count(false);                                                \
   }                                                                     \
 
 #define VC(e1, e2)                                                      \
   if (!VerifyClose(#e1, #e2, e1, e2)) {                                 \
-    printf("%s:%d: VerifyClose failed.\n", __FILE__, __LINE__);         \
+    LOG_TEST_ERROR("%s:%d: VerifyClose failed.", __FILE__, __LINE__);   \
     return Count(false);                                                \
   }                                                                     \
 

@@ -21,6 +21,8 @@
 #include <runtime/base/zend/zend_math.h>
 
 #include <sched.h>
+#include <iostream>
+#include <fstream>
 
 // Append the delimiter
 #define HP_STACK_DELIM        "==>"
@@ -105,7 +107,7 @@ static void hp_trunc_time(struct timeval *tv, uint64 intr) {
  * @return 64 bit unsigned integer
  * @author cjiang
  */
-inline uint64 cycle_timer() {
+inline uint64 tsc() {
   uint32 __a,__d;
   uint64 val;
   asm volatile("rdtsc" : "=a" (__a), "=d" (__d));
@@ -117,10 +119,10 @@ inline uint64 cycle_timer() {
  * This is a microbenchmark to get cpu frequency the process is running on. The
  * returned value is used to convert TSC counter values to microseconds.
  *
- * @return double.
+ * @return int64.
  * @author cjiang
  */
-static double get_cpu_frequency() {
+static int64 get_cpu_frequency() {
   struct timeval start;
   struct timeval end;
 
@@ -128,7 +130,7 @@ static double get_cpu_frequency() {
     perror("gettimeofday");
     return 0.0;
   }
-  uint64 tsc_start = cycle_timer();
+  uint64 tsc_start = tsc();
   // Sleep for 5 miliseconds. Comparaing with gettimeofday's  few microseconds
   // execution time, this should be enough.
   usleep(5000);
@@ -136,9 +138,76 @@ static double get_cpu_frequency() {
     perror("gettimeofday");
     return 0.0;
   }
-  uint64 tsc_end = cycle_timer();
-  return (tsc_end - tsc_start) * 1.0 / (get_us_interval(&start, &end));
+  uint64 tsc_end = tsc();
+  return nearbyint((tsc_end - tsc_start) * 1.0
+                                   / (get_us_interval(&start, &end)));
 }
+
+#define MAX_LINELENGTH 1024
+
+static int64* get_cpu_frequency_from_file(const char *file, int ncpus)
+{
+  std::ifstream cpuinfo(file);
+  if (cpuinfo.fail()) {
+    return NULL;
+  }
+  char line[MAX_LINELENGTH];
+  int64* freqs = new int64[ncpus];
+  for (int i = 0; i < ncpus; ++i) {
+    freqs[i] = 0;
+  }
+  int processor = -1;
+
+  while (cpuinfo.getline(line, sizeof(line))) {
+    if (sscanf(line, "processor : %d", &processor) == 1) {
+      continue;
+    }
+    float freq;
+    if (sscanf(line, "cpu MHz : %f", &freq) == 1) {
+      if (processor != -1 && processor < ncpus) {
+         freqs[processor] = nearbyint(freq);
+         processor = -1;
+      }
+    }
+  }
+  for (int i = 0; i < ncpus; ++i) {
+    if (freqs[i] == 0) {
+      delete[] freqs;
+      return NULL;
+    }
+  }
+  return freqs;
+}
+
+class esyscall {
+public:
+  int num;
+
+  esyscall(const char *syscall_name)
+  {
+    num = -1;
+    char format[strlen(syscall_name) + sizeof(" %d")];
+    sprintf(format, "%s %%d", syscall_name);
+
+    std::ifstream syscalls("/proc/esyscall");
+    if (syscalls.fail()) {
+      return;
+    }
+    char line[MAX_LINELENGTH];
+    if (!syscalls.getline(line, sizeof(line))) {
+      return;
+    }
+    // perhaps we should check the format, but we're just going to assume
+    // Name Number
+    while (syscalls.getline(line, sizeof(line))) {
+      int number;
+      if (sscanf(line, format, &number) == 1) {
+        num = number;
+        return;
+      }
+    }
+  }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Machine information that we collect just once.
@@ -162,39 +231,61 @@ public:
   }
 
 public:
-  // This array is used to store cpu frequencies for all available logical
-  // cpus. For now, we assume the cpu frequencies will not change for power
-  // saving or other reasons. If we need to worry about that in the future, we
-  // can use a periodical timer to re-calculate this arrary every once in a
-  // while (for example, every 1 or 5 seconds).
-  double *m_cpu_frequencies;
-
   // The number of logical CPUs this machine has.
   int m_cpu_num;
+  // Store the cpu frequency.  Get it from /proc/cpuinfo if we can.
+  int64* m_cpu_frequencies;
 
   MachineInfo() {
     m_cpu_num = sysconf(_SC_NPROCESSORS_CONF);
-    m_cpu_frequencies = (double*)malloc(sizeof(double) * m_cpu_num);
+    m_cpu_frequencies = get_cpu_frequency_from_file("/proc/cpuinfo", m_cpu_num);
 
-    cpu_set_t prev_mask;
-    sched_getaffinity(0, sizeof(cpu_set_t), &prev_mask);
-    for (int id = 0; id < m_cpu_num; ++id) {
-      BindToCPU(id);
-
+    if (m_cpu_frequencies)
+      return;
+    m_cpu_frequencies = new int64[m_cpu_num];
+    for (int i = 0; i < m_cpu_num; i++) {
+      cpu_set_t prev_mask;
+      sched_getaffinity(0, sizeof(cpu_set_t), &prev_mask);
+      BindToCPU(i);
       // Make sure the current process gets scheduled to the target cpu. This
       // might not be necessary though.
       usleep(0);
-
-      m_cpu_frequencies[id] = get_cpu_frequency();
+      m_cpu_frequencies[i] = get_cpu_frequency();
+      sched_setaffinity(0, sizeof(cpu_set_t), &prev_mask);
     }
-    sched_setaffinity(0, sizeof(cpu_set_t), &prev_mask);
   }
 
   ~MachineInfo() {
-    free(m_cpu_frequencies);
+    delete[] m_cpu_frequencies;
   }
 };
 static MachineInfo s_machine;
+
+static inline uint64
+tv_to_cycles(const struct timeval& tv, int cpuid)
+{
+  return (((uint64)tv.tv_sec * 1000000) + tv.tv_usec)
+                                 * s_machine.m_cpu_frequencies[cpuid];
+}
+
+static inline uint64
+cycles_to_usec(uint64 cycles, int cpuid)
+{
+  int64 freq = s_machine.m_cpu_frequencies[cpuid];
+  return (cycles + freq/2) / freq;
+}
+
+static esyscall vtsc_syscall("vtsc");
+
+static inline uint64 vtsc(int cpuid) {
+  if (vtsc_syscall.num > 0) {
+    return syscall(vtsc_syscall.num);
+  }
+  struct rusage usage;
+  getrusage(RUSAGE_SELF, &usage);
+  return
+    tv_to_cycles(usage.ru_utime, cpuid) + tv_to_cycles(usage.ru_stime, cpuid);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // classes
@@ -212,7 +303,7 @@ public:
   uint64          m_tsc_start;   // start value for TSC counter
   int64           m_mu_start;    // memory usage
   int64           m_pmu_start;   // peak memory usage
-  struct rusage   m_ru_start;    // user/sys time start
+  int64           m_vtsc_start;    // user/sys time start
 
   /**
    * Returns formatted function name
@@ -409,7 +500,11 @@ bool Profiler::s_rand_initialized = false;
 // SimpleProfiler
 
 /**
- * getrusage() based profiler, but simple enough to print basic information.
+ * vtsc() based profiler, but simple enough to print basic information.
+ *
+ * When available, we now use the vtsc() call, which is relatively inexpensive
+ * and accurate.  It's still a system call, but a cheap one.  If the call isn't
+ * available, the comment below still applies.  --renglish
  *
  * COMMENT(cjiang): getrusage is very expensive and inaccurate. It is based
  * on sampling at the rate about once every 5 to 10 miliseconds. The sampling
@@ -425,19 +520,18 @@ bool Profiler::s_rand_initialized = false;
  *
  * See: http://ww2.cs.fsu.edu/~hines/present/timing_linux.pdf
  *
- * Above is a nice paper talking about the overhead and the inaccucy problem
- * asscociated with getrusage.
+ * Above is a nice paper talking about the overhead and the inaccuracy problem
+ * associated with getrusage.
  */
 class SimpleProfiler : public Profiler {
 private:
   class CountMap {
   public:
-    CountMap() : count(0), wall_time(0), user_time(0), system_time(0) {}
+    CountMap() : count(0), tsc(0), vtsc(0) {}
 
     int64 count;
-    int64 wall_time;
-    int64 user_time;
-    int64 system_time;
+    int64 tsc;
+    int64 vtsc;
   };
   typedef __gnu_cxx::hash_map<std::string, CountMap, string_hash> StatsMap;
   StatsMap m_stats; // outcome
@@ -453,23 +547,15 @@ public:
   }
 
   virtual void beginFrameEx() {
-    m_stack->m_tsc_start = cycle_timer();
-    getrusage(RUSAGE_SELF, &m_stack->m_ru_start);
+    m_stack->m_tsc_start = tsc();
+    m_stack->m_vtsc_start = vtsc(m_cur_cpu_id);
   }
 
   virtual void endFrameEx() {
-    struct rusage ru_end;
-    getrusage(RUSAGE_SELF, &ru_end);
-
     CountMap &counts = m_stats[m_stack->m_name];
     counts.count++;
-    counts.wall_time +=
-      (int64)((double)(cycle_timer() - m_stack->m_tsc_start)/
-              s_machine.m_cpu_frequencies[m_cur_cpu_id]);
-    counts.user_time +=
-      get_us_interval(&m_stack->m_ru_start.ru_utime, &ru_end.ru_utime);
-    counts.system_time +=
-      get_us_interval(&m_stack->m_ru_start.ru_stime, &ru_end.ru_stime);
+    counts.tsc += tsc() - m_stack->m_tsc_start;
+    counts.vtsc += vtsc(m_cur_cpu_id) - m_stack->m_vtsc_start;
   }
 
 private:
@@ -489,9 +575,9 @@ private:
 
       char buf[512];
       snprintf(buf, sizeof(buf),
-               ",\"ct\": %lld,\"wt\": %lld,\"ut\": %lld,\"st\": %lld",
-               counts.count, counts.wall_time, counts.user_time,
-               counts.system_time);
+               ",\"ct\": %lld,\"wt\": %lld,\"ut\": %lld,\"st\": 0",
+               counts.count, cycles_to_usec(counts.tsc, m_cur_cpu_id),
+               cycles_to_usec(counts.vtsc, m_cur_cpu_id));
       print(buf);
 
       print("},\n");
@@ -523,6 +609,7 @@ public:
     TrackBuiltins = 1,
     TrackCPU      = 2,
     TrackMemory   = 4,
+    TrackVtsc     = 8,
   };
 
 public:
@@ -530,10 +617,10 @@ public:
   }
 
   virtual void beginFrameEx() {
-    m_stack->m_tsc_start = cycle_timer();
+    m_stack->m_tsc_start = tsc();
 
-    if (m_flags & TrackCPU) {
-      getrusage(RUSAGE_SELF, &m_stack->m_ru_start);
+    if (m_flags & (TrackVtsc | TrackCPU)) {
+      m_stack->m_vtsc_start = vtsc(m_cur_cpu_id);
     }
 
     if (m_flags & TrackMemory) {
@@ -549,16 +636,10 @@ public:
     m_stack->getStack(2, symbol, sizeof(symbol));
     CountMap &counts = m_stats[symbol];
     counts.count++;
-    counts.wall_time +=
-      (int64)((double)(cycle_timer() - m_stack->m_tsc_start)/
-              s_machine.m_cpu_frequencies[m_cur_cpu_id]);
+    counts.wall_time += tsc() - m_stack->m_tsc_start;
 
-    if (m_flags & TrackCPU) {
-      struct rusage ru_end;
-      getrusage(RUSAGE_SELF, &ru_end);
-      counts.cpu +=
-        get_us_interval(&m_stack->m_ru_start.ru_utime, &ru_end.ru_utime) +
-        get_us_interval(&m_stack->m_ru_start.ru_stime, &ru_end.ru_stime);
+    if (m_flags & (TrackCPU | TrackVtsc)) {
+      counts.cpu += vtsc(m_cur_cpu_id) - m_stack->m_vtsc_start;
     }
 
     if (m_flags & TrackMemory) {
@@ -577,9 +658,9 @@ public:
       const CountMap &counts = iter->second;
       Array arr;
       arr.set("ct",  counts.count);
-      arr.set("wt",  counts.wall_time);
-      if (m_flags & TrackCPU) {
-        arr.set("cpu", counts.cpu);
+      arr.set("wt",  cycles_to_usec(counts.wall_time, m_cur_cpu_id));
+      if (m_flags & (TrackCPU| TrackVtsc)) {
+        arr.set("cpu", cycles_to_usec(counts.cpu, m_cur_cpu_id));
       }
       if (m_flags & TrackMemory) {
         arr.set("mu",  counts.memory);
@@ -610,10 +691,10 @@ public:
     struct timeval  now;
     uint64 truncated_us;
     uint64 truncated_tsc;
-    double cpu_freq = s_machine.m_cpu_frequencies[m_cur_cpu_id];
+    int64 cpu_freq = s_machine.m_cpu_frequencies[m_cur_cpu_id];
 
     // Init the last_sample in tsc
-    m_last_sample_tsc = cycle_timer();
+    m_last_sample_tsc = tsc();
 
     // Find the microseconds that need to be truncated
     gettimeofday(&m_last_sample_time, 0);
@@ -622,14 +703,14 @@ public:
 
     // Subtract truncated time from last_sample_tsc
     truncated_us  = get_us_interval(&m_last_sample_time, &now);
-    truncated_tsc = (int64)((double)truncated_us * cpu_freq);
+    truncated_tsc = truncated_us * cpu_freq;
     if (m_last_sample_tsc > truncated_tsc) {
       // just to be safe while subtracting unsigned ints
       m_last_sample_tsc -= truncated_tsc;
     }
 
     // Convert sampling interval to ticks
-    m_sampling_interval_tsc = (int64)((double)SAMPLING_INTERVAL * cpu_freq);
+    m_sampling_interval_tsc = SAMPLING_INTERVAL * cpu_freq;
   }
 
   virtual void beginFrameEx() {
@@ -692,7 +773,7 @@ private:
     if (m_stack) {
       // While loop is to handle a single function taking a long time
       // and passing several sampling intervals
-      while ((cycle_timer() - m_last_sample_tsc) > m_sampling_interval_tsc) {
+      while ((tsc() - m_last_sample_tsc) > m_sampling_interval_tsc) {
         m_last_sample_tsc += m_sampling_interval_tsc;
         // HAS TO BE UPDATED BEFORE calling sample_stack
         incr_us_interval(&m_last_sample_time, SAMPLING_INTERVAL);
@@ -817,6 +898,12 @@ Variant f_phprof_disable() {
 void f_xhprof_enable(int flags/* = 0 */,
                      CArrRef args /* = null_array */) {
 #ifdef HOTPROFILER
+  if (flags & HierarchicalProfiler::TrackMemory) {
+    flags |= HierarchicalProfiler::TrackVtsc;
+  }
+  if (vtsc_syscall.num <= 0) {
+    flags &= ~HierarchicalProfiler::TrackVtsc;
+  }
   s_factory->start(ProfilerFactory::Hierarchical, flags);
 #endif
 }

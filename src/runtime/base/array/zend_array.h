@@ -19,6 +19,7 @@
 
 #include <runtime/base/types.h>
 #include <runtime/base/array/array_data.h>
+#include <runtime/base/array/small_array.h>
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/complex_types.h>
 

@@ -250,6 +250,8 @@ class ArrayData : public Countable {
    */
   int compare(const ArrayData *v2, bool strict) const;
 
+  void setPosition(ssize_t p) { m_pos = p; }
+
  protected:
   ssize_t m_pos;
 

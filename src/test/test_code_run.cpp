@@ -1664,6 +1664,13 @@ bool TestCodeRun::TestArrayIterator() {
       "  print \"$a: $b\n\";"
       "}"
       );
+  MVCR("<?php\n"
+      "$a = array(1, 2, 3, 4, 5, 6);\n"
+      "while ($v = each($a)) { if ($v[1] < 4) $a[] = $v[1] + $v[1]; }\n"
+      "var_dump($a);\n"
+      "$a = array(1, 2, 3, 4, 5, 6);\n"
+      "foreach ($a as $k => $v) { if ($v >= 4) $a = $v + $v; }\n"
+      "var_dump($a);\n");
   return true;
 }
 

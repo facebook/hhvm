@@ -17,6 +17,7 @@
 #include <runtime/base/array/small_array.h>
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/array/zend_array.h>
+#include <runtime/base/runtime_option.h>
 
 namespace HPHP {
 
@@ -379,6 +380,7 @@ ssize_t SmallArray::getIndex(CVarRef k, int64 prehash /* = -1 */) const {
 
 ArrayData *SmallArray::escalate() {
   // Assume UseZendArray for now
+  ASSERT(RuntimeOption::UseZendArray);
   ZendArray *ret = NEW(ZendArray)(m_nNumOfElements);
   for (int p = m_nListHead; p >= 0; p = m_arBuckets[p].next) {
     Bucket &b = m_arBuckets[p];
@@ -387,8 +389,18 @@ ArrayData *SmallArray::escalate() {
     if (b.kind == IntKey) {
       ret->set(b.h, b.data, false);
     } else {
-      int64 hash = hash_string(b.key->data(), b.key->size());
-      ret->set(String(b.key), b.data, false, hash);
+      ASSERT(b.key);
+      ret->set(String(b.key), b.data, false, -1);
+    }
+  }
+  // Set m_pos in the escalated array
+  if (m_pos != ArrayData::invalid_index) {
+    Bucket &b = m_arBuckets[m_pos];
+    if (b.kind == IntKey) {
+      ret->setPosition(ret->getIndex(b.h));
+    } else {
+      ASSERT(b.key);
+      ret->setPosition(ret->getIndex(String(b.key)));
     }
   }
   return ret;

@@ -20,7 +20,7 @@ f('call_user_func_array', Variant,
 
 f('call_user_func', Variant,
   array('function' => Variant),
-  VariableArguments);
+  ReferenceVariableArguments);
 
 f('call_user_func_array_async', Object,
   array('function' => Variant,
@@ -28,7 +28,7 @@ f('call_user_func_array_async', Object,
 
 f('call_user_func_async', Object,
   array('function' => Variant),
-  VariableArguments);
+  ReferenceVariableArguments);
 
 f('end_user_func_async', Variant,
   array('handle' => Object,
@@ -41,7 +41,7 @@ f('forward_static_call_array', Variant,
 
 f('forward_static_call', Variant,
   array('function' => Variant),
-  VariableArguments);
+  ReferenceVariableArguments);
 
 f('create_function', String,
   array('args' => String,

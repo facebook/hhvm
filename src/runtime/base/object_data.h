@@ -22,6 +22,7 @@
 #include <runtime/base/memory/unsafe_pointer.h>
 #include <runtime/base/macros.h>
 #include <runtime/base/runtime_error.h>
+#include <runtime/base/fiber_reference_map.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -212,6 +213,12 @@ class ObjectData : public Countable {
   virtual Variant t___set_state(Variant v_properties);
   virtual String t___tostring();
   virtual Variant t___clone();
+
+  /**
+   * Marshaling/Unmarshaling between request thread and fiber thread.
+   */
+  virtual Object fiberMarshal(FiberReferenceMap &refMap) const;
+  virtual Object fiberUnmarshal(FiberReferenceMap &refMap) const;
 
  protected:
   virtual ObjectData* cloneImpl() = 0;

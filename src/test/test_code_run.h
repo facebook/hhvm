@@ -161,6 +161,7 @@ class TestCodeRun : public TestBase {
   bool TestExtSplFile();
   bool TestExtIterator();
   bool TestExtSoap();
+  bool TestFiber();
 
   // PHP 5.3
   bool TestVariableClassName();

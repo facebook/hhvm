@@ -754,9 +754,40 @@ void Array::unserialize(VariableUnserializer *unserializer) {
   }
 }
 
-Array Array::fiberCopy() {
+Array Array::fiberMarshal(FiberReferenceMap &refMap) const {
   if (m_px) {
-    return m_px->copy();
+    Array ret = Array::Create();
+    if (m_px->supportValueRef()) {
+      for (ArrayIter iter(*this); iter; ++iter) {
+        ret.set(iter.first().fiberMarshal(refMap),
+                iter.secondRef().fiberMarshal(refMap));
+      }
+    } else {
+      for (ArrayIter iter(*this); iter; ++iter) {
+        ret.set(iter.first().fiberMarshal(refMap),
+                iter.second().fiberMarshal(refMap));
+      }
+    }
+    return ret;
+  }
+  return Array();
+}
+
+Array Array::fiberUnmarshal(FiberReferenceMap &refMap) const {
+  if (m_px) {
+    Array ret = Array::Create();
+    if (m_px->supportValueRef()) {
+      for (ArrayIter iter(*this); iter; ++iter) {
+        ret.set(iter.first().fiberUnmarshal(refMap),
+                iter.secondRef().fiberUnmarshal(refMap));
+      }
+    } else {
+      for (ArrayIter iter(*this); iter; ++iter) {
+        ret.set(iter.first().fiberUnmarshal(refMap),
+                iter.second().fiberUnmarshal(refMap));
+      }
+    }
+    return ret;
   }
   return Array();
 }

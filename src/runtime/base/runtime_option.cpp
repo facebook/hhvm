@@ -25,6 +25,7 @@
 #include <util/file_cache.h>
 #include <runtime/base/preg.h>
 #include <runtime/base/server/access_log.h>
+#include <runtime/base/util/extended_logger.h>
 
 using namespace std;
 
@@ -343,7 +344,10 @@ void RuntimeOption::Load(Hdf &config) {
       Logger::LogLevel = Logger::LogVerbose;
     }
     Logger::LogHeader = logger["Header"].getBool();
-    InjectedStackTrace = logger["InjectedStackTrace"].getBool(true);
+    bool logInjectedStackTrace = logger["InjectedStackTrace"].getBool(false);
+    if (logInjectedStackTrace) {
+      Logger::SetTheLogger(new ExtendedLogger());
+    }
     Logger::LogNativeStackTrace = logger["NativeStackTrace"].getBool(true);
     Logger::MaxMessagesPerRequest =
       logger["MaxMessagesPerRequest"].getInt32(-1);
@@ -578,6 +582,8 @@ void RuntimeOption::Load(Hdf &config) {
     LightProcessFilePrefix =
       server["LightProcessFilePrefix"].getString("./lightprocess");
     LightProcessCount = server["LightProcessCount"].getInt32(0);
+
+    InjectedStackTrace = server["InjectedStackTrace"].getBool(true);
 
     ForceServerNameToHeader = server["ForceServerNameToHeader"].getBool();
   }

@@ -75,7 +75,16 @@ public:
   static bool SetThreadLog(const char *file);
   static void ClearThreadLog();
 
-private:
+  static void SetTheLogger(Logger* logger) {
+    if (logger != NULL) {
+      delete s_logger;
+      s_logger = logger;
+    }
+  }
+
+  virtual ~Logger() { }
+
+protected:
   class ThreadData {
   public:
     ThreadData() : request(0), message(0), log(NULL) {}
@@ -90,12 +99,23 @@ private:
                   bool escape = true);
 
   /**
+   * For subclasses to override, e.g., to support injected stack trace.
+   */
+  virtual void log(const char *type, const Exception &e,
+                   const char *file = NULL, int line = 0);
+  virtual void log(const std::string &msg, const StackTrace *stackTrace,
+                   bool escape = true);
+
+  /**
    * What needs to be print for each line of logging. Currently it's
    * [machine:thread:datetime].
    */
   static std::string GetHeader();
 
   static char *EscapeString(const std::string &msg);
+
+private:
+  static Logger *s_logger;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

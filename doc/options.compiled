@@ -155,6 +155,9 @@ flood error logs.
 
     # Recommend to turn this on for faster array operations.
     UseZendArray = true
+    # Faster data structure for arrays of size < 8. Requires UseZendArray=true.
+    # Recommend to turn this on.
+    UseSmallArray = true
 
     # If ServerName is not specified for a virtual host, use prefix + this
     # suffix to compose one

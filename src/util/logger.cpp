@@ -58,6 +58,8 @@ std::string Logger::ExtraHeader;
 int Logger::MaxMessagesPerRequest = -1;
 IMPLEMENT_THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
 
+Logger *Logger::s_logger = new Logger();
+
 void Logger::Printf(std::string &msg, const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
@@ -92,6 +94,11 @@ void Logger::Log(const char *fmt, va_list ap) {
 
 void Logger::Log(const char *type, const Exception &e,
                  const char *file /* = NULL */, int line /* = 0 */) {
+  s_logger->log(type, e, file, line);
+}
+
+void Logger::log(const char *type, const Exception &e,
+                 const char *file /* = NULL */, int line /* = 0 */) {
   if (!UseLogAggregator && !UseLogFile) return;
 
   std::string msg = type;
@@ -117,6 +124,11 @@ void Logger::ResetRequestCount() {
 }
 
 void Logger::Log(const std::string &msg, const StackTrace *stackTrace,
+                 bool escape /* = true */) {
+  s_logger->log(msg, stackTrace, escape);
+}
+
+void Logger::log(const std::string &msg, const StackTrace *stackTrace,
                  bool escape /* = true */) {
   ThreadData *threadData = s_threadData.get();
   if (++threadData->message > MaxMessagesPerRequest &&

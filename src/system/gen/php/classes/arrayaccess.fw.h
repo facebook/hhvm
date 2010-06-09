@@ -28,7 +28,7 @@ namespace HPHP {
 // 1. Constants
 
 // 2. Classes
-FORWARD_DECLARE_CLASS(arrayaccess);
+FORWARD_DECLARE_INTERFACE(arrayaccess);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

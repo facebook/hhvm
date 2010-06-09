@@ -380,24 +380,15 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       // one of the invoke methods
       if (type->isSpecificObject() && !m_name.empty() && m_valid) {
         objType = type->getName();
+      } else {
+        objType = "ObjectData";
       }
 
-      if (!objType.empty()) {
-        cg.printf("AS_CLASS(");
-        m_object->outputCPP(cg, ar);
-        cg.printf(",%s%s)", Option::ClassPrefix, objType.c_str());
-        if (m_bindClass) {
-          cg.printf("-> BIND_CLASS_ARROW(%s) ", objType.c_str());
-        } else {
-          cg.printf("->");
-        }
+      m_object->outputCPP(cg, ar);
+      if (m_bindClass) {
+        cg.printf("-> BIND_CLASS_ARROW(%s) ", objType.c_str());
       } else {
-        m_object->outputCPP(cg, ar);
-        if (m_bindClass) {
-          cg.printf("-> BIND_CLASS_ARROW(ObjectData) ");
-        } else {
-          cg.printf("->");
-        }
+        cg.printf("->");
       }
     }
   } else if (m_bindClass && m_classScope) {

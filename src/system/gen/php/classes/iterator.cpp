@@ -1596,7 +1596,7 @@ void c_appenditerator::t___construct() {
 /* SRC: classes/iterator.php line 286 */
 void c_appenditerator::t_append(p_iterator v_it) {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::append);
-  m_iterators. BIND_CLASS_DOT o_invoke_few_args("append", 0x4DEE4A472DC69EC2LL, 1, v_it);
+  m_iterators. BIND_CLASS_DOT o_invoke_few_args("append", 0x4DEE4A472DC69EC2LL, 1, ((Object)(v_it)));
 } /* function */
 /* SRC: classes/iterator.php line 290 */
 Variant c_appenditerator::t_getinneriterator() {
@@ -2939,28 +2939,28 @@ void c_recursivedirectoryiterator::t___construct(Variant v_path, Variant v_flags
 ) {
   INSTANCE_METHOD_INJECTION(RecursiveDirectoryIterator, RecursiveDirectoryIterator::__construct);
   bool oldInCtor = gasInCtor(true);
-  x_hphp_recursivedirectoryiterator___construct(GET_THIS(), toString(v_path), toInt64(v_flags));
+  x_hphp_recursivedirectoryiterator___construct(((Object)(GET_THIS())), toString(v_path), toInt64(v_flags));
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/iterator.php line 223 */
 Variant c_recursivedirectoryiterator::t_current() {
   INSTANCE_METHOD_INJECTION(RecursiveDirectoryIterator, RecursiveDirectoryIterator::current);
-  return x_hphp_recursivedirectoryiterator_current(GET_THIS());
+  return x_hphp_recursivedirectoryiterator_current(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 227 */
 Variant c_recursivedirectoryiterator::t_key() {
   INSTANCE_METHOD_INJECTION(RecursiveDirectoryIterator, RecursiveDirectoryIterator::key);
-  return x_hphp_recursivedirectoryiterator_key(GET_THIS());
+  return x_hphp_recursivedirectoryiterator_key(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 231 */
 Variant c_recursivedirectoryiterator::t_next() {
   INSTANCE_METHOD_INJECTION(RecursiveDirectoryIterator, RecursiveDirectoryIterator::next);
-  return (x_hphp_recursivedirectoryiterator_next(GET_THIS()), null);
+  return (x_hphp_recursivedirectoryiterator_next(((Object)(GET_THIS()))), null);
 } /* function */
 /* SRC: classes/iterator.php line 235 */
 Variant c_recursivedirectoryiterator::t_rewind() {
   INSTANCE_METHOD_INJECTION(RecursiveDirectoryIterator, RecursiveDirectoryIterator::rewind);
-  return (x_hphp_recursivedirectoryiterator_rewind(GET_THIS()), null);
+  return (x_hphp_recursivedirectoryiterator_rewind(((Object)(GET_THIS()))), null);
 } /* function */
 /* SRC: classes/iterator.php line 239 */
 Variant c_recursivedirectoryiterator::t_seek(CVarRef v_position) {
@@ -2970,32 +2970,32 @@ Variant c_recursivedirectoryiterator::t_seek(CVarRef v_position) {
 /* SRC: classes/iterator.php line 243 */
 String c_recursivedirectoryiterator::t___tostring() {
   INSTANCE_METHOD_INJECTION(RecursiveDirectoryIterator, RecursiveDirectoryIterator::__toString);
-  return x_hphp_recursivedirectoryiterator___tostring(GET_THIS());
+  return x_hphp_recursivedirectoryiterator___tostring(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 247 */
 bool c_recursivedirectoryiterator::t_valid() {
   INSTANCE_METHOD_INJECTION(RecursiveDirectoryIterator, RecursiveDirectoryIterator::valid);
-  return x_hphp_recursivedirectoryiterator_valid(GET_THIS());
+  return x_hphp_recursivedirectoryiterator_valid(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 251 */
 bool c_recursivedirectoryiterator::t_haschildren() {
   INSTANCE_METHOD_INJECTION(RecursiveDirectoryIterator, RecursiveDirectoryIterator::hasChildren);
-  return x_hphp_recursivedirectoryiterator_haschildren(GET_THIS());
+  return x_hphp_recursivedirectoryiterator_haschildren(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 255 */
 Object c_recursivedirectoryiterator::t_getchildren() {
   INSTANCE_METHOD_INJECTION(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getChildren);
-  return x_hphp_recursivedirectoryiterator_getchildren(GET_THIS());
+  return x_hphp_recursivedirectoryiterator_getchildren(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 259 */
 String c_recursivedirectoryiterator::t_getsubpath() {
   INSTANCE_METHOD_INJECTION(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getSubPath);
-  return x_hphp_recursivedirectoryiterator_getsubpath(GET_THIS());
+  return x_hphp_recursivedirectoryiterator_getsubpath(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 263 */
 String c_recursivedirectoryiterator::t_getsubpathname() {
   INSTANCE_METHOD_INJECTION(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getSubPathname);
-  return x_hphp_recursivedirectoryiterator_getsubpathname(GET_THIS());
+  return x_hphp_recursivedirectoryiterator_getsubpathname(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 170 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_directoryiterator
@@ -4119,48 +4119,48 @@ void c_directoryiterator::init() {
 void c_directoryiterator::t___construct(Variant v_path) {
   INSTANCE_METHOD_INJECTION(DirectoryIterator, DirectoryIterator::__construct);
   bool oldInCtor = gasInCtor(true);
-  x_hphp_directoryiterator___construct(GET_THIS(), toString(v_path));
+  x_hphp_directoryiterator___construct(((Object)(GET_THIS())), toString(v_path));
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/iterator.php line 176 */
 Variant c_directoryiterator::t_current() {
   INSTANCE_METHOD_INJECTION(DirectoryIterator, DirectoryIterator::current);
-  return x_hphp_directoryiterator_current(GET_THIS());
+  return x_hphp_directoryiterator_current(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 180 */
 Variant c_directoryiterator::t_key() {
   INSTANCE_METHOD_INJECTION(DirectoryIterator, DirectoryIterator::key);
-  return x_hphp_directoryiterator_key(GET_THIS());
+  return x_hphp_directoryiterator_key(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 184 */
 Variant c_directoryiterator::t_next() {
   INSTANCE_METHOD_INJECTION(DirectoryIterator, DirectoryIterator::next);
-  return (x_hphp_directoryiterator_next(GET_THIS()), null);
+  return (x_hphp_directoryiterator_next(((Object)(GET_THIS()))), null);
 } /* function */
 /* SRC: classes/iterator.php line 188 */
 Variant c_directoryiterator::t_rewind() {
   INSTANCE_METHOD_INJECTION(DirectoryIterator, DirectoryIterator::rewind);
-  return (x_hphp_directoryiterator_rewind(GET_THIS()), null);
+  return (x_hphp_directoryiterator_rewind(((Object)(GET_THIS()))), null);
 } /* function */
 /* SRC: classes/iterator.php line 192 */
 Variant c_directoryiterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION(DirectoryIterator, DirectoryIterator::seek);
-  return (x_hphp_directoryiterator_seek(GET_THIS(), toInt64(v_position)), null);
+  return (x_hphp_directoryiterator_seek(((Object)(GET_THIS())), toInt64(v_position)), null);
 } /* function */
 /* SRC: classes/iterator.php line 196 */
 String c_directoryiterator::t___tostring() {
   INSTANCE_METHOD_INJECTION(DirectoryIterator, DirectoryIterator::__toString);
-  return x_hphp_directoryiterator___tostring(GET_THIS());
+  return x_hphp_directoryiterator___tostring(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 200 */
 bool c_directoryiterator::t_valid() {
   INSTANCE_METHOD_INJECTION(DirectoryIterator, DirectoryIterator::valid);
-  return x_hphp_directoryiterator_valid(GET_THIS());
+  return x_hphp_directoryiterator_valid(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 204 */
 bool c_directoryiterator::t_isdot() {
   INSTANCE_METHOD_INJECTION(DirectoryIterator, DirectoryIterator::isDot);
-  return x_hphp_directoryiterator_isdot(GET_THIS());
+  return x_hphp_directoryiterator_isdot(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 28 */
 const int64 q_recursiveiteratoriterator_LEAVES_ONLY = 0LL;
@@ -4578,38 +4578,38 @@ void c_recursiveiteratoriterator::t___construct(Variant v_iterator, Variant v_mo
 ) {
   INSTANCE_METHOD_INJECTION(RecursiveIteratorIterator, RecursiveIteratorIterator::__construct);
   bool oldInCtor = gasInCtor(true);
-  x_hphp_recursiveiteratoriterator___construct(GET_THIS(), toObject(v_iterator), toInt64(v_mode), toInt64(v_flags));
+  x_hphp_recursiveiteratoriterator___construct(((Object)(GET_THIS())), toObject(v_iterator), toInt64(v_mode), toInt64(v_flags));
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/iterator.php line 40 */
 Object c_recursiveiteratoriterator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION(RecursiveIteratorIterator, RecursiveIteratorIterator::getInnerIterator);
-  return x_hphp_recursiveiteratoriterator_getinneriterator(GET_THIS());
+  return x_hphp_recursiveiteratoriterator_getinneriterator(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 43 */
 Variant c_recursiveiteratoriterator::t_current() {
   INSTANCE_METHOD_INJECTION(RecursiveIteratorIterator, RecursiveIteratorIterator::current);
-  return x_hphp_recursiveiteratoriterator_current(GET_THIS());
+  return x_hphp_recursiveiteratoriterator_current(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 46 */
 Variant c_recursiveiteratoriterator::t_key() {
   INSTANCE_METHOD_INJECTION(RecursiveIteratorIterator, RecursiveIteratorIterator::key);
-  return x_hphp_recursiveiteratoriterator_key(GET_THIS());
+  return x_hphp_recursiveiteratoriterator_key(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 49 */
 Variant c_recursiveiteratoriterator::t_next() {
   INSTANCE_METHOD_INJECTION(RecursiveIteratorIterator, RecursiveIteratorIterator::next);
-  return (x_hphp_recursiveiteratoriterator_next(GET_THIS()), null);
+  return (x_hphp_recursiveiteratoriterator_next(((Object)(GET_THIS()))), null);
 } /* function */
 /* SRC: classes/iterator.php line 52 */
 Variant c_recursiveiteratoriterator::t_rewind() {
   INSTANCE_METHOD_INJECTION(RecursiveIteratorIterator, RecursiveIteratorIterator::rewind);
-  return (x_hphp_recursiveiteratoriterator_rewind(GET_THIS()), null);
+  return (x_hphp_recursiveiteratoriterator_rewind(((Object)(GET_THIS()))), null);
 } /* function */
 /* SRC: classes/iterator.php line 55 */
 bool c_recursiveiteratoriterator::t_valid() {
   INSTANCE_METHOD_INJECTION(RecursiveIteratorIterator, RecursiveIteratorIterator::valid);
-  return x_hphp_recursiveiteratoriterator_valid(GET_THIS());
+  return x_hphp_recursiveiteratoriterator_valid(((Object)(GET_THIS())));
 } /* function */
 /* SRC: classes/iterator.php line 268 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_filteriterator

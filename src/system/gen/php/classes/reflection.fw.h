@@ -30,7 +30,7 @@ namespace HPHP {
 // 2. Classes
 FORWARD_DECLARE_CLASS(reflectionfunctionabstract)
 FORWARD_DECLARE_CLASS(reflectionobject)
-FORWARD_DECLARE_CLASS(reflector);
+FORWARD_DECLARE_INTERFACE(reflector);
 FORWARD_DECLARE_CLASS(reflectionexception)
 FORWARD_DECLARE_CLASS(reflectionclass)
 extern const int64 q_reflectionclass_IS_IMPLICIT_ABSTRACT;

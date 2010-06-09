@@ -28,15 +28,15 @@ namespace HPHP {
 // 1. Constants
 
 // 2. Classes
-FORWARD_DECLARE_CLASS(outeriterator);
-FORWARD_DECLARE_CLASS(serializable);
-FORWARD_DECLARE_CLASS(traversable);
-FORWARD_DECLARE_CLASS(countable);
+FORWARD_DECLARE_INTERFACE(outeriterator);
+FORWARD_DECLARE_INTERFACE(serializable);
+FORWARD_DECLARE_INTERFACE(traversable);
+FORWARD_DECLARE_INTERFACE(countable);
 FORWARD_DECLARE_CLASS(arrayiterator)
-FORWARD_DECLARE_CLASS(iterator);
+FORWARD_DECLARE_INTERFACE(iterator);
 FORWARD_DECLARE_CLASS(appenditerator)
-FORWARD_DECLARE_CLASS(seekableiterator);
-FORWARD_DECLARE_CLASS(recursiveiterator);
+FORWARD_DECLARE_INTERFACE(seekableiterator);
+FORWARD_DECLARE_INTERFACE(recursiveiterator);
 FORWARD_DECLARE_CLASS(recursivedirectoryiterator)
 extern const int64 q_recursivedirectoryiterator_CURRENT_AS_SELF;
 extern const int64 q_recursivedirectoryiterator_CURRENT_AS_FILEINFO;
@@ -45,7 +45,7 @@ extern const int64 q_recursivedirectoryiterator_KEY_AS_PATHNAME;
 extern const int64 q_recursivedirectoryiterator_KEY_AS_FILENAME;
 extern const int64 q_recursivedirectoryiterator_NEW_CURRENT_AND_KEY;
 FORWARD_DECLARE_CLASS(directoryiterator)
-FORWARD_DECLARE_CLASS(iteratoraggregate);
+FORWARD_DECLARE_INTERFACE(iteratoraggregate);
 FORWARD_DECLARE_CLASS(recursiveiteratoriterator)
 extern const int64 q_recursiveiteratoriterator_LEAVES_ONLY;
 extern const int64 q_recursiveiteratoriterator_SELF_FIRST;

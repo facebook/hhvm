@@ -447,7 +447,12 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   bool isLvalue = (m_context & LValue);
-  if (dstType && srcType && !isLvalue &&
+  if ((m_context & (LValue|RefValue|ObjectContext|AssignmentRHS)) == 0 &&
+      srcType &&
+      srcType->isSpecificObject() &&
+      (!dstType || !dstType->isSpecificObject()) &&
+      !is(Expression::KindOfParameterExpression)) {
+  } else if (dstType && srcType && !isLvalue &&
       Type::IsCastNeeded(ar, srcType, dstType)) {
   } else {
     killCast = true;
@@ -672,17 +677,30 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (!dstType) dstType = m_actualType;
   }
 
+  // When p_ types are used as r-value, we cast it to Object so not to define
+  // every function with SmartObject<T> template functions
+  bool castToObject = false;
   if (hasError(Expression::BadPassByRef)) {
     cg.printf("throw_fatal(\"bad pass by reference\")");
     return;
   }
+  if ((m_context & (LValue|RefValue|ObjectContext|AssignmentRHS)) == 0 &&
+      srcType &&
+      srcType->isSpecificObject() &&
+      (!dstType || !dstType->isSpecificObject()) &&
+      !is(Expression::KindOfParameterExpression)) {
+    castToObject = true;
+  }
 
-  int closeParen = 0;
+  int closeParen = castToObject ? 2 : 0;
   if (dstType && srcType && ((m_context & LValue) == 0) &&
       Type::IsCastNeeded(ar, srcType, dstType)) {
     dstType->outputCPPCast(cg, ar);
     cg.printf("(");
     closeParen++;
+    if (castToObject) {
+      cg.printf("((Object)(");
+    }
     outputCPPImpl(cg, ar);
   } else {
     if (((m_context & RefValue) != 0) && ((m_context & NoRefWrapper) == 0) &&
@@ -698,6 +716,9 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
          is(Expression::KindOfObjectPropertyExpression))) {
       cg.printf("lval(");
       closeParen++;
+    }
+    if (castToObject) {
+      cg.printf("((Object)(");
     }
     outputCPPImpl(cg, ar);
   }

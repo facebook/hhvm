@@ -96,9 +96,9 @@ class SmartObject : public SmartPtr<T> {
   /**
    * r-value and l-value of object properties.
    */
-  Variant o_get(CStrRef propName, int64 hash) const {
-    if (SmartPtr<T>::m_px == NULL) return null;
-    return SmartPtr<T>::m_px->o_get(propName, hash);
+  Variant o_get(CStrRef propName, int64 hash, bool error = true) const {
+    if (!this->m_px) throw NullPointerException();
+    return this->m_px->o_get(propName, hash, error);
   }
   ObjectOffset o_lval(CStrRef propName, int64 hash) {
     return ObjectOffset(SmartPtr<T>::m_px, propName, hash);

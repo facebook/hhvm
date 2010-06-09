@@ -620,6 +620,26 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       }
     }
     break;
+  case T_IS_IDENTICAL:
+  case T_IS_NOT_IDENTICAL:
+  case T_IS_EQUAL:
+  case T_IS_NOT_EQUAL:
+    {
+      m_exp1->inferAndCheck(ar, et1, coerce1);
+      m_exp2->inferAndCheck(ar, et2, coerce2);
+      TypePtr act1 = m_exp1->getActualType();
+      TypePtr act2 = m_exp2->getActualType();
+      TypePtr ot;
+      if (act1 && act1->is(Type::KindOfObject) && act1->isSpecificObject()) {
+        ot = Type::CreateType(Type::KindOfObject);
+        m_exp1->setExpectedType(ot);
+      }
+      if (act2 && act2->is(Type::KindOfObject) && act2->isSpecificObject()) {
+        if (!ot) ot = Type::CreateType(Type::KindOfObject);
+        m_exp2->setExpectedType(ot);
+      }
+      break;
+    }
   default:
     m_exp1->inferAndCheck(ar, et1, coerce1);
     m_exp2->inferAndCheck(ar, et2, coerce2);

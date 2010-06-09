@@ -346,11 +346,8 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       } else {
         if (!bThis) {
           ASSERT(!directVariant);
-          cg.printf("AS_CLASS(");
           m_object->outputCPP(cg, ar);
-          cg.printf(",%s%s)->",
-                    Option::ClassPrefix,
-                    m_object->getType()->getName().c_str());
+          cg.printf("->");
         }
         cg.printf("%s%s", Option::PropertyPrefix, propName);
       }

@@ -623,7 +623,7 @@ void Type::outputCPPCast(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (m_name.empty()) {
       cg.printf("toObject");
     } else {
-      cg.printf("p_%s", m_name.c_str());
+      cg.printf("%s%s", Option::SmartPtrPrefix, m_name.c_str());
     }
     break;
   default:

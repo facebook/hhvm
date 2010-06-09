@@ -298,7 +298,7 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) 
   switch (cg.getContext()) {
   case CodeGenerator::CppForwardDeclaration:
     if (Option::GenerateCPPMacros) {
-      cg.printf("FORWARD_DECLARE_CLASS(%s);\n", clsName);
+      cg.printf("FORWARD_DECLARE_INTERFACE(%s);\n", clsName);
     }
     break;
   case CodeGenerator::CppDeclaration:

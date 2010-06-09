@@ -664,6 +664,8 @@ inline CStrRef id(CStrRef v) { return v; }
 inline CArrRef id(CArrRef v) { return v; }
 inline CObjRef id(CObjRef v) { return v; }
 inline CVarRef id(CVarRef v) { return v; }
+template <class T>
+inline const SmartObject<T> &id(const SmartObject<T> &v) { return v; }
 
 /**
  * For wrapping return values to prevent elision of copy

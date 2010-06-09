@@ -280,12 +280,6 @@ static DataType collator_is_numeric(UChar *str, int length, long *lval,
   return KindOfNull;
 }
 
-static Variant collator_convert_object_to_string(CVarRef obj) {
-  // TODO: is this equivalent to PHP's implementation?
-  if (!obj.isObject()) return obj;
-  return obj.toString();
-}
-
 static Variant collator_convert_string_to_number(CVarRef str) {
   Variant num = collator_convert_string_to_number_if_possible(str);
   if (num.same(false)) {
@@ -343,6 +337,22 @@ static String collator_convert_str_utf8_to_utf16(CStrRef utf8_str,
     raise_notice("Error converting utf16 to utf8");
   }
   return String((char*)ustr, UBYTES(ustr_len), AttachString);
+}
+
+static Variant collator_convert_object_to_string(CVarRef obj) {
+  if (!obj.isObject()) return obj;
+  String str;
+  try {
+    str = obj.toString();
+  } catch (Exception &e) {
+    return obj;
+  }
+  UErrorCode status = U_ZERO_ERROR;
+  String ustr = collator_convert_str_utf8_to_utf16(obj.toString(), &status);
+  if (U_FAILURE(status)) {
+    raise_warning("Error converting object to utf16 string");
+  }
+  return ustr;
 }
 
 static void collator_convert_array_from_utf16_to_utf8(Array &array,

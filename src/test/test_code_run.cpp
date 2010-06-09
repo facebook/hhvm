@@ -6764,6 +6764,28 @@ bool TestCodeRun::TestPrint() {
 }
 
 bool TestCodeRun::TestLocale() {
+  MVCRO("<?php "
+        "class A { public $a; function __toString() { return $this->a;}} "
+        "$a = new A; $a->a = 'a'; $b = new A; $b->a = 'b'; "
+        "$arr = array($a, $b); sort($arr, SORT_REGULAR, true); "
+        "print ((string)$arr[0]);",
+        "a");
+  MVCRO("<?php "
+        "class A { public $a; }"
+        "$a = new A; $a->a = 'a'; $b = new A; $b->a = 'b'; "
+        "$arr = array($b, $a);"
+        "print $arr[0]->a;"
+        "sort($arr, SORT_REGULAR, true); "
+        "print $arr[0]->a;",
+        "ba");
+  MVCRO("<?php "
+        "$a = array(1);"
+        "$b = array(2);"
+        "$arr = array($b, $a);"
+        "print $arr[0][0];"
+        "asort($arr, SORT_REGULAR, true); "
+        "print $arr[0][0];",
+        "22");
   MVCR("<?php "
       "$a = array(\"a bc\", \"\\xc1 bc\", \"d ef\");"
       "asort($a);"

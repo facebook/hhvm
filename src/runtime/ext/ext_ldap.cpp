@@ -237,7 +237,9 @@ errexit:
   return ret;
 }
 
-static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, int *old_sizelimit, int *old_timelimit, int *old_deref) {
+static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref,
+                         int *old_sizelimit, int *old_timelimit,
+                         int *old_deref) {
   /* sizelimit */
   if (sizelimit > -1) {
     ldap_get_option(ldap, LDAP_OPT_SIZELIMIT, old_sizelimit);
@@ -360,7 +362,8 @@ static Variant php_ldap_do_search(CVarRef link, CVarRef base_dn,
         ldap_filter = (char*)sentry.data();
       }
 
-      php_set_opts(ld->link, sizelimit, timelimit, deref, &old_sizelimit, &old_timelimit, &old_deref);
+      php_set_opts(ld->link, sizelimit, timelimit, deref, &old_sizelimit,
+                   &old_timelimit, &old_deref);
 
       /* Run the actual search */
       rcs[i] = ldap_search(ld->link, ldap_base_dn, scope, ldap_filter,
@@ -402,7 +405,8 @@ cleanup_parallel:
       goto cleanup;
     }
 
-    php_set_opts(ld->link, sizelimit, timelimit, deref, &old_sizelimit, &old_timelimit, &old_deref);
+    php_set_opts(ld->link, sizelimit, timelimit, deref, &old_sizelimit,
+                 &old_timelimit, &old_deref);
 
     /* Run the actual search */
     LDAPMessage *ldap_res;
@@ -435,7 +439,8 @@ cleanup_parallel:
 cleanup:
   if (ld) {
     /* Restoring previous options */
-    php_set_opts(ld->link, old_sizelimit, old_timelimit, old_deref, &sizelimit, &timelimit, &deref);
+    php_set_opts(ld->link, old_sizelimit, old_timelimit, old_deref, &sizelimit,
+                 &timelimit, &deref);
   }
   if (ldap_attrs != NULL) {
     free(ldap_attrs);
@@ -531,6 +536,8 @@ Variant f_ldap_connect(CStrRef hostname /* = null_string */,
     ld->link = ldap;
     return ret;
   }
+  raise_warning("Unable to initialize LDAP: %s",
+                Util::safe_strerror(errno).c_str());
   return false;
 }
 

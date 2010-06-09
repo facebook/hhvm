@@ -1168,6 +1168,10 @@ void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
 
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
+    if (iter->second.empty()) {
+      throw Exception("During code gen, class %s is undefined",
+                      iter->first.c_str());
+    }
     ClassScopePtr cls = iter->second[0];
     if (!cls->isInterface()) {
       classes.push_back(cls->getName().c_str());

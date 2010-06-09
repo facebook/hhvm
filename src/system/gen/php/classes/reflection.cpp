@@ -4400,7 +4400,7 @@ Variant c_reflectionclass::t_issubclassof(Variant v_cls) {
   }
   {
     const Object &tmp72((toObject(t_getparentclass())));
-    return wrap_variant(tmp72-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args("isSubclassOf", 0x373333991926C97ELL, 1, v_cls));
+    return tmp72-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args("isSubclassOf", 0x373333991926C97ELL, 1, v_cls);
   }
 } /* function */
 /* SRC: classes/reflection.php line 460 */

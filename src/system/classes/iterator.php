@@ -280,7 +280,7 @@ class AppendIterator implements OuterIterator {
   private $iterators;
 
   function __construct() {
-    $this->iterators = new ArrayIterator();
+    $this->iterators = new ArrayIterator(array());
   }
 
   function append(Iterator $it) {

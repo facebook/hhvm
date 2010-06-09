@@ -18348,7 +18348,7 @@ Variant c_pdo::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 14:
       HASH_GUARD(0x7FF4D594AC38340ELL, getavailabledrivers) {
         if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
-        return (t_getavailabledrivers());
+        return (ti_getavailabledrivers(o_getClassName()));
       }
       break;
     case 18:
@@ -18466,7 +18466,7 @@ Variant c_pdo::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a
     case 14:
       HASH_GUARD(0x7FF4D594AC38340ELL, getavailabledrivers) {
         if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
-        return (t_getavailabledrivers());
+        return (ti_getavailabledrivers(o_getClassName()));
       }
       break;
     case 18:
@@ -18562,6 +18562,17 @@ Variant c_pdo::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdo
 Variant c_pdo::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 1) {
+    case 0:
+      HASH_GUARD(0x7FF4D594AC38340ELL, getavailabledrivers) {
+        if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
+        return (ti_getavailabledrivers(c));
+      }
+      break;
+    default:
+      break;
+  }
   return c_ObjectData::os_invoke(c, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdo
@@ -18633,7 +18644,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_getavailabledrivers());
+        return (ti_getavailabledrivers(o_getClassName()));
       }
       break;
     case 18:
@@ -18874,6 +18885,25 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_pdo::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 1) {
+    case 0:
+      HASH_GUARD(0x7FF4D594AC38340ELL, getavailabledrivers) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_getavailabledrivers(c));
+      }
+      break;
+    default:
+      break;
+  }
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 struct ObjectStaticCallbacks cw_pdo = {

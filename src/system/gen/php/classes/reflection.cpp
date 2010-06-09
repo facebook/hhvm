@@ -628,7 +628,7 @@ int64 c_reflectionfunctionabstract::t_getnumberofrequiredparameters() {
 
   (v_count = 0LL);
   {
-    Array tmp5((t_getparameters()));
+    const Array &tmp5((t_getparameters()));
     (v_params = tmp5);
   }
   {
@@ -3961,7 +3961,7 @@ bool c_reflectionclass::t_test(CStrRef v_what, CVarRef v_name) {
   Variant v_v;
 
   {
-    Variant tmp26((t_fetch(v_what)));
+    const Variant &tmp26((t_fetch(v_what)));
     (v_v = tmp26);
   }
   return toBoolean(v_v) && isset(v_v, v_name);
@@ -4059,7 +4059,7 @@ Variant c_reflectionclass::t_getconstructor() {
   {
     bool tmp29;
     {
-      Variant tmp30((t_fetch("name")));
+      const Variant &tmp30((t_fetch("name")));
       tmp29 = (t_hasmethod((v_name = tmp30)));
     }
     if (tmp29) {
@@ -4083,7 +4083,7 @@ p_reflectionmethod c_reflectionclass::t_getmethod(CVarRef v_name) {
     (v_lname = tmp31);
   }
   {
-    Variant tmp32((t_fetch("methods")));
+    const Variant &tmp32((t_fetch("methods")));
     (v_methods = tmp32);
   }
   if (!(isset(v_methods, v_lname))) {
@@ -4119,7 +4119,7 @@ Array c_reflectionclass::t_getmethods(int64 v_filter //  = 65535LL
 
   (v_ret = SystemScalarArrays::ssa_[0]);
   {
-    Variant tmp36((t_fetch("methods")));
+    const Variant &tmp36((t_fetch("methods")));
     (v_methods = tmp36);
   }
   {
@@ -4130,7 +4130,7 @@ Array c_reflectionclass::t_getmethods(int64 v_filter //  = 65535LL
       v_name = iter39->first();
       {
         {
-          p_reflectionmethod tmp40((t_getmethod(v_name)));
+          const p_reflectionmethod &tmp40((t_getmethod(v_name)));
           (v_m = tmp40);
         }
         if (toBoolean(((bitwise_and(v_filter, 256LL /* reflectionmethod::IS_PUBLIC */)))) && AS_CLASS(v_m,c_reflectionmethod)->t_ispublic() || toBoolean(((bitwise_and(v_filter, 512LL /* reflectionmethod::IS_PROTECTED */)))) && AS_CLASS(v_m,c_reflectionmethod)->t_isprotected() || toBoolean(((bitwise_and(v_filter, 1024LL /* reflectionmethod::IS_PRIVATE */)))) && AS_CLASS(v_m,c_reflectionmethod)->t_isprivate() || toBoolean(((bitwise_and(v_filter, 1LL /* reflectionmethod::IS_STATIC */)))) && toBoolean(AS_CLASS(v_m,c_reflectionmethod)->t_isstatic()) || toBoolean(((bitwise_and(v_filter, 4LL /* reflectionmethod::IS_FINAL */)))) && toBoolean(AS_CLASS(v_m,c_reflectionmethod)->t_isfinal()) || ((toBoolean(bitwise_and(v_filter, 2LL /* reflectionmethod::IS_ABSTRACT */)) && toBoolean(AS_CLASS(v_m,c_reflectionmethod)->t_isabstract())))) {
@@ -4151,7 +4151,7 @@ p_reflectionproperty c_reflectionclass::t_getproperty(CVarRef v_name) {
   p_reflectionproperty v_ret;
 
   {
-    Variant tmp41((t_fetch("properties")));
+    const Variant &tmp41((t_fetch("properties")));
     (v_properties = tmp41);
   }
   if (!(isset(v_properties, v_name))) {
@@ -4209,7 +4209,7 @@ Variant c_reflectionclass::t_getconstant(CVarRef v_name) {
   Variant v_class;
 
   {
-    Variant tmp48((t_fetch("constants")));
+    const Variant &tmp48((t_fetch("constants")));
     (v_constants = tmp48);
   }
   if (!(isset(v_constants, v_name))) {
@@ -4251,7 +4251,7 @@ Variant c_reflectionclass::t_getinterfaces() {
         if (toBoolean(AS_CLASS(v_cls,c_reflectionclass)->t_isinterface())) {
           {
             {
-              Variant tmp56((AS_CLASS(v_cls,c_reflectionclass)->t_getname()));
+              const Variant &tmp56((AS_CLASS(v_cls,c_reflectionclass)->t_getname()));
               v_ret.set(tmp56, (v_cls));
             }
           }
@@ -4389,7 +4389,7 @@ Variant c_reflectionclass::t_issubclassof(Variant v_cls) {
     bool tmp69;
     {
       String tmp70((toString(v_cls)));
-      String tmp71((toString(t_fetch("parent"))));
+      const String &tmp71((toString(t_fetch("parent"))));
       tmp69 = (equal(x_strcasecmp(tmp70, tmp71), 0LL));
     }
     if (tmp69) {
@@ -4399,7 +4399,7 @@ Variant c_reflectionclass::t_issubclassof(Variant v_cls) {
     }
   }
   {
-    Object tmp72((toObject(t_getparentclass())));
+    const Object &tmp72((toObject(t_getparentclass())));
     return tmp72-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args("isSubclassOf", 0x373333991926C97ELL, 1, v_cls);
   }
 } /* function */
@@ -6344,7 +6344,7 @@ Variant c_reflectionmethod::ti_export(const char* cls, Variant v_cls, CVarRef v_
     }
   }
   {
-    Variant tmp95((v_cls. BIND_CLASS_DOT o_invoke_few_args("getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
+    const Variant &tmp95((v_cls.o_invoke_few_args("getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
     (v_obj = tmp95);
   }
   (v_str = (toString(v_obj)));
@@ -7245,7 +7245,7 @@ Variant c_reflectionproperty::ti_export(const char* cls, Variant v_cls, CVarRef 
     }
   }
   {
-    Variant tmp110((v_cls. BIND_CLASS_DOT o_invoke_few_args("getProperty", 0x0FD73627FB023047LL, 1, v_name)));
+    const Variant &tmp110((v_cls.o_invoke_few_args("getProperty", 0x0FD73627FB023047LL, 1, v_name)));
     (v_obj = tmp110);
   }
   (v_str = (toString(v_obj)));

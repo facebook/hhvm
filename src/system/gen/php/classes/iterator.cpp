@@ -945,7 +945,8 @@ bool c_arrayiterator::t_asort() {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::asort);
   {
     const Variant &tmp2((lval(m_arr)));
-    return x_asort(ref(tmp2), toInt32(m_flags));
+    Variant &tmp2_lv = const_cast<Variant&>(tmp2);
+    return x_asort(ref(tmp2_lv), toInt32(m_flags));
   }
 } /* function */
 /* SRC: classes/iterator.php line 88 */
@@ -978,7 +979,8 @@ bool c_arrayiterator::t_ksort() {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::ksort);
   {
     const Variant &tmp3((lval(m_arr)));
-    return x_ksort(ref(tmp3), toInt32(m_flags));
+    Variant &tmp3_lv = const_cast<Variant&>(tmp3);
+    return x_ksort(ref(tmp3_lv), toInt32(m_flags));
   }
 } /* function */
 /* SRC: classes/iterator.php line 112 */
@@ -1064,7 +1066,8 @@ bool c_arrayiterator::t_uasort(CVarRef v_cmp_function) {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::uasort);
   {
     const Variant &tmp6((lval(m_arr)));
-    return x_uasort(ref(tmp6), v_cmp_function);
+    Variant &tmp6_lv = const_cast<Variant&>(tmp6);
+    return x_uasort(ref(tmp6_lv), v_cmp_function);
   }
 } /* function */
 /* SRC: classes/iterator.php line 161 */
@@ -1587,7 +1590,7 @@ void c_appenditerator::init() {
 void c_appenditerator::t___construct() {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::__construct);
   bool oldInCtor = gasInCtor(true);
-  (m_iterators = create_object("arrayiterator", Array()));
+  (m_iterators = p_arrayiterator((NEWOBJ(c_arrayiterator)())->create(SystemScalarArrays::ssa_[0])));
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/iterator.php line 286 */

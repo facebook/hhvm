@@ -238,7 +238,7 @@ ProcessSharedVariant::lookup(CVarRef key) {
   ProcessSharedVariantToIntMap::const_iterator it;
   if (key.isString()) {
     SharedMemoryString ks;
-    if (key.is(KindOfString)) {
+    if (key.is(KindOfString) || key.is(KindOfStaticString)) {
       StringData* sd = key.getStringData();
       ks = SharedMemoryString(sd->data(), sd->size());
     } else {

@@ -329,7 +329,7 @@ php_rfc822_tokenized_t *php_mailparse_rfc822_tokenize(const char *header,
 
   tokenize(toks->buffer, NULL, &toks->ntokens, report_errors);
   toks->tokens = toks->ntokens ?
-    (php_rfc822_token_t*)calloc(toks->ntokens, sizeof(php_rfc822_token_t)) :
+    (php_rfc822_token_t*)calloc(toks->ntokens+1, sizeof(php_rfc822_token_t)) :
     NULL;
   tokenize(toks->buffer, toks->tokens, &toks->ntokens, report_errors);
   return toks;
@@ -484,7 +484,7 @@ address:  /* mailbox / group */
   /* the stuff from start_tok to i - 1 is the display name part */
   if (addrs && !in_group && i - start_tok > 0) {
     int j, has_comments = 0, has_strings = 0;
-    switch(toks->tokens[i].token) {
+    switch (toks->tokens[i].token) {
     case ';': case ',': case '<':
       addrs->addrs[iaddr].name =
         php_rfc822_recombine_tokens(toks, start_tok, i - start_tok,

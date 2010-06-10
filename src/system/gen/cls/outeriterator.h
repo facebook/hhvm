@@ -25,7 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 19 */
 class c_outeriterator {
-  // public: void t_getinneriterator() = 0;
+  // public: virtual void t_getinneriterator() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

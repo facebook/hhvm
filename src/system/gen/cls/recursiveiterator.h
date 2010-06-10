@@ -25,8 +25,8 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 23 */
 class c_recursiveiterator {
-  // public: void t_getchildren() = 0;
-  // public: void t_haschildren() = 0;
+  // public: virtual void t_getchildren() = 0;
+  // public: virtual void t_haschildren() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

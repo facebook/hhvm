@@ -935,18 +935,15 @@ void c_arrayiterator::t___construct(Variant v_array, Variant v_flags //  = 0LL /
 /* SRC: classes/iterator.php line 78 */
 void c_arrayiterator::t_append(CVarRef v_value) {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::append);
-  {
-    Variant &tmp1((m_arr));
-    tmp1.append((v_value));
-  }
+  m_arr.append((v_value));
 } /* function */
 /* SRC: classes/iterator.php line 82 */
 bool c_arrayiterator::t_asort() {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::asort);
   {
-    const Variant &tmp2((lval(m_arr)));
-    Variant &tmp2_lv = const_cast<Variant&>(tmp2);
-    return x_asort(ref(tmp2_lv), toInt32(m_flags));
+    const Variant &tmp1((lval(m_arr)));
+    Variant &tmp1_lv = const_cast<Variant&>(tmp1);
+    return x_asort(ref(tmp1_lv), toInt32(m_flags));
   }
 } /* function */
 /* SRC: classes/iterator.php line 86 */
@@ -978,9 +975,9 @@ Variant c_arrayiterator::t_key() {
 bool c_arrayiterator::t_ksort() {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::ksort);
   {
-    const Variant &tmp3((lval(m_arr)));
-    Variant &tmp3_lv = const_cast<Variant&>(tmp3);
-    return x_ksort(ref(tmp3_lv), toInt32(m_flags));
+    const Variant &tmp2((lval(m_arr)));
+    Variant &tmp2_lv = const_cast<Variant&>(tmp2);
+    return x_ksort(ref(tmp2_lv), toInt32(m_flags));
   }
 } /* function */
 /* SRC: classes/iterator.php line 110 */
@@ -1018,10 +1015,7 @@ Variant &c_arrayiterator::___offsetget_lval(Variant v_index) {
 /* SRC: classes/iterator.php line 130 */
 Variant c_arrayiterator::t_offsetset(CVarRef v_index, CVarRef v_newval) {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::offsetSet);
-  {
-    Variant &tmp4((m_arr));
-    tmp4.set(v_index, (v_newval));
-  }
+  m_arr.set(v_index, (v_newval));
   return null;
 } /* function */
 /* SRC: classes/iterator.php line 134 */
@@ -1043,9 +1037,9 @@ void c_arrayiterator::t_seek(CVarRef v_position) {
 
   x_reset(ref(lval(m_arr)));
   {
-    LOOP_COUNTER(5);
+    LOOP_COUNTER(3);
     for ((v_i = 0LL); less(v_i, v_position); v_i++) {
-      LOOP_COUNTER_CHECK(5);
+      LOOP_COUNTER_CHECK(3);
       {
         if (!(toBoolean(x_next(ref(lval(m_arr)))))) {
           {
@@ -1065,9 +1059,9 @@ void c_arrayiterator::t_setflags(CVarRef v_flags) {
 bool c_arrayiterator::t_uasort(CVarRef v_cmp_function) {
   INSTANCE_METHOD_INJECTION(ArrayIterator, ArrayIterator::uasort);
   {
-    const Variant &tmp6((lval(m_arr)));
-    Variant &tmp6_lv = const_cast<Variant&>(tmp6);
-    return x_uasort(ref(tmp6_lv), v_cmp_function);
+    const Variant &tmp4((lval(m_arr)));
+    Variant &tmp4_lv = const_cast<Variant&>(tmp4);
+    return x_uasort(ref(tmp4_lv), v_cmp_function);
   }
 } /* function */
 /* SRC: classes/iterator.php line 159 */
@@ -1643,10 +1637,10 @@ void c_appenditerator::t_next() {
     }
   }
   m_iterators. BIND_CLASS_DOT o_invoke_few_args("next", 0x3C6D50F3BB8102B8LL, 0);
-  LOOP_COUNTER(7);
+  LOOP_COUNTER(5);
   {
     while (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
-      LOOP_COUNTER_CHECK(7);
+      LOOP_COUNTER_CHECK(5);
       {
         o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
         if (toBoolean(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0))) {
@@ -1663,10 +1657,10 @@ void c_appenditerator::t_next() {
 Variant c_appenditerator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::__call);
   {
-    ArrayInit tmp8(2, true);
-    tmp8.set(0, o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0));
-    tmp8.set(1, v_func);
-    return x_call_user_func_array(Array(tmp8), toArray(v_params));
+    ArrayInit tmp6(2, true);
+    tmp6.set(0, o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0));
+    tmp6.set(1, v_func);
+    return x_call_user_func_array(Array(tmp6), toArray(v_params));
   }
 } /* function */
 /* SRC: classes/iterator.php line 207 */

@@ -212,25 +212,33 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
     }
     ClassScopePtr super = ar->findClass(base);
     if (super) {
-      if (super->isRedeclaring() && base == m_parent) {
-        if (forInvoke) continue;
-        const ClassScopePtrVec &classes = ar->findClasses(m_parent);
-        StringToFunctionScopePtrMap pristine(funcs);
-        BOOST_FOREACH(ClassScopePtr cls, classes) {
-          StringToFunctionScopePtrMap cur(pristine);
-          cls->collectMethods(ar, cur, false, forInvoke);
-          funcs.insert(cur.begin(), cur.end());
+      if (super->isRedeclaring()) {
+        if (base == m_parent) {
+          if (forInvoke) continue;
+          const ClassScopePtrVec &classes = ar->findClasses(m_parent);
+          StringToFunctionScopePtrMap pristine(funcs);
+          BOOST_FOREACH(ClassScopePtr cls, classes) {
+            StringToFunctionScopePtrMap cur(pristine);
+            cls->collectMethods(ar, cur, false, forInvoke);
+            funcs.insert(cur.begin(), cur.end());
+          }
+          m_derivesFromRedeclaring = DirectFromRedeclared;
+          getVariables()->forceVariants(ar);
+          getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
+          setVolatile();
+        } else if (isInterface()) {
+          m_derivesFromRedeclaring = DirectFromRedeclared;
         }
-        m_derivesFromRedeclaring = DirectFromRedeclared;
-        getVariables()->forceVariants(ar);
-        getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
-        setVolatile();
       } else {
         super->collectMethods(ar, funcs, false, forInvoke);
-        if (super->derivesFromRedeclaring() && base == m_parent) {
-          m_derivesFromRedeclaring = IndirectFromRedeclared;
-          getVariables()->forceVariants(ar);
-          setVolatile();
+        if (super->derivesFromRedeclaring()) {
+          if (base == m_parent) {
+            m_derivesFromRedeclaring = IndirectFromRedeclared;
+            getVariables()->forceVariants(ar);
+            setVolatile();
+          } else if (isInterface()) {
+            m_derivesFromRedeclaring = IndirectFromRedeclared;
+          }
         }
       }
     } else {
@@ -243,6 +251,9 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
         getVariables()->forceVariants(ar);
         setVolatile();
       } else {
+        if (isInterface()) {
+          m_derivesFromRedeclaring = DirectFromRedeclared;
+        }
         m_bases.erase(m_bases.begin() + i);
       }
     }

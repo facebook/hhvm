@@ -300,13 +300,34 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) 
   switch (cg.getContext()) {
   case CodeGenerator::CppForwardDeclaration:
     if (Option::GenerateCPPMacros) {
-      cg_printf("FORWARD_DECLARE_INTERFACE(%s);\n", clsName);
+      if (!Option::UseVirtualDispatch ||
+          classScope->isRedeclaring()) {
+        cg_printf("FORWARD_DECLARE_GENERIC_INTERFACE(%s);\n", clsName);
+      } else {
+        cg_printf("FORWARD_DECLARE_INTERFACE(%s);\n", clsName);
+      }
     }
     break;
   case CodeGenerator::CppDeclaration:
     {
       printSource(cg);
       cg_printf("class %s%s", Option::ClassPrefix, clsName);
+      if (m_base && Option::UseVirtualDispatch &&
+          !classScope->isRedeclaring()) {
+        const char *sep = " :";
+        for (int i = 0; i < m_base->getCount(); i++) {
+          ScalarExpressionPtr exp =
+            dynamic_pointer_cast<ScalarExpression>((*m_base)[i]);
+          const char *intf = exp->getString().c_str();
+          ClassScopePtr intfClassScope = ar->findClass(intf);
+          if (intfClassScope && !intfClassScope->isRedeclaring() &&
+              classScope->derivesDirectlyFrom(ar, intf)) {
+            string id = intfClassScope->getId();
+            cg_printf("%s public %s%s", sep, Option::ClassPrefix, id.c_str());
+            sep = ",";
+          }
+        }
+      }
       cg_indentBegin(" {\n");
       if (m_stmt) m_stmt->outputCPP(cg, ar);
       cg_indentEnd("};\n");

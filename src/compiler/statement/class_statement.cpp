@@ -421,10 +421,13 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     {
       bool system = cg.getOutput() == CodeGenerator::SystemCPP;
       ClassScopePtr parCls;
-      if (!m_parent.empty()) parCls = ar->findClass(m_parent);
+      if (!m_parent.empty()) {
+        parCls = ar->findClass(m_parent);
+        if (parCls && parCls->isRedeclaring()) parCls.reset();
+      }
       cg_printf("class %s%s", Option::ClassPrefix, clsName);
       if (!m_parent.empty() && classScope->derivesDirectlyFrom(ar, m_parent)) {
-        if (!parCls || parCls->isRedeclaring()) {
+        if (!parCls) {
           cg_printf(" : public DynamicObjectData");
         } else {
           cg_printf(" : public %s%s", Option::ClassPrefix,
@@ -437,6 +440,20 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           cg_printf(" : public ExtObjectData");
         } else {
           cg_printf(" : public ObjectData");
+        }
+      }
+      if (m_base && Option::UseVirtualDispatch) {
+        for (int i = 0; i < m_base->getCount(); i++) {
+          ScalarExpressionPtr exp =
+            dynamic_pointer_cast<ScalarExpression>((*m_base)[i]);
+          const char *intf = exp->getString().c_str();
+          ClassScopePtr intfClassScope = ar->findClass(intf);
+          if (intfClassScope && !intfClassScope->isRedeclaring() &&
+              classScope->derivesDirectlyFrom(ar, intf) &&
+              (!parCls || !parCls->derivesFrom(ar, intf, true, false))) {
+            string id = intfClassScope->getId();
+            cg_printf(", public %s%s", Option::ClassPrefix, id.c_str());
+          }
         }
       }
       cg_indentBegin(" {\n");
@@ -455,7 +472,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           cg_printf("PARENT_CLASS(%s)\n", bases[i].c_str());
         }
         if (classScope->derivesFromRedeclaring()) {
-          cg_printf("if (parent->o_instanceof(s)) return true;\n");
+          cg_printf("CLASS_MAP_REDECLARED()\n");
         }
         cg_indentEnd("END_CLASS_MAP(%s)\n", clsName);
       }
@@ -464,7 +481,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         bool dyn = (!parCls && !m_parent.empty()) ||
           classScope->derivesFromRedeclaring() ==
           ClassScope::DirectFromRedeclared;
-        bool idyn = classScope->derivesFromRedeclaring() ==
+        bool idyn = parCls && classScope->derivesFromRedeclaring() ==
           ClassScope::IndirectFromRedeclared;
         bool redec = classScope->isRedeclaring();
         if (!classScope->derivesFromRedeclaring()) {

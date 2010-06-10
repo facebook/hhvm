@@ -25,11 +25,11 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 59 */
 class c_iterator {
-  // public: void t_current() = 0;
-  // public: void t_key() = 0;
-  // public: void t_next() = 0;
-  // public: void t_rewind() = 0;
-  // public: void t_valid() = 0;
+  // public: virtual void t_current() = 0;
+  // public: virtual void t_key() = 0;
+  // public: virtual void t_next() = 0;
+  // public: virtual void t_rewind() = 0;
+  // public: virtual void t_valid() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

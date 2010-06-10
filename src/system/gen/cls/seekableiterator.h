@@ -25,7 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 15 */
 class c_seekableiterator {
-  // public: void t_seek(CVarRef v_position) = 0;
+  // public: virtual void t_seek(CVarRef v_position) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

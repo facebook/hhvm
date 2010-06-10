@@ -24,7 +24,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 3 */
 class c_countable {
-  // public: void t_count() = 0;
+  // public: virtual void t_count() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

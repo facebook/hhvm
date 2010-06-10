@@ -25,7 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 269 */
 class c_iteratoraggregate {
-  // public: void t_getiterator() = 0;
+  // public: virtual void t_getiterator() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

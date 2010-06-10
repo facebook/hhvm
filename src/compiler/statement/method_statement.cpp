@@ -463,12 +463,13 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   switch (cg.getContext()) {
   case CodeGenerator::CppDeclaration:
     {
-      if (!m_stmt) {
+      if (!m_stmt && !Option::UseVirtualDispatch) {
         cg_printf("// ");
       }
+
       m_modifiers->outputCPP(cg, ar);
 
-      if (m_name == "__offsetget_lval") {
+      if (!m_stmt || m_name == "__offsetget_lval") {
         cg_printf("virtual ");
       }
       TypePtr type = funcScope->getReturnType();

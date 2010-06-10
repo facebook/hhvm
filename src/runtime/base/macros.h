@@ -34,8 +34,11 @@ namespace HPHP {
 
 #define FORWARD_DECLARE_INTERFACE(cls)                  \
   class c_##cls;                                        \
+  typedef SmartInterface<c_##cls> p_##cls;              \
+
+#define FORWARD_DECLARE_GENERIC_INTERFACE(cls)          \
+  class c_##cls;                                        \
   typedef Object               p_##cls;                 \
-  typedef Object               sp_##cls;                \
 
 #define FORWARD_DECLARE_REDECLARED_CLASS(cls)           \
   class cs_##cls;                                       \
@@ -48,6 +51,9 @@ namespace HPHP {
 
 #define PARENT_CLASS(parent)                            \
     if (strcasecmp(s, #parent) == 0) return true;       \
+
+#define CLASS_MAP_REDECLARED()                          \
+    if (parent->o_instanceof(s)) return true;           \
 
 #define RECURSIVE_PARENT_CLASS(parent)                  \
     if (strcasecmp(s, #parent) == 0) return true;       \

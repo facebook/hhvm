@@ -24,8 +24,8 @@ namespace HPHP {
 
 /* SRC: classes/reflection.php line 6 */
 class c_reflector {
-  // public: String t___tostring() = 0;
-  // public: static void t_export() = 0;
+  // public: virtual String t___tostring() = 0;
+  // public: static virtual void t_export() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -24,10 +24,10 @@ namespace HPHP {
 
 /* SRC: classes/arrayaccess.php line 3 */
 class c_arrayaccess {
-  // public: bool t_offsetexists(CVarRef v_index) = 0;
-  // public: Variant t_offsetget(Variant v_index) = 0;
-  // public: Variant t_offsetset(CVarRef v_index, CVarRef v_newvalue) = 0;
-  // public: Variant t_offsetunset(CVarRef v_index) = 0;
+  // public: virtual bool t_offsetexists(CVarRef v_index) = 0;
+  // public: virtual Variant t_offsetget(Variant v_index) = 0;
+  // public: virtual Variant t_offsetset(CVarRef v_index, CVarRef v_newvalue) = 0;
+  // public: virtual Variant t_offsetunset(CVarRef v_index) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

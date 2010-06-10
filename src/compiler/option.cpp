@@ -177,6 +177,7 @@ std::string Option::FlibDirectory;
 StringBag Option::OptionStrings;
 
 bool Option::GenerateSourceInfo = false;
+bool Option::UseVirtualDispatch = false;
 bool Option::FlAnnotate = false;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -326,6 +327,7 @@ void Option::Load(Hdf &config) {
   AllVolatile = config["AllVolatile"].getBool();
 
   GenerateSourceInfo = config["GenerateSourceInfo"].getBool(false);
+  UseVirtualDispatch = config["UseVirtualDispatch"].getBool(false);
 
   OnLoad();
 }

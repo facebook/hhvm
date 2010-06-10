@@ -1662,7 +1662,6 @@ void c_appenditerator::t_next() {
 /* SRC: classes/iterator.php line 336 */
 Variant c_appenditerator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION(AppendIterator, AppendIterator::__call);
-  INCALL_HELPER(v_func);
   {
     ArrayInit tmp8(2, true);
     tmp8.set(0, o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0));

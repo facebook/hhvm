@@ -71,8 +71,6 @@ class ObjectData : public Countable {
   bool inCtor() { return getAttribute(InConstructor); }
   bool inCtorDtor() { return inCtor() || inDtor(); }
   void setInDtor() { setAttribute(InDestructor); }
-  void setInCall(CStrRef name);
-  void clearInCall() { --o_inCall;}
   bool gasInCtor(bool inCtor) { // get and set InConstructor
     bool oldInCtor = getAttribute(InConstructor);
     if (inCtor) {
@@ -226,7 +224,6 @@ class ObjectData : public Countable {
   mutable Array *o_properties;   // dynamic properties
  private:
   mutable int16  o_attribute;    // vairous flags
-  mutable int16  o_inCall;       // counter for __call() recursion checking
 
 #ifdef FAST_REFCOUNT_FOR_VARIANT
  private:

@@ -36,7 +36,7 @@ static IMPLEMENT_THREAD_LOCAL(int, os_max_id);
 ///////////////////////////////////////////////////////////////////////////////
 // constructor/destructor
 
-ObjectData::ObjectData() : o_properties(NULL), o_attribute(0), o_inCall(0) {
+ObjectData::ObjectData() : o_properties(NULL), o_attribute(0) {
   o_id = ++(*os_max_id.get());
 }
 
@@ -521,14 +521,6 @@ Variant ObjectData::t___destruct() {
 Variant ObjectData::t___call(Variant v_name, Variant v_arguments) {
   // do nothing
   return null;
-}
-
-void ObjectData::setInCall(CStrRef name) {
-  if (++o_inCall > 10) {
-    string msg = "Too many levels of recursion in __call() while calling ";
-    msg += (const char *)name;
-    throw FatalErrorException(msg.c_str());
-  }
 }
 
 Variant ObjectData::t___set(Variant v_name, Variant v_value) {

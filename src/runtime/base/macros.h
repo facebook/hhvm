@@ -315,19 +315,6 @@ do { \
 #define HASH_INVOKE_REDECLARED_FROM_EVAL(code, f)                       \
   if (hash == code && !strcasecmp(s, #f)) return g->ei_ ## f(env_caller)
 
-#define INCALL_HELPER(name)                                             \
-  class incall {                                                        \
-  public:                                                               \
-    incall(ObjectData *obj, CStrRef name) : m_obj(obj) {                \
-      m_obj->setInCall(name);                                           \
-    }                                                                   \
-    ~incall() {                                                         \
-      m_obj->clearInCall();                                             \
-    }                                                                   \
-  private:                                                              \
-    ObjectData *m_obj;                                                  \
-  } incall_helper(this, name);                                          \
-
 ///////////////////////////////////////////////////////////////////////////////
 // global variable macros
 

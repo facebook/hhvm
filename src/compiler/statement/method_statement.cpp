@@ -577,15 +577,6 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           cg.printf("bool oldInCtor = gasInCtor(true);\n");
         } else if (m_name == "__destruct") {
           cg.printf("setInDtor();\n");
-        } else if (m_name == "__call") {
-          ParameterExpressionPtr param;
-          if (m_params->getCount() > 0) {
-            param = dynamic_pointer_cast<ParameterExpression>((*m_params)[0]);
-            cg.printf("INCALL_HELPER(%s%s);\n",
-                      Option::VariablePrefix, param->getName().c_str());
-          } else {
-            cg.printf("INCALL_HELPER(\"\");\n");
-          }
         }
         funcScope->outputCPP(cg, ar);
         cg.setContext(CodeGenerator::NoContext); // no inner functions/classes

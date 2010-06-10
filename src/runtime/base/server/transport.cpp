@@ -301,12 +301,16 @@ void Transport::addHeader(const char *name, const char *value) {
 
   if (strcasecmp(name, "Location") == 0 && m_responseCode != 201 &&
       !(m_responseCode >= 300 && m_responseCode <=307)) {
+    /* Zend seems to set 303 on a post with HTTP version > 1.0 in the code but
+     * in our testing we can only get it to give 302.
     Method m = getMethod();
     if (m != GET && m != HEAD) {
       setResponse(303);
     } else {
       setResponse(302);
     }
+    */
+    setResponse(302);
   }
 }
 

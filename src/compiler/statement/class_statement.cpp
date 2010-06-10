@@ -198,7 +198,9 @@ void ClassStatement::getAllParents(AnalysisResultPtr ar,
   if (!m_parent.empty()) {
     ClassScopePtr cls = ar->findClass(m_parent);
     if (cls) {
-      cls->getAllParents(ar, names);
+      if (!cls->isRedeclaring()) {
+        cls->getAllParents(ar, names);
+      }
       names.push_back(m_parent);
     }
   }
@@ -209,7 +211,9 @@ void ClassStatement::getAllParents(AnalysisResultPtr ar,
     for (unsigned int i = 0; i < bases.size(); i++) {
       ClassScopePtr cls = ar->findClass(bases[i]);
       if (cls) {
-        cls->getAllParents(ar, names);
+        if (!cls->isRedeclaring()) {
+          cls->getAllParents(ar, names);
+        }
         names.push_back(bases[i]);
       }
     }
@@ -449,6 +453,9 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                        Util::toLower(classScope->getName()).c_str());
         for (unsigned int i = 0; i < bases.size(); i++) {
           cg.printf("PARENT_CLASS(%s)\n", bases[i].c_str());
+        }
+        if (classScope->derivesFromRedeclaring()) {
+          cg.printf("if (parent->o_instanceof(s)) return true;\n");
         }
         cg.indentEnd("END_CLASS_MAP(%s)\n", clsName);
       }

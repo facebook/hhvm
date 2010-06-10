@@ -7370,6 +7370,12 @@ bool TestCodeRun::TestRedeclaredClasses() {
        "}"
        "test();");
 
+  MVCR("<?php "
+       "if (true) { class base extends Exception {} } else { class base {} }"
+       "class child1 extends base {}"
+       "$obj = new child1;"
+       "echo ($obj instanceof Exception) ? \"Passed\n\" : \"Failed\n\";");
+
   return true;
 }
 

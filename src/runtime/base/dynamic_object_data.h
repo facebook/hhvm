@@ -86,6 +86,7 @@ class DynamicObjectData : public ObjectData {
   virtual Variant &___offsetget_lval(Variant v_name);
 
   void setParent(Object p) { parent = p; }
+  ObjectData *getRedeclaredParent() const { return parent.get(); }
 
  protected:
   ObjectData* root;
@@ -97,4 +98,4 @@ typedef DynamicObjectData c_DynamicObjectData; // purely for easier code generat
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_OBJECT_DATA_H__
+#endif // __HPHP_DYNAMIC_OBJECT_DATA_H__

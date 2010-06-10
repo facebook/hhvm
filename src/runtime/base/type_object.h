@@ -81,21 +81,28 @@ class Object : public SmartPtr<ObjectData> {
   T *getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
     CT_ASSERT_DESCENDENT_OF_OBJECTDATA(T);
 
-    if (!m_px) {
+    ObjectData *cur = m_px;
+    if (!cur) {
       if (!nullOkay) {
         throw NullPointerException();
       }
       return NULL;
     }
+    while (true) {
+      T *px = dynamic_cast<T*>(cur);
+      if (!px) {
+        cur = cur->getRedeclaredParent();
+        if (cur) continue;
+        if (!badTypeOkay) {
+          throw InvalidObjectTypeException(m_px->o_getClassName());
+        }
+        return NULL;
+      }
 
-    T *px = dynamic_cast<T*>(m_px);
-    // Assert that casting does not adjust the 'this' pointer
-    ASSERT(px == NULL || (void*)px == (void*)m_px);
-    if (!px && !badTypeOkay) {
-      throw InvalidObjectTypeException(m_px->o_getClassName());
+      // Assert that casting does not adjust the 'this' pointer
+      ASSERT((void*)px == (void*)cur);
+      return px;
     }
-
-    return px;
   }
   template<typename T>
   bool is() const {

@@ -100,6 +100,12 @@ const ClassStatement *ClassStatement::parentStatement() const {
   return NULL;
 }
 
+void ClassStatement::loadInterfaceStatements() const {
+  for (unsigned int i = 0; i < m_basesVec.size(); ++i) {
+    RequestEvalState::findClass(m_basesVec[i].c_str(), true);
+  }
+}
+
 void ClassStatement::
 loadMethodTable(ClassEvalState &ce) const {
   hphp_const_char_imap<const MethodStatement*> &mtable = ce.getMethodTable();
@@ -569,6 +575,7 @@ void ClassStatement::toArray(Array &props, Array &vals) const {
 
 void ClassStatement::semanticCheck(const ClassStatement *cls)
   const {
+  loadInterfaceStatements();
   const ClassStatement *parent = parentStatement();
   if (cls) {
     if (getModifiers() & (Interface|Abstract))  {

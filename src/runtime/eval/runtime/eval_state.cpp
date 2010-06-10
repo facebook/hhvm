@@ -198,7 +198,9 @@ const ClassStatement *RequestEvalState::findClass(const char *name,
   if (it != self->m_classes.end()) {
     return it->second.getClass();
   }
-  if (autoload && !ClassInfo::HasClass(name) && eval_try_autoload(name)) {
+  if (autoload &&
+      (!ClassInfo::HasClass(name) && !ClassInfo::HasInterface(name)) &&
+      eval_try_autoload(name)) {
     return findClass(name, false);
   }
   return NULL;

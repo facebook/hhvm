@@ -244,6 +244,7 @@ Variant EvalClassExists::invoke(CArrRef params) const {
   String cname = params.rvalAt(0);
   if (!f_class_exists(cname, false)) {
     if ((params.size() == 1 || params.rvalAt(1).toBoolean()) &&
+        !f_interface_exists(cname, false) &&
         eval_try_autoload(cname.data())) {
       return f_class_exists(cname, false);
     }
@@ -256,6 +257,7 @@ Variant EvalInterfaceExists::invoke(CArrRef params) const {
   String cname = params.rvalAt(0);
   if (!f_interface_exists(cname, false)) {
     if ((params.size() == 1 || params.rvalAt(1).toBoolean()) &&
+        !f_class_exists(cname, false) &&
         eval_try_autoload(cname.data())) {
       return f_interface_exists(cname, false);
     }
@@ -272,7 +274,7 @@ Variant EvalGetDefinedVars::invokeImpl(VariableEnvironment &env,
 
 Variant EvalHphpGetClassInfo::invoke(CArrRef params) const {
   String cname = params.rvalAt(0);
-  if (!f_class_exists(cname)) {
+  if (!f_class_exists(cname) && !f_interface_exists(cname)) {
     eval_try_autoload(cname.data());
   }
   return f_hphp_get_class_info(cname);

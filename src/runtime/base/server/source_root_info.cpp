@@ -132,7 +132,15 @@ string SourceRootInfo::parseSandboxServerVariable(const string &format) const {
     char c = format[i];
     if (control) {
       switch (c) {
-      case 'p': res << m_path; break;
+      case 'p':
+        {
+          // skip trailing /
+          const char *data = m_path.data();
+          int n = m_path.size() - 1;
+          ASSERT(data[n] == '/');
+          res.write(data, n);
+          break;
+        }
       case 's': res << m_sandbox; break;
       case 'u': res << m_user; break;
       default: res << c; break;

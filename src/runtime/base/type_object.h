@@ -49,10 +49,10 @@ class Object : public SmartPtr<ObjectData> {
   Object(T *data) : SmartPtr<ObjectData>() {
     // Assert that casting does not adjust the 'this' pointer
     ASSERT((void*)dynamic_cast<ObjectData*>(data) == (void*)data);
-    // Performs a static_cast from T* to ObjectData*. This statement will
+    // Performs a implicit cast from T* to ObjectData*. This will
     // cause a compile time failure if T is not a descendent of ObjectData
     // in the inheritance hierarchy
-    SmartPtr<ObjectData>::operator=(static_cast<ObjectData*>(data));
+    SmartPtr<ObjectData>::operator=(data);
   }
 
   Object(CObjRef src) : SmartPtr<ObjectData>(src.m_px) { }

@@ -43,65 +43,55 @@ namespace HPHP {
  * used as a parameter's type, but if it can be specialized to SmartObject<T>,
  * it will almost always be better.
  */
-template<typename T>
-class SmartObject : public SmartPtr<T> {
- public:
-  /**
-   * Constructors
-   */
+template <typename T>
+class SmartObject : public Object {
+public:
   SmartObject()           { }
-  SmartObject(Variant v)  { SmartPtr<T>::operator=(v.toObject().get());}
-  SmartObject(T *data) : SmartPtr<T>(data) { }
+  SmartObject(CVarRef v) : Object(v.toObject().get()) { }
+  SmartObject(T *data) : Object(data) { }
   template<class Y>
-  SmartObject(Y *data)    { SmartPtr<T>::operator=(data);}
+  SmartObject(Y *data) : Object(data) { }
   template<class Y>
-  SmartObject(const SmartPtr<Y> &data) { SmartPtr<T>::operator=(data);}
-  SmartObject(Object obj) { SmartPtr<T>::operator=(obj.get());}
-
-  bool instanceof(const char *s) const {
-    return SmartPtr<T>::m_px && SmartPtr<T>::m_px->o_instanceof(s);
-  }
+  SmartObject(const SmartPtr<Y> &data) : Object(data.get()) { }
+  SmartObject(CObjRef src) : Object(src) { }
 
   /**
    * Assignment
    */
   SmartObject &operator=(CVarRef v) {
-    SmartPtr<T>::operator=(v.toObject().get());
+    Object::operator=(v.toObject().get());
     return *this;
   }
   SmartObject &operator=(const SmartPtr<T> &src) {
-    SmartPtr<T>::operator=(src);
+    Object::operator=(src);
     return *this;
   }
   SmartObject &operator=(T *src) {
-    SmartPtr<T>::operator=(src);
+    Object::operator=(src);
     return *this;
   }
   template<class Y>
   SmartObject &operator=(const SmartPtr<Y> &src) {
-    SmartPtr<T>::operator=(src.get());
+    Object::operator=(src.get());
     return *this;
   }
 
-  /**
-   * Conversions
-   */
-  operator Object() const { return SmartPtr<T>::m_px;}
+  T *operator->() const {
+    return static_cast<T*>(Object::operator->());
+  }
+
+  T *get() const {
+    return static_cast<T*>(Object::get());
+  }
 
   template<class Y>
   operator SmartObject<Y>() {
-    return static_cast<Y *>(SmartPtr<T>::m_px);
-  }
-
-  /**
-   * r-value and l-value of object properties.
-   */
-  Variant o_get(CStrRef propName, int64 hash, bool error = true) const {
-    if (!this->m_px) throw NullPointerException();
-    return this->m_px->o_get(propName, hash, error);
-  }
-  ObjectOffset o_lval(CStrRef propName, int64 hash) {
-    return ObjectOffset(SmartPtr<T>::m_px, propName, hash);
+    /*
+      Note the cast to T* is intentional. We want to allow this
+      conversion only if T is derived from Y, so we are using an
+      implicit cast from T* to Y* to achieve that
+    */
+    return static_cast<T*>(this->m_px);
   }
 };
 

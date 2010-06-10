@@ -76,6 +76,7 @@ public:
   const std::string &lname() const { return m_lname; }
   const std::string &parent() const { return m_parent; }
   const ClassStatement *parentStatement() const;
+  void loadInterfaceStatements() const;
   void setModifiers(int m) { m_modifiers = m; }
   int getModifiers() const { return m_modifiers; }
   void addBases(const std::vector<String> &bases);

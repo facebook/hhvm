@@ -67,8 +67,9 @@ Variant f_apc_fetch(CVarRef key, Variant success /* = null */,
 
   if (key.is(KindOfArray)) {
     bool tmp = false;
-    Array ret = Array::Create();
     Array keys = key.toArray();
+    ArrayInit init(keys.size(), false);
+    int i = 0;
     for (ArrayIter iter(keys); iter; ++iter) {
       Variant k = iter.second();
       if (!k.isString()) {
@@ -77,11 +78,11 @@ Variant f_apc_fetch(CVarRef key, Variant success /* = null */,
       }
       if (s_apc_store[cache_id].get(k.toString(), v)) {
         tmp = true;
-        ret.set(k, v);
+        init.set(i++, k, v, -1, true);
       }
     }
     success = tmp;
-    return ret;
+    return init.create();
   }
 
   if (s_apc_store[cache_id].get(key.toString(), v)) {
@@ -102,18 +103,19 @@ Variant f_apc_delete(CVarRef key, int64 cache_id /* = 0 */) {
   }
 
   if (key.is(KindOfArray)) {
-    Array ret = Array::Create();
     Array keys = key.toArray();
+    ArrayInit init(keys.size(), true);
+    int i = 0;
     for (ArrayIter iter(keys); iter; ++iter) {
       Variant k = iter.second();
       if (!k.isString()) {
         raise_warning("apc key is not a string");
-        ret.append(k);
+        init.set(i++, k);
       } else if (!s_apc_store[cache_id].erase(k.toString())) {
-        ret.append(k);
+        init.set(i++, k);
       }
     }
-    return ret;
+    return init.create();
   }
 
   return s_apc_store[cache_id].erase(key.toString());

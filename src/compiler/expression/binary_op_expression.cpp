@@ -758,13 +758,15 @@ int BinaryOpExpression::getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
     } else if (exp->is(Expression::KindOfEncapsListExpression)) {
       EncapsListExpressionPtr e =
         static_pointer_cast<EncapsListExpression>(exp);
-      ExpressionListPtr el = e->getExpressions();
-      int num = 0;
-      for (int i = 0, s = el->getCount(); i < s; i++) {
-        ExpressionPtr exp = (*el)[i];
-        num += getConcatList(ev, exp, hasVoid, hasLitStr);
+      if (e->getType() != '`') {
+        ExpressionListPtr el = e->getExpressions();
+        int num = 0;
+        for (int i = 0, s = el->getCount(); i < s; i++) {
+          ExpressionPtr exp = (*el)[i];
+          num += getConcatList(ev, exp, hasVoid, hasLitStr);
+        }
+        return num;
       }
-      return num;
     }
   }
 

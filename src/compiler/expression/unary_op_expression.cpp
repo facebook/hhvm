@@ -292,7 +292,8 @@ ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultPtr ar) {
   }
 
   ar->postOptimize(m_exp);
-  if (m_op == T_PRINT && m_exp->is(KindOfEncapsListExpression)) {
+  if (m_op == T_PRINT && m_exp->is(KindOfEncapsListExpression) &&
+      !m_exp->hasEffect()) {
     EncapsListExpressionPtr e = static_pointer_cast<EncapsListExpression>
       (m_exp);
     e->stripConcat();
@@ -574,7 +575,7 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       cg.printf("%s%d.disable();\n", Option::SilencerPrefix, m_silencer);
       return true;
     }
-  } else if (m_op == T_PRINT && m_exp) {
+  } else if (m_op == T_PRINT && m_exp && !m_exp->hasEffect()) {
     ExpressionPtrVec ev;
     bool hasVoid = false, hasLit = false;
     if (BinaryOpExpression::getConcatList(ev, m_exp, hasVoid, hasLit) > 1 ||

@@ -34,6 +34,7 @@ public:
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   virtual int getLocalEffects() const { return m_type == '`' ? UnknownEffect : NoEffect; }
   virtual bool canonCompare(ExpressionPtr e) const;
+  int getType() { return m_type;}
   ExpressionListPtr getExpressions() { return m_exps; }
   void stripConcat();
 private:

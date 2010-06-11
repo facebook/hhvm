@@ -93,7 +93,7 @@ bool ArrayElementExpression::weakLval(VariableEnvironment &env,
       return false;
     }
     SET_LINE;
-    if (arr->getArrayData()->exists(idx)) {
+    if (arr->toArray().exists(idx)) {
       v = &arr->lvalAt(idx);
       return true;
     }

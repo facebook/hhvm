@@ -502,7 +502,7 @@ Variant &unsetLval(Variant &v, const T &key, int64 prehash = -1) {
     return v;
   }
   if (v.is(KindOfArray)) {
-    if (v.getArrayData()->exists(key, prehash)) {
+    if (v.toArray().exists(key, prehash)) {
       return v.lvalAt(key, prehash);
     }
     return Variant::lvalBlackHole();

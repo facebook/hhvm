@@ -86,6 +86,7 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized)
           = createAnother(it->first(), false);
         ThreadSharedVariant* val
           = createAnother(it->second(), false);
+        if (val->hasObject()) m_hasObject = true;
         keys[i] = key;
         vals[i] = val;
         map[key] = i++;
@@ -99,6 +100,7 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized)
   default:
     {
       m_type = KindOfObject;
+      m_hasObject = true;
       String s = f_serialize(source);
       m_data.str = new StringData(s.data(), s.size(), CopyString);
       break;
@@ -131,6 +133,7 @@ Variant ThreadSharedVariant::toLocal() {
     }
   default:
     {
+      ASSERT(m_type == KindOfObject);
       return f_unserialize(String(m_data.str->data(), m_data.str->size(),
                                   AttachLiteral));
     }
@@ -281,14 +284,20 @@ bool ThreadSharedVariant::exists(CVarRef key) {
   return it != map().end();
 }
 
-void ThreadSharedVariant::loadElems(ArrayData *&elems) {
+void ThreadSharedVariant::loadElems(ArrayData *&elems, CArrRef cache) {
   ASSERT(is(KindOfArray));
   SharedVariant** ks = keys();
   SharedVariant** vs = vals();
   uint count = map().size();
   ArrayInit ai(count);
   for (uint i = 0; i < count; i++) {
-    ai.set(i, ks[i]->toLocal(), vs[i]->toLocal(), -1, true);
+    SharedVariant *k = ks[i];
+    int64 key = (int64)k;
+    if (cache.exists(key)) {
+      ai.set(i, k->toLocal(), cache.rvalAt(key), -1, true);
+    } else {
+      ai.set(i, k->toLocal(), vs[i]->toLocal(), -1, true);
+    }
   }
   elems = ai.create();
   if (elems->isStatic()) elems = elems->copy();

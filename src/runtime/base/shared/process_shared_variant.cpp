@@ -105,6 +105,7 @@ ProcessSharedVariant::ProcessSharedVariant(CVarRef source,
           ->construct<ProcessSharedVariant>
           (boost::interprocess::anonymous_instance)
           (it->second(), getLock());
+        if (val->hasObject()) m_hasObject = true;
         (*map)[key] = i++;
         keys->push_back(putPtr(key));
         vals->push_back(putPtr(val));
@@ -114,6 +115,7 @@ ProcessSharedVariant::ProcessSharedVariant(CVarRef source,
   default:
     {
       m_type = KindOfObject;
+      m_hasObject = true;
       String s = f_serialize(source);
       m_data.str = putPtr(SharedMemoryManager::GetSegment()
                           ->construct<SharedMemoryString>
@@ -149,6 +151,7 @@ Variant ProcessSharedVariant::toLocal() {
     }
   default:
     {
+      ASSERT(m_type == KindOfObject);
       SharedMemoryString* s = getString();
       return f_unserialize(String(s->c_str(), s->size(), AttachLiteral));
     }
@@ -220,14 +223,20 @@ ProcessSharedVariant::~ProcessSharedVariant() {
   }
 }
 
-void ProcessSharedVariant::loadElems(ArrayData *&elems) {
+void ProcessSharedVariant::loadElems(ArrayData *&elems, CArrRef cache) {
   ASSERT(is(KindOfArray));
   const SharedMemoryVector<SharedVariant*>& ks = keys();
   const SharedMemoryVector<SharedVariant*>& vs = vals();
   uint count = ks.size();
   ArrayInit ai(count);
   for (uint i = 0; i < count; i++) {
-    ai.set(i, getPtr(ks[i])->toLocal(), getPtr(vs[i])->toLocal(), -1, true);
+    SharedVariant *k = getPtr(ks[i]);
+    int64 key = (int64)k;
+    if (cache.exists(key)) {
+      ai.set(i, k->toLocal(), cache.rvalAt(key), -1, true);
+    } else {
+      ai.set(i, k->toLocal(), getPtr(vs[i])->toLocal(), -1, true);
+    }
   }
   elems = ai.create();
   if (elems->isStatic()) elems = elems->copy();

@@ -445,7 +445,7 @@ SmallArray::Bucket *SmallArray::addKey(int p, StringData *key) {
   b.kind = StrKey;
   b.h = str_ohash(k, len);
   if (key->isShared()) {
-    b.key = NEW(StringData)(k, len, CopyString);
+    b.key = key->copy(false);
   } else {
     b.key = key;
   }

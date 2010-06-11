@@ -32,7 +32,7 @@ class SharedVariant
 #endif
 {
 public:
-  SharedVariant() : m_ref(1) {}
+  SharedVariant() : m_ref(1), m_hasObject(false) {}
   virtual ~SharedVariant() {}
 
   bool is(DataType d) const {
@@ -56,14 +56,18 @@ public:
   virtual int getIndex(CVarRef key) = 0;
   virtual SharedVariant* get(CVarRef key) = 0;
   virtual bool exists(CVarRef key) = 0;
-  virtual void loadElems(ArrayData *&elems) = 0;
+  virtual void loadElems(ArrayData *&elems, CArrRef cache) = 0;
   virtual SharedVariant* getKey(ssize_t pos) const = 0;
   virtual SharedVariant* getValue(ssize_t pos) const = 0;
 
   int countReachable();
 
+  // whether it is an object, or an array that recursively contains an object
+  bool hasObject() { return m_hasObject; }
+
  protected:
   int m_ref;
+  bool m_hasObject;
   DataType m_type;
 };
 

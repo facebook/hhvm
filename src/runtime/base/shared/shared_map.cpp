@@ -37,10 +37,8 @@ bool SharedMap::exists(CVarRef k, int64 prehash /* = -1*/) const {
 
 Variant SharedMap::get(CVarRef k, int64 prehash /* = -1 */,
                        bool error /* = false */) const {
-  SharedVariant* sv = m_arr->get(k);
-  if (sv) {
-    return sv->toLocal();
-  }
+  SharedVariant *sv = m_arr->get(k);
+  if (sv) return getLocal(sv);
   if (error) {
     raise_notice("Undefined index: %s", k.toString().data());
   }
@@ -211,7 +209,7 @@ ArrayData *SharedMap::prepend(CVarRef v, bool copy) {
 
 ArrayData *SharedMap::escalate() const {
   ArrayData *ret = NULL;
-  m_arr->loadElems(ret);
+  m_arr->loadElems(ret, m_localCache);
   ASSERT(!ret->isStatic());
   return ret;
 }

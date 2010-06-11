@@ -554,7 +554,7 @@ bool ZendArray::addLval(StringData *key, int64 h, Variant **pDest,
   }
   p = NEW(Bucket)();
   if (key->isShared()) {
-    p->key = NEW(StringData)(key->data(), key->size(), CopyString);
+    p->key = key->copy(false);
   } else {
     p->key = key;
   }
@@ -618,7 +618,7 @@ bool ZendArray::add(StringData *key, int64 h, CVarRef data) {
   }
   p = NEW(Bucket)(data);
   if (key->isShared()) {
-    p->key = NEW(StringData)(key->data(), key->size(), CopyString);
+    p->key = key->copy(false);
   } else {
     p->key = key;
   }
@@ -692,7 +692,7 @@ bool ZendArray::update(StringData *key, int64 h, CVarRef data) {
 
   p = NEW(Bucket)(data);
   if (key->isShared()) {
-    p->key = NEW(StringData)(key->data(), key->size(), CopyString);
+    p->key = key->copy(false);
   } else {
     p->key = key;
   }

@@ -50,7 +50,7 @@ public:
 
   Variant getValue(ssize_t pos) const {
     SharedVariant* v = m_arr->getValue(pos);
-    return v ? v->toLocal() : null;
+    return v ? getLocal(v) : null;
   }
 
   bool exists(int64 k, int64 prehash = -1) const {
@@ -139,6 +139,20 @@ public:
 
 private:
   SharedVariant *m_arr;
+  mutable Array m_localCache;
+
+  Variant getLocal(SharedVariant *sv) const {
+    ASSERT(sv);
+    if (!sv->hasObject()) return sv->toLocal();
+    int64 key = (int64)sv;
+    key = ((key & 0xfll) << 60) | (key >> 4);
+    if (m_localCache.exists(key)) {
+      return m_localCache.rvalAt(key);
+    }
+    Variant v = sv->toLocal();
+    m_localCache.set(key, v);
+    return v;
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

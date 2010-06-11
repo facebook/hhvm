@@ -621,8 +621,8 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
                                     AnalysisResultPtr ar,
                                     int state) {
-  if (!(m_context & (OprLValue | AssignmentLHS | ExistContext |
-                     UnsetContext)) ||
+  if (!(m_context & (OprLValue | AssignmentLHS | DeepAssignmentLHS |
+                     ExistContext | UnsetContext)) ||
       !(state & FixOrder)) {
     return Expression::preOutputCPP(cg, ar, state);
   }

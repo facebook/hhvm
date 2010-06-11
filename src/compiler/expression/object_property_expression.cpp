@@ -63,7 +63,8 @@ void ObjectPropertyExpression::setContext(Context context) {
       !hasContext(Expression::UnsetContext)) {
     m_object->setContext(Expression::LValue);
   }
-  if (context == Expression::ExistContext) {
+  if (context == Expression::ExistContext ||
+      context == Expression::DeepAssignmentLHS) {
     m_object->setContext(context);
   }
 }

@@ -19,7 +19,6 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/variable_serializer.h>
 #include <system/gen/php/classes/stdclass.h>
-#include <runtime/base/fiber_async_func.h>
 
 namespace HPHP {
 
@@ -85,17 +84,16 @@ bool Object::unserialize(std::istream &in) {
   throw NotImplementedException(__func__);
 }
 
-Object Object::fiberCopy() {
+Object Object::fiberMarshal(FiberReferenceMap &refMap) const {
   if (m_px) {
-    if (m_px->getCount() > 1) {
-      ObjectData *px = (ObjectData*)FiberReferenceMap::Lookup(m_px);
-      if (px == NULL) {
-        px = m_px->clone();
-        FiberReferenceMap::Insert(m_px, px);
-      }
-      return px;
-    }
-    return m_px->clone();
+    return m_px->fiberMarshal(refMap);
+  }
+  return Object();
+}
+
+Object Object::fiberUnmarshal(FiberReferenceMap &refMap) const {
+  if (m_px) {
+    return m_px->fiberUnmarshal(refMap);
   }
   return Object();
 }

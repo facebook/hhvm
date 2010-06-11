@@ -607,5 +607,37 @@ Variant ObjectData::t___clone() {
   return null;
 }
 
+Object ObjectData::fiberMarshal(FiberReferenceMap &refMap) const {
+  ObjectData *px = (ObjectData*)refMap.lookup((void*)this);
+  if (px == NULL) {
+    Object copy = create_object(o_getClassName(), null_array);
+    refMap.insert((void*)this, copy.get()); // ahead of deep copy
+    Array props;
+    o_get(props);
+    copy->o_set(props.fiberMarshal(refMap));
+    return copy;
+  }
+  return px;
+}
+
+Object ObjectData::fiberUnmarshal(FiberReferenceMap &refMap) const {
+  // marshaling back to original thread
+  ObjectData *px = (ObjectData*)refMap.lookup((void*)this);
+  Object copy;
+  if (px == NULL) {
+    // was i in original thread?
+    px = (ObjectData*)refMap.reverseLookup((void*)this);
+    if (px == NULL) {
+      copy = create_object(o_getClassName(), null_array);
+      px = copy.get();
+    }
+    refMap.insert((void*)this, px); // ahead of deep copy
+    Array props;
+    o_get(props);
+    px->o_set(props.fiberUnmarshal(refMap));
+  }
+  return Object(px);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

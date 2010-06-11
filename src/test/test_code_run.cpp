@@ -22,6 +22,8 @@
 #include <util/util.h>
 #include <util/process.h>
 #include <compiler/option.h>
+#include <runtime/base/fiber_async_func.h>
+#include <runtime/base/runtime_option.h>
 
 using namespace std;
 
@@ -453,6 +455,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestExtSplFile);
   RUN_TEST(TestExtIterator);
   RUN_TEST(TestExtSoap);
+  RUN_TEST(TestFiber);
 
   // PHP 5.3 features
   RUN_TEST(TestVariableClassName);
@@ -11139,6 +11142,110 @@ bool TestCodeRun::TestExtSoap() {
       "       '</ns1:Add>  </SOAP-ENV:Body></SOAP-ENV:Envelope>';"
       "$server->addFunction('Add');"
       "$server->handle($str);");
+  return true;
+}
+
+bool TestCodeRun::TestFiber() {
+  RuntimeOption::FiberCount = 5;
+  FiberAsyncFunc::Restart();
+
+  // test parameter and return value passing
+  MVCRO("<?php "
+        "function fiber($a) { var_dump($a); return 'fiber';}"
+        "$f = call_user_func_async('fiber', array(123, 456));"
+        "var_dump(end_user_func_async($f));",
+
+        "array(2) {\n"
+        "  [0]=>\n"
+        "  int(123)\n"
+        "  [1]=>\n"
+        "  int(456)\n"
+        "}\n"
+        "string(5) \"fiber\"\n"
+       );
+
+  // test references
+  MVCRO("<?php "
+        "function fiber(&$a) { $a = 123;}"
+        "$b = 456;"
+        "call_user_func('fiber', $b);"
+        "var_dump($b);",
+
+        "int(123)\n"
+       );
+  MVCRO("<?php "
+        "function fiber(&$a) { $a = 123;}"
+        "$b = 456;"
+        "end_user_func_async(call_user_func_async('fiber', $b));"
+        "var_dump($b);",
+
+        "int(123)\n"
+       );
+  MVCRO("<?php "
+        "function fiber($a) { $a = 123;}"
+        "$b = 456;"
+        "call_user_func('fiber', $b);"
+        "var_dump($b);",
+
+        "int(456)\n"
+       );
+  MVCRO("<?php "
+        "function fiber($a) { $a = 123;}"
+        "$b = 456;"
+        "end_user_func_async(call_user_func_async('fiber', $b));"
+        "var_dump($b);",
+
+        "int(456)\n"
+       );
+
+  // test objects
+  MVCRO("<?php "
+        "class A { public $data = 456;}"
+        "function fiber($a) { $a->data = 123;}"
+        "$obj = new A();"
+        "call_user_func('fiber', $obj);"
+        "var_dump($obj->data);",
+
+        "int(123)\n"
+       );
+  MVCRO("<?php "
+        "class A { public $data = 456;}"
+        "function fiber($a) { $a->data = 123;}"
+        "$obj = new A();"
+        "end_user_func_async(call_user_func_async('fiber', $obj));"
+        "var_dump($obj->data);",
+
+        "int(123)\n"
+       );
+
+  // test arrays of references and objects
+  MVCRO("<?php "
+        "class A { public $data = 456;}"
+        "function fiber($a) { $a[0]->data = 123; $a[1] = 234;}"
+        "$obj = new A();"
+        "$b = 456;"
+        "$arr = array($obj, &$b);"
+        "call_user_func('fiber', $arr);"
+        "var_dump($obj->data);"
+        "var_dump($b);",
+
+        "int(123)\n"
+        "int(234)\n"
+       );
+  MVCRO("<?php "
+        "class A { public $data = 456;}"
+        "function fiber($a) { $a[0]->data = 123; $a[1] = 234;}"
+        "$obj = new A();"
+        "$b = 456;"
+        "$arr = array($obj, &$b);"
+        "end_user_func_async(call_user_func_async('fiber', $arr));"
+        "var_dump($obj->data);"
+        "var_dump($b);",
+
+        "int(123)\n"
+        "int(234)\n"
+       );
+
   return true;
 }
 

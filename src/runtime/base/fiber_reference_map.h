@@ -14,42 +14,32 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/resource_data.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/variable_serializer.h>
+#ifndef __HPHP_FIBER_REFERENCE_MAP_H__
+#define __HPHP_FIBER_REFERENCE_MAP_H__
+
+#include <util/base.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-String ResourceData::t___tostring() {
-  return String("Resource id #") + String(o_getId());
-}
+/**
+ * Referenced pointer (strongly bound variants and objects) mapping between
+ * mother thread and fiber.
+ */
+class FiberReferenceMap {
+public:
+  void insert(void *src, void *copy);
+  void *lookup(void *src);
+  void *reverseLookup(void *copy);
 
-ObjectData* ResourceData::cloneImpl() {
-  return NULL;
-}
+  bool empty() const { return m_forward_references.empty();}
 
-void ResourceData::serialize(VariableSerializer *serializer) const {
-  if (serializer->incNestedLevel((void*)this, true)) {
-    serializer->writeOverflow((void*)this, true);
-  } else {
-    std::string saveName;
-    int saveId;
-    serializer->getResourceInfo(saveName, saveId);
-    serializer->setResourceInfo(o_getResourceName(), o_getResourceId());
-    o_toArray().serialize(serializer);
-    serializer->setResourceInfo(saveName.c_str(), saveId);
-  }
-  serializer->decNestedLevel((void*)this);
-}
-
-Object ResourceData::fiberMarshal(FiberReferenceMap &refMap) const {
-  return Object();
-}
-
-Object ResourceData::fiberUnmarshal(FiberReferenceMap &refMap) const {
-  return Object();
-}
+private:
+  PointerMap m_forward_references;
+  PointerMap m_reverse_references;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif // __HPHP_FIBER_REFERENCE_MAP_H__

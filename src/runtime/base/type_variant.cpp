@@ -23,7 +23,6 @@
 #include <runtime/base/externals.h>
 #include <runtime/ext/ext_variable.h>
 #include <runtime/base/runtime_option.h>
-#include <runtime/base/fiber_async_func.h>
 
 using namespace std;
 
@@ -2864,19 +2863,19 @@ Variant Variant::share(bool save) const {
   return false; // same as non-existent
 }
 
-Variant Variant::fiberCopy() {
+Variant Variant::fiberMarshal(FiberReferenceMap &refMap) const {
   if (m_type == KindOfVariant) {
     Variant *mpvar = m_data.pvar;
     if (mpvar->getCount() > 1) {
-      Variant *pvar = (Variant*)FiberReferenceMap::Lookup(mpvar);
+      Variant *pvar = (Variant*)refMap.lookup(mpvar);
       if (pvar == NULL) {
         pvar = NEW(Variant)();
-        *pvar = mpvar->fiberCopy();
-        FiberReferenceMap::Insert(mpvar, pvar);
+        refMap.insert(mpvar, pvar); // ahead of deep copy
+        *pvar = mpvar->fiberMarshal(refMap);
       }
       return pvar;
     }
-    return mpvar->fiberCopy();
+    return mpvar->fiberMarshal(refMap);
   }
 
   switch (m_type) {
@@ -2890,11 +2889,57 @@ Variant Variant::fiberCopy() {
   case LiteralString: return m_data.str;
   case KindOfStaticString:
   case KindOfString:
-    return String(m_data.pstr->data(), m_data.pstr->size(), CopyString);
+    return String(m_data.pstr).fiberCopy();
   case KindOfArray:
-    return Array(m_data.parr->copy());
+    return Array(m_data.parr).fiberMarshal(refMap);
   case KindOfObject:
-    return Object(m_data.pobj).fiberCopy();
+    return m_data.pobj->fiberMarshal(refMap);
+  default:
+    ASSERT(false);
+    break;
+  }
+
+  return Variant();
+}
+
+Variant Variant::fiberUnmarshal(FiberReferenceMap &refMap) const {
+  if (m_type == KindOfVariant) {
+    Variant *mpvar = m_data.pvar;
+    if (mpvar->getCount() > 1) {
+      // marshaling back to original thread
+      Variant *pvar = (Variant*)refMap.lookup(mpvar);
+      if (pvar == NULL) {
+        // was i in original thread?
+        pvar = (Variant*)refMap.reverseLookup(mpvar);
+        if (pvar == NULL) {
+          pvar = NEW(Variant)();
+        }
+        refMap.insert(mpvar, pvar); // ahead of deep copy
+        *pvar = mpvar->fiberUnmarshal(refMap);
+      }
+      return pvar;
+    }
+
+    // i'm actually a weakly bound variant
+    return mpvar->fiberUnmarshal(refMap);
+  }
+
+  switch (m_type) {
+  case KindOfNull:    return Variant();
+  case KindOfBoolean: return (m_data.num != 0);
+  case KindOfByte:
+  case KindOfInt16:
+  case KindOfInt32:
+  case KindOfInt64:   return m_data.num;
+  case KindOfDouble:  return m_data.dbl;
+  case LiteralString: return m_data.str;
+  case KindOfStaticString:
+  case KindOfString:
+    return String(m_data.pstr).fiberCopy();
+  case KindOfArray:
+    return Array(m_data.parr).fiberUnmarshal(refMap);
+  case KindOfObject:
+    return m_data.pobj->fiberUnmarshal(refMap);
   default:
     ASSERT(false);
     break;

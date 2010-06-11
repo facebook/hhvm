@@ -14,41 +14,34 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/resource_data.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/variable_serializer.h>
+#include <runtime/base/fiber_reference_map.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-String ResourceData::t___tostring() {
-  return String("Resource id #") + String(o_getId());
+void FiberReferenceMap::insert(void *src, void *copy) {
+  ASSERT(lookup(src) == NULL);
+  ASSERT(copy == NULL || reverseLookup(copy) == NULL);
+  m_forward_references[src] = copy;
+  if (copy) {
+    m_reverse_references[copy] = src;
+  }
 }
 
-ObjectData* ResourceData::cloneImpl() {
+void *FiberReferenceMap::lookup(void *src) {
+  PointerMap::iterator iter = m_forward_references.find(src);
+  if (iter != m_forward_references.end()) {
+    return iter->second;
+  }
   return NULL;
 }
 
-void ResourceData::serialize(VariableSerializer *serializer) const {
-  if (serializer->incNestedLevel((void*)this, true)) {
-    serializer->writeOverflow((void*)this, true);
-  } else {
-    std::string saveName;
-    int saveId;
-    serializer->getResourceInfo(saveName, saveId);
-    serializer->setResourceInfo(o_getResourceName(), o_getResourceId());
-    o_toArray().serialize(serializer);
-    serializer->setResourceInfo(saveName.c_str(), saveId);
+void *FiberReferenceMap::reverseLookup(void *copy) {
+  PointerMap::iterator iter = m_reverse_references.find(copy);
+  if (iter != m_reverse_references.end()) {
+    return iter->second;
   }
-  serializer->decNestedLevel((void*)this);
-}
-
-Object ResourceData::fiberMarshal(FiberReferenceMap &refMap) const {
-  return Object();
-}
-
-Object ResourceData::fiberUnmarshal(FiberReferenceMap &refMap) const {
-  return Object();
+  return NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

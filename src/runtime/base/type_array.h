@@ -28,6 +28,7 @@
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/type_string.h>
 #include <runtime/base/hphp_value.h>
+#include <runtime/base/fiber_reference_map.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -422,9 +423,10 @@ class Array : public SmartPtr<ArrayData> {
   void unserialize(VariableUnserializer *in);
 
   /**
-   * Used by FiberAsyncFunc to copy in the new fiber.
+   * Marshaling/Unmarshaling between request thread and fiber thread.
    */
-  Array fiberCopy();
+  Array fiberMarshal(FiberReferenceMap &refMap) const;
+  Array fiberUnmarshal(FiberReferenceMap &refMap) const;
 
   /**
    * Memory allocator methods.

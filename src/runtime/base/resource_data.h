@@ -43,6 +43,15 @@ public:
   // implementing UnsafePointer
   virtual void protect() { setStatic();}
 
+  /**
+   * Marshaling/Unmarshaling between request thread and fiber thread.
+   *
+   * ResourceData cannot be copied across fiber in general, unless a derived
+   * class overwrites this behavior by providing its own copying.
+   */
+  virtual Object fiberMarshal(FiberReferenceMap &refMap) const;
+  virtual Object fiberUnmarshal(FiberReferenceMap &refMap) const;
+
 protected:
   int rsrc_id; // resource id, not used yet.
   virtual ObjectData* cloneImpl();

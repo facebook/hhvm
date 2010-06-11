@@ -271,15 +271,15 @@ void InterfaceStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (ar) ar->pushScope(classScope);
 
-  cg.printf("interface %s", m_name.c_str());
+  cg_printf("interface %s", m_name.c_str());
   if (m_base) {
-    cg.printf(" extends ");
+    cg_printf(" extends ");
     m_base->outputPHP(cg, ar);
   }
-  cg.indentBegin(" {\n");
+  cg_indentBegin(" {\n");
   m_classScope.lock()->outputPHP(cg, ar);
   if (m_stmt) m_stmt->outputPHP(cg, ar);
-  cg.indentEnd("}\n");
+  cg_indentEnd("}\n");
 
   if (ar) ar->popScope();
 }
@@ -288,7 +288,7 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) 
   ClassScopePtr classScope = m_classScope.lock();
   if (cg.getContext() == CodeGenerator::NoContext) {
     if (classScope->isVolatile()) {
-      cg.printf("g->CDEC(%s) = true;\n", m_name.c_str());
+      cg_printf("g->CDEC(%s) = true;\n", m_name.c_str());
     }
     return;
   }
@@ -300,16 +300,16 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) 
   switch (cg.getContext()) {
   case CodeGenerator::CppForwardDeclaration:
     if (Option::GenerateCPPMacros) {
-      cg.printf("FORWARD_DECLARE_INTERFACE(%s);\n", clsName);
+      cg_printf("FORWARD_DECLARE_INTERFACE(%s);\n", clsName);
     }
     break;
   case CodeGenerator::CppDeclaration:
     {
       printSource(cg);
-      cg.printf("class %s%s", Option::ClassPrefix, clsName);
-      cg.indentBegin(" {\n");
+      cg_printf("class %s%s", Option::ClassPrefix, clsName);
+      cg_indentBegin(" {\n");
       if (m_stmt) m_stmt->outputCPP(cg, ar);
-      cg.indentEnd("};\n");
+      cg_indentEnd("};\n");
     }
     break;
   case CodeGenerator::CppImplementation:

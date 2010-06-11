@@ -635,42 +635,42 @@ void BinaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_exp1->outputPHP(cg, ar);
 
   switch (m_op) {
-  case T_PLUS_EQUAL:          cg.printf(" += ");         break;
-  case T_MINUS_EQUAL:         cg.printf(" -= ");         break;
-  case T_MUL_EQUAL:           cg.printf(" *= ");         break;
-  case T_DIV_EQUAL:           cg.printf(" /= ");         break;
-  case T_CONCAT_EQUAL:        cg.printf(" .= ");         break;
-  case T_MOD_EQUAL:           cg.printf(" %%= ");        break;
-  case T_AND_EQUAL:           cg.printf(" &= ");         break;
-  case T_OR_EQUAL:            cg.printf(" |= ");         break;
-  case T_XOR_EQUAL:           cg.printf(" ^= ");         break;
-  case T_SL_EQUAL:            cg.printf(" <<= ");        break;
-  case T_SR_EQUAL:            cg.printf(" >>= ");        break;
-  case T_BOOLEAN_OR:          cg.printf(" || ");         break;
-  case T_BOOLEAN_AND:         cg.printf(" && ");         break;
-  case T_LOGICAL_OR:          cg.printf(" or ");         break;
-  case T_LOGICAL_AND:         cg.printf(" and ");        break;
-  case T_LOGICAL_XOR:         cg.printf(" xor ");        break;
-  case '|':                   cg.printf(" | ");          break;
-  case '&':                   cg.printf(" & ");          break;
-  case '^':                   cg.printf(" ^ ");          break;
-  case '.':                   cg.printf(" . ");          break;
-  case '+':                   cg.printf(" + ");          break;
-  case '-':                   cg.printf(" - ");          break;
-  case '*':                   cg.printf(" * ");          break;
-  case '/':                   cg.printf(" / ");          break;
-  case '%':                   cg.printf(" %% ");         break;
-  case T_SL:                  cg.printf(" << ");         break;
-  case T_SR:                  cg.printf(" >> ");         break;
-  case T_IS_IDENTICAL:        cg.printf(" === ");        break;
-  case T_IS_NOT_IDENTICAL:    cg.printf(" !== ");        break;
-  case T_IS_EQUAL:            cg.printf(" == ");         break;
-  case T_IS_NOT_EQUAL:        cg.printf(" != ");         break;
-  case '<':                   cg.printf(" < ");          break;
-  case T_IS_SMALLER_OR_EQUAL: cg.printf(" <= ");         break;
-  case '>':                   cg.printf(" > ");          break;
-  case T_IS_GREATER_OR_EQUAL: cg.printf(" >= ");         break;
-  case T_INSTANCEOF:          cg.printf(" instanceof "); break;
+  case T_PLUS_EQUAL:          cg_printf(" += ");         break;
+  case T_MINUS_EQUAL:         cg_printf(" -= ");         break;
+  case T_MUL_EQUAL:           cg_printf(" *= ");         break;
+  case T_DIV_EQUAL:           cg_printf(" /= ");         break;
+  case T_CONCAT_EQUAL:        cg_printf(" .= ");         break;
+  case T_MOD_EQUAL:           cg_printf(" %%= ");        break;
+  case T_AND_EQUAL:           cg_printf(" &= ");         break;
+  case T_OR_EQUAL:            cg_printf(" |= ");         break;
+  case T_XOR_EQUAL:           cg_printf(" ^= ");         break;
+  case T_SL_EQUAL:            cg_printf(" <<= ");        break;
+  case T_SR_EQUAL:            cg_printf(" >>= ");        break;
+  case T_BOOLEAN_OR:          cg_printf(" || ");         break;
+  case T_BOOLEAN_AND:         cg_printf(" && ");         break;
+  case T_LOGICAL_OR:          cg_printf(" or ");         break;
+  case T_LOGICAL_AND:         cg_printf(" and ");        break;
+  case T_LOGICAL_XOR:         cg_printf(" xor ");        break;
+  case '|':                   cg_printf(" | ");          break;
+  case '&':                   cg_printf(" & ");          break;
+  case '^':                   cg_printf(" ^ ");          break;
+  case '.':                   cg_printf(" . ");          break;
+  case '+':                   cg_printf(" + ");          break;
+  case '-':                   cg_printf(" - ");          break;
+  case '*':                   cg_printf(" * ");          break;
+  case '/':                   cg_printf(" / ");          break;
+  case '%':                   cg_printf(" %% ");         break;
+  case T_SL:                  cg_printf(" << ");         break;
+  case T_SR:                  cg_printf(" >> ");         break;
+  case T_IS_IDENTICAL:        cg_printf(" === ");        break;
+  case T_IS_NOT_IDENTICAL:    cg_printf(" !== ");        break;
+  case T_IS_EQUAL:            cg_printf(" == ");         break;
+  case T_IS_NOT_EQUAL:        cg_printf(" != ");         break;
+  case '<':                   cg_printf(" < ");          break;
+  case T_IS_SMALLER_OR_EQUAL: cg_printf(" <= ");         break;
+  case '>':                   cg_printf(" > ");          break;
+  case T_IS_GREATER_OR_EQUAL: cg_printf(" >= ");         break;
+  case T_INSTANCEOF:          cg_printf(" instanceof "); break;
   default:
     ASSERT(false);
   }
@@ -683,7 +683,7 @@ static bool castIfNeeded(TypePtr top, TypePtr arg,
   if (top && top->isPrimitive()) {
     if (!arg || !arg->isPrimitive()) {
       top->outputCPPCast(cg, ar);
-      cg.printf("(");
+      cg_printf("(");
       return true;
     }
   }
@@ -762,7 +762,7 @@ static void outputStringExpr(CodeGenerator &cg, AnalysisResultPtr ar,
   if (asLitStr && exp->isLiteralString()) {
     const std::string &s = exp->getLiteralString();
     char *enc = string_cplus_escape(s.c_str());
-    cg.printf("\"%s\", %d", enc, s.size());
+    cg_printf("\"%s\", %d", enc, s.size());
     free(enc);
     return;
   }
@@ -774,20 +774,20 @@ static void outputStringExpr(CodeGenerator &cg, AnalysisResultPtr ar,
          !exp->getImplementedType()->is(Type::KindOfString))))
       ||
       !exp->getType()->is(Type::KindOfString)) {
-    cg.printf("toString(");
+    cg_printf("toString(");
     close = true;
   }
   exp->outputCPP(cg, ar);
-  if (close) cg.printf(")");
+  if (close) cg_printf(")");
 }
 
 static void outputStringBufExprs(ExpressionPtrVec &ev,
                                  CodeGenerator &cg, AnalysisResultPtr ar) {
   for (size_t i = 0; i < ev.size(); i++) {
     ExpressionPtr exp = ev[i];
-    cg.printf(".add(");
+    cg_printf(".add(");
     outputStringExpr(cg, ar, exp, true);
-    cg.printf(")");
+    cg_printf(")");
   }
 }
 
@@ -829,7 +829,7 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       } else if (numConcat) {
         buf = m_cppTemp = genCPPTemp(cg, ar);
         buf += "_buf";
-        cg.printf("StringBuffer %s;\n", buf.c_str());
+        cg_printf("StringBuffer %s;\n", buf.c_str());
       } else {
         m_cppTemp = "\"\"";
       }
@@ -839,21 +839,21 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         bool is_void = !exp->getActualType();
         exp->preOutputCPP(cg, ar, 0);
         if (!is_void) {
-          cg.printf("%s.append(", buf.c_str());
+          cg_printf("%s.append(", buf.c_str());
           outputStringExpr(cg, ar, exp, true);
-          cg.printf(")");
+          cg_printf(")");
         } else {
           exp->outputCPPUnneeded(cg, ar);
         }
-        cg.printf(";\n");
+        cg_printf(";\n");
       }
 
       if (numConcat && !prefix) {
-        cg.printf("CStrRef %s(%s.detach());\n",
+        cg_printf("CStrRef %s(%s.detach());\n",
                   m_cppTemp.c_str(), buf.c_str());
         if (m_op == T_CONCAT_EQUAL) {
           m_exp1->outputCPP(cg, ar);
-          cg.printf(" = %s;\n", m_cppTemp.c_str());
+          cg_printf(" = %s;\n", m_cppTemp.c_str());
         }
       }
       return true;
@@ -880,17 +880,17 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   if (fix_e2) {
     ar->wrapExpressionBegin(cg);
     std::string tmp = genCPPTemp(cg, ar);
-    cg.printf("bool %s = (", tmp.c_str());
+    cg_printf("bool %s = (", tmp.c_str());
     m_exp1->outputCPP(cg, ar);
-    cg.printf(");\n");
-    cg.indentBegin("if (%s%s) {\n",
+    cg_printf(");\n");
+    cg_indentBegin("if (%s%s) {\n",
                    m_op == T_LOGICAL_OR || m_op == T_BOOLEAN_OR ? "!" : "",
                    tmp.c_str());
     m_exp2->preOutputCPP(cg, ar, 0);
-    cg.printf("%s = (", tmp.c_str());
+    cg_printf("%s = (", tmp.c_str());
     m_exp2->outputCPP(cg, ar);
-    cg.printf(");\n");
-    cg.indentEnd("}\n");
+    cg_printf(");\n");
+    cg_indentEnd("}\n");
     m_cppTemp = tmp;
   } else if (state & FixOrder) {
     preOutputStash(cg, ar, state);
@@ -911,12 +911,12 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       ExpressionPtrVec ev;
       bool hasVoid = false, hasLitStr = false;
       getConcatList(ev, m_exp2, hasVoid, hasLitStr);
-      cg.printf("%s", stringBufferName(Option::TempPrefix, prefix,
+      cg_printf("%s", stringBufferName(Option::TempPrefix, prefix,
                                        sv->getName().c_str()).c_str());
       outputStringBufExprs(ev, cg, ar);
       return;
     }
-    cg.printf("concat_assign");
+    cg_printf("concat_assign");
     break;
   case '.':
     {
@@ -929,44 +929,44 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
           (!hasLitStr || Option::PrecomputeLiteralStrings)) {
         assert(num >= 2);
         if (num == 2) {
-          cg.printf("concat(");
+          cg_printf("concat(");
         } else {
-          cg.printf("concat%d(", num);
+          cg_printf("concat%d(", num);
         }
         for (size_t i = 0; i < ev.size(); i++) {
           ExpressionPtr exp = ev[i];
-          if (i) cg.printf(", ");
+          if (i) cg_printf(", ");
           outputStringExpr(cg, ar, exp, false);
         }
-        cg.printf(")");
+        cg_printf(")");
       } else {
-        cg.printf("StringBuffer()");
+        cg_printf("StringBuffer()");
         outputStringBufExprs(ev, cg, ar);
-        cg.printf(".detach()");
+        cg_printf(".detach()");
       }
     }
     return;
-  case T_LOGICAL_XOR:         cg.printf("logical_xor");   break;
-  case '|':                   cg.printf("bitwise_or");    break;
-  case '&':                   cg.printf("bitwise_and");   break;
-  case '^':                   cg.printf("bitwise_xor");   break;
-  case T_IS_IDENTICAL:        cg.printf("same");          break;
-  case T_IS_NOT_IDENTICAL:    cg.printf("!same");         break;
-  case T_IS_EQUAL:            cg.printf("equal");         break;
-  case T_IS_NOT_EQUAL:        cg.printf("!equal");        break;
-  case '<':                   cg.printf("less");          break;
-  case T_IS_SMALLER_OR_EQUAL: cg.printf("not_more");      break;
-  case '>':                   cg.printf("more");          break;
-  case T_IS_GREATER_OR_EQUAL: cg.printf("not_less");      break;
-  case '/':                   cg.printf("divide");        break;
-  case '%':                   cg.printf("modulo");        break;
-  case T_INSTANCEOF:          cg.printf("instanceOf");    break;
+  case T_LOGICAL_XOR:         cg_printf("logical_xor");   break;
+  case '|':                   cg_printf("bitwise_or");    break;
+  case '&':                   cg_printf("bitwise_and");   break;
+  case '^':                   cg_printf("bitwise_xor");   break;
+  case T_IS_IDENTICAL:        cg_printf("same");          break;
+  case T_IS_NOT_IDENTICAL:    cg_printf("!same");         break;
+  case T_IS_EQUAL:            cg_printf("equal");         break;
+  case T_IS_NOT_EQUAL:        cg_printf("!equal");        break;
+  case '<':                   cg_printf("less");          break;
+  case T_IS_SMALLER_OR_EQUAL: cg_printf("not_more");      break;
+  case '>':                   cg_printf("more");          break;
+  case T_IS_GREATER_OR_EQUAL: cg_printf("not_less");      break;
+  case '/':                   cg_printf("divide");        break;
+  case '%':                   cg_printf("modulo");        break;
+  case T_INSTANCEOF:          cg_printf("instanceOf");    break;
   default:
     wrapped = false;
     break;
   }
 
-  if (wrapped) cg.printf("(");
+  if (wrapped) cg_printf("(");
 
   ExpressionPtr first = m_exp1;
   ExpressionPtr second = m_exp2;
@@ -982,29 +982,29 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     if (actualType &&
         (actualType->is(Type::KindOfString) ||
          actualType->is(Type::KindOfArray))) {
-      cg.printf("(Variant)(");
+      cg_printf("(Variant)(");
       first->outputCPP(cg, ar);
-      cg.printf(")");
+      cg_printf(")");
     } else {
       bool flag = castIfNeeded(getActualType(), actualType, cg, ar);
       first->outputCPP(cg, ar);
       if (flag) {
-        cg.printf(")");
+        cg_printf(")");
       }
     }
     break;
   }
   case T_SL:
   case T_SR:
-    cg.printf("toInt64(");
+    cg_printf("toInt64(");
     first->outputCPP(cg, ar);
-    cg.printf(")");
+    cg_printf(")");
     break;
   case T_LOGICAL_AND:
   case T_LOGICAL_OR:
-    cg.printf("(");
+    cg_printf("(");
     first->outputCPP(cg, ar);
-    cg.printf(")");
+    cg_printf(")");
     break;
   default:
     first->outputCPP(cg, ar);
@@ -1012,29 +1012,29 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   }
 
   switch (m_op) {
-  case T_PLUS_EQUAL:          cg.printf(" += ");   break;
-  case T_MINUS_EQUAL:         cg.printf(" -= ");   break;
-  case T_MUL_EQUAL:           cg.printf(" *= ");   break;
-  case T_DIV_EQUAL:           cg.printf(" /= ");   break;
-  case T_MOD_EQUAL:           cg.printf(" %%= ");  break;
-  case T_AND_EQUAL:           cg.printf(" &= ");   break;
-  case T_OR_EQUAL:            cg.printf(" |= ");   break;
-  case T_XOR_EQUAL:           cg.printf(" ^= ");   break;
-  case T_SL_EQUAL:            cg.printf(" <<= ");  break;
-  case T_SR_EQUAL:            cg.printf(" >>= ");  break;
-  case T_BOOLEAN_OR:          cg.printf(" || ");   break;
-  case T_BOOLEAN_AND:         cg.printf(" && ");   break;
-  case T_LOGICAL_OR:          cg.printf(" || ");   break;
-  case T_LOGICAL_AND:         cg.printf(" && ");   break;
+  case T_PLUS_EQUAL:          cg_printf(" += ");   break;
+  case T_MINUS_EQUAL:         cg_printf(" -= ");   break;
+  case T_MUL_EQUAL:           cg_printf(" *= ");   break;
+  case T_DIV_EQUAL:           cg_printf(" /= ");   break;
+  case T_MOD_EQUAL:           cg_printf(" %%= ");  break;
+  case T_AND_EQUAL:           cg_printf(" &= ");   break;
+  case T_OR_EQUAL:            cg_printf(" |= ");   break;
+  case T_XOR_EQUAL:           cg_printf(" ^= ");   break;
+  case T_SL_EQUAL:            cg_printf(" <<= ");  break;
+  case T_SR_EQUAL:            cg_printf(" >>= ");  break;
+  case T_BOOLEAN_OR:          cg_printf(" || ");   break;
+  case T_BOOLEAN_AND:         cg_printf(" && ");   break;
+  case T_LOGICAL_OR:          cg_printf(" || ");   break;
+  case T_LOGICAL_AND:         cg_printf(" && ");   break;
   default:
     switch (m_op) {
-    case '+':                   cg.printf(" + ");    break;
-    case '-':                   cg.printf(" - ");    break;
-    case '*':                   cg.printf(" * ");    break;
-    case T_SL:                  cg.printf(" << ");   break;
-    case T_SR:                  cg.printf(" >> ");   break;
+    case '+':                   cg_printf(" + ");    break;
+    case '-':                   cg_printf(" - ");    break;
+    case '*':                   cg_printf(" * ");    break;
+    case T_SL:                  cg_printf(" << ");   break;
+    case T_SR:                  cg_printf(" >> ");   break;
     default:
-      cg.printf(", ");
+      cg_printf(", ");
       break;
     }
     break;
@@ -1050,14 +1050,14 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     if (actualType &&
         (actualType->is(Type::KindOfString) ||
          actualType->is(Type::KindOfArray))) {
-      cg.printf("(Variant)(");
+      cg_printf("(Variant)(");
       second->outputCPP(cg, ar);
-      cg.printf(")");
+      cg_printf(")");
     } else {
       bool flag = castIfNeeded(getActualType(), actualType, cg, ar);
       second->outputCPP(cg, ar);
       if (flag) {
-        cg.printf(")");
+        cg_printf(")");
       }
     }
     break;
@@ -1065,9 +1065,9 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   case T_INSTANCEOF:
     {
       if (second->isUnquotedScalar()) {
-        cg.printf("\"");
+        cg_printf("\"");
         second->outputCPP(cg, ar);
-        cg.printf("\"");
+        cg_printf("\"");
       } else {
         second->outputCPP(cg, ar);
       }
@@ -1081,9 +1081,9 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       TypePtr t2 = second->getActualType();
       if (t1 && t2 && Type::IsCastNeeded(ar, t2, t1)) {
         t1->outputCPPCast(cg, ar);
-        cg.printf("(");
+        cg_printf("(");
         second->outputCPP(cg, ar);
-        cg.printf(")");
+        cg_printf(")");
       } else {
         second->outputCPP(cg, ar);
       }
@@ -1091,14 +1091,14 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     }
   case T_LOGICAL_AND:
   case T_LOGICAL_OR:
-    cg.printf("(");
+    cg_printf("(");
     second->outputCPP(cg, ar);
-    cg.printf(")");
+    cg_printf(")");
     break;
   default:
     second->outputCPP(cg, ar);
   }
 
-  if (wrapped) cg.printf(")");
-  if (linemap) cg.printf(")");
+  if (wrapped) cg_printf(")");
+  if (linemap) cg_printf(")");
 }

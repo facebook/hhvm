@@ -302,6 +302,8 @@ public:
   static bool ControlEvalOrder;
   static bool GenerateSourceInfo;
 
+  static bool FlAnnotate; // annotate emitted code withe compiler file-line info
+
 private:
   /**
    * Directory that has system HPHP files for loading builtin classes, etc.

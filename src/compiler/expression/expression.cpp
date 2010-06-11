@@ -381,7 +381,7 @@ bool Expression::outputLineMap(CodeGenerator &cg, AnalysisResultPtr ar,
     if (cg.getStream(CodeGenerator::MapFile) &&
         cg.usingStream(CodeGenerator::PrimaryStream)) {
       cg.useStream(CodeGenerator::MapFile);
-      cg.printf("%d => '%s:%d',", cg.getLineNo(CodeGenerator::PrimaryStream),
+      cg_printf("%d => '%s:%d',", cg.getLineNo(CodeGenerator::PrimaryStream),
                 getLocation()->file, getLocation()->line1);
       cg.useStream(CodeGenerator::PrimaryStream);
     }
@@ -398,7 +398,7 @@ bool Expression::outputLineMap(CodeGenerator &cg, AnalysisResultPtr ar,
         ar->recordSourceInfo(fileline, loc);
         if (cg.getPHPLineNo() != loc->line1) {
           cg.setPHPLineNo(loc->line1);
-          cg.printf("LINE(%d,", loc->line1);
+          cg_printf("LINE(%d,", loc->line1);
           return true;
         }
       }
@@ -482,7 +482,7 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
 
   ar->wrapExpressionBegin(cg);
   if (constRef) {
-    cg.printf("const ");
+    cg_printf("const ");
   }
   dstType->outputCPPDecl(cg, ar);
   std::string t = genCPPTemp(cg, ar);
@@ -497,7 +497,7 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
 
     tmp28 is an object of type type_name1, initialized by type_name2(foo)
   */
-  cg.printf(" %s%s((", ref, t.c_str());
+  cg_printf(" %s%s((", ref, t.c_str());
 
   /*
     In c++ a temporary bound to a reference gets the lifetime of the reference.
@@ -537,12 +537,12 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
   }
   m_context = save;
 
-  cg.printf("));\n");
+  cg_printf("));\n");
   if (isLvalue && constRef) {
     dstType->outputCPPDecl(cg, ar);
-    cg.printf(" &%s_lv = const_cast<", t.c_str());
+    cg_printf(" &%s_lv = const_cast<", t.c_str());
     dstType->outputCPPDecl(cg, ar);
-    cg.printf("&>(%s);\n", t.c_str());
+    cg_printf("&>(%s);\n", t.c_str());
     t += "_lv";
   }
 
@@ -603,7 +603,7 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         if (noEffect) {
           k->outputCPPUnneeded(cg, ar);
           k->setCPPTemp("0");
-          cg.printf(";\n");
+          cg_printf(";\n");
         }
       }
     }
@@ -654,9 +654,9 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
     bool ref = (m_context & RefValue) &&
       !(m_context & NoRefWrapper) &&
       isRefable();
-    if (ref) cg.printf("ref(");
-    cg.printf("%s", m_cppTemp.c_str());
-    if (ref) cg.printf(")");
+    if (ref) cg_printf("ref(");
+    cg_printf("%s", m_cppTemp.c_str());
+    if (ref) cg_printf(")");
     return;
   }
 
@@ -678,7 +678,7 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   if (hasError(Expression::BadPassByRef)) {
-    cg.printf("throw_fatal(\"bad pass by reference\")");
+    cg_printf("throw_fatal(\"bad pass by reference\")");
     return;
   }
 
@@ -686,13 +686,13 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (dstType && srcType && ((m_context & LValue) == 0) &&
       Type::IsCastNeeded(ar, srcType, dstType)) {
     dstType->outputCPPCast(cg, ar);
-    cg.printf("(");
+    cg_printf("(");
     closeParen++;
     outputCPPImpl(cg, ar);
   } else {
     if (((m_context & RefValue) != 0) && ((m_context & NoRefWrapper) == 0) &&
         isRefable()) {
-      cg.printf("ref(");
+      cg_printf("ref(");
       closeParen++;
     }
     if (((((m_context & LValue) != 0) &&
@@ -701,13 +701,13 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
          ((m_context & InvokeArgument) == 0)) &&
         (is(Expression::KindOfArrayElementExpression) ||
          is(Expression::KindOfObjectPropertyExpression))) {
-      cg.printf("lval(");
+      cg_printf("lval(");
       closeParen++;
     }
     outputCPPImpl(cg, ar);
   }
   for (int i = 0; i < closeParen; i++) {
-    cg.printf(")");
+    cg_printf(")");
   }
 
   string comment;
@@ -723,9 +723,9 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (!comment.empty()) {
     if (cg.inComments()) {
-      cg.printf(" (%s)", comment.c_str());
+      cg_printf(" (%s)", comment.c_str());
     } else {
-      cg.printf(" /* %s */", comment.c_str());
+      cg_printf(" /* %s */", comment.c_str());
     }
   }
 }
@@ -749,7 +749,7 @@ void Expression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   outputCPPInternal(cg, ar);
 
   if (!inExpression) {
-    if (wrapped) cg.printf(";");
+    if (wrapped) cg_printf(";");
     ar->wrapExpressionEnd(cg);
     ar->setInExpression(inExpression);
   }
@@ -758,15 +758,15 @@ void Expression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void Expression::outputCPPExistTest(CodeGenerator &cg, AnalysisResultPtr ar,
                                     int op) {
   switch (op) {
-  case T_ISSET:  cg.printf("isset("); break;
-  case T_EMPTY:  cg.printf("empty("); break;
+  case T_ISSET:  cg_printf("isset("); break;
+  case T_EMPTY:  cg_printf("empty("); break;
   default: ASSERT(false);
   }
   outputCPP(cg, ar);
-  cg.printf(")");
+  cg_printf(")");
 }
 void Expression::outputCPPUnset(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg.printf("unset(");
+  cg_printf("unset(");
   outputCPP(cg, ar);
-  cg.printf(");\n");
+  cg_printf(");\n");
 }

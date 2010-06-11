@@ -300,15 +300,15 @@ void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   getConstants()->outputCPP(cg, ar);
 
   cg.setContext(CodeGenerator::CppImplementation);
-  cg.printf("/* preface starts */\n");
+  cg_printf("/* preface starts */\n");
   for (vector<lambda>::const_iterator it = m_lambdas.begin();
        it != m_lambdas.end(); ++it) {
-    cg.indentBegin("inline %s %s(%s) {\n", it->rt.c_str(), it->name.c_str(),
+    cg_indentBegin("inline %s %s(%s) {\n", it->rt.c_str(), it->name.c_str(),
                    it->args.c_str());
-    cg.printf("%s\n", it->body.c_str());
-    cg.indentEnd("}\n");
+    cg_printf("%s\n", it->body.c_str());
+    cg_indentEnd("}\n");
   }
-  cg.printf("/* preface finishes */\n");
+  cg_printf("/* preface finishes */\n");
 
   outputCPPHelper(cg, ar);
 
@@ -362,7 +362,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   if (cg.getOutput() != CodeGenerator::MonoCPP) {
     getConstants()->outputCPP(cg, ar);
   } else {
-    cg.printf("// (omitted in MonoCPP mode)\n");
+    cg_printf("// (omitted in MonoCPP mode)\n");
   }
 
   cg.printSection("2. Classes");
@@ -381,7 +381,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
        iter != extraIncs.end(); ++iter) {
     FileScopePtr fs = iter->second;
     if (fs != shared_from_this()) {
-      cg.printInclude(fs->outputFilebase() + ".fw.h");
+      cg_printInclude(fs->outputFilebase() + ".fw.h");
     }
   }
 }
@@ -404,7 +404,7 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
     for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
          it != m_classes.end(); ++it) {
       BOOST_FOREACH(ClassScopePtr cls, it->second) {
-        cg.printInclude(cls->getHeaderFilename());
+        cg_printInclude(cls->getHeaderFilename());
       }
     }
 
@@ -414,7 +414,7 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
         FileScopePtr fs = cls->getFileScope();
         if (fs && done.find(fs) == done.end()) {
           done.insert(fs);
-          cg.printInclude(fs->outputFilebase());
+          cg_printInclude(fs->outputFilebase());
         }
       }
     }
@@ -425,7 +425,7 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
         FileScopePtr fs = func->getFileScope();
         if (fs && done.find(fs) == done.end()) {
           done.insert(fs);
-          cg.printInclude(fs->outputFilebase());
+          cg_printInclude(fs->outputFilebase());
         }
       }
     }
@@ -433,7 +433,7 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
       FileScopePtr fs = ar->findFileScope(name, false);
       if (fs && done.find(fs) == done.end()) {
         done.insert(fs);
-        cg.printInclude(fs->outputFilebase());
+        cg_printInclude(fs->outputFilebase());
       }
     }
 
@@ -463,10 +463,10 @@ void FileScope::outputCPPForwardDeclHeader(CodeGenerator &cg,
   string header = outputFilebase() + ".fw.h";
   cg.headerBegin(header);
   if (Option::GenerateCPPMain) {
-    cg.printInclude("<runtime/base/hphp.h>");
-    cg.printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
+    cg_printInclude("<runtime/base/hphp.h>");
+    cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
   } else if (cg.getOutput() == CodeGenerator::SystemCPP) {
-    cg.printInclude("<runtime/base/hphp_system.h>");
+    cg_printInclude("<runtime/base/hphp_system.h>");
   }
   outputCPPForwardDeclarations(cg, ar);
   cg.headerEnd(header);
@@ -477,12 +477,12 @@ void FileScope::outputCPPDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar) {
   string header = outputFilebase() + ".h";
   cg.headerBegin(header);
   if (Option::GenerateCPPMain) {
-    cg.printInclude("<runtime/base/hphp.h>");
-    cg.printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
+    cg_printInclude("<runtime/base/hphp.h>");
+    cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
   } else if (cg.getOutput() == CodeGenerator::SystemCPP) {
-    cg.printInclude("<runtime/base/hphp_system.h>");
+    cg_printInclude("<runtime/base/hphp_system.h>");
   }
-  cg.printInclude(fwheader);
+  cg_printInclude(fwheader);
   outputCPPDeclarations(cg, ar);
   cg.headerEnd(header);
 }
@@ -506,7 +506,7 @@ void FileScope::outputCPPFFI(CodeGenerator &cg,
   outputCPPHelper(cg, ar, true);
   cg.useStream(CodeGenerator::ImplFile);
   cg.setContext(CodeGenerator::CppFFIImpl);
-  cg.printInclude(outputFilebase() + ".h");
+  cg_printInclude(outputFilebase() + ".h");
   outputCPPHelper(cg, ar, true);
 }
 
@@ -542,7 +542,7 @@ void FileScope::outputJavaFFICPPStub(CodeGenerator &cg,
                                      AnalysisResultPtr ar) {
   if (cg.getContext() == CodeGenerator::JavaFFICppImpl) {
     // java_stubs.h doesn't need the extra include
-    cg.printInclude(outputFilebase() + ".h");
+    cg_printInclude(outputFilebase() + ".h");
   }
   outputCPPHelper(cg, ar, true);
 }

@@ -307,17 +307,17 @@ void ObjectMethodExpression::outputPHP(CodeGenerator &cg,
   outputLineMap(cg, ar);
 
   m_object->outputPHP(cg, ar);
-  cg.printf("->");
+  cg_printf("->");
   if (m_nameExp->getKindOf() == Expression::KindOfScalarExpression) {
     m_nameExp->outputPHP(cg, ar);
   } else {
-    cg.printf("{");
+    cg_printf("{");
     m_nameExp->outputPHP(cg, ar);
-    cg.printf("}");
+    cg_printf("}");
   }
-  cg.printf("(");
+  cg_printf("(");
   m_params->outputPHP(cg, ar);
-  cg.printf(")");
+  cg_printf(")");
 }
 
 bool ObjectMethodExpression::directVariantProxy(AnalysisResultPtr ar) {
@@ -350,8 +350,8 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
 
   if (isThis && ar->getFunctionScope()->isStatic()) {
     bool linemap = outputLineMap(cg, ar, true);
-    cg.printf("throw_fatal(\"Using $this when not in object context\")");
-    if (linemap) cg.printf(")");
+    cg_printf("throw_fatal(\"Using $this when not in object context\")");
+    if (linemap) cg_printf(")");
     return;
   }
 
@@ -368,9 +368,9 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       m_object->setExpectedType(expectedType);
 
       if (m_bindClass) {
-        cg.printf(". BIND_CLASS_DOT ");
+        cg_printf(". BIND_CLASS_DOT ");
       } else {
-        cg.printf(".");
+        cg_printf(".");
       }
     } else {
       string objType;
@@ -383,73 +383,73 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
 
       m_object->outputCPP(cg, ar);
       if (m_bindClass) {
-        cg.printf("-> BIND_CLASS_ARROW(%s) ", objType.c_str());
+        cg_printf("-> BIND_CLASS_ARROW(%s) ", objType.c_str());
       } else {
-        cg.printf("->");
+        cg_printf("->");
       }
     }
   } else if (m_bindClass && m_classScope) {
-    cg.printf(" BIND_CLASS_ARROW(%s) ", m_classScope->getId().c_str());
+    cg_printf(" BIND_CLASS_ARROW(%s) ", m_classScope->getId().c_str());
   }
 
   if (!m_name.empty()) {
     if (m_valid && m_object->getType()->isSpecificObject()) {
-      cg.printf("%s%s(", Option::MethodPrefix, m_name.c_str());
+      cg_printf("%s%s(", Option::MethodPrefix, m_name.c_str());
       FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
                                         m_variableArgument, m_argArrayId);
-      cg.printf(")");
+      cg_printf(")");
     } else {
       if (fewParams) {
         uint64 hash = hash_string_i(m_name.data(), m_name.size());
-        cg.printf("%s%sinvoke_few_args(\"%s\"", Option::ObjectPrefix,
+        cg_printf("%s%sinvoke_few_args(\"%s\"", Option::ObjectPrefix,
                   isThis ? "root_" : "", m_origName.c_str());
-        cg.printf(", 0x%016llXLL, ", hash);
+        cg_printf(", 0x%016llXLL, ", hash);
 
         if (m_params && m_params->getCount()) {
-          cg.printf("%d, ", m_params->getCount());
+          cg_printf("%d, ", m_params->getCount());
           FunctionScope::outputCPPArguments(m_params, cg, ar, 0, false);
         } else {
-          cg.printf("0");
+          cg_printf("0");
         }
-        cg.printf(")");
+        cg_printf(")");
       } else {
-        cg.printf("%s%sinvoke(\"%s\"", Option::ObjectPrefix,
+        cg_printf("%s%sinvoke(\"%s\"", Option::ObjectPrefix,
                   isThis ? "root_" : "", m_origName.c_str());
-        cg.printf(", ");
+        cg_printf(", ");
         if (m_params && m_params->getCount()) {
           FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
         } else {
-          cg.printf("Array()");
+          cg_printf("Array()");
         }
         uint64 hash = hash_string_i(m_name.data(), m_name.size());
-        cg.printf(", 0x%016llXLL)", hash);
+        cg_printf(", 0x%016llXLL)", hash);
       }
     }
   } else {
     if (fewParams) {
-      cg.printf("%s%sinvoke_few_args(", Option::ObjectPrefix,
+      cg_printf("%s%sinvoke_few_args(", Option::ObjectPrefix,
                 isThis ? "root_" : "");
       m_nameExp->outputCPP(cg, ar);
-      cg.printf(", -1LL, ");
+      cg_printf(", -1LL, ");
       if (m_params && m_params->getCount()) {
-        cg.printf("%d, ", m_params->getCount());
+        cg_printf("%d, ", m_params->getCount());
         FunctionScope::outputCPPArguments(m_params, cg, ar, 0, false);
       } else {
-        cg.printf("0");
+        cg_printf("0");
       }
-      cg.printf(")");
+      cg_printf(")");
     } else {
-      cg.printf("%s%sinvoke((", Option::ObjectPrefix, isThis ? "root_" : "");
+      cg_printf("%s%sinvoke((", Option::ObjectPrefix, isThis ? "root_" : "");
       m_nameExp->outputCPP(cg, ar);
-      cg.printf(")");
-      cg.printf(", ");
+      cg_printf(")");
+      cg_printf(", ");
       if (m_params && m_params->getCount()) {
         FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
       } else {
-        cg.printf("Array()");
+        cg_printf("Array()");
       }
-      cg.printf(", -1LL)");
+      cg_printf(", -1LL)");
     }
   }
-  if (linemap) cg.printf(")");
+  if (linemap) cg_printf(")");
 }

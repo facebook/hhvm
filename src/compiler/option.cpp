@@ -177,6 +177,7 @@ std::string Option::FlibDirectory;
 StringBag Option::OptionStrings;
 
 bool Option::GenerateSourceInfo = false;
+bool Option::FlAnnotate = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 // load from a PHP file

@@ -221,6 +221,19 @@ private:
   void print(const std::string &msg);
 };
 
+#define STR(x) #x
+#define XSTR(x) STR(x)
+#define FLANN(stream,func,nl) (Option::FlAnnotate ?                           \
+               stream.printf("/*" __FILE__ ":" XSTR(__LINE__) "*/"nl):        \
+               void()), stream.func
+#define cg_printf FLANN(cg,printf,"")
+#define m_cg_printf FLANN(m_cg,printf,"")
+#define cg_indentBegin FLANN(cg,indentBegin,"")
+#define m_cg_indentBegin FLANN(m_cg,indentBegin,"")
+#define cg_indentEnd FLANN(cg,indentEnd,"")
+#define m_cg_indentEnd FLANN(m_cg,indentEnd,"")
+#define cg_printInclude FLANN(cg,printInclude,"\n")
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 #endif // __CODE_GENERATOR_H__

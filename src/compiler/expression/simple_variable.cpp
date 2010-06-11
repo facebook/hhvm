@@ -188,7 +188,7 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
 // code generation functions
 
 void SimpleVariable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg.printf("$%s", m_name.c_str());
+  cg_printf("$%s", m_name.c_str());
 }
 
 void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
@@ -202,15 +202,15 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
 void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_this) {
     ASSERT((getContext() & ObjectContext) == 0);
-    cg.printf("GET_THIS()");
+    cg_printf("GET_THIS()");
   } else if (m_superGlobal) {
     VariableTablePtr variables = ar->getScope()->getVariables();
-    cg.printf("g->%s", variables->getGlobalVariableName(ar, m_name).c_str());
+    cg_printf("g->%s", variables->getGlobalVariableName(ar, m_name).c_str());
   } else if (m_globals) {
-    cg.printf("get_global_array_wrapper()");
+    cg_printf("get_global_array_wrapper()");
   } else {
     const char *prefix =
       ar->getScope()->getVariables()->getVariablePrefix(ar, m_name);
-    cg.printf("%s%s", prefix, m_name.c_str());
+    cg_printf("%s%s", prefix, m_name.c_str());
   }
 }

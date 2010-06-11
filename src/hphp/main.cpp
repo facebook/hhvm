@@ -89,6 +89,7 @@ struct ProgramOptions {
   bool dump;
   bool coredump;
   bool nofork;
+  bool fl_annotate;
   string optimizations;
 };
 
@@ -288,6 +289,9 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
      value<bool>(&po.nofork)->default_value(false),
      "forking is needed for large compilation to release memory before g++"
      "compilation. turning off forking can help gdb debugging.")
+    ("fl-annotate",
+     value<bool>(&po.fl_annotate)->default_value(false),
+     "Annote emitted source with compiler file-line info")
     ("opts",
      value<string>(&po.optimizations)->default_value(""),
      "Set optimizations to enable/disable")
@@ -325,6 +329,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     Option::GenerateCPPMetaInfo = false;
     Option::GenerateCPPMacros = false;
   }
+  Option::FlAnnotate = po.fl_annotate;
 
   Hdf config;
   for (vector<string>::const_iterator it = po.config.begin();

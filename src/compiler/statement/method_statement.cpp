@@ -429,17 +429,17 @@ void MethodStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (ar) ar->pushScope(funcScope);
 
   m_modifiers->outputPHP(cg, ar);
-  cg.printf(" function ");
-  if (m_ref) cg.printf("&");
-  cg.printf("%s(", m_originalName.c_str());
+  cg_printf(" function ");
+  if (m_ref) cg_printf("&");
+  cg_printf("%s(", m_originalName.c_str());
   if (m_params) m_params->outputPHP(cg, ar);
   if (m_stmt) {
-    cg.indentBegin(") {\n");
+    cg_indentBegin(") {\n");
     funcScope->outputPHP(cg, ar);
     m_stmt->outputPHP(cg, ar);
-    cg.indentEnd("}\n");
+    cg_indentEnd("}\n");
   } else {
-    cg.printf(");\n");
+    cg_printf(");\n");
   }
 
   if (ar) ar->popScope();
@@ -464,37 +464,37 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   case CodeGenerator::CppDeclaration:
     {
       if (!m_stmt) {
-        cg.printf("// ");
+        cg_printf("// ");
       }
       m_modifiers->outputCPP(cg, ar);
 
       if (m_name == "__offsetget_lval") {
-        cg.printf("virtual ");
+        cg_printf("virtual ");
       }
       TypePtr type = funcScope->getReturnType();
       if (type) {
         type->outputCPPDecl(cg, ar);
       } else {
-        cg.printf("void");
+        cg_printf("void");
       }
       if (m_name == "__lval") {
-        cg.printf(" &___lval(");
+        cg_printf(" &___lval(");
       } else if (m_name == "__offsetget_lval") {
-        cg.printf(" &___offsetget_lval(");
+        cg_printf(" &___offsetget_lval(");
       } else if (m_modifiers->isStatic() && m_stmt) {
         // Static method wrappers get generated as support methods
-        cg.printf(" %s%s(const char* cls%s", Option::MethodImplPrefix,
+        cg_printf(" %s%s(const char* cls%s", Option::MethodImplPrefix,
                   m_name.c_str(),
                   funcScope->isVariableArgument() ||
                   (m_params && m_params->getCount()) ? ", " : "");
       } else {
-        cg.printf(" %s%s(", Option::MethodPrefix, m_name.c_str());
+        cg_printf(" %s%s(", Option::MethodPrefix, m_name.c_str());
       }
       funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
       if (m_stmt) {
-        cg.printf(");\n");
+        cg_printf(");\n");
       } else {
-        cg.printf(") = 0;\n");
+        cg_printf(") = 0;\n");
       }
 
       if (funcScope->isConstructor(scope)
@@ -509,40 +509,40 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (type) {
         type->outputCPPDecl(cg, ar);
       } else {
-        cg.printf("void");
+        cg_printf("void");
       }
       origFuncName = std::string(scope->getOriginalName()) +
                      "::" + m_originalName;
       funcSection = Option::FunctionSections[origFuncName];
       if (!funcSection.empty()) {
-        cg.printf(" __attribute__ ((section (\".text.%s\")))",
+        cg_printf(" __attribute__ ((section (\".text.%s\")))",
                   funcSection.c_str());
       }
 
       if (m_name == "__lval") {
-        cg.printf(" &%s%s::___lval(",
+        cg_printf(" &%s%s::___lval(",
                   Option::ClassPrefix, scope->getId().c_str());
       } else if (m_name == "__offsetget_lval") {
-        cg.printf(" &%s%s::___offsetget_lval(",
+        cg_printf(" &%s%s::___offsetget_lval(",
                   Option::ClassPrefix, scope->getId().c_str());
       } else if (m_modifiers->isStatic()) {
-        cg.printf(" %s%s::%s%s(const char* cls%s", Option::ClassPrefix,
+        cg_printf(" %s%s::%s%s(const char* cls%s", Option::ClassPrefix,
                   scope->getId().c_str(),
                   Option::MethodImplPrefix, m_name.c_str(),
                   funcScope->isVariableArgument() ||
                   (m_params && m_params->getCount()) ? ", " : "");
       } else {
-        cg.printf(" %s%s::%s%s(", Option::ClassPrefix, scope->getId().c_str(),
+        cg_printf(" %s%s::%s%s(", Option::ClassPrefix, scope->getId().c_str(),
                   Option::MethodPrefix, m_name.c_str());
       }
       funcScope->outputCPPParamsDecl(cg, ar, m_params, false);
-      cg.indentBegin(") {\n");
+      cg_indentBegin(") {\n");
       if (m_stmt->hasBody()) {
         if (m_modifiers->isStatic()) {
-          cg.printf("STATIC_METHOD_INJECTION(%s, %s);\n",
+          cg_printf("STATIC_METHOD_INJECTION(%s, %s);\n",
                     scope->getOriginalName(), origFuncName.c_str());
         } else {
-          cg.printf("INSTANCE_METHOD_INJECTION(%s, %s);\n",
+          cg_printf("INSTANCE_METHOD_INJECTION(%s, %s);\n",
                     scope->getOriginalName(), origFuncName.c_str());
         }
       }
@@ -555,7 +555,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
             int id = ar->getParamRTTIEntryId(ar->getClassScope(), funcScope,
                                              paramName);
             if (id != -1) {
-              cg.printf("RTTI_INJECTION(%s%s, %d);\n",
+              cg_printf("RTTI_INJECTION(%s%s, %d);\n",
                         Option::VariablePrefix, paramName.c_str(), id);
             }
           }
@@ -564,30 +564,30 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (m_name == "__lval" || m_name == "__offsetget_lval") {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*m_params)[0]);
-        cg.printf("Variant &v = %s->__lvalProxy;\n",
+        cg_printf("Variant &v = %s->__lvalProxy;\n",
                   cg.getOutput() == CodeGenerator::SystemCPP ?
                   "get_system_globals()" : "get_global_variables()");
         string lowered = Util::toLower(m_originalName);
-        cg.printf("v = %s%s(%s%s);\n",
+        cg_printf("v = %s%s(%s%s);\n",
                   Option::MethodPrefix, lowered.c_str(),
                   Option::VariablePrefix, param->getName().c_str());
-        cg.printf("return v;\n");
+        cg_printf("return v;\n");
       } else {
         if (funcScope->isConstructor(scope)) {
-          cg.printf("bool oldInCtor = gasInCtor(true);\n");
+          cg_printf("bool oldInCtor = gasInCtor(true);\n");
         } else if (m_name == "__destruct") {
-          cg.printf("setInDtor();\n");
+          cg_printf("setInDtor();\n");
         }
         funcScope->outputCPP(cg, ar);
         cg.setContext(CodeGenerator::NoContext); // no inner functions/classes
         if (!funcScope->isStatic() && funcScope->getVariables()->
             getAttribute(VariableTable::ContainsDynamicVariable)) {
-          cg.printf("%sthis = this;\n", Option::VariablePrefix);
+          cg_printf("%sthis = this;\n", Option::VariablePrefix);
         }
         outputCPPStmt(cg, ar);
         cg.setContext(CodeGenerator::CppImplementation);
       }
-      cg.indentEnd("} /* function */\n");
+      cg_indentEnd("} /* function */\n");
     }
     break;
   default:
@@ -604,7 +604,7 @@ void MethodStatement::outputCPPStmt(CodeGenerator &cg, AnalysisResultPtr ar) {
       FunctionScopePtr funcScope = m_funcScope.lock();
       ClassScopePtr cls = ar->getClassScope();
       if (funcScope->isConstructor(cls)) {
-        cg.printf("gasInCtor(oldInCtor);\n");
+        cg_printf("gasInCtor(oldInCtor);\n");
       }
     }
   }
@@ -621,31 +621,31 @@ void MethodStatement::outputCPPStaticMethodWrapper(CodeGenerator &cg,
   if (type) {
     type->outputCPPDecl(cg, ar);
   } else {
-    cg.printf("void");
+    cg_printf("void");
   }
-  cg.printf(" %s%s(", Option::MethodPrefix, m_name.c_str());
+  cg_printf(" %s%s(", Option::MethodPrefix, m_name.c_str());
   CodeGenerator::Context old = cg.getContext();
   cg.setContext(CodeGenerator::CppStaticMethodWrapper);
   funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
   cg.setContext(old);
-  cg.printf(") { %s%s%s(\"%s\"", type ? "return " : "",
+  cg_printf(") { %s%s%s(\"%s\"", type ? "return " : "",
             Option::MethodImplPrefix, m_name.c_str(),
             cls);
   if (funcScope->isVariableArgument()) {
-    cg.printf(", num_args");
+    cg_printf(", num_args");
   }
   if (m_params) {
     for (int i = 0; i < m_params->getCount(); i++) {
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
       ASSERT(param);
-      cg.printf(", %s%s", Option::VariablePrefix, param->getName().c_str());
+      cg_printf(", %s%s", Option::VariablePrefix, param->getName().c_str());
     }
   }
   if (funcScope->isVariableArgument()) {
-    cg.printf(", args");
+    cg_printf(", args");
   }
-  cg.printf("); }\n");
+  cg_printf("); }\n");
   ar->popScope();
 }
 
@@ -712,14 +712,14 @@ void MethodStatement::outputCPPFFIStub(CodeGenerator &cg,
   }
 
   if (ret) {
-    cg.printf("int");
+    cg_printf("int");
   } else {
-    cg.printf("void");
+    cg_printf("void");
   }
-  cg.printf(" %s%s%s(", Option::FFIFnPrefix,
+  cg_printf(" %s%s%s(", Option::FFIFnPrefix,
             (inClass ? (m_className + "_cls_").c_str() : ""), fname.c_str());
   if (ret) {
-    cg.printf("void** res");
+    cg_printf("void** res");
   }
 
   bool first = !ret;
@@ -730,9 +730,9 @@ void MethodStatement::outputCPPFFIStub(CodeGenerator &cg,
       first = false;
     }
     else {
-      cg.printf(", ");
+      cg_printf(", ");
     }
-    cg.printf("Variant *target");
+    cg_printf("Variant *target");
   }
 
   int ac = funcScope->getMaxParamCount();
@@ -740,44 +740,44 @@ void MethodStatement::outputCPPFFIStub(CodeGenerator &cg,
     if (first) {
       first = false;
     } else {
-      cg.printf(", ");
+      cg_printf(", ");
     }
-    cg.printf("Variant *a%d", i);
+    cg_printf("Variant *a%d", i);
   }
   if (varArgs) {
     if (!first) {
-      cg.printf(", ");
+      cg_printf(", ");
     }
-    cg.printf("Variant *va");
+    cg_printf("Variant *va");
   }
-  cg.printf(")");
+  cg_printf(")");
   if (cg.getContext() == CodeGenerator::CppFFIDecl) {
-    cg.printf(";\n");
+    cg_printf(";\n");
   } else {
-    cg.indentBegin(" {\n");
+    cg_indentBegin(" {\n");
     if (ret) {
-      cg.printf("return hphp_ffi_exportVariant(");
+      cg_printf("return hphp_ffi_exportVariant(");
     }
 
     if (!inClass) {
       // simple function call
-      cg.printf("%s%s(", Option::FunctionPrefix, fname.c_str());
+      cg_printf("%s%s(", Option::FunctionPrefix, fname.c_str());
     }
     else if (isStatic) {
       // static method call
-      cg.printf("%s%s::%s%s(", Option::ClassPrefix, m_className.c_str(),
+      cg_printf("%s%s::%s%s(", Option::ClassPrefix, m_className.c_str(),
                 Option::MethodPrefix, fname.c_str());
     }
     else {
       // instance method call
-      cg.printf("dynamic_cast<%s%s *>(target->getObjectData())->",
+      cg_printf("dynamic_cast<%s%s *>(target->getObjectData())->",
                 Option::ClassPrefix, m_className.c_str());
-      cg.printf("%s%s(", Option::MethodPrefix, fname.c_str());
+      cg_printf("%s%s(", Option::MethodPrefix, fname.c_str());
     }
 
     first = true;
     if (varArgs) {
-      cg.printf("%d + (va->isNull() ? 0 : va->getArrayData()->size())", ac);
+      cg_printf("%d + (va->isNull() ? 0 : va->getArrayData()->size())", ac);
       first = false;
     }
 
@@ -785,18 +785,18 @@ void MethodStatement::outputCPPFFIStub(CodeGenerator &cg,
       if (first) {
         first = false;
       } else {
-        cg.printf(", ");
+        cg_printf(", ");
       }
-      cg.printf("*a%d", i);
+      cg_printf("*a%d", i);
     }
     if (varArgs) {
-      cg.printf(", va->toArray()");
+      cg_printf(", va->toArray()");
     }
     if (ret) {
-      cg.printf("), res");
+      cg_printf("), res");
     }
-    cg.printf(");\n");
-    cg.indentEnd("} /* function */\n");
+    cg_printf(");\n");
+    cg_indentEnd("} /* function */\n");
   }
   return;
 }
@@ -811,100 +811,100 @@ void MethodStatement::outputHSFFIStub(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool varArgs = funcScope->isVariableArgument();
   bool ret = funcScope->getReturnType();
   string fname = funcScope->getId().c_str();
-  cg.indentBegin("foreign import ccall \"stubs.h %s%s\" %s%s\n",
+  cg_indentBegin("foreign import ccall \"stubs.h %s%s\" %s%s\n",
                  Option::FFIFnPrefix,
                  fname.c_str(),
                  Option::FFIFnPrefix,
                  fname.c_str());
-  cg.printf(":: ");
+  cg_printf(":: ");
   if (ret) {
-    cg.printf("PtrPtr a -> ");
+    cg_printf("PtrPtr a -> ");
   }
   int ac = funcScope->getMaxParamCount();
   for (int i = 0; i < ac; ++i) {
-    cg.printf("HphpVariantPtr -> ");
+    cg_printf("HphpVariantPtr -> ");
   }
   if (varArgs) {
-    cg.printf("HphpVariantPtr -> ");
+    cg_printf("HphpVariantPtr -> ");
   }
   if (ret) {
-    cg.printf("IO CInt");
+    cg_printf("IO CInt");
   } else {
-    cg.printf("IO ()");
+    cg_printf("IO ()");
   }
-  cg.indentEnd("\n");
+  cg_indentEnd("\n");
 
-  cg.printf("f_%s :: ", fname.c_str());
+  cg_printf("f_%s :: ", fname.c_str());
   bool first = true;
   if (ac > 0) {
-    cg.printf("(");
+    cg_printf("(");
   }
   for (int i = 0; i < ac; ++i) {
     if (first) {
       first = false;
     } else {
-      cg.printf(", ");
+      cg_printf(", ");
     }
-    cg.printf("VariantAble a%d", i);
+    cg_printf("VariantAble a%d", i);
   }
   if (ac > 0) {
-    cg.printf(") => ");
+    cg_printf(") => ");
   }
   for (int i = 0; i < ac; ++i) {
-    cg.printf("a%d -> ", i);
+    cg_printf("a%d -> ", i);
   }
   if (varArgs) {
-    cg.printf("[Variant] -> ");
+    cg_printf("[Variant] -> ");
   }
   if (ret) {
-    cg.printf("IO Variant");
+    cg_printf("IO Variant");
   } else {
-    cg.printf("IO ()");
+    cg_printf("IO ()");
   }
-  cg.printf("\n");
-  cg.printf("f_%s ", fname.c_str());
+  cg_printf("\n");
+  cg_printf("f_%s ", fname.c_str());
   for (int i = 0; i < ac; ++i) {
-    cg.printf("v%d ", i);
+    cg_printf("v%d ", i);
   }
   if (varArgs) {
-    cg.printf("va ");
+    cg_printf("va ");
   }
-  cg.indentBegin("=%s\n", ret ? " alloca (\\pres ->" : "");
+  cg_indentBegin("=%s\n", ret ? " alloca (\\pres ->" : "");
   for (int i = 0; i < ac; ++i) {
-    cg.indentBegin("withExportedVariant (toVariant v%d) (\\p%d ->\n", i, i);
+    cg_indentBegin("withExportedVariant (toVariant v%d) (\\p%d ->\n", i, i);
   }
   if (varArgs) {
-    cg.indentBegin("withVParamList va (\\pva ->\n");
+    cg_indentBegin("withVParamList va (\\pva ->\n");
   }
-  cg.indentBegin("do\n");
-  cg.printf("%sffi_%s", ret ? "t <- " : "", fname.c_str());
+  cg_indentBegin("do\n");
+  cg_printf("%sffi_%s", ret ? "t <- " : "", fname.c_str());
   if (ret) {
-    cg.printf(" pres");
+    cg_printf(" pres");
   }
   for (int i = 0; i < ac; ++i) {
-    cg.printf(" p%d", i);
+    cg_printf(" p%d", i);
   }
   if (varArgs) {
-    cg.printf(" pva");
-  }
-  if (ret) {
-    cg.printf("\n");
-    cg.printf("ppres <- peek pres\n");
-    cg.printf("buildVariant (fromIntegral t) ppres");
-  }
-  cg.indentEnd(""); // end do
-  if (varArgs) {
-    cg.indentEnd(")"); // end varargs
-  }
-  for (int i = 0; i < ac; ++i) {
-    cg.indentEnd(")"); // end wEV i
+    cg_printf(" pva");
   }
   if (ret) {
-    cg.indentEnd(")"); // end alloca
+    cg_printf("\n");
+    cg_printf("ppres <- peek pres\n");
+    cg_printf("buildVariant (fromIntegral t) ppres");
+  }
+  cg_indentEnd(""); // end do
+  if (varArgs) {
+    cg_indentEnd(")"); // end varargs
+  }
+  for (int i = 0; i < ac; ++i) {
+    cg_indentEnd(")"); // end wEV i
+  }
+  if (ret) {
+    cg_indentEnd(")"); // end alloca
   } else {
-    cg.indentEnd("");
+    cg_indentEnd("");
   }
-  cg.printf("\n");
+  cg_printf("\n");
   return;
 }
 
@@ -954,7 +954,7 @@ void MethodStatement::outputJavaFFIStub(CodeGenerator &cg,
    || cg.getContext() == CodeGenerator::JavaFFIInterface) {
     // make methods always return something, so that they can override
     // each other
-    cg.printf("public %s%s %s(",
+    cg_printf("public %s%s %s(",
               (isStatic ? "static " : ""),
               (!ret && !inClass ? "void" : "HphpVariant"),
               originalName.c_str());
@@ -970,44 +970,44 @@ void MethodStatement::outputJavaFFIStub(CodeGenerator &cg,
         if (!isStatic) args << ", ";
       }
       else {
-        cg.printf(", ");
+        cg_printf(", ");
         args << ", ";
       }
-      cg.printf("HphpVariant a%d", i);
+      cg_printf("HphpVariant a%d", i);
       args << "a" << i << ".getVariantPtr()";
     }
     if (varArgs) {
       if (!first) {
-        cg.printf(", ");
+        cg_printf(", ");
         args << ", ";
       }
       else if (!isStatic) {
         args << ", ";
       }
-      cg.printf("HphpVariant va");
+      cg_printf("HphpVariant va");
       args << "va.getVariantPtr()";
     }
 
     if (cg.getContext() == CodeGenerator::JavaFFIInterface) {
-      cg.printf(");\n\n");
+      cg_printf(");\n\n");
       return;
     }
 
-    cg.indentBegin(") {\n");
-    cg.printf("%s%s_native(%s);\n", (ret ? "return " : ""),
+    cg_indentBegin(") {\n");
+    cg_printf("%s%s_native(%s);\n", (ret ? "return " : ""),
               originalName.c_str(),
               args.str().c_str());
     if (!ret && inClass) {
-      cg.printf("return HphpNull.phpNull();\n");
+      cg_printf("return HphpNull.phpNull();\n");
     }
-    cg.indentEnd("}\n\n");
+    cg_indentEnd("}\n\n");
   }
   else {
     exposeNative = true;
   }
 
   // the native method stub
-  cg.printf("%s %snative %s %s%s(",
+  cg_printf("%s %snative %s %s%s(",
             (exposeNative ? "public" : "private"),
             (isStatic ? "static " : ""), (ret ? "HphpVariant" : "void"),
             originalName.c_str(),
@@ -1015,19 +1015,19 @@ void MethodStatement::outputJavaFFIStub(CodeGenerator &cg,
   bool first = true;
   if (!isStatic) {
     // instance method has an additional parameter
-    cg.printf("long targetPtr");
+    cg_printf("long targetPtr");
     first = false;
   }
   for (int i = 0; i < ac; i++) {
     if (first) first = false;
-    else cg.printf(", ");
-    cg.printf("long a%d", i);
+    else cg_printf(", ");
+    cg_printf("long a%d", i);
   }
   if (varArgs) {
-    if (!first) cg.printf(", ");
-    cg.printf("long va");
+    if (!first) cg_printf(", ");
+    cg_printf("long va");
   }
-  cg.printf(");\n\n");
+  cg_printf(");\n\n");
 }
 
 void MethodStatement::outputJavaFFICPPStub(CodeGenerator &cg,
@@ -1067,8 +1067,8 @@ void MethodStatement::outputJavaFFICPPStub(CodeGenerator &cg,
   Util::replaceAll(mangledName, "_", "_1");
   Util::replaceAll(mangledName, ".", "_");
 
-  cg.printf("JNIEXPORT %s JNICALL\n", ret ? "jobject" : "void");
-  cg.printf("%s(JNIEnv *env, %s target", mangledName.c_str(),
+  cg_printf("JNIEXPORT %s JNICALL\n", ret ? "jobject" : "void");
+  cg_printf("%s(JNIEnv *env, %s target", mangledName.c_str(),
             (isStatic ? "jclass" : "jobject"));
 
   ostringstream args;
@@ -1077,56 +1077,56 @@ void MethodStatement::outputJavaFFICPPStub(CodeGenerator &cg,
     // instance method also gets an additional argument, which is a Variant
     // pointer to the target, encoded in int64
     first = false;
-    cg.printf(", jlong targetPtr");
+    cg_printf(", jlong targetPtr");
     args << "(Variant *)targetPtr";
   }
   for (int i = 0; i < ac; i++) {
-    cg.printf(", jlong a%d", i);
+    cg_printf(", jlong a%d", i);
     if (first) first = false;
     else args << ", ";
     args << "(Variant *)a" << i;
   }
   if (varArgs) {
-    cg.printf(", jlong va");
+    cg_printf(", jlong va");
     if (!first) args << ", ";
     args << "(Variant *)va";
   }
 
   if (cg.getContext() == CodeGenerator::JavaFFICppDecl) {
     // java_stubs.h
-    cg.printf(");\n\n");
+    cg_printf(");\n\n");
     return;
   }
 
-  cg.indentBegin(") {\n");
+  cg_indentBegin(") {\n");
 
   // support static/instance methods
   if (ret) {
-    cg.printf("void *result;\n");
-    cg.printf("int kind = ");
-    cg.printf("%s%s%s(&result",
+    cg_printf("void *result;\n");
+    cg_printf("int kind = ");
+    cg_printf("%s%s%s(&result",
               Option::FFIFnPrefix,
               (inClass ? (m_className + "_cls_").c_str() : ""), fname.c_str());
-    if (!isStatic || ac > 0 || varArgs) cg.printf(", ");
+    if (!isStatic || ac > 0 || varArgs) cg_printf(", ");
   }
   else {
-    cg.printf("%s%s%s(", Option::FFIFnPrefix,
+    cg_printf("%s%s%s(", Option::FFIFnPrefix,
                          (inClass ? (m_className + "_cls_").c_str() : ""),
                          fname.c_str());
   }
-  cg.printf("%s);\n", args.str().c_str());
+  cg_printf("%s);\n", args.str().c_str());
   if (ret) {
     if (!inClass) {
       // HphpMain extends hphp.Hphp.
-      cg.printf("jclass hphp = env->GetSuperclass(target);\n");
+      cg_printf("jclass hphp = env->GetSuperclass(target);\n");
     }
     else {
-      cg.printf("jclass hphp = env->FindClass(\"hphp/Hphp\");\n");
+      cg_printf("jclass hphp = env->FindClass(\"hphp/Hphp\");\n");
     }
-    cg.printf("return exportVariantToJava(env, hphp, result, kind);\n");
+    cg_printf("return exportVariantToJava(env, hphp, result, kind);\n");
   }
 
-  cg.indentEnd("} /* function */\n\n");
+  cg_indentEnd("} /* function */\n\n");
 }
 
 void MethodStatement::outputSwigFFIStub(CodeGenerator &cg,
@@ -1142,44 +1142,44 @@ void MethodStatement::outputSwigFFIStub(CodeGenerator &cg,
     printSource(cg);
   }
 
-  cg.printf("Variant *%s(HphpSession *s", originalName.c_str());
+  cg_printf("Variant *%s(HphpSession *s", originalName.c_str());
   ostringstream args;
   bool first = true;
   for (int i = 0; i < ac; i++) {
-    cg.printf(", Variant *a%d", i);
+    cg_printf(", Variant *a%d", i);
     if (first) first = false;
     else args << ", ";
     args << "a" << i;
   }
   if (varArgs) {
-    cg.printf(", Variant *va");
+    cg_printf(", Variant *va");
     if (!first) args << ", ";
     args << "va";
   }
 
   if (cg.getContext() == CodeGenerator::SwigFFIDecl) {
-    cg.printf(");\n\n");
+    cg_printf(");\n\n");
     return;
   }
 
-  cg.indentBegin(") {\n");
+  cg_indentBegin(") {\n");
   if (ret) {
-    cg.printf("void *result;\n");
-    cg.printf("int kind = ");
-    cg.printf("%s%s(&result", Option::FFIFnPrefix, fname.c_str());
-    if (ac > 0 || varArgs) cg.printf(", ");
+    cg_printf("void *result;\n");
+    cg_printf("int kind = ");
+    cg_printf("%s%s(&result", Option::FFIFnPrefix, fname.c_str());
+    if (ac > 0 || varArgs) cg_printf(", ");
   } else {
-    cg.printf("%s%s(", Option::FFIFnPrefix, fname.c_str());
+    cg_printf("%s%s(", Option::FFIFnPrefix, fname.c_str());
   }
-  cg.printf("%s);\n", args.str().c_str());
-  cg.printf("Variant *ret = ");
+  cg_printf("%s);\n", args.str().c_str());
+  cg_printf("Variant *ret = ");
   if (ret) {
-    cg.printf("hphpBuildVariant(kind, result);\n");
-    cg.printf("s->addVariant(ret);\n");
+    cg_printf("hphpBuildVariant(kind, result);\n");
+    cg_printf("s->addVariant(ret);\n");
   } else {
-    cg.printf("hphpBuildVariant(0, 0);\n");
-    cg.printf("s->addVariant(ret);\n");
+    cg_printf("hphpBuildVariant(0, 0);\n");
+    cg_printf("s->addVariant(ret);\n");
   }
-  cg.printf("return ret;\n");
-  cg.indentEnd("}\n\n");
+  cg_printf("return ret;\n");
+  cg_indentEnd("}\n\n");
 }

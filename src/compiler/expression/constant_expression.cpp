@@ -229,46 +229,46 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 // code generation functions
 
 void ConstantExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg.printf("%s", m_name.c_str());
+  cg_printf("%s", m_name.c_str());
 }
 
 void ConstantExpression::outputCPPImpl(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
   // special cases: STDIN, STDOUT, STDERR
   if (m_name == "STDIN" || m_name == "STDOUT" || m_name == "STDERR") {
-    cg.printf("%s", m_name.c_str());
+    cg_printf("%s", m_name.c_str());
     return;
   }
 
   if (m_name == "INF") {
-    cg.printf("Limits::inf_double");
+    cg_printf("Limits::inf_double");
     return;
   }
   if (m_name == "NAN") {
-    cg.printf("Limits::nan_double");
+    cg_printf("Limits::nan_double");
     return;
   }
 
   string lower = Util::toLower(m_name);
   if (lower == "true" || lower == "false" || lower == "null") {
-    cg.printf("%s", lower.c_str());
+    cg_printf("%s", lower.c_str());
   } else if (m_valid) {
     if (m_dynamic) {
       int stringId = cg.checkLiteralString(m_name, ar);
       if (stringId >= 0) {
-        cg.printf("getDynamicConstant(%s->%s%s, LITSTR(%d, \"%s\"))",
+        cg_printf("getDynamicConstant(%s->%s%s, LITSTR(%d, \"%s\"))",
                   cg.getGlobals(ar), Option::ConstantPrefix, m_name.c_str(),
                   stringId, m_name.c_str());
       } else {
-        cg.printf("getDynamicConstant(%s->%s%s, \"%s\")",
+        cg_printf("getDynamicConstant(%s->%s%s, \"%s\")",
                   cg.getGlobals(ar), Option::ConstantPrefix, m_name.c_str(),
                   m_name.c_str());
       }
     } else {
-      cg.printf("%s%s", Option::ConstantPrefix, m_name.c_str());
+      cg_printf("%s%s", Option::ConstantPrefix, m_name.c_str());
     }
   } else {
-    cg.printf("getUndefinedConstant(%s%s)",
+    cg_printf("getUndefinedConstant(%s%s)",
               Option::ConstantPrefix, m_name.c_str());
   }
 }

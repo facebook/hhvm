@@ -252,13 +252,13 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
 void ObjectPropertyExpression::outputPHP(CodeGenerator &cg,
                                          AnalysisResultPtr ar) {
   m_object->outputPHP(cg, ar);
-  cg.printf("->");
+  cg_printf("->");
   if (m_property->getKindOf() == Expression::KindOfScalarExpression) {
     m_property->outputPHP(cg, ar);
   } else {
-    cg.printf("{");
+    cg_printf("{");
     m_property->outputPHP(cg, ar);
-    cg.printf("}");
+    cg_printf("}");
   }
 }
 
@@ -332,7 +332,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       if (m_static) {
         if (!bThis) {
           ASSERT(m_class);
-          cg.printf("g->%s%s%s%s",
+          cg_printf("g->%s%s%s%s",
                     Option::StaticPropertyPrefix, m_class->getName().c_str(),
                     Option::IdPrefix.c_str(), propName);
         } else {
@@ -340,22 +340,22 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
           // cannot be declared as a class variable (var $val), $this->val
           // refers to a non-static class variable and has to use get/lval.
           uint64 hash = hash_string(propName);
-          cg.printf("%s(", func.c_str());
+          cg_printf("%s(", func.c_str());
           int stringId = cg.checkLiteralString(propName, ar);
           if (stringId >= 0) {
-            cg.printf("LITSTR(%d, \"%s\")", stringId, propName);
+            cg_printf("LITSTR(%d, \"%s\")", stringId, propName);
           } else {
-            cg.printf("\"%s\"", propName);
+            cg_printf("\"%s\"", propName);
           }
-          cg.printf(", 0x%016llXLL)", hash);
+          cg_printf(", 0x%016llXLL)", hash);
         }
       } else {
         if (!bThis) {
           ASSERT(!directVariant);
           m_object->outputCPP(cg, ar);
-          cg.printf("->");
+          cg_printf("->");
         }
-        cg.printf("%s%s", Option::PropertyPrefix, propName);
+        cg_printf("%s%s", Option::PropertyPrefix, propName);
       }
     } else {
       if (!bThis) {
@@ -369,17 +369,17 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
         } else {
           m_object->outputCPP(cg, ar);
         }
-        cg.printf(op);
+        cg_printf(op);
       }
       uint64 hash = hash_string(propName);
-      cg.printf("%s(", func.c_str());
+      cg_printf("%s(", func.c_str());
       int stringId = cg.checkLiteralString(propName, ar);
       if (stringId >= 0) {
-        cg.printf("LITSTR(%d, \"%s\")", stringId, propName);
+        cg_printf("LITSTR(%d, \"%s\")", stringId, propName);
       } else {
-        cg.printf("\"%s\"", propName);
+        cg_printf("\"%s\"", propName);
       }
-      cg.printf(", 0x%016llXLL%s)", hash, error);
+      cg_printf(", 0x%016llXLL%s)", hash, error);
     }
   } else {
     if (!bThis) {
@@ -393,11 +393,11 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       } else {
         m_object->outputCPP(cg, ar);
       }
-      cg.printf(op);
+      cg_printf(op);
     }
-    cg.printf("%s(", func.c_str());
+    cg_printf("%s(", func.c_str());
     m_property->outputCPP(cg, ar);
-    cg.printf(", -1LL%s)", error);
+    cg_printf(", -1LL%s)", error);
   }
 }
 
@@ -413,22 +413,22 @@ void ObjectPropertyExpression::outputCPPExistTest(CodeGenerator &cg,
       }
     } else {
       m_object->outputCPP(cg, ar);
-      cg.printf("->");
+      cg_printf("->");
     }
-    cg.printf("t___isset(");
+    cg_printf("t___isset(");
     bool direct = m_property->isUnquotedScalar();
     if (direct) {
-      cg.printf("\"");
+      cg_printf("\"");
     }
     m_property->outputCPP(cg, ar);
     if (direct) {
-      cg.printf("\"");
+      cg_printf("\"");
     }
-    cg.printf(")");
+    cg_printf(")");
   } else {
-    cg.printf("empty(");
+    cg_printf("empty(");
     outputCPPObjProperty(cg, ar, false);
-    cg.printf(")");
+    cg_printf(")");
   }
 }
 void ObjectPropertyExpression::outputCPPUnset(CodeGenerator &cg,
@@ -441,16 +441,16 @@ void ObjectPropertyExpression::outputCPPUnset(CodeGenerator &cg,
     }
   } else {
     m_object->outputCPP(cg, ar);
-    cg.printf("->");
+    cg_printf("->");
   }
-  cg.printf("t___unset(");
+  cg_printf("t___unset(");
   bool direct = m_property->isUnquotedScalar();
   if (direct) {
-    cg.printf("\"");
+    cg_printf("\"");
   }
   m_property->outputCPP(cg, ar);
   if (direct) {
-    cg.printf("\"");
+    cg_printf("\"");
   }
-  cg.printf(");\n");
+  cg_printf(");\n");
 }

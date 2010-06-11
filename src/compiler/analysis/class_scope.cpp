@@ -445,20 +445,20 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_kindOf == KindOfAbstractClass) attribute |= ClassInfo::IsAbstract;
   if (m_kindOf == KindOfFinalClass) attribute |= ClassInfo::IsFinal;
   if (!m_docComment.empty()) attribute |= ClassInfo::HasDocComment;
-  cg.printf("(const char *)0x%04X, \"%s\", \"%s\",\n", attribute,
+  cg_printf("(const char *)0x%04X, \"%s\", \"%s\",\n", attribute,
             getOriginalName(), m_parent.c_str());
 
   if (!m_docComment.empty()) {
     char *dc = string_cplus_escape(m_docComment.c_str());
-    cg.printf("\"%s\",\n", dc);
+    cg_printf("\"%s\",\n", dc);
     free(dc);
   }
 
   // parent interfaces
   for (unsigned int i = (m_parent.empty() ? 0 : 1); i < m_bases.size(); i++) {
-    cg.printf("\"%s\", ", m_bases[i].c_str());
+    cg_printf("\"%s\", ", m_bases[i].c_str());
   }
-  cg.printf("NULL,\n");
+  cg_printf("NULL,\n");
 
   // methods
   std::map<int, FunctionScopePtrVec> sortedMethods; // by source line number
@@ -480,7 +480,7 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
       iter->second[i]->outputCPPClassMap(cg, ar);
     }
   }
-  cg.printf("NULL,\n");
+  cg_printf("NULL,\n");
 
   // properties && constants
   ar->pushScope(shared_from_this());
@@ -573,12 +573,12 @@ void ClassScope::serialize(JSON::OutputStream &out) const {
 void ClassScope::outputCPPDynamicClassDecl(CodeGenerator &cg) {
   string clsStr = getId();
   const char *clsName = clsStr.c_str();
-  cg.printf("Object %s%s(CArrRef params, bool init = true);\n",
+  cg_printf("Object %s%s(CArrRef params, bool init = true);\n",
             Option::CreateObjectPrefix, clsName);
 }
 
 void ClassScope::outputCPPDynamicClassCreateDecl(CodeGenerator &cg) {
-  cg.printf("Object create_object(const char *s, CArrRef params, "
+  cg_printf("Object create_object(const char *s, CArrRef params, "
             "bool init = true, ObjectData *root);\n");
 }
 
@@ -586,11 +586,11 @@ void ClassScope::outputCPPDynamicClassImpl(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
   string clsStr = getId();
   const char *clsName = clsStr.c_str();
-  cg.indentBegin("Object %s%s(CArrRef params, bool init /* = true */) {\n",
+  cg_indentBegin("Object %s%s(CArrRef params, bool init /* = true */) {\n",
                  Option::CreateObjectPrefix, clsName);
-  cg.printf("return Object((NEW(%s%s)())->dynCreate(params, init));\n",
+  cg_printf("return Object((NEW(%s%s)())->dynCreate(params, init));\n",
             Option::ClassPrefix, clsName);
-  cg.indentEnd("}\n");
+  cg_indentEnd("}\n");
 }
 
 void ClassScope::outputCPPClassJumpTable
@@ -604,13 +604,13 @@ void ClassScope::outputCPPClassJumpTable
       classScopes.find(clsName);
     if (iterClasses != classScopes.end()) {
       if (iterClasses->second[0]->isRedeclaring()) {
-        cg.printf("%s_REDECLARED(0x%016llXLL, %s);\n", macro,
+        cg_printf("%s_REDECLARED(0x%016llXLL, %s);\n", macro,
                   hash_string_i(clsName), clsName);
       } else if (iterClasses->second[0]->isVolatile()) {
-        cg.printf("%s_VOLATILE(0x%016llXLL, %s);\n", macro,
+        cg_printf("%s_VOLATILE(0x%016llXLL, %s);\n", macro,
                   hash_string_i(clsName), clsName);
       } else {
-        cg.printf("%s(0x%016llXLL, %s);\n", macro,
+        cg_printf("%s(0x%016llXLL, %s);\n", macro,
                   hash_string_i(clsName), clsName);
       }
     }
@@ -621,25 +621,25 @@ void ClassScope::outputCPPClassVarInitImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  cg.indentBegin("Variant get%s_class_var_init(const char *s, "
+  cg_indentBegin("Variant get%s_class_var_init(const char *s, "
                  "const char *var) {\n",
                  system ? "_builtin" : "");
   bool withEval = !system && Option::EnableEval == Option::FullEval;
   if (withEval) {
     // See if there's an eval'd version
-    cg.indentBegin("{\n");
-    cg.printf("Variant r;\n");
-    cg.printf("if (eval_get_class_var_init_hook(r, s, var)) "
+    cg_indentBegin("{\n");
+    cg_printf("Variant r;\n");
+    cg_printf("if (eval_get_class_var_init_hook(r, s, var)) "
               "return r;\n");
-    cg.indentEnd("}\n");
+    cg_indentEnd("}\n");
   }
   outputCPPClassJumpTable(cg, classScopes, classes, "HASH_GET_CLASS_VAR_INIT");
   if (!system) {
-    cg.printf("return get_builtin_class_var_init(s, var);\n");
+    cg_printf("return get_builtin_class_var_init(s, var);\n");
   } else {
-    cg.printf("return throw_missing_class(s);\n");
+    cg_printf("return throw_missing_class(s);\n");
   }
-  cg.indentEnd("}\n");
+  cg_indentEnd("}\n");
 }
 
 void ClassScope::outputCPPDynamicClassCreateImpl
@@ -647,142 +647,142 @@ void ClassScope::outputCPPDynamicClassCreateImpl
  const vector<const char*> &classes) {
   // output create_object()
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  cg.indentBegin("Object create%s_object(const char *s, "
+  cg_indentBegin("Object create%s_object(const char *s, "
                  "CArrRef params, bool init /* = true */,"
                  "ObjectData* root /* = NULL*/) {\n", system ?
                  "_builtin" : "");
   bool withEval = !system && Option::EnableEval == Option::FullEval;
   if (withEval) {
     // See if there's an eval'd version
-    cg.indentBegin("{\n");
-    cg.printf("Variant r;\n");
-    cg.printf("if (eval_create_object_hook(r, s, params, init, root)) "
+    cg_indentBegin("{\n");
+    cg_printf("Variant r;\n");
+    cg_printf("if (eval_create_object_hook(r, s, params, init, root)) "
               "return r;\n");
-    cg.indentEnd("}\n");
+    cg_indentEnd("}\n");
   }
   outputCPPClassJumpTable(cg, classScopes, classes, "HASH_CREATE_OBJECT");
   if (!system) {
-    cg.printf("return create_builtin_object(s, params, init, root);\n");
+    cg_printf("return create_builtin_object(s, params, init, root);\n");
   } else {
-    cg.printf("return throw_missing_class(s);\n");
+    cg_printf("return throw_missing_class(s);\n");
   }
-  cg.indentEnd("}\n");
+  cg_indentEnd("}\n");
 }
 
 void ClassScope::outputCPPInvokeStaticMethodImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  cg.indentBegin("Variant invoke%s_static_method(const char *s, "
+  cg_indentBegin("Variant invoke%s_static_method(const char *s, "
                  "const char *method, CArrRef params, bool fatal) {\n",
                  system ? "_builtin" : "");
   if (!system && Option::EnableEval == Option::FullEval) {
     // See if there's an eval'd version
-    cg.printf("bool foundClass = false;\n");
-    cg.indentBegin("{\n");
-    cg.printf("Variant r;\n");
-    cg.printf("if (eval_invoke_static_method_hook(r, s, method, params, "
+    cg_printf("bool foundClass = false;\n");
+    cg_indentBegin("{\n");
+    cg_printf("Variant r;\n");
+    cg_printf("if (eval_invoke_static_method_hook(r, s, method, params, "
               "foundClass)) return r;\n");
-    cg.indentBegin("else if (foundClass) {\n");
-    cg.printf("return o_invoke_failed(s, method, fatal);\n");
-    cg.indentEnd("}\n");
-    cg.indentEnd("}\n");
+    cg_indentBegin("else if (foundClass) {\n");
+    cg_printf("return o_invoke_failed(s, method, fatal);\n");
+    cg_indentEnd("}\n");
+    cg_indentEnd("}\n");
   }
   outputCPPClassJumpTable(cg, classScopes, classes,
                           "HASH_INVOKE_STATIC_METHOD");
 
   // There should be invoke_failed for static methods...
   if (!system) {
-    cg.printf("return invoke_builtin_static_method(s, method, params, fatal);"
+    cg_printf("return invoke_builtin_static_method(s, method, params, fatal);"
               "\n");
   } else {
-    cg.indentBegin("if (fatal) {\n");
-    cg.printf("return throw_missing_class(s);\n");
-    cg.indentEnd("");
-    cg.indentBegin("} else {\n");
-    cg.printf("raise_warning(\"call_user_func to non-existent class's method"
+    cg_indentBegin("if (fatal) {\n");
+    cg_printf("return throw_missing_class(s);\n");
+    cg_indentEnd("");
+    cg_indentBegin("} else {\n");
+    cg_printf("raise_warning(\"call_user_func to non-existent class's method"
               " %%s::%%s\", s, method);\n");
-    cg.printf("return false;\n");
-    cg.indentEnd("}\n");
+    cg_printf("return false;\n");
+    cg_indentEnd("}\n");
   }
-  cg.indentEnd("}\n");
+  cg_indentEnd("}\n");
 }
 
 void ClassScope::outputCPPGetStaticPropertyImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  cg.indentBegin("Variant get%s_static_property(const char *s, "
+  cg_indentBegin("Variant get%s_static_property(const char *s, "
                  "const char *prop) {\n",
                  system ? "_builtin" : "");
   if (!system && Option::EnableEval == Option::FullEval) {
     // See if there's an eval'd version
-    cg.indentBegin("{\n");
-    cg.printf("Variant r;\n");
-    cg.printf("if (eval_get_static_property_hook(r, s, prop)) "
+    cg_indentBegin("{\n");
+    cg_printf("Variant r;\n");
+    cg_printf("if (eval_get_static_property_hook(r, s, prop)) "
               "return r;\n");
-    cg.indentEnd("}\n");
+    cg_indentEnd("}\n");
   }
   outputCPPClassJumpTable(cg, classScopes, classes,
                           "HASH_GET_STATIC_PROPERTY");
   if (!system) {
-    cg.printf("return get_builtin_static_property(s, prop);\n");
+    cg_printf("return get_builtin_static_property(s, prop);\n");
   } else {
-    cg.printf("return null;\n");
+    cg_printf("return null;\n");
   }
-  cg.indentEnd("}\n");
+  cg_indentEnd("}\n");
 
-  cg.indentBegin("Variant *get%s_static_property_lv(const char *s, "
+  cg_indentBegin("Variant *get%s_static_property_lv(const char *s, "
                  "const char *prop) {\n",
                  system ? "_builtin" : "");
   if (!system && Option::EnableEval == Option::FullEval) {
     // See if there's an eval'd version
-    cg.indentBegin("{\n");
-    cg.printf("Variant *r;\n");
-    cg.printf("if (eval_get_static_property_lv_hook(r, s, prop)) "
+    cg_indentBegin("{\n");
+    cg_printf("Variant *r;\n");
+    cg_printf("if (eval_get_static_property_lv_hook(r, s, prop)) "
               "return r;\n");
-    cg.indentEnd("}\n");
+    cg_indentEnd("}\n");
   }
   outputCPPClassJumpTable(cg, classScopes, classes,
                           "HASH_GET_STATIC_PROPERTY_LV");
   if (!system) {
-    cg.printf("return get_builtin_static_property_lv(s, prop);\n");
+    cg_printf("return get_builtin_static_property_lv(s, prop);\n");
   } else {
-    cg.printf("return NULL;\n");
+    cg_printf("return NULL;\n");
   }
-  cg.indentEnd("}\n");
+  cg_indentEnd("}\n");
 }
 
 void ClassScope::outputCPPGetClassConstantImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  cg.indentBegin("Variant get%s_class_constant(const char *s, "
+  cg_indentBegin("Variant get%s_class_constant(const char *s, "
                  "const char *constant, bool fatal /* = true */) {\n",
                  system ? "_builtin" : "");
   if (!system && Option::EnableEval == Option::FullEval) {
     // See if there's an eval'd version
-    cg.indentBegin("{\n");
-    cg.printf("Variant r;\n");
-    cg.printf("if (eval_get_class_constant_hook(r, s, constant)) "
+    cg_indentBegin("{\n");
+    cg_printf("Variant r;\n");
+    cg_printf("if (eval_get_class_constant_hook(r, s, constant)) "
               "return r;\n");
-    cg.indentEnd("}\n");
+    cg_indentEnd("}\n");
   }
   outputCPPClassJumpTable(cg, classScopes, classes, "HASH_GET_CLASS_CONSTANT");
   if (!system) {
-    cg.printf("return get_builtin_class_constant(s, constant, fatal);\n");
+    cg_printf("return get_builtin_class_constant(s, constant, fatal);\n");
   } else {
-    cg.indentBegin("if (fatal) {\n");
-    cg.printf("raise_error(\"Couldn't find constant %%s::%%s\", s, "
+    cg_indentBegin("if (fatal) {\n");
+    cg_printf("raise_error(\"Couldn't find constant %%s::%%s\", s, "
               "constant);\n");
-    cg.indentEnd("");
-    cg.indentBegin("} else {\n");
-    cg.printf("raise_warning(\"Couldn't find constant %%s::%%s\", s, "
+    cg_indentEnd("");
+    cg_indentBegin("} else {\n");
+    cg_printf("raise_warning(\"Couldn't find constant %%s::%%s\", s, "
               "constant);\n");
-    cg.indentEnd("}\n");
-    cg.printf("return null;\n");
+    cg_indentEnd("}\n");
+    cg_printf("return null;\n");
   }
-  cg.indentEnd("}\n");
+  cg_indentEnd("}\n");
 }
 
 bool ClassScope::hasProperty(const string &name) {
@@ -824,7 +824,7 @@ void ClassScope::outputCPPHeader(AnalysisResultPtr ar,
   BOOST_FOREACH(string base, m_bases) {
     ClassScopePtr cls = ar->findClass(base);
     if (cls && cls->isUserClass()) {
-      cg.printInclude(cls->getHeaderFilename());
+      cg_printInclude(cls->getHeaderFilename());
     }
   }
 
@@ -854,26 +854,26 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
 
     // If parent is redeclared, you have to go to their class statics object.
     if (dynamicObject) {
-      cg.indentBegin("Variant %s%s::%sconstant(const char *s) {\n",
+      cg_indentBegin("Variant %s%s::%sconstant(const char *s) {\n",
                      Option::ClassPrefix, clsName, Option::ObjectStaticPrefix);
       cg.printDeclareGlobals();
       getConstants()->outputCPPJumpTable(cg, ar, !dynamicObject, false);
-      cg.printf("return %s->%s%s->%sconstant(s);\n", cg.getGlobals(ar),
+      cg_printf("return %s->%s%s->%sconstant(s);\n", cg.getGlobals(ar),
                 Option::ClassStaticsObjectPrefix, parent,
                 Option::ObjectStaticPrefix);
-      cg.indentEnd("}\n");
+      cg_indentEnd("}\n");
     } else {
       cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_CONSTANT_%s", clsName);
-      cg.indentBegin("Variant %s%s::%sconstant(const char *s) {\n",
+      cg_indentBegin("Variant %s%s::%sconstant(const char *s) {\n",
                      Option::ClassPrefix, clsName, Option::ObjectStaticPrefix);
       getConstants()->outputCPPJumpTable(cg, ar, !dynamicObject, false);
-      cg.printf("return %s%s::%sconstant(s);\n", Option::ClassPrefix, parent,
+      cg_printf("return %s%s::%sconstant(s);\n", Option::ClassPrefix, parent,
                 Option::ObjectStaticPrefix);
-      cg.indentEnd("}\n");
+      cg_indentEnd("}\n");
       cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_CONSTANT_%s", clsName);
     }
 
-    cg.printf("IMPLEMENT_CLASS(%s)\n", clsName);
+    cg_printf("IMPLEMENT_CLASS(%s)\n", clsName);
   }
 
   // Create method
@@ -891,60 +891,60 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
 
   // Destruct method
   if (getAttribute(ClassScope::HasDestructor)) {
-    cg.indentBegin("void %s%s::destruct() {\n", Option::ClassPrefix, clsName);
-    cg.indentBegin("if (!inCtorDtor()) {\n");
-    cg.printf("incRefCount();\n");
-    cg.indentBegin("try {\n");
-    cg.printf("%s__destruct();\n", Option::MethodPrefix);
-    cg.indentEnd("} catch (...) { handle_destructor_exception();}\n");
-    cg.indentEnd("}\n");
-    cg.indentEnd("}\n");
+    cg_indentBegin("void %s%s::destruct() {\n", Option::ClassPrefix, clsName);
+    cg_indentBegin("if (!inCtorDtor()) {\n");
+    cg_printf("incRefCount();\n");
+    cg_indentBegin("try {\n");
+    cg_printf("%s__destruct();\n", Option::MethodPrefix);
+    cg_indentEnd("} catch (...) { handle_destructor_exception();}\n");
+    cg_indentEnd("}\n");
+    cg_indentEnd("}\n");
   }
 
   // Cloning
-  cg.indentBegin("ObjectData *%s%s::cloneImpl() {\n",
+  cg_indentBegin("ObjectData *%s%s::cloneImpl() {\n",
                  Option::ClassPrefix, clsName);
-  cg.printf("%s%s *obj = NEW(%s%s)();\n", Option::ClassPrefix, clsName,
+  cg_printf("%s%s *obj = NEW(%s%s)();\n", Option::ClassPrefix, clsName,
             Option::ClassPrefix, clsName);
-  cg.printf("cloneSet(obj);\n");
-  cg.printf("return obj;\n");
-  cg.indentEnd("}\n");
-  cg.indentBegin("void %s%s::cloneSet(%s%s *clone) {\n",
+  cg_printf("cloneSet(obj);\n");
+  cg_printf("return obj;\n");
+  cg_indentEnd("}\n");
+  cg_indentBegin("void %s%s::cloneSet(%s%s *clone) {\n",
                  Option::ClassPrefix, clsName, Option::ClassPrefix, clsName);
   getVariables()->outputCPPPropertyClone(cg, ar, derivesFromRedeclaring());
   if (derivesFromRedeclaring()) {
-    cg.printf("clone->setParent(parent->clone());\n");
+    cg_printf("clone->setParent(parent->clone());\n");
   } else if(!getParent().empty()) {
-    cg.printf("%s%s::cloneSet(clone);\n", Option::ClassPrefix, parent);
+    cg_printf("%s%s::cloneSet(clone);\n", Option::ClassPrefix, parent);
   } else {
-    cg.printf("ObjectData::cloneSet(clone);\n");
+    cg_printf("ObjectData::cloneSet(clone);\n");
   }
-  cg.indentEnd("}\n");
+  cg_indentEnd("}\n");
 
   // doCall
   if (getAttribute(ClassScope::HasUnknownMethodHandler)) {
-    cg.indentBegin("Variant %s%s::doCall(Variant v_name, Variant "
+    cg_indentBegin("Variant %s%s::doCall(Variant v_name, Variant "
                    "v_arguments, bool fatal) {\n",
                    Option::ClassPrefix, clsName);
-    cg.printf("return t___call(v_name, !v_arguments.isNull() ? "
+    cg_printf("return t___call(v_name, !v_arguments.isNull() ? "
               "v_arguments : Variant(Array::Create()));\n");
-    cg.indentEnd("}\n");
+    cg_indentEnd("}\n");
   }
 
   // doGet
   if (getAttribute(ClassScope::HasUnknownPropHandler)) {
-    cg.indentBegin("Variant %s%s::doGet(Variant v_name, bool error) {\n",
+    cg_indentBegin("Variant %s%s::doGet(Variant v_name, bool error) {\n",
                    Option::ClassPrefix, clsName);
-    cg.printf("return t___get(v_name);\n");
-    cg.indentEnd("}\n");
+    cg_printf("return t___get(v_name);\n");
+    cg_indentEnd("}\n");
   }
 
   if (isRedeclaring() && !derivesFromRedeclaring()) {
-    cg.indentBegin("Variant %s%s::doRootCall(Variant v_name, Variant "
+    cg_indentBegin("Variant %s%s::doRootCall(Variant v_name, Variant "
                    "v_arguments, bool fatal) {\n",
                    Option::ClassPrefix, clsName);
-    cg.printf("return root->doCall(v_name, v_arguments, fatal);\n");
-    cg.indentEnd("}\n");
+    cg_printf("return root->doCall(v_name, v_arguments, fatal);\n");
+    cg_indentEnd("}\n");
   }
 
   // Invoke tables
@@ -962,7 +962,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
 
 void ClassScope::outputCPPStaticInitializerDecl(CodeGenerator &cg) {
   if (needStaticInitializer()) {
-    cg.printf("void %s%s();\n", Option::ClassStaticInitializerPrefix,
+    cg_printf("void %s%s();\n", Option::ClassStaticInitializerPrefix,
               getId().c_str());
   }
 }
@@ -990,27 +990,27 @@ void ClassScope::outputCPPStaticMethodWrappers(CodeGenerator &cg,
 void ClassScope::outputCPPGlobalTableWrappersDecl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
   string id = getId();
-  cg.printf("extern struct ObjectStaticCallbacks %s%s;\n",
+  cg_printf("extern struct ObjectStaticCallbacks %s%s;\n",
             Option::ClassWrapperFunctionPrefix, id.c_str());
 }
 
 void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
   string id = getId();
-  cg.indentBegin("struct ObjectStaticCallbacks %s%s = {\n",
+  cg_indentBegin("struct ObjectStaticCallbacks %s%s = {\n",
                  Option::ClassWrapperFunctionPrefix, id.c_str());
   // This order must match the one in object_data.h
-  cg.printf("%s%s::%sgetInit,\n", Option::ClassPrefix, id.c_str(),
+  cg_printf("%s%s::%sgetInit,\n", Option::ClassPrefix, id.c_str(),
             Option::ObjectStaticPrefix);
-  cg.printf("%s%s::%sget,\n", Option::ClassPrefix, id.c_str(),
+  cg_printf("%s%s::%sget,\n", Option::ClassPrefix, id.c_str(),
             Option::ObjectStaticPrefix);
-  cg.printf("%s%s::%slval,\n", Option::ClassPrefix, id.c_str(),
+  cg_printf("%s%s::%slval,\n", Option::ClassPrefix, id.c_str(),
             Option::ObjectStaticPrefix);
-  cg.printf("%s%s::%sinvoke,\n", Option::ClassPrefix, id.c_str(),
+  cg_printf("%s%s::%sinvoke,\n", Option::ClassPrefix, id.c_str(),
             Option::ObjectStaticPrefix);
-  cg.printf("%s%s::%sconstant,\n", Option::ClassPrefix, id.c_str(),
+  cg_printf("%s%s::%sconstant,\n", Option::ClassPrefix, id.c_str(),
             Option::ObjectStaticPrefix);
-  cg.indentEnd("};\n");
+  cg_indentEnd("};\n");
 }
 
 bool ClassScope::addFunction(AnalysisResultPtr ar,
@@ -1063,7 +1063,7 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
     if (fewArgs &&
         func->getMinParamCount() > Option::InvokeFewArgsCount)
       continue;
-    cg.indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
+    cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
                    hash_string_i(name), name);
     const char *extra = NULL;
     const char *prefix = Option::MethodPrefix;
@@ -1082,7 +1082,7 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
       func->outputCPPDynamicInvoke(cg, ar, prefix, name, false, fewArgs,
                                    true, extra, func->isConstructor(self));
     }
-    cg.indentEnd("}\n");
+    cg_indentEnd("}\n");
   }
 }
 
@@ -1149,14 +1149,14 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
 
   if (forEval) {
     if (staticOnly) { // os_invoke
-      cg.indentBegin("Variant %s%s"
+      cg_indentBegin("Variant %s%s"
                      "(const char *c, const char *s, "
                      "Eval::VariableEnvironment &env, "
                      "const Eval::FunctionCallExpression *caller, "
                      "int64 hash, bool fatal) {\n", scope.c_str(),
                      invokeName.c_str());
     } else {
-      cg.indentBegin("Variant %s%s"
+      cg_indentBegin("Variant %s%s"
                      "(const char *s, "
                      "Eval::VariableEnvironment &env, "
                      "const Eval::FunctionCallExpression *caller, "
@@ -1170,7 +1170,7 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
         m_emptyJumpTables.insert(JumpTableStaticInvoke);
       }
       cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_%s", clsName);
-      cg.indentBegin("Variant %s%s"
+      cg_indentBegin("Variant %s%s"
                      "(const char *c, const char *s, CArrRef params,"
                      " int64 hash, bool fatal) {\n", scope.c_str(),
                      invokeName.c_str());
@@ -1179,7 +1179,7 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
         m_emptyJumpTables.insert(JumpTableInvoke);
       }
       cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
-      cg.indentBegin("Variant %s%s"
+      cg_indentBegin("Variant %s%s"
                      "(const char *s, CArrRef params,"
                      " int64 hash, bool fatal) {\n", scope.c_str(),
                      invokeName.c_str());
@@ -1198,41 +1198,41 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
 
   if (forEval) {
     if (staticOnly) {
-      cg.printf("return %s(c, s, env, caller, hash, fatal);\n",
+      cg_printf("return %s(c, s, env, caller, hash, fatal);\n",
                 parent.c_str());
     } else {
-      cg.printf("return %s(s, env, caller, hash, fatal);\n", parent.c_str());
+      cg_printf("return %s(s, env, caller, hash, fatal);\n", parent.c_str());
     }
-    cg.indentEnd("}\n");
+    cg_indentEnd("}\n");
   } else {
     if (staticOnly) {
-      cg.printf("return %s(c, s, params, hash, fatal);\n", base.c_str());
-      cg.indentEnd("}\n");
+      cg_printf("return %s(c, s, params, hash, fatal);\n", base.c_str());
+      cg_indentEnd("}\n");
       cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_%s", clsName);
     } else {
-      cg.printf("return %s(s, params, hash, fatal);\n", base.c_str());
-      cg.indentEnd("}\n");
+      cg_printf("return %s(s, params, hash, fatal);\n", base.c_str());
+      cg_indentEnd("}\n");
       cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
     }
   }
 
   if (!staticOnly && !forEval) {
     cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
-    cg.indentBegin("Variant %s%s_few_args(const char *s, int64 hash, "
+    cg_indentBegin("Variant %s%s_few_args(const char *s, int64 hash, "
                    "int count", scope.c_str(), invokeName.c_str());
     for (int i = 0; i < Option::InvokeFewArgsCount; i++) {
-      cg.printf(", CVarRef a%d", i);
+      cg_printf(", CVarRef a%d", i);
     }
-    cg.printf(") {\n");
+    cg_printf(") {\n");
     if (needGlobals) cg.printDeclareGlobals();
     outputCPPMethodInvokeTable(cg, ar, funcs, funcScopes, true, staticOnly,
                                false);
-    cg.printf("return %s_few_args(s, hash, count", base.c_str());
+    cg_printf("return %s_few_args(s, hash, count", base.c_str());
     for (int i = 0; i < Option::InvokeFewArgsCount; i++) {
-      cg.printf(", a%d", i);
+      cg_printf(", a%d", i);
     }
-    cg.printf(");\n");
-    cg.indentEnd("}\n");
+    cg_printf(");\n");
+    cg_indentEnd("}\n");
     cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
   }
 }
@@ -1254,10 +1254,10 @@ void ClassScope::OutputVolatileCheckBegin(CodeGenerator &cg,
                                           AnalysisResultPtr ar,
                                           const string &origName) {
   string lwrName(Util::toLower(origName));
-  cg.printf("(checkClassExists(String(\"%s\", %d, AttachLiteral), "
+  cg_printf("(checkClassExists(String(\"%s\", %d, AttachLiteral), "
             "%s->CDEC(%s)), (", origName.c_str(), origName.size(),
             cg.getGlobals(ar), lwrName.c_str());
 }
 void ClassScope::OutputVolatileCheckEnd(CodeGenerator &cg) {
-  cg.printf("))");
+  cg_printf("))");
 }

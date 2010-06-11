@@ -843,7 +843,7 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           outputStringExpr(cg, ar, exp, true);
           cg.printf(")");
         } else {
-          exp->outputCPP(cg, ar);
+          exp->outputCPPUnneeded(cg, ar);
         }
         cg.printf(";\n");
       }

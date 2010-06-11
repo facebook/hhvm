@@ -1043,6 +1043,12 @@ bool TestCodeRun::TestString() {
        "}"
        "var_dump(test6());");
 
+  MVCR("<?php ;"
+       "class X {"
+       " static function g() {}"
+       "};"
+       "echo 'abc' . X::g() . 'efg';");
+
   return true;
 }
 

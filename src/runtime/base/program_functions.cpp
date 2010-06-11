@@ -41,7 +41,6 @@
 #include <runtime/ext/ext_json.h>
 #include <runtime/ext/ext_variable.h>
 #include <runtime/eval/runtime/code_coverage.h>
-#include <runtime/base/fiber_async_func.h>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
@@ -825,7 +824,6 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
 }
 
 void hphp_session_exit() {
-  FiberAsyncFunc::OnRequestExit();
   Eval::RequestEvalState::Reset();
   // Server note has to live long enough for the access log to fire.
   // RequestLocal is too early.

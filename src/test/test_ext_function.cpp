@@ -16,7 +16,6 @@
 
 #include <test/test_ext_function.h>
 #include <runtime/ext/ext_function.h>
-#include <runtime/base/fiber_async_func.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -81,22 +80,18 @@ bool TestExtFunction::test_call_user_func() {
 
 bool TestExtFunction::test_call_user_func_array_async() {
   Array params = CREATE_VECTOR1("param");
-  // sanity tests
   {
     RuntimeOption::FiberCount = 0;
-    FiberAsyncFunc::Restart();
     Object handle = f_call_user_func_array_async("Test", params);
     Variant ret = f_end_user_func_async(handle);
     VS(ret, "param");
   }
   {
     RuntimeOption::FiberCount = 1;
-    FiberAsyncFunc::Restart();
     Object handle = f_call_user_func_array_async("Test", params);
     Variant ret = f_end_user_func_async(handle);
     VS(ret, "param");
   }
-  // more testing in TestCodeRun::TestFiber()
   return Count(true);
 }
 

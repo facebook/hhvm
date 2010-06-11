@@ -492,10 +492,9 @@ class Variant {
   Variant share(bool save) const;
 
   /**
-   * Marshaling/Unmarshaling between request thread and fiber thread.
+   * Used by FiberAsyncFunc to copy in the new fiber.
    */
-  Variant fiberMarshal(FiberReferenceMap &refMap) const;
-  Variant fiberUnmarshal(FiberReferenceMap &refMap) const;
+  Variant fiberCopy();
 
   /**
    * Debugging functions.

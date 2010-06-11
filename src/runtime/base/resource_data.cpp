@@ -43,13 +43,5 @@ void ResourceData::serialize(VariableSerializer *serializer) const {
   serializer->decNestedLevel((void*)this);
 }
 
-Object ResourceData::fiberMarshal(FiberReferenceMap &refMap) const {
-  return Object();
-}
-
-Object ResourceData::fiberUnmarshal(FiberReferenceMap &refMap) const {
-  return Object();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

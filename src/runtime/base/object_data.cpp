@@ -597,45 +597,13 @@ Variant ObjectData::t___clone() {
   return null;
 }
 
-Object ObjectData::fiberMarshal(FiberReferenceMap &refMap) const {
-  ObjectData *px = (ObjectData*)refMap.lookup((void*)this);
-  if (px == NULL) {
-    Object copy = create_object(o_getClassName(), null_array);
-    refMap.insert((void*)this, copy.get()); // ahead of deep copy
-    Array props;
-    o_get(props);
-    copy->o_set(props.fiberMarshal(refMap));
-    return copy;
-  }
-  return px;
-}
-
-Object ObjectData::fiberUnmarshal(FiberReferenceMap &refMap) const {
-  // marshaling back to original thread
-  ObjectData *px = (ObjectData*)refMap.lookup((void*)this);
-  Object copy;
-  if (px == NULL) {
-    // was i in original thread?
-    px = (ObjectData*)refMap.reverseLookup((void*)this);
-    if (px == NULL) {
-      copy = create_object(o_getClassName(), null_array);
-      px = copy.get();
-    }
-    refMap.insert((void*)this, px); // ahead of deep copy
-    Array props;
-    o_get(props);
-    px->o_set(props.fiberUnmarshal(refMap));
-  }
-  return Object(px);
-}
 
 Variant ExtObjectData::o_root_invoke(const char *s, CArrRef ps, int64 h,
-                                     bool f /* = true */) {
+    bool f /* = true */) {
   return root->o_invoke(s, ps, h, f);
 }
-Variant ExtObjectData::o_root_invoke_few_args(const char *s, int64 h,
-                                              int count,
-                                              INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant ExtObjectData::o_root_invoke_few_args(const char *s, int64 h, int count,
+                          INVOKE_FEW_ARGS_IMPL_ARGS) {
   return root->o_invoke_few_args(s, h, count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 

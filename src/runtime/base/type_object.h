@@ -26,7 +26,6 @@
 #include <runtime/base/object_data.h>
 #include <runtime/base/type_string.h>
 #include <runtime/base/hphp_value.h>
-#include <runtime/base/fiber_reference_map.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -138,10 +137,9 @@ class Object : public SmartPtr<ObjectData> {
   bool unserialize(std::istream &in);
 
   /**
-   * Marshaling/Unmarshaling between request thread and fiber thread.
+   * Used by FiberAsyncFunc to copy in the new fiber.
    */
-  Object fiberMarshal(FiberReferenceMap &refMap) const;
-  Object fiberUnmarshal(FiberReferenceMap &refMap) const;
+  Object fiberCopy();
 
  private:
   static void compileTimeAssertions() {

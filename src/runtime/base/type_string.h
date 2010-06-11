@@ -265,9 +265,9 @@ public:
                    char delimiter1 = '"');
 
   /**
-   * Marshaling/Unmarshaling between request thread and fiber thread.
+   * Used by FiberAsyncFunc to copy in the new fiber.
    */
-  String fiberCopy() const;
+  String fiberCopy();
 
   /**
    * Debugging

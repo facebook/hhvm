@@ -133,7 +133,14 @@ Variant EvalObjectData::o_get(CStrRef s, int64 hash, bool error /* = true */,
   if (priv.is(KindOfArray) && priv.getArrayData()->exists(s, hash)) {
     return priv.rvalAt(s);
   }
-  m_cls.getClass()->attemptPropertyAccess(this, s, context);
+  int mods;
+  if (!m_cls.getClass()->attemptPropertyAccess(s, context, mods)) {
+    const MethodStatement *ms = getMethodStatement("__get");
+    if (ms) {
+      return doGet(s, false);
+    }
+    m_cls.getClass()->failPropertyAccess(s, context, mods);
+  }
   return DynamicObjectData::o_get(s, hash, error);
 }
 
@@ -158,7 +165,10 @@ Variant &EvalObjectData::o_lval(CStrRef s, int64 hash,
       return priv.lvalAt(s, hash);
     }
   }
-  m_cls.getClass()->attemptPropertyAccess(this, s, context);
+  int mods;
+  if (!m_cls.getClass()->attemptPropertyAccess(s, context, mods)) {
+    m_cls.getClass()->failPropertyAccess(s, context, mods);
+  }
   return DynamicObjectData::o_lval(s, hash, context);
 }
 
@@ -173,8 +183,14 @@ Variant EvalObjectData::o_set(CStrRef s, int64 hash, CVarRef v,
       return priv.set(s, v, hash);
     }
   }
-  if (!forInit) m_cls.getClass()->
-    attemptPropertyAccess(this, s, FrameInjection::GetClassName(false));
+  int mods;
+  if (!forInit && !m_cls.getClass()->attemptPropertyAccess(s, context, mods)) {
+    const MethodStatement *ms = getMethodStatement("__set");
+    if (ms) {
+      return t___set(s, v);
+    }
+    m_cls.getClass()->failPropertyAccess(s, context, mods);
+  }
   return DynamicObjectData::o_set(s, hash, v, forInit, context);
 }
 

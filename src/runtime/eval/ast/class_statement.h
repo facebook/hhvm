@@ -114,9 +114,11 @@ public:
   void getPropertyInfo(ClassInfoEvaled &owner) const;
   void getInfo(ClassInfoEvaled &info) const;
 
-  bool hasAccess(CStrRef context, Modifier level) const;
-  bool attemptPropertyAccess(EvalObjectData *obj, CStrRef prop,
-                             CStrRef context, bool rec = false) const;
+  bool hasAccess(const char *context, Modifier level) const;
+  bool attemptPropertyAccess(CStrRef prop, const char *context,
+      int &mods, bool rec = false) const;
+  void failPropertyAccess(CStrRef prop, const char *context,
+      int mods) const;
   void toArray(Array &props, Array &vals) const;
   void loadMethodTable(ClassEvalState &ce) const;
   void semanticCheck(const ClassStatement *cls) const;

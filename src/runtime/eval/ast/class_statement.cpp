@@ -493,17 +493,17 @@ void ClassStatement::getInfo(ClassInfoEvaled &info) const {
   }
 }
 
-bool ClassStatement::hasAccess(CStrRef context, Modifier level) const {
+bool ClassStatement::hasAccess(const char *context, Modifier level) const {
   ASSERT(context);
   switch (level) {
   case Public: return true;
-  case Private: return strcasecmp(context.c_str(), m_name.c_str()) == 0;
+  case Private: return strcasecmp(context, m_name.c_str()) == 0;
   case Protected:
     {
-      if (context.empty()) return false;
-      if (strcasecmp(context.c_str(), m_name.c_str()) == 0) return true;
-      const ClassStatement *cls = RequestEvalState::findClass(context.c_str());
-      return cls->subclassOf(m_name.c_str()) || subclassOf(context.c_str());
+      if (!*context) return false;
+      if (strcasecmp(context, m_name.c_str()) == 0) return true;
+      const ClassStatement *cls = RequestEvalState::findClass(context);
+      return cls->subclassOf(m_name.c_str()) || subclassOf(context);
     }
   default:
     ASSERT(false);
@@ -511,40 +511,39 @@ bool ClassStatement::hasAccess(CStrRef context, Modifier level) const {
   }
 }
 
-bool ClassStatement::attemptPropertyAccess(EvalObjectData *obj,
-                                           CStrRef prop,
-                                           CStrRef context,
-                                           bool rec /* = false */) const {
+bool ClassStatement::attemptPropertyAccess( CStrRef prop, const char *context,
+    int &mods, bool rec /* = false */) const {
 
   hphp_const_char_imap<ClassVariablePtr>::const_iterator it =
     m_variables.find(prop);
   if (it == m_variables.end()) {
     const ClassStatement *par = parentStatement();
     if (par) {
-      par->attemptPropertyAccess(obj, prop, context, true);
+      return par->attemptPropertyAccess(prop, context, mods, true);
     }
-    return false;
+    // Var doesn't exist
+    return true;
   }
-  int mods = it->second->getModifiers();
+  mods = it->second->getModifiers();
   Modifier level = Public;
   if (mods & Private) level = Private;
   else if (mods & Protected) level = Protected;
+  // Var is private in superclass, treat an new
   if (level == Private && rec) return true;
-  if (!hasAccess(context, level)) {
-    // If __get() is defined, we fall back to it regardless.
-    if (obj && obj->getMethodStatement("__get")) {
-      return false;
-    }
+  return hasAccess(context, level);
+}
 
-    const char *mod = "protected";
-    if (level == ClassStatement::Private) mod = "private";
-    throw FatalErrorException("Attempt to access %s %s::%s%s%s",
-                              mod, m_name.c_str(), prop.data(),
-                              !context.empty() ? " from " : "",
-                              !context.empty() ? context.c_str() : "");
-  }
-
-  return true;
+void ClassStatement::failPropertyAccess(CStrRef prop, const char *context,
+    int mods) const {
+  const char *mod = "protected";
+  Modifier level = Public;
+  if (mods & Private) level = Private;
+  else if (mods & Protected) level = Protected;
+  if (level == ClassStatement::Private) mod = "private";
+  throw FatalErrorException("Attempt to access %s %s::%s%s%s",
+      mod, m_name.c_str(), prop.data(),
+      *context ? " from " : "",
+      *context ? context : "");
 }
 
 void ClassStatement::toArray(Array &props, Array &vals) const {

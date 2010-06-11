@@ -129,7 +129,7 @@ bool Option::PreOptimization = false;
 bool Option::PostOptimization = false;
 bool Option::ScalarArrayOptimization = true;
 bool Option::ScalarArrayCompression = true;
-bool Option::LiteralStringCompression = false;
+bool Option::LiteralStringCompression = true;
 int Option::ScalarArrayFileCount = 1;
 int Option::ScalarArrayOverflowLimit = 2000;
 bool Option::SeparateCompilation = false;
@@ -165,7 +165,7 @@ std::string Option::ProgramName;
 bool Option::EnableXHP = false;
 
 int Option::InvokeFewArgsCount = 6;
-bool Option::PrecomputeLiteralStrings = false;
+bool Option::PrecomputeLiteralStrings = true;
 bool Option::FlattenInvoke = true;
 int Option::InlineFunctionThreshold = -1;
 bool Option::ControlEvalOrder = true;

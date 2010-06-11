@@ -256,7 +256,7 @@ void ConstantExpression::outputCPPImpl(CodeGenerator &cg,
     if (m_dynamic) {
       int stringId = cg.checkLiteralString(m_name, ar);
       if (stringId >= 0) {
-        cg.printf("getDynamicConstant(%s->%s%s, LITSTR(%d, \"%s\")",
+        cg.printf("getDynamicConstant(%s->%s%s, LITSTR(%d, \"%s\"))",
                   cg.getGlobals(ar), Option::ConstantPrefix, m_name.c_str(),
                   stringId, m_name.c_str());
       } else {

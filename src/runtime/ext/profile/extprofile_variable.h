@@ -26,72 +26,58 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline bool x_is_bool(CVarRef var) {
-  FUNCTION_INJECTION_BUILTIN(is_bool);
   return f_is_bool(var);
 }
 
 inline bool x_is_int(CVarRef var) {
-  FUNCTION_INJECTION_BUILTIN(is_int);
   return f_is_int(var);
 }
 
 inline bool x_is_integer(CVarRef var) {
-  FUNCTION_INJECTION_BUILTIN(is_integer);
   return f_is_integer(var);
 }
 
 inline bool x_is_long(CVarRef var) {
-  FUNCTION_INJECTION_BUILTIN(is_long);
   return f_is_long(var);
 }
 
 inline bool x_is_double(CVarRef var) {
-  FUNCTION_INJECTION_BUILTIN(is_double);
   return f_is_double(var);
 }
 
 inline bool x_is_float(CVarRef var) {
-  FUNCTION_INJECTION_BUILTIN(is_float);
   return f_is_float(var);
 }
 
 inline bool x_is_numeric(CVarRef var) {
-  FUNCTION_INJECTION_BUILTIN(is_numeric);
   return f_is_numeric(var);
 }
 
 inline bool x_is_real(CVarRef var) {
-  FUNCTION_INJECTION_BUILTIN(is_real);
   return f_is_real(var);
 }
 
 inline bool x_is_string(CVarRef var) {
-  FUNCTION_INJECTION_BUILTIN(is_string);
   return f_is_string(var);
 }
 
 inline bool x_is_scalar(CVarRef var) {
-  FUNCTION_INJECTION_BUILTIN(is_scalar);
   return f_is_scalar(var);
 }
 
 inline bool x_is_array(CVarRef var) {
-  FUNCTION_INJECTION_BUILTIN(is_array);
   return f_is_array(var);
 }
 
 inline bool x_is_object(CVarRef var) {
-  FUNCTION_INJECTION_BUILTIN(is_object);
   return f_is_object(var);
 }
 
 inline bool x_is_resource(CVarRef var) {
-  FUNCTION_INJECTION_BUILTIN(is_resource);
   return f_is_resource(var);
 }
 
 inline bool x_is_null(CVarRef var) {
-  FUNCTION_INJECTION_BUILTIN(is_null);
   return f_is_null(var);
 }
 
@@ -106,22 +92,18 @@ inline String x_get_resource_type(CObjRef handle) {
 }
 
 inline int64 x_intval(CVarRef v, int64 base = 10) {
-  FUNCTION_INJECTION_BUILTIN(intval);
   return f_intval(v, base);
 }
 
 inline double x_doubleval(CVarRef v) {
-  FUNCTION_INJECTION_BUILTIN(doubleval);
   return f_doubleval(v);
 }
 
 inline double x_floatval(CVarRef v) {
-  FUNCTION_INJECTION_BUILTIN(floatval);
   return f_floatval(v);
 }
 
 inline String x_strval(CVarRef v) {
-  FUNCTION_INJECTION_BUILTIN(strval);
   return f_strval(v);
 }
 

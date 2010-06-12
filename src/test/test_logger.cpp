@@ -125,8 +125,11 @@ std::string TestLogger::getRepoRoot() {
 
   // Fall back to our current directory
   char buf[MAXPATHLEN];
-  getcwd(buf, sizeof(buf));
-  out.assign(buf);
+  if (getcwd(buf, sizeof(buf)) == NULL) {
+    out.assign(buf);
+  } else {
+    out.assign("/");
+  }
   return out;
 }
 
@@ -164,7 +167,12 @@ int TestLogger::getOutput(const char* cmd, std::string &buf) {
   }
 
   char b[1024];
-  fread(b, sizeof(char), sizeof(b), output);
+  if (fread(b, sizeof(char), sizeof(b), output) <= 0) {
+    buf = "";
+    pclose(output);
+    return -1;
+  }
+
   buf = b;
 
   if (pclose(output)) {

@@ -170,10 +170,8 @@ bool Option::FlattenInvoke = true;
 bool Option::UseFastInvoke = false;
 int Option::InlineFunctionThreshold = -1;
 bool Option::ControlEvalOrder = true;
-
 bool Option::GlobalRefParamAnalysis = true;
-
-bool Option::AllDynamic = false;
+bool Option::AllDynamic = true;
 bool Option::AllVolatile = false;
 
 std::string Option::FlibDirectory;
@@ -324,7 +322,7 @@ void Option::Load(Hdf &config) {
   EnableXHP = config["EnableXHP"].getBool();
   RTTIOutputFile = config["RTTIOutputFile"].getString();
   EnableEval = (EvalLevel)config["EnableEval"].getByte(0);
-  AllDynamic = config["AllDynamic"].getBool();
+  AllDynamic = config["AllDynamic"].getBool(true);
   AllVolatile = config["AllVolatile"].getBool();
 
   GenerateSourceInfo = config["GenerateSourceInfo"].getBool(false);

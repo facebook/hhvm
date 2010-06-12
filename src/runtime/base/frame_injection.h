@@ -56,7 +56,7 @@ public:
   int flags;
 
   virtual Array getArgs();
-  CObjRef getObjectRef() { return m_object; }
+  CObjRef getObjectRef();
 
 public:
   // what does "static::" resolve to?

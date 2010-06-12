@@ -25,10 +25,6 @@ In PHP, a data member that is unset will not appear at all in vardump or
 serialize.
 In HipHop, it will still appear, as null.
 
-(3) isset($this)
-
-This is not supported yet.
-
 3. Eval Issues
 
 (1) eval

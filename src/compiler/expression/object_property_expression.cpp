@@ -300,6 +300,12 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
                                                     AnalysisResultPtr ar,
                                                     bool directVariant) {
   bool bThis = m_object->isThis();
+  if (bThis) {
+    FunctionScopePtr func = ar->getFunctionScope();
+    if (func && func->isStatic()) {
+      cg.printf("GET_THIS()->");
+    }
+  }
 
   const char *op = ".";
   string func = Option::ObjectPrefix;
@@ -400,7 +406,12 @@ void ObjectPropertyExpression::outputCPPExistTest(CodeGenerator &cg,
                                                   int op) {
   if (op == T_ISSET) {
     bool bThis = m_object->isThis();
-    if (!bThis) {
+    if (bThis) {
+      FunctionScopePtr func = ar->getFunctionScope();
+      if (func && func->isStatic()) {
+        cg.printf("GET_THIS()->");
+      }
+    } else {
       m_object->outputCPP(cg, ar);
       cg.printf("->");
     }
@@ -423,7 +434,12 @@ void ObjectPropertyExpression::outputCPPExistTest(CodeGenerator &cg,
 void ObjectPropertyExpression::outputCPPUnset(CodeGenerator &cg,
                                               AnalysisResultPtr ar) {
   bool bThis = m_object->isThis();
-  if (!bThis) {
+  if (bThis) {
+    FunctionScopePtr func = ar->getFunctionScope();
+    if (func && func->isStatic()) {
+      cg.printf("GET_THIS()->");
+    }
+  } else {
     m_object->outputCPP(cg, ar);
     cg.printf("->");
   }

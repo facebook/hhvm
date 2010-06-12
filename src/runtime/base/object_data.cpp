@@ -89,6 +89,7 @@ Variant ObjectData::os_invoke(const char *c, const char *s,
                               CArrRef params, int64 hash,
                               bool fatal /* = true */) {
   Object obj = create_object(c, Array::Create(), false);
+  obj.get()->o_id = 0; // for isset($this) to tell whether this is a fake obj
   return obj->o_invoke(s, params, hash, fatal);
 }
 

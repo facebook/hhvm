@@ -70,9 +70,7 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
     FunctionScopePtr func =
       dynamic_pointer_cast<FunctionScope>(ar->getScope());
     func->setContainsThis();
-    if (!func->isStatic() || (m_context & ObjectContext)) {
-      m_this = true;
-    }
+    m_this = true;
   } else if (m_name == "GLOBALS") {
     m_globals = true;
   }
@@ -203,13 +201,8 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
 
 void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_this) {
-    ClassScopePtr cls = ar->getClassScope();
-    if (cls->isRedeclaring() || cls->derivesFromRedeclaring() !=
-        ClassScope::FromNormal) {
-      cg.printf("root");
-    } else {
-      cg.printf("GET_THIS()");
-    }
+    ASSERT((getContext() & ObjectContext) == 0);
+    cg.printf("GET_THIS()");
   } else if (m_superGlobal) {
     VariableTablePtr variables = ar->getScope()->getVariables();
     cg.printf("g->%s", variables->getGlobalVariableName(ar, m_name).c_str());

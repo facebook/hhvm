@@ -162,6 +162,13 @@ Array FrameInjection::getArgs() {
   return Array();
 }
 
+CObjRef FrameInjection::getObjectRef() {
+  if (m_object.get() && m_object->o_getId()) {
+    return m_object;
+  }
+  return null_object;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // static late binding
 

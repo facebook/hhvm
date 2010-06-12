@@ -152,6 +152,22 @@ bool TestCodeRun::CompileFiles() {
   return true;
 }
 
+static string escape(const std::string &s) {
+  string ret;
+  ret.reserve(s.size() + 20);
+  for (unsigned int i = 0; i < s.length(); i++) {
+    char ch = s[i];
+    if (isprint(ch) || ch == '\n') {
+      ret += ch;
+    } else {
+      char buf[10];
+      snprintf(buf, sizeof(buf), "{\\x%02X}", (unsigned char)ch);
+      ret += buf;
+    }
+  }
+  return ret;
+}
+
 static bool verify_result(const char *input, const char *output, bool perfMode,
                           const char *file = "", int line = 0,
                           bool nowarnings = false, const char *subdir = "",
@@ -266,8 +282,8 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
              "%s"
              "--------------------------------------\n"
              "Err: [%s]\n", file, line, input,
-             (int)expected.length(), expected.c_str(),
-             (int)actual.length(), actual.c_str(),
+             (int)expected.length(), escape(expected).c_str(),
+             (int)actual.length(), escape(actual).c_str(),
              err.c_str());
       return false;
     }
@@ -2882,6 +2898,34 @@ bool TestCodeRun::TestObjectMethod() {
 }
 
 bool TestCodeRun::TestClassMethod() {
+  MVCR(
+    "<?php\n"
+    "class Foo {\n"
+    "  static function Bar() {\n"
+    "    if (isset($this) && isset($this->bar)) {\n"
+    "      echo \"isset\\n\";\n"
+    "    }\n"
+    "    var_dump($this);\n"
+    "  }\n"
+    "} Foo::Bar(); $obj = new Foo(); $obj->Bar();\n"
+  );
+
+  MVCR(
+    "<?php\n"
+    "class Example {\n"
+    "   function whatever() {\n"
+    "      if (isset($this)) {\n"
+    "          var_dump('static method call');\n"
+    "      } else {\n"
+    "          var_dump('non-static method call');\n"
+    "      }\n"
+    "   }\n"
+    "}\n"
+    "Example::whatever();\n"
+    "$inst = new Example();\n"
+    "$inst->whatever();\n"
+  );
+
   MVCR("<?php\n"
        "if (true) {\n"
        "  class c extends AppendIterator {}\n"

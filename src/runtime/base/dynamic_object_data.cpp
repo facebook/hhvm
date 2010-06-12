@@ -67,9 +67,6 @@ void DynamicObjectData::setRoot(ObjectData *r) {
   }
 }
 ObjectData *DynamicObjectData::getRoot() {
-  // Every DynamicObjectData in the chain has a direct
-  // pointer to the root
-  ASSERT(root->getRoot() == root);
   return root;
 }
 

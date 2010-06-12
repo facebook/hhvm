@@ -34,7 +34,7 @@ public:
                  const char *cls, const char *name, ObjectData *obj = NULL,
                  int fs = 0) : line(0), flags(fs), m_info(info),
                  m_class(cls), m_name(name), m_object(obj) {
-    ASSERT(!m_object || m_object->getRoot() == m_object);
+    ASSERT(!obj || obj->getRoot() == obj);
     ASSERT(m_class);
     ASSERT(m_name);
     m_prev = m_info->m_top;

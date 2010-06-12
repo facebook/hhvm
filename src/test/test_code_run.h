@@ -70,6 +70,7 @@ class TestCodeRun : public TestBase {
   bool TestArrayOffset();
   bool TestArrayAccess();
   bool TestArrayIterator();
+  bool TestArrayForEach();
   bool TestArrayAssignment();
   bool TestArrayMerge();
   bool TestArrayUnique();

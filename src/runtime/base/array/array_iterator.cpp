@@ -117,7 +117,6 @@ MutableArrayIter::~MutableArrayIter() {
   if (m_data && m_data->decRefCount() == 0) m_data->release();
 }
 
-
 bool MutableArrayIter::advance() {
   ArrayData *data = m_var ? getData() : m_data;
   if (!data) return false;

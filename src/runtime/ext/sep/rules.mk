@@ -13,6 +13,7 @@ TEST_SOURCES = \
 	$(PROJECT_ROOT)/src/test/test_cpp_base.cpp \
 	$(PROJECT_ROOT)/src/test/test_cpp_ext.cpp \
 	$(PROJECT_ROOT)/src/test/test_externals.cpp \
+	$(PROJECT_ROOT)/src/test/test_logger.cpp \
 	test_ext_$(EXT).cpp
 
 TEST_OBJECTS = $(patsubst %.cpp, %.o, $(TEST_SOURCES))

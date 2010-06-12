@@ -12,11 +12,11 @@ interface Serializable {
 interface Traversable {
 }
 
-interface SeekableIterator {
+interface SeekableIterator extends Iterator {
   public function seek($position);
 }
 
-interface OuterIterator {
+interface OuterIterator extends Iterator {
   public function getInnerIterator();
 }
 
@@ -25,8 +25,7 @@ interface RecursiveIterator extends Iterator {
   public function hasChildren();
 }
 
-class RecursiveIteratorIterator implements OuterIterator, Traversable,
-  Iterator {
+class RecursiveIteratorIterator implements OuterIterator, Traversable {
   const LEAVES_ONLY = 0;
   const SELF_FIRST = 1;
   const CHILD_FIRST = 2;
@@ -67,8 +66,7 @@ interface Iterator extends Traversable {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ArrayIterator implements Iterator,
-  ArrayAccess, SeekableIterator, Countable {
+class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   private $arr;
   private $flags;
 
@@ -167,8 +165,8 @@ class ArrayIterator implements Iterator,
   }
 }
 
-class DirectoryIterator extends SplFileInfo implements Iterator,
-  Traversable, SeekableIterator {
+class DirectoryIterator extends SplFileInfo implements Traversable,
+  SeekableIterator {
   public function __construct($path) {
     hphp_directoryiterator___construct($this, $path);
   }
@@ -265,7 +263,7 @@ class RecursiveDirectoryIterator extends DirectoryIterator
   }
 }
 
-abstract class FilterIterator implements Iterator, OuterIterator {
+abstract class FilterIterator implements OuterIterator {
 }
 
 interface IteratorAggregate extends Traversable {

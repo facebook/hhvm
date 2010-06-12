@@ -3878,7 +3878,7 @@ void c_reflectionclass::t___construct(Variant v_name) {
         {
           {
             c_reflectionexception *tmp12 = NEWOBJ(c_reflectionexception)();
-            throw_exception(p_reflectionexception(tmp12->create(StringBuffer().add("Class ", 6).add(toString(v_name)).add(" does not exist", 15).detach())));
+            throw_exception(p_reflectionexception(tmp12->create(concat3("Class ", toString(v_name), " does not exist"))));
           }
         }
       }
@@ -3902,7 +3902,7 @@ Variant c_reflectionclass::t_fetch(CVarRef v_what) {
         {
           {
             c_reflectionexception *tmp13 = NEWOBJ(c_reflectionexception)();
-            throw_exception(p_reflectionexception(tmp13->create(StringBuffer().add("Class ", 6).add(toString(v_name)).add(" does not exist", 15).detach())));
+            throw_exception(p_reflectionexception(tmp13->create(concat3("Class ", toString(v_name), " does not exist"))));
           }
         }
       }
@@ -4094,7 +4094,7 @@ p_reflectionmethod c_reflectionclass::t_getmethod(CVarRef v_name) {
       }
       {
         c_reflectionexception *tmp34 = NEWOBJ(c_reflectionexception)();
-        throw_exception(p_reflectionexception(tmp34->create(StringBuffer().add("Method ", 7).add(toString(v_class)).add("::", 2).add(toString(v_name)).add(" does not exist", 15).detach())));
+        throw_exception(p_reflectionexception(tmp34->create(concat5("Method ", toString(v_class), "::", toString(v_name), " does not exist"))));
       }
     }
   }
@@ -4162,7 +4162,7 @@ p_reflectionproperty c_reflectionclass::t_getproperty(CVarRef v_name) {
       }
       {
         c_reflectionexception *tmp43 = NEWOBJ(c_reflectionexception)();
-        throw_exception(p_reflectionexception(tmp43->create(StringBuffer().add("Property ", 9).add(toString(v_class)).add("::", 2).add(toString(v_name)).add(" does not exist", 15).detach())));
+        throw_exception(p_reflectionexception(tmp43->create(concat5("Property ", toString(v_class), "::", toString(v_name), " does not exist"))));
       }
     }
   }
@@ -4220,7 +4220,7 @@ Variant c_reflectionclass::t_getconstant(CVarRef v_name) {
       }
       {
         c_reflectionexception *tmp50 = NEWOBJ(c_reflectionexception)();
-        throw_exception(p_reflectionexception(tmp50->create(StringBuffer().add("Class constant ", 15).add(toString(v_class)).add("::", 2).add(toString(v_name)).add(" does not exist", 15).detach())));
+        throw_exception(p_reflectionexception(tmp50->create(concat5("Class constant ", toString(v_class), "::", toString(v_name), " does not exist"))));
       }
     }
   }
@@ -8067,7 +8067,7 @@ void c_reflectionfunction::t___construct(Variant v_name) {
     {
       {
         c_reflectionexception *tmp121 = NEWOBJ(c_reflectionexception)();
-        throw_exception(p_reflectionexception(tmp121->create(StringBuffer().add("Function ", 9).add(toString(v_name)).add(" does not exist", 15).detach())));
+        throw_exception(p_reflectionexception(tmp121->create(concat3("Function ", toString(v_name), " does not exist"))));
       }
     }
   }

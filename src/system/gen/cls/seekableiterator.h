@@ -18,6 +18,7 @@
 #ifndef __GENERATED_cls_seekableiterator_h__
 #define __GENERATED_cls_seekableiterator_h__
 
+#include <cls/iterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

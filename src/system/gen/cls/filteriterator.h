@@ -18,13 +18,12 @@
 #ifndef __GENERATED_cls_filteriterator_h__
 #define __GENERATED_cls_filteriterator_h__
 
-#include <cls/iterator.h>
 #include <cls/outeriterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 268 */
+/* SRC: classes/iterator.php line 266 */
 class c_filteriterator : public ExtObjectData {
   BEGIN_CLASS_MAP(filteriterator)
     PARENT_CLASS(iterator)

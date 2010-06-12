@@ -2882,6 +2882,20 @@ bool TestCodeRun::TestObjectMethod() {
 }
 
 bool TestCodeRun::TestClassMethod() {
+  MVCR("<?php\n"
+       "if (true) {\n"
+       "  class c extends AppendIterator {}\n"
+       "} else {\n"
+       "  class c {}\n"
+       "}\n"
+       "class d extends c {\n"
+       "  public function rewind() {\n"
+       "    var_dump('rewinding');\n"
+       "  }\n"
+       "}\n"
+       "$obj = new d;\n"
+       "foreach ($obj as $k => $v) {}\n");
+
   MVCR("<?php "
       "$error = 'fatal error';"
       "echo AdsConsoleRenderer::getInstance()->writeMsg('error', $error);"
@@ -3539,7 +3553,7 @@ bool TestCodeRun::TestObjectPropertyExpression() {
     COMPARE(a, op, '1')                         \
     COMPARE(a, op, '0')                         \
     COMPARE(a, op, '-1')                        \
-    COMPARE(a, op, null)                        \
+    COMPARE(a, op, NULL)                        \
     COMPARE(a, op, array())                     \
     COMPARE(a, op, array(1))                    \
     COMPARE(a, op, array(2))                    \
@@ -3553,27 +3567,27 @@ bool TestCodeRun::TestObjectPropertyExpression() {
     COMPARE(a, op, '')                          \
 
 #define COMPARE_OP(op)                                                  \
-  MVCR("<?php $i = 0; " COMPARE_ALL('1.2', op));                         \
-  MVCR("<?php $i = 0; " COMPARE_ALL(true, op));                          \
-  MVCR("<?php $i = 0; " COMPARE_ALL(false, op));                         \
-  MVCR("<?php $i = 0; " COMPARE_ALL(1, op));                             \
-  MVCR("<?php $i = 0; " COMPARE_ALL(0, op));                             \
-  MVCR("<?php $i = 0; " COMPARE_ALL(-1, op));                            \
-  MVCR("<?php $i = 0; " COMPARE_ALL('1', op));                           \
-  MVCR("<?php $i = 0; " COMPARE_ALL('0', op));                           \
-  MVCR("<?php $i = 0; " COMPARE_ALL('-1', op));                          \
-  MVCR("<?php $i = 0; " COMPARE_ALL(null, op));                          \
-  MVCR("<?php $i = 0; " COMPARE_ALL(array(), op));                       \
-  MVCR("<?php $i = 0; " COMPARE_ALL(array(1), op));                      \
-  MVCR("<?php $i = 0; " COMPARE_ALL(array(2), op));                      \
-  MVCR("<?php $i = 0; " COMPARE_ALL(array('1'), op));                    \
-  MVCR("<?php $i = 0; " COMPARE_ALL(array('0' => '1'), op));             \
-  MVCR("<?php $i = 0; " COMPARE_ALL(array('a'), op));                    \
-  MVCR("<?php $i = 0; " COMPARE_ALL(array('a' => 1), op));               \
-  MVCR("<?php $i = 0; " COMPARE_ALL(array('b' => 1), op));               \
-  MVCR("<?php $i = 0; " COMPARE_ALL(array('a' => 1, 'b' => 2), op));     \
-  MVCR("<?php $i = 0; " COMPARE_ALL('php', op));                         \
-  MVCR("<?php $i = 0; " COMPARE_ALL('', op));                            \
+  MVCR("<?php $i = 0; " COMPARE_ALL('1.2', op));                        \
+  MVCR("<?php $i = 0; " COMPARE_ALL(true, op));                         \
+  MVCR("<?php $i = 0; " COMPARE_ALL(false, op));                        \
+  MVCR("<?php $i = 0; " COMPARE_ALL(1, op));                            \
+  MVCR("<?php $i = 0; " COMPARE_ALL(0, op));                            \
+  MVCR("<?php $i = 0; " COMPARE_ALL(-1, op));                           \
+  MVCR("<?php $i = 0; " COMPARE_ALL('1', op));                          \
+  MVCR("<?php $i = 0; " COMPARE_ALL('0', op));                          \
+  MVCR("<?php $i = 0; " COMPARE_ALL('-1', op));                         \
+  MVCR("<?php $i = 0; " COMPARE_ALL(NULL, op));                         \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array(), op));                      \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array(1), op));                     \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array(2), op));                     \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array('1'), op));                   \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array('0' => '1'), op));            \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array('a'), op));                   \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array('a' => 1), op));              \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array('b' => 1), op));              \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array('a' => 1, 'b' => 2), op));    \
+  MVCR("<?php $i = 0; " COMPARE_ALL('php', op));                        \
+  MVCR("<?php $i = 0; " COMPARE_ALL('', op));                           \
 
 bool TestCodeRun::TestComparisons() {
   MVCR("<?php var_dump(array(1 => 1, 2 => 1) ==  array(2 => 1, 1 => 1));");

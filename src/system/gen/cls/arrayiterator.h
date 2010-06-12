@@ -18,7 +18,6 @@
 #ifndef __GENERATED_cls_arrayiterator_h__
 #define __GENERATED_cls_arrayiterator_h__
 
-#include <cls/iterator.h>
 #include <cls/arrayaccess.h>
 #include <cls/seekableiterator.h>
 #include <cls/countable.h>
@@ -26,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 70 */
+/* SRC: classes/iterator.php line 69 */
 class c_arrayiterator : public ExtObjectData {
   BEGIN_CLASS_MAP(arrayiterator)
     PARENT_CLASS(arrayaccess)

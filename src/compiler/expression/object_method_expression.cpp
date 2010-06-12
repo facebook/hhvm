@@ -375,9 +375,6 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
     } else {
       string objType;
       TypePtr type = m_object->getType();
-      // We only need to use the AS_CLASS macro if we are working
-      // with a specific object type and we are not going to use
-      // one of the invoke methods
       if (type->isSpecificObject() && !m_name.empty() && m_valid) {
         objType = type->getName();
       } else {

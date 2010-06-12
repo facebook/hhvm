@@ -4111,7 +4111,7 @@ String c_exception::t_gettraceasstring() {
       concat_assign(v_s, tmp_sbuf_v_s);
     }
   }
-  concat_assign(v_s, StringBuffer().add("#", 1).add(toString(v_i)).add(" {main}", 7).detach());
+  concat_assign(v_s, concat3("#", toString(v_i), " {main}"));
   return v_s;
 } /* function */
 /* SRC: classes/exception.php line 75 */

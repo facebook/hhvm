@@ -25,14 +25,6 @@ namespace HPHP {
 #define LITSTR_INIT(str)    (true ? (str) : ("" str "")), (sizeof(str)-1)
 #define LITSTR(index, str)  (literalStrings[index])
 
-#ifndef DEBUG
-#define AS_CLASS(obj,cls) \
-  (static_cast<cls*>(obj.get()))
-#else
-#define AS_CLASS(obj,cls) \
-  (dynamic_cast<cls*>(obj.get()))
-#endif
-
 #define GET_THIS()        (fi.getObjectRef())
 
 #define FORWARD_DECLARE_CLASS(cls)                      \

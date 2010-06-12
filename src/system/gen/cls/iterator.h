@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 60 */
+/* SRC: classes/iterator.php line 59 */
 class c_iterator {
   // public: void t_current() = 0;
   // public: void t_key() = 0;

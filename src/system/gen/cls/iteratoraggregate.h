@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 271 */
+/* SRC: classes/iterator.php line 269 */
 class c_iteratoraggregate {
   // public: void t_getiterator() = 0;
 };

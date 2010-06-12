@@ -20,7 +20,6 @@
 
 #include <cls/outeriterator.h>
 #include <cls/traversable.h>
-#include <cls/iterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

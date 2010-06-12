@@ -19,14 +19,13 @@
 #define __GENERATED_cls_directoryiterator_h__
 
 #include <cls/splfileinfo.h>
-#include <cls/iterator.h>
 #include <cls/traversable.h>
 #include <cls/seekableiterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 170 */
+/* SRC: classes/iterator.php line 168 */
 class c_directoryiterator : public c_splfileinfo {
   BEGIN_CLASS_MAP(directoryiterator)
     PARENT_CLASS(iterator)

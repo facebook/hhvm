@@ -186,6 +186,7 @@ public:
   }
   virtual bool isThis() const { return false;}
   virtual bool isLiteralString() const { return false;}
+  bool isUnquotedScalar() const;
   virtual std::string getLiteralString() const { return "";}
   virtual bool containsDynamicConstant(AnalysisResultPtr ar) const {
     return false;

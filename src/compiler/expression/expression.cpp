@@ -367,6 +367,11 @@ bool Expression::canonCompare(ExpressionPtr e) const {
   return true;
 }
 
+bool Expression::isUnquotedScalar() const {
+  if (!is(KindOfScalarExpression)) return false;
+  return !((ScalarExpression*)this)->isQuoted();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool Expression::outputLineMap(CodeGenerator &cg, AnalysisResultPtr ar,

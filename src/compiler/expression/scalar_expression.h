@@ -48,6 +48,7 @@ public:
   }
   virtual unsigned getCanonHash() const;
   virtual bool canonCompare(ExpressionPtr e) const;
+  bool isQuoted() const { return m_quoted; }
 
   // implementing IParseHandler
   virtual void onParse(AnalysisResultPtr ar);

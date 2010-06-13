@@ -1064,7 +1064,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   }
   case T_INSTANCEOF:
     {
-      if (second->is(Expression::KindOfScalarExpression)) {
+      if (second->isUnquotedScalar()) {
         cg.printf("\"");
         second->outputCPP(cg, ar);
         cg.printf("\"");

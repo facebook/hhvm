@@ -416,7 +416,7 @@ void ObjectPropertyExpression::outputCPPExistTest(CodeGenerator &cg,
       cg.printf("->");
     }
     cg.printf("t___isset(");
-    bool direct = m_property->is(KindOfScalarExpression);
+    bool direct = m_property->isUnquotedScalar();
     if (direct) {
       cg.printf("\"");
     }
@@ -444,7 +444,7 @@ void ObjectPropertyExpression::outputCPPUnset(CodeGenerator &cg,
     cg.printf("->");
   }
   cg.printf("t___unset(");
-  bool direct = m_property->getKindOf() == Expression::KindOfScalarExpression;
+  bool direct = m_property->isUnquotedScalar();
   if (direct) {
     cg.printf("\"");
   }

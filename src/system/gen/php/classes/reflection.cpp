@@ -3874,7 +3874,7 @@ void c_reflectionclass::t___construct(Variant v_name) {
   }
   else {
     {
-      if (!(toBoolean(x_call_user_func(2, "class_exists", Array(ArrayInit(1, true).set(0, v_name).create())))) && !(toBoolean(x_call_user_func(2, "interface_exists", Array(ArrayInit(1, true).set(0, v_name).create()))))) {
+      if (!(toBoolean(x_call_user_func(2, "class_exists", Array(ArrayInit(1, true).setRef(0, v_name).create())))) && !(toBoolean(x_call_user_func(2, "interface_exists", Array(ArrayInit(1, true).setRef(0, v_name).create()))))) {
         {
           {
             c_reflectionexception *tmp12 = NEWOBJ(c_reflectionexception)();
@@ -3897,7 +3897,7 @@ Variant c_reflectionclass::t_fetch(CVarRef v_what) {
 
   if (!(toBoolean(m_info))) {
     {
-      (m_info = x_call_user_func(2, "hphp_get_class_info", Array(ArrayInit(1, true).set(0, m_name).create())));
+      (m_info = x_call_user_func(2, "hphp_get_class_info", Array(ArrayInit(1, true).setRef(0, lval(m_name)).create())));
       if (empty(m_info)) {
         {
           {
@@ -3956,7 +3956,7 @@ Variant c_reflectionclass::t_fetch(CVarRef v_what) {
   return m_info.rvalAt(v_what, -1, true);
 } /* function */
 /* SRC: classes/reflection.php line 246 */
-bool c_reflectionclass::t_test(CStrRef v_what, CVarRef v_name) {
+bool c_reflectionclass::t_test(CVarRef v_what, CVarRef v_name) {
   INSTANCE_METHOD_INJECTION(ReflectionClass, ReflectionClass::test);
   Variant v_v;
 
@@ -4108,7 +4108,7 @@ p_reflectionmethod c_reflectionclass::t_getmethod(CVarRef v_name) {
   return v_ret;
 } /* function */
 /* SRC: classes/reflection.php line 332 */
-Array c_reflectionclass::t_getmethods(int64 v_filter //  = 65535LL
+Array c_reflectionclass::t_getmethods(CVarRef v_filter //  = 65535LL
 ) {
   INSTANCE_METHOD_INJECTION(ReflectionClass, ReflectionClass::getMethods);
   Array v_ret;

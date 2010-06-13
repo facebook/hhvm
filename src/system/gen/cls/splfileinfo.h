@@ -78,10 +78,10 @@ class c_splfileinfo : public ExtObjectData {
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: String t_getpath();
   public: String t_getfilename();
-  public: Object t_getfileinfo(CStrRef v_class_name = "");
-  public: String t_getbasename(CStrRef v_suffix = "");
+  public: Object t_getfileinfo(CVarRef v_class_name = "");
+  public: String t_getbasename(CVarRef v_suffix = "");
   public: String t_getpathname();
-  public: Object t_getpathinfo(CStrRef v_class_name = "");
+  public: Object t_getpathinfo(CVarRef v_class_name = "");
   public: int64 t_getperms();
   public: int64 t_getinode();
   public: int64 t_getsize();
@@ -100,9 +100,9 @@ class c_splfileinfo : public ExtObjectData {
   public: String t_getlinktarget();
   public: Variant t_getrealpath();
   public: String t___tostring();
-  public: Object t_openfile(CStrRef v_mode = "r", bool v_use_include_path = false, CVarRef v_context = null_variant);
-  public: Variant t_setfileclass(CStrRef v_class_name = "SplFileObject");
-  public: Variant t_setinfoclass(CStrRef v_class_name = "SplFileInfo");
+  public: Object t_openfile(CVarRef v_mode = "r", CVarRef v_use_include_path = false, CVarRef v_context = null_variant);
+  public: Variant t_setfileclass(CVarRef v_class_name = "SplFileObject");
+  public: Variant t_setinfoclass(CVarRef v_class_name = "SplFileInfo");
   public: Variant m_rsrc;
 };
 

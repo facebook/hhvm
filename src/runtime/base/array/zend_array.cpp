@@ -1198,15 +1198,26 @@ void ZendArray::getFullPos(FullPos &pos) {
 }
 
 bool ZendArray::setFullPos(const FullPos &pos) {
-  // Only set if pos hasn't been invalidated.
-  if (pos.primary) {
-    for (Bucket *p = m_arBuckets[pos.secondary & m_nTableMask]; p;
-         p = p->pNext) {
-      if ((ssize_t)p == pos.primary) m_pos = (ssize_t)p;
+  // If the Bucket* given by pos.primary is null, return false.
+  if (!pos.primary) {
+    m_pos = (ssize_t)NULL;
+    return false;
+  }
+  // If the Bucket* matches the array's internal iterator, return true.
+  if (pos.primary == m_pos) return true;
+  // Search for the Bucket* in the bucket corresponding to the key given
+  // by pos.secondary. If the Bucket* is found, set m_pos to the Bucket*
+  // and return true.
+  for (Bucket *p = m_arBuckets[pos.secondary & m_nTableMask]; p;
+       p = p->pNext) {
+    if ((ssize_t)p == pos.primary) {
+      m_pos = (ssize_t)p;
+      return true;
     }
   }
-  if (!m_pos) return false;
-  return true;
+  // If the Bucket* could not be found, fall back to using m_pos. Return
+  // true is m_pos is not null, false otherwise.
+  return m_pos;
 }
 
 CVarRef ZendArray::currentRef() {

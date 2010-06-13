@@ -1838,8 +1838,6 @@ bool TestCodeRun::TestArrayForEach() {
        "}\n"
        "f6();\n");
 
-// PHP's bug
-#if 0
   MVCR("<?php\n"
        "function f7() {\n"
        "  $i = 0;\n"
@@ -1858,7 +1856,6 @@ bool TestCodeRun::TestArrayForEach() {
        "  }\n"
        "}\n"
        "f7();\n");
-#endif
 
   MVCR("<?php\n"
        "function f8() {\n"

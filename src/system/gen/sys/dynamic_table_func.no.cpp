@@ -35370,7 +35370,7 @@ Variant ei_call_user_func_async(Eval::VariableEnvironment &env, const Eval::Func
   } while(false);
   Array vargs;
   for (; it != params.end(); ++it) {
-    vargs.append((*it)->eval(env));
+    vargs.append(ref((*it)->refval(env, false)));
   }
   if (count <= 1) return (x_call_user_func_async(count, a0));
   return (x_call_user_func_async(count, a0,vargs));
@@ -39504,7 +39504,7 @@ Variant ei_forward_static_call(Eval::VariableEnvironment &env, const Eval::Funct
   } while(false);
   Array vargs;
   for (; it != params.end(); ++it) {
-    vargs.append((*it)->eval(env));
+    vargs.append(ref((*it)->refval(env, false)));
   }
   if (count <= 1) return (x_forward_static_call(count, a0));
   return (x_forward_static_call(count, a0,vargs));
@@ -47558,7 +47558,7 @@ Variant ei_call_user_func(Eval::VariableEnvironment &env, const Eval::FunctionCa
   } while(false);
   Array vargs;
   for (; it != params.end(); ++it) {
-    vargs.append((*it)->eval(env));
+    vargs.append(ref((*it)->refval(env, false)));
   }
   if (count <= 1) return (x_call_user_func(count, a0));
   return (x_call_user_func(count, a0,vargs));

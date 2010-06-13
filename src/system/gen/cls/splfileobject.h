@@ -90,7 +90,7 @@ class c_splfileobject : public c_splfileinfo {
   public: bool t_eof();
   public: bool t_fflush();
   public: String t_fgetc();
-  public: Variant t_fgetcsv(CStrRef v_delimiter = ",", CStrRef v_enclosure = "\"", CStrRef v_escape = "\\");
+  public: Variant t_fgetcsv(CVarRef v_delimiter = ",", CVarRef v_enclosure = "\"", CVarRef v_escape = "\\");
   public: String t_fgets();
   public: String t_fgetss(CVarRef v_allowable_tags);
   public: bool t_flock(CVarRef v_operation, Variant v_wouldblock);
@@ -110,7 +110,7 @@ class c_splfileobject : public c_splfileinfo {
   public: Variant t_next();
   public: Variant t_rewind();
   public: Variant t_seek(CVarRef v_line_pos);
-  public: Variant t_setcsvcontrol(CStrRef v_delimiter = ",", CStrRef v_enclosure = "\"", CStrRef v_escape = "\\");
+  public: Variant t_setcsvcontrol(CVarRef v_delimiter = ",", CVarRef v_enclosure = "\"", CVarRef v_escape = "\\");
   public: Variant t_setflags(CVarRef v_flags);
   public: Variant t_setmaxlinelen(CVarRef v_max_len);
   public: bool t_valid();

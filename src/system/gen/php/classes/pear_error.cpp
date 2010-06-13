@@ -111,7 +111,7 @@ Variant c_pear_error::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_pear_error
 IMPLEMENT_CLASS(pear_error)
-c_pear_error *c_pear_error::create(CStrRef v_message //  = "unknown error"
+c_pear_error *c_pear_error::create(CVarRef v_message //  = "unknown error"
 , CVarRef v_code //  = null_variant
 , CVarRef v_mode //  = null_variant
 , CVarRef v_options //  = null_variant
@@ -136,6 +136,53 @@ ObjectData *c_pear_error::dynCreate(CArrRef params, bool construct /* = true */)
     else (t_pear_error(params[0], params[1], params[2], params[3], params[4]));
   }
   return this;
+}
+void c_pear_error::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 5) throw_toomany_arguments("pear_error::pear_error", 5, 2);
+  if (count <= 0) (t_pear_error());
+  else if (count == 1) (t_pear_error(params[0]));
+  else if (count == 2) (t_pear_error(params[0], params[1]));
+  else if (count == 3) (t_pear_error(params[0], params[1], params[2]));
+  else if (count == 4) (t_pear_error(params[0], params[1], params[2], params[3]));
+  else (t_pear_error(params[0], params[1], params[2], params[3], params[4]));
+}
+void c_pear_error::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 5) throw_toomany_arguments("pear_error::pear_error", 5, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 0) (t_pear_error(), null);
+  else if (count == 1) (t_pear_error(a0), null);
+  else if (count == 2) (t_pear_error(a0, a1), null);
+  else if (count == 3) (t_pear_error(a0, a1, a2), null);
+  else if (count == 4) (t_pear_error(a0, a1, a2, a3), null);
+  else (t_pear_error(a0, a1, a2, a3, a4), null);
 }
 ObjectData *c_pear_error::cloneImpl() {
   c_pear_error *obj = NEW(c_pear_error)();
@@ -519,7 +566,7 @@ struct ObjectStaticCallbacks cw_pear_error = {
 void c_pear_error::init() {
 }
 /* SRC: classes/pear_error.php line 4 */
-void c_pear_error::t_pear_error(CStrRef v_message //  = "unknown error"
+void c_pear_error::t_pear_error(CVarRef v_message //  = "unknown error"
 , CVarRef v_code //  = null_variant
 , CVarRef v_mode //  = null_variant
 , CVarRef v_options //  = null_variant

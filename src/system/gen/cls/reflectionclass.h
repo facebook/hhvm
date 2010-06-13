@@ -84,7 +84,7 @@ class c_reflectionclass : public ExtObjectData {
   public: void dynConstruct(CArrRef params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Variant t_fetch(CVarRef v_what);
-  public: bool t_test(CStrRef v_what, CVarRef v_name);
+  public: bool t_test(CVarRef v_what, CVarRef v_name);
   public: String t___tostring();
   public: static Variant ti_export(const char* cls, CVarRef v_name, CVarRef v_ret);
   public: Variant t_getname();
@@ -100,7 +100,7 @@ class c_reflectionclass : public ExtObjectData {
   public: Variant t_getdoccomment();
   public: Variant t_getconstructor();
   public: p_reflectionmethod t_getmethod(CVarRef v_name);
-  public: Array t_getmethods(int64 v_filter = 65535LL);
+  public: Array t_getmethods(CVarRef v_filter = 65535LL);
   public: p_reflectionproperty t_getproperty(CVarRef v_name);
   public: Array t_getproperties();
   public: Variant t_getconstants();

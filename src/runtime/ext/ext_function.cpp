@@ -112,10 +112,11 @@ Object f_call_user_func_async(int _argc, CVarRef function,
 }
 
 Variant f_end_user_func_async(CObjRef handle,
-                              int strategy /* = k_GLOBAL_STATE_OVERWRITE */,
-                              CVarRef resolver /* = null */) {
-  return FiberAsyncFunc::Result(handle, (FiberAsyncFunc::Strategy)strategy,
-                                resolver);
+                              int default_strategy /* = k_GLOBAL_STATE_OVERWRITE */,
+                              CVarRef additional_strategies /* = null */) {
+  return FiberAsyncFunc::Result(handle,
+                                (FiberAsyncFunc::Strategy)default_strategy,
+                                additional_strategies);
 }
 
 Variant f_forward_static_call_array(CVarRef function, CArrRef params) {

@@ -186,6 +186,7 @@ public:
   static const char *ClassPrefix;
   static const char *ClassStaticsPrefix;
   static const char *ClassStaticsObjectPrefix;
+  static const char *ClassStaticsCallbackPrefix;
   static const char *ClassStaticsIdGetterPrefix;
   static const char *ClassStaticInitializerPrefix;
   static const char *ClassStaticInitializerFlagPrefix;

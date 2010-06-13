@@ -781,6 +781,7 @@ extern const int64 k_XML_ERROR_NONE;
 extern const int64 k_SOCKET_EL2HLT;
 extern const int64 k_XSD_HEXBINARY;
 extern const int64 k_T_UNSET_CAST;
+extern const int64 k_GLOBAL_SYMBOL_CLASS_STATIC;
 extern const int64 k_CURLE_FTP_COULDNT_SET_BINARY;
 extern const int64 k_MSG_EAGAIN;
 extern const int64 k_T_LIST;
@@ -971,6 +972,7 @@ extern const int64 k_U_STRINGPREP_UNASSIGNED_ERROR;
 extern const int64 k_U_PATTERN_SYNTAX_ERROR;
 extern const int64 k_ASSERT_WARNING;
 extern const int64 k_SO_ERROR;
+extern const int64 k_GLOBAL_SYMBOL_GLOBAL_VARIABLE;
 extern const int64 k_MW_OptionFatalError;
 extern const int64 k_CURLE_FTP_WEIRD_227_FORMAT;
 extern const int64 k_T_INCLUDE;
@@ -1076,7 +1078,6 @@ extern const int64 k_SOCKET_EUSERS;
 extern const int64 k_CURLOPT_LOW_SPEED_TIME;
 extern const int64 k_PHP_BINARY_READ;
 extern const int64 k_STR_PAD_BOTH;
-extern const int64 k_GLOBAL_STATE_RESOLVE_CONFLICT;
 extern const int64 k_U_REGEX_PROPERTY_SYNTAX;
 extern const int64 k_STREAM_FILTER_ALL;
 extern const int64 k_CURLAUTH_DIGEST;
@@ -1246,6 +1247,7 @@ extern const int64 k_T_CHARACTER;
 extern const int64 k_MYSQLI_DATA_TRUNCATED;
 extern const int64 k_XML_ATTRIBUTE_NODE;
 extern const int64 k_STREAM_ENFORCE_SAFE_MODE;
+extern const int64 k_GLOBAL_SYMBOL_REDECLARED_FUNCTION;
 extern const int64 k_SUNFUNCS_RET_TIMESTAMP;
 extern const int64 k_STREAM_IPPROTO_TCP;
 extern const int64 k_SO_RCVBUF;
@@ -1468,6 +1470,7 @@ extern const int64 k_U_UNDEFINED_VARIABLE;
 extern const int64 k_SOAP_LITERAL;
 extern const int64 k_XML_ERROR_JUNK_AFTER_DOC_ELEMENT;
 extern const int64 k_MW_BlurPreview;
+extern const int64 k_GLOBAL_SYMBOL_DYNAMIC_CONSTANT;
 extern const int64 k_U_INVALID_RBT_SYNTAX;
 extern const int64 k_MW_SouthEastGravity;
 extern const int64 k_SOCKET_EXFULL;
@@ -1550,6 +1553,7 @@ extern const int64 k_U_NO_SPACE_AVAILABLE;
 extern const int64 k_T_CONSTANT_ENCAPSED_STRING;
 extern const int64 k_MW_MeanAbsoluteErrorMetric;
 extern const int64 k_CURLOPT_PROXYAUTH;
+extern const int64 k_GLOBAL_SYMBOL_STATIC_VARIABLE;
 extern const int64 k_GD_RELEASE_VERSION;
 extern const int64 k_SOL_SOCKET;
 extern const StaticString k_MCRYPT_RIJNDAEL_192;
@@ -1777,6 +1781,7 @@ extern const int64 k_MW_PlaneInterlace;
 extern const int64 k_MW_ResourceLimitFatalError;
 extern const int64 k_U_MALFORMED_SET;
 extern const int64 k_LOG_USER;
+extern const int64 k_GLOBAL_SYMBOL_REDECLARED_CLASS;
 extern const int64 k_LDAP_OPT_HOST_NAME;
 extern const int64 k_CURLOPT_RETURNTRANSFER;
 extern const int64 k_CURLE_FTP_WEIRD_PASV_REPLY;
@@ -1878,6 +1883,7 @@ extern const int64 k_MW_NorthEastGravity;
 extern const int64 k_INTL_MAX_LOCALE_LEN;
 extern const int64 k_SIGTTOU;
 extern const int64 k_MW_CacheError;
+extern const int64 k_GLOBAL_SYMBOL_FILE_INCLUDE;
 extern const int64 k_CURLINFO_PRETRANSFER_TIME;
 extern const int64 k_SOCKET_ECONNABORTED;
 extern const int64 k_SOCKET_ENOLINK;
@@ -2145,6 +2151,7 @@ Variant get_builtin_constant(CStrRef name) {
       break;
     case 122:
       HASH_RETURN(0x5C6D7235E402E07ALL, k_STREAM_CRYPTO_METHOD_TLS_SERVER, "STREAM_CRYPTO_METHOD_TLS_SERVER");
+      HASH_RETURN(0x2A37E6C77D97507ALL, k_GLOBAL_SYMBOL_REDECLARED_FUNCTION, "GLOBAL_SYMBOL_REDECLARED_FUNCTION");
       break;
     case 124:
       HASH_RETURN(0x5C80BAFA7EF1807CLL, k_MW_FileResource, "MW_FileResource");
@@ -2231,6 +2238,9 @@ Variant get_builtin_constant(CStrRef name) {
       break;
     case 199:
       HASH_RETURN(0x2CFE05AC8C3220C7LL, k_CURL_IPRESOLVE_WHATEVER, "CURL_IPRESOLVE_WHATEVER");
+      break;
+    case 201:
+      HASH_RETURN(0x044981AB5759F0C9LL, k_GLOBAL_SYMBOL_DYNAMIC_CONSTANT, "GLOBAL_SYMBOL_DYNAMIC_CONSTANT");
       break;
     case 204:
       HASH_RETURN(0x4A55CB4BDF07F0CCLL, k_XML_ATTRIBUTE_IDREF, "XML_ATTRIBUTE_IDREF");
@@ -2868,6 +2878,9 @@ Variant get_builtin_constant(CStrRef name) {
     case 651:
       HASH_RETURN(0x29E952E38690128BLL, k_CURLOPT_FTP_SSL, "CURLOPT_FTP_SSL");
       break;
+    case 656:
+      HASH_RETURN(0x0A40294430D9E290LL, k_GLOBAL_SYMBOL_FILE_INCLUDE, "GLOBAL_SYMBOL_FILE_INCLUDE");
+      break;
     case 658:
       HASH_RETURN(0x41521C6927220292LL, k_MCRYPT_LOKI97, "MCRYPT_LOKI97");
       break;
@@ -3137,6 +3150,9 @@ Variant get_builtin_constant(CStrRef name) {
       break;
     case 862:
       HASH_RETURN(0x423C964C1413835ELL, k_XML_ATTRIBUTE_NODE, "XML_ATTRIBUTE_NODE");
+      break;
+    case 864:
+      HASH_RETURN(0x3FB39A43A260E360LL, k_GLOBAL_SYMBOL_REDECLARED_CLASS, "GLOBAL_SYMBOL_REDECLARED_CLASS");
       break;
     case 865:
       HASH_RETURN(0x3B1509B1742A7361LL, k_MW_HueCompositeOp, "MW_HueCompositeOp");
@@ -3449,6 +3465,7 @@ Variant get_builtin_constant(CStrRef name) {
       break;
     case 1126:
       HASH_RETURN(0x6C5E618A94DA9466LL, k_U_MULTIPLE_POST_CONTEXTS, "U_MULTIPLE_POST_CONTEXTS");
+      HASH_RETURN(0x3DC904CD8568B466LL, k_GLOBAL_SYMBOL_CLASS_STATIC, "GLOBAL_SYMBOL_CLASS_STATIC");
       break;
     case 1127:
       HASH_RETURN(0x2F753E1FC8D81467LL, k_ABMON_8, "ABMON_8");
@@ -3592,6 +3609,9 @@ Variant get_builtin_constant(CStrRef name) {
       break;
     case 1231:
       HASH_RETURN(0x4D12E388F00434CFLL, k_AF_INET6, "AF_INET6");
+      break;
+    case 1232:
+      HASH_RETURN(0x163F13E3E6D834D0LL, k_GLOBAL_SYMBOL_GLOBAL_VARIABLE, "GLOBAL_SYMBOL_GLOBAL_VARIABLE");
       break;
     case 1236:
       HASH_RETURN(0x6D4BF2FC509F14D4LL, k_CURLOPT_NOBODY, "CURLOPT_NOBODY");
@@ -4897,9 +4917,6 @@ Variant get_builtin_constant(CStrRef name) {
       HASH_RETURN(0x76D357E7C04318FELL, k_SOAP_PERSISTENCE_SESSION, "SOAP_PERSISTENCE_SESSION");
       HASH_RETURN(0x6965B811EECB48FELL, k_XSD_ID, "XSD_ID");
       break;
-    case 2309:
-      HASH_RETURN(0x61E051C741894905LL, k_GLOBAL_STATE_RESOLVE_CONFLICT, "GLOBAL_STATE_RESOLVE_CONFLICT");
-      break;
     case 2312:
       HASH_RETURN(0x03378600DF2A6908LL, k_CURL_TIMECOND_IFMODSINCE, "CURL_TIMECOND_IFMODSINCE");
       break;
@@ -6013,6 +6030,9 @@ Variant get_builtin_constant(CStrRef name) {
       break;
     case 3178:
       HASH_RETURN(0x3B9FDE327DF1DC6ALL, k_CURLE_FTP_COULDNT_RETR_FILE, "CURLE_FTP_COULDNT_RETR_FILE");
+      break;
+    case 3183:
+      HASH_RETURN(0x6B90FA201270EC6FLL, k_GLOBAL_SYMBOL_STATIC_VARIABLE, "GLOBAL_SYMBOL_STATIC_VARIABLE");
       break;
     case 3184:
       HASH_RETURN(0x02DE0CD2B0DEBC70LL, k_ABDAY_1, "ABDAY_1");

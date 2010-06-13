@@ -254,7 +254,9 @@ public:
                                         AnalysisResultPtr ar);
   void outputCPPGlobalVariablesMethods(CodeGenerator &cg,
                                        AnalysisResultPtr ar);
-  void outputCPPGlobalState(CodeGenerator &cg, AnalysisResultPtr ar);
+
+  void collectCPPGlobalSymbols(StringPairVecVec &symbols, CodeGenerator &cg,
+                               AnalysisResultPtr ar);
 
   void *getHookData() { return m_hookData;}
   static void setHookHandler(void (*hookHandler)(AnalysisResultPtr ar,

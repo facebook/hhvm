@@ -96,6 +96,7 @@ class MapVariant;
 
 class VariableSerializer;
 class VariableUnserializer;
+class FiberReferenceMap;
 
 ///////////////////////////////////////////////////////////////////////////////
 

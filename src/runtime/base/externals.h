@@ -143,6 +143,12 @@ extern void free_global_variables();
 extern Array get_global_array_wrapper();
 extern void output_global_state(FILE *fp);
 
+extern void fiber_marshal_global_state
+(GlobalVariables *g1, GlobalVariables *g2, FiberReferenceMap &refMap);
+extern void fiber_unmarshal_global_state
+(GlobalVariables *g1, GlobalVariables *g2, FiberReferenceMap &refMap,
+ char defstrategy, const std::vector<std::pair<std::string, char> > &resolver);
+
 /**
  * Returns a thread local global variable table pointer.
  */

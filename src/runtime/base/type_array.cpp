@@ -790,7 +790,7 @@ Array Array::fiberMarshal(FiberReferenceMap &refMap) const {
     if (m_px->supportValueRef()) {
       for (ArrayIter iter(*this); iter; ++iter) {
         ret.set(iter.first().fiberMarshal(refMap),
-                iter.secondRef().fiberMarshal(refMap));
+                ref(iter.secondRef().fiberMarshal(refMap)));
       }
     } else {
       for (ArrayIter iter(*this); iter; ++iter) {
@@ -809,7 +809,7 @@ Array Array::fiberUnmarshal(FiberReferenceMap &refMap) const {
     if (m_px->supportValueRef()) {
       for (ArrayIter iter(*this); iter; ++iter) {
         ret.set(iter.first().fiberUnmarshal(refMap),
-                iter.secondRef().fiberUnmarshal(refMap));
+                ref(iter.secondRef().fiberUnmarshal(refMap)));
       }
     } else {
       for (ArrayIter iter(*this); iter; ++iter) {

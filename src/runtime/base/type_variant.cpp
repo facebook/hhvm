@@ -23,6 +23,7 @@
 #include <runtime/base/externals.h>
 #include <runtime/ext/ext_variable.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/fiber_reference_map.h>
 #include <compiler/parser/hphp.tab.hpp>
 
 using namespace std;
@@ -3083,6 +3084,7 @@ Variant Variant::fiberMarshal(FiberReferenceMap &refMap) const {
         refMap.insert(mpvar, pvar); // ahead of deep copy
         *pvar = mpvar->fiberMarshal(refMap);
       }
+      pvar->incRefCount();
       return pvar;
     }
     return mpvar->fiberMarshal(refMap);
@@ -3127,6 +3129,7 @@ Variant Variant::fiberUnmarshal(FiberReferenceMap &refMap) const {
         refMap.insert(mpvar, pvar); // ahead of deep copy
         *pvar = mpvar->fiberUnmarshal(refMap);
       }
+      pvar->incRefCount();
       return pvar;
     }
 

@@ -17,3 +17,7 @@ VirtualHost {
   default {
   }
 }
+
+Fiber {
+  ThreadCount = 5
+}

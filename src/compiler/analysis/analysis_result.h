@@ -71,6 +71,22 @@ public:
     PropertyName
   };
 
+  enum GlobalSymbolType {
+    KindOfStaticGlobalVariable,
+    KindOfDynamicGlobalVariable,
+    KindOfMethodStaticVariable,
+    KindOfClassStaticVariable,
+    KindOfDynamicConstant,
+    KindOfPseudoMain,
+    KindOfRedeclaredFunction,
+    KindOfRedeclaredClass,
+    KindOfRedeclaredClassId,
+    KindOfVolatileClass,
+    KindOfLazyStaticInitializer,
+
+    GlobalSymbolTypeCount
+  };
+
 public:
   AnalysisResult();
   AnalysisResult(FileScopePtr file);
@@ -331,12 +347,6 @@ public:
   void addRTTIFunction(const std::string &id);
   void cloneRTTIFuncs(const char *RTTIDirectory);
 
-  /**
-   * For global state output
-   */
-  void outputCPPGlobalStateBegin(CodeGenerator &cg, const char *section);
-  void outputCPPGlobalStateEnd(CodeGenerator &cg, const char *section);
-
   std::vector<const char *> &getFuncTableBucket(FunctionScopePtr func);
 
   /**
@@ -440,11 +450,20 @@ private:
   void outputCPPScalarArrays(bool system);
   void outputCPPScalarArrays(CodeGenerator &cg, int fileCount, int part);
   void outputCPPGlobalVariablesMethods(int part);
-  void outputCPPGlobalStateDynamicConstants(CodeGenerator &cg);
-  void outputCPPGlobalStatePseudoMainVariables(CodeGenerator &cg);
-  void outputCPPGlobalStateRedeclaredFunctions(CodeGenerator &cg);
-  void outputCPPGlobalStateRedeclaredClasses(CodeGenerator &cg);
+
+  void collectCPPGlobalSymbols(StringPairVecVec &symbols,
+                               CodeGenerator &cg);
   void outputCPPGlobalState();
+  void outputCPPGlobalStateBegin(CodeGenerator &cg, const char *section);
+  void outputCPPGlobalStateEnd(CodeGenerator &cg, const char *section);
+  void outputCPPGlobalStateSection(CodeGenerator &cg,
+                                   const StringPairVec &names,
+                                   const char *section,
+                                   const char *prefix = "g->",
+                                   const char *name_prefix = "");
+
+  void outputCPPFiberGlobalState();
+
   void outputCPPClassStaticInitializerDecls(CodeGenerator &cg);
   void outputCPPClassIncludes(CodeGenerator &cg);
   void outputCPPExtClassImpl(CodeGenerator &cg);

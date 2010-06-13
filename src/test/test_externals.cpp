@@ -22,6 +22,8 @@
 #include <runtime/base/program_functions.h>
 #include <system/gen/sys/system_globals.h>
 
+using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 // These are normally code-generated and we are implementing them here
 // purely for unit testing.
@@ -344,6 +346,16 @@ Variant invoke_from_eval(const char *function, VariableEnvironment &env,
 
 const ObjectStaticCallbacks * get_object_static_callbacks(const char *s) {
     return NULL;
+}
+
+void fiber_marshal_global_state(GlobalVariables *g1, GlobalVariables *g2,
+                                FiberReferenceMap &refMap) {
+}
+
+void fiber_unmarshal_global_state(GlobalVariables *g1, GlobalVariables *g2,
+                                  FiberReferenceMap &refMap,
+                                  char defstrategy,
+                                  const vector<pair<string, char> > &resolver){
 }
 
 ///////////////////////////////////////////////////////////////////////////////

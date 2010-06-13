@@ -217,6 +217,7 @@ used in different places of code generation.
 - ClassPrefix
 - ClassStaticsPrefix
 - ClassStaticsObjectPrefix
+- ClassStaticsCallbackPrefix
 - ClassStaticsIdGetterPrefix
 - ClassStaticInitializerPrefix
 - ClassStaticInitializerFlagPrefix

@@ -21,6 +21,7 @@
 #include <runtime/base/variable_serializer.h>
 #include <util/lock.h>
 #include <runtime/base/class_info.h>
+#include <runtime/base/fiber_reference_map.h>
 
 #include <runtime/eval/ast/function_call_expression.h>
 
@@ -622,7 +623,8 @@ Object ObjectData::fiberMarshal(FiberReferenceMap &refMap) const {
   ObjectData *px = (ObjectData*)refMap.lookup((void*)this);
   if (px == NULL) {
     Object copy = create_object(o_getClassName(), null_array);
-    refMap.insert((void*)this, copy.get()); // ahead of deep copy
+    // ahead of deep copy
+    refMap.insert(const_cast<ObjectData*>(this), copy.get());
     Array props;
     o_get(props);
     copy->o_set(props.fiberMarshal(refMap));
@@ -642,7 +644,8 @@ Object ObjectData::fiberUnmarshal(FiberReferenceMap &refMap) const {
       copy = create_object(o_getClassName(), null_array);
       px = copy.get();
     }
-    refMap.insert((void*)this, px); // ahead of deep copy
+    // ahead of deep copy
+    refMap.insert(const_cast<ObjectData*>(this), px);
     Array props;
     o_get(props);
     px->o_set(props.fiberUnmarshal(refMap));

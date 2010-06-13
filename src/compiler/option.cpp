@@ -95,6 +95,7 @@ const char *Option::SystemScalarArrayName = "ssa_";
 const char *Option::ClassPrefix = "c_";
 const char *Option::ClassStaticsPrefix = "cs_";
 const char *Option::ClassStaticsObjectPrefix = "cso_";
+const char *Option::ClassStaticsCallbackPrefix = "cwo_";
 const char *Option::ClassStaticsIdGetterPrefix = "csig_";
 const char *Option::ClassStaticInitializerPrefix = "csi_";
 const char *Option::ClassStaticInitializerFlagPrefix = "csf_";
@@ -260,6 +261,7 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(ClassPrefix);
     READ_CG_OPTION(ClassStaticsPrefix);
     READ_CG_OPTION(ClassStaticsObjectPrefix);
+    READ_CG_OPTION(ClassStaticsCallbackPrefix);
     READ_CG_OPTION(ClassStaticsIdGetterPrefix);
     READ_CG_OPTION(ClassStaticInitializerPrefix);
     READ_CG_OPTION(ClassStaticInitializerFlagPrefix);

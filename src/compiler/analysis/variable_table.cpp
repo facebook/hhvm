@@ -797,54 +797,37 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   cg_printf("\n");
 }
 
-void VariableTable::outputCPPGlobalState(CodeGenerator &cg,
-                                         AnalysisResultPtr ar) {
-  const char *section = "static_global_variables";
-  ar->outputCPPGlobalStateBegin(cg, section);
-  int maxIdx = m_symbols.size();
-  for (int i = 0; i < maxIdx; i++) {
+///////////////////////////////////////////////////////////////////////////////
+// global state
+
+void VariableTable::collectCPPGlobalSymbols(StringPairVecVec &symbols,
+                                            CodeGenerator &cg,
+                                            AnalysisResultPtr ar) {
+  ASSERT(symbols.size() == AnalysisResult::GlobalSymbolTypeCount);
+
+  // static global variables
+  StringPairVec *names = &symbols[AnalysisResult::KindOfStaticGlobalVariable];
+  names->resize(m_symbols.size());
+  for (unsigned int i = 0; i < m_symbols.size(); i++) {
     const string &name = m_symbols[i];
-    cg_printf("%s.set(\"%s%s\", g->get(\"%s\"));\n", section,
-              Option::GlobalVariablePrefix, cg.escapeLabel(name).c_str(),
-              cg.escapeLabel(name).c_str());
+    (*names)[i].first = Option::GlobalVariablePrefix + cg.escapeLabel(name);
+    (*names)[i].second = getGlobalVariableName(cg, ar, name);
   }
-  ar->outputCPPGlobalStateEnd(cg, section);
 
-  section = "dynamic_global_variables";
-  ar->outputCPPGlobalStateBegin(cg, section);
-  cg_printf("%s = *get_variable_table();\n", section);
-  ar->outputCPPGlobalStateEnd(cg, section);
-
-  section = "method_static_variables";
-  ar->outputCPPGlobalStateBegin(cg, section);
+  // method static variables
+  names = &symbols[AnalysisResult::KindOfMethodStaticVariable];
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
        m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     const string &id = iter->first;
     StaticGlobalInfoPtr sgi = iter->second;
     if (sgi->func) {
-      cg_printf("%s.set(\"%s%s\", g->%s%s);\n", section,
-                Option::StaticVariablePrefix, id.c_str(),
-                Option::StaticVariablePrefix, id.c_str());
+      string name = Option::StaticVariablePrefix + id;
+      names->push_back(pair<string, string>(name, name));
     }
   }
-  ar->outputCPPGlobalStateEnd(cg, section);
 
-  section = "method_static_inited";
-  ar->outputCPPGlobalStateBegin(cg, section);
-  for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
-       m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
-    const string &id = iter->first;
-    StaticGlobalInfoPtr sgi = iter->second;
-    if (sgi->func) {
-      cg_printf("%s.set(\"%s%s%s\", g->%s%s%s);\n", section,
-                Option::InitPrefix, Option::StaticVariablePrefix, id.c_str(),
-                Option::InitPrefix, Option::StaticVariablePrefix, id.c_str());
-    }
-  }
-  ar->outputCPPGlobalStateEnd(cg, section);
-
-  section = "class_static_variables";
-  ar->outputCPPGlobalStateBegin(cg, section);
+  // class static variables
+  names = &symbols[AnalysisResult::KindOfClassStaticVariable];
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
        m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
@@ -852,14 +835,13 @@ void VariableTable::outputCPPGlobalState(CodeGenerator &cg,
     const string &id = StaticGlobalInfo::getId(cg, sgi->cls, sgi->func,
                                                sgi->name);
     if (!sgi->func) {
-      TypePtr varType = sgi->variables->getFinalType(sgi->name);
-      cg_printf("%s.set(\"%s%s\", g->%s%s);\n", section,
-                Option::StaticPropertyPrefix, id.c_str(),
-                Option::StaticPropertyPrefix, id.c_str());
+      string name = Option::StaticPropertyPrefix + id;
+      names->push_back(pair<string, string>(name, name));
     }
   }
-  ar->outputCPPGlobalStateEnd(cg, section);
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
                                                  AnalysisResultPtr ar) {

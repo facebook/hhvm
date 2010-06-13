@@ -213,15 +213,15 @@ void ConstantTable::outputCPPDynamicImpl(CodeGenerator &cg,
   }
 }
 
-void ConstantTable::outputCPPGlobalState(CodeGenerator &cg,
-                                         AnalysisResultPtr ar) {
+void ConstantTable::collectCPPGlobalSymbols(StringPairVec &symbols,
+                                            CodeGenerator &cg,
+                                            AnalysisResultPtr ar) {
   for (StringToConstructPtrMap::const_iterator iter = m_declarations.begin();
        iter != m_declarations.end(); ++iter) {
     const string &name = iter->first;
     if (isDynamic(name)) {
-      cg_printf("dynamic_constants.set(\"%s%s\", g->%s%s);\n",
-                Option::ConstantPrefix, cg.formatLabel(name).c_str(),
-                Option::ConstantPrefix, cg.formatLabel(name).c_str());
+      string varname = Option::ConstantPrefix + cg.formatLabel(name);
+      symbols.push_back(pair<string, string>(varname, varname));
     }
   }
 }

@@ -35,7 +35,7 @@ public:
    * Constructing a string buffer with some initial size, subsequent allocation
    * will double existing size every round.
    */
-  StringBuffer(int initialSize = 256);
+  StringBuffer(int initialSize = 1024);
   StringBuffer(const char *filename);
   StringBuffer(char *data, int len); // attaching
   ~StringBuffer();

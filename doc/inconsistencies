@@ -19,7 +19,13 @@ while logging an error. Effectively, there is a try/catch enclosing the body
 of the __destruct method. These exceptions are catchable in PHP outside of the
 __destruct method.
 
-(2) unset
+(2) Exceptions thrown from __toString()
+
+PHP doesn't allow them. HipHop does. Also, PHP doesn't allow __toString() to
+return anything other than a string. HipHop will just convert return value to
+string.
+
+(3) unset
 
 In PHP, a data member that is unset will not appear at all in vardump or
 serialize. Also, unsetting a data member and then resetting it will alter its

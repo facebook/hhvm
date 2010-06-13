@@ -245,7 +245,9 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
       if (subdir) filearg = filearg + subdir + "/";
       filearg += "main.php";
       const char *argv[] = {"", filearg.c_str(),
-                            "--config=test/config.hdf", NULL};
+                            "--config=test/config.hdf",
+                            "-v Fiber.ThreadCount = 0",
+                            NULL};
       Process::Exec("hphpi/hphpi", argv, NULL, actual, &err);
     }
 
@@ -11638,9 +11640,6 @@ bool TestCodeRun::TestExtSoap() {
 }
 
 bool TestCodeRun::TestFiber() {
-  RuntimeOption::FiberCount = 5;
-  FiberAsyncFunc::Restart();
-
   // test parameter and return value passing
   MVCRO("<?php "
         "function fiber($a) { var_dump($a); return 'fiber';}"
@@ -11736,6 +11735,36 @@ bool TestCodeRun::TestFiber() {
 
         "int(123)\n"
         "int(234)\n"
+       );
+
+  // test global states
+  MVCRO("<?php "
+        "function fiber() { global $foo; $foo = 456;}"
+        "$foo = 123;"
+        "end_user_func_async(call_user_func_async('fiber'));"
+        "var_dump($foo);",
+
+        "int(456)\n"
+       );
+
+  // test dynamic globals
+  MVCRO("<?php "
+        "function fiber() { $a = 'foo'; global $$a; $$a = 456;}"
+        "$a = 'foo'; $$a = 123;"
+        "end_user_func_async(call_user_func_async('fiber'));"
+        "var_dump($$a);",
+
+        "int(456)\n"
+       );
+
+  // test static variables
+  MVCRO("<?php "
+        "function fiber() { static $a = 123; var_dump(++$a); }"
+        "end_user_func_async(call_user_func_async('fiber'));"
+        "fiber();",
+
+        "int(124)\n"
+        "int(125)\n"
        );
 
   return true;

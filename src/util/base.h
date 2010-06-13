@@ -139,6 +139,9 @@ typedef hphp_hash_map<void*, void*, pointer_hash<void> > PointerMap;
 typedef hphp_hash_map<void*, int, pointer_hash<void> > PointerCounterMap;
 typedef hphp_hash_set<void*, pointer_hash<void> > PointerSet;
 
+typedef std::vector<std::pair<std::string, std::string> > StringPairVec;
+typedef std::vector<StringPairVec> StringPairVecVec;
+
 ///////////////////////////////////////////////////////////////////////////////
 // boost
 

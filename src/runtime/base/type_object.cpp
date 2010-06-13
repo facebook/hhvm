@@ -36,28 +36,29 @@ Variant Object::toKey() const {
 }
 
 bool Object::equal(CObjRef v2) const {
-  if (m_px == v2.get())
+  if (m_px == v2.get()) {
     return true;
-  if (!m_px || !v2.get())
+  }
+  if (!m_px || !v2.get()) {
     return false;
-  if (isResource() || v2.isResource())
+  }
+  if (isResource() || v2.isResource()) {
     return false;
+  }
   return (v2.get()->o_isClass(m_px->o_getClassName()) &&
           toArray().equal(v2.toArray()));
 }
 
 bool Object::less(CObjRef v2) const {
-  return m_px != v2.m_px &&
-    toArray().less(v2.toArray());
+  return m_px != v2.m_px && toArray().less(v2.toArray());
 }
 
 bool Object::more(CObjRef v2) const {
-  return m_px != v2.m_px &&
-    toArray().more(v2.toArray());
+  return m_px != v2.m_px && toArray().more(v2.toArray());
 }
 
 Variant Object::o_get(CStrRef propName, int64 hash /* = -1 */,
-    bool error /* = true */) const {
+                      bool error /* = true */) const {
   if (!m_px) throw NullPointerException();
   return m_px->o_get(propName, hash, error);
 }

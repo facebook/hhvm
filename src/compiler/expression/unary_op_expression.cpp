@@ -558,23 +558,24 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
   if (m_op == '@') {
     bool inExpression = ar->inExpression();
-    if (!(state & FixOrder)) {
+    bool doit = state & FixOrder;
+    if (!doit) {
       ar->setInExpression(false);
       if (m_exp->preOutputCPP(cg, ar, state)) {
-        state |= FixOrder;
+        doit = true;
       }
       ar->setInExpression(inExpression);
     }
-    if (state & FixOrder && inExpression) {
+    if (doit && inExpression) {
       cg_printf("%s%d.enable();\n", Option::SilencerPrefix, m_silencer);
       m_exp->preOutputCPP(cg, ar, 0);
       int s = m_silencer;
       m_silencer = -1;
-      this->preOutputStash(cg, ar, state);
+      this->preOutputStash(cg, ar, state | FixOrder);
       m_silencer = s;
       cg_printf("%s%d.disable();\n", Option::SilencerPrefix, m_silencer);
-      return true;
     }
+    return doit;
   } else if (m_op == T_PRINT && m_exp && !m_exp->hasEffect()) {
     ExpressionPtrVec ev;
     bool hasVoid = false, hasLit = false;
@@ -699,7 +700,7 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       break;
     case '@':
       // Void needs to return something to silenceDec
-      if (!m_exp->getActualType()) {
+      if (!m_exp->hasCPPTemp() && !m_exp->getActualType()) {
         cg_printf("(");
         m_exp->outputCPP(cg, ar);
         cg_printf(",null)");

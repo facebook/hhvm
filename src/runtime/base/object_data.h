@@ -166,24 +166,21 @@ class ObjectData : public Countable {
   // methods
   virtual Variant o_invoke(const char *s, CArrRef params, int64 hash,
                            bool fatal = true);
+  virtual Variant o_root_invoke(const char *s, CArrRef params, int64 hash,
+                                bool fatal = false);
   virtual Variant o_invoke_ex(const char *clsname, const char *s,
                               CArrRef params, int64 hash, bool fatal = true);
 
   virtual Variant o_invoke_few_args(const char *s, int64 hash, int count,
                                     INVOKE_FEW_ARGS_DECL_ARGS);
 
+  virtual Variant o_root_invoke_few_args(const char *s, int64 hash, int count,
+                                         INVOKE_FEW_ARGS_DECL_ARGS);
   virtual Variant o_invoke_from_eval(const char *s,
                                      Eval::VariableEnvironment &env,
                                      const Eval::FunctionCallExpression *call,
                                      int64 hash,
                                      bool fatal /* = true */);
-
-  Variant o_fast_invoke(const char *s, int64 hash, int count,
-                        const Variant ** args, bool fatal = true);
-
-  Variant o_fast_invoke(const char *s, int64 hash, int count,
-                        CArrRef args, bool fatal = true);
-
   // misc
   Variant o_throw_fatal(const char *msg);
   virtual void serialize(VariableSerializer *serializer) const;
@@ -249,6 +246,9 @@ typedef ObjectData c_ObjectData; // purely for easier code generation
 class ExtObjectData : public ObjectData {
 public:
   ExtObjectData() : root(this) {}
+  Variant o_root_invoke(const char *s, CArrRef ps, int64 h, bool f = true);
+  Variant o_root_invoke_few_args(const char *s, int64 h, int count,
+                          INVOKE_FEW_ARGS_DECL_ARGS);
   virtual void setRoot(ObjectData *r) { root = r; }
   virtual ObjectData *getRoot() { return root; }
 protected: ObjectData *root;

@@ -139,66 +139,6 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
   return null;
 }
 
-Variant fast_invoke(const char *s, int64 hash, int count,
-                    const Variant ** args, bool fatal /* = true */) {
-  if (count >= 0) {
-    Array params = Array::Create();
-    for (int i = 0; i < count; ++i) {
-      params.append(ref(*args[i]));
-    }
-    return ref(invoke(s, params, hash, fatal));
-  }
-  ASSERT(count == -1);
-  return ref(invoke(s, *args[0], hash, fatal));
-}
-
-Variant fast_invoke(const char *s, int64 hash, int count, CArrRef args,
-                    bool fatal /* = true */) {
-  ASSERT(count == -1);
-  return ref(invoke(s, args, hash, fatal));
-}
-
-Variant fast_invoke_static_method(const char *s, const char *method, int count,
-                                  const Variant ** args,
-                                  bool fatal /* = true */) {
-  if (count >= 0) {
-    Array params = Array::Create();
-    for (int i = 0; i < count; ++i) {
-      params.append(ref(*args[i]));
-    }
-    return ref(invoke_static_method(s, method, params, fatal));
-  }
-  ASSERT(count == -1);
-  return ref(invoke_static_method(s, method, *args[0], fatal));
-}
-
-Variant fast_invoke_static_method(const char *s, const char *method, int count,
-                                  const Array & args, bool fatal /* = true */) {
-  ASSERT(count == -1);
-  return ref(invoke_static_method(s, method, args, fatal));
-}
-
-Variant fast_invoke_static_method_bind(const char *s, const char *method,
-                                       int count, const Variant ** args,
-                                       bool fatal /* = true */) {
-  if (count >= 0) {
-    Array params = Array::Create();
-    for (int i = 0; i < count; ++i) {
-      params.append(ref(*args[i]));
-    }
-    return ref(invoke_static_method_bind(s, method, params, fatal));
-  }
-  ASSERT(count == -1);
-  return ref(invoke_static_method_bind(s, method, *args[0], fatal));
-}
-
-Variant fast_invoke_static_method_bind(const char *s, const char *method,
-                                       int count, const Array & args,
-                                       bool fatal /* = true */) {
-  ASSERT(count == -1);
-  return ref(invoke_static_method_bind(s, method, args, fatal));
-}
-
 Variant invoke_failed(const char *func, CArrRef params, int64 hash,
                       bool fatal /* = true */) {
   if (fatal) {

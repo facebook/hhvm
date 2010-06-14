@@ -166,7 +166,7 @@ bool QOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
   ar->setInExpression(false);
   bool fix_yes = m_expYes->preOutputCPP(cg, ar, 0);
-  bool fix_no = m_expNo->preOutputCPP(cg, ar, 0);
+  bool fix_no = m_expYes->preOutputCPP(cg, ar, 0);
   ar->setInExpression(true);
 
   if (fix_yes || fix_no) {

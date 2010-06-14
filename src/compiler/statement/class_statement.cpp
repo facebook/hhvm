@@ -480,11 +480,12 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         }
         if (dyn || idyn || redec) {
           if (redec) {
-            if (!dyn && !idyn) {
-              cg.printf("private: ObjectData* root;\n");
-              cg.printf("public:\n");
-              cg.printf("virtual ObjectData *getRoot() { return root; }\n");
-            }
+            cg.printf("DECLARE_ROOT;\n");
+             if (!dyn && !idyn) {
+               cg.printf("private: ObjectData* root;\n");
+               cg.printf("public:\n");
+               cg.printf("virtual ObjectData *getRoot() { return root; }\n");
+             }
           }
 
           string conInit = ":";

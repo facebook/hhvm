@@ -75,20 +75,6 @@ private:
     LastType, // marker, not a valid type
   };
 
-  enum CallType {
-    NormalCall,
-    LambdaCall,
-    DefineCall,
-    FuncNumArgsCall,
-    VarArgsCall,
-    ExistsCall,
-    GetDefinedVarsCall,
-    ExtractCall,
-    CompactCall,
-
-    LastCallType // marker, not a valid call type
-  };
-
   static std::map<std::string, int> FunctionTypeMap;
   static void InitFunctionTypeMap();
   int m_type;
@@ -99,12 +85,7 @@ private:
   bool m_builtinFunction;
   bool m_noPrefix;
 
-  int m_argvTemp;
-  bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
   void outputCPPParamOrderControlled(CodeGenerator &cg, AnalysisResultPtr ar);
-
-  // helper function for checking if this call requires special handling
-  int getCallType(AnalysisResultPtr ar);
 
   // only used for redeclared functions
   bool canInvokeFewArgs();

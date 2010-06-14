@@ -258,6 +258,24 @@ Variant DynamicObjectData::o_invoke_few_args(const char *s, int64 hash, int coun
   }
 }
 
+Variant DynamicObjectData::o_root_invoke(const char *s, CArrRef params,
+                                         int64 hash, bool fatal /* = false */) {
+  if (root != this) {
+    return root->o_root_invoke(s, params, hash, fatal);
+  } else {
+    return o_invoke(s, params, hash, fatal);
+  }
+}
+Variant
+DynamicObjectData::o_root_invoke_few_args(const char *s, int64 hash, int count,
+    INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (root != this) {
+    return root->o_invoke_few_args(s, hash, count, INVOKE_FEW_ARGS_PASS_ARGS);
+  } else {
+    return o_invoke_few_args(s, hash, count, INVOKE_FEW_ARGS_PASS_ARGS);
+  }
+}
+
 Variant DynamicObjectData::doCall(Variant v_name, Variant v_arguments,
                                   bool fatal) {
   if (!parent.isNull()) {

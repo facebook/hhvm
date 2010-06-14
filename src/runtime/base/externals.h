@@ -48,7 +48,6 @@ extern Variant invoke_builtin(const char *s, const Array &params, int64 hash,
  */
 extern Variant invoke_static_method(const char *s, const char *method,
                                     const Array &params, bool fatal = true);
-
 /**
  * defined in builtin_functions.cpp, used for "static::" resolution
  */
@@ -60,31 +59,6 @@ Variant invoke_static_method_bind(CStrRef s, const char *method,
  */
 extern Variant invoke_builtin_static_method(const char *s, const char *method,
                                             const Array &params, bool fatal);
-
-/**
- * currently defined in builtin_functions.cpp; if fast_invoke* is adopted
- * in the future, the implementations for these functions will generated
- * by hphp just like the implementations for invoke and invoke_static_method
- */
-Variant fast_invoke(const char *s, int64 hash, int count,
-                    const Variant ** args, bool fatal = true);
-
-Variant fast_invoke(const char *s, int64 hash, int count, CArrRef args,
-                    bool fatal = true);
-
-Variant fast_invoke_static_method(const char *s, const char *method, int count,
-                                  const Variant ** args, bool fatal = true);
-
-Variant fast_invoke_static_method(const char *s, const char *method, int count,
-                                  const Array & args, bool fatal = true);
-
-Variant fast_invoke_static_method_bind(const char *s, const char *method,
-                                       int count, const Variant ** args,
-                                       bool fatal = true);
-
-Variant fast_invoke_static_method_bind(const char *s, const char *method,
-                                       int count, const Array & args,
-                                       bool fatal = true);
 
 /**
  * Getting a static property

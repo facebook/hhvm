@@ -91,7 +91,6 @@ SimpleFunctionCall::SimpleFunctionCall
                  ExpressionPtr(), name, params, cls),
     m_type(UnknownType), m_dynamicConstant(false),
     m_parentClass(false), m_builtinFunction(false), m_noPrefix(false),
-    m_argvTemp(-1),
     m_invokeFewArgsDecision(true),
     m_dynamicInvoke(false),
     m_hookData(NULL) {
@@ -340,19 +339,13 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       } else {
         FunctionScopePtr func = ar->findFunction(m_name);
         if (func && func->isRedeclaring()) {
-          if (Option::GlobalRefParamAnalysis) {
-            FunctionScope::RefParamInfoPtr info =
-              FunctionScope::GetRefParamInfo(m_name);
-            if (info) {
-              for (int i = m_params->getCount(); i--; ) {
-                if (info->isRefParam(i)) {
-                  m_params->markParam(i, canInvokeFewArgs());
-                }
-              }
-            }
-          } else {
+          FunctionScope::RefParamInfoPtr info =
+            FunctionScope::GetRefParamInfo(m_name);
+          if (info) {
             for (int i = m_params->getCount(); i--; ) {
-              m_params->markParam(i, canInvokeFewArgs());
+              if (info->isRefParam(i)) {
+                m_params->markParam(i, canInvokeFewArgs());
+              }
             }
           }
         } else {
@@ -625,17 +618,11 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
     if (m_params) {
       if (func) {
-        if (Option::GlobalRefParamAnalysis) {
-          FunctionScope::RefParamInfoPtr info =
-            FunctionScope::GetRefParamInfo(m_name);
-          ASSERT(info);
-          for (int i = m_params->getCount(); i--; ) {
-            if (info->isRefParam(i)) {
-              m_params->markParam(i, canInvokeFewArgs());
-            }
-          }
-        } else {
-          for (int i = m_params->getCount(); i--; ) {
+        FunctionScope::RefParamInfoPtr info =
+          FunctionScope::GetRefParamInfo(m_name);
+        ASSERT(info);
+        for (int i = m_params->getCount(); i--; ) {
+          if (info->isRefParam(i)) {
             m_params->markParam(i, canInvokeFewArgs());
           }
         }
@@ -737,6 +724,22 @@ void SimpleFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
                                                        AnalysisResultPtr ar) {
+  if (!m_class && m_className.empty()) {
+    switch (m_type) {
+    case ExtractFunction:
+      cg.printf("extract(variables, ");
+      FunctionScope::outputCPPArguments(m_params, cg, ar, 0, false);
+      cg.printf(")");
+      return;
+    case CompactFunction:
+      cg.printf("compact(variables, ");
+      FunctionScope::outputCPPArguments(m_params, cg, ar, -1, true);
+      cg.printf(")");
+      return;
+    default:
+      break;
+    }
+  }
   bool volatileCheck = false;
   ClassScopePtr cls;
   if (!m_className.empty()) {
@@ -804,32 +807,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
                     m_name.c_str());
         }
       } else {
-        if (Option::UseFastInvoke) {
-          cg.printf("fast_invoke(\"%s\", ", m_name.c_str());
-          cg.printf("0x%.16lXLL, ",
-                    hash_string_i(m_name.data(), m_name.size()));
-          if (canInvokeFewArgs()) {
-            if (m_params && m_params->getCount() > 0) {
-              if (m_argvTemp == -1) {
-                m_argvTemp = cg.createNewId(ar);
-              }
-              cg.printf("%d, argv%d", m_params->getCount(), m_argvTemp);
-            } else {
-              cg.printf("0, NULL");
-            }
-          } else {
-            cg.printf("-1, ");
-            if ((!m_params) || (m_params->getCount() == 0)) {
-              cg.printf("Array()");
-            } else {
-              FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
-            }
-          }
-          cg.printf(")");
-          return;
-        } else {
-          cg.printf("invoke(\"%s\", ", m_name.c_str());
-        }
+        cg.printf("invoke(\"%s\", ", m_name.c_str());
       }
     } else {
       bool inObj = m_parentClass && ar->getClassScope() &&
@@ -859,60 +837,22 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
                     m_name.c_str());
         }
       } else {
-        if (Option::UseFastInvoke) {
-          if (m_class) {
-            cg.printf("FAST_INVOKE_STATIC_METHOD(toString(");
-            if (m_class->is(KindOfScalarExpression)) {
-              ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(
-                m_class)->getString().c_str(), "static") == 0);
-              cg.printf("\"static\"");
-            } else {
-              m_class->outputCPP(cg, ar);
-            }
-            cg.printf("), \"%s\",", m_name.c_str());
+        if (m_class) {
+          cg.printf("INVOKE_STATIC_METHOD(toString(");
+          if (m_class->is(KindOfScalarExpression)) {
+            ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
+                              getString().c_str(), "static") == 0);
+            cg.printf("\"static\"");
           } else {
-            cg.printf("fast_invoke_static_method(\"%s\", \"%s\",",
-                      m_className.c_str(), m_name.c_str());
+            m_class->outputCPP(cg, ar);
           }
-          if (canInvokeFewArgs()) {
-            if (m_params && m_params->getCount() > 0) {
-              if (m_argvTemp == -1) {
-                m_argvTemp = cg.createNewId(ar);
-              }
-              cg.printf("%d, argv%d", m_params->getCount(), m_argvTemp);
-            } else {
-              cg.printf("0, NULL");
-            }
-          } else {
-            cg.printf("-1, ");
-            if ((!m_params) || (m_params->getCount() == 0)) {
-              cg.printf("Array()");
-            } else {
-              FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
-            }
-          }
-          cg.printf(")");
-          return;
+          cg.printf("), \"%s\",", m_name.c_str());
         } else {
-          if (m_class) {
-            cg.printf("INVOKE_STATIC_METHOD(toString(");
-            if (m_class->is(KindOfScalarExpression)) {
-              ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(
-                m_class)->getString().c_str(), "static") == 0);
-              cg.printf("\"static\"");
-            } else {
-              m_class->outputCPP(cg, ar);
-            }
-            cg.printf("), \"%s\",", m_name.c_str());
-          } else {
-            cg.printf("invoke_static_method(\"%s\", \"%s\",",
-                      m_className.c_str(), m_name.c_str());
-          }
+          cg.printf("invoke_static_method(\"%s\", \"%s\",",
+                    m_className.c_str(), m_name.c_str());
         }
       }
     }
-
-
     if ((!m_params) || (m_params->getCount() == 0)) {
       cg.printf("Array()");
     } else {
@@ -929,107 +869,24 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
     } else {
       cg.printf(", 0x%.16lXLL)", hash_string_i(m_name.data(), m_name.size()));
     }
-
-
   }
   if (volatileCheck) {
     cls->outputVolatileCheckEnd(cg);
   }
 }
 
-bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg,
-                                      AnalysisResultPtr ar,
-                                      int state) {
-  bool tempInvokeFewArgs = Option::UseFastInvoke &&
-    getCallType(ar) == NormalCall && !m_valid && !m_class &&
-    m_className.empty() && (!m_redeclared || m_dynamicInvoke) &&
-    m_params && m_params->getCount() != 0 && canInvokeFewArgs();
-
-  tempInvokeFewArgs = tempInvokeFewArgs || (Option::UseFastInvoke &&
-    getCallType(ar) == NormalCall && !m_valid &&
-    (m_class || !m_className.empty()) && !m_redeclaredClass &&
-    !m_validClass && m_params && m_params->getCount() != 0 &&
-    canInvokeFewArgs());
-
-  // Short circuit out if inExpression() returns false
-  if (tempInvokeFewArgs && !ar->inExpression()) return true;
-
-  if (!tempInvokeFewArgs) {
-    return FunctionCall::preOutputCPP(cg, ar, state);
-  }
-
-  ar->wrapExpressionBegin(cg);
-  if (m_argvTemp == -1) {
-    m_argvTemp = cg.createNewId(ar);
-  }
-  FunctionScope::preOutputCPPArgs(m_params, cg, ar, m_argvTemp);
-  return true;
-}
-
-int SimpleFunctionCall::getCallType(AnalysisResultPtr ar) {
-  if (!m_lambda.empty()) return LambdaCall;
-  if (!m_class && m_className.empty()) {
-    if (m_type == DefineFunction && m_params && m_params->getCount() >= 2) {
-      return DefineCall;
-    }
-    if (m_name == "func_num_args") {
-      return FuncNumArgsCall;
-    }
-    if (m_type == VariableArgumentFunction) {
-      FunctionScopePtr func =
-        dynamic_pointer_cast<FunctionScope>(ar->getScope());
-      if (func) {
-        return VarArgsCall;
-      }
-    }
-    if (m_type == FunctionExistsFunction ||
-        m_type == ClassExistsFunction ||
-        m_type == InterfaceExistsFunction) {
-      if (m_params && m_params->getCount() == 1) {
-        ExpressionPtr value = (*m_params)[0];
-        if (value->isScalar()) {
-          ScalarExpressionPtr name =
-            dynamic_pointer_cast<ScalarExpression>(value);
-          if (name && name->isLiteralString()) {
-            return ExistsCall;
-          }
-        }
-      }
-    }
-    if (m_type == GetDefinedVarsFunction) {
-      return GetDefinedVarsCall;
-    }
-    if (m_type == ExtractFunction) {
-      return ExtractCall;
-    }
-    if (m_type == CompactFunction) {
-      return CompactCall;
-    }
-  }
-  return NormalCall;
-}
-
 void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
   bool linemap = outputLineMap(cg, ar, true);
-  switch (getCallType(ar)) {
-  case NormalCall:
-    {
-      outputCPPParamOrderControlled(cg, ar);
-      if (linemap) cg.printf(")");
-      return;
-    }
-  case LambdaCall:
-    {
-      ASSERT(!m_lambda.empty());
-      cg.printf("\"%s\"", m_lambda.c_str());
-      if (linemap) cg.printf(")");
-      return;
-    }
-  case DefineCall:
-    {
-      ASSERT(!m_class && m_className.empty());
-      ASSERT(m_type == DefineFunction && m_params && m_params->getCount() >= 2);
+
+  if (!m_lambda.empty()) {
+    cg.printf("\"%s\"", m_lambda.c_str());
+    if (linemap) cg.printf(")");
+    return;
+  }
+
+  if (!m_class && m_className.empty()) {
+    if (m_type == DefineFunction && m_params && m_params->getCount() >= 2) {
       ScalarExpressionPtr name =
         dynamic_pointer_cast<ScalarExpression>((*m_params)[0]);
       string varName;
@@ -1070,145 +927,124 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
       if (linemap) cg.printf(")");
       return;
     }
-  case FuncNumArgsCall:
-    {
-      ASSERT(!m_class && m_className.empty());
-      ASSERT(m_name == "func_num_args");
+    if (m_name == "func_num_args") {
       cg.printf("num_args");
       if (linemap) cg.printf(")");
       return;
     }
-  case VarArgsCall:
-    {
-      ASSERT(!m_class && m_className.empty());
-      ASSERT(m_type == VariableArgumentFunction);
-      FunctionScopePtr func =
-        dynamic_pointer_cast<FunctionScope>(ar->getScope());
-      ASSERT(func);
-      cg.printf("%s(", m_name.c_str());
-      func->outputCPPParamsCall(cg, ar, true);
-      if (m_params) {
-        cg.printf(",");
-        m_params->outputCPP(cg, ar);
-      }
-      cg.printf(")");
-      if (linemap) cg.printf(")");
-      return;
-    }
-  case ExistsCall:
-    {
-      ASSERT(!m_class && m_className.empty());
-      bool literalString = false;
-      string symbol;
-      if (m_params && m_params->getCount() == 1) {
-        ExpressionPtr value = (*m_params)[0];
-        if (value->isScalar()) {
-          ScalarExpressionPtr name =
-            dynamic_pointer_cast<ScalarExpression>(value);
-          if (name && name->isLiteralString()) {
-            literalString = true;
-            symbol = name->getLiteralString();
+
+    switch (m_type) {
+    case VariableArgumentFunction:
+      {
+        FunctionScopePtr func =
+          dynamic_pointer_cast<FunctionScope>(ar->getScope());
+        if (func) {
+          cg.printf("%s(", m_name.c_str());
+          func->outputCPPParamsCall(cg, ar, true);
+          if (m_params) {
+            cg.printf(",");
+            m_params->outputCPP(cg, ar);
           }
+          cg.printf(")");
+          if (linemap) cg.printf(")");
+          return;
         }
       }
-      ASSERT(literalString);
-      switch (m_type) {
-      case FunctionExistsFunction:
-        {
-          const std::string &lname = Util::toLower(symbol);
-          bool dynInvoke = Option::DynamicInvokeFunctions.find(lname) !=
-            Option::DynamicInvokeFunctions.end();
-          if (!dynInvoke) {
-            FunctionScopePtr func = ar->findFunction(lname);
-            if (func) {
-              if (!func->isDynamic()) {
-                if (func->isRedeclaring()) {
-                  const char *name = func->getName().c_str();
-                  cg.printf("(%s->%s%s != invoke_failed_%s)",
-                            cg.getGlobals(ar), Option::InvokePrefix,
-                            name, name);
-                  break;
-                }
-                cg.printf("true");
-                break;
-              }
-            } else {
-              cg.printf("false");
-              break;
+      break;
+    case FunctionExistsFunction:
+    case ClassExistsFunction:
+    case InterfaceExistsFunction:
+      {
+        bool literalString = false;
+        string symbol;
+        if (m_params && m_params->getCount() == 1) {
+          ExpressionPtr value = (*m_params)[0];
+          if (value->isScalar()) {
+            ScalarExpressionPtr name =
+              dynamic_pointer_cast<ScalarExpression>(value);
+            if (name && name->isLiteralString()) {
+              literalString = true;
+              symbol = name->getLiteralString();
             }
           }
-          cg.printf("f_function_exists(\"%s\")", lname.c_str());
         }
-        break;
-      case ClassExistsFunction:
-        {
-          ClassScopePtr cls = ar->findClass(Util::toLower(symbol));
-          if (cls && !cls->isInterface()) {
-            const char *name = cls->getName().c_str();
-            cg.printf("f_class_exists(\"%s\")", name);
-          } else {
-            cg.printf("false");
+        if (literalString) {
+          switch (m_type) {
+          case FunctionExistsFunction:
+            {
+              const std::string &lname = Util::toLower(symbol);
+              bool dynInvoke = Option::DynamicInvokeFunctions.find(lname) !=
+                Option::DynamicInvokeFunctions.end();
+              if (!dynInvoke) {
+                FunctionScopePtr func = ar->findFunction(lname);
+                if (func) {
+                  if (!func->isDynamic()) {
+                    if (func->isRedeclaring()) {
+                      const char *name = func->getName().c_str();
+                      cg.printf("(%s->%s%s != invoke_failed_%s)",
+                                cg.getGlobals(ar), Option::InvokePrefix,
+                                name, name);
+                      break;
+                    }
+                    cg.printf("true");
+                    break;
+                  }
+                } else {
+                  cg.printf("false");
+                  break;
+                }
+              }
+              cg.printf("f_function_exists(\"%s\")", lname.c_str());
+            }
+            break;
+          case ClassExistsFunction:
+            {
+              ClassScopePtr cls = ar->findClass(Util::toLower(symbol));
+              if (cls && !cls->isInterface()) {
+                const char *name = cls->getName().c_str();
+                cg.printf("f_class_exists(\"%s\")", name);
+              } else {
+                cg.printf("false");
+              }
+            }
+            break;
+          case InterfaceExistsFunction:
+            {
+              ClassScopePtr cls = ar->findClass(Util::toLower(symbol));
+              if (cls && cls->isInterface()) {
+                const char *name = cls->getName().c_str();
+                cg.printf("f_interface_exists(\"%s\")", name);
+              } else {
+                cg.printf("false");
+              }
+            }
+            break;
+          default:
+            break;
           }
+          if (linemap) cg.printf(")");
+          return;
         }
-        break;
-      case InterfaceExistsFunction:
-        {
-          ClassScopePtr cls = ar->findClass(Util::toLower(symbol));
-          if (cls && cls->isInterface()) {
-            const char *name = cls->getName().c_str();
-            cg.printf("f_interface_exists(\"%s\")", name);
-          } else {
-            cg.printf("false");
-          }
-        }
-        break;
-      default:
-        ASSERT(false);
-        break;
       }
-      if (linemap) cg.printf(")");
-      return;
-    }
-  case GetDefinedVarsCall:
-    {
-      ASSERT(!m_class && m_className.empty());
-      ASSERT(m_type == GetDefinedVarsFunction);
+      break;
+    case GetDefinedVarsFunction:
       cg.printf("get_defined_vars(variables)");
       if (linemap) cg.printf(")");
       return;
-    }
-  case ExtractCall:
-    {
-      ASSERT(!m_class && m_className.empty());
-      ASSERT(m_type == ExtractFunction);
-      cg.printf("extract(variables, ");
-      FunctionScope::outputCPPArguments(m_params, cg, ar, 0, false);
-      cg.printf(")");
-      if (linemap) cg.printf(")");
-      return;
-    }
-  case CompactCall:
-    {
-      ASSERT(!m_class && m_className.empty());
-      ASSERT(m_type == CompactFunction);
-      cg.printf("compact(variables, ");
-      FunctionScope::outputCPPArguments(m_params, cg, ar, -1, true);
-      cg.printf(")");
-      if (linemap) cg.printf(")");
-      return;
-    }
-  default:
-    {
-      ASSERT(false);
+    default:
       break;
     }
   }
+
+  outputCPPParamOrderControlled(cg, ar);
+  if (linemap) cg.printf(")");
 }
 
 bool SimpleFunctionCall::canInvokeFewArgs() {
   // We can always change out minds about saying yes, but once we say
   // no, it sticks.
-  if ((m_invokeFewArgsDecision && m_params &&
+  if (m_dynamicInvoke ||
+      (m_invokeFewArgsDecision && m_params &&
        m_params->getCount() > Option::InvokeFewArgsCount)) {
     m_invokeFewArgsDecision = false;
   }

@@ -44,7 +44,6 @@ ObjectMethodExpression::ObjectMethodExpression
     m_invokeFewArgsDecision(true), m_bindClass(true) {
   m_object->setContext(Expression::ObjectContext);
   m_object->clearContext(Expression::LValue);
-  m_argvTemp = -1;
 }
 
 ExpressionPtr ObjectMethodExpression::clone() {
@@ -109,24 +108,18 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
         }
       }
     } else if (!m_name.empty()) {
-      if (Option::GlobalRefParamAnalysis) {
-        FunctionScope::RefParamInfoPtr info =
-          FunctionScope::GetRefParamInfo(m_name);
-        if (info) {
-          for (int i = params.getCount(); i--; ) {
-            if (info->isRefParam(i)) {
-              m_params->markParam(i, canInvokeFewArgs());
-            }
+      FunctionScope::RefParamInfoPtr info =
+        FunctionScope::GetRefParamInfo(m_name);
+      if (info) {
+        for (int i = params.getCount(); i--; ) {
+          if (info->isRefParam(i)) {
+            m_params->markParam(i, canInvokeFewArgs());
           }
         }
-        // If we cannot find information of the so-named function, it might not
-        // exist, or it might go through __call(), either of which cannot have
-        // reference parameters.
-      } else {
-        for (int i = params.getCount(); i--; ) {
-          m_params->markParam(i, canInvokeFewArgs());
-        }
       }
+      // If we cannot find information of the so-named function, it might not
+      // exist, or it might go through __call(), either of which cannot have
+      // reference parameters.
     } else {
       for (int i = params.getCount(); i--; ) {
         m_params->markParam(i, canInvokeFewArgs());
@@ -187,24 +180,17 @@ TypePtr ObjectMethodExpression::inferTypes(AnalysisResultPtr ar,
 }
 
 void ObjectMethodExpression::setInvokeParams(AnalysisResultPtr ar) {
-  if (Option::GlobalRefParamAnalysis) {
-    FunctionScope::RefParamInfoPtr info =
-      FunctionScope::GetRefParamInfo(m_name);
-    if (info || m_name.empty()) {
-      for (int i = m_params->getCount(); i--; ) {
-        if (!info || info->isRefParam(i)) {
-          m_params->markParam(i, canInvokeFewArgs());
-        }
+  FunctionScope::RefParamInfoPtr info = FunctionScope::GetRefParamInfo(m_name);
+  if (info || m_name.empty()) {
+    for (int i = m_params->getCount(); i--; ) {
+      if (!info || info->isRefParam(i)) {
+        m_params->markParam(i, canInvokeFewArgs());
       }
     }
-    // If we cannot find information of the so-named function, it might not
-    // exist, or it might go through __call(), either of which cannot have
-    // reference parameters.
-  } else {
-    for (int i = m_params->getCount(); i--; ) {
-      m_params->markParam(i, canInvokeFewArgs());
-    }
   }
+  // If we cannot find information of the so-named function, it might not
+  // exist, or it might go through __call(), either of which cannot have
+  // reference parameters.
   for (int i = 0; i < m_params->getCount(); i++) {
     (*m_params)[i]->inferAndCheck(ar, Type::Variant, false);
   }
@@ -358,33 +344,6 @@ bool ObjectMethodExpression::directVariantProxy(AnalysisResultPtr ar) {
   return false;
 }
 
-bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
-                                          AnalysisResultPtr ar,
-                                          int state) {
-  bool tempInvokeFewArgs = m_params && m_params->getCount() != 0 &&
-    (m_name.empty() || !m_valid || !m_object->getType()->isSpecificObject()) &&
-    canInvokeFewArgs() && Option::UseFastInvoke;
-
-  tempInvokeFewArgs = tempInvokeFewArgs ||
-    (m_name.empty() && canInvokeFewArgs() && Option::UseFastInvoke &&
-     m_params && m_params->getCount() != 0);
-
-  // Short circuit out if inExpression() returns false
-  if (tempInvokeFewArgs && !ar->inExpression()) return true;
-
-  if (!tempInvokeFewArgs) {
-    return FunctionCall::preOutputCPP(cg, ar, state);
-  }
-
-  ar->wrapExpressionBegin(cg);
-  m_object->preOutputCPP(cg, ar, state | FixOrder);
-  if (m_argvTemp == -1) {
-    m_argvTemp = cg.createNewId(ar);
-  }
-  FunctionScope::preOutputCPPArgs(m_params, cg, ar, m_argvTemp);
-  return true;
-}
-
 void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
   bool isThis = m_object->isThis();
@@ -429,17 +388,8 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
         cg.printf("->");
       }
     }
-  } else {
-    if (m_bindClass && m_classScope) {
-      cg.printf(" BIND_CLASS_ARROW(%s) ", m_classScope->getId().c_str());
-    }
-  }
-
-  if (isThis) {
-    if (m_name.empty() || !m_valid ||
-        !m_object->getType()->isSpecificObject()) {
-      cg.printf("getRoot()->");
-    }
+  } else if (m_bindClass && m_classScope) {
+    cg.printf(" BIND_CLASS_ARROW(%s) ", m_classScope->getId().c_str());
   }
 
   if (!m_name.empty()) {
@@ -451,106 +401,54 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
     } else {
       if (fewParams) {
         uint64 hash = hash_string_i(m_name.data(), m_name.size());
-        if (Option::UseFastInvoke) {
-          cg.printf("%sfast_invoke(\"%s\"", Option::ObjectPrefix,
-                    m_origName.c_str());
-        } else {
-          cg.printf("%sinvoke_few_args(\"%s\"", Option::ObjectPrefix,
-                    m_origName.c_str());
-        }
+        cg.printf("%s%sinvoke_few_args(\"%s\"", Option::ObjectPrefix,
+                  isThis ? "root_" : "", m_origName.c_str());
         cg.printf(", 0x%016llXLL, ", hash);
 
         if (m_params && m_params->getCount()) {
-          if (Option::UseFastInvoke) {
-            if (m_argvTemp == -1) {
-              m_argvTemp = cg.createNewId(ar);
-            }
-            cg.printf("%d, argv%d", m_params->getCount(), m_argvTemp);
-          } else {
-            cg.printf("%d, ", m_params->getCount());
-            FunctionScope::outputCPPArguments(m_params, cg, ar, 0, false);
-          }
+          cg.printf("%d, ", m_params->getCount());
+          FunctionScope::outputCPPArguments(m_params, cg, ar, 0, false);
         } else {
           cg.printf("0");
-          if (Option::UseFastInvoke) {
-            cg.printf(", NULL");
-          }
         }
         cg.printf(")");
       } else {
-        if (Option::UseFastInvoke) {
-          cg.printf("%sfast_invoke(\"%s\"", Option::ObjectPrefix,
-                    m_origName.c_str());
-          uint64 hash = hash_string_i(m_name.data(), m_name.size());
-          cg.printf(", 0x%016llXLL", hash); // hash
-          cg.printf(", -1, "); // arg count
-          if (m_params && m_params->getCount()) {
-            FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
-          } else {
-            cg.printf("Array()");
-          }
-          cg.printf(")", hash);
+        cg.printf("%s%sinvoke(\"%s\"", Option::ObjectPrefix,
+                  isThis ? "root_" : "", m_origName.c_str());
+        cg.printf(", ");
+        if (m_params && m_params->getCount()) {
+          FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
         } else {
-          cg.printf("%sinvoke(\"%s\"", Option::ObjectPrefix,
-                    m_origName.c_str());
-          cg.printf(", ");
-          if (m_params && m_params->getCount()) {
-            FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
-          } else {
-            cg.printf("Array()");
-          }
-          uint64 hash = hash_string_i(m_name.data(), m_name.size());
-          cg.printf(", 0x%016llXLL)", hash);
+          cg.printf("Array()");
         }
+        uint64 hash = hash_string_i(m_name.data(), m_name.size());
+        cg.printf(", 0x%016llXLL)", hash);
       }
     }
   } else {
     if (fewParams) {
-      if (Option::UseFastInvoke) {
-        cg.printf("%sfast_invoke(", Option::ObjectPrefix);
-      } else {
-        cg.printf("%sinvoke_few_args(", Option::ObjectPrefix);
-      }
+      cg.printf("%s%sinvoke_few_args(", Option::ObjectPrefix,
+                isThis ? "root_" : "");
       m_nameExp->outputCPP(cg, ar);
-      cg.printf(", -1LL, "); // hash
+      cg.printf(", -1LL, ");
       if (m_params && m_params->getCount()) {
-        if (Option::UseFastInvoke) {
-          if (m_argvTemp == -1) {
-            m_argvTemp = cg.createNewId(ar);
-          }
-          cg.printf("%d, argv%d", m_params->getCount(), m_argvTemp);
-        } else {
-          cg.printf("%d, ", m_params->getCount());
-          FunctionScope::outputCPPArguments(m_params, cg, ar, 0, false);
-        }
+        cg.printf("%d, ", m_params->getCount());
+        FunctionScope::outputCPPArguments(m_params, cg, ar, 0, false);
       } else {
         cg.printf("0");
-        if (Option::UseFastInvoke) {
-          cg.printf(", NULL");
-        }
       }
       cg.printf(")");
     } else {
-      if (Option::UseFastInvoke) {
-        cg.printf("%sfast_invoke((", Option::ObjectPrefix);
-      } else {
-        cg.printf("%sinvoke((", Option::ObjectPrefix);
-      }
+      cg.printf("%s%sinvoke((", Option::ObjectPrefix, isThis ? "root_" : "");
       m_nameExp->outputCPP(cg, ar);
-      cg.printf("), ");
-      if (Option::UseFastInvoke) {
-        cg.printf("-1LL, -1, "); // hash and arg count
-      }
+      cg.printf(")");
+      cg.printf(", ");
       if (m_params && m_params->getCount()) {
         FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
       } else {
         cg.printf("Array()");
       }
-      if (Option::UseFastInvoke) {
-        cg.printf(")");
-      } else {
-        cg.printf(", -1LL)");
-      }
+      cg.printf(", -1LL)");
     }
   }
   if (linemap) cg.printf(")");

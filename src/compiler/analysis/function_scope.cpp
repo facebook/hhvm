@@ -635,31 +635,6 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
   }
 }
 
-void FunctionScope::preOutputCPPArgs(ExpressionListPtr params,
-                                     CodeGenerator &cg,
-                                     AnalysisResultPtr ar,
-                                     int argvTemp) {
-  int paramCount = params ? params->getCount() : 0;
-  if (paramCount == 0) return;
-  cg.printf("const Variant * argv%d[%d];\n", argvTemp, paramCount);
-  for (int i = 0; i < paramCount; i++) {
-    ExpressionPtr param = (*params)[i];
-    bool hadNoRefWrapper = param->hasContext(Expression::NoRefWrapper);
-    param->setContext(Expression::NoRefWrapper);
-    cg.setItemIndex(i);
-    std::string foo = param->genCPPTemp(cg,ar);
-    param->preOutputCPP(cg, ar, 0);
-    cg.printf("CVarRef %s = ", foo.c_str());
-    param->outputCPP(cg, ar);
-    param->setCPPTemp(foo);
-    cg.printf(";\n");
-    cg.printf("argv%d[%d] = &(", argvTemp, i);
-    param->outputCPP(cg, ar);
-    cg.printf(");\n");
-    if (!hadNoRefWrapper) param->clearContext(Expression::NoRefWrapper);
-  }
-}
-
 void FunctionScope::outputCPPArguments(ExpressionListPtr params,
                                        CodeGenerator &cg,
                                        AnalysisResultPtr ar, int extraArg,

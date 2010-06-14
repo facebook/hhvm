@@ -602,7 +602,7 @@ void c_splobjectstorage::t_detach(CVarRef v_obj) {
             if (same(v_object, v_obj)) {
               {
                 m_storage.weakRemove(v_idx);
-                getRoot()->o_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
+                o_root_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
                 return;
               }
             }

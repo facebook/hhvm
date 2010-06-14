@@ -253,10 +253,6 @@ public:
                                  int extraArg, bool variableArgument,
                                  int extraArgArrayId = -1);
 
-  static void preOutputCPPArgs(ExpressionListPtr params,
-                               CodeGenerator &cg, AnalysisResultPtr ar,
-                               int argvTemp);
-
   /**
    * Only generate arguments that have effects. This is for keeping those
    * parameters around when generating a error-raising function call, so to

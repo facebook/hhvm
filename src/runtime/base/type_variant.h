@@ -371,7 +371,9 @@ class Variant {
   ArrayIterPtr begin(const char *context = NULL) const;
   // used by generated code
   MutableArrayIterPtr begin(Variant *key, Variant &val);
-  void escalate();
+
+  // Mutable iteration requires the most escalation.
+  void escalate(bool mutableIteration = false);
 
   /**
    * Implicit type conversions. In general, we prefer explicit type conversion

@@ -1499,6 +1499,7 @@ MutableArrayIterPtr Variant::begin(Variant *key, Variant &val) {
                                 "foreach by reference");
     }
     Array properties = obj->o_toIterArray(NULL, true);
+    properties.escalate(true);
     ArrayData *arr = properties.getArrayData();
     return new MutableArrayIter(arr, key, val);
   }
@@ -1513,10 +1514,10 @@ MutableArrayIterPtr Variant::begin(Variant *key, Variant &val) {
   return new MutableArrayIter(this, key, val);
 }
 
-void Variant::escalate() {
+void Variant::escalate(bool mutableIteration /* = false */) {
   if (is(KindOfArray)) {
     Array arr = toArray();
-    arr.escalate();
+    arr.escalate(mutableIteration);
     set(arr);
   }
 }

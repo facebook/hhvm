@@ -106,6 +106,8 @@ public:
   virtual CVarRef currentRef();
   virtual CVarRef endRef();
 
+  ArrayData *escalate() const;
+
   DECLARE_SMART_ALLOCATION_NOCALLBACKS(SmallArray);
 
   enum Kind {
@@ -166,7 +168,6 @@ private:
   inline int find(int64 h) const;
   inline int find(const char *k, int len) const;
 
-  ArrayData *escalate();
   SmallArray *copyImpl() const {
     SmallArray *a = NEW(SmallArray)(*this);
     a->_count = 0;

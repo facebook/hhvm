@@ -205,8 +205,8 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (m_ref) {
       cg_printf(" = ref(");
       m_array->outputCPPImpl(cg, ar);
-      cg_printf(");\n");
-      cg_printf("%s%d.escalate();\n", Option::MapPrefix, mapId);
+      cg.printf(");\n");
+      cg.printf("%s%d.escalate(true);\n", Option::MapPrefix, mapId);
     } else {
       TypePtr expectedType = m_array->getExpectedType();
       // Clear m_expectedType to avoid type cast (toArray).

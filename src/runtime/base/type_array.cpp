@@ -20,6 +20,7 @@
 #include <util/exception.h>
 #include <runtime/base/array/vector_variant.h>
 #include <runtime/base/array/map_variant.h>
+#include <runtime/base/array/small_array.h>
 #include <runtime/base/shared/shared_map.h>
 #include <system/gen/php/classes/stdclass.h>
 #include <runtime/base/variable_serializer.h>
@@ -358,12 +359,19 @@ bool Array::more(CVarRef v2) const {
 ///////////////////////////////////////////////////////////////////////////////
 // iterator
 
-void Array::escalate() {
+void Array::escalate(bool mutableIteration /* = false */) {
+  // TODO make escalate() a virtual method, and avoid dynamic_casts.
   if (m_px) {
     SharedMap *mapShared = dynamic_cast<SharedMap *>(m_px);
     if (mapShared) {
       SmartPtr<ArrayData>::operator=(mapShared->escalate());
-      return;
+    }
+    if (mutableIteration) {
+      SmallArray *small = dynamic_cast<SmallArray *>(m_px);
+      if (small) {
+        SmartPtr<ArrayData>::operator=(small->escalate());
+        return;
+      }
     }
     if (!RuntimeOption::UseZendArray) {
       VectorVariant *vecVariant = dynamic_cast<VectorVariant *>(m_px);

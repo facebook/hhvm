@@ -285,7 +285,7 @@ bool TestCppBase::TestArray() {
   }
   {
     Variant arr = CREATE_MAP1("n1", "v1");
-    arr.escalate();
+    arr.escalate(true);
     Variant k, v;
     for (MutableArrayIterPtr iter = arr.begin(&k, v); iter->advance();) {
       arr.weakRemove(k);
@@ -785,7 +785,7 @@ bool TestCppBase::TestVariant() {
   }
   {
     Variant arr = CREATE_VECTOR2(1, 2);
-    arr.escalate();
+    arr.escalate(true);
     Variant v;
     for (MutableArrayIterPtr iter = arr.begin(NULL, v); iter->advance();) {
       v++;

@@ -183,19 +183,13 @@ Variant SmallArray::each() {
 }
 
 void SmallArray::getFullPos(FullPos &pos) {
-  ASSERT(m_pos == ArrayData::invalid_index ||
-         m_pos >= 0 && m_pos < SARR_TABLE_SIZE &&
-         m_arBuckets[m_pos].kind != Empty);
-  pos.primary = m_pos;
+  // it should have been escalated
+  throw FatalErrorException("SmallArray should have been escalated");
 }
 
 bool SmallArray::setFullPos(const FullPos &pos) {
-  // Only set if pos hasn't been invalidated.
-  if (pos.primary >= 0) {
-    Bucket &b = m_arBuckets[pos.primary];
-    if (b.kind != Empty) m_pos = pos.primary;
-  }
-  return m_pos >= 0;
+  // it should have been escalated
+  throw FatalErrorException("SmallArray should have been escalated");
 }
 
 CVarRef SmallArray::currentRef() {
@@ -378,12 +372,12 @@ ssize_t SmallArray::getIndex(CVarRef k, int64 prehash /* = -1 */) const {
 ///////////////////////////////////////////////////////////////////////////////
 // append/insert/update
 
-ArrayData *SmallArray::escalate() {
+ArrayData *SmallArray::escalate() const {
   // Assume UseZendArray for now
   ASSERT(RuntimeOption::UseZendArray);
   ZendArray *ret = NEW(ZendArray)(m_nNumOfElements);
   for (int p = m_nListHead; p >= 0; p = m_arBuckets[p].next) {
-    Bucket &b = m_arBuckets[p];
+    const Bucket &b = m_arBuckets[p];
     ASSERT(b.kind != Empty);
     if (b.data.isReferenced()) b.data.setContagious();
     if (b.kind == IntKey) {
@@ -395,7 +389,7 @@ ArrayData *SmallArray::escalate() {
   }
   // Set m_pos in the escalated array
   if (m_pos != ArrayData::invalid_index) {
-    Bucket &b = m_arBuckets[m_pos];
+    const Bucket &b = m_arBuckets[m_pos];
     if (b.kind == IntKey) {
       ret->setPosition(ret->getIndex(b.h));
     } else {

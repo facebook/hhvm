@@ -16,6 +16,7 @@
 
 #include <runtime/eval/ast/this_expression.h>
 #include <runtime/eval/runtime/variable_environment.h>
+#include <runtime/eval/parser/hphp.tab.hpp>
 
 namespace HPHP {
 namespace Eval {
@@ -24,12 +25,24 @@ namespace Eval {
 ThisExpression::ThisExpression(EXPRESSION_ARGS)
   : LvalExpression(EXPRESSION_PASS) {}
 
+Variant ThisExpression::eval(VariableEnvironment &env) const {
+  return env.currentObject();
+}
+
 Variant &ThisExpression::lval(VariableEnvironment &env) const {
   if (!env.currentObject().is(KindOfObject)) {
     SET_LINE;
     raise_error("Using $this when not in an object context");
   }
   return env.currentObject();
+}
+
+bool ThisExpression::exist(VariableEnvironment &env, int op) const {
+  if (op == T_ISSET) {
+    return HPHP::isset(env.currentObject());
+  }
+  ASSERT(op == T_EMPTY);
+  return HPHP::empty(env.currentObject());
 }
 
 Variant ThisExpression::set(VariableEnvironment &env, CVarRef val) const {

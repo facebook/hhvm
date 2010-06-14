@@ -28,7 +28,9 @@ DECLARE_AST_PTR(ThisExpression);
 class ThisExpression : public LvalExpression {
 public:
   ThisExpression(EXPRESSION_ARGS);
+  virtual Variant eval(VariableEnvironment &env) const;
   virtual Variant &lval(VariableEnvironment &env) const;
+  virtual bool exist(VariableEnvironment &env, int op) const;
   virtual Variant set(VariableEnvironment &env, CVarRef val) const;
   virtual void dump() const;
 };

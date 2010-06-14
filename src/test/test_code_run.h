@@ -58,6 +58,7 @@ class TestCodeRun : public TestBase {
   bool TestListAssignment();
   bool TestExceptions();
   bool TestPredefined();
+  bool TestLabels();
 
   // test types
   bool TestBoolean();

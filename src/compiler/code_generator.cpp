@@ -228,6 +228,62 @@ const char *CodeGenerator::getGlobals(AnalysisResultPtr ar) {
   return "get_global_variables()";
 }
 
+std::string CodeGenerator::formatLabel(const std::string &name) {
+  ASSERT(name.find(Option::IdPrefix) == string::npos);
+
+  string ret;
+  ret.reserve(name.size());
+  for (size_t i = 0; i < name.size(); i++) {
+    unsigned char ch = name[i];
+    if ((ch >= 'a' && ch <= 'z') ||
+        (ch >= 'A' && ch <= 'Z') ||
+        (ch >= '0' && ch <= '9') || ch == '_') {
+      ret += ch;
+    } else {
+      char buf[10];
+      snprintf(buf, sizeof(buf), "%s%02X", Option::LabelEscape.c_str(),
+               (int)ch);
+      ret += buf;
+    }
+  }
+  return ret;
+}
+
+std::string CodeGenerator::escapeLabel(const std::string &name,
+                                       bool *binary /* = NULL */) {
+  if (binary) *binary = false;
+
+  string ret;
+  ret.reserve((name.length() << 1) + 2);
+  for (unsigned int i = 0; i < name.length(); i++) {
+    unsigned char ch = name[i];
+    switch (ch) {
+      case '\n': ret += "\\n";  break;
+      case '\r': ret += "\\r";  break;
+      case '\t': ret += "\\t";  break;
+      case '\a': ret += "\\a";  break;
+      case '\b': ret += "\\b";  break;
+      case '\f': ret += "\\f";  break;
+      case '\v': ret += "\\v";  break;
+      case '\0': ret += "\\0";  if (binary) *binary = true; break;
+      case '\"': ret += "\\\""; break;
+      case '\\': ret += "\\\\"; break;
+      case '?':  ret += "\\?";  break; // avoiding trigraph errors
+      default:
+        if (isprint(ch)) {
+          ret += ch;
+        } else {
+          // output in octal notation
+          char buf[10];
+          snprintf(buf, sizeof(buf), "\\%03o", ch);
+          ret += buf;
+        }
+        break;
+    }
+  }
+  return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 

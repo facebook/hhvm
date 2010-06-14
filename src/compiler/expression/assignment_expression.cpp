@@ -182,7 +182,7 @@ ExpressionPtr AssignmentExpression::postOptimize(AnalysisResultPtr ar) {
     const std::string &name = var->getName();
     VariableTablePtr variables = ar->getScope()->getVariables();
     if (variables->checkUnused(name) &&
-        !checkNeeded(ar, var, m_value)) {
+        !CheckNeeded(ar, var, m_value)) {
       if (m_value->getContainedEffects() != getContainedEffects()) {
         s_effectsTag++;
       }

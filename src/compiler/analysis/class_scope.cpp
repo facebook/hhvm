@@ -87,6 +87,15 @@ const char *ClassScope::getOriginalName() const {
   return m_name.c_str();
 }
 
+std::string ClassScope::getId(CodeGenerator &cg) const {
+  string name = cg.formatLabel(getName());
+  if (m_redeclaring < 0) {
+    return name;
+  }
+  return name + Option::IdPrefix +
+    boost::lexical_cast<std::string>(m_redeclaring);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 int ClassScope::implementsArrayAccess(AnalysisResultPtr ar) {
@@ -582,7 +591,7 @@ void ClassScope::serialize(JSON::OutputStream &out) const {
 }
 
 void ClassScope::outputCPPDynamicClassDecl(CodeGenerator &cg) {
-  string clsStr = getId();
+  string clsStr = getId(cg);
   const char *clsName = clsStr.c_str();
   cg_printf("Object %s%s(CArrRef params, bool init = true);\n",
             Option::CreateObjectPrefix, clsName);
@@ -595,7 +604,7 @@ void ClassScope::outputCPPDynamicClassCreateDecl(CodeGenerator &cg) {
 
 void ClassScope::outputCPPDynamicClassImpl(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
-  string clsStr = getId();
+  string clsStr = getId(cg);
   const char *clsName = clsStr.c_str();
   cg_indentBegin("Object %s%s(CArrRef params, bool init /* = true */) {\n",
                  Option::CreateObjectPrefix, clsName);
@@ -616,13 +625,13 @@ void ClassScope::outputCPPClassJumpTable
     if (iterClasses != classScopes.end()) {
       if (iterClasses->second[0]->isRedeclaring()) {
         cg_printf("%s_REDECLARED(0x%016llXLL, %s);\n", macro,
-                  hash_string_i(clsName), clsName);
+                  hash_string_i(clsName), cg.formatLabel(clsName).c_str());
       } else if (iterClasses->second[0]->isVolatile()) {
         cg_printf("%s_VOLATILE(0x%016llXLL, %s);\n", macro,
-                  hash_string_i(clsName), clsName);
+                  hash_string_i(clsName), cg.formatLabel(clsName).c_str());
       } else {
         cg_printf("%s(0x%016llXLL, %s);\n", macro,
-                  hash_string_i(clsName), clsName);
+                  hash_string_i(clsName), cg.formatLabel(clsName).c_str());
       }
     }
   }
@@ -844,18 +853,18 @@ void ClassScope::setRedeclaring(AnalysisResultPtr ar, int redecId) {
   m_variables->forceVariants(ar);
 }
 
-string ClassScope::getHeaderFilename() {
+string ClassScope::getHeaderFilename(CodeGenerator &cg) {
   FileScopePtr file = getFileScope();
   ASSERT(file);
   string fileBase = file->outputFilebase();
   string headerFile = Option::ClassHeaderPrefix;
-  headerFile += getId() + ".h";
+  headerFile += getId(cg) + ".h";
   return headerFile;
 }
 
-void ClassScope::outputCPPHeader(AnalysisResultPtr ar,
+void ClassScope::outputCPPHeader(CodeGenerator &old_cg, AnalysisResultPtr ar,
                                  CodeGenerator::Output output) {
-  string filename = getHeaderFilename();
+  string filename = getHeaderFilename(old_cg);
   string root = ar->getOutputPath() + "/";
   Util::mkdir(root + filename);
   ofstream f((root + filename).c_str());
@@ -867,7 +876,7 @@ void ClassScope::outputCPPHeader(AnalysisResultPtr ar,
   BOOST_FOREACH(string base, m_bases) {
     ClassScopePtr cls = ar->findClass(base);
     if (cls && cls->isUserClass()) {
-      cg_printInclude(cls->getHeaderFilename());
+      cg_printInclude(cls->getHeaderFilename(cg));
     }
   }
 
@@ -884,7 +893,7 @@ void ClassScope::outputCPPHeader(AnalysisResultPtr ar,
 
 void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
                                              AnalysisResultPtr ar) {
-  string clsNameStr = getId();
+  string clsNameStr = getId(cg);
   const char *clsName = clsNameStr.c_str();
   bool dynamicObject = derivesFromRedeclaring() == DirectFromRedeclared;
   const char *parent = "ObjectData";
@@ -1006,7 +1015,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
 void ClassScope::outputCPPStaticInitializerDecl(CodeGenerator &cg) {
   if (needStaticInitializer()) {
     cg_printf("void %s%s();\n", Option::ClassStaticInitializerPrefix,
-              getId().c_str());
+              getId(cg).c_str());
   }
 }
 
@@ -1032,14 +1041,14 @@ void ClassScope::outputCPPStaticMethodWrappers(CodeGenerator &cg,
 
 void ClassScope::outputCPPGlobalTableWrappersDecl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
-  string id = getId();
+  string id = getId(cg);
   cg_printf("extern struct ObjectStaticCallbacks %s%s;\n",
             Option::ClassWrapperFunctionPrefix, id.c_str());
 }
 
 void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
                                                   AnalysisResultPtr ar) {
-  string id = getId();
+  string id = getId(cg);
   cg_indentBegin("struct ObjectStaticCallbacks %s%s = {\n",
                  Option::ClassWrapperFunctionPrefix, id.c_str());
   // This order must match the one in object_data.h
@@ -1134,7 +1143,7 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
                                     bool staticOnly,
                                     bool dynamicObject /* = false */,
                                     bool forEval /* = false */) {
-  string id = getId();
+  string id = getId(cg);
   const char *clsName = id.c_str();
 
   string scope;
@@ -1299,7 +1308,7 @@ void ClassScope::OutputVolatileCheckBegin(CodeGenerator &cg,
   string lwrName(Util::toLower(origName));
   cg_printf("(checkClassExists(String(\"%s\", %d, AttachLiteral), "
             "%s->CDEC(%s)), (", origName.c_str(), origName.size(),
-            cg.getGlobals(ar), lwrName.c_str());
+            cg.getGlobals(ar), cg.formatLabel(lwrName).c_str());
 }
 void ClassScope::OutputVolatileCheckEnd(CodeGenerator &cg) {
   cg_printf("))");

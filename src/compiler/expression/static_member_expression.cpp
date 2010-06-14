@@ -316,29 +316,37 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
     ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
     if (cls->needLazyStaticInitializer()) {
       cg_printf("%s%s::lazy_initializer(g)->%s%s%s%s",
-                Option::ClassPrefix, m_resolvedClassName.c_str(),
-                Option::StaticPropertyPrefix, m_resolvedClassName.c_str(),
-                Option::IdPrefix.c_str(), var->getString().c_str());
+                Option::ClassPrefix,
+                cg.formatLabel(m_resolvedClassName).c_str(),
+                Option::StaticPropertyPrefix,
+                cg.formatLabel(m_resolvedClassName).c_str(),
+                Option::IdPrefix.c_str(),
+                cg.formatLabel(var->getString()).c_str());
     } else {
       cg_printf("g->%s%s%s%s", Option::StaticPropertyPrefix,
-                m_resolvedClassName.c_str(), Option::IdPrefix.c_str(),
-                var->getString().c_str());
+                cg.formatLabel(m_resolvedClassName).c_str(),
+                Option::IdPrefix.c_str(),
+                cg.formatLabel(var->getString()).c_str());
     }
   } else {
     if (m_context & (LValue | RefValue)) {
       if (m_redeclared) {
         cg_printf("g->%s%s->%slval(", Option::ClassStaticsObjectPrefix,
-                  m_className.c_str(),Option::ObjectStaticPrefix);
+                  cg.formatLabel(m_className).c_str(),
+                  Option::ObjectStaticPrefix);
       } else {
-        cg_printf("%s%s::%slval(", Option::ClassPrefix, m_className.c_str(),
+        cg_printf("%s%s::%slval(", Option::ClassPrefix,
+                  cg.formatLabel(m_className).c_str(),
                   Option::ObjectStaticPrefix);
       }
     } else {
       if (m_redeclared) {
         cg_printf("g->%s%s->%sget(", Option::ClassStaticsObjectPrefix,
-                  m_className.c_str(), Option::ObjectStaticPrefix);
+                  cg.formatLabel(m_className).c_str(),
+                  Option::ObjectStaticPrefix);
       } else {
-        cg_printf("%s%s::%sget(", Option::ClassPrefix, m_className.c_str(),
+        cg_printf("%s%s::%sget(", Option::ClassPrefix,
+                  cg.formatLabel(m_className).c_str(),
                   Option::ObjectStaticPrefix);
       }
     }

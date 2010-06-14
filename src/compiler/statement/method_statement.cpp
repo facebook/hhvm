@@ -485,11 +485,12 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       } else if (m_modifiers->isStatic() && m_stmt) {
         // Static method wrappers get generated as support methods
         cg_printf(" %s%s(const char* cls%s", Option::MethodImplPrefix,
-                  m_name.c_str(),
+                  cg.formatLabel(m_name).c_str(),
                   funcScope->isVariableArgument() ||
                   (m_params && m_params->getCount()) ? ", " : "");
       } else {
-        cg_printf(" %s%s(", Option::MethodPrefix, m_name.c_str());
+        cg_printf(" %s%s(", Option::MethodPrefix,
+                  cg.formatLabel(m_name).c_str());
       }
       funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
       if (m_stmt) {
@@ -522,19 +523,20 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
       if (m_name == "__lval") {
         cg_printf(" &%s%s::___lval(",
-                  Option::ClassPrefix, scope->getId().c_str());
+                  Option::ClassPrefix, scope->getId(cg).c_str());
       } else if (m_name == "__offsetget_lval") {
         cg_printf(" &%s%s::___offsetget_lval(",
-                  Option::ClassPrefix, scope->getId().c_str());
+                  Option::ClassPrefix, scope->getId(cg).c_str());
       } else if (m_modifiers->isStatic()) {
         cg_printf(" %s%s::%s%s(const char* cls%s", Option::ClassPrefix,
-                  scope->getId().c_str(),
-                  Option::MethodImplPrefix, m_name.c_str(),
+                  scope->getId(cg).c_str(),
+                  Option::MethodImplPrefix, cg.formatLabel(m_name).c_str(),
                   funcScope->isVariableArgument() ||
                   (m_params && m_params->getCount()) ? ", " : "");
       } else {
-        cg_printf(" %s%s::%s%s(", Option::ClassPrefix, scope->getId().c_str(),
-                  Option::MethodPrefix, m_name.c_str());
+        cg_printf(" %s%s::%s%s(", Option::ClassPrefix,
+                  scope->getId(cg).c_str(),
+                  Option::MethodPrefix, cg.formatLabel(m_name).c_str());
       }
       funcScope->outputCPPParamsDecl(cg, ar, m_params, false);
       cg_indentBegin(") {\n");
@@ -624,13 +626,13 @@ void MethodStatement::outputCPPStaticMethodWrapper(CodeGenerator &cg,
   } else {
     cg_printf("void");
   }
-  cg_printf(" %s%s(", Option::MethodPrefix, m_name.c_str());
+  cg_printf(" %s%s(", Option::MethodPrefix, cg.formatLabel(m_name).c_str());
   CodeGenerator::Context old = cg.getContext();
   cg.setContext(CodeGenerator::CppStaticMethodWrapper);
   funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
   cg.setContext(old);
   cg_printf(") { %s%s%s(\"%s\"", type ? "return " : "",
-            Option::MethodImplPrefix, m_name.c_str(),
+            Option::MethodImplPrefix, cg.formatLabel(m_name).c_str(),
             cls);
   if (funcScope->isVariableArgument()) {
     cg_printf(", num_args");
@@ -700,7 +702,7 @@ void MethodStatement::outputCPPFFIStub(CodeGenerator &cg,
   FunctionScopePtr funcScope = m_funcScope.lock();
   bool varArgs = funcScope->isVariableArgument();
   bool ret = funcScope->getReturnType();
-  string fname = funcScope->getId();
+  string fname = funcScope->getId(cg);
   bool inClass = !m_className.empty();
   bool isStatic = !inClass || m_modifiers->isStatic();
 
@@ -811,12 +813,10 @@ void MethodStatement::outputHSFFIStub(CodeGenerator &cg, AnalysisResultPtr ar) {
   FunctionScopePtr funcScope = m_funcScope.lock();
   bool varArgs = funcScope->isVariableArgument();
   bool ret = funcScope->getReturnType();
-  string fname = funcScope->getId().c_str();
+  string fname = funcScope->getId(cg).c_str();
   cg_indentBegin("foreign import ccall \"stubs.h %s%s\" %s%s\n",
-                 Option::FFIFnPrefix,
-                 fname.c_str(),
-                 Option::FFIFnPrefix,
-                 fname.c_str());
+                 Option::FFIFnPrefix, fname.c_str(),
+                 Option::FFIFnPrefix, fname.c_str());
   cg_printf(":: ");
   if (ret) {
     cg_printf("PtrPtr a -> ");
@@ -921,7 +921,7 @@ void MethodStatement::outputJavaFFIStub(CodeGenerator &cg,
   bool ret = funcScope->getReturnType();
   bool inClass = !m_className.empty();
   bool isStatic = !inClass || m_modifiers->isStatic();
-  string fname = funcScope->getId();
+  string fname = funcScope->getId(cg);
   string originalName = funcScope->getOriginalName();
   if (originalName.length() < fname.length()) {
     // if there are functions of the same name, fname may contain "$$..."
@@ -1041,7 +1041,7 @@ void MethodStatement::outputJavaFFICPPStub(CodeGenerator &cg,
   bool ret = funcScope->getReturnType();
   bool inClass = !m_className.empty();
   bool isStatic = !inClass || m_modifiers->isStatic();
-  string fname = funcScope->getId();
+  string fname = funcScope->getId(cg);
   int ac = funcScope->getMaxParamCount();
   bool exposeNative = !(ac > 0 || varArgs || !isStatic || !ret && inClass);
 
@@ -1135,7 +1135,7 @@ void MethodStatement::outputSwigFFIStub(CodeGenerator &cg,
   FunctionScopePtr funcScope = m_funcScope.lock();
   bool varArgs = funcScope->isVariableArgument();
   bool ret = funcScope->getReturnType();
-  string fname = funcScope->getId();
+  string fname = funcScope->getId(cg);
   string originalName = funcScope->getOriginalName();
   int ac = funcScope->getMaxParamCount();
 

@@ -20,7 +20,7 @@
 #include <compiler/expression/expression.h>
 
 #define CONSTANT(value)                                 \
-  (Expression::makeConstant(ar, getLocation(), value))
+  (Expression::MakeConstant(ar, getLocation(), value))
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

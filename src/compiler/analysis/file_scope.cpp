@@ -404,7 +404,7 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
     for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
          it != m_classes.end(); ++it) {
       BOOST_FOREACH(ClassScopePtr cls, it->second) {
-        cg_printInclude(cls->getHeaderFilename());
+        cg_printInclude(cls->getHeaderFilename(cg));
       }
     }
 
@@ -487,14 +487,14 @@ void FileScope::outputCPPDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg.headerEnd(header);
 }
 
-void FileScope::outputCPPClassHeaders(AnalysisResultPtr ar,
+void FileScope::outputCPPClassHeaders(CodeGenerator &cg, AnalysisResultPtr ar,
                                       CodeGenerator::Output output) {
   string name;
   ClassScopePtr cls;
   for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
        it != m_classes.end(); ++it) {
     BOOST_FOREACH(ClassScopePtr cls, it->second) {
-      cls->outputCPPHeader(ar, output);
+      cls->outputCPPHeader(cg, ar, output);
     }
   }
 }

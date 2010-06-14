@@ -753,12 +753,14 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
   }
   if (m_valid) {
     if (!m_className.empty()) {
-      cg_printf("%s%s::", Option::ClassPrefix, m_className.c_str());
+      cg_printf("%s%s::", Option::ClassPrefix,
+                cg.formatLabel(m_className).c_str());
       if (m_name == "__construct" && cls) {
         FunctionScopePtr func = cls->findConstructor(ar, true);
-        cg_printf("%s%s(", Option::MethodPrefix, func->getName().c_str());
+        cg_printf("%s%s(", Option::MethodPrefix, func->getId(cg).c_str());
       } else {
-        cg_printf("%s%s(", Option::MethodPrefix, m_name.c_str());
+        cg_printf("%s%s(", Option::MethodPrefix,
+                  cg.formatLabel(m_name).c_str());
       }
     } else {
       int paramCount = m_params ? m_params->getCount() : 0;
@@ -774,11 +776,12 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         }
       } else {
         if (m_noPrefix) {
-          cg_printf("%s(", m_name.c_str());
+          cg_printf("%s(", cg.formatLabel(m_name).c_str());
         }
         else {
-         cg_printf("%s%s(", m_builtinFunction ? Option::BuiltinFunctionPrefix :
-                   Option::FunctionPrefix, m_name.c_str());
+          cg_printf("%s%s(",
+                    m_builtinFunction ? Option::BuiltinFunctionPrefix :
+                    Option::FunctionPrefix, cg.formatLabel(m_name).c_str());
         }
       }
     }
@@ -790,7 +793,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       if (m_redeclared && !m_dynamicInvoke) {
         if (canInvokeFewArgs()) {
           cg_printf("%s->%s%s_few_args(", cg.getGlobals(ar),
-                    Option::InvokePrefix, m_name.c_str());
+                    Option::InvokePrefix, cg.formatLabel(m_name).c_str());
           int left = Option::InvokeFewArgsCount;
           if (m_params && m_params->getCount()) {
             left -= m_params->getCount();
@@ -806,7 +809,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
           return;
         } else {
           cg_printf("%s->%s%s(", cg.getGlobals(ar), Option::InvokePrefix,
-                    m_name.c_str());
+                    cg.formatLabel(m_name).c_str());
         }
       } else {
         cg_printf("invoke(\"%s\", ", m_name.c_str());
@@ -822,18 +825,19 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
           cg_printf("%s->%s%s->%sinvoke(\"%s\", \"%s\",",
                     cg.getGlobals(ar),
                     Option::ClassStaticsObjectPrefix,
-                    m_className.c_str(), Option::ObjectStaticPrefix,
+                    cg.formatLabel(m_className).c_str(),
+                    Option::ObjectStaticPrefix,
                     m_className.c_str(),
                     m_name.c_str());
         }
       } else if (m_validClass) {
         if (inObj) {
           cg_printf("%s%s::%sinvoke(\"%s\",",
-                    Option::ClassPrefix, m_className.c_str(),
+                    Option::ClassPrefix, cg.formatLabel(m_className).c_str(),
                     Option::ObjectPrefix, m_name.c_str());
         } else {
           cg_printf("%s%s::%sinvoke(\"%s\", \"%s\",",
-                    Option::ClassPrefix, m_className.c_str(),
+                    Option::ClassPrefix, cg.formatLabel(m_className).c_str(),
                     Option::ObjectStaticPrefix,
                     m_className.c_str(),
                     m_name.c_str());

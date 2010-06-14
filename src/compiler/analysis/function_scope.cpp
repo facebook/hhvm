@@ -353,7 +353,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
     // error for some vararg case (e.g., array_multisort can have either ref
     // or value for the same vararg).
     if (!isRefVararg || !isMixedVariableArgument()) {
-      Expression::checkPassByReference(ar, param);
+      Expression::CheckPassByReference(ar, param);
     }
   }
   return ret;
@@ -463,6 +463,15 @@ void FunctionScope::setOverriding(TypePtr returnType,
   }
 }
 
+std::string FunctionScope::getId(CodeGenerator &cg) const {
+  string name = cg.formatLabel(getName());
+  if (m_redeclaring < 0) {
+    return name;
+  }
+  return name + Option::IdPrefix +
+    boost::lexical_cast<std::string>(m_redeclaring);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void FunctionScope::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
@@ -502,7 +511,8 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (specType->is(Type::KindOfArray)) {
       cg_printf("if(!%s%s.isArray())\n",
                 Option::VariablePrefix, param->getName().c_str());
-      cg_printf("  throw_unexpected_argument_type(%d,\"%s\",\"array\",%s%s);\n",
+      cg_printf("  throw_unexpected_argument_type"
+                "(%d,\"%s\",\"array\",%s%s);\n",
                 i, m_name.c_str(),
                 Option::VariablePrefix, param->getName().c_str());
     } else if (specType->is(Type::KindOfObject)) {
@@ -1035,7 +1045,7 @@ void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,
   ClassScopePtr scope = ar->getClassScope();
 
   cg_printf("public: %s%s *create(",
-            Option::ClassPrefix, scope->getId().c_str());
+            Option::ClassPrefix, scope->getId(cg).c_str());
   outputCPPParamsDecl(cg, ar,
                       dynamic_pointer_cast<MethodStatement>(getStmt())
                       ->getParams(), true);
@@ -1055,7 +1065,7 @@ void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,
 void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   ClassScopePtr scope = ar->getClassScope();
-  string clsNameStr = scope->getId();
+  string clsNameStr = scope->getId(cg);
   const char *clsName = clsNameStr.c_str();
   const char *consName = scope->classNameCtor() ? scope->getName().c_str()
                                                 : "__construct";

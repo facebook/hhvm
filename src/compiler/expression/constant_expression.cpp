@@ -257,18 +257,21 @@ void ConstantExpression::outputCPPImpl(CodeGenerator &cg,
       int stringId = cg.checkLiteralString(m_name, ar);
       if (stringId >= 0) {
         cg_printf("getDynamicConstant(%s->%s%s, LITSTR(%d, \"%s\"))",
-                  cg.getGlobals(ar), Option::ConstantPrefix, m_name.c_str(),
-                  stringId, m_name.c_str());
+                  cg.getGlobals(ar), Option::ConstantPrefix,
+                  cg.formatLabel(m_name).c_str(),
+                  stringId, cg.escapeLabel(m_name).c_str());
       } else {
         cg_printf("getDynamicConstant(%s->%s%s, \"%s\")",
-                  cg.getGlobals(ar), Option::ConstantPrefix, m_name.c_str(),
-                  m_name.c_str());
+                  cg.getGlobals(ar), Option::ConstantPrefix,
+                  cg.formatLabel(m_name).c_str(),
+                  cg.escapeLabel(m_name).c_str());
       }
     } else {
-      cg_printf("%s%s", Option::ConstantPrefix, m_name.c_str());
+      cg_printf("%s%s", Option::ConstantPrefix,
+                cg.formatLabel(m_name).c_str());
     }
   } else {
     cg_printf("getUndefinedConstant(%s%s)",
-              Option::ConstantPrefix, m_name.c_str());
+              Option::ConstantPrefix, cg.formatLabel(m_name).c_str());
   }
 }

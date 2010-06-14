@@ -921,7 +921,7 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs) {
             ai.setIsRefTo();
             m_variables->addUsed(name);
           } else {
-            Expression::checkNeeded(m_arp, var, val);
+            Expression::CheckNeeded(m_arp, var, val);
           }
         }
       }

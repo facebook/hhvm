@@ -211,12 +211,13 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
   } else if (m_superGlobal) {
     VariableTablePtr variables = ar->getScope()->getVariables();
-    cg_printf("g->%s", variables->getGlobalVariableName(ar, m_name).c_str());
+    string name = variables->getGlobalVariableName(cg, ar, m_name);
+    cg_printf("g->%s", name.c_str());
   } else if (m_globals) {
     cg_printf("get_global_array_wrapper()");
   } else {
     const char *prefix =
       ar->getScope()->getVariables()->getVariablePrefix(ar, m_name);
-    cg_printf("%s%s", prefix, m_name.c_str());
+    cg_printf("%s%s", prefix, cg.formatLabel(m_name).c_str());
   }
 }

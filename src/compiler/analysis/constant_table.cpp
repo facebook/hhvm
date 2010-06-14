@@ -186,7 +186,7 @@ void ConstantTable::outputCPPDynamicDecl(CodeGenerator &cg,
   ClassScopePtr scope = ar->getClassScope();
   if (scope) {
     prefix = Option::ClassConstantPrefix;
-    classId = scope->getId();
+    classId = scope->getId(cg);
     fmt = "Variant %s%s_%s;\n";
   }
 
@@ -194,7 +194,7 @@ void ConstantTable::outputCPPDynamicDecl(CodeGenerator &cg,
        iter != m_declarations.end(); ++iter) {
     const string &name = iter->first;
     if (isDynamic(name)) {
-      cg_printf(fmt, prefix, classId.c_str(), name.c_str());
+      cg_printf(fmt, prefix, classId.c_str(), cg.formatLabel(name).c_str());
     }
   }
 }
@@ -206,7 +206,9 @@ void ConstantTable::outputCPPDynamicImpl(CodeGenerator &cg,
     const string &name = iter->first;
     if (isDynamic(name)) {
       const char *nameStr = name.c_str();
-      cg_printf("%s%s = \"%s\";\n", Option::ConstantPrefix, nameStr, nameStr);
+      cg_printf("%s%s = \"%s\";\n", Option::ConstantPrefix,
+                cg.formatLabel(nameStr).c_str(),
+                cg.escapeLabel(nameStr).c_str());
     }
   }
 }
@@ -218,8 +220,8 @@ void ConstantTable::outputCPPGlobalState(CodeGenerator &cg,
     const string &name = iter->first;
     if (isDynamic(name)) {
       cg_printf("dynamic_constants.set(\"%s%s\", g->%s%s);\n",
-                Option::ConstantPrefix, name.c_str(),
-                Option::ConstantPrefix, name.c_str());
+                Option::ConstantPrefix, cg.formatLabel(name).c_str(),
+                Option::ConstantPrefix, cg.formatLabel(name).c_str());
     }
   }
 }
@@ -250,9 +252,11 @@ void ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     const char *nameStr = name.c_str();
     if (decl) {
-      cg_printf(" %s%s", Option::ConstantPrefix, nameStr);
+      cg_printf(" %s%s", Option::ConstantPrefix,
+                cg.formatLabel(nameStr).c_str());
     } else {
-      cg_printf(" %s%s", Option::ConstantPrefix, nameStr);
+      cg_printf(" %s%s", Option::ConstantPrefix,
+                cg.formatLabel(nameStr).c_str());
       cg_printf(isString ? "(" : " = ");
       if (value) {
         ExpressionPtr exp = dynamic_pointer_cast<Expression>(value);
@@ -261,12 +265,12 @@ void ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
           dynamic_pointer_cast<ScalarExpression>(exp);
         if (isString && scalarExp) {
           cg_printf("LITSTR_INIT(%s)",
-                    scalarExp->getCPPLiteralString().c_str());
+                    scalarExp->getCPPLiteralString(cg).c_str());
         } else {
           exp->outputCPP(cg, ar);
         }
       } else {
-        cg_printf("\"%s\"", nameStr);
+        cg_printf("\"%s\"", cg.escapeLabel(nameStr).c_str());
       }
       if (isString) {
         cg_printf(")");
@@ -310,12 +314,13 @@ void ConstantTable::outputCPPJumpTable(CodeGenerator &cg,
          jt.next()) {
       const char *name = jt.key();
       string varName = string(Option::ClassConstantPrefix) +
-        getScope()->getId() + "_" + name;
+        getScope()->getId(cg) + "_" + cg.formatLabel(name);
       if (isDynamic(name)) {
         varName = string("g->") + varName;
       }
-      cg_printf("HASH_RETURN(0x%016llXLL, %s, %s);\n",
-                hash_string(name), varName.c_str(), name);
+      cg_printf("HASH_RETURN(0x%016llXLL, %s, \"%s\");\n",
+                hash_string(name), varName.c_str(),
+                cg.escapeLabel(name).c_str());
     }
   }
   if (ret) {
@@ -337,10 +342,11 @@ void ConstantTable::outputCPPConstantSymbol(CodeGenerator &cg,
     if (value && value->getScalarValue(v)) {
       int len;
       string output = getEscapedText(v, len);
-      cg_printf("\"%s\", (const char *)%d, \"%s\",\n", name.c_str(),
-                len, output.c_str());
+      cg_printf("\"%s\", (const char *)%d, \"%s\",\n",
+                cg.escapeLabel(name).c_str(), len, output.c_str());
     } else {
-      cg_printf("\"%s\", (const char *)0, NULL,\n", name.c_str());
+      cg_printf("\"%s\", (const char *)0, NULL,\n",
+                cg.escapeLabel(name).c_str());
     }
   }
 }

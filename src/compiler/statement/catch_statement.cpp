@@ -141,7 +141,8 @@ void CatchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_valid) {
     cg_indentBegin("if (e.instanceof(\"%s\")) {\n", m_className.c_str());
     VariableTablePtr variables = ar->getScope()->getVariables();
-    cg_printf("%s = e;\n", variables->getVariableName(ar, m_variable).c_str());
+    string name = variables->getVariableName(cg, ar, m_variable);
+    cg_printf("%s = e;\n", name.c_str());
   } else {
     cg_indentBegin("if (false) {\n");
   }

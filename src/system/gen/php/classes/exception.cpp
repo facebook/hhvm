@@ -3502,15 +3502,15 @@ Variant c_exception::os_getInit(const char *s, int64 hash) {
   switch (hash & 7) {
     case 4:
       HASH_RETURN(0x08C19339767C0884LL, 
-                  null, file);
+                  null, "file");
       HASH_RETURN(0x21093C71DDF9728CLL, 
-                  null, line);
+                  null, "line");
       break;
     case 7:
       HASH_RETURN(0x3EAA4B97155266DFLL, 
-                  "Unknown exception", message);
+                  "Unknown exception", "message");
       HASH_RETURN(0x33997C0BC1E6CC87LL, 
-                  0LL, code);
+                  0LL, "code");
       break;
     default:
       break;
@@ -3548,15 +3548,15 @@ Variant c_exception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */)
   switch (hash & 7) {
     case 4:
       HASH_RETURN_STRING(0x08C19339767C0884LL, m_file,
-                         file, 4);
+                         "file", 4);
       HASH_RETURN_STRING(0x21093C71DDF9728CLL, m_line,
-                         line, 4);
+                         "line", 4);
       break;
     case 7:
       HASH_RETURN_STRING(0x3EAA4B97155266DFLL, m_message,
-                         message, 7);
+                         "message", 7);
       HASH_RETURN_STRING(0x33997C0BC1E6CC87LL, m_code,
-                         code, 4);
+                         "code", 4);
       break;
     default:
       break;
@@ -3579,12 +3579,12 @@ bool c_exception::o_existsPublic(CStrRef s, int64 hash) const {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 7) {
     case 4:
-      HASH_EXISTS_STRING(0x08C19339767C0884LL, file, 4);
-      HASH_EXISTS_STRING(0x21093C71DDF9728CLL, line, 4);
+      HASH_EXISTS_STRING(0x08C19339767C0884LL, "file", 4);
+      HASH_EXISTS_STRING(0x21093C71DDF9728CLL, "line", 4);
       break;
     case 7:
-      HASH_EXISTS_STRING(0x3EAA4B97155266DFLL, message, 7);
-      HASH_EXISTS_STRING(0x33997C0BC1E6CC87LL, code, 4);
+      HASH_EXISTS_STRING(0x3EAA4B97155266DFLL, "message", 7);
+      HASH_EXISTS_STRING(0x33997C0BC1E6CC87LL, "code", 4);
       break;
     default:
       break;
@@ -3608,15 +3608,15 @@ Variant c_exception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit 
   switch (hash & 7) {
     case 4:
       HASH_SET_STRING(0x08C19339767C0884LL, m_file,
-                      file, 4);
+                      "file", 4);
       HASH_SET_STRING(0x21093C71DDF9728CLL, m_line,
-                      line, 4);
+                      "line", 4);
       break;
     case 7:
       HASH_SET_STRING(0x3EAA4B97155266DFLL, m_message,
-                      message, 7);
+                      "message", 7);
       HASH_SET_STRING(0x33997C0BC1E6CC87LL, m_code,
-                      code, 4);
+                      "code", 4);
       break;
     default:
       break;
@@ -3640,15 +3640,15 @@ Variant& c_exception::o_lvalPublic(CStrRef s, int64 hash) {
   switch (hash & 7) {
     case 4:
       HASH_RETURN_STRING(0x08C19339767C0884LL, m_file,
-                         file, 4);
+                         "file", 4);
       HASH_RETURN_STRING(0x21093C71DDF9728CLL, m_line,
-                         line, 4);
+                         "line", 4);
       break;
     case 7:
       HASH_RETURN_STRING(0x3EAA4B97155266DFLL, m_message,
-                         message, 7);
+                         "message", 7);
       HASH_RETURN_STRING(0x33997C0BC1E6CC87LL, m_code,
-                         code, 4);
+                         "code", 4);
       break;
     default:
       break;
@@ -4127,7 +4127,7 @@ Variant c_errorexception::os_getInit(const char *s, int64 hash) {
   switch (hash & 1) {
     case 0:
       HASH_RETURN(0x78B6E7FAB84C8CFALL, 
-                  null, severity);
+                  null, "severity");
       break;
     default:
       break;
@@ -4162,7 +4162,7 @@ Variant c_errorexception::o_getPublic(CStrRef s, int64 hash, bool error /* = tru
   switch (hash & 1) {
     case 0:
       HASH_RETURN_STRING(0x78B6E7FAB84C8CFALL, m_severity,
-                         severity, 8);
+                         "severity", 8);
       break;
     default:
       break;
@@ -4185,7 +4185,7 @@ bool c_errorexception::o_existsPublic(CStrRef s, int64 hash) const {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 1) {
     case 0:
-      HASH_EXISTS_STRING(0x78B6E7FAB84C8CFALL, severity, 8);
+      HASH_EXISTS_STRING(0x78B6E7FAB84C8CFALL, "severity", 8);
       break;
     default:
       break;
@@ -4209,7 +4209,7 @@ Variant c_errorexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool for
   switch (hash & 1) {
     case 0:
       HASH_SET_STRING(0x78B6E7FAB84C8CFALL, m_severity,
-                      severity, 8);
+                      "severity", 8);
       break;
     default:
       break;
@@ -4233,7 +4233,7 @@ Variant& c_errorexception::o_lvalPublic(CStrRef s, int64 hash) {
   switch (hash & 1) {
     case 0:
       HASH_RETURN_STRING(0x78B6E7FAB84C8CFALL, m_severity,
-                         severity, 8);
+                         "severity", 8);
       break;
     default:
       break;

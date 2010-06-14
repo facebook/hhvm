@@ -378,11 +378,12 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (cg.getContext() == CodeGenerator::NoContext) {
     if (classScope->isRedeclaring()) {
       cg_printf("g->%s%s = ClassStaticsPtr(NEW(%s%s)());\n",
-                Option::ClassStaticsObjectPrefix, m_name.c_str(),
-                Option::ClassStaticsPrefix, classScope->getId().c_str());
-      cg.printf("g->cwo_%s = &cw_%s;\n",
-                m_name.c_str(),
-                classScope->getId().c_str());
+                Option::ClassStaticsObjectPrefix,
+                cg.formatLabel(m_name).c_str(),
+                Option::ClassStaticsPrefix, classScope->getId(cg).c_str());
+      cg_printf("g->cwo_%s = &cw_%s;\n",
+                cg.formatLabel(m_name).c_str(),
+                classScope->getId(cg).c_str());
     }
     if (classScope->isVolatile()) {
       cg_printf("g->CDEC(%s) = true;\n", m_name.c_str());
@@ -403,7 +404,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   ar->pushScope(classScope);
-  string clsNameStr = classScope->getId();
+  string clsNameStr = classScope->getId(cg);
   const char *clsName = clsNameStr.c_str();
   bool redeclared = classScope->isRedeclaring();
   switch (cg.getContext()) {
@@ -434,7 +435,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           cg_printf(" : public DynamicObjectData");
         } else {
           cg_printf(" : public %s%s", Option::ClassPrefix,
-                    parCls->getId().c_str());
+                    parCls->getId(cg).c_str());
         }
       } else {
         if (classScope->derivesFromRedeclaring()) {
@@ -454,7 +455,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           if (intfClassScope && !intfClassScope->isRedeclaring() &&
               classScope->derivesDirectlyFrom(ar, intf) &&
               (!parCls || !parCls->derivesFrom(ar, intf, true, false))) {
-            string id = intfClassScope->getId();
+            string id = intfClassScope->getId(cg);
             cg_printf(", public %s%s", Option::ClassPrefix, id.c_str());
           }
         }
@@ -512,7 +513,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           if (dyn) {
             conInit += "DynamicObjectData(\"" + m_parent + "\", r)";
           } else if (idyn) {
-            conInit += string(Option::ClassPrefix) + parCls->getId() +
+            conInit += string(Option::ClassPrefix) + parCls->getId(cg) +
               "(r?r:this)";
           } else {
             conInit += "root(r?r:this)";
@@ -904,7 +905,7 @@ void ClassStatement::outputJavaFFICPPCreator(CodeGenerator &cg,
 
   cg_indentBegin(") {\n");
   cg_printf("ObjectData *obj = (NEW(%s%s)())->create(%s);\n",
-            Option::ClassPrefix, cls->getId().c_str(), args.str().c_str());
+            Option::ClassPrefix, cls->getId(cg).c_str(), args.str().c_str());
   cg_printf("return (jlong)(NEW(Variant)(obj));\n");
   cg_indentEnd("}\n\n");
 }

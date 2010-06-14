@@ -106,12 +106,19 @@ ExpressionPtr Expression::unneeded(AnalysisResultPtr ar) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool Expression::isIdentifier(const string &value) {
-  for (unsigned int i = 0; i < value.size(); i++) {
-    char ch = value[i];
-    if ((i == 0 && ch >= '0' && ch <= '9') ||
-        ((ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') &&
-         (ch < '0' || ch > '9') && (ch != '_'))) {
+bool Expression::IsIdentifier(const string &value) {
+  if (value.empty()) {
+    return false;
+  }
+  unsigned char ch = value[0];
+  if ((ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') &&
+      ch < '\x7f' && ch != '_') {
+    return false;
+  }
+  for (unsigned int i = 1; i < value.size(); i++) {
+    unsigned char ch = value[i];
+    if (((ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') &&
+         (ch < '0' || ch > '9') && ch < '\x7f' && ch != '_')) {
       return false;
     }
   }
@@ -192,14 +199,14 @@ void Expression::setDynamicByIdentifier(AnalysisResultPtr ar,
   if (c != 0 && c != string::npos && c+2 < id.size()) {
     string cl = id.substr(0, c);
     string fn = id.substr(c+2);
-    if (isIdentifier(cl) && isIdentifier(fn)) {
+    if (IsIdentifier(cl) && IsIdentifier(fn)) {
       ci = ar->findClass(cl);
       if (ci) {
         fi = ci->findFunction(ar, fn, false);
         if (fi) fi->setDynamic();
       }
     }
-  } else if (isIdentifier(id)) {
+  } else if (IsIdentifier(id)) {
     fi = ar->findFunction(id);
     if (fi) {
       fi->setDynamic();
@@ -214,7 +221,7 @@ void Expression::setDynamicByIdentifier(AnalysisResultPtr ar,
   }
 }
 
-bool Expression::checkNeeded(AnalysisResultPtr ar,
+bool Expression::CheckNeeded(AnalysisResultPtr ar,
                              ExpressionPtr variable, ExpressionPtr value) {
   // if the value may involve object, consider the variable as "needed"
   // so that objects are not destructed prematurely.
@@ -273,7 +280,7 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
   }
 
   if (ar->getPhase() == AnalysisResult::LastInference) {
-    checkNeeded(ar, variable, value);
+    CheckNeeded(ar, variable, value);
   }
 
   m_implementedType.reset();
@@ -293,7 +300,7 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
   return ret;
 }
 
-ExpressionPtr Expression::makeConstant(AnalysisResultPtr ar,
+ExpressionPtr Expression::MakeConstant(AnalysisResultPtr ar,
                                        LocationPtr loc,
                                        const std::string &value) {
   ConstantExpressionPtr exp(new ConstantExpression(loc,
@@ -313,7 +320,7 @@ ExpressionPtr Expression::makeConstant(AnalysisResultPtr ar,
   return exp;
 }
 
-void Expression::checkPassByReference(AnalysisResultPtr ar,
+void Expression::CheckPassByReference(AnalysisResultPtr ar,
                                       ExpressionPtr param) {
   if (param->hasContext(Expression::RefValue) &&
       !param->isRefable(true)) {

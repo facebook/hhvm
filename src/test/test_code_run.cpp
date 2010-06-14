@@ -64,9 +64,30 @@ bool TestCodeRun::CleanUp() {
   return true;
 }
 
+static bool GenerateMainPHP(const std::string &fullPath, const char *input) {
+  Util::mkdir(fullPath.c_str());
+  ofstream f(fullPath.c_str());
+  if (!f) {
+    printf("Unable to open %s for write. Run this test from src/.\n",
+           fullPath.c_str());
+    return false;
+  }
+
+  f << input;
+  f.close();
+  return true;
+}
+
 bool TestCodeRun::GenerateFiles(const char *input,
                                 const char *subdir) {
   ASSERT(subdir && subdir[0]);
+
+  // generate main.php early, so if we fail, we have a PHP file to debug with
+  string fullPath = "runtime/tmp";
+  if (subdir && subdir[0]) fullPath = fullPath + "/" + subdir;
+  fullPath += "/main.php";
+  if (!GenerateMainPHP(fullPath, input)) return false;
+
   AnalysisResultPtr ar(new AnalysisResult());
   string path = string("runtime/tmp/") + subdir;
   ar->setOutputPath(path.c_str());
@@ -137,6 +158,10 @@ bool TestCodeRun::CompileFiles() {
           istringstream isl(line.substr(start + 4));
           int seqno;
           if (isl >> seqno) {
+            printf("======================================\n"
+                   "runtime/tmp/Test%d/main.php:\n"
+                   "======================================\n",
+                  seqno);
             printf("\n%s:%d\nParsing: [%s]\n%s\n", m_infos[seqno].file,
                    m_infos[seqno].line, m_infos[seqno].input, buffer.c_str());
             buffer = "";
@@ -178,18 +203,7 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
   string fullPath = "runtime/tmp";
   if (subdir && subdir[0]) fullPath = fullPath + "/" + subdir;
   fullPath += "/main.php";
-  {
-    Util::mkdir(fullPath.c_str());
-    ofstream f(fullPath.c_str());
-    if (!f) {
-      printf("Unable to open %s for write. Run this test from src/.\n",
-             fullPath.c_str());
-      return false;
-    }
-
-    f << input;
-    f.close();
-  }
+  if (!GenerateMainPHP(fullPath, input)) return false;
 
   // get PHP's output if "output" is NULL
   string expected;
@@ -275,7 +289,10 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
     }
 
     if (actual != expected || !err.empty()) {
-      printf("%s:%d\nParsing: [%s]\nBet %d:\n"
+      printf("======================================\n"
+             "%s:\n"
+             "======================================\n"
+             "%s:%d\nParsing: [%s]\nBet %d:\n"
              "--------------------------------------\n"
              "%s"
              "--------------------------------------\n"
@@ -283,7 +300,7 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
              "--------------------------------------\n"
              "%s"
              "--------------------------------------\n"
-             "Err: [%s]\n", file, line, input,
+             "Err: [%s]\n", fullPath.c_str(), file, line, input,
              (int)expected.length(), escape(expected).c_str(),
              (int)actual.length(), escape(actual).c_str(),
              err.c_str());
@@ -357,6 +374,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestListAssignment);
   RUN_TEST(TestExceptions);
   RUN_TEST(TestPredefined);
+  RUN_TEST(TestLabels);
   RUN_TEST(TestBoolean);
   RUN_TEST(TestInteger);
   RUN_TEST(TestDouble);
@@ -796,6 +814,26 @@ bool TestCodeRun::TestPredefined() {
       "static function Testm() { var_dump(__CLASS__, __METHOD__);}} "
       "function Testf() { var_dump(__CLASS__, __METHOD__);} "
       "testf(); A::testm(); $obj = new A(); $obj->testr();");
+  return true;
+}
+
+bool TestCodeRun::TestLabels() {
+  MVCR("<?php\n"
+       "$modalité = 'extended ASCII'; var_dump($modalité);\n"
+       "${\"a-b\"} = 'dash'; var_dump(${\"a-b\"});\n"
+       "${'a\"b'} = 'quote'; var_dump(${'a\"b'});\n"
+       "${'a$b'} = 'dollar'; var_dump(${'a$b'});\n");
+
+  MVCR("<?php\n"
+       "define('modalité', 123); var_dump(modalité);");
+
+  MVCR("<?php\n"
+       "function modalité($a) { var_dump($a);} modalité(123);");
+
+  MVCR("<?php\n"
+       "class modalité { static function odalité() { var_dump(123);} } "
+       "modalité::odalité();");
+
   return true;
 }
 

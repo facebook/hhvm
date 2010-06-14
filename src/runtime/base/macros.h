@@ -215,19 +215,17 @@ namespace HPHP {
 
 #define HASH_GUARD(code, f)                                             \
   if (hash == code && !strcasecmp(s, #f))
-#define HASH_EXISTS(code, str)                                          \
-  if (hash == code && strcmp(s, #str) == 0) return true
 #define HASH_EXISTS_STRING(code, str, len)                              \
   if (hash == code && s.length() == len &&                              \
-      memcmp(s.data(), #str, len) == 0) return true
+      memcmp(s.data(), str, len) == 0) return true
 #define HASH_INITIALIZED(code, name, str)                               \
-  if (hash == code && strcmp(s, #str) == 0)                             \
+  if (hash == code && strcmp(s, str) == 0)                              \
     return isInitialized(name)
 #define HASH_RETURN(code, name, str)                                    \
-  if (hash == code && strcmp(s, #str) == 0) return name
+  if (hash == code && strcmp(s, str) == 0) return name
 #define HASH_RETURN_STRING(code, name, str, len)                        \
   if (hash == code && s.length() == len &&                              \
-      memcmp(s.data(), #str, len) == 0) return name
+      memcmp(s.data(), str, len) == 0) return name
 #define HASH_RETURN_LITSTR(code, index, name, len)                      \
 do { \
   const char *s1 = s.data();                                            \
@@ -237,11 +235,9 @@ do { \
       memcmp(s1, s2, len) == 0)) return name;                           \
 } while (0)
 
-#define HASH_SET(code, name, str)                                       \
-  if (hash == code && strcmp(s, #str) == 0) { name = v; return null;}
 #define HASH_SET_STRING(code, name, str, len)                           \
   if (hash == code && s.length() == len &&                              \
-      memcmp(s.data(), #str, len) == 0) { name = v; return null; }
+      memcmp(s.data(), str, len) == 0) { name = v; return null; }
 #define HASH_INDEX(code, str, index)                                    \
   if (hash == code && strcmp(s, #str) == 0) { return index;}
 

@@ -334,7 +334,7 @@ std::string ScalarExpression::getLiteralString() const {
 
 std::string ScalarExpression::getIdentifier() const {
   if (isLiteralString()) {
-    if (isIdentifier(m_value)) {
+    if (IsIdentifier(m_value)) {
       return m_value;
     }
   }
@@ -391,42 +391,15 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
-std::string ScalarExpression::getCPPLiteralString(
-    bool * hasEmbeddedNullPtr /* = NULL */) {
+std::string ScalarExpression::getCPPLiteralString(CodeGenerator &cg,
+                                                  bool *binary /* = NULL */) {
   string output;
-  bool hasEmbeddedNull = false;
   switch (m_type) {
   case T_CONSTANT_ENCAPSED_STRING:
   case T_ENCAPSED_AND_WHITESPACE:
   case T_STRING: {
-    output.reserve((m_value.length() << 1) + 2);
     output = "\"";
-    for (unsigned int i = 0; i < m_value.length(); i++) {
-      unsigned char ch = m_value[i];
-      switch (ch) {
-      case '\n': output += "\\n";  break;
-      case '\r': output += "\\r";  break;
-      case '\t': output += "\\t";  break;
-      case '\a': output += "\\a";  break;
-      case '\b': output += "\\b";  break;
-      case '\f': output += "\\f";  break;
-      case '\v': output += "\\v";  break;
-      case '\0': output += "\\0";  hasEmbeddedNull = true; break;
-      case '\"': output += "\\\""; break;
-      case '\\': output += "\\\\"; break;
-      case '?':  output += "\\?";  break; // avoiding trigraph errors
-      default:
-        if (isprint(ch)) {
-          output += ch;
-        } else {
-          // output in octal notation
-          char buf[10];
-          snprintf(buf, sizeof(buf), "\\%03o", ch);
-          output += buf;
-        }
-        break;
-      }
-    }
+    output += cg.escapeLabel(m_value, binary);
     output += "\"";
     break;
   }
@@ -440,9 +413,6 @@ std::string ScalarExpression::getCPPLiteralString(
   default:
     ASSERT(false);
   }
-  if (hasEmbeddedNullPtr) {
-    *hasEmbeddedNullPtr = hasEmbeddedNull;
-  }
   return output;
 }
 
@@ -455,7 +425,7 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
   case T_STRING: {
     if (m_quoted) {
       bool hasEmbeddedNull = false;
-      string output = getCPPLiteralString(&hasEmbeddedNull);
+      string output = getCPPLiteralString(cg, &hasEmbeddedNull);
       if (hasEmbeddedNull) {
         char length[20];
         snprintf(length, sizeof(length), "%ld", m_value.length());

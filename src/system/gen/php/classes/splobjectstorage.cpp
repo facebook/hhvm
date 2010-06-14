@@ -33,11 +33,11 @@ Variant c_splobjectstorage::os_getInit(const char *s, int64 hash) {
   switch (hash & 3) {
     case 0:
       HASH_RETURN(0x1C79FCB6D76A8068LL, 
-                  0LL, index);
+                  0LL, "index");
       break;
     case 2:
       HASH_RETURN(0x77112DE97B68FFDALL, 
-                  SystemScalarArrays::ssa_[0], storage);
+                  SystemScalarArrays::ssa_[0], "storage");
       break;
     default:
       break;
@@ -88,11 +88,11 @@ Variant c_splobjectstorage::o_getPrivate(CStrRef s, int64 hash, bool error /* = 
   switch (hash & 3) {
     case 0:
       HASH_RETURN_STRING(0x1C79FCB6D76A8068LL, m_index,
-                         index, 5);
+                         "index", 5);
       break;
     case 2:
       HASH_RETURN_STRING(0x77112DE97B68FFDALL, m_storage,
-                         storage, 7);
+                         "storage", 7);
       break;
     default:
       break;
@@ -125,10 +125,10 @@ bool c_splobjectstorage::o_existsPrivate(CStrRef s, int64 hash) const {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 3) {
     case 0:
-      HASH_EXISTS_STRING(0x1C79FCB6D76A8068LL, index, 5);
+      HASH_EXISTS_STRING(0x1C79FCB6D76A8068LL, "index", 5);
       break;
     case 2:
-      HASH_EXISTS_STRING(0x77112DE97B68FFDALL, storage, 7);
+      HASH_EXISTS_STRING(0x77112DE97B68FFDALL, "storage", 7);
       break;
     default:
       break;
@@ -162,11 +162,11 @@ Variant c_splobjectstorage::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool 
   switch (hash & 3) {
     case 0:
       HASH_SET_STRING(0x1C79FCB6D76A8068LL, m_index,
-                      index, 5);
+                      "index", 5);
       break;
     case 2:
       HASH_SET_STRING(0x77112DE97B68FFDALL, m_storage,
-                      storage, 7);
+                      "storage", 7);
       break;
     default:
       break;
@@ -200,7 +200,7 @@ Variant& c_splobjectstorage::o_lvalPrivate(CStrRef s, int64 hash) {
   switch (hash & 1) {
     case 0:
       HASH_RETURN_STRING(0x77112DE97B68FFDALL, m_storage,
-                         storage, 7);
+                         "storage", 7);
       break;
     default:
       break;

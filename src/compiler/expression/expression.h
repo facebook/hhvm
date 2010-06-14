@@ -271,17 +271,17 @@ public:
   }
   TypePtr getType();
 
-  static ExpressionPtr makeConstant(AnalysisResultPtr ar,
+  static ExpressionPtr MakeConstant(AnalysisResultPtr ar,
                                     LocationPtr loc,
                                     const std::string &value);
-  static void checkPassByReference(AnalysisResultPtr ar,
+  static void CheckPassByReference(AnalysisResultPtr ar,
                                    ExpressionPtr param);
 
-  static bool checkNeeded(AnalysisResultPtr ar, ExpressionPtr variable,
+  static bool CheckNeeded(AnalysisResultPtr ar, ExpressionPtr variable,
                           ExpressionPtr value);
 
 protected:
-  static bool isIdentifier(const std::string &value);
+  static bool IsIdentifier(const std::string &value);
 
   KindOf m_kindOf;
   int m_context;

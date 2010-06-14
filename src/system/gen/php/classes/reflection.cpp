@@ -33,7 +33,7 @@ Variant c_reflectionfunctionabstract::os_getInit(const char *s, int64 hash) {
   switch (hash & 1) {
     case 1:
       HASH_RETURN(0x3255DC7C4A035C47LL, 
-                  null, info);
+                  null, "info");
       break;
     default:
       break;
@@ -68,7 +68,7 @@ Variant c_reflectionfunctionabstract::o_getPublic(CStrRef s, int64 hash, bool er
   switch (hash & 1) {
     case 1:
       HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
-                         info, 4);
+                         "info", 4);
       break;
     default:
       break;
@@ -91,7 +91,7 @@ bool c_reflectionfunctionabstract::o_existsPublic(CStrRef s, int64 hash) const {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 1) {
     case 1:
-      HASH_EXISTS_STRING(0x3255DC7C4A035C47LL, info, 4);
+      HASH_EXISTS_STRING(0x3255DC7C4A035C47LL, "info", 4);
       break;
     default:
       break;
@@ -115,7 +115,7 @@ Variant c_reflectionfunctionabstract::o_setPublic(CStrRef s, int64 hash, CVarRef
   switch (hash & 1) {
     case 1:
       HASH_SET_STRING(0x3255DC7C4A035C47LL, m_info,
-                      info, 4);
+                      "info", 4);
       break;
     default:
       break;
@@ -139,7 +139,7 @@ Variant& c_reflectionfunctionabstract::o_lvalPublic(CStrRef s, int64 hash) {
   switch (hash & 1) {
     case 1:
       HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
-                         info, 4);
+                         "info", 4);
       break;
     default:
       break;
@@ -2349,11 +2349,11 @@ Variant c_reflectionclass::os_getInit(const char *s, int64 hash) {
   switch (hash & 3) {
     case 0:
       HASH_RETURN(0x0BCDB293DC3DBDDCLL, 
-                  null, name);
+                  null, "name");
       break;
     case 3:
       HASH_RETURN(0x3255DC7C4A035C47LL, 
-                  null, info);
+                  null, "info");
       break;
     default:
       break;
@@ -2399,7 +2399,7 @@ Variant c_reflectionclass::o_getPublic(CStrRef s, int64 hash, bool error /* = tr
   switch (hash & 1) {
     case 0:
       HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
-                         name, 4);
+                         "name", 4);
       break;
     default:
       break;
@@ -2413,7 +2413,7 @@ Variant c_reflectionclass::o_getPrivate(CStrRef s, int64 hash, bool error /* = t
   switch (hash & 1) {
     case 1:
       HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
-                         info, 4);
+                         "info", 4);
       break;
     default:
       break;
@@ -2441,7 +2441,7 @@ bool c_reflectionclass::o_existsPublic(CStrRef s, int64 hash) const {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 1) {
     case 0:
-      HASH_EXISTS_STRING(0x0BCDB293DC3DBDDCLL, name, 4);
+      HASH_EXISTS_STRING(0x0BCDB293DC3DBDDCLL, "name", 4);
       break;
     default:
       break;
@@ -2454,7 +2454,7 @@ bool c_reflectionclass::o_existsPrivate(CStrRef s, int64 hash) const {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 1) {
     case 1:
-      HASH_EXISTS_STRING(0x3255DC7C4A035C47LL, info, 4);
+      HASH_EXISTS_STRING(0x3255DC7C4A035C47LL, "info", 4);
       break;
     default:
       break;
@@ -2483,7 +2483,7 @@ Variant c_reflectionclass::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool fo
   switch (hash & 1) {
     case 0:
       HASH_SET_STRING(0x0BCDB293DC3DBDDCLL, m_name,
-                      name, 4);
+                      "name", 4);
       break;
     default:
       break;
@@ -2497,7 +2497,7 @@ Variant c_reflectionclass::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool f
   switch (hash & 1) {
     case 1:
       HASH_SET_STRING(0x3255DC7C4A035C47LL, m_info,
-                      info, 4);
+                      "info", 4);
       break;
     default:
       break;
@@ -2526,7 +2526,7 @@ Variant& c_reflectionclass::o_lvalPublic(CStrRef s, int64 hash) {
   switch (hash & 1) {
     case 0:
       HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
-                         name, 4);
+                         "name", 4);
       break;
     default:
       break;
@@ -2540,7 +2540,7 @@ Variant& c_reflectionclass::o_lvalPrivate(CStrRef s, int64 hash) {
   switch (hash & 1) {
     case 1:
       HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
-                         info, 4);
+                         "info", 4);
       break;
     default:
       break;
@@ -2553,11 +2553,11 @@ Variant c_reflectionclass::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 7) {
     case 2:
-      HASH_RETURN(0x042E299D3BE2773ALL, q_reflectionclass_IS_IMPLICIT_ABSTRACT, IS_IMPLICIT_ABSTRACT);
+      HASH_RETURN(0x042E299D3BE2773ALL, q_reflectionclass_IS_IMPLICIT_ABSTRACT, "IS_IMPLICIT_ABSTRACT");
       break;
     case 6:
-      HASH_RETURN(0x468EF528A19A529ELL, q_reflectionclass_IS_EXPLICIT_ABSTRACT, IS_EXPLICIT_ABSTRACT);
-      HASH_RETURN(0x47AAFAC74A59AD66LL, q_reflectionclass_IS_FINAL, IS_FINAL);
+      HASH_RETURN(0x468EF528A19A529ELL, q_reflectionclass_IS_EXPLICIT_ABSTRACT, "IS_EXPLICIT_ABSTRACT");
+      HASH_RETURN(0x47AAFAC74A59AD66LL, q_reflectionclass_IS_FINAL, "IS_FINAL");
       break;
     default:
       break;
@@ -4528,11 +4528,11 @@ Variant c_reflectionextension::os_getInit(const char *s, int64 hash) {
   switch (hash & 3) {
     case 0:
       HASH_RETURN(0x0BCDB293DC3DBDDCLL, 
-                  null, name);
+                  null, "name");
       break;
     case 3:
       HASH_RETURN(0x3255DC7C4A035C47LL, 
-                  null, info);
+                  null, "info");
       break;
     default:
       break;
@@ -4583,11 +4583,11 @@ Variant c_reflectionextension::o_getPrivate(CStrRef s, int64 hash, bool error /*
   switch (hash & 3) {
     case 0:
       HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
-                         name, 4);
+                         "name", 4);
       break;
     case 3:
       HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
-                         info, 4);
+                         "info", 4);
       break;
     default:
       break;
@@ -4620,10 +4620,10 @@ bool c_reflectionextension::o_existsPrivate(CStrRef s, int64 hash) const {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 3) {
     case 0:
-      HASH_EXISTS_STRING(0x0BCDB293DC3DBDDCLL, name, 4);
+      HASH_EXISTS_STRING(0x0BCDB293DC3DBDDCLL, "name", 4);
       break;
     case 3:
-      HASH_EXISTS_STRING(0x3255DC7C4A035C47LL, info, 4);
+      HASH_EXISTS_STRING(0x3255DC7C4A035C47LL, "info", 4);
       break;
     default:
       break;
@@ -4657,11 +4657,11 @@ Variant c_reflectionextension::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bo
   switch (hash & 3) {
     case 0:
       HASH_SET_STRING(0x0BCDB293DC3DBDDCLL, m_name,
-                      name, 4);
+                      "name", 4);
       break;
     case 3:
       HASH_SET_STRING(0x3255DC7C4A035C47LL, m_info,
-                      info, 4);
+                      "info", 4);
       break;
     default:
       break;
@@ -4695,11 +4695,11 @@ Variant& c_reflectionextension::o_lvalPrivate(CStrRef s, int64 hash) {
   switch (hash & 3) {
     case 0:
       HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
-                         name, 4);
+                         "name", 4);
       break;
     case 3:
       HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
-                         info, 4);
+                         "info", 4);
       break;
     default:
       break;
@@ -5234,11 +5234,11 @@ Variant c_reflectionmethod::os_getInit(const char *s, int64 hash) {
   switch (hash & 3) {
     case 0:
       HASH_RETURN(0x0BCDB293DC3DBDDCLL, 
-                  null, name);
+                  null, "name");
       break;
     case 2:
       HASH_RETURN(0x45397FE5C82CBD12LL, 
-                  null, class);
+                  null, "class");
       break;
     default:
       break;
@@ -5274,11 +5274,11 @@ Variant c_reflectionmethod::o_getPublic(CStrRef s, int64 hash, bool error /* = t
   switch (hash & 3) {
     case 0:
       HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
-                         name, 4);
+                         "name", 4);
       break;
     case 2:
       HASH_RETURN_STRING(0x45397FE5C82CBD12LL, m_class,
-                         class, 5);
+                         "class", 5);
       break;
     default:
       break;
@@ -5301,10 +5301,10 @@ bool c_reflectionmethod::o_existsPublic(CStrRef s, int64 hash) const {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 3) {
     case 0:
-      HASH_EXISTS_STRING(0x0BCDB293DC3DBDDCLL, name, 4);
+      HASH_EXISTS_STRING(0x0BCDB293DC3DBDDCLL, "name", 4);
       break;
     case 2:
-      HASH_EXISTS_STRING(0x45397FE5C82CBD12LL, class, 5);
+      HASH_EXISTS_STRING(0x45397FE5C82CBD12LL, "class", 5);
       break;
     default:
       break;
@@ -5328,11 +5328,11 @@ Variant c_reflectionmethod::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool f
   switch (hash & 3) {
     case 0:
       HASH_SET_STRING(0x0BCDB293DC3DBDDCLL, m_name,
-                      name, 4);
+                      "name", 4);
       break;
     case 2:
       HASH_SET_STRING(0x45397FE5C82CBD12LL, m_class,
-                      class, 5);
+                      "class", 5);
       break;
     default:
       break;
@@ -5356,11 +5356,11 @@ Variant& c_reflectionmethod::o_lvalPublic(CStrRef s, int64 hash) {
   switch (hash & 3) {
     case 0:
       HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
-                         name, 4);
+                         "name", 4);
       break;
     case 2:
       HASH_RETURN_STRING(0x45397FE5C82CBD12LL, m_class,
-                         class, 5);
+                         "class", 5);
       break;
     default:
       break;
@@ -5378,20 +5378,20 @@ Variant c_reflectionmethod::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 15) {
     case 1:
-      HASH_RETURN(0x163BE642CB04C741LL, q_reflectionmethod_IS_PRIVATE, IS_PRIVATE);
+      HASH_RETURN(0x163BE642CB04C741LL, q_reflectionmethod_IS_PRIVATE, "IS_PRIVATE");
       break;
     case 3:
-      HASH_RETURN(0x6572B785E302A373LL, q_reflectionmethod_IS_ABSTRACT, IS_ABSTRACT);
+      HASH_RETURN(0x6572B785E302A373LL, q_reflectionmethod_IS_ABSTRACT, "IS_ABSTRACT");
       break;
     case 4:
-      HASH_RETURN(0x5F17AEF953553E24LL, q_reflectionmethod_IS_PUBLIC, IS_PUBLIC);
+      HASH_RETURN(0x5F17AEF953553E24LL, q_reflectionmethod_IS_PUBLIC, "IS_PUBLIC");
       break;
     case 6:
-      HASH_RETURN(0x47AAFAC74A59AD66LL, q_reflectionmethod_IS_FINAL, IS_FINAL);
+      HASH_RETURN(0x47AAFAC74A59AD66LL, q_reflectionmethod_IS_FINAL, "IS_FINAL");
       break;
     case 7:
-      HASH_RETURN(0x56142E71554B0647LL, q_reflectionmethod_IS_STATIC, IS_STATIC);
-      HASH_RETURN(0x6912B8D6D8DE2FF7LL, q_reflectionmethod_IS_PROTECTED, IS_PROTECTED);
+      HASH_RETURN(0x56142E71554B0647LL, q_reflectionmethod_IS_STATIC, "IS_STATIC");
+      HASH_RETURN(0x6912B8D6D8DE2FF7LL, q_reflectionmethod_IS_PROTECTED, "IS_PROTECTED");
       break;
     default:
       break;
@@ -6459,15 +6459,15 @@ Variant c_reflectionproperty::os_getInit(const char *s, int64 hash) {
   switch (hash & 7) {
     case 2:
       HASH_RETURN(0x45397FE5C82CBD12LL, 
-                  null, class);
+                  null, "class");
       break;
     case 4:
       HASH_RETURN(0x0BCDB293DC3DBDDCLL, 
-                  null, name);
+                  null, "name");
       break;
     case 7:
       HASH_RETURN(0x3255DC7C4A035C47LL, 
-                  null, info);
+                  null, "info");
       break;
     default:
       break;
@@ -6504,15 +6504,15 @@ Variant c_reflectionproperty::o_getPublic(CStrRef s, int64 hash, bool error /* =
   switch (hash & 7) {
     case 2:
       HASH_RETURN_STRING(0x45397FE5C82CBD12LL, m_class,
-                         class, 5);
+                         "class", 5);
       break;
     case 4:
       HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
-                         name, 4);
+                         "name", 4);
       break;
     case 7:
       HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
-                         info, 4);
+                         "info", 4);
       break;
     default:
       break;
@@ -6535,13 +6535,13 @@ bool c_reflectionproperty::o_existsPublic(CStrRef s, int64 hash) const {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 7) {
     case 2:
-      HASH_EXISTS_STRING(0x45397FE5C82CBD12LL, class, 5);
+      HASH_EXISTS_STRING(0x45397FE5C82CBD12LL, "class", 5);
       break;
     case 4:
-      HASH_EXISTS_STRING(0x0BCDB293DC3DBDDCLL, name, 4);
+      HASH_EXISTS_STRING(0x0BCDB293DC3DBDDCLL, "name", 4);
       break;
     case 7:
-      HASH_EXISTS_STRING(0x3255DC7C4A035C47LL, info, 4);
+      HASH_EXISTS_STRING(0x3255DC7C4A035C47LL, "info", 4);
       break;
     default:
       break;
@@ -6565,15 +6565,15 @@ Variant c_reflectionproperty::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool
   switch (hash & 7) {
     case 2:
       HASH_SET_STRING(0x45397FE5C82CBD12LL, m_class,
-                      class, 5);
+                      "class", 5);
       break;
     case 4:
       HASH_SET_STRING(0x0BCDB293DC3DBDDCLL, m_name,
-                      name, 4);
+                      "name", 4);
       break;
     case 7:
       HASH_SET_STRING(0x3255DC7C4A035C47LL, m_info,
-                      info, 4);
+                      "info", 4);
       break;
     default:
       break;
@@ -6597,15 +6597,15 @@ Variant& c_reflectionproperty::o_lvalPublic(CStrRef s, int64 hash) {
   switch (hash & 7) {
     case 2:
       HASH_RETURN_STRING(0x45397FE5C82CBD12LL, m_class,
-                         class, 5);
+                         "class", 5);
       break;
     case 4:
       HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
-                         name, 4);
+                         "name", 4);
       break;
     case 7:
       HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
-                         info, 4);
+                         "info", 4);
       break;
     default:
       break;
@@ -6623,14 +6623,14 @@ Variant c_reflectionproperty::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 7) {
     case 1:
-      HASH_RETURN(0x163BE642CB04C741LL, q_reflectionproperty_IS_PRIVATE, IS_PRIVATE);
+      HASH_RETURN(0x163BE642CB04C741LL, q_reflectionproperty_IS_PRIVATE, "IS_PRIVATE");
       break;
     case 4:
-      HASH_RETURN(0x5F17AEF953553E24LL, q_reflectionproperty_IS_PUBLIC, IS_PUBLIC);
+      HASH_RETURN(0x5F17AEF953553E24LL, q_reflectionproperty_IS_PUBLIC, "IS_PUBLIC");
       break;
     case 7:
-      HASH_RETURN(0x56142E71554B0647LL, q_reflectionproperty_IS_STATIC, IS_STATIC);
-      HASH_RETURN(0x6912B8D6D8DE2FF7LL, q_reflectionproperty_IS_PROTECTED, IS_PROTECTED);
+      HASH_RETURN(0x56142E71554B0647LL, q_reflectionproperty_IS_STATIC, "IS_STATIC");
+      HASH_RETURN(0x6912B8D6D8DE2FF7LL, q_reflectionproperty_IS_PROTECTED, "IS_PROTECTED");
       break;
     default:
       break;
@@ -7444,7 +7444,7 @@ Variant c_reflectionfunction::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 1) {
     case 1:
-      HASH_RETURN(0x7E324BF544E5B919LL, q_reflectionfunction_IS_DEPRECATED, IS_DEPRECATED);
+      HASH_RETURN(0x7E324BF544E5B919LL, q_reflectionfunction_IS_DEPRECATED, "IS_DEPRECATED");
       break;
     default:
       break;
@@ -8128,7 +8128,7 @@ Variant c_reflectionparameter::os_getInit(const char *s, int64 hash) {
   switch (hash & 1) {
     case 1:
       HASH_RETURN(0x3255DC7C4A035C47LL, 
-                  null, info);
+                  null, "info");
       break;
     default:
       break;
@@ -8163,7 +8163,7 @@ Variant c_reflectionparameter::o_getPublic(CStrRef s, int64 hash, bool error /* 
   switch (hash & 1) {
     case 1:
       HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
-                         info, 4);
+                         "info", 4);
       break;
     default:
       break;
@@ -8186,7 +8186,7 @@ bool c_reflectionparameter::o_existsPublic(CStrRef s, int64 hash) const {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 1) {
     case 1:
-      HASH_EXISTS_STRING(0x3255DC7C4A035C47LL, info, 4);
+      HASH_EXISTS_STRING(0x3255DC7C4A035C47LL, "info", 4);
       break;
     default:
       break;
@@ -8210,7 +8210,7 @@ Variant c_reflectionparameter::o_setPublic(CStrRef s, int64 hash, CVarRef v, boo
   switch (hash & 1) {
     case 1:
       HASH_SET_STRING(0x3255DC7C4A035C47LL, m_info,
-                      info, 4);
+                      "info", 4);
       break;
     default:
       break;
@@ -8234,7 +8234,7 @@ Variant& c_reflectionparameter::o_lvalPublic(CStrRef s, int64 hash) {
   switch (hash & 1) {
     case 1:
       HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
-                         info, 4);
+                         "info", 4);
       break;
     default:
       break;

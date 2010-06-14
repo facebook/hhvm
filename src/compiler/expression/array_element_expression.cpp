@@ -320,8 +320,8 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
   if (m_global) {
     if (!m_globalName.empty()) {
       VariableTablePtr variables = ar->getScope()->getVariables();
-      cg_printf("g->%s",
-                variables->getGlobalVariableName(ar, m_globalName).c_str());
+      string name = variables->getGlobalVariableName(cg, ar, m_globalName);
+      cg_printf("g->%s", name.c_str());
     } else {
       cg_printf("get_variable_table()->get(");
       m_offset->outputCPP(cg, ar);
@@ -416,8 +416,8 @@ void ArrayElementExpression::outputCPPExistTest(CodeGenerator &cg,
   if (m_global) {
     if (!m_globalName.empty()) {
       VariableTablePtr variables = ar->getScope()->getVariables();
-      cg_printf("g->%s",
-                variables->getGlobalVariableName(ar, m_globalName).c_str());
+      string name = variables->getGlobalVariableName(cg, ar, m_globalName);
+      cg_printf("g->%s", name.c_str());
     } else {
       cg_printf("get_variable_table()->get(");
       m_offset->outputCPP(cg, ar);

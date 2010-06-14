@@ -389,7 +389,7 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       }
     }
   } else if (m_bindClass && m_classScope) {
-    cg_printf(" BIND_CLASS_ARROW(%s) ", m_classScope->getId().c_str());
+    cg_printf(" BIND_CLASS_ARROW(%s) ", m_classScope->getId(cg).c_str());
   }
 
   if (!m_name.empty()) {

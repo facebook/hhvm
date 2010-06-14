@@ -32,9 +32,9 @@ Variant c_directory::os_getInit(const char *s, int64 hash) {
   switch (hash & 3) {
     case 0:
       HASH_RETURN(0x42DD5992F363B3C4LL, 
-                  null, path);
+                  null, "path");
       HASH_RETURN(0x48E8F48146EEEF5CLL, 
-                  null, handle);
+                  null, "handle");
       break;
     default:
       break;
@@ -70,9 +70,9 @@ Variant c_directory::o_getPublic(CStrRef s, int64 hash, bool error /* = true */)
   switch (hash & 3) {
     case 0:
       HASH_RETURN_STRING(0x42DD5992F363B3C4LL, m_path,
-                         path, 4);
+                         "path", 4);
       HASH_RETURN_STRING(0x48E8F48146EEEF5CLL, m_handle,
-                         handle, 6);
+                         "handle", 6);
       break;
     default:
       break;
@@ -95,8 +95,8 @@ bool c_directory::o_existsPublic(CStrRef s, int64 hash) const {
   if (hash < 0) hash = hash_string(s.data(), s.length());
   switch (hash & 3) {
     case 0:
-      HASH_EXISTS_STRING(0x42DD5992F363B3C4LL, path, 4);
-      HASH_EXISTS_STRING(0x48E8F48146EEEF5CLL, handle, 6);
+      HASH_EXISTS_STRING(0x42DD5992F363B3C4LL, "path", 4);
+      HASH_EXISTS_STRING(0x48E8F48146EEEF5CLL, "handle", 6);
       break;
     default:
       break;
@@ -120,9 +120,9 @@ Variant c_directory::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit 
   switch (hash & 3) {
     case 0:
       HASH_SET_STRING(0x42DD5992F363B3C4LL, m_path,
-                      path, 4);
+                      "path", 4);
       HASH_SET_STRING(0x48E8F48146EEEF5CLL, m_handle,
-                      handle, 6);
+                      "handle", 6);
       break;
     default:
       break;
@@ -146,9 +146,9 @@ Variant& c_directory::o_lvalPublic(CStrRef s, int64 hash) {
   switch (hash & 3) {
     case 0:
       HASH_RETURN_STRING(0x42DD5992F363B3C4LL, m_path,
-                         path, 4);
+                         "path", 4);
       HASH_RETURN_STRING(0x48E8F48146EEEF5CLL, m_handle,
-                         handle, 6);
+                         "handle", 6);
       break;
     default:
       break;

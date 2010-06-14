@@ -68,7 +68,7 @@ public:
 
   void outputCPPString(CodeGenerator &cg, AnalysisResultPtr ar);
 
-  std::string getCPPLiteralString(bool * hasEmbeddedNullPtr = NULL);
+  std::string getCPPLiteralString(CodeGenerator &cg, bool *binary = NULL);
 
   static void setHookHandler(void (*hookHandler)(AnalysisResultPtr ar,
                                                  ScalarExpressionPtr sc,

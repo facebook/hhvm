@@ -141,9 +141,9 @@ public:
 
   const char *getVariablePrefix(AnalysisResultPtr ar,
                                 const std::string &name) const;
-  std::string getVariableName(AnalysisResultPtr ar,
+  std::string getVariableName(CodeGenerator &cg, AnalysisResultPtr ar,
                               const std::string &name) const;
-  std::string getGlobalVariableName(AnalysisResultPtr ar,
+  std::string getGlobalVariableName(CodeGenerator &cg, AnalysisResultPtr ar,
                                     const std::string &name) const;
 
   /**
@@ -321,8 +321,10 @@ private:
     FunctionScopePtr func;
 
     // get unique identifier for this variable
-    static std::string getId(ClassScopePtr cls, FunctionScopePtr func,
-                             const std::string &name);
+    static std::string getName(ClassScopePtr cls,
+                               FunctionScopePtr func, const std::string &name);
+    static std::string getId(CodeGenerator &cg, ClassScopePtr cls,
+                             FunctionScopePtr func, const std::string &name);
   };
   StringToStaticGlobalInfoPtrMap m_staticGlobals;
 

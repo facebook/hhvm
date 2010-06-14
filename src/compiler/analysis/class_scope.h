@@ -99,16 +99,10 @@ public:
   const char *getOriginalName() const;
 
 
-  std::string getId() const {
-    if (m_redeclaring < 0) {
-      return getName();
-    }
-    return getName() + Option::IdPrefix +
-      boost::lexical_cast<std::string>(m_redeclaring);
-  }
+  virtual std::string getId(CodeGenerator &cg) const;
 
   const std::string &getParent() const { return m_parent;}
-  std::string getHeaderFilename();
+  std::string getHeaderFilename(CodeGenerator &cg);
 
   /**
    * Whether this is a user-defined class.
@@ -278,7 +272,7 @@ public:
   bool isAbstract() { return m_kindOf == KindOfAbstractClass; }
   bool hasProperty(const std::string &name);
   bool hasConst(const std::string &name);
-  void outputCPPHeader(AnalysisResultPtr ar,
+  void outputCPPHeader(CodeGenerator &cg, AnalysisResultPtr ar,
                        CodeGenerator::Output output);
 
   /**

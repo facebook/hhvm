@@ -95,6 +95,7 @@ public:
                              bool caseInsensitive);
 
 public:
+  CodeGenerator() {} // only for creating a dummy code generator
   CodeGenerator(std::ostream *primary, Output output = PickledPHP,
                 std::string *filename = NULL);
 
@@ -140,6 +141,8 @@ public:
   void printDeclareGlobals();
   void printStartOfJumpTable(int tableSize);
   const char *getGlobals(AnalysisResultPtr ar);
+  std::string formatLabel(const std::string &name);
+  std::string escapeLabel(const std::string &name, bool *binary = NULL);
 
   /**
    * Make sure PHP variables, functions and typenames are unique and
@@ -192,6 +195,7 @@ public:
   void translatePredefined(bool flag) { m_translatePredefined = flag; }
 
   int checkLiteralString(const std::string &str, AnalysisResultPtr ar);
+
 private:
   std::string m_filename;
   Stream m_curStream;

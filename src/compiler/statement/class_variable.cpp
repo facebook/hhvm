@@ -253,13 +253,13 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           AssignmentExpressionPtr assignment =
             dynamic_pointer_cast<AssignmentExpression>(exp);
 
-          var = dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
+          var = dynamic_pointer_cast<SimpleVariable>
+            (assignment->getVariable());
           ExpressionPtr value = assignment->getValue();
           if (!value->isScalar()) continue;
           cg_printf("g->%s%s%s%s = ",
-                    Option::StaticPropertyPrefix, scope->getId().c_str(),
+                    Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
                     Option::IdPrefix.c_str(), var->getName().c_str());
-
 
           value->outputCPP(cg, ar);
         } else {
@@ -268,7 +268,7 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           const char *initializer = type->getCPPInitializer();
           if (initializer) {
             cg_printf("g->%s%s%s%s = %s",
-                      Option::StaticPropertyPrefix, scope->getId().c_str(),
+                      Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
                       Option::IdPrefix.c_str(), var->getName().c_str(),
                       initializer);
           }
@@ -288,7 +288,7 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         if (value->isScalar()) continue;
         value->outputCPPBegin(cg, ar);
         cg_printf("g->%s%s%s%s = ",
-                  Option::StaticPropertyPrefix, scope->getId().c_str(),
+                  Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
                   Option::IdPrefix.c_str(), var->getName().c_str());
         value->outputCPP(cg, ar);
         cg_printf(";\n");

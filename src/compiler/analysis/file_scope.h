@@ -154,7 +154,7 @@ public:
   void outputCPPDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPForwardDeclarations(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPDeclarations(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPClassHeaders(AnalysisResultPtr ar,
+  void outputCPPClassHeaders(CodeGenerator &cg, AnalysisResultPtr ar,
                              CodeGenerator::Output output);
   void outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPPseudoMain(CodeGenerator &cg, AnalysisResultPtr ar);

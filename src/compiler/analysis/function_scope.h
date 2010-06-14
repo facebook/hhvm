@@ -85,13 +85,7 @@ public:
     return getName();
   }
 
-  std::string getId() const {
-    if (m_redeclaring < 0) {
-      return getName();
-    }
-    return getName() + Option::IdPrefix +
-      boost::lexical_cast<std::string>(m_redeclaring);
-  }
+  virtual std::string getId(CodeGenerator &cg) const;
 
   int getRedeclaringId() const {
     return m_redeclaring;

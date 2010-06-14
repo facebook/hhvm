@@ -1068,7 +1068,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
 
     // for each file, generate one list of class headers
     BOOST_FOREACH(FileScopePtr fs, iter->second) {
-      fs->outputCPPClassHeaders(ar, output);
+      fs->outputCPPClassHeaders(cg, ar, output);
     }
   }
 
@@ -1451,7 +1451,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
           if (it->second.size() == 1) {
             cg_indentBegin("Variant %s%s(const char *s, CArrRef params, "
                            "int64 hash, bool fatal) {\n",
-                           Option::InvokePrefix, name);
+                           Option::InvokePrefix, cg.formatLabel(name).c_str());
             cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
                            hash_string_i(name), name);
             FunctionScope::OutputCPPDynamicInvokeCount(cg);
@@ -1476,12 +1476,13 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
         // no conflict
         cg_printf("Variant %s%s(const char *s, CArrRef params, int64 hash, "
                   "bool fatal);\n",
-                  Option::InvokePrefix, it->second.front());
+                  Option::InvokePrefix,
+                  cg.formatLabel(it->second.front()).c_str());
       } else {
         for (unsigned int i = 0; i < it->second.size(); i++) {
           const char *name = it->second.at(i);
           cg_printf("Variant %s%s(CArrRef params);\n", Option::InvokePrefix,
-                    name);
+                    cg.formatLabel(name).c_str());
         }
         cg_indentBegin("static Variant invoke_case_%d(const char *s, "
                        "CArrRef params, int64 hash, bool fatal) {\n",
@@ -1489,7 +1490,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
         for (unsigned int i = 0; i < it->second.size(); i++) {
           const char *name = it->second.at(i);
           cg_printf("HASH_INVOKE(0x%016llXLL, %s);\n",
-                    hash_string_i(name), name);
+                    hash_string_i(name), cg.formatLabel(name).c_str());
         }
         cg_printf("return invoke_builtin(s, params, hash, fatal);\n");
         cg_indentEnd("}\n");
@@ -1514,7 +1515,8 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
           if (it->second.size() == 1 &&
               !findFunction(it->second[0])->isRedeclaring()) {
             cg_printf("funcTable[%d] = &%s%s;\n", it->first,
-                      Option::InvokePrefix, it->second.front());
+                      Option::InvokePrefix,
+                      cg.formatLabel(it->second.front()).c_str());
           } else {
             cg_printf("funcTable[%d] = &invoke_case_%d;\n",
                       it->first, it->first);
@@ -1669,21 +1671,25 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
       for (JumpTable jt(cg, strings, false, false, false); jt.ready();
            jt.next()) {
         const char *name = jt.key();
-        string varName = string(Option::ConstantPrefix) + name;
+        string varName = string(Option::ConstantPrefix) + cg.formatLabel(name);
         hphp_const_char_map<bool>::const_iterator it = dyns.find(name);
         bool dyn = it != dyns.end() && it->second;
         if (dyn) {
-          cg_printf("HASH_RETURN(0x%016llXLL, g->%s, %s);\n",
-                    hash_string(name), varName.c_str(), name);
+          cg_printf("HASH_RETURN(0x%016llXLL, g->%s, \"%s\");\n",
+                    hash_string(name), varName.c_str(),
+                    cg.escapeLabel(name).c_str());
         } else if (!strcmp(name, "INF")) {
-          cg_printf("HASH_RETURN(0x%016llXLL, %s, %s);\n",
-                    hash_string(name), "Limits::inf_double", name);
+          cg_printf("HASH_RETURN(0x%016llXLL, %s, \"%s\");\n",
+                    hash_string(name), "Limits::inf_double",
+                    cg.escapeLabel(name).c_str());
         } else if (!strcmp(name, "NAN")) {
-          cg_printf("HASH_RETURN(0x%016llXLL, %s, %s);\n",
-                    hash_string(name), "Limits::nan_double", name);
+          cg_printf("HASH_RETURN(0x%016llXLL, %s, \"%s\");\n",
+                    hash_string(name), "Limits::nan_double",
+                    cg.escapeLabel(name).c_str());
         } else {
-          cg_printf("HASH_RETURN(0x%016llXLL, %s, %s);\n",
-                    hash_string(name), varName.c_str(), name);
+          cg_printf("HASH_RETURN(0x%016llXLL, %s, \"%s\");\n",
+                    hash_string(name), varName.c_str(),
+                    cg.escapeLabel(name).c_str());
         }
       }
     }
@@ -2241,7 +2247,7 @@ void AnalysisResult::outputCPPClassStaticInitializerFlags(CodeGenerator &cg,
     BOOST_FOREACH(ClassScopePtr cls, iter->second) {
       if (cls->needLazyStaticInitializer()) {
         cg_printf(fmt, Option::ClassStaticInitializerFlagPrefix,
-                  cls->getId().c_str());
+                  cls->getId(cg).c_str());
       }
     }
   }
@@ -2688,7 +2694,7 @@ void AnalysisResult::outputHSFFIStubs() {
         } else {
           cg_printf(", ");
         }
-        cg_printf("f_%s", func->getId().c_str());
+        cg_printf("f_%s", func->getId(cg).c_str());
       }
     }
   }
@@ -2895,10 +2901,11 @@ int AnalysisResult::getLiteralStringId(const std::string &s) {
 }
 
 string AnalysisResult::getFuncId(ClassScopePtr cls, FunctionScopePtr func) {
+  CodeGenerator cg;
   if (cls) {
-    return cls->getId() + "::" + func->getId();
+    return cls->getId(cg) + "::" + func->getId(cg);
   }
-  return func->getId();
+  return func->getId(cg);
 }
 
 string AnalysisResult::getParamRTTIEntryKey(ClassScopePtr cls,
@@ -3049,7 +3056,7 @@ void AnalysisResult::outputCPPLiteralStringPrecomputation() {
     } else {
       for (int j = 0; j < bucketSize &&
            it != m_stringLiterals.end(); ++it, ++j) {
-        std::string str = it->second.second->getCPPLiteralString();
+        std::string str = it->second.second->getCPPLiteralString(cg);
         cg_printf("%s[%d].init(LITSTR_INIT(%s));", lsname,
                   it->second.first, str.c_str());
       }

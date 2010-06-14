@@ -130,9 +130,10 @@ bool FunctionStatement::hasImpl() const {
   return m_funcScope.lock()->isVolatile();
 }
 
-void FunctionStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
+void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
+                                      AnalysisResultPtr ar) {
   FunctionScopePtr funcScope = m_funcScope.lock();
-  string fname = funcScope->getId().c_str();
+  string fname = funcScope->getId(cg).c_str();
   bool pseudoMain = funcScope->inPseudoMain();
   string origFuncName = !pseudoMain ? funcScope->getOriginalName() :
           ("run_init::" + funcScope->getFileScope()->getName());
@@ -143,10 +144,10 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (cg.getContext() == CodeGenerator::NoContext) {
     if (funcScope->isRedeclaring()) {
       cg_printf("g->%s%s = %s%s;\n",
-                Option::InvokePrefix, m_name.c_str(),
+                Option::InvokePrefix, cg.formatLabel(m_name).c_str(),
                 Option::InvokePrefix, fname.c_str());
       cg_printf("g->%s%s_few_args = %s%s_few_args;\n",
-                Option::InvokePrefix, m_name.c_str(),
+                Option::InvokePrefix, cg.formatLabel(m_name).c_str(),
                 Option::InvokePrefix, fname.c_str());
     }
     if (funcScope->isVolatile()) {

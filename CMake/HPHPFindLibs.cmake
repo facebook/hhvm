@@ -31,8 +31,13 @@ find_package(MySQL REQUIRED)
 include_directories(${MYSQL_INCLUDE_DIR})
 link_directories(${MYSQL_LIB_DIR})
 
+# libmemcached checks
+find_package(Libmemcached REQUIRED)
+include_directories(${LIBMEMCACHED_INCLUDE_DIRS})
+
 # pcre checks
 find_package(PCRE REQUIRED)
+include_directories(${PCRE_INCLUDE_DIRS})
 
 # libevent checks
 find_package(LibEvent REQUIRED)
@@ -115,7 +120,7 @@ if (USE_TCMALLOC)
 	FIND_LIBRARY(GOOGLE_TCMALLOC_LIB tcmalloc_minimal)
 
 	set(HAVE_TCMALLOC 0)
-	if (GOOGLE_TCMALLOC_LIB STREQUAL "GOOGLE_TCMALLOC_LIB-NOTFOUND")
+	if (NOT GOOGLE_TCMALLOC_LIB)
 		message(STATUS "Skipping TCmalloc")
 	else()
 		message(STATUS "Found tcmalloc: ${GOOGLE_TCMALLOC_LIB}")
@@ -163,7 +168,7 @@ FIND_LIBRARY (RT_LIB rt)
 
 FIND_LIBRARY (CAP_LIB cap)
 
-if (CAP_LIB STREQUAL "CAP_LIB-NOTFOUND")
+if (NOT CAP_LIB)
   message(FATAL_ERROR "You need to install libcap")
 endif()
 
@@ -172,11 +177,11 @@ FIND_LIBRARY (BFD_LIB bfd)
 FIND_LIBRARY (BINUTIL_LIB iberty)
 FIND_LIBRARY (DL_LIB dl)
 
-if (BFD_LIB STREQUAL "BFD_LIB-NOTFOUND")
+if (NOT BFD_LIB)
 	message(FATAL_ERROR "You need to install binutils")
 endif()
 
-if (BINUTIL_LIB STREQUAL "BINUTIL_LIB-NOTFOUND")
+if (NOT BINUTIL_LIB)
 	message(FATAL_ERROR "You need to install binutils")
 endif()
 
@@ -215,6 +220,8 @@ macro(hphp_link target)
 
 	target_link_libraries(${target} ${LDAP_LIBRARIES})
 	target_link_libraries(${target} ${LBER_LIBRARIES})
+
+	target_link_libraries(${target} ${LIBMEMCACHED_LIBRARIES})
 
 	target_link_libraries(${target} ${CRYPT_LIB})
 	target_link_libraries(${target} ${RESOLV_LIB})

@@ -30,9 +30,10 @@ protected:
                    const char *file = NULL, int line = 0);
   virtual void log(const std::string &msg, const StackTrace *stackTrace,
                    bool escape = true);
-private:
+
   // Log additional injected stacktrace.
   void Log(CArrRef stackTrace);
+private:
   void PrintStackTrace(FILE *f, CArrRef stackTrace);
 };
 

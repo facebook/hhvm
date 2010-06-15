@@ -17,6 +17,7 @@ $excluded = array(
   'runtime/ext/JSON_parser.cpp',
   'runtime/ext/php_unicode.h',
   'runtime/base/zend/zend_ini.tab.cpp',
+  'third_party/',
 );
 
 $files_zend = array(

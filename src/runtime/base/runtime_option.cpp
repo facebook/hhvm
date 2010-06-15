@@ -60,8 +60,6 @@ int RuntimeOption::NoticeFrequency = 1;
 int RuntimeOption::WarningFrequency = 1;
 int64 RuntimeOption::SerializationSizeLimit = 0;
 
-int RecursionInjection::MaxStackDepth = 1000;
-
 std::string RuntimeOption::AccessLogDefaultFormat;
 std::vector<std::pair<std::string, std::string> >  RuntimeOption::AccessLogs;
 
@@ -395,7 +393,6 @@ void RuntimeOption::Load(Hdf &config) {
     NoInfiniteLoopDetection = error["NoInfiniteLoopDetection"].getBool();
     NoInfiniteRecursionDetection =
       error["NoInfiniteRecursionDetection"].getBool();
-    RecursionInjection::MaxStackDepth = error["MaxStackDepth"].getInt32(1000);
     ThrowBadTypeExceptions = error["ThrowBadTypeExceptions"].getBool();
     ThrowTooManyArguments = error["ThrowTooManyArguments"].getBool();
     WarnTooManyArguments = error["WarnTooManyArguments"].getBool();

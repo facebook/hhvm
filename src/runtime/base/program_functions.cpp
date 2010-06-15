@@ -689,8 +689,7 @@ void hphp_session_init() {
   ThreadInfo *info = ThreadInfo::s_threadInfo.get();
   info->m_reqInjectionData.started = time(0);
   info->m_reqInjectionData.timedout = false;
-  info->m_stackdepth = 0;
-  info->m_top = NULL;
+  info->reset();
 
   MemoryManager::TheMemoryManager()->resetStats();
 

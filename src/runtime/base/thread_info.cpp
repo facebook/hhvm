@@ -32,9 +32,28 @@ ThreadInfo::ThreadInfo() {
     m_allocators[it->first] = it->second->get();
   }
 
-  m_top = NULL;
-  m_stackdepth = 0;
   m_profiler = NULL;
+
+  // get the default thread stack size once
+  pthread_attr_t info;
+  pthread_attr_init(&info);
+  pthread_attr_getstacksize(&info, &m_stacksize);
+  pthread_attr_destroy(&info);
+
+  reset();
+}
+
+void ThreadInfo::reset() {
+  char marker;
+
+  m_top = NULL;
+
+  // We assume that reset() will be called reasonably low in the call stack.
+  // Taking the address of marker gives us a location in this stack frame;
+  // then, use that to calculate where the bottom of the stack should be,
+  // allowing some slack for (a) stack usage above the caller of reset() and
+  // (b) stack usage after the position gets checked.
+  m_stacklimit = &marker - (m_stacksize - RecursionInjection::StackSlack);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

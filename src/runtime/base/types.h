@@ -195,28 +195,31 @@ public:
   FrameInjection *m_top;
   RequestInjectionData m_reqInjectionData;
 
-  // This integer is reset during every hphp_session_init()
-  int m_stackdepth;
+  size_t m_stacksize;
+  char *m_stacklimit;
 
   // This pointer is set by ProfilerFactory
   Profiler *m_profiler;
 
   ThreadInfo();
+  void reset();
 };
 
 extern void throw_infinite_recursion_exception();
 class RecursionInjection {
 public:
-  static int MaxStackDepth;
+  // This is the amount of "slack" in stack usage checks - if the
+  // stack pointer gets within this distance from the end (minus
+  // overhead), throw an infinite recursion exception.
+  static const int StackSlack = 32768;
 
   RecursionInjection(ThreadInfo *info) : m_info(info) {
-    if (++m_info->m_stackdepth > MaxStackDepth) {
-      m_info->m_stackdepth = 0;
+    char marker;
+    if (&marker < m_info->m_stacklimit) {
       throw_infinite_recursion_exception();
     }
   }
   ~RecursionInjection() {
-    --m_info->m_stackdepth;
   }
 
 private:

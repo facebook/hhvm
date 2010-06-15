@@ -28183,660 +28183,243 @@ Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef 
     return false;
   }
 }
-Variant get_builtin_static_property(const char *s, const char *prop) {
+const ObjectStaticCallbacks * get_builtin_object_static_callbacks(const char *s) {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = hash_string_i(s);
   switch (hash & 255) {
     case 9:
-      HASH_GET_STATIC_PROPERTY(0x21EF70351574EC09LL, reflectionfunction);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x21EF70351574EC09LL, reflectionfunction);
       break;
     case 11:
-      HASH_GET_STATIC_PROPERTY(0x4365BE9E5A85E60BLL, domnotation);
-      HASH_GET_STATIC_PROPERTY(0x69EDCA1CC29CFE0BLL, errorexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x4365BE9E5A85E60BLL, domnotation);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x69EDCA1CC29CFE0BLL, errorexception);
       break;
     case 19:
-      HASH_GET_STATIC_PROPERTY(0x6A76B9AABB7CC713LL, simplexmlelement);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x6A76B9AABB7CC713LL, simplexmlelement);
       break;
     case 21:
-      HASH_GET_STATIC_PROPERTY(0x32E5C767255D2515LL, soapfault);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x32E5C767255D2515LL, soapfault);
       break;
     case 26:
-      HASH_GET_STATIC_PROPERTY(0x5CBA5B52C68B501ALL, domentityreference);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x5CBA5B52C68B501ALL, domentityreference);
       break;
     case 29:
-      HASH_GET_STATIC_PROPERTY(0x35A44A5E6AE2E71DLL, reflectionclass);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x35A44A5E6AE2E71DLL, reflectionclass);
       break;
     case 30:
-      HASH_GET_STATIC_PROPERTY(0x3DB8FB455A602A1ELL, datetime);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x3DB8FB455A602A1ELL, datetime);
       break;
     case 43:
-      HASH_GET_STATIC_PROPERTY(0x7E66D362EAB5BF2BLL, simplexmlelementiterator);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x7E66D362EAB5BF2BLL, simplexmlelementiterator);
       break;
     case 49:
-      HASH_GET_STATIC_PROPERTY(0x7A394042E7488231LL, filteriterator);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x7A394042E7488231LL, filteriterator);
       break;
     case 50:
-      HASH_GET_STATIC_PROPERTY(0x365899865E2EAA32LL, recursiveiteratoriterator);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x365899865E2EAA32LL, recursiveiteratoriterator);
       break;
     case 53:
-      HASH_GET_STATIC_PROPERTY(0x7909270014376235LL, soapvar);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x7909270014376235LL, soapvar);
       break;
     case 55:
-      HASH_GET_STATIC_PROPERTY(0x7FF7A8442616EF37LL, domnodeiterator);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x7FF7A8442616EF37LL, domnodeiterator);
       break;
     case 56:
-      HASH_GET_STATIC_PROPERTY(0x672AD818DDE95538LL, reflectionexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x672AD818DDE95538LL, reflectionexception);
       break;
     case 62:
-      HASH_GET_STATIC_PROPERTY(0x49FC1A1F7B878C3ELL, soapserver);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x49FC1A1F7B878C3ELL, soapserver);
       break;
     case 65:
-      HASH_GET_STATIC_PROPERTY(0x227C70ED5B143841LL, outofboundsexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x227C70ED5B143841LL, outofboundsexception);
       break;
     case 68:
-      HASH_GET_STATIC_PROPERTY(0x4253D8488B734244LL, pdostatement);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x4253D8488B734244LL, pdostatement);
       break;
     case 70:
-      HASH_GET_STATIC_PROPERTY(0x196F76C9C527B946LL, domnamednodemap);
-      HASH_GET_STATIC_PROPERTY(0x66282FC8E4EF4E46LL, badfunctioncallexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x196F76C9C527B946LL, domnamednodemap);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x66282FC8E4EF4E46LL, badfunctioncallexception);
       break;
     case 73:
-      HASH_GET_STATIC_PROPERTY(0x5AA2EE582E0D3849LL, unexpectedvalueexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x5AA2EE582E0D3849LL, unexpectedvalueexception);
       break;
     case 75:
-      HASH_GET_STATIC_PROPERTY(0x4860DC2F9B0E6D4BLL, logicexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x4860DC2F9B0E6D4BLL, logicexception);
       break;
     case 77:
-      HASH_GET_STATIC_PROPERTY(0x164F490DAC49174DLL, domtext);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x164F490DAC49174DLL, domtext);
       break;
     case 78:
-      HASH_GET_STATIC_PROPERTY(0x308D1D59986A3D4ELL, soapheader);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x308D1D59986A3D4ELL, soapheader);
       break;
     case 79:
-      HASH_GET_STATIC_PROPERTY(0x5BA243B9FBA7A64FLL, splobjectstorage);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x5BA243B9FBA7A64FLL, splobjectstorage);
       break;
     case 80:
-      HASH_GET_STATIC_PROPERTY(0x52EA111229F87A50LL, normalizer);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x52EA111229F87A50LL, normalizer);
       break;
     case 83:
-      HASH_GET_STATIC_PROPERTY(0x02239AA5D64B1453LL, domcharacterdata);
-      HASH_GET_STATIC_PROPERTY(0x6AF83706F76A9D53LL, rangeexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x02239AA5D64B1453LL, domcharacterdata);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x6AF83706F76A9D53LL, rangeexception);
       break;
     case 94:
-      HASH_GET_STATIC_PROPERTY(0x7754323897E8A15ELL, directoryiterator);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x7754323897E8A15ELL, directoryiterator);
       break;
     case 97:
-      HASH_GET_STATIC_PROPERTY(0x70EBB2CC1FBF9761LL, domdocumenttype);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x70EBB2CC1FBF9761LL, domdocumenttype);
       break;
     case 98:
-      HASH_GET_STATIC_PROPERTY(0x70747A09B3523662LL, domnode);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x70747A09B3523662LL, domnode);
       break;
     case 101:
-      HASH_GET_STATIC_PROPERTY(0x2FF1EF6EBB3DA065LL, xmlwriter);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x2FF1EF6EBB3DA065LL, xmlwriter);
       break;
     case 104:
-      HASH_GET_STATIC_PROPERTY(0x7E07B9C27FE59D68LL, domcomment);
-      HASH_GET_STATIC_PROPERTY(0x17A40D895C55D968LL, soapparam);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x7E07B9C27FE59D68LL, domcomment);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x17A40D895C55D968LL, soapparam);
       break;
     case 106:
-      HASH_GET_STATIC_PROPERTY(0x6A5B99D5B1A4566ALL, domexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x6A5B99D5B1A4566ALL, domexception);
       break;
     case 107:
-      HASH_GET_STATIC_PROPERTY(0x3CAE91CFA2AAD16BLL, lengthexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x3CAE91CFA2AAD16BLL, lengthexception);
       break;
     case 115:
-      HASH_GET_STATIC_PROPERTY(0x3D5870E53BF89873LL, arrayiterator);
-      HASH_GET_STATIC_PROPERTY(0x0B61E0BFCFA06573LL, reflectionextension);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x3D5870E53BF89873LL, arrayiterator);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x0B61E0BFCFA06573LL, reflectionextension);
       break;
     case 117:
-      HASH_GET_STATIC_PROPERTY(0x085A4F6FD393D475LL, invalidargumentexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x085A4F6FD393D475LL, invalidargumentexception);
       break;
     case 122:
-      HASH_GET_STATIC_PROPERTY(0x41A9F7D81254DD7ALL, reflectionobject);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x41A9F7D81254DD7ALL, reflectionobject);
       break;
     case 125:
-      HASH_GET_STATIC_PROPERTY(0x7AD161197633B87DLL, domdocumentfragment);
-      HASH_GET_STATIC_PROPERTY(0x2E899D2A2572EF7DLL, sqlite3result);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x7AD161197633B87DLL, domdocumentfragment);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x2E899D2A2572EF7DLL, sqlite3result);
       break;
     case 128:
-      HASH_GET_STATIC_PROPERTY(0x59B3EFD1CD987F80LL, domprocessinginstruction);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x59B3EFD1CD987F80LL, domprocessinginstruction);
       break;
     case 130:
-      HASH_GET_STATIC_PROPERTY(0x33BD46E935281082LL, reflectionfunctionabstract);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x33BD46E935281082LL, reflectionfunctionabstract);
       break;
     case 131:
-      HASH_GET_STATIC_PROPERTY(0x24DE53FD7D3E8383LL, datetimezone);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x24DE53FD7D3E8383LL, datetimezone);
       break;
     case 132:
-      HASH_GET_STATIC_PROPERTY(0x70D4A29DE6A7BA84LL, domainexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x70D4A29DE6A7BA84LL, domainexception);
       break;
     case 143:
-      HASH_GET_STATIC_PROPERTY(0x34C95AF311506C8FLL, directory);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x34C95AF311506C8FLL, directory);
       break;
     case 144:
-      HASH_GET_STATIC_PROPERTY(0x06335FF83CDEA590LL, badmethodcallexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x06335FF83CDEA590LL, badmethodcallexception);
       break;
     case 147:
-      HASH_GET_STATIC_PROPERTY(0x2E7081C468A05993LL, reflectionparameter);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x2E7081C468A05993LL, reflectionparameter);
       break;
     case 148:
-      HASH_GET_STATIC_PROPERTY(0x6FFDF8DF15CABE94LL, domcdatasection);
-      HASH_GET_STATIC_PROPERTY(0x6576EACCCE24D694LL, __php_incomplete_class);
-      HASH_GET_STATIC_PROPERTY(0x47D93E6F80B66A94LL, exception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x6FFDF8DF15CABE94LL, domcdatasection);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x6576EACCCE24D694LL, __php_incomplete_class);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x47D93E6F80B66A94LL, exception);
       break;
     case 152:
-      HASH_GET_STATIC_PROPERTY(0x3CEBA108A1BAB998LL, pear_error);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x3CEBA108A1BAB998LL, pear_error);
       break;
     case 167:
-      HASH_GET_STATIC_PROPERTY(0x71089C29FE923FA7LL, splfileinfo);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x71089C29FE923FA7LL, splfileinfo);
       break;
     case 168:
-      HASH_GET_STATIC_PROPERTY(0x7D46DB2E09C6DBA8LL, domxpath);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x7D46DB2E09C6DBA8LL, domxpath);
       break;
     case 169:
-      HASH_GET_STATIC_PROPERTY(0x1D35C3EFD00E11A9LL, sqlite3);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x1D35C3EFD00E11A9LL, sqlite3);
       break;
     case 173:
-      HASH_GET_STATIC_PROPERTY(0x0A34015F67C804ADLL, pdo);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x0A34015F67C804ADLL, pdo);
       break;
     case 175:
-      HASH_GET_STATIC_PROPERTY(0x2E650138BA043AAFLL, domdocument);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x2E650138BA043AAFLL, domdocument);
       break;
     case 176:
-      HASH_GET_STATIC_PROPERTY(0x43BBC8F6F28E44B0LL, reflectionmethod);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x43BBC8F6F28E44B0LL, reflectionmethod);
       break;
     case 177:
-      HASH_GET_STATIC_PROPERTY(0x6DD772FA3B20B8B1LL, domnodelist);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x6DD772FA3B20B8B1LL, domnodelist);
       break;
     case 189:
-      HASH_GET_STATIC_PROPERTY(0x5D8785ACD19F77BDLL, pdoexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x5D8785ACD19F77BDLL, pdoexception);
       break;
     case 195:
-      HASH_GET_STATIC_PROPERTY(0x40B3C44077F5DDC3LL, domelement);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x40B3C44077F5DDC3LL, domelement);
       break;
     case 200:
-      HASH_GET_STATIC_PROPERTY(0x2E363D51549781C8LL, appenditerator);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x2E363D51549781C8LL, appenditerator);
       break;
     case 203:
-      HASH_GET_STATIC_PROPERTY(0x253AC17234FC8CCBLL, libxmlerror);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x253AC17234FC8CCBLL, libxmlerror);
       break;
     case 210:
-      HASH_GET_STATIC_PROPERTY(0x52E5CC58B841AED2LL, sqlite3stmt);
-      HASH_GET_STATIC_PROPERTY(0x297ECCC7A259EDD2LL, splfileobject);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x52E5CC58B841AED2LL, sqlite3stmt);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x297ECCC7A259EDD2LL, splfileobject);
       break;
     case 212:
-      HASH_GET_STATIC_PROPERTY(0x5E623FEAF7B068D4LL, underflowexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x5E623FEAF7B068D4LL, underflowexception);
       break;
     case 216:
-      HASH_GET_STATIC_PROPERTY(0x464D3427431A6ED8LL, recursivedirectoryiterator);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x464D3427431A6ED8LL, recursivedirectoryiterator);
       break;
     case 217:
-      HASH_GET_STATIC_PROPERTY(0x0E4CCE95F6A727D9LL, overflowexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x0E4CCE95F6A727D9LL, overflowexception);
       break;
     case 218:
-      HASH_GET_STATIC_PROPERTY(0x7A52EBE538182BDALL, soapclient);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x7A52EBE538182BDALL, soapclient);
       break;
     case 220:
-      HASH_GET_STATIC_PROPERTY(0x1078CB3118A8B3DCLL, runtimeexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x1078CB3118A8B3DCLL, runtimeexception);
       break;
     case 228:
-      HASH_GET_STATIC_PROPERTY(0x75AA2571BDB659E4LL, reflectionproperty);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x75AA2571BDB659E4LL, reflectionproperty);
       break;
     case 244:
-      HASH_GET_STATIC_PROPERTY(0x297174231D4912F4LL, domattr);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x297174231D4912F4LL, domattr);
       break;
     case 247:
-      HASH_GET_STATIC_PROPERTY(0x3D69936178BA13F7LL, stdclass);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x3D69936178BA13F7LL, stdclass);
       break;
     case 252:
-      HASH_GET_STATIC_PROPERTY(0x622D4DF07E2A01FCLL, outofrangeexception);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x622D4DF07E2A01FCLL, outofrangeexception);
       break;
     case 253:
-      HASH_GET_STATIC_PROPERTY(0x74419B70A46387FDLL, domimplementation);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x74419B70A46387FDLL, domimplementation);
       break;
     case 255:
-      HASH_GET_STATIC_PROPERTY(0x624835B2D74B86FFLL, domentity);
-      break;
-    default:
-      break;
-  }
-  return null;
-}
-Variant *get_builtin_static_property_lv(const char *s, const char *prop) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = hash_string_i(s);
-  switch (hash & 255) {
-    case 9:
-      HASH_GET_STATIC_PROPERTY_LV(0x21EF70351574EC09LL, reflectionfunction);
-      break;
-    case 11:
-      HASH_GET_STATIC_PROPERTY_LV(0x4365BE9E5A85E60BLL, domnotation);
-      HASH_GET_STATIC_PROPERTY_LV(0x69EDCA1CC29CFE0BLL, errorexception);
-      break;
-    case 19:
-      HASH_GET_STATIC_PROPERTY_LV(0x6A76B9AABB7CC713LL, simplexmlelement);
-      break;
-    case 21:
-      HASH_GET_STATIC_PROPERTY_LV(0x32E5C767255D2515LL, soapfault);
-      break;
-    case 26:
-      HASH_GET_STATIC_PROPERTY_LV(0x5CBA5B52C68B501ALL, domentityreference);
-      break;
-    case 29:
-      HASH_GET_STATIC_PROPERTY_LV(0x35A44A5E6AE2E71DLL, reflectionclass);
-      break;
-    case 30:
-      HASH_GET_STATIC_PROPERTY_LV(0x3DB8FB455A602A1ELL, datetime);
-      break;
-    case 43:
-      HASH_GET_STATIC_PROPERTY_LV(0x7E66D362EAB5BF2BLL, simplexmlelementiterator);
-      break;
-    case 49:
-      HASH_GET_STATIC_PROPERTY_LV(0x7A394042E7488231LL, filteriterator);
-      break;
-    case 50:
-      HASH_GET_STATIC_PROPERTY_LV(0x365899865E2EAA32LL, recursiveiteratoriterator);
-      break;
-    case 53:
-      HASH_GET_STATIC_PROPERTY_LV(0x7909270014376235LL, soapvar);
-      break;
-    case 55:
-      HASH_GET_STATIC_PROPERTY_LV(0x7FF7A8442616EF37LL, domnodeiterator);
-      break;
-    case 56:
-      HASH_GET_STATIC_PROPERTY_LV(0x672AD818DDE95538LL, reflectionexception);
-      break;
-    case 62:
-      HASH_GET_STATIC_PROPERTY_LV(0x49FC1A1F7B878C3ELL, soapserver);
-      break;
-    case 65:
-      HASH_GET_STATIC_PROPERTY_LV(0x227C70ED5B143841LL, outofboundsexception);
-      break;
-    case 68:
-      HASH_GET_STATIC_PROPERTY_LV(0x4253D8488B734244LL, pdostatement);
-      break;
-    case 70:
-      HASH_GET_STATIC_PROPERTY_LV(0x196F76C9C527B946LL, domnamednodemap);
-      HASH_GET_STATIC_PROPERTY_LV(0x66282FC8E4EF4E46LL, badfunctioncallexception);
-      break;
-    case 73:
-      HASH_GET_STATIC_PROPERTY_LV(0x5AA2EE582E0D3849LL, unexpectedvalueexception);
-      break;
-    case 75:
-      HASH_GET_STATIC_PROPERTY_LV(0x4860DC2F9B0E6D4BLL, logicexception);
-      break;
-    case 77:
-      HASH_GET_STATIC_PROPERTY_LV(0x164F490DAC49174DLL, domtext);
-      break;
-    case 78:
-      HASH_GET_STATIC_PROPERTY_LV(0x308D1D59986A3D4ELL, soapheader);
-      break;
-    case 79:
-      HASH_GET_STATIC_PROPERTY_LV(0x5BA243B9FBA7A64FLL, splobjectstorage);
-      break;
-    case 80:
-      HASH_GET_STATIC_PROPERTY_LV(0x52EA111229F87A50LL, normalizer);
-      break;
-    case 83:
-      HASH_GET_STATIC_PROPERTY_LV(0x02239AA5D64B1453LL, domcharacterdata);
-      HASH_GET_STATIC_PROPERTY_LV(0x6AF83706F76A9D53LL, rangeexception);
-      break;
-    case 94:
-      HASH_GET_STATIC_PROPERTY_LV(0x7754323897E8A15ELL, directoryiterator);
-      break;
-    case 97:
-      HASH_GET_STATIC_PROPERTY_LV(0x70EBB2CC1FBF9761LL, domdocumenttype);
-      break;
-    case 98:
-      HASH_GET_STATIC_PROPERTY_LV(0x70747A09B3523662LL, domnode);
-      break;
-    case 101:
-      HASH_GET_STATIC_PROPERTY_LV(0x2FF1EF6EBB3DA065LL, xmlwriter);
-      break;
-    case 104:
-      HASH_GET_STATIC_PROPERTY_LV(0x7E07B9C27FE59D68LL, domcomment);
-      HASH_GET_STATIC_PROPERTY_LV(0x17A40D895C55D968LL, soapparam);
-      break;
-    case 106:
-      HASH_GET_STATIC_PROPERTY_LV(0x6A5B99D5B1A4566ALL, domexception);
-      break;
-    case 107:
-      HASH_GET_STATIC_PROPERTY_LV(0x3CAE91CFA2AAD16BLL, lengthexception);
-      break;
-    case 115:
-      HASH_GET_STATIC_PROPERTY_LV(0x3D5870E53BF89873LL, arrayiterator);
-      HASH_GET_STATIC_PROPERTY_LV(0x0B61E0BFCFA06573LL, reflectionextension);
-      break;
-    case 117:
-      HASH_GET_STATIC_PROPERTY_LV(0x085A4F6FD393D475LL, invalidargumentexception);
-      break;
-    case 122:
-      HASH_GET_STATIC_PROPERTY_LV(0x41A9F7D81254DD7ALL, reflectionobject);
-      break;
-    case 125:
-      HASH_GET_STATIC_PROPERTY_LV(0x7AD161197633B87DLL, domdocumentfragment);
-      HASH_GET_STATIC_PROPERTY_LV(0x2E899D2A2572EF7DLL, sqlite3result);
-      break;
-    case 128:
-      HASH_GET_STATIC_PROPERTY_LV(0x59B3EFD1CD987F80LL, domprocessinginstruction);
-      break;
-    case 130:
-      HASH_GET_STATIC_PROPERTY_LV(0x33BD46E935281082LL, reflectionfunctionabstract);
-      break;
-    case 131:
-      HASH_GET_STATIC_PROPERTY_LV(0x24DE53FD7D3E8383LL, datetimezone);
-      break;
-    case 132:
-      HASH_GET_STATIC_PROPERTY_LV(0x70D4A29DE6A7BA84LL, domainexception);
-      break;
-    case 143:
-      HASH_GET_STATIC_PROPERTY_LV(0x34C95AF311506C8FLL, directory);
-      break;
-    case 144:
-      HASH_GET_STATIC_PROPERTY_LV(0x06335FF83CDEA590LL, badmethodcallexception);
-      break;
-    case 147:
-      HASH_GET_STATIC_PROPERTY_LV(0x2E7081C468A05993LL, reflectionparameter);
-      break;
-    case 148:
-      HASH_GET_STATIC_PROPERTY_LV(0x6FFDF8DF15CABE94LL, domcdatasection);
-      HASH_GET_STATIC_PROPERTY_LV(0x6576EACCCE24D694LL, __php_incomplete_class);
-      HASH_GET_STATIC_PROPERTY_LV(0x47D93E6F80B66A94LL, exception);
-      break;
-    case 152:
-      HASH_GET_STATIC_PROPERTY_LV(0x3CEBA108A1BAB998LL, pear_error);
-      break;
-    case 167:
-      HASH_GET_STATIC_PROPERTY_LV(0x71089C29FE923FA7LL, splfileinfo);
-      break;
-    case 168:
-      HASH_GET_STATIC_PROPERTY_LV(0x7D46DB2E09C6DBA8LL, domxpath);
-      break;
-    case 169:
-      HASH_GET_STATIC_PROPERTY_LV(0x1D35C3EFD00E11A9LL, sqlite3);
-      break;
-    case 173:
-      HASH_GET_STATIC_PROPERTY_LV(0x0A34015F67C804ADLL, pdo);
-      break;
-    case 175:
-      HASH_GET_STATIC_PROPERTY_LV(0x2E650138BA043AAFLL, domdocument);
-      break;
-    case 176:
-      HASH_GET_STATIC_PROPERTY_LV(0x43BBC8F6F28E44B0LL, reflectionmethod);
-      break;
-    case 177:
-      HASH_GET_STATIC_PROPERTY_LV(0x6DD772FA3B20B8B1LL, domnodelist);
-      break;
-    case 189:
-      HASH_GET_STATIC_PROPERTY_LV(0x5D8785ACD19F77BDLL, pdoexception);
-      break;
-    case 195:
-      HASH_GET_STATIC_PROPERTY_LV(0x40B3C44077F5DDC3LL, domelement);
-      break;
-    case 200:
-      HASH_GET_STATIC_PROPERTY_LV(0x2E363D51549781C8LL, appenditerator);
-      break;
-    case 203:
-      HASH_GET_STATIC_PROPERTY_LV(0x253AC17234FC8CCBLL, libxmlerror);
-      break;
-    case 210:
-      HASH_GET_STATIC_PROPERTY_LV(0x52E5CC58B841AED2LL, sqlite3stmt);
-      HASH_GET_STATIC_PROPERTY_LV(0x297ECCC7A259EDD2LL, splfileobject);
-      break;
-    case 212:
-      HASH_GET_STATIC_PROPERTY_LV(0x5E623FEAF7B068D4LL, underflowexception);
-      break;
-    case 216:
-      HASH_GET_STATIC_PROPERTY_LV(0x464D3427431A6ED8LL, recursivedirectoryiterator);
-      break;
-    case 217:
-      HASH_GET_STATIC_PROPERTY_LV(0x0E4CCE95F6A727D9LL, overflowexception);
-      break;
-    case 218:
-      HASH_GET_STATIC_PROPERTY_LV(0x7A52EBE538182BDALL, soapclient);
-      break;
-    case 220:
-      HASH_GET_STATIC_PROPERTY_LV(0x1078CB3118A8B3DCLL, runtimeexception);
-      break;
-    case 228:
-      HASH_GET_STATIC_PROPERTY_LV(0x75AA2571BDB659E4LL, reflectionproperty);
-      break;
-    case 244:
-      HASH_GET_STATIC_PROPERTY_LV(0x297174231D4912F4LL, domattr);
-      break;
-    case 247:
-      HASH_GET_STATIC_PROPERTY_LV(0x3D69936178BA13F7LL, stdclass);
-      break;
-    case 252:
-      HASH_GET_STATIC_PROPERTY_LV(0x622D4DF07E2A01FCLL, outofrangeexception);
-      break;
-    case 253:
-      HASH_GET_STATIC_PROPERTY_LV(0x74419B70A46387FDLL, domimplementation);
-      break;
-    case 255:
-      HASH_GET_STATIC_PROPERTY_LV(0x624835B2D74B86FFLL, domentity);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x624835B2D74B86FFLL, domentity);
       break;
     default:
       break;
   }
   return NULL;
 }
+Variant get_builtin_static_property(const char *s, const char *prop) {
+  {
+    const ObjectStaticCallbacks * cwo = get_builtin_object_static_callbacks(s);
+    if (cwo) return cwo->os_get(prop, -1);
+  }
+  return null;
+}
+Variant *get_builtin_static_property_lv(const char *s, const char *prop) {
+  {
+    const ObjectStaticCallbacks * cwo = get_builtin_object_static_callbacks(s);
+    if (cwo) return &cwo->os_lval(prop, -1);
+  }
+  return NULL;
+}
 Variant get_builtin_class_constant(const char *s, const char *constant, bool fatal /* = true */) {
-  DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = hash_string_i(s);
-  switch (hash & 255) {
-    case 9:
-      HASH_GET_CLASS_CONSTANT(0x21EF70351574EC09LL, reflectionfunction);
-      break;
-    case 11:
-      HASH_GET_CLASS_CONSTANT(0x4365BE9E5A85E60BLL, domnotation);
-      HASH_GET_CLASS_CONSTANT(0x69EDCA1CC29CFE0BLL, errorexception);
-      break;
-    case 19:
-      HASH_GET_CLASS_CONSTANT(0x6A76B9AABB7CC713LL, simplexmlelement);
-      break;
-    case 21:
-      HASH_GET_CLASS_CONSTANT(0x32E5C767255D2515LL, soapfault);
-      break;
-    case 26:
-      HASH_GET_CLASS_CONSTANT(0x5CBA5B52C68B501ALL, domentityreference);
-      break;
-    case 29:
-      HASH_GET_CLASS_CONSTANT(0x35A44A5E6AE2E71DLL, reflectionclass);
-      break;
-    case 30:
-      HASH_GET_CLASS_CONSTANT(0x3DB8FB455A602A1ELL, datetime);
-      break;
-    case 43:
-      HASH_GET_CLASS_CONSTANT(0x7E66D362EAB5BF2BLL, simplexmlelementiterator);
-      break;
-    case 49:
-      HASH_GET_CLASS_CONSTANT(0x7A394042E7488231LL, filteriterator);
-      break;
-    case 50:
-      HASH_GET_CLASS_CONSTANT(0x365899865E2EAA32LL, recursiveiteratoriterator);
-      break;
-    case 53:
-      HASH_GET_CLASS_CONSTANT(0x7909270014376235LL, soapvar);
-      break;
-    case 55:
-      HASH_GET_CLASS_CONSTANT(0x7FF7A8442616EF37LL, domnodeiterator);
-      break;
-    case 56:
-      HASH_GET_CLASS_CONSTANT(0x672AD818DDE95538LL, reflectionexception);
-      break;
-    case 62:
-      HASH_GET_CLASS_CONSTANT(0x49FC1A1F7B878C3ELL, soapserver);
-      break;
-    case 65:
-      HASH_GET_CLASS_CONSTANT(0x227C70ED5B143841LL, outofboundsexception);
-      break;
-    case 68:
-      HASH_GET_CLASS_CONSTANT(0x4253D8488B734244LL, pdostatement);
-      break;
-    case 70:
-      HASH_GET_CLASS_CONSTANT(0x196F76C9C527B946LL, domnamednodemap);
-      HASH_GET_CLASS_CONSTANT(0x66282FC8E4EF4E46LL, badfunctioncallexception);
-      break;
-    case 73:
-      HASH_GET_CLASS_CONSTANT(0x5AA2EE582E0D3849LL, unexpectedvalueexception);
-      break;
-    case 75:
-      HASH_GET_CLASS_CONSTANT(0x4860DC2F9B0E6D4BLL, logicexception);
-      break;
-    case 77:
-      HASH_GET_CLASS_CONSTANT(0x164F490DAC49174DLL, domtext);
-      break;
-    case 78:
-      HASH_GET_CLASS_CONSTANT(0x308D1D59986A3D4ELL, soapheader);
-      break;
-    case 79:
-      HASH_GET_CLASS_CONSTANT(0x5BA243B9FBA7A64FLL, splobjectstorage);
-      break;
-    case 80:
-      HASH_GET_CLASS_CONSTANT(0x52EA111229F87A50LL, normalizer);
-      break;
-    case 83:
-      HASH_GET_CLASS_CONSTANT(0x02239AA5D64B1453LL, domcharacterdata);
-      HASH_GET_CLASS_CONSTANT(0x6AF83706F76A9D53LL, rangeexception);
-      break;
-    case 94:
-      HASH_GET_CLASS_CONSTANT(0x7754323897E8A15ELL, directoryiterator);
-      break;
-    case 97:
-      HASH_GET_CLASS_CONSTANT(0x70EBB2CC1FBF9761LL, domdocumenttype);
-      break;
-    case 98:
-      HASH_GET_CLASS_CONSTANT(0x70747A09B3523662LL, domnode);
-      break;
-    case 101:
-      HASH_GET_CLASS_CONSTANT(0x2FF1EF6EBB3DA065LL, xmlwriter);
-      break;
-    case 104:
-      HASH_GET_CLASS_CONSTANT(0x7E07B9C27FE59D68LL, domcomment);
-      HASH_GET_CLASS_CONSTANT(0x17A40D895C55D968LL, soapparam);
-      break;
-    case 106:
-      HASH_GET_CLASS_CONSTANT(0x6A5B99D5B1A4566ALL, domexception);
-      break;
-    case 107:
-      HASH_GET_CLASS_CONSTANT(0x3CAE91CFA2AAD16BLL, lengthexception);
-      break;
-    case 115:
-      HASH_GET_CLASS_CONSTANT(0x3D5870E53BF89873LL, arrayiterator);
-      HASH_GET_CLASS_CONSTANT(0x0B61E0BFCFA06573LL, reflectionextension);
-      break;
-    case 117:
-      HASH_GET_CLASS_CONSTANT(0x085A4F6FD393D475LL, invalidargumentexception);
-      break;
-    case 122:
-      HASH_GET_CLASS_CONSTANT(0x41A9F7D81254DD7ALL, reflectionobject);
-      break;
-    case 125:
-      HASH_GET_CLASS_CONSTANT(0x7AD161197633B87DLL, domdocumentfragment);
-      HASH_GET_CLASS_CONSTANT(0x2E899D2A2572EF7DLL, sqlite3result);
-      break;
-    case 128:
-      HASH_GET_CLASS_CONSTANT(0x59B3EFD1CD987F80LL, domprocessinginstruction);
-      break;
-    case 130:
-      HASH_GET_CLASS_CONSTANT(0x33BD46E935281082LL, reflectionfunctionabstract);
-      break;
-    case 131:
-      HASH_GET_CLASS_CONSTANT(0x24DE53FD7D3E8383LL, datetimezone);
-      break;
-    case 132:
-      HASH_GET_CLASS_CONSTANT(0x70D4A29DE6A7BA84LL, domainexception);
-      break;
-    case 143:
-      HASH_GET_CLASS_CONSTANT(0x34C95AF311506C8FLL, directory);
-      break;
-    case 144:
-      HASH_GET_CLASS_CONSTANT(0x06335FF83CDEA590LL, badmethodcallexception);
-      break;
-    case 147:
-      HASH_GET_CLASS_CONSTANT(0x2E7081C468A05993LL, reflectionparameter);
-      break;
-    case 148:
-      HASH_GET_CLASS_CONSTANT(0x6FFDF8DF15CABE94LL, domcdatasection);
-      HASH_GET_CLASS_CONSTANT(0x6576EACCCE24D694LL, __php_incomplete_class);
-      HASH_GET_CLASS_CONSTANT(0x47D93E6F80B66A94LL, exception);
-      break;
-    case 152:
-      HASH_GET_CLASS_CONSTANT(0x3CEBA108A1BAB998LL, pear_error);
-      break;
-    case 167:
-      HASH_GET_CLASS_CONSTANT(0x71089C29FE923FA7LL, splfileinfo);
-      break;
-    case 168:
-      HASH_GET_CLASS_CONSTANT(0x7D46DB2E09C6DBA8LL, domxpath);
-      break;
-    case 169:
-      HASH_GET_CLASS_CONSTANT(0x1D35C3EFD00E11A9LL, sqlite3);
-      break;
-    case 173:
-      HASH_GET_CLASS_CONSTANT(0x0A34015F67C804ADLL, pdo);
-      break;
-    case 175:
-      HASH_GET_CLASS_CONSTANT(0x2E650138BA043AAFLL, domdocument);
-      break;
-    case 176:
-      HASH_GET_CLASS_CONSTANT(0x43BBC8F6F28E44B0LL, reflectionmethod);
-      break;
-    case 177:
-      HASH_GET_CLASS_CONSTANT(0x6DD772FA3B20B8B1LL, domnodelist);
-      break;
-    case 189:
-      HASH_GET_CLASS_CONSTANT(0x5D8785ACD19F77BDLL, pdoexception);
-      break;
-    case 195:
-      HASH_GET_CLASS_CONSTANT(0x40B3C44077F5DDC3LL, domelement);
-      break;
-    case 200:
-      HASH_GET_CLASS_CONSTANT(0x2E363D51549781C8LL, appenditerator);
-      break;
-    case 203:
-      HASH_GET_CLASS_CONSTANT(0x253AC17234FC8CCBLL, libxmlerror);
-      break;
-    case 210:
-      HASH_GET_CLASS_CONSTANT(0x52E5CC58B841AED2LL, sqlite3stmt);
-      HASH_GET_CLASS_CONSTANT(0x297ECCC7A259EDD2LL, splfileobject);
-      break;
-    case 212:
-      HASH_GET_CLASS_CONSTANT(0x5E623FEAF7B068D4LL, underflowexception);
-      break;
-    case 216:
-      HASH_GET_CLASS_CONSTANT(0x464D3427431A6ED8LL, recursivedirectoryiterator);
-      break;
-    case 217:
-      HASH_GET_CLASS_CONSTANT(0x0E4CCE95F6A727D9LL, overflowexception);
-      break;
-    case 218:
-      HASH_GET_CLASS_CONSTANT(0x7A52EBE538182BDALL, soapclient);
-      break;
-    case 220:
-      HASH_GET_CLASS_CONSTANT(0x1078CB3118A8B3DCLL, runtimeexception);
-      break;
-    case 228:
-      HASH_GET_CLASS_CONSTANT(0x75AA2571BDB659E4LL, reflectionproperty);
-      break;
-    case 244:
-      HASH_GET_CLASS_CONSTANT(0x297174231D4912F4LL, domattr);
-      break;
-    case 247:
-      HASH_GET_CLASS_CONSTANT(0x3D69936178BA13F7LL, stdclass);
-      break;
-    case 252:
-      HASH_GET_CLASS_CONSTANT(0x622D4DF07E2A01FCLL, outofrangeexception);
-      break;
-    case 253:
-      HASH_GET_CLASS_CONSTANT(0x74419B70A46387FDLL, domimplementation);
-      break;
-    case 255:
-      HASH_GET_CLASS_CONSTANT(0x624835B2D74B86FFLL, domentity);
-      break;
-    default:
-      break;
+  {
+    const ObjectStaticCallbacks * cwo = get_builtin_object_static_callbacks(s);
+    if (cwo) return cwo->os_constant(constant);
   }
   if (fatal) {
     raise_error("Couldn't find constant %s::%s", s, constant);

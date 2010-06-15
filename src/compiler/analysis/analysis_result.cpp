@@ -1838,6 +1838,7 @@ void AnalysisResult::outputCPPRedeclaredClassDecl(CodeGenerator &cg) {
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
       cg_printf("ClassStaticsPtr %s%s;\n", Option::ClassStaticsObjectPrefix,
                 name);
+      cg.printf("ObjectStaticCallbacks * cwo_%s;\n", name);
     }
   }
 }
@@ -1849,6 +1850,7 @@ void AnalysisResult::outputCPPRedeclaredClassImpl(CodeGenerator &cg) {
       const char *name = iter->first.c_str();
       cg_printf("%s%s = ClassStaticsPtr(NEW(ClassStatics)(\"%s\"));\n",
                 Option::ClassStaticsObjectPrefix, name, name);
+      cg.printf("cwo_%s = NULL;\n", name);
     }
   }
 }

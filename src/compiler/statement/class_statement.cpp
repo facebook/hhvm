@@ -380,6 +380,9 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("g->%s%s = ClassStaticsPtr(NEW(%s%s)());\n",
                 Option::ClassStaticsObjectPrefix, m_name.c_str(),
                 Option::ClassStaticsPrefix, classScope->getId().c_str());
+      cg.printf("g->cwo_%s = &cw_%s;\n",
+                m_name.c_str(),
+                classScope->getId().c_str());
     }
     if (classScope->isVolatile()) {
       cg_printf("g->CDEC(%s) = true;\n", m_name.c_str());

@@ -723,6 +723,19 @@ void ClassScope::outputCPPGetStaticPropertyImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
+
+  cg_indentBegin("const ObjectStaticCallbacks * "
+                 "get%s_object_static_callbacks(const char *s) {\n",
+                 system ? "_builtin" : "");
+  outputCPPClassJumpTable(cg, classScopes, classes,
+                          "HASH_GET_OBJECT_STATIC_CALLBACKS");
+  if (!system) {
+    cg_printf("return get_builtin_object_static_callbacks(s);\n");
+  } else {
+    cg_printf("return NULL;\n");
+  }
+  cg_indentEnd("}\n");
+
   cg_indentBegin("Variant get%s_static_property(const char *s, "
                  "const char *prop) {\n",
                  system ? "_builtin" : "");
@@ -734,8 +747,14 @@ void ClassScope::outputCPPGetStaticPropertyImpl
               "return r;\n");
     cg_indentEnd("}\n");
   }
-  outputCPPClassJumpTable(cg, classScopes, classes,
-                          "HASH_GET_STATIC_PROPERTY");
+
+  cg.indentBegin("{\n");
+  cg.printf("const ObjectStaticCallbacks * cwo = "
+            "get%s_object_static_callbacks(s);\n",
+            system ? "_builtin" : "");
+  cg.printf("if (cwo) return cwo->os_get(prop, -1);\n");
+  cg.indentEnd("}\n");
+
   if (!system) {
     cg_printf("return get_builtin_static_property(s, prop);\n");
   } else {
@@ -754,8 +773,14 @@ void ClassScope::outputCPPGetStaticPropertyImpl
               "return r;\n");
     cg_indentEnd("}\n");
   }
-  outputCPPClassJumpTable(cg, classScopes, classes,
-                          "HASH_GET_STATIC_PROPERTY_LV");
+
+  cg.indentBegin("{\n");
+  cg.printf("const ObjectStaticCallbacks * cwo = "
+            "get%s_object_static_callbacks(s);\n",
+            system ? "_builtin" : "");
+  cg.printf("if (cwo) return &cwo->os_lval(prop, -1);\n");
+  cg.indentEnd("}\n");
+
   if (!system) {
     cg_printf("return get_builtin_static_property_lv(s, prop);\n");
   } else {
@@ -779,7 +804,14 @@ void ClassScope::outputCPPGetClassConstantImpl
               "return r;\n");
     cg_indentEnd("}\n");
   }
-  outputCPPClassJumpTable(cg, classScopes, classes, "HASH_GET_CLASS_CONSTANT");
+
+  cg.indentBegin("{\n");
+  cg.printf("const ObjectStaticCallbacks * cwo = "
+            "get%s_object_static_callbacks(s);\n",
+            system ? "_builtin" : "");
+  cg.printf("if (cwo) return cwo->os_constant(constant);\n");
+  cg.indentEnd("}\n");
+
   if (!system) {
     cg_printf("return get_builtin_class_constant(s, constant, fatal);\n");
   } else {

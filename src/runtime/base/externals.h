@@ -61,6 +61,15 @@ extern Variant invoke_builtin_static_method(const char *s, const char *method,
                                             const Array &params, bool fatal);
 
 /**
+ * Getting the object static callbacks for a given class
+ */
+struct ObjectStaticCallbacks;
+extern const ObjectStaticCallbacks *
+  get_object_static_callbacks(const char *s);
+extern const ObjectStaticCallbacks *
+  get_builtin_object_static_callbacks(const char *s);
+
+/**
  * Getting a static property
  */
 extern Variant get_static_property(const char *s, const char *prop);

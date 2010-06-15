@@ -901,8 +901,21 @@ void AnalysisResult::repartitionCPP(const string &filename, int64 targetSize,
     return;
   }
 
-  vector <string> includes;
-  vector <string> preface;
+  // for updating source info
+  map<string, map<int, LocationPtr> >::iterator fileInfoIter =
+    m_sourceInfos.find(filename);
+  bool inSourceInfos = fileInfoIter != m_sourceInfos.end();
+  map<int, LocationPtr> linemap;
+  if (inSourceInfos) {
+    linemap.swap(fileInfoIter->second);
+    m_sourceInfos.erase(fileInfoIter);
+  }
+  map<int, LocationPtr>::const_iterator lineIter = linemap.begin();
+  int origLine = 0;
+  int newLine = 0;
+
+  vector<string> includes;
+  vector<string> preface;
   bool inPreface = false;
   string line;
   int64 current = 0;
@@ -914,6 +927,14 @@ void AnalysisResult::repartitionCPP(const string &filename, int64 targetSize,
   ofstream fout(foutName);
   while (getline(fin, line)) {
     fout << line << endl;
+
+    origLine++;
+    newLine++;
+    if (lineIter != linemap.end() && origLine == lineIter->first) {
+      m_sourceInfos[foutName][newLine] = lineIter->second;
+      ++lineIter;
+    }
+
     current += line.length() + 1;
     if (inPreface) preface.push_back(line);
 
@@ -937,15 +958,19 @@ void AnalysisResult::repartitionCPP(const string &filename, int64 targetSize,
         snprintf(foutName, sizeof(foutName),
                  "%s-%d.cpp", base.c_str(), ++seq);
         fout.open(foutName);
+        newLine = 0;
         current = 0;
         for (unsigned int j = 0; j < includes.size(); j++) {
           fout << includes[j] << endl;
+          newLine++;
         }
         if (insideHPHP) {
           fout << "namespace HPHP {" << endl;
+          newLine++;
         }
         for (unsigned int j = 0; j < preface.size(); j++) {
           fout << preface[j] << endl;
+          newLine++;
         }
       }
     }
@@ -1066,7 +1091,6 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
   }
   if (Option::GenerateCPPMacros && output != CodeGenerator::SystemCPP) {
     outputCPPClassMapFile();
-    outputCPPSourceInfos();
     outputCPPNameMaps();
   }
 
@@ -1085,6 +1109,10 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
   }
 
   if (clusterCount > 0) repartitionLargeCPP(filenames, additionalCPPs);
+
+  if (Option::GenerateCPPMacros && output != CodeGenerator::SystemCPP) {
+    outputCPPSourceInfos();
+  }
 
   if (Option::GenRTTIProfileData) {
     outputRTTIMetaData(Option::RTTIOutputFile.c_str());
@@ -1203,14 +1231,14 @@ void AnalysisResult::outputCPPClassMapFile() {
   f.close();
 }
 
-void AnalysisResult::recordSourceInfo(const std::string &fileline,
+void AnalysisResult::recordSourceInfo(const std::string &file, int line,
                                       LocationPtr loc) {
   // With FrameInjection, there is normally no need to generate the source info
   // map, so to save memory.
   if (Option::GenerateSourceInfo) {
     // we only need one to one mapping, and there doesn't seem to be a need
     // to display multiple PHP file locations for one C++ frame
-    m_sourceInfos[fileline] = loc;
+    m_sourceInfos[file][line] = loc;
   }
 }
 
@@ -1238,11 +1266,15 @@ void AnalysisResult::outputCPPSourceInfos() {
             (Process::GetCurrentDirectory() + '/').c_str());
   cg_indentBegin("const char *g_source_info[] = {\n");
 
-  for (map<string, LocationPtr>::const_iterator
-         iter = m_sourceInfos.begin(); iter != m_sourceInfos.end(); ++iter) {
-    LocationPtr loc = iter->second;
-    cg_printf("\"%s\", \"%s\", (const char *)%d,\n",
-              iter->first.c_str(), loc->file, loc->line1);
+  for (map<string, map<int, LocationPtr> >::const_iterator
+         i = m_sourceInfos.begin(); i != m_sourceInfos.end(); ++i) {
+    for (map<int, LocationPtr>::const_iterator j = i->second.begin();
+         j != i->second.end(); ++j) {
+      LocationPtr loc = j->second;
+      string fileline = i->first + ":" + lexical_cast<string>(j->first);
+      cg_printf("\"%s\", \"%s\", (const char *)%d,\n",
+                fileline.c_str(), loc->file, loc->line1);
+    }
   }
 
   cg_printf("NULL\n");

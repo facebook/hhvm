@@ -301,7 +301,7 @@ public:
   /**
    * PHP source info functions.
    */
-  void recordSourceInfo(const std::string &fileline, LocationPtr loc);
+  void recordSourceInfo(const std::string &file, int line, LocationPtr loc);
   void recordClassSource(const std::string &clsname,
                          const std::string &filename);
   void recordFunctionSource(const std::string &funcname,
@@ -418,7 +418,7 @@ private:
   void clusterByFileSizes(StringToFileScopePtrVecMap &clusters,
                           int clusterCount);
 
-  std::map<std::string, LocationPtr> m_sourceInfos;
+  std::map<std::string, std::map<int, LocationPtr> > m_sourceInfos;
   std::map<std::string, std::set<std::string> > m_clsNameMap;
   std::map<std::string, std::set<std::string> > m_funcNameMap;
 

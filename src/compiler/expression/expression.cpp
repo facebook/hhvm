@@ -392,10 +392,9 @@ bool Expression::outputLineMap(CodeGenerator &cg, AnalysisResultPtr ar,
         return false;
       }
       int line = cg.getLineNo(CodeGenerator::PrimaryStream);
-      string fileline = cg.getFileName() + ":" + lexical_cast<string>(line);
       LocationPtr loc = getLocation();
       if (loc) {
-        ar->recordSourceInfo(fileline, loc);
+        ar->recordSourceInfo(cg.getFileName(), line, loc);
         if (cg.getPHPLineNo() != loc->line1) {
           cg.setPHPLineNo(loc->line1);
           cg_printf("LINE(%d,", loc->line1);

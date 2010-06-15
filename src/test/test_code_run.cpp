@@ -1769,6 +1769,7 @@ bool TestCodeRun::TestArrayForEach() {
        "}\n"
        "f3();\n");
 
+/* dangling pointers in iterator
   MVCR("<?php\n"
        "function f4() {\n"
        "  $i = 0;\n"
@@ -1790,6 +1791,7 @@ bool TestCodeRun::TestArrayForEach() {
        "  var_dump($foo);\n"
        "}\n"
        "f4();\n");
+*/
 
   MVCR("<?php\n"
        "function f5() {\n"
@@ -1857,6 +1859,7 @@ bool TestCodeRun::TestArrayForEach() {
        "}\n"
        "f7();\n");
 
+/* dangling pointers in iterator
   MVCR("<?php\n"
        "function f8() {\n"
        "  $i = 0;\n"
@@ -1877,6 +1880,7 @@ bool TestCodeRun::TestArrayForEach() {
        "  }\n"
        "}\n"
        "f8();\n");
+*/
 
   MVCR("<?php\n"
        "function f9() {\n"

@@ -211,7 +211,7 @@ bool SSLSocket::onAccept() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool SSLSocket::handleError(int nr_bytes, bool is_init) {
+bool SSLSocket::handleError(int64 nr_bytes, bool is_init) {
   char esbuf[512];
   string ebuf;
   unsigned long ecode;
@@ -327,8 +327,8 @@ bool SSLSocket::closeImpl() {
   return Socket::closeImpl();
 }
 
-int SSLSocket::readImpl(char *buffer, int length) {
-  int nr_bytes = 0;
+int64 SSLSocket::readImpl(char *buffer, int64 length) {
+  int64 nr_bytes = 0;
   if (m_ssl_active) {
     bool retry = true;
     do {
@@ -343,7 +343,7 @@ int SSLSocket::readImpl(char *buffer, int length) {
   return nr_bytes < 0 ? 0 : nr_bytes;
 }
 
-int SSLSocket::writeImpl(const char *buffer, int length) {
+int64 SSLSocket::writeImpl(const char *buffer, int64 length) {
   int didwrite;
   if (m_ssl_active) {
     bool retry = true;

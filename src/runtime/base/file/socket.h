@@ -47,11 +47,11 @@ public:
   // implementing File
   virtual bool open(CStrRef filename, CStrRef mode);
   virtual bool close();
-  virtual int readImpl(char *buffer, int length);
-  virtual int writeImpl(const char *buffer, int length);
+  virtual int64 readImpl(char *buffer, int64 length);
+  virtual int64 writeImpl(const char *buffer, int64 length);
   virtual bool eof();
   virtual Array getMetaData();
-  virtual int tell();
+  virtual int64 tell();
 
   // allows SSLSocket to perform special checking
   virtual bool checkLiveness() { return true;}
@@ -77,7 +77,7 @@ protected:
   int m_timeout; // in micro-seconds;
   bool m_timedOut;
 
-  int m_bytesSent;
+  int64 m_bytesSent;
 
   bool closeImpl();
   bool waitForData();

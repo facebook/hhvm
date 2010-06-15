@@ -38,7 +38,7 @@ public:
   const char *o_getClassName() const { return "UrlFile";}
 
   virtual bool open(CStrRef filename, CStrRef mode);
-  virtual int writeImpl(const char *buffer, int length);
+  virtual int64 writeImpl(const char *buffer, int64 length);
   virtual bool flush();
 
 private:

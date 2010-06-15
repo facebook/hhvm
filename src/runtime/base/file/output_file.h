@@ -40,15 +40,15 @@ public:
   // implementing File
   virtual bool open(CStrRef filename, CStrRef mode);
   virtual bool close();
-  virtual int readImpl(char *buffer, int length);
+  virtual int64 readImpl(char *buffer, int64 length);
   virtual int getc();
-  virtual int writeImpl(const char *buffer, int length);
-  virtual bool seek(int offset, int whence = SEEK_SET);
-  virtual int tell();
+  virtual int64 writeImpl(const char *buffer, int64 length);
+  virtual bool seek(int64 offset, int whence = SEEK_SET);
+  virtual int64 tell();
   virtual bool eof();
   virtual bool rewind();
   virtual bool flush();
-  virtual bool truncate(int size);
+  virtual bool truncate(int64 size);
 
 protected:
   bool closeImpl();

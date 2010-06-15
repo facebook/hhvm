@@ -54,7 +54,7 @@ bool OutputFile::closeImpl() {
 ///////////////////////////////////////////////////////////////////////////////
 // virtual functions
 
-int OutputFile::readImpl(char *buffer, int length) {
+int64 OutputFile::readImpl(char *buffer, int64 length) {
   raise_warning("cannot read from a php://output stream");
   return -1;
 }
@@ -64,19 +64,19 @@ int OutputFile::getc() {
   return -1;
 }
 
-int OutputFile::writeImpl(const char *buffer, int length) {
+int64 OutputFile::writeImpl(const char *buffer, int64 length) {
   ASSERT(length > 0);
   if (m_closed) return 0;
   g_context->out().write(buffer, length);
   return length;
 }
 
-bool OutputFile::seek(int offset, int whence /* = SEEK_SET */) {
+bool OutputFile::seek(int64 offset, int whence /* = SEEK_SET */) {
   raise_warning("cannot seek a php://output stream");
   return false;
 }
 
-int OutputFile::tell() {
+int64 OutputFile::tell() {
   raise_warning("cannot tell a php://output stream");
   return -1;
 }
@@ -98,7 +98,7 @@ bool OutputFile::flush() {
   return false;
 }
 
-bool OutputFile::truncate(int size) {
+bool OutputFile::truncate(int64 size) {
   raise_warning("cannot truncate a php://output stream");
   return false;
 }

@@ -67,26 +67,26 @@ public:
   /**
    * Read one chunk of input. Returns a null string on failure or eof.
    */
-  virtual int readImpl(char *buffer, int length) = 0;
+  virtual int64 readImpl(char *buffer, int64 length) = 0;
   virtual int getc();
-  virtual String read(int length = 0);
+  virtual String read(int64 length = 0);
 
   /**
    * Write one chunk of output. Returns bytes written.
    */
-  virtual int writeImpl(const char *buffer, int length) = 0;
-  virtual int write(CStrRef str, int length = 0);
+  virtual int64 writeImpl(const char *buffer, int64 length) = 0;
+  virtual int64 write(CStrRef str, int64 length = 0);
   int putc(char c);
 
   /**
    * Optional virtual functions to implement.
    */
-  virtual bool seek(int offset, int whence = SEEK_SET);
-  virtual int tell();
+  virtual bool seek(int64 offset, int whence = SEEK_SET);
+  virtual int64 tell();
   virtual bool eof();
   virtual bool rewind();
   virtual bool flush();
-  virtual bool truncate(int size);
+  virtual bool truncate(int64 size);
   virtual bool lock(int operation);
   virtual bool lock(int operation, bool &wouldblock);
   virtual Array getMetaData();
@@ -94,32 +94,32 @@ public:
   /**
    * Read one line a time. Returns a null string on failure or eof.
    */
-  String readLine(int maxlen = 0);
+  String readLine(int64 maxlen = 0);
 
   /**
    * Read one record a time. Returns a null string on failure or eof.
    */
-  String readRecord(CStrRef delimiter, int maxlen = 0);
+  String readRecord(CStrRef delimiter, int64 maxlen = 0);
 
   /**
    * Read entire file and print it out.
    */
-  int print();
+  int64 print();
 
   /**
    * Write to file with specified format and arguments.
    */
-  int printf(CStrRef format, CArrRef args);
+  int64 printf(CStrRef format, CArrRef args);
 
   /**
    * Write one line of csv record.
    */
-  int writeCSV(CArrRef fields, char delimiter = ',', char enclosure = '"');
+  int64 writeCSV(CArrRef fields, char delimiter = ',', char enclosure = '"');
 
   /**
    * Read one line of csv record.
    */
-  Array readCSV(int length = 0, char delimiter = ',', char enclosure = '"');
+  Array readCSV(int64 length = 0, char delimiter = ',', char enclosure = '"');
 
 protected:
   int m_fd;      // file descriptor
@@ -127,9 +127,9 @@ protected:
   bool m_pipe;
 
   // fields only useful for buffered reads
-  int m_writepos; // where we have read from lower level
-  int m_readpos;  // where we have given to upper level
-  int m_position; // the current cursor position
+  int64 m_writepos; // where we have read from lower level
+  int64 m_readpos;  // where we have given to upper level
+  int64 m_position; // the current cursor position
 
   void closeImpl();
 

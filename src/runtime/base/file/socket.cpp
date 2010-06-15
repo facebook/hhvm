@@ -108,7 +108,7 @@ bool Socket::waitForData() {
   return false;
 }
 
-int Socket::readImpl(char *buffer, int length) {
+int64 Socket::readImpl(char *buffer, int64 length) {
   ASSERT(m_fd);
   ASSERT(length > 0);
 
@@ -125,19 +125,19 @@ int Socket::readImpl(char *buffer, int length) {
   }
 
   IOStatusHelper io("socket::recv", m_address.c_str(), m_port);
-  int ret = recv(m_fd, buffer, length, recvFlags);
+  int64 ret = recv(m_fd, buffer, length, recvFlags);
   if (ret == 0 || (ret == -1 && errno != EWOULDBLOCK)) {
     m_eof = true;
   }
   return (ret < 0) ? 0 : ret;
 }
 
-int Socket::writeImpl(const char *buffer, int length) {
+int64 Socket::writeImpl(const char *buffer, int64 length) {
   ASSERT(m_fd);
   ASSERT(length > 0);
   m_eof = false;
   IOStatusHelper io("socket::send", m_address.c_str(), m_port);
-  int ret = send(m_fd, buffer, length, 0);
+  int64 ret = send(m_fd, buffer, length, 0);
   if (ret >= 0) {
     m_bytesSent += ret;
   }
@@ -154,7 +154,7 @@ Array Socket::getMetaData() {
   return ret;
 }
 
-int Socket::tell() {
+int64 Socket::tell() {
   return m_bytesSent;
 }
 

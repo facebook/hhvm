@@ -76,8 +76,10 @@ bool UrlFile::open(CStrRef url, CStrRef mode) {
   }
 
   if (code == 200) {
+    int len = m_len;
     m_name = url;
-    m_data = response.detach(m_len);
+    m_data = response.detach(len);
+    m_len = len;
     m_malloced = true;
     return true;
   } else {
@@ -85,7 +87,7 @@ bool UrlFile::open(CStrRef url, CStrRef mode) {
   }
 }
 
-int UrlFile::writeImpl(const char *buffer, int length) {
+int64 UrlFile::writeImpl(const char *buffer, int64 length) {
   ASSERT(m_len != -1);
   throw FatalErrorException((string("cannot write a url stream: ") +
                              m_name).c_str());

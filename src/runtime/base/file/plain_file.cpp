@@ -76,7 +76,7 @@ bool PlainFile::closeImpl() {
 ///////////////////////////////////////////////////////////////////////////////
 // virtual functions
 
-int PlainFile::readImpl(char *buffer, int length) {
+int64 PlainFile::readImpl(char *buffer, int64 length) {
   ASSERT(valid());
   ASSERT(length > 0);
   // use read instead of fread to handle EOL in stdin
@@ -94,17 +94,17 @@ int PlainFile::getc() {
   return File::getc();
 }
 
-int PlainFile::writeImpl(const char *buffer, int length) {
+int64 PlainFile::writeImpl(const char *buffer, int64 length) {
   ASSERT(valid());
   ASSERT(length > 0);
 
   // use write instead of fwrite to be consistent with read
   // o.w., read-and-write files would not work
-  int written = ::write(m_fd, buffer, length);
+  int64 written = ::write(m_fd, buffer, length);
   return written < 0 ? 0 : written;
 }
 
-bool PlainFile::seek(int offset, int whence /* = SEEK_SET */) {
+bool PlainFile::seek(int64 offset, int whence /* = SEEK_SET */) {
   ASSERT(valid());
 
   if (whence == SEEK_CUR) {
@@ -128,14 +128,14 @@ bool PlainFile::seek(int offset, int whence /* = SEEK_SET */) {
   return result != (off_t)-1;
 }
 
-int PlainFile::tell() {
+int64 PlainFile::tell() {
   ASSERT(valid());
   return m_position;
 }
 
 bool PlainFile::eof() {
   ASSERT(valid());
-  int avail = m_writepos - m_readpos;
+  int64 avail = m_writepos - m_readpos;
   if (avail > 0) {
     return false;
   }
@@ -160,7 +160,7 @@ bool PlainFile::flush() {
   return true;
 }
 
-bool PlainFile::truncate(int size) {
+bool PlainFile::truncate(int64 size) {
   ASSERT(valid());
   return ftruncate(m_fd, size) == 0;
 }

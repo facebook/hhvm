@@ -31,7 +31,7 @@ MemFile::MemFile()
   : m_data(NULL), m_len(-1), m_cursor(0), m_malloced(false) {
 }
 
-MemFile::MemFile(const char *data, int len)
+MemFile::MemFile(const char *data, int64 len)
   : m_data(NULL), m_len(len), m_cursor(0), m_malloced(true) {
   m_data = (char*)malloc(len + 1);
   if (m_data && len) {
@@ -79,10 +79,10 @@ bool MemFile::closeImpl() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int MemFile::readImpl(char *buffer, int length) {
+int64 MemFile::readImpl(char *buffer, int64 length) {
   ASSERT(m_len != -1);
   ASSERT(length > 0);
-  int remaining = m_len - m_cursor;
+  int64 remaining = m_len - m_cursor;
   if (remaining < length) length = remaining;
   if (length > 0) {
     memcpy(buffer, (const void *)(m_data + m_cursor), length);
@@ -96,7 +96,7 @@ int MemFile::getc() {
   return File::getc();
 }
 
-bool MemFile::seek(int offset, int whence /* = SEEK_SET */) {
+bool MemFile::seek(int64 offset, int whence /* = SEEK_SET */) {
   ASSERT(m_len != -1);
   if (whence == SEEK_CUR) {
     if (offset > 0 && offset < m_writepos - m_readpos) {
@@ -121,14 +121,14 @@ bool MemFile::seek(int offset, int whence /* = SEEK_SET */) {
   return true;
 }
 
-int MemFile::tell() {
+int64 MemFile::tell() {
   ASSERT(m_len != -1);
   return m_position;
 }
 
 bool MemFile::eof() {
   ASSERT(m_len != -1);
-  int avail = m_writepos - m_readpos;
+  int64 avail = m_writepos - m_readpos;
   if (avail > 0) {
     return false;
   }
@@ -144,7 +144,7 @@ bool MemFile::rewind() {
   return true;
 }
 
-int MemFile::writeImpl(const char *buffer, int length) {
+int64 MemFile::writeImpl(const char *buffer, int64 length) {
   throw FatalErrorException((string("cannot write a mem stream: ") +
                              m_name).c_str());
 }
@@ -160,13 +160,15 @@ void MemFile::unzip() {
   ASSERT(m_len != -1);
   ASSERT(!m_malloced);
   ASSERT(m_cursor == 0);
-  char *data = gzdecode(m_data, m_len);
+  int len = m_len;
+  char *data = gzdecode(m_data, len);
   if (data == NULL) {
     throw FatalErrorException((string("cannot unzip mem stream: ") +
                                m_name).c_str());
   }
   m_data = data;
   m_malloced = true;
+  m_len = len;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

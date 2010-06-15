@@ -98,6 +98,7 @@ public:
   typedef hphp_const_char_imap<ClassInfo*> ClassMap;
   typedef hphp_const_char_iset InterfaceMap;
   typedef std::vector<const char *> InterfaceVec;
+  typedef std::vector<const char *> ClassVec;
   typedef hphp_const_char_imap<MethodInfo*> MethodMap;
   typedef std::vector<MethodInfo*> MethodVec;
   typedef hphp_const_char_map<PropertyInfo *> PropertyMap;
@@ -202,6 +203,9 @@ public:
   virtual const InterfaceMap &getInterfaces() const = 0;
   virtual const InterfaceVec &getInterfacesVec() const = 0;
   bool derivesFrom(const char *name, bool considerInterface) const;
+
+  void getAllParentsVec(ClassVec &parents) const; // recursive
+  void getAllInterfacesVec(InterfaceVec &interfaces) const; // recursive
 
   /**
    * Method functions.

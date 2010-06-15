@@ -8,6 +8,7 @@
 "array_filter", T(Variant), S(0), "input", T(Variant), NULL, S(0), "callback", T(Variant), "null_variant", S(0), NULL, S(0), 
 "array_flip", T(Variant), S(0), "trans", T(Variant), NULL, S(0), NULL, S(0), 
 "array_key_exists", T(Boolean), S(0), "key", T(Variant), NULL, S(0), "search", T(Variant), NULL, S(0), NULL, S(0), 
+"key_exists", T(Boolean), S(0), "key", T(Variant), NULL, S(0), "search", T(Variant), NULL, S(0), NULL, S(0), 
 "array_keys", T(Variant), S(0), "input", T(Variant), NULL, S(0), "search_value", T(Variant), "null_variant", S(0), "strict", T(Boolean), "false", S(0), NULL, S(0), 
 "array_map", T(Variant), S(0), "callback", T(Variant), NULL, S(0), "arr1", T(Variant), NULL, S(0), NULL, S(1), 
 "array_merge_recursive", T(Variant), S(0), "array1", T(Variant), NULL, S(0), NULL, S(1), 

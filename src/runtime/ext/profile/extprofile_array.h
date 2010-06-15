@@ -70,6 +70,11 @@ inline bool x_array_key_exists(CVarRef key, CVarRef search) {
   return f_array_key_exists(key, search);
 }
 
+inline bool x_key_exists(CVarRef key, CVarRef search) {
+  FUNCTION_INJECTION_BUILTIN(key_exists);
+  return f_key_exists(key, search);
+}
+
 inline Variant x_array_keys(CVarRef input, CVarRef search_value = null_variant, bool strict = false) {
   FUNCTION_INJECTION_BUILTIN(array_keys);
   return f_array_keys(input, search_value, strict);

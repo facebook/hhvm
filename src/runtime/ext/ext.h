@@ -64,6 +64,7 @@
 #include <runtime/ext/profile/extprofile_soap.h>
 #include <runtime/ext/profile/extprofile_socket.h>
 #include <runtime/ext/profile/extprofile_splfile.h>
+#include <runtime/ext/profile/extprofile_spl.h>
 #include <runtime/ext/profile/extprofile_sqlite3.h>
 #include <runtime/ext/profile/extprofile_stream.h>
 #include <runtime/ext/profile/extprofile_string.h>

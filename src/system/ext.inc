@@ -47,6 +47,7 @@
 #include "soap.inc"
 #include "socket.inc"
 #include "splfile.inc"
+#include "spl.inc"
 #include "sqlite3.inc"
 #include "stream.inc"
 #include "string.inc"

@@ -68,6 +68,10 @@ f('array_key_exists', Boolean,
   array('key' => Variant,
         'search' => Variant));
 
+f('key_exists', Boolean,
+  array('key' => Variant,
+        'search' => Variant));
+
 f('array_keys', Variant,
   array('input' => Variant,
         'search_value' => array(Variant, 'null_variant'),

@@ -282,6 +282,25 @@ bool ClassInfo::isDeclared() const {
   return true;
 }
 
+void ClassInfo::getAllParentsVec(ClassVec &parents) const {
+  const char *parent = getParentClass();
+  if (parent && *parent) {
+    parents.push_back(parent);
+    const ClassInfo *info = FindClass(parent);
+    if (info) info->getAllParentsVec(parents);
+  }
+}
+
+void ClassInfo::getAllInterfacesVec(InterfaceVec &interfaces) const {
+  const InterfaceVec &ifs = getInterfacesVec();
+  for (unsigned int i = 0; i < ifs.size(); i++) {
+    const char *intf = ifs[i];
+    interfaces.push_back(intf);
+    const ClassInfo *info = FindInterface(intf);
+    if (info) info->getAllInterfacesVec(interfaces);
+  }
+}
+
 bool ClassInfo::derivesFrom(const char *name, bool considerInterface) const {
   ASSERT(name);
   return derivesFromImpl(name, considerInterface);

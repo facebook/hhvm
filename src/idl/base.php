@@ -263,7 +263,7 @@ function g($name) {
 
 function typename($type, $prefix = true) {
   if (is_string($type)) {
-    if ($prefix) return 'sp_' . strtolower($type);
+    if ($prefix) return 'p_' . strtolower($type);
     return $type;
   }
 
@@ -280,7 +280,7 @@ function typename($type, $prefix = true) {
 
 function param_typename($type, $ref) {
   if (is_string($type)) {
-    return 'sp_' . strtolower($type);
+    return 'p_' . strtolower($type);
   }
 
   global $REFNAMES;

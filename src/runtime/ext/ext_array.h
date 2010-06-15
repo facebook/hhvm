@@ -103,6 +103,9 @@ inline Variant f_array_flip(CVarRef trans) {
 }
 
 bool f_array_key_exists(CVarRef key, CVarRef search);
+inline bool f_key_exists(CVarRef key, CVarRef search) {
+  return f_array_key_exists(key, search);
+}
 
 inline Variant f_array_keys(CVarRef input, CVarRef search_value = null_variant,
                             bool strict = false) {

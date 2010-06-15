@@ -47,6 +47,7 @@ RUN_TESTSUITE(TestExtSimplexml);
 RUN_TESTSUITE(TestExtSoap);
 RUN_TESTSUITE(TestExtSocket);
 RUN_TESTSUITE(TestExtSplfile);
+RUN_TESTSUITE(TestExtSpl);
 RUN_TESTSUITE(TestExtSqlite3);
 RUN_TESTSUITE(TestExtStream);
 RUN_TESTSUITE(TestExtString);

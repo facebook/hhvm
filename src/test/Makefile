@@ -10,8 +10,7 @@ LIBS = \
 	$(LIB_DIR)/libhphp_runtime.a \
 	$(ALL_LIBS)
 
-include $(PROJECT_ROOT)/src/rules.mk
-TARGETS = $(APP_TARGET)
+include $(PROJECT_ROOT)/src/dirs.mk
 
 TEST_SUITE_INC := test_base_suite.inc
 TEST_FAST_INC := test_base_fast.inc
@@ -21,6 +20,9 @@ HOOK_RULE_FILE = $(wildcard hook.mk)
 ifneq ($(strip $(HOOK_RULE_FILE)),)
  include hook.mk
 endif
+
+include $(PROJECT_ROOT)/src/rules.mk
+TARGETS = $(APP_TARGET)
 
 $(OUT_DIR)test_suite.inc:: $(TEST_SUITE_INC)
 	$(V)cat $^ > $@

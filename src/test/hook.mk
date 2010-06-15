@@ -1,6 +1,8 @@
-EXTRA_FILES = $(OUT_DIR)fb_compiler_hooks.cpp $(OUT_DIR)test_fbcode_error.cpp \
-	$(OUT_DIR)test_fbdepend_graph.cpp
+EXTRA_FILES = $(ABS_PROJECT_ROOT)/facebook/src/compiler/fb_compiler_hooks.cpp \
+	$(ABS_PROJECT_ROOT)/facebook/src/test/test_fbcode_error.cpp \
+	$(ABS_PROJECT_ROOT)/facebook/src/test/test_fbdepend_graph.cpp
 
+CPPFLAGS += -I$(PROJECT_ROOT)/facebook/src
 CXX_SOURCES += $(EXTRA_FILES)
 
 EXTRA_TEST_SUITE_INC := \
@@ -19,22 +21,5 @@ ifneq ($(strip $(REAL_MYSQL_INFO_INC)),)
   TEST_MYSQL_INFO_INC := $(REAL_MYSQL_INFO_INC)
 endif
 
-$(filter-out $(OUT_DIR)fb_compiler_hooks.%, $(EXTRA_FILES) $(EXTRA_FILES:.cpp=.h)): $(OUT_DIR)% : ../../facebook/src/test/%
-	$(V)cp $< $@
-
-$(filter $(OUT_DIR)fb_compiler_hooks.%, $(EXTRA_FILES) $(EXTRA_FILES:.cpp=.h)): $(OUT_DIR)% : ../../facebook/src/compiler/%
-	$(V)cp $< $@
-
-
-$(EXTRA_FILES:.cpp=.o) : %.o : %.cpp %.h %.d
-
-$(OBJECTS): $(EXTRA_FILES:.cpp=.h)
-$(OUT_TOP)test: $(EXTRA_FILES:.cpp=.o)
-
--include $(EXTRA_FILES:.cpp=.d)
-
 clean clobber::
-	$(V)rm -f $(OUT_DIR)test_fbcode_error.cpp $(OUT_DIR)test_fbcode_error.h \
-               $(OUT_DIR)test_fbdepend_graph.cpp $(OUT_DIR)test_fbdepend_graph.h \
-               $(OUT_DIR)test_extra_suite.inc $(OUT_DIR)test_extra_fast.inc \
-               $(OUT_DIR)fb_compiler_hooks.cpp $(OUT_DIR)fb_compiler_hooks.h
+	$(V)rm -f $(OUT_DIR)test_extra_suite.inc $(OUT_DIR)test_extra_fast.inc

@@ -15,10 +15,9 @@ unexport SUB_CLEAN_DIRS
 # delete all intermediate files and built targets
 .PHONY: clobber
 clobber:
-	$(V)$(RM) $(SUB_INTERMEDIATE_FILES) $(SUB_OBJECTS)
+	$(V)$(RM) $(SUB_INTERMEDIATE_FILES) $(SUB_OBJECTS) $(SUB_OBJECTS:.o=.d)
 	$(V)$(RM) *.merge-left.* *.merge-right.* *.working www.pid
 	$(V)$(RM) $(OUT_DIR)lib$(PROJECT_NAME).so $(OUT_DIR)lib$(PROJECT_NAME).a
-	$(V)$(RM) *~ $(addprefix $(OUT_DIR),$(OBJECTS:.o=))
 	$(V)$(RM) $(filter-out $(SUB_PROGRAMS) $(SUB_LIB_TARGETS), $(TARGETS))
 	$(V)$(RM) $(shell echo `find $(OUT_DIR) -name "*.o"`)
 	$(V)$(RM) $(shell echo `find $(OUT_DIR) -name "*.d"`)

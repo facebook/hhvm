@@ -11,6 +11,9 @@
 # directory, not the one that make was invoked from
 CWD := $(shell readlink -f `pwd`)
 
+# This is to make sure "make" without any target will actually "make all".
+overall: all
+
 # only want to do this once per invocation of make
 # (particularly the build rules)
 # unfortunately, the variables get passed down to

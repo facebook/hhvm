@@ -53,6 +53,7 @@ class StringData {
    */
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
+  /* Only call setStatic() in a thread-neutral context! */
   void setStatic() const {
     _count = (1 << 30);
     ASSERT(!isShared()); // because we are gonna reuse the space!
@@ -64,6 +65,12 @@ class StringData {
     }
   }
   bool isStatic() const { return _count == (1 << 30); }
+
+  /**
+   * When we have static StringData in SharedStore, we should avoid directly
+   * deleting the StringData pointer, but rather call destruct().
+   */
+  void destruct() const { if (!isStatic()) delete this; }
 
   int64 getStaticHash() const {
     ASSERT(!isShared() && isStatic());

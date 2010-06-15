@@ -22,38 +22,22 @@
 #include <util/hash.h>
 #include <util/atomic.h>
 #include <runtime/base/shared/shared_variant.h>
+#include <runtime/base/complex_types.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ThreadSharedVariantMapData;
 class ThreadSharedVariant;
-struct ThreadSharedVariantHash;
 
-template<class T>
-class ptreq {
-public:
-  bool operator()(const T& x, const T& y) const {
-    if (x && y) {
-      return *x == *y;
-    }
-    return x == y;
-  }
-};
-
-class ThreadSharedVariantHash {
-public:
-  size_t operator()(ThreadSharedVariant* v) const;
-};
-
-typedef hphp_hash_map<ThreadSharedVariant*, int, ThreadSharedVariantHash,
-                      ptreq<ThreadSharedVariant*> > ThreadSharedVariantToIntMap;
+typedef hphp_hash_map<int64, int, int64_hash> Int64ToIntMap;
+typedef hphp_hash_map<StringData *, int, string_data_hash, string_data_equal>
+        StringDataToIntMap;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 class ThreadSharedVariant : public SharedVariant {
- public:
-  ThreadSharedVariant(CVarRef source, bool serialized);
+public:
+  ThreadSharedVariant(CVarRef source, bool serialized, bool inner = false);
   virtual ~ThreadSharedVariant();
 
   virtual void incRef() {
@@ -68,8 +52,11 @@ class ThreadSharedVariant : public SharedVariant {
   }
 
   Variant toLocal();
-  bool operator==(const SharedVariant& svother) const;
-  ssize_t hash() const;
+
+  virtual int64 intData() const {
+    ASSERT(is(KindOfInt64));
+    return m_data.num;
+  }
 
   const char* stringData() const;
   size_t stringLength() const;
@@ -79,52 +66,74 @@ class ThreadSharedVariant : public SharedVariant {
   SharedVariant* get(CVarRef key);
   bool exists(CVarRef key);
 
-  void loadElems(ArrayData *&elems, CArrRef cache, bool keepRef = false);
+  void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
+                 bool keepRef = false);
 
   virtual SharedVariant* getKey(ssize_t pos) const {
     ASSERT(is(KindOfArray));
-    return keys()[pos];
+    return m_data.map->keys[pos];
   }
   virtual SharedVariant* getValue(ssize_t pos) const {
     ASSERT(is(KindOfArray));
-    return vals()[pos];
+    return m_data.map->vals[pos];
   }
 
   // implementing LeakDetectable
   virtual void dump(std::string &out);
 
 protected:
-  virtual ThreadSharedVariant *createAnother(CVarRef source, bool serialized);
+  virtual ThreadSharedVariant *createAnother(CVarRef source, bool serialized,
+                                             bool inner = false);
 
 private:
+  class MapData {
+  public:
+    size_t size;
+    Int64ToIntMap intMap;
+    StringDataToIntMap strMap;
+    ThreadSharedVariant **keys;
+    ThreadSharedVariant **vals;
+
+    MapData(size_t s) : size(s) {
+      keys = new ThreadSharedVariant *[s];
+      vals = new ThreadSharedVariant *[s];
+    }
+
+    ~MapData() {
+      for (size_t i = 0; i < size; i++) {
+        keys[i]->decRef();
+        vals[i]->decRef();
+      }
+      delete [] keys;
+      delete [] vals;
+    }
+
+    void set(int p, ThreadSharedVariant *key, ThreadSharedVariant *val) {
+      keys[p] = key;
+      vals[p] = val;
+      if (key->is(KindOfInt64)) {
+        intMap[key->m_data.num] = p;
+      } else {
+        ASSERT(key->is(KindOfString));
+        strMap[key->m_data.str] = p;
+      }
+    }
+  };
+
   union {
     int64 num;
     double dbl;
     StringData *str;
-    ThreadSharedVariantMapData* map;
+    MapData* map;
   } m_data;
   bool m_owner;
-
-  const ThreadSharedVariantToIntMap &map() const;
-  SharedVariant** keys() const;
-  SharedVariant** vals() const;
-
-  ThreadSharedVariant(StringData *source);
-  ThreadSharedVariant(int64 num);
-  ThreadSharedVariantToIntMap::const_iterator lookup(CVarRef key);
-};
-
-class ThreadSharedVariantMapData {
-public:
-  ThreadSharedVariantToIntMap map;
-  SharedVariant** keys;
-  SharedVariant** vals;
 };
 
 class ThreadSharedVariantLockedRefs : public ThreadSharedVariant {
 public:
-  ThreadSharedVariantLockedRefs(CVarRef source, bool serialized, Mutex &lock)
-    : ThreadSharedVariant(source, serialized), m_lock(lock) {}
+  ThreadSharedVariantLockedRefs(CVarRef source, bool serialized, Mutex &lock,
+                                bool inner = false)
+    : ThreadSharedVariant(source, serialized, inner), m_lock(lock) {}
 
   virtual void incRef() {
     Lock lock(m_lock);
@@ -141,7 +150,8 @@ public:
 
 protected:
   Mutex &m_lock;
-  virtual ThreadSharedVariant *createAnother(CVarRef source, bool serialized);
+  virtual ThreadSharedVariant *createAnother(CVarRef source, bool serialized,
+                                             bool inner = false);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2982,7 +2982,7 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
             (key.charAt(1) == '*' ?
              obj->o_lval(key.substr(subLen), -1, clsName) :
              obj->o_lval(key.substr(subLen), -1, key.substr(1, subLen - 2)))
-            : obj.o_lval(key, -1).lval();
+            : obj->o_lval(key, -1);
           value.unserialize(unserializer);
         }
       }

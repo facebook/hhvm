@@ -307,7 +307,7 @@ public:
     }
     m_vars.clear();
     for (unsigned int i = 0; i < keys.size(); i++) {
-      delete keys[i];
+      keys[i]->destruct();
     }
   }
   virtual bool eraseLockedImpl(CStrRef key, bool expired) {
@@ -321,7 +321,7 @@ public:
       iter->second.var->decRef();
       StringData *pkey = iter->first;
       m_vars.erase(iter);
-      delete pkey;
+      pkey->destruct();
       return true;
     }
     return false;
@@ -396,7 +396,7 @@ protected:
     ~StringMap() {
       for (baseType::iterator iter = baseType::begin();
            iter != baseType::end(); ++iter) {
-        delete iter->first;
+        iter->first->destruct();
       }
     }
   };
@@ -558,7 +558,7 @@ private:
   class NodeDestructor {
   public:
     void operator()(const StringData *k, StoreValue &val) {
-      delete k;
+      k->destruct();
       val.var->decRef();
     }
   };
@@ -581,6 +581,9 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConcurrentThreadSharedStore
+
+static string_data_hash g_hash;
+static string_data_equal g_equal;
 
 class ConcurrentTableSharedStore : public SharedStore,
                                    private ThreadSharedVariantFactory {
@@ -625,11 +628,11 @@ protected:
   struct StringHashCompare {
     bool equal(StringData *s1, StringData *s2) const {
       ASSERT(s1 && s2);
-      return s1->compare(s2) == 0;
+      return g_equal(s1, s2);
     }
     size_t hash(StringData *s) const {
       ASSERT(s);
-      return hash_string(s->data(), s->size());
+      return g_hash(s);
     }
   };
   typedef tbb::concurrent_hash_map<StringData*, StoreValue, StringHashCompare>
@@ -640,7 +643,7 @@ protected:
     for (Map::iterator iter = m_vars.begin(); iter != m_vars.end();
          ++iter) {
       iter->second.var->decRef();
-      delete iter->first;
+      iter->first->destruct();
     }
     m_vars.clear();
   }
@@ -662,13 +665,13 @@ protected:
     acc->second.var->decRef();
     StringData *pkey = acc->first;
     m_vars.erase(acc);
-    delete pkey;
+    pkey->destruct();
   }
   void eraseAcc(Map::const_accessor &acc) {
     acc->second.var->decRef();
     StringData *pkey = acc->first;
     m_vars.erase(acc);
-    delete pkey;
+    pkey->destruct();
   }
 
   Map m_vars;
@@ -720,7 +723,7 @@ protected:
       for (int j = 0; j < i; ++j) {
         String k(s[j]->data(), s[j]->size(), AttachLiteral);
         eraseImpl(k, true);
-        delete s[j];
+        s[j]->destruct();
       }
       if (i < PURGE_RATE) {
         // No work left
@@ -909,7 +912,7 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
     present = !m_vars.insert(acc, kcp);
     sval = &acc->second;
     if (present) {
-      delete kcp;
+      kcp->destruct();
       if (overwrite || sval->expired()) {
         sval->var->decRef();
       } else {
@@ -959,7 +962,7 @@ bool LfuTableSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
           added = true;
           if (stats) ServerStats::Log("apc.update", 1);
         }
-        delete newkey;
+        newkey->destruct();
       } else {
         val.set(var, ttl);
         added = true;
@@ -1011,6 +1014,7 @@ void ConcurrentTableSharedStore::prime
     const SharedStore::KeyValuePair &item = vars[i];
     Map::accessor acc;
     String k(item.key, item.len, CopyString);
+    k.checkStatic();
     m_vars.insert(acc, k.get()->copy(true));
     acc->second.set(item.value, 0);
   }

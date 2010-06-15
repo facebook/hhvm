@@ -24,17 +24,8 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-ThreadSharedVariant::ThreadSharedVariant(StringData *source) : m_owner(false) {
-  m_type = KindOfString;
-  m_data.str = source;
-}
-
-ThreadSharedVariant::ThreadSharedVariant(int64 num) : m_owner(false) {
-  m_type = KindOfInt64;
-  m_data.num = num;
-}
-
-ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized)
+ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
+                                         bool inner /* = false */)
   : m_owner(true) {
   ASSERT(!serialized || source.isString());
 
@@ -76,36 +67,29 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized)
       m_type = KindOfArray;
 
       ArrayData *arr = source.getArrayData();
-      PointerSet seen;
-      if (arr->hasInternalReference(seen)) {
-        m_serializedArray = true;
-        m_shouldCache = true;
-        String s = f_serialize(source);
-        m_data.str = new StringData(s.data(), s.size(), CopyString);
-        break;
+
+      if (!inner) {
+        // only need to call hasInternalReference() on the toplevel array
+        PointerSet seen;
+        if (arr->hasInternalReference(seen)) {
+          m_serializedArray = true;
+          m_shouldCache = true;
+          String s = f_serialize(source);
+          m_data.str = new StringData(s.data(), s.size(), CopyString);
+          break;
+        }
       }
 
       size_t size = arr->size();
-      ThreadSharedVariantMapData* mapData = new ThreadSharedVariantMapData();
-      ThreadSharedVariantToIntMap map;
-      SharedVariant** keys = new SharedVariant*[size];
-      SharedVariant** vals = new SharedVariant*[size];
+      m_data.map = new MapData(size);
 
       uint i = 0;
-      for (ArrayIterPtr it = source.begin(); !it->end(); it->next()) {
-        ThreadSharedVariant* key
-          = createAnother(it->first(), false);
-        ThreadSharedVariant* val
-          = createAnother(it->second(), false);
+      for (ArrayIter it(arr); !it.end(); it.next(), i++) {
+        ThreadSharedVariant* key = createAnother(it.first(), false);
+        ThreadSharedVariant* val = createAnother(it.second(), false, true);
         if (val->shouldCache()) m_shouldCache = true;
-        keys[i] = key;
-        vals[i] = val;
-        map[key] = i++;
+        m_data.map->set(i, key, val);
       }
-      m_data.map = mapData;
-      mapData->map.swap(map);
-      mapData->keys = keys;
-      mapData->vals = vals;
       break;
     }
   default:
@@ -136,6 +120,7 @@ Variant ThreadSharedVariant::toLocal() {
     }
   case KindOfString:
     {
+      if (m_data.str->isStatic()) return m_data.str;
       return NEW(StringData)(this);
     }
   case KindOfArray:
@@ -199,28 +184,20 @@ ThreadSharedVariant::~ThreadSharedVariant() {
   case KindOfString:
   case KindOfObject:
     if (m_owner) {
-      delete m_data.str;
+      m_data.str->destruct();
     }
     break;
   case KindOfArray:
     {
       if (m_serializedArray) {
         if (m_owner) {
-          delete m_data.str;
+          m_data.str->destruct();
         }
         break;
       }
 
       ASSERT(m_owner);
-      ThreadSharedVariantMapData* map = m_data.map;
-      size_t size = map->map.size();
-      for (size_t i = 0; i < size; i++) {
-        map->keys[i]->decRef();
-        map->vals[i]->decRef();
-      }
-      delete [] map->keys;
-      delete [] map->vals;
-      delete map;
+      delete m_data.map;
     }
     break;
   default:
@@ -229,40 +206,6 @@ ThreadSharedVariant::~ThreadSharedVariant() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-bool ThreadSharedVariant::operator==(const SharedVariant& svother) const {
-  ThreadSharedVariant const *other =
-    dynamic_cast<ThreadSharedVariant const *>(&svother);
-  ASSERT(other);
-  if (m_type != other->m_type) {
-    return false;
-  }
-  switch (m_type) {
-  case KindOfInt64:
-    return m_data.num == other->m_data.num;
-  case KindOfString:
-    return m_data.str->compare(other->m_data.str) == 0;
-  default:
-    break;
-  }
-  // No other types are legitimate keys
-  ASSERT(false);
-  return false;
-}
-
-ssize_t ThreadSharedVariant::hash() const {
-  switch (m_type) {
-  case KindOfInt64:
-    return hash_int64(m_data.num);
-  case KindOfString:
-    return hash_string(m_data.str->data(), m_data.str->size());
-  default:
-    break;
-  }
-  // No other types are legitimate keys
-  ASSERT(false);
-  return -1;
-}
 
 const char *ThreadSharedVariant::stringData() const {
   ASSERT(is(KindOfString));
@@ -274,108 +217,78 @@ size_t ThreadSharedVariant::stringLength() const {
   return m_data.str->size();
 }
 
-const ThreadSharedVariantToIntMap &ThreadSharedVariant::map() const {
-  return m_data.map->map;
-}
-SharedVariant** ThreadSharedVariant::keys() const {
-  return m_data.map->keys;
-}
-SharedVariant** ThreadSharedVariant::vals() const {
-  return m_data.map->vals;
-}
-
 size_t ThreadSharedVariant::arrSize() const {
-  return map().size();
+  ASSERT(is(KindOfArray));
+  return m_data.map->size;
 }
 
 int ThreadSharedVariant::getIndex(CVarRef key) {
   ASSERT(is(KindOfArray));
-  ThreadSharedVariantToIntMap::const_iterator it = lookup(key);
-  if (it == map().end()) {
-    return -1;
+  switch (key.getType()) {
+  case KindOfByte:
+  case KindOfInt16:
+  case KindOfInt32:
+  case KindOfInt64: {
+    int64 num = key.getNumData();
+    Int64ToIntMap::const_iterator it = m_data.map->intMap.find(num);
+    if (it == m_data.map->intMap.end()) return -1;
+    return it->second;
   }
-  return it->second;
+  case KindOfStaticString:
+  case KindOfString: {
+    StringData *sd = key.getStringData();
+    StringDataToIntMap::const_iterator it = m_data.map->strMap.find(sd);
+    if (it == m_data.map->strMap.end()) return -1;
+    return it->second;
+  }
+  case LiteralString: {
+    StringData sd(key.getLiteralString(), AttachLiteral);
+    StringDataToIntMap::const_iterator it = m_data.map->strMap.find(&sd);
+    if (it == m_data.map->strMap.end()) return -1;
+    return it->second;
+  }
+  default:
+    // No other types are legitimate keys
+    break;
+  }
+  return -1;
 }
 
 SharedVariant* ThreadSharedVariant::get(CVarRef key) {
   int idx = getIndex(key);
   if (idx != -1) {
-    return vals()[idx];
+    return m_data.map->vals[idx];
   }
   return NULL;
 }
 
 bool ThreadSharedVariant::exists(CVarRef key) {
   ASSERT(is(KindOfArray));
-  ThreadSharedVariantToIntMap::const_iterator it = lookup(key);
-  return it != map().end();
+  int idx = getIndex(key);
+  return idx != -1;
 }
 
-void ThreadSharedVariant::loadElems(ArrayData *&elems, CArrRef cache,
+void ThreadSharedVariant::loadElems(ArrayData *&elems,
+                                    const SharedMap &sharedMap,
                                     bool keepRef /* = false */) {
   ASSERT(is(KindOfArray));
-  SharedVariant** ks = keys();
-  SharedVariant** vs = vals();
-  uint count = map().size();
+  uint count = arrSize();
   ArrayInit ai(count, false, keepRef);
   for (uint i = 0; i < count; i++) {
-    SharedVariant *k = ks[i];
-    int64 key = (int64)k;
-    if (cache.exists(key)) {
-      ai.set(i, k->toLocal(), cache.rvalAt(key), -1, true);
-    } else {
-      ai.set(i, k->toLocal(), vs[i]->toLocal(), -1, true);
-    }
+    ai.set(i, m_data.map->keys[i]->toLocal(), sharedMap.getValue(i), -1, true);
   }
   elems = ai.create();
   if (elems->isStatic()) elems = elems->copy();
 }
 
-ThreadSharedVariantToIntMap::const_iterator
-ThreadSharedVariant::lookup(CVarRef key) {
-  ThreadSharedVariantToIntMap::const_iterator it;
-  switch (key.getType()) {
-  case KindOfStaticString:
-  case KindOfString: {
-    ThreadSharedVariant svk(key.getStringData());
-    it = map().find(&svk);
-    break;
-  }
-  case LiteralString: {
-    StringData sd(key.getLiteralString(), AttachLiteral);
-    ThreadSharedVariant svk(&sd);
-    it = map().find(&svk);
-    break;
-  }
-  case KindOfByte:
-  case KindOfInt16:
-  case KindOfInt32:
-  case KindOfInt64: {
-    int64 num = key.getNumData();
-    ThreadSharedVariant svk(num);
-    it = map().find(&svk);
-    break;
-  }
-  default:
-    // No other types are legitimate keys
-    it = map().end();
-    break;
-  }
-  return it;
-}
-
-size_t ThreadSharedVariantHash::operator()(ThreadSharedVariant* v) const {
-  return v->hash();
-}
-
 ThreadSharedVariant *ThreadSharedVariant::createAnother
-(CVarRef source, bool serialized) {
-  return new ThreadSharedVariant(source, serialized);
+(CVarRef source, bool serialized, bool inner /* = false */) {
+  return new ThreadSharedVariant(source, serialized, inner);
 }
 
 ThreadSharedVariant *ThreadSharedVariantLockedRefs::createAnother
-(CVarRef source, bool serialized) {
-  return new ThreadSharedVariantLockedRefs(source, serialized, m_lock);
+(CVarRef source, bool serialized, bool inner /* = false */) {
+  return new ThreadSharedVariantLockedRefs(source, serialized, m_lock, inner);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

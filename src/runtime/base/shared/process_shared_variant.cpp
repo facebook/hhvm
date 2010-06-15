@@ -253,21 +253,16 @@ ProcessSharedVariant::~ProcessSharedVariant() {
   }
 }
 
-void ProcessSharedVariant::loadElems(ArrayData *&elems, CArrRef cache,
+void ProcessSharedVariant::loadElems(ArrayData *&elems,
+                                     const SharedMap &sharedMap,
                                      bool keepRef /* = false */) {
   ASSERT(is(KindOfArray));
   const SharedMemoryVector<SharedVariant*>& ks = keys();
-  const SharedMemoryVector<SharedVariant*>& vs = vals();
   uint count = ks.size();
   ArrayInit ai(count, false, keepRef);
   for (uint i = 0; i < count; i++) {
     SharedVariant *k = getPtr(ks[i]);
-    int64 key = (int64)k;
-    if (cache.exists(key)) {
-      ai.set(i, k->toLocal(), cache.rvalAt(key), -1, true);
-    } else {
-      ai.set(i, k->toLocal(), getPtr(vs[i])->toLocal(), -1, true);
-    }
+    ai.set(i, k->toLocal(), sharedMap.getValue(i), -1, true);
   }
   elems = ai.create();
   if (elems->isStatic()) elems = elems->copy();

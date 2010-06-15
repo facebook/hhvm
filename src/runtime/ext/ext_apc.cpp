@@ -76,9 +76,10 @@ Variant f_apc_fetch(CVarRef key, Variant success /* = null */,
         throw_invalid_argument("apc key: (not a string)");
         return false;
       }
-      if (s_apc_store[cache_id].get(k.toString(), v)) {
+      String strKey = k.toString();
+      if (s_apc_store[cache_id].get(strKey, v)) {
         tmp = true;
-        init.set(i++, k, v, -1, true);
+        init.set(i++, strKey, v, -1, true);
       }
     }
     success = tmp;

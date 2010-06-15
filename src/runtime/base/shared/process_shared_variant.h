@@ -71,6 +71,11 @@ class ProcessSharedVariant : public SharedVariant {
   Variant toLocal();
   bool operator<(const SharedVariant& svother) const;
 
+  virtual int64 intData() const {
+    ASSERT(is(KindOfInt64));
+    return m_data.num;
+  }
+
   const char* stringData() const {
     ASSERT(is(KindOfString));
     return getString()->c_str();
@@ -87,7 +92,8 @@ class ProcessSharedVariant : public SharedVariant {
   int getIndex(CVarRef key);
   SharedVariant* get(CVarRef key);
   bool exists(CVarRef key);
-  void loadElems(ArrayData *&elems, CArrRef cache, bool keepRef = false);
+  void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
+                 bool keepRef = false);
 
   virtual SharedVariant* getKey(ssize_t pos) const;
   virtual SharedVariant* getValue(ssize_t pos) const;

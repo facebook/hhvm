@@ -44,8 +44,7 @@ public:
   }
 
   Variant getKey(ssize_t pos) const {
-    SharedVariant* k = m_arr->getKey(pos);
-    return k ? k->toLocal() : null;
+    return m_arr->getKey(pos)->toLocal();
   }
 
   Variant getValue(ssize_t pos) const {
@@ -146,11 +145,11 @@ private:
     if (!sv->shouldCache()) return sv->toLocal();
     int64 key = (int64)sv;
     key = ((key & 0xfll) << 60) | (key >> 4);
-    if (m_localCache.exists(key)) {
-      return m_localCache.rvalAt(key);
+    Variant v = m_localCache.rvalAt(key);
+    if (v.isNull()) {
+      v = sv->toLocal();
+      if (!v.isNull()) m_localCache.set(key, v);
     }
-    Variant v = sv->toLocal();
-    m_localCache.set(key, v);
     return v;
   }
 };

@@ -40,6 +40,7 @@
 #include <runtime/ext/ext_fb.h>
 #include <runtime/ext/ext_json.h>
 #include <runtime/ext/ext_variable.h>
+#include <runtime/ext/ext_apc.h>
 #include <runtime/eval/runtime/code_coverage.h>
 #include <runtime/base/fiber_async_func.h>
 
@@ -683,6 +684,8 @@ void hphp_process_init() {
   PageletServer::Restart();
   XboxServer::Restart();
   Extension::InitModules();
+  apc_load(RuntimeOption::ApcLoadThread);
+  StaticString::FinishInit();
 }
 
 void hphp_session_init() {

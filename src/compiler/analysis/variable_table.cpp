@@ -964,9 +964,6 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
       cg_printf("LiteralStringInitializer::initialize();\n");
     }
     cg_printf("ScalarArrays::initialize();\n");
-    if (Option::PrecomputeLiteralStrings && ar->getLiteralStringCount() > 0) {
-      cg_printf("StaticString::TheStaticStringSet().clear();\n");
-    }
     cg_indentEnd("}\n");
     cg_printf("static ThreadLocalSingleton<GlobalVariables> g_variables;\n");
 
@@ -1498,7 +1495,13 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
         prop += lexical_cast<string>(ps);
         prop += ", CopyString)"; // Copy is necessary because it's binary
       } else {
-        prop = string("\"") + prop + "\"";
+        int stringId = cg.checkLiteralString(prop, ar);
+        if (stringId >= 0) {
+          prop = "LITSTR(" + lexical_cast<string>(stringId) + ", \"" +
+                 prop + "\")";
+        } else {
+          prop = string("\"") + prop + "\"";
+        }
       }
       if (getFinalType(s)->is(Type::KindOfVariant)) {
         cg_printf("if (isInitialized(%s%s)) props.set(%s, "

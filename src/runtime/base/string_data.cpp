@@ -154,6 +154,10 @@ void StringData::append(const char *s, int len) {
 }
 
 StringData *StringData::copy(bool sharedMemory /* = false */) const {
+  if (isStatic()) {
+    // Static strings cannot change, and are always available.
+    return const_cast<StringData *>(this);
+  }
   if (sharedMemory) {
     // Even if it's literal, it might come from hphpi's class info
     // which will be freed at the end of the request, and so must be
@@ -402,6 +406,8 @@ int StringData::numericCompare(const StringData *v2) const {
 
 int StringData::compare(const StringData *v2) const {
   ASSERT(v2);
+
+  if (v2 == this) return 0;
 
   int ret = numericCompare(v2);
   if (ret < -1) {

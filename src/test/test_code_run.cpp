@@ -11665,6 +11665,21 @@ bool TestCodeRun::TestAPC() {
         ")\n"
       );
 
+  MVCRO("<?php\n"
+        "class A { var $v = 10; function f() { $this->v = 100; } }\n"
+        "$a = array(array(1, 2, 3), new A());\n"
+        "apc_store('0', $a);\n"
+        "$b = apc_fetch(0);\n"
+        "var_dump($b[1]->v);\n"
+        "$b[1]->f();\n"          // SharedMap::get() needs caching
+        "var_dump($b[1]->v);\n"
+        "$b[2] = 1;\n"           // SharedMap::escalate() needs caching
+        "var_dump($b[1]->v);\n",
+        "int(10)\n"
+        "int(100)\n"
+        "int(100)\n"
+      );
+
   return true;
 }
 

@@ -26,6 +26,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class SharedMap;
+
 class SharedVariant
 #ifdef DEBUG_APC_LEAK
   : public LeakDetectable
@@ -48,6 +50,8 @@ public:
   virtual Variant toLocal() = 0;
   virtual bool operator<(const SharedVariant& other) const { return false; }
 
+  virtual int64 intData() const = 0;
+
   virtual const char* stringData() const = 0;
   virtual size_t stringLength() const = 0;
 
@@ -56,8 +60,10 @@ public:
   virtual int getIndex(CVarRef key) = 0;
   virtual SharedVariant* get(CVarRef key) = 0;
   virtual bool exists(CVarRef key) = 0;
-  virtual void loadElems(ArrayData *&elems, CArrRef cache,
+  virtual void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
                          bool keepRef = false) = 0;
+
+  /** Returns a key in thread-local space. */
   virtual SharedVariant* getKey(ssize_t pos) const = 0;
   virtual SharedVariant* getValue(ssize_t pos) const = 0;
 

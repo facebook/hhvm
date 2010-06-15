@@ -107,7 +107,6 @@ HttpServer::HttpServer()
   RTTIInfo::TheRTTIInfo.init(true);
 
   hphp_process_init();
-  apc_load(RuntimeOption::ApcLoadThread);
 
   Server::InstallStopSignalHandlers(m_pageServer);
   Server::InstallStopSignalHandlers(m_adminServer);

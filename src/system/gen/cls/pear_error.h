@@ -87,6 +87,7 @@ class c_pear_error : public ExtObjectData {
   public: void t_getbacktrace(CVarRef v_frame = null_variant);
   public: void t_tostring();
 };
+extern struct ObjectStaticCallbacks cw_pear_error;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

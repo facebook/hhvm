@@ -92,6 +92,7 @@ class c_directoryiterator : public c_splfileinfo {
   public: bool t_valid();
   public: bool t_isdot();
 };
+extern struct ObjectStaticCallbacks cw_directoryiterator;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -115,6 +115,7 @@ class c_splfileobject : public c_splfileinfo {
   public: Variant t_setmaxlinelen(CVarRef v_max_len);
   public: bool t_valid();
 };
+extern struct ObjectStaticCallbacks cw_splfileobject;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

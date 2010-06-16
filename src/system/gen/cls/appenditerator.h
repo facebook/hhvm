@@ -91,6 +91,7 @@ class c_appenditerator : public ExtObjectData {
   public: void t_next();
   public: Variant t___call(Variant v_func, Variant v_params);
 };
+extern struct ObjectStaticCallbacks cw_appenditerator;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -75,6 +75,7 @@ class c_outofboundsexception : public c_runtimeexception {
   DECLARE_INVOKES_FROM_EVAL
   void init();
 };
+extern struct ObjectStaticCallbacks cw_outofboundsexception;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

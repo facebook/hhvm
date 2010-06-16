@@ -96,6 +96,7 @@ class c_reflectionparameter : public ExtObjectData {
   public: Variant t_getposition();
   public: static Variant t_export(CVarRef v_func, CVarRef v_param, CVarRef v_ret) { return ti_export("reflectionparameter", v_func, v_param, v_ret); }
 };
+extern struct ObjectStaticCallbacks cw_reflectionparameter;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -84,6 +84,7 @@ class c_directory : public ExtObjectData {
   public: Variant t_rewind();
   public: Variant t_close();
 };
+extern struct ObjectStaticCallbacks cw_directory;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

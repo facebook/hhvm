@@ -105,6 +105,7 @@ class c_splfileinfo : public ExtObjectData {
   public: Variant t_setinfoclass(CVarRef v_class_name = "SplFileInfo");
   public: Variant m_rsrc;
 };
+extern struct ObjectStaticCallbacks cw_splfileinfo;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

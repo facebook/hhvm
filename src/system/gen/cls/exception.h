@@ -90,6 +90,7 @@ class c_exception : public ExtObjectData {
   public: String t_gettraceasstring();
   public: String t___tostring();
 };
+extern struct ObjectStaticCallbacks cw_exception;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -68,6 +68,7 @@ class c_stdclass : public ExtObjectData {
   DECLARE_INVOKES_FROM_EVAL
   void init();
 };
+extern struct ObjectStaticCallbacks cw_stdclass;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -75,6 +75,7 @@ class c_unexpectedvalueexception : public c_runtimeexception {
   DECLARE_INVOKES_FROM_EVAL
   void init();
 };
+extern struct ObjectStaticCallbacks cw_unexpectedvalueexception;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

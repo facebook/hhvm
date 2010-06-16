@@ -96,6 +96,7 @@ class c_recursivedirectoryiterator : public c_directoryiterator {
   public: String t_getsubpath();
   public: String t_getsubpathname();
 };
+extern struct ObjectStaticCallbacks cw_recursivedirectoryiterator;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -89,6 +89,7 @@ class c_recursiveiteratoriterator : public ExtObjectData {
   public: bool t_valid();
   public: Variant m_rsrc;
 };
+extern struct ObjectStaticCallbacks cw_recursiveiteratoriterator;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

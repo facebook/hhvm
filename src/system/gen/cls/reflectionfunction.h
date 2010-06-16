@@ -87,6 +87,7 @@ class c_reflectionfunction : public c_reflectionfunctionabstract {
   public: Variant t_invokeargs(CVarRef v_args);
   public: static Variant t_export(CVarRef v_name, CVarRef v_ret) { return ti_export("reflectionfunction", v_name, v_ret); }
 };
+extern struct ObjectStaticCallbacks cw_reflectionfunction;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -109,6 +109,7 @@ class c_arrayiterator : public ExtObjectData {
   public: bool t_uksort(Variant v_cmp_function);
   public: bool t_valid();
 };
+extern struct ObjectStaticCallbacks cw_arrayiterator;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

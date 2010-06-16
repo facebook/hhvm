@@ -75,6 +75,7 @@ class c_outofrangeexception : public c_logicexception {
   DECLARE_INVOKES_FROM_EVAL
   void init();
 };
+extern struct ObjectStaticCallbacks cw_outofrangeexception;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

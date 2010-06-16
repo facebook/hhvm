@@ -93,6 +93,7 @@ class c_reflectionextension : public ExtObjectData {
   public: Variant t_info();
   public: static Variant t_export(CVarRef v_name, CVarRef v_ret) { return ti_export("reflectionextension", v_name, v_ret); }
 };
+extern struct ObjectStaticCallbacks cw_reflectionextension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

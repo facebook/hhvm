@@ -88,6 +88,7 @@ class c_reflectionfunctionabstract : public ExtObjectData {
   public: int t_getnumberofparameters();
   public: int64 t_getnumberofrequiredparameters();
 };
+extern struct ObjectStaticCallbacks cw_reflectionfunctionabstract;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

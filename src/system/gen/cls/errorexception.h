@@ -83,6 +83,7 @@ class c_errorexception : public c_exception {
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Variant t_getseverity();
 };
+extern struct ObjectStaticCallbacks cw_errorexception;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

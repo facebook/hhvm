@@ -74,6 +74,7 @@ class c_reflectionexception : public c_exception {
   DECLARE_INVOKES_FROM_EVAL
   void init();
 };
+extern struct ObjectStaticCallbacks cw_reflectionexception;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

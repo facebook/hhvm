@@ -635,6 +635,8 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_indentEnd("}\n");
         cg_indentEnd("};\n");
       }
+
+      classScope->outputCPPGlobalTableWrappersDecl(cg, ar);
     }
     break;
   case CodeGenerator::CppImplementation:

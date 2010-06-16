@@ -88,6 +88,7 @@ class c_splobjectstorage : public ExtObjectData {
   public: void t_attach(CVarRef v_obj);
   public: void t_detach(CVarRef v_obj);
 };
+extern struct ObjectStaticCallbacks cw_splobjectstorage;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

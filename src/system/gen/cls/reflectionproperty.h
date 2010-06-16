@@ -100,6 +100,7 @@ class c_reflectionproperty : public ExtObjectData {
   public: Variant t_getdoccomment();
   public: static Variant t_export(CVarRef v_cls, CVarRef v_name, CVarRef v_ret) { return ti_export("reflectionproperty", v_cls, v_name, v_ret); }
 };
+extern struct ObjectStaticCallbacks cw_reflectionproperty;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

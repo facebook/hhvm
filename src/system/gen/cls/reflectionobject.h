@@ -78,6 +78,7 @@ class c_reflectionobject : public c_reflectionclass {
   public: static Variant ti_export(const char* cls, Variant v_obj, CVarRef v_ret);
   public: static Variant t_export(CVarRef v_obj, CVarRef v_ret) { return ti_export("reflectionobject", v_obj, v_ret); }
 };
+extern struct ObjectStaticCallbacks cw_reflectionobject;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

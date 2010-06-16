@@ -79,7 +79,11 @@ class ReflectionParameter implements Reflector {
     if (!$this->isOptional()) {
       throw new ReflectionException('Parameter is not optional');
     }
-    return $this->info['default'];
+    $defaultValue = $this->info['default'];
+    if ($defaultValue instanceof stdclass) {
+      hphp_throw_fatal_error($defaultValue->msg);
+    }
+    return $defaultValue;
   }
 
   public function getPosition() {

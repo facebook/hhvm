@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 92 */
+/* SRC: classes/reflection.php line 96 */
 class c_reflectionfunctionabstract : public ExtObjectData {
   BEGIN_CLASS_MAP(reflectionfunctionabstract)
   END_CLASS_MAP(reflectionfunctionabstract)

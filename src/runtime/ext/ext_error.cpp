@@ -128,6 +128,11 @@ void f_hphp_set_error_page(CStrRef page) {
   g_context->setErrorPage(page);
 }
 
+void f_hphp_throw_fatal_error(CStrRef error_msg) {
+  std::string msg = error_msg.data();
+  raise_error(msg);
+}
+
 bool f_trigger_error(CStrRef error_msg,
                      int error_type /* = k_E_USER_NOTICE */) {
   std::string msg = error_msg.data();

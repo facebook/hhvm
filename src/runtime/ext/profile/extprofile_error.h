@@ -60,8 +60,7 @@ inline bool x_restore_exception_handler() {
   return f_restore_exception_handler();
 }
 
-inline Variant x_set_error_handler(CVarRef error_handler,
-                                   int error_types = k_E_ALL) {
+inline Variant x_set_error_handler(CVarRef error_handler, int error_types = k_E_ALL) {
   FUNCTION_INJECTION_BUILTIN(set_error_handler);
   return f_set_error_handler(error_handler, error_types);
 }
@@ -74,6 +73,11 @@ inline String x_set_exception_handler(CStrRef exception_handler) {
 inline void x_hphp_set_error_page(CStrRef page) {
   FUNCTION_INJECTION_BUILTIN(hphp_set_error_page);
   f_hphp_set_error_page(page);
+}
+
+inline void x_hphp_throw_fatal_error(CStrRef error_msg) {
+  FUNCTION_INJECTION_BUILTIN(hphp_throw_fatal_error);
+  f_hphp_throw_fatal_error(error_msg);
 }
 
 inline bool x_trigger_error(CStrRef error_msg, int error_type = k_E_USER_NOTICE) {

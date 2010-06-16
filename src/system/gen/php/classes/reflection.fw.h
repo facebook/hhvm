@@ -56,5 +56,6 @@ FORWARD_DECLARE_CLASS(reflectionparameter)
 ///////////////////////////////////////////////////////////////////////////////
 }
 #include <php/classes/exception.fw.h>
+#include <php/classes/stdclass.fw.h>
 
 #endif // __GENERATED_php_classes_reflection_fw_h__

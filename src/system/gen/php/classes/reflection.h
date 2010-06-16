@@ -33,6 +33,7 @@
 #include <cls/reflectionfunction.h>
 #include <cls/reflectionparameter.h>
 #include <php/classes/exception.h>
+#include <php/classes/stdclass.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

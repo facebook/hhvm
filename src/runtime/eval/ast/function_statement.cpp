@@ -131,7 +131,14 @@ void Parameter::getInfo(ClassInfo::ParameterInfo &info,
   info.type = m_type.c_str();
   info.value = NULL;
   if (m_defVal) {
-    Variant v = m_defVal->eval(env);
+    Variant v;
+    try {
+      v = m_defVal->eval(env);
+    } catch (FatalErrorException e) {
+      std::string msg = e.getMessage();
+      v = Object((NEW(c_stdclass)())->create());
+      v.o_lval("msg") = String(msg.c_str(), msg.size(), CopyString);
+    }
     String s = f_serialize(v);
     info.value = strdup(s);
   }

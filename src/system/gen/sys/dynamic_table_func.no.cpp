@@ -3614,6 +3614,12 @@ Variant i_ob_iconv_handler(CArrRef params) {
   if (count != 2) return throw_wrong_arguments("ob_iconv_handler", count, 2, 2, 1);
   return (f_ob_iconv_handler(params[0], params[1]));
 }
+Variant i_hphp_throw_fatal_error(CArrRef params) {
+  FUNCTION_INJECTION(hphp_throw_fatal_error);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("hphp_throw_fatal_error", count, 1, 1, 1);
+  return (f_hphp_throw_fatal_error(params[0]), null);
+}
 Variant i_pathinfo(CArrRef params) {
   FUNCTION_INJECTION(pathinfo);
   int count __attribute__((__unused__)) = params.size();
@@ -16205,6 +16211,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x22BA0903D344CBC9LL, array_rand);
       break;
     case 3018:
+      HASH_INVOKE(0x0D375A94E75ACBCALL, hphp_throw_fatal_error);
       HASH_INVOKE(0x4122DFAC25BDFBCALL, hphp_splfileinfo_getowner);
       break;
     case 3021:
@@ -28950,6 +28957,22 @@ Variant ei_ob_iconv_handler(Eval::VariableEnvironment &env, const Eval::Function
     (*it)->eval(env);
   }
   return (x_ob_iconv_handler(a0, a1));
+}
+Variant ei_hphp_throw_fatal_error(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("hphp_throw_fatal_error", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_hphp_throw_fatal_error(a0), null);
 }
 Variant ei_pathinfo(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -61191,6 +61214,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x22BA0903D344CBC9LL, array_rand);
       break;
     case 3018:
+      HASH_INVOKE_FROM_EVAL(0x0D375A94E75ACBCALL, hphp_throw_fatal_error);
       HASH_INVOKE_FROM_EVAL(0x4122DFAC25BDFBCALL, hphp_splfileinfo_getowner);
       break;
     case 3021:

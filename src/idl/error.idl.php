@@ -33,6 +33,9 @@ f('set_exception_handler', String,
 f('hphp_set_error_page', null,
   array('page' => String));
 
+f('hphp_throw_fatal_error', null,
+  array('error_msg' => String));
+
 f('trigger_error', Boolean,
   array('error_msg' => String,
         'error_type' => array(Int32, 'k_E_USER_NOTICE')));

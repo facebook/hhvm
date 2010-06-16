@@ -100,7 +100,7 @@ f('array_replace', Variant,
 
 f('array_multisort', Boolean,
   array('ar1' => Variant | Reference),
-  ReferenceVariableArguments);
+  MixedVariableArguments);
 
 f('array_pad', Variant,
   array('input' => Variant,

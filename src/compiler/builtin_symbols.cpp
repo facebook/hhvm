@@ -273,10 +273,12 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   // Read function flags (these flags are defined in "idl/base.php")
   int flags = (int)(int64)(*p++);
   // Flags for variable arguments
-  if (flags & 0x2) {
-    f->setVariableArgument(true);
+  if (flags & 0x10) {
+    f->setVariableArgument(-1);
+  } else if (flags & 0x2) {
+    f->setVariableArgument(1);
   } else if (flags & 0x1) {
-    f->setVariableArgument(false);
+    f->setVariableArgument(0);
   }
   // Flag for no side effects
   if (flags & 0x4) {

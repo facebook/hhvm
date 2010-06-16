@@ -15,7 +15,7 @@
 "array_merge", T(Variant), S(0), "array1", T(Variant), NULL, S(0), NULL, S(1), 
 "array_replace_recursive", T(Variant), S(0), "array1", T(Variant), NULL, S(0), NULL, S(1), 
 "array_replace", T(Variant), S(0), "array1", T(Variant), NULL, S(0), NULL, S(1), 
-"array_multisort", T(Boolean), S(0), "ar1", T(Variant), NULL, S(1), NULL, S(2), 
+"array_multisort", T(Boolean), S(0), "ar1", T(Variant), NULL, S(1), NULL, S(16), 
 "array_pad", T(Variant), S(0), "input", T(Variant), NULL, S(0), "pad_size", T(Int32), NULL, S(0), "pad_value", T(Variant), NULL, S(0), NULL, S(0), 
 "array_pop", T(Variant), S(0), "array", T(Variant), NULL, S(1), NULL, S(0), 
 "array_product", T(Variant), S(0), "array", T(Variant), NULL, S(0), NULL, S(0), 

@@ -575,6 +575,15 @@ bool TestCodeRun::TestVariableArgument() {
   MVCR("<?php $ar1 = array(10, 100, 100, 0); $ar2 = array(1, 3, 2, 4);"
       "array_multisort($ar1, $ar2); var_dump($ar1, $ar2);");
 
+  MVCR("<?php "
+       "class Foo {"
+       "  public static function Add($x, $y) {}"
+       "}"
+       "$x = 0;"
+       "if (!call_user_func(array('Foo', 'add'), $x, 0)) {"
+       "  echo 'foo';"
+       "}");
+
   return true;
 }
 

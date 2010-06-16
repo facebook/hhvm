@@ -197,15 +197,18 @@ bool FunctionScope::isReferenceVariableArgument() const {
   return m_attribute & FileScope::ReferenceVariableArgument;
 }
 
-void FunctionScope::setVariableArgument(bool reference) {
+void FunctionScope::setVariableArgument(int reference) {
   m_attribute |= FileScope::VariableArgument;
   if (reference) {
     m_attribute |= FileScope::ReferenceVariableArgument;
+    if (reference < 0) {
+      m_attribute |= FileScope::MixedVariableArgument;
+    }
   }
 }
 
 bool FunctionScope::isMixedVariableArgument() const {
-  return (m_name == "array_multisort");
+  return m_attribute & FileScope::MixedVariableArgument;
 }
 
 bool FunctionScope::hasEffect() const {
@@ -913,7 +916,6 @@ void FunctionScope::outputCPPEvalInvoke(CodeGenerator &cg,
   if (variable) {
     callss << "count";
   }
-
 
   bool preArgs = variable || extraArg;
   // Build temps

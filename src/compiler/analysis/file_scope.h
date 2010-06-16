@@ -41,17 +41,18 @@ DECLARE_BOOST_TYPES(FunctionScope);
 class FileScope : public BlockScope, public FunctionContainer {
 public:
   enum Attribute {
-    ContainsDynamicVariable = 1,
-    ContainsLDynamicVariable = 2,
-    VariableArgument = 4,
-    ContainsExtract = 8, // need special VariableTable
-    ContainsCompact = 16, // need RVariableTable + exists()
-    ContainsReference = 32, // either returning ref or with ref parameters
-    ReferenceVariableArgument = 64, // like sscanf or fscanf
-    ContainsUnset = 128, // need special handling
-    NoEffect = 256, // does not side effect
-    HelperFunction = 512, // runtime helper function
-    ContainsGetDefinedVars = 1024, // need VariableTable with getDefinedVars
+    ContainsDynamicVariable   = 0x001,
+    ContainsLDynamicVariable  = 0x002,
+    VariableArgument          = 0x004,
+    ContainsExtract           = 0x008, // need special VariableTable
+    ContainsCompact           = 0x010, // need RVariableTable + exists()
+    ContainsReference         = 0x020, // returns ref or has ref parameters
+    ReferenceVariableArgument = 0x040, // like sscanf or fscanf
+    ContainsUnset             = 0x080, // need special handling
+    NoEffect                  = 0x100, // does not side effect
+    HelperFunction            = 0x200, // runtime helper function
+    ContainsGetDefinedVars    = 0x400, // need VariableTable with getDefinedVars
+    MixedVariableArgument     = 0x800, // variable args, may or may not be ref'd
   };
 
   typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;

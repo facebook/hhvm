@@ -123,7 +123,7 @@ public:
    */
   bool isVariableArgument() const;
   bool isReferenceVariableArgument() const;
-  void setVariableArgument(bool reference);
+  void setVariableArgument(int reference);
   bool isMixedVariableArgument() const;
 
   /**

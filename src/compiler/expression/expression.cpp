@@ -315,7 +315,7 @@ ExpressionPtr Expression::makeConstant(AnalysisResultPtr ar,
 
 void Expression::checkPassByReference(AnalysisResultPtr ar,
                                       ExpressionPtr param) {
-  if ((param->hasContext(Expression::RefValue)) != 0 &&
+  if (param->hasContext(Expression::RefValue) &&
       !param->isRefable(true)) {
     param->setError(Expression::BadPassByRef);
     ar->getCodeError()->record(CodeError::BadPassByReference, param);

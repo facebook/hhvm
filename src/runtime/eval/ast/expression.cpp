@@ -37,9 +37,7 @@ Variant Expression::evalVector(const std::vector<ExpressionPtr> &v,
 
 Variant Expression::refval(VariableEnvironment &env, bool strict /* = true */)
   const {
-  if (strict) {
-    raise_error("Value cannot be used in reference context");
-  }
+  raise_notice("Value cannot be used in reference context");
   return ref(eval(env));
 }
 

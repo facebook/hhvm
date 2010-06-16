@@ -70,9 +70,9 @@ Array f_get_class_methods(CVarRef class_or_object) {
 
   Array ret = Array::Create();
   for (unsigned int i = 0; i < methods.size(); i++) {
-    ret.append(methods[i]->name);
+    ret.set(methods[i]->name, true);
   }
-  return ret;
+  return ret.keys();
 }
 
 Array f_get_class_vars(CStrRef class_name) {

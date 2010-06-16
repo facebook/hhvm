@@ -75,18 +75,15 @@ void ExpressionList::removeElement(int index) {
 }
 
 bool ExpressionList::isScalar() const {
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
+  if (m_arrayElements) {
+    return isScalarArrayPairs();
+  }
+
+  for (unsigned int i = m_exps.size(); i--; ) {
     if (m_exps[i] && !m_exps[i]->isScalar()) return false;
   }
-  return true;
-}
 
-unsigned int ExpressionList::getScalarCount() const {
-  unsigned int count = 0;
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
-    if (m_exps[i]->isScalar()) count++;
-  }
-  return count;
+  return true;
 }
 
 bool ExpressionList::isNoObjectInvolved() const {
@@ -124,29 +121,35 @@ void ExpressionList::getStrings(std::vector<std::string> &strings) {
 }
 
 bool ExpressionList::getScalarValue(Variant &value) {
-  if (!isScalarArrayPairs()) return false;
-  ArrayInit init(m_exps.size());
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
-    ArrayPairExpressionPtr exp =
-      dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
-    ExpressionPtr name = exp->getName();
-    ExpressionPtr val = exp->getValue();
-    if (!name) {
-      Variant v;
-      bool ret = val->getScalarValue(v);
-      if (!ret) ASSERT(false);
-      init.set(i, v);
-    } else {
-      Variant n;
-      Variant v;
-      bool ret1 = name->getScalarValue(n);
-      bool ret2 = val->getScalarValue(v);
-      if (!(ret1 && ret2)) ASSERT(false);
-      init.set(i, n, v);
+  if (m_arrayElements && isScalarArrayPairs()) {
+    ArrayInit init(m_exps.size());
+    for (unsigned int i = 0; i < m_exps.size(); i++) {
+      ArrayPairExpressionPtr exp =
+        dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
+      ExpressionPtr name = exp->getName();
+      ExpressionPtr val = exp->getValue();
+      if (!name) {
+        Variant v;
+        bool ret = val->getScalarValue(v);
+        if (!ret) ASSERT(false);
+        init.set(i, v);
+      } else {
+        Variant n;
+        Variant v;
+        bool ret1 = name->getScalarValue(n);
+        bool ret2 = val->getScalarValue(v);
+        if (!(ret1 && ret2)) ASSERT(false);
+        init.set(i, n, v);
+      }
     }
+    value = Array(init.create());
+    return true;
   }
-  value = Array(init.create());
-  return true;
+  if (m_kind != ListKindParam && !hasEffect()) {
+    int i = m_exps.size();
+    if (i) return m_exps[i-1]->getScalarValue(value);
+  }
+  return false;
 }
 
 void ExpressionList::stripConcat() {

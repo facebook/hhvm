@@ -95,10 +95,10 @@ bool Type::IsLegalCast(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
   case KindOfInt32:
   case KindOfInt64:
   case KindOfDouble:
+  case KindOfNumeric:
     switch (from->m_kindOf) {
     case KindOfArray:
     case KindOfObject:
-    case KindOfSequence:
       return false;
     default:
       return true;
@@ -136,20 +136,8 @@ bool Type::IsLegalCast(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
     }
   case KindOfVariant:
     return true;
-  case KindOfNumeric:
-    switch (from->m_kindOf) {
-    case KindOfBoolean:
-    case KindOfString:
-    case KindOfArray:
-    case KindOfObject:
-    case KindOfSequence:
-      return false;
-    default:
-      return true;
-    }
   case KindOfPrimitive:
     switch (from->m_kindOf) {
-    case KindOfBoolean:
     case KindOfArray:
       return false;
     case KindOfObject:
@@ -207,12 +195,12 @@ TypePtr Type::Cast(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
     case KindOfInt16:
     case KindOfInt32:
     case KindOfInt64:
-    case KindOfDouble:
+    case KindOfDouble:      return from;
     case KindOfString:
-    case KindOfSequence:    return from;
+    case KindOfSequence:    return to;
     case KindOfArray:
     case KindOfObject:      return Type::Byte;
-    case KindOfVariant:     return from;
+    case KindOfVariant:
     case KindOfNumeric:
     case KindOfPrimitive:
     case KindOfPlusOperand:
@@ -240,7 +228,7 @@ TypePtr Type::Cast(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
         }
       }
       return Type::Byte;
-    case KindOfVariant:     return from;
+    case KindOfVariant:     return to;
     case KindOfNumeric:     return from;
     case KindOfPrimitive:   return to;
     case KindOfPlusOperand: return CreateType(KindOfNumeric);

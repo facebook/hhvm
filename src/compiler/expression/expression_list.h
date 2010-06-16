@@ -46,7 +46,6 @@ public:
   virtual void insertElement(ExpressionPtr exp, int index = 0);
   virtual bool isScalar() const;
   virtual int getLocalEffects() const { return NoEffect; }
-  unsigned int getScalarCount() const;
   bool isNoObjectInvolved() const;
   virtual bool containsDynamicConstant(AnalysisResultPtr ar) const;
   void removeElement(int index);

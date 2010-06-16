@@ -113,6 +113,7 @@ int HttpClient::impl(const char *url, const char *data, int size,
   curl_easy_setopt(cp, CURLOPT_DNS_USE_GLOBAL_CACHE, 0); // for thread-safe
   curl_easy_setopt(cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
   curl_easy_setopt(cp, CURLOPT_NOSIGNAL, 1); // for multithreading mode
+  curl_easy_setopt(cp, CURLOPT_SSL_VERIFYPEER,    0);
 
   curl_easy_setopt(cp, CURLOPT_TIMEOUT,           m_timeout);
   if (m_maxRedirect > 1) {

@@ -21,6 +21,7 @@
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/expression/simple_variable.h>
+#include <compiler/expression/dynamic_variable.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/dependency_graph.h>
 
@@ -34,13 +35,11 @@ using namespace boost;
 GlobalStatement::GlobalStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
-    m_exp(exp), m_dynamicGlobal(false) {
+    m_exp(exp) {
 
   for (int i = 0; i < m_exp->getCount(); i++) {
     ExpressionPtr exp = (*m_exp)[i];
-    if (exp->is(Expression::KindOfSimpleVariable)) {
-      exp->setContext(Expression::LValue);
-    }
+    exp->setContext(Expression::LValue);
   }
 }
 
@@ -101,9 +100,10 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
   scope->getVariables()->setAttribute(VariableTable::InsideGlobalStatement);
   for (int i = 0; i < m_exp->getCount(); i++) {
     ExpressionPtr exp = (*m_exp)[i];
+    VariableTablePtr variables = scope->getVariables();
+    variables->setAttribute(VariableTable::NeedGlobalPointer);
     if (exp->is(Expression::KindOfSimpleVariable)) {
       SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(exp);
-      VariableTablePtr variables = scope->getVariables();
       const std::string &name = var->getName();
       /* If we have already seen this variable in the current scope and
          it is not a global variable, record this variable as "redeclared"
@@ -114,7 +114,6 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
       var->setContext(Expression::Declaration);
       var->inferAndCheck(ar, NEW_TYPE(Any), true);
       variables->forceVariant(ar, name);
-      variables->setAttribute(VariableTable::NeedGlobalPointer);
 
       ConstructPtr decl =
         ar->getVariables()->getDeclaration(var->getName());
@@ -129,7 +128,13 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
         ar->getCodeError()->record(shared_from_this(),
                                    CodeError::UseDynamicGlobal, exp);
       }
-      m_dynamicGlobal = true;
+      variables->forceVariants(ar);
+      variables->setAttribute(VariableTable::ContainsLDynamicVariable);
+      if (exp->is(Expression::KindOfDynamicVariable)) {
+        exp->inferAndCheck(ar, NEW_TYPE(Any), true);
+      } else {
+        assert(false);
+      }
     }
   }
   FunctionScopePtr func = ar->getFunctionScope();
@@ -146,28 +151,32 @@ void GlobalStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void GlobalStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (m_dynamicGlobal) {
-    cg_printf("throw_fatal(\"dynamic global\");\n");
-  } else {
-    BlockScopePtr scope = ar->getScope();
-    if (m_exp->getCount() > 1) cg_indentBegin("{\n");
-    for (int i = 0; i < m_exp->getCount(); i++) {
-      ExpressionPtr exp = (*m_exp)[i];
-      if (exp->is(Expression::KindOfSimpleVariable)) {
-        SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(exp);
-        const string &name = var->getName();
-        VariableTablePtr variables = scope->getVariables();
-        if (variables->needLocalCopy(name)) {
-          cg_printf("%s%s = ref(g->%s);\n",
-                    Option::VariablePrefix, name.c_str(),
-                    variables->getGlobalVariableName(ar, name).c_str());
-        }
+  BlockScopePtr scope = ar->getScope();
+  if (m_exp->getCount() > 1) cg_indentBegin("{\n");
+  for (int i = 0; i < m_exp->getCount(); i++) {
+    ExpressionPtr exp = (*m_exp)[i];
+    if (exp->is(Expression::KindOfSimpleVariable)) {
+      SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(exp);
+      const string &name = var->getName();
+      VariableTablePtr variables = scope->getVariables();
+      if (variables->needLocalCopy(name)) {
+        cg_printf("%s%s = ref(g->%s);\n",
+                  Option::VariablePrefix, name.c_str(),
+                  variables->getGlobalVariableName(ar, name).c_str());
       }
-      else {
-        // type inference should have set m_dynamicGlobal to true.
-        ASSERT(false);
-      }
+    } else if (exp->is(Expression::KindOfDynamicVariable)) {
+      DynamicVariablePtr var = dynamic_pointer_cast<DynamicVariable>(exp);
+      ExpressionPtr exp = var->getSubExpression();
+      exp->outputCPPBegin(cg, ar);
+      int id = cg.createNewId("dgv");
+      cg_printf("CStrRef dgv_%d((", id);
+      exp->outputCPP(cg, ar);
+      cg_printf("));\n");
+      cg_printf("variables->get(dgv_%d) = ref(g->get(dgv_%d));\n", id, id);
+      exp->outputCPPEnd(cg, ar);
+    } else {
+      assert(false);
     }
-    if (m_exp->getCount() > 1) cg_indentEnd("}\n");
   }
+  if (m_exp->getCount() > 1) cg_indentEnd("}\n");
 }

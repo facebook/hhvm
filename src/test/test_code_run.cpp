@@ -4260,6 +4260,25 @@ bool TestCodeRun::TestDynamicVariables() {
       "var_dump(isset($ggdv['_FILES']));"
       "var_dump(isset($ggdv['d']));"
       );
+
+  MVCR("<?php "
+       "function foo(array $test) {"
+       "  foreach ($test AS $var) {"
+       "    global $$var;"
+       "    $$var = $var . 'foo';"
+       "  }"
+       "}"
+       "foo(array('a', 'b'));"
+       "var_dump($a, $b);");
+
+  MVCR("<?php "
+       "function test($a) {"
+       "  $b = 5;"
+       "  global $$a;"
+       "  var_dump($b);"
+       "}"
+       "test('b');");
+
   return true;
 }
 

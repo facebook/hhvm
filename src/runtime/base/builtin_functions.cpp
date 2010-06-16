@@ -24,6 +24,7 @@
 #include <util/util.h>
 #include <util/process.h>
 #include <runtime/base/execution_context.h>
+#include <runtime/base/util/request_local.h>
 
 #include <limits>
 
@@ -32,12 +33,22 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct RuntimeInfo {
+class RuntimeInfo : public RequestEventHandler {
+public:
+  virtual void requestInit() {
+    renamed_functions.clear();
+    unmapped_functions.clear();
+  }
+
+  virtual void requestShutdown() {
+    renamed_functions.clear();
+    unmapped_functions.clear();
+  }
+
   hphp_const_char_imap<const char*> renamed_functions;
   hphp_const_char_iset unmapped_functions;
 };
-
-static IMPLEMENT_THREAD_LOCAL(RuntimeInfo, s_runtime_info);
+IMPLEMENT_STATIC_REQUEST_LOCAL(RuntimeInfo, s_runtime_info);
 
 hphp_const_char_imap<const char*> &get_renamed_functions() {
   return s_runtime_info->renamed_functions;

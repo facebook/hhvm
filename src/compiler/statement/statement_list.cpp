@@ -16,7 +16,6 @@
 
 #include <compiler/statement/statement_list.h>
 #include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/alias_manager.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/class_scope.h>
@@ -165,7 +164,7 @@ void StatementList::analyzeProgramImpl(AnalysisResultPtr ar) {
 }
 
 bool StatementList::mergeConcatAssign(AnalysisResultPtr ar) {
-  if (AliasManager::doLocalCopyProp()) {
+  if (Option::LocalCopyProp) {
     return false;
   } else {
     // check for vector string concat assignment such as
@@ -344,7 +343,7 @@ StatementPtr StatementList::preOptimize(AnalysisResultPtr ar) {
     if (s) {
       ar->preOptimize(s);
       if (ar->getPhase() != AnalysisResult::AnalyzeInclude &&
-          AliasManager::doDeadCodeElim()) {
+          Option::EliminateDeadCode) {
         if (s->is(KindOfBreakStatement) ||
             s->is(KindOfContinueStatement) ||
             s->is(KindOfReturnStatement) ||
@@ -373,7 +372,7 @@ StatementPtr StatementList::postOptimize(AnalysisResultPtr ar) {
     StatementPtr &s = m_stmts[i];
     ar->postOptimize(s);
     if (s->is(KindOfExpStatement) && !s->hasEffect()) {
-      if (AliasManager::doDeadCodeElim() ||
+      if (Option::EliminateDeadCode ||
           static_pointer_cast<ExpStatement>(s)->getExpression()->isScalar()) {
         removeElement(i--);
         changed = true;

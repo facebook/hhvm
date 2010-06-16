@@ -475,6 +475,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestExtSoap);
   RUN_TEST(TestFiber);
   RUN_TEST(TestAPC);
+  RUN_TEST(TestInlining);
 
   // PHP 5.3 features
   RUN_TEST(TestVariableClassName);
@@ -8451,6 +8452,20 @@ bool TestCodeRun::TestEvalOrder() {
        "}"
        "foo(new C);");
 
+  MVCR("<?php ;"
+       "class X {"
+       "  function __destruct() { var_dump('done'); }"
+       "}"
+       "function f() {"
+       "  $x = new X;"
+       "}"
+       "function g() {"
+       "  var_dump('start');"
+       "  f();"
+       "  var_dump('end');"
+       "}"
+       "g();");
+
  return true;
 }
 
@@ -11772,6 +11787,73 @@ bool TestCodeRun::TestAPC() {
         "int(100)\n"
       );
 
+  return true;
+}
+
+bool TestCodeRun::TestInlining() {
+  bool save = Option::AutoInline++;
+
+  MVCR("<?php "
+       "function id($x) {"
+       " return $x;"
+       " }"
+       "class X {"
+       "  public function f() { return 'hello'; }"
+       "}"
+       "function test($a, $b) {"
+       "  return $a ? $b : id(new X)->f();"
+       "}"
+       "var_dump(test());");
+
+  MVCR("<?php "
+       "function foo($e='e') {"
+       "  return '<a name=\"'.$e.'\" id=\"'.$e.'\"></a>';"
+       "}"
+       "function test() {"
+       "  echo foo();"
+       "}"
+       "test();");
+
+  MVCR("<?php "
+       "function foo($e, $m) {"
+       "  $_REQUEST['_foo'] = $e;"
+       "  $_REQUEST['_bar'] = $m;"
+       "  return $e;"
+       "}"
+       "function test($x) {"
+       "  return foo('a', $x);"
+       "}"
+       "var_dump(test('b'));");
+
+  MVCR("<?php "
+       "function h() { class X{}; }"
+       "function f($a, $b, $c) { return h(); }"
+       "function g($a, $b, $c) {"
+       "  return f($a++, $b++ + $a++, $c);"
+       "}");
+
+  MVCR("<?php "
+       "function f($name, $unique_id=false, $id=null) {"
+       "  $id = $id ? $id : ($unique_id ? uniqid($name) : $name);"
+       "  return $id;"
+       "  }"
+       "function test($a, $b, $c) {"
+       "  return f($name = 'status', $unique_id = true, $id = 'status_active');"
+       "  }"
+       "var_dump(test(1,2,3));");
+
+  MVCR("<?php "
+       "function g($a) { function t(){}; return $a ? array(1,2,3) : 'foo'; }"
+       "function f($a) { return g($a); }"
+       "function test($a) {"
+       "  return reset((f($a)));"
+       "  }"
+       "var_dump(test(1));"
+       "function &h(&$a) { return $a['foo']; }"
+       "function i($a) { $x = &h($a); $x = 'hello'; return $a; }"
+       "var_dump(i(false));");
+
+  Option::AutoInline = save;
   return true;
 }
 

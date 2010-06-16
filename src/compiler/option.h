@@ -304,6 +304,11 @@ public:
   static bool GenerateSourceInfo;
   static bool UseVirtualDispatch;
 
+  static bool EliminateDeadCode;
+  static bool LocalCopyProp;
+  static bool StringLoopOpts;
+  static bool AutoInline;
+
   static bool FlAnnotate; // annotate emitted code withe compiler file-line info
 private:
   /**

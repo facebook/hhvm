@@ -74,6 +74,9 @@ public:
   bool isRefReturn() const { return m_refReturn;}
   bool hasImpl() const;
 
+  void setInlineAsExpr(bool f) { m_inlineAsExpr = f; }
+  bool getInlineAsExpr() const { return m_inlineAsExpr; }
+  int nextInlineIndex() { return ++m_inlineIndex; }
   /**
    * Either __construct or a class-name constructor.
    */
@@ -377,7 +380,8 @@ private:
   int m_callTempCountCurrent;
   StatementPtr m_stmtCloned; // cloned method body stmt
   bool m_nrvoFix;
-
+  bool m_inlineAsExpr;
+  int m_inlineIndex;
   void outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
       bool ret, bool constructor);
 };

@@ -47,11 +47,12 @@
 using namespace HPHP;
 using std::string;
 
-bool AliasManager::s_deadCodeElim = true;
-bool AliasManager::s_localCopyProp = true;
-bool AliasManager::s_stringOpts = true;
-
 ///////////////////////////////////////////////////////////////////////////////
+
+AliasManager::AliasManager() :
+  m_nextID(1), m_changed(false),
+  m_wildRefs(0), m_nrvoFix(0), m_inlineAsExpr(true) {
+}
 
 bool AliasManager::parseOptimizations(const std::string &optimizations,
                                       std::string &errs)
@@ -68,15 +69,18 @@ bool AliasManager::parseOptimizations(const std::string &optimizations,
     }
 
     if (opt == "deadcode") {
-      setDeadCodeElim(val);
+      Option::EliminateDeadCode = val;
     } else if (opt == "localcopy") {
-      setLocalCopyProp(val);
+      Option::LocalCopyProp = val;
     } else if (opt == "string") {
-      setStringOpts(val);
+      Option::StringLoopOpts = val;
+    } else if (opt == "inline") {
+      Option::AutoInline = val;
     } else if (val && (opt == "all" || opt == "none")) {
       val = opt == "all";
-      setDeadCodeElim(val);
-      setLocalCopyProp(val);
+      Option::EliminateDeadCode = val;
+      Option::LocalCopyProp = val;
+      Option::AutoInline = val;
     } else {
       errs = "Unknown optimization: " + opt;
       return false;
@@ -565,7 +569,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
         }
       case Expression::KindOfUnaryOpExpression:
       case Expression::KindOfBinaryOpExpression:
-        if (doDeadCodeElim()) {
+        if (Option::EliminateDeadCode) {
           rep->setContext(Expression::DeadStore);
         }
         break;
@@ -896,6 +900,7 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs) {
       case Statement::KindOfMethodStatement:
       case Statement::KindOfClassStatement:
       case Statement::KindOfInterfaceStatement:
+        m_inlineAsExpr = false;
         return;
       default:
         break;
@@ -997,6 +1002,7 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs) {
     }
   } else {
     StatementPtr s = spc(Statement, cs);
+    bool inlineOk = false;
     switch (s->getKindOf()) {
     case Statement::KindOfGlobalStatement:
     case Statement::KindOfStaticStatement:
@@ -1013,6 +1019,10 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs) {
         }
         break;
       }
+    case Statement::KindOfExpStatement:
+    case Statement::KindOfStatementList:
+      inlineOk = true;
+      break;
     case Statement::KindOfCatchStatement:
       {
         const std::string &name = spc(CatchStatement, s)->getVariable();
@@ -1020,6 +1030,7 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs) {
         break;
       }
     case Statement::KindOfReturnStatement:
+      inlineOk = true;
       if (m_nrvoFix >= 0) {
         ExpressionPtr e = spc(ReturnStatement, s)->getRetExp();
         if (!e || !e->is(Expression::KindOfSimpleVariable)) {
@@ -1037,6 +1048,9 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs) {
       }
     default:
       break;
+    }
+    if (!inlineOk) {
+      m_inlineAsExpr = false;
     }
   }
 }
@@ -1062,6 +1076,20 @@ bool AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
   }
 
   collectAliasInfoRecur(m->getStmts());
+  FunctionScopePtr func = ar->getFunctionScope();
+  if (func) {
+    if (m_inlineAsExpr) {
+      if (!Option::AutoInline ||
+          func->isVariableArgument() ||
+          m_variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
+          m_variables->getAttribute(VariableTable::ContainsExtract) ||
+          m_variables->getAttribute(VariableTable::ContainsCompact) ||
+          m_variables->getAttribute(VariableTable::ContainsGetDefinedVars)) {
+        m_inlineAsExpr = false;
+      }
+    }
+    func->setInlineAsExpr(m_inlineAsExpr);
+  }
 
   for (AliasInfoMap::iterator it = m_aliasInfo.begin(),
          end = m_aliasInfo.end(); it != end; ++it) {
@@ -1072,12 +1100,12 @@ bool AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
     }
   }
 
-  if (doLocalCopyProp() || doDeadCodeElim()) {
+  if (Option::LocalCopyProp || Option::EliminateDeadCode) {
     canonicalizeRecur(m->getStmts());
   }
 
   if (ar->getPhase() == AnalysisResult::PostOptimize) {
-    if (FunctionScopePtr func = ar->getFunctionScope()) {
+    if (func) {
       if (func->isRefReturn()) {
         m_nrvoFix = -1;
       } else if (m_nrvoFix > 0) {
@@ -1094,7 +1122,7 @@ bool AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
       func->setNRVOFix(m_nrvoFix > 0);
     }
 
-    if (!m_changed && doStringOpts() && !m_wildRefs) {
+    if (!m_changed && Option::StringLoopOpts && !m_wildRefs) {
       stringOptsRecur(m->getStmts());
     }
   }

@@ -180,6 +180,12 @@ StringBag Option::OptionStrings;
 
 bool Option::GenerateSourceInfo = false;
 bool Option::UseVirtualDispatch = false;
+
+bool Option::EliminateDeadCode = true;
+bool Option::LocalCopyProp = true;
+bool Option::StringLoopOpts = true;
+bool Option::AutoInline = false;
+
 bool Option::FlAnnotate = false;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -331,6 +337,11 @@ void Option::Load(Hdf &config) {
 
   GenerateSourceInfo = config["GenerateSourceInfo"].getBool(false);
   UseVirtualDispatch = config["UseVirtualDispatch"].getBool(false);
+
+  EliminateDeadCode  = config["EliminateDeadCode"].getBool(true);
+  LocalCopyProp      = config["LocalCopyProp"].getBool(true);
+  StringLoopOpts     = config["StringLoopOpts"].getBool(true);
+  AutoInline         = config["AutoInline"].getBool(false);
 
   OnLoad();
 }

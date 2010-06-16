@@ -349,7 +349,7 @@ StatementPtr MethodStatement::preOptimize(AnalysisResultPtr ar) {
   FunctionScopePtr funcScope = m_funcScope.lock();
   ar->pushScope(funcScope);
   if (ar->getPhase() != AnalysisResult::AnalyzeInclude &&
-      AliasManager::doLocalCopyProp()) {
+      Option::LocalCopyProp) {
     bool flag;
     do {
       AliasManager am;
@@ -371,8 +371,7 @@ StatementPtr MethodStatement::postOptimize(AnalysisResultPtr ar) {
   FunctionScopePtr funcScope = m_funcScope.lock();
   ar->pushScope(funcScope);
   if (ar->getPhase() != AnalysisResult::AnalyzeInclude &&
-      (AliasManager::doLocalCopyProp() ||
-       AliasManager::doStringOpts())) {
+      (Option::LocalCopyProp || Option::StringLoopOpts)) {
     bool flag;
     do {
       AliasManager am;

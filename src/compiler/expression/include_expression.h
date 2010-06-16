@@ -49,6 +49,7 @@ private:
    */
   bool m_documentRoot;
   bool m_privateScope;
+  bool m_depsSet;
   std::string m_include;
 
   std::string getCurrentInclude(AnalysisResultPtr ar);

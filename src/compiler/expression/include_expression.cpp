@@ -39,13 +39,14 @@ using namespace boost;
 IncludeExpression::IncludeExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp, int op)
   : UnaryOpExpression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES, exp, op, true),
-    m_documentRoot(false), m_privateScope(false) {
+    m_documentRoot(false), m_privateScope(false), m_depsSet(false) {
 }
 
 ExpressionPtr IncludeExpression::clone() {
   IncludeExpressionPtr exp(new IncludeExpression(*this));
   Expression::deepCopy(exp);
   exp->m_exp = Clone(m_exp);
+  exp->m_depsSet = false;
   return exp;
 }
 
@@ -126,12 +127,16 @@ ExpressionPtr IncludeExpression::preOptimize(AnalysisResultPtr ar) {
   if (ExpressionPtr rep = UnaryOpExpression::preOptimize(ar)) {
     return rep;
   }
-  if (m_include.empty() && ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
-    m_include = ar->getDependencyGraph()->add
-      (DependencyGraph::KindOfPHPInclude, shared_from_this(), m_exp,
-       ar->getCodeError(), m_documentRoot);
-    if (!m_include.empty()) {
+  if (ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
+    if (m_include.empty()) {
+      m_include = ar->getDependencyGraph()->add
+        (DependencyGraph::KindOfPHPInclude, shared_from_this(), m_exp,
+         ar->getCodeError(), m_documentRoot);
+      m_depsSet = false;
+    }
+    if (!m_depsSet && !m_include.empty()) {
       analyzeInclude(ar, m_include);
+      m_depsSet = true;
     }
   }
   return ExpressionPtr();
@@ -140,6 +145,10 @@ ExpressionPtr IncludeExpression::preOptimize(AnalysisResultPtr ar) {
 ExpressionPtr IncludeExpression::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_exp);
   if (!m_include.empty()) {
+    if (!m_depsSet) {
+      analyzeInclude(ar, m_include);
+      m_depsSet = true;
+    }
     FileScopePtr fs = ar->findFileScope(m_include, false);
     if (fs) {
       if (!Option::KeepStatementsWithNoEffect) {

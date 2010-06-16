@@ -22,8 +22,14 @@
 #include <compiler/analysis/code_error.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/statement/statement_list.h>
+#include <compiler/statement/exp_statement.h>
+#include <compiler/statement/return_statement.h>
+#include <compiler/statement/method_statement.h>
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/expression/constant_expression.h>
+#include <compiler/expression/parameter_expression.h>
+#include <compiler/expression/assignment_expression.h>
+#include <compiler/expression/unary_op_expression.h>
 #include <compiler/analysis/constant_table.h>
 #include <compiler/analysis/variable_table.h>
 #include <util/util.h>
@@ -145,6 +151,15 @@ void SimpleFunctionCall::onParse(AnalysisResultPtr ar) {
       }
       break;
     case VariableArgumentFunction:
+      /*
+        Note:
+        At this point, we dont have a function scope, so we set
+        the flags on the FileScope.
+        The FileScope maintains a stack of attributes, so that
+        it correctly handles each function.
+        But note that later phases should set/get the attribute
+        directly on the FunctionScope, rather than on the FileScope
+      */
       ar->getFileScope()->setAttribute(FileScope::VariableArgument);
       break;
     case ExtractFunction:
@@ -182,18 +197,24 @@ void SimpleFunctionCall::onParse(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
+void SimpleFunctionCall::addDependencies(AnalysisResultPtr ar) {
+  if (!m_class) {
+    if (m_className.empty()) {
+      addUserFunction(ar, m_name);
+    } else if (m_origClassName != "parent") {
+      addUserClass(ar, m_className);
+    } else {
+      m_parentClass = true;
+    }
+  }
+}
+
 void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   if (m_class) {
     m_class->analyzeProgram(ar);
     setDynamicByIdentifier(ar, m_name);
   } else {
-    if (m_className.empty()) {
-      addUserFunction(ar, m_name);
-    } else if (m_className != "parent") {
-      addUserClass(ar, m_className);
-    } else {
-      m_parentClass = true;
-    }
+    addDependencies(ar);
   }
 
   if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
@@ -345,6 +366,178 @@ bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultPtr ar) {
   }
 }
 
+//typedef std::map<std::string, ExpressionPtr> StringToExpressionPtrMap;
+
+static ExpressionPtr cloneForInlineRecur(ExpressionPtr exp,
+                                         const std::string &prefix,
+                                         StringToExpressionPtrMap &sepm,
+                                         AnalysisResultPtr ar) {
+  for (int i = 0, n = exp->getKidCount(); i < n; i++) {
+    if (ExpressionPtr k = exp->getNthExpr(i)) {
+      exp->setNthKid(i, cloneForInlineRecur(k, prefix, sepm, ar));
+    }
+  }
+  switch (exp->getKindOf()) {
+  case Expression::KindOfSimpleVariable:
+    {
+      SimpleVariablePtr sv(dynamic_pointer_cast<SimpleVariable>(exp));
+      if (!sv->isThis() && !sv->isSuperGlobal()) {
+        string name = prefix + sv->getName();
+        ExpressionPtr rep(new SimpleVariable(exp->getLocation(),
+                                             exp->getKindOf(), name));
+        rep->Expression::setContext((Expression::Context)exp->getContext());
+        sepm[name] = rep;
+        exp = rep;
+      }
+    }
+    break;
+  case Expression::KindOfSimpleFunctionCall:
+    {
+      AnalysisResult::Phase phase = ar->getPhase();
+      ar->setPhase(AnalysisResult::AnalyzeAll);
+      static_pointer_cast<SimpleFunctionCall>(exp)->addDependencies(ar);
+      ar->setPhase(phase);
+    }
+  default:
+    break;
+  }
+  return exp;
+}
+
+static ExpressionPtr cloneForInline(ExpressionPtr exp,
+                                    const std::string &prefix,
+                                    StringToExpressionPtrMap &sepm,
+                                    AnalysisResultPtr ar) {
+  return cloneForInlineRecur(exp->clone(), prefix, sepm, ar);
+}
+
+static int cloneStmtsForInline(ExpressionListPtr elist, StatementPtr s,
+                               const std::string &prefix,
+                               StringToExpressionPtrMap &sepm,
+                               AnalysisResultPtr ar) {
+  switch (s->getKindOf()) {
+  case Statement::KindOfStatementList:
+    {
+      for (int i = 0, n = s->getKidCount(); i < n; ++i) {
+        if (int ret = cloneStmtsForInline(elist, s->getNthStmt(i),
+                                          prefix, sepm, ar)) {
+          return ret;
+        }
+      }
+      return 0;
+    }
+  case Statement::KindOfExpStatement:
+    elist->addElement(cloneForInline(dynamic_pointer_cast<ExpStatement>(s)->
+                                     getExpression(), prefix, sepm, ar));
+    return 0;
+  case Statement::KindOfReturnStatement:
+    {
+      ExpressionPtr exp =
+        dynamic_pointer_cast<ReturnStatement>(s)->getRetExp();
+
+      if (exp) {
+        elist->addElement(cloneForInline(exp, prefix, sepm, ar));
+        return 1;
+      }
+      return -1;
+    }
+  default:
+    assert(false);
+  }
+  return 1;
+}
+
+ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
+  if (m_class || !m_className.empty() || !m_funcScope ||
+      !m_funcScope->getInlineAsExpr() ||
+      !m_funcScope->getStmt() ||
+      m_funcScope->getStmt()->getRecursiveCount() > 10) {
+    return ExpressionPtr();
+  }
+
+  FunctionScopePtr fs = ar->getFunctionScope();
+  if (!fs || fs->inPseudoMain()) return ExpressionPtr();
+  VariableTablePtr vt = fs->getVariables();
+  int nAct = m_params ? m_params->getCount() : 0;
+  int nMax = m_funcScope->getMaxParamCount();
+  if (unsigned(nAct - m_funcScope->getMinParamCount()) > (unsigned)nMax ||
+      vt->getAttribute(VariableTable::ContainsDynamicVariable) ||
+      vt->getAttribute(VariableTable::ContainsExtract) ||
+      vt->getAttribute(VariableTable::ContainsCompact) ||
+      vt->getAttribute(VariableTable::ContainsGetDefinedVars)) {
+    return ExpressionPtr();
+  }
+
+  ExpressionListPtr elist(new ExpressionList(getLocation(),
+                                             KindOfExpressionList,
+                                             ExpressionList::ListKindWrapped));
+
+  std::ostringstream oss;
+  oss << "inl" << m_funcScope->nextInlineIndex() << "_" << m_name << "_";
+  std::string prefix = oss.str();
+
+  MethodStatementPtr m
+    (dynamic_pointer_cast<MethodStatement>(m_funcScope->getStmt()));
+  ExpressionListPtr plist = m->getParams();
+
+  int i;
+  StringToExpressionPtrMap sepm;
+
+  for (i = 0; i < nMax; i++) {
+    ParameterExpressionPtr param
+      (dynamic_pointer_cast<ParameterExpression>((*plist)[i]));
+    ExpressionPtr arg = i < nAct ? (*m_params)[i] :
+      param->defaultValue()->clone();
+    SimpleVariablePtr var
+      (new SimpleVariable((i < nAct ? arg.get() : this)->getLocation(),
+                          KindOfSimpleVariable,
+                          prefix + param->getName()));
+    bool ref = m_funcScope->isRefParam(i);
+    AssignmentExpressionPtr ae
+      (new AssignmentExpression(arg->getLocation(), KindOfAssignmentExpression,
+                                var, arg, ref));
+    elist->addElement(ae);
+    if (i < nAct && (ref || !arg->isScalar())) {
+      sepm[var->getName()] = var;
+    }
+  }
+
+  if (cloneStmtsForInline(elist, m->getStmts(), prefix, sepm, ar) <= 0) {
+    elist->addElement(CONSTANT("null"));
+  }
+
+  if (sepm.size()) {
+    ExpressionListPtr unset_list
+      (new ExpressionList(this->getLocation(), KindOfExpressionList));
+
+    for (StringToExpressionPtrMap::iterator it = sepm.begin(), end = sepm.end();
+         it != end; ++it) {
+      ExpressionPtr var = it->second->clone();
+      var->clearContext((Context)(unsigned)-1);
+      unset_list->addElement(var);
+    }
+
+    ExpressionPtr unset(
+      new UnaryOpExpression(this->getLocation(), KindOfUnaryOpExpression,
+                            unset_list, T_UNSET, true));
+    i = elist->getCount();
+    ExpressionPtr ret = (*elist)[--i];
+    if (ret->isScalar()) {
+      elist->insertElement(unset, i);
+    } else {
+      ExpressionListPtr result_list
+        (new ExpressionList(this->getLocation(), KindOfExpressionList,
+                            ExpressionList::ListKindLeft));
+      result_list->addElement(ret);
+      result_list->addElement(unset);
+      (*elist)[i] = result_list;
+    }
+  }
+
+  elist->Expression::setContext((Expression::Context)getContext());
+  return elist;
+}
+
 ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
   if (m_class) {
     ar->preOptimize(m_class);
@@ -362,6 +555,9 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
 
   if (ar->getPhase() != AnalysisResult::SecondPreOptimize) {
     return ExpressionPtr();
+  }
+  if (ExpressionPtr rep = optimize(ar)) {
+    return rep;
   }
   // optimize away various "exists" functions, this may trigger
   // dead code elimination and improve type-inference.
@@ -451,6 +647,14 @@ ExpressionPtr SimpleFunctionCall::postOptimize(AnalysisResultPtr ar) {
     Construct::recomputeEffects();
     return CONSTANT("true");
   }
+  /*
+    Dont do this for now. Need to take account of newly created
+    variables etc (which would normally be handled by inferTypes).
+
+    if (ExpressionPtr rep = optimize(ar)) {
+      return rep;
+    }
+  */
   return FunctionCall::postOptimize(ar);
 }
 

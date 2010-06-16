@@ -45,6 +45,8 @@ Expression::Expression(LocationPtr loc, KindOf kindOf)
 void Expression::deepCopy(ExpressionPtr exp) {
   exp->m_actualType = m_actualType;
   exp->m_expectedType = m_expectedType;
+  exp->m_canon_id = 0;
+  exp->m_canonPtr.reset();
 };
 
 void Expression::addElement(ExpressionPtr exp) {

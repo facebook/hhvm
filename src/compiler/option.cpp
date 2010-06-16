@@ -170,7 +170,7 @@ bool Option::FlattenInvoke = true;
 int Option::InlineFunctionThreshold = -1;
 bool Option::ControlEvalOrder = true;
 
-bool Option::AllDynamic = false;
+bool Option::AllDynamic = true;
 bool Option::AllVolatile = false;
 
 std::string Option::FlibDirectory;

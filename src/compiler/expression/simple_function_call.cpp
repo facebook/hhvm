@@ -597,6 +597,8 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         // set the method static to avoid "unknown method" runtime exception
         if (Option::StaticMethodAutoFix && !func->containsThis()) {
           func->setStaticMethodAutoFixed();
+        } else {
+          func->setDynamic();
         }
         if (ar->isFirstPass()) {
           ar->getCodeError()->record(self, CodeError::MissingObjectContext,

@@ -469,7 +469,12 @@ bool String::less(CObjRef v2) const {
   if (m_px == NULL || v2.get() == NULL) {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
-  return true;
+  if (v2.isResource()) return true;
+  try {
+    return less(v2.toString());
+  } catch (BadTypeConversionException &e) {
+    return true;
+  }
 }
 
 bool String::more(litstr v2) const {
@@ -494,7 +499,12 @@ bool String::more(CObjRef v2) const {
   if (m_px == NULL || v2.get() == NULL) {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
-  return false;
+  if (v2.isResource()) return false;
+  try {
+    return more(v2.toString());
+  } catch (BadTypeConversionException &e) {
+    return false;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

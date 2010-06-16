@@ -202,7 +202,13 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
 void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_this) {
     ASSERT((getContext() & ObjectContext) == 0);
-    cg_printf("GET_THIS()");
+    if (hasContext(LValue)) {
+      // LValue and not ObjectContext must be $this = or $this[..] =
+      // Wrap with Variant to avoid compiler error
+      cg_printf("Variant(GET_THIS())");
+    } else {
+      cg_printf("GET_THIS()");
+    }
   } else if (m_superGlobal) {
     VariableTablePtr variables = ar->getScope()->getVariables();
     cg_printf("g->%s", variables->getGlobalVariableName(ar, m_name).c_str());

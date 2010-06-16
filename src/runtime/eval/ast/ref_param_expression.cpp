@@ -31,7 +31,7 @@ bool RefParamExpression::weakLval(VariableEnvironment &env, Variant* &v) const {
 }
 
 Variant RefParamExpression::refval(VariableEnvironment &env,
-                                   bool strict /* = true */) const {
+    int strict /* = 2 */) const {
   return m_lv->refval(env, strict);
 }
 

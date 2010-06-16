@@ -30,7 +30,7 @@ public:
   RefParamExpression(EXPRESSION_ARGS, LvalExpressionPtr lv);
   virtual Variant &lval(VariableEnvironment &env) const;
   virtual bool weakLval(VariableEnvironment &env, Variant* &v) const;
-  virtual Variant refval(VariableEnvironment &env, bool strict = true) const;
+  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
   virtual Variant set(VariableEnvironment &env, CVarRef val) const;
   virtual Variant setOp(VariableEnvironment &env, int op, CVarRef rhs) const;
   virtual void unset(VariableEnvironment &env) const;

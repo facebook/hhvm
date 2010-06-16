@@ -85,7 +85,7 @@ void LvalExpression::unset(VariableEnvironment &env) const {
 }
 
 Variant LvalExpression::refval(VariableEnvironment &env,
-                               bool strict /* = true */) const {
+    int strict /* = 2 */) const {
   return ref(lval(env));
 }
 

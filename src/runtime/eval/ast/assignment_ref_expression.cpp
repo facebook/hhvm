@@ -31,7 +31,7 @@ Variant AssignmentRefExpression::eval(VariableEnvironment &env) const {
 }
 
 Variant AssignmentRefExpression::refval(VariableEnvironment &env,
-                                        bool strict /* = true */) const {
+    int strict /* = 2 */) const {
   Variant tmp = ref(m_rhs->refval(env));
   m_lhs->set(env, ref(tmp));
   return ref(tmp);

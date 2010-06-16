@@ -31,7 +31,7 @@ Array FunctionCallExpression::getParams(VariableEnvironment &env) const {
   Array params;
   for (std::vector<ExpressionPtr>::const_iterator it = m_params.begin();
        it != m_params.end(); ++it) {
-    params.append(ref((*it)->refval(env, false)));
+    params.append(ref((*it)->refval(env, 0)));
   }
   return params;
 }
@@ -48,7 +48,7 @@ bool FunctionCallExpression::exist(VariableEnvironment &env, int op) const {
 }
 
 Variant FunctionCallExpression::refval(VariableEnvironment &env,
-                                       bool strict /* = true */) const {
+    int strict /* = 2 */) const {
   return ref(eval(env));
 }
 

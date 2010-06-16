@@ -28,7 +28,7 @@ public:
   const std::vector<ExpressionPtr> &params() const { return m_params; }
   Array getParams(VariableEnvironment &env) const;
   virtual bool exist(VariableEnvironment &env, int op) const;
-  virtual Variant refval(VariableEnvironment &env, bool strict = true) const;
+  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
 protected:
   FunctionCallExpression(EXPRESSION_ARGS,
                          const std::vector<ExpressionPtr> &params);

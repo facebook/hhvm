@@ -36,7 +36,7 @@ public:
   virtual void unset(VariableEnvironment &env) const;
   virtual bool exist(VariableEnvironment &env, int op) const;
   virtual bool weakLval(VariableEnvironment &env, Variant* &v) const;
-  virtual Variant refval(VariableEnvironment &env, bool strict /* = true */)
+  virtual Variant refval(VariableEnvironment &env, int strict = 2)
     const;
   virtual Variant set(VariableEnvironment &env, CVarRef val) const;
   void sinkStaticMember(Parser *parser, const NamePtr &className);

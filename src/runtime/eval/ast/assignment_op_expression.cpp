@@ -57,7 +57,7 @@ void AssignmentOpExpression::dump() const {
 }
 
 Variant AssignmentOpExpression::refval(VariableEnvironment &env,
-                                       bool strict /* = true */) const {
+    int strict /* = 2 */) const {
   return ref(eval(env));
 }
 

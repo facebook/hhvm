@@ -31,7 +31,7 @@ public:
   AssignmentOpExpression(EXPRESSION_ARGS, int op, LvalExpressionPtr lhs,
                          ExpressionPtr rhs);
   virtual Variant eval(VariableEnvironment &env) const;
-  virtual Variant refval(VariableEnvironment &env, bool strict = true) const;
+  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
   LvalExpressionPtr getLhs() const { return m_lhs; }
   ExpressionPtr getRhs() const { return m_rhs; }
   virtual void dump() const;

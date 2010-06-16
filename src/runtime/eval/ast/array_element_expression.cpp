@@ -102,7 +102,7 @@ bool ArrayElementExpression::weakLval(VariableEnvironment &env,
 }
 
 Variant ArrayElementExpression::refval(VariableEnvironment &env,
-                                       bool strict /* = true */) const {
+                                       int strict /* = 2 */) const {
   if (m_idx) {
     Variant arr(m_arr->refval(env, strict));
     Variant idx(m_idx->eval(env));

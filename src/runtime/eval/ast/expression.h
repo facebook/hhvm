@@ -36,7 +36,7 @@ public:
   Expression(EXPRESSION_ARGS);
   virtual ~Expression() {}
   virtual Variant eval(VariableEnvironment &env) const = 0;
-  virtual Variant refval(VariableEnvironment &env, bool strict = true) const;
+  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
   virtual bool exist(VariableEnvironment &env, int op) const;
   virtual Variant evalExist(VariableEnvironment &env) const;
   virtual const LvalExpression *toLval() const;

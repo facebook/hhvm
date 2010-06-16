@@ -209,6 +209,11 @@ bool IniSetting::Get(CStrRef name, String &value) {
     value = g_context->getArgSeparatorOutput();
     return true;
   }
+  if (name == "upload_max_filesize") {
+    int uploadMaxFilesize = RuntimeOption::UploadMaxFileSize / (1 << 20);
+    value = String(uploadMaxFilesize);
+    return true;
+  }
   return false;
 }
 

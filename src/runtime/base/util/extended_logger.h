@@ -25,6 +25,25 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class ExtendedLogger : public Logger {
+public:
+  // These logging functions will also print stacktrace at end of each message.
+
+  static void Error(const std::string &msg);
+  static void Warning(const std::string &msg);
+  static void Info(const std::string &msg);
+  static void Verbose(const std::string &msg);
+
+  static void Error(const char *fmt, ...);
+  static void Warning(const char *fmt, ...);
+  static void Info(const char *fmt, ...);
+  static void Verbose(const char *fmt, ...);
+
+  // log messages without escaping
+  static void RawError(const std::string &msg);
+  static void RawWarning(const std::string &msg);
+  static void RawInfo(const std::string &msg);
+  static void RawVerbose(const std::string &msg);
+
 protected:
   virtual void log(const char *type, const Exception &e,
                    const char *file = NULL, int line = 0);
@@ -32,9 +51,10 @@ protected:
                    bool escape = true);
 
   // Log additional injected stacktrace.
-  void Log(CArrRef stackTrace);
+  static void Log(CArrRef stackTrace);
+
 private:
-  void PrintStackTrace(FILE *f, CArrRef stackTrace);
+  static void PrintStackTrace(FILE *f, CArrRef stackTrace);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

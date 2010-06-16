@@ -19,7 +19,41 @@
 #include <runtime/base/frame_injection.h>
 #include <runtime/base/array/array_iterator.h>
 
+///////////////////////////////////////////////////////////////////////////////
+
+#define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                   \
+  void ExtendedLogger::LOGLEVEL(const char *fmt, ...) {                \
+    if (LogLevel < Log ## LOGLEVEL) return;                            \
+    va_list ap; va_start(ap, fmt); Logger::Log(fmt, ap);               \
+    if (RuntimeOption::InjectedStackTrace) {                           \
+      Log(FrameInjection::GetBacktrace());                             \
+    }                                                                  \
+    va_end(ap);                                                        \
+  }                                                                    \
+  void ExtendedLogger::LOGLEVEL(const std::string &msg) {              \
+    if (LogLevel < Log ## LOGLEVEL) return;                            \
+    Logger::Log(msg, NULL);                                            \
+    if (RuntimeOption::InjectedStackTrace) {                           \
+      Log(FrameInjection::GetBacktrace());                             \
+    }                                                                  \
+  }                                                                    \
+  void ExtendedLogger::Raw ## LOGLEVEL(const std::string &msg) {       \
+    if (LogLevel < Log ## LOGLEVEL) return;                            \
+    Logger::Log(msg, NULL, false);                                     \
+    if (RuntimeOption::InjectedStackTrace) {                           \
+      Log(FrameInjection::GetBacktrace());                             \
+    }                                                                  \
+  }                                                                    \
+
 namespace HPHP {
+
+///////////////////////////////////////////////////////////////////////////////
+
+IMPLEMENT_LOGLEVEL(Error);
+IMPLEMENT_LOGLEVEL(Warning);
+IMPLEMENT_LOGLEVEL(Info);
+IMPLEMENT_LOGLEVEL(Verbose);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void ExtendedLogger::log(const char *type, const Exception &e,

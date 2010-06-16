@@ -22,6 +22,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/util/request_local.h>
+#include <runtime/base/util/extended_logger.h>
 #include <util/timer.h>
 #include <util/db_mysql.h>
 #include <netinet/in.h>
@@ -860,8 +861,9 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
   if (RuntimeOption::MaxSQLRowCount > 0 &&
       (s_mysql_data->totalRowCount += r->getRowCount())
       > RuntimeOption::MaxSQLRowCount) {
-    Logger::Error("MaxSQLRowCount is over: fetching at least %d rows: %s",
-                  s_mysql_data->totalRowCount, query.data());
+    ExtendedLogger::Error
+      ("MaxSQLRowCount is over: fetching at least %d rows: %s",
+       s_mysql_data->totalRowCount, query.data());
     s_mysql_data->totalRowCount = 0; // so no repetitive logging
   }
 

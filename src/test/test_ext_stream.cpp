@@ -215,8 +215,26 @@ bool TestExtStream::test_stream_filter_prepend() {
 }
 
 bool TestExtStream::test_stream_get_contents() {
-  Variant f = f_fopen("test/test_ext_file.txt", "r");
-  VS(f_stream_get_contents(f), "Testing Ext File\n");
+  {
+    Variant f = f_fopen("test/test_ext_file.txt", "r");
+    VS(f_stream_get_contents(f), "Testing Ext File\n");
+  }
+
+  {
+    Variant f = f_tmpfile();
+
+    f_fwrite(f, "fwrite1");
+    f_fseek(f, 0); VS(f_stream_get_contents(f), "fwrite1");
+
+    f_fwrite(f, "fwrite2");
+    f_fseek(f, 0); VS(f_stream_get_contents(f), "fwrite2");
+
+    f_fwrite(f, "fwrite3");
+    VS(f_stream_get_contents(f), "");
+
+    f_fclose(f);
+  }
+
   return Count(true);
 }
 

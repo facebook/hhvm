@@ -311,11 +311,17 @@ String File::read(int64 length) {
 }
 
 int64 File::write(CStrRef data, int64 length /* = 0 */) {
+  if (seekable()) {
+    m_readpos = m_writepos = 0; // invalidating read buffer
+    seek(m_position, SEEK_SET);
+  }
   if (length <= 0 || length > data.size()) {
     length = data.size();
   }
   if (length) {
-    return writeImpl(data.data(), length);
+    int64 written = writeImpl(data.data(), length);
+    m_position += written;
+    return written;
   }
   return 0;
 }
@@ -323,7 +329,9 @@ int64 File::write(CStrRef data, int64 length /* = 0 */) {
 int File::putc(char c) {
   char buf[1];
   buf[0] = c;
-  return writeImpl(buf, 1);
+  int ret = writeImpl(buf, 1);
+  m_position += ret;
+  return ret;
 }
 
 bool File::seek(int64 offset, int whence /* = SEEK_SET */) {

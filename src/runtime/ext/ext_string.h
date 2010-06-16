@@ -109,7 +109,7 @@ Variant f_substr_replace(CVarRef str, CVarRef replacement, CVarRef start,
                          CVarRef length = 0x7FFFFFFF);
 
 inline Variant f_substr(CStrRef str, int start, int length = 0x7FFFFFFF) {
-  String ret = str.substr(start, length);
+  String ret = str.substr(start, length, true);
   if (ret.isNull()) return false;
   return ret;
 }

@@ -122,6 +122,7 @@ bool PlainFile::seek(int64 offset, int whence /* = SEEK_SET */) {
   m_readpos = 0;
   // clear the eof flag
   m_eof = false;
+  flush();
   // lseek instead of seek to be consistent with read
   off_t result = lseek(m_fd, offset, whence);
   m_position = result;

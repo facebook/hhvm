@@ -40,6 +40,7 @@ public:
   virtual bool close();
   virtual int64 readImpl(char *buffer, int64 length);
   virtual int64 writeImpl(const char *buffer, int64 length);
+  virtual bool seekable() { return true;}
   virtual bool seek(int64 offset, int whence = SEEK_SET);
   virtual int64 tell();
   virtual bool eof();

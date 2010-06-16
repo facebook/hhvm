@@ -395,6 +395,8 @@ bool TestExtString::test_substr() {
   VS(f_substr("abcdef", 0, 4), "abcd");
   VS(f_substr("abcdef", 0, 8), "abcdef");
   VS(f_substr("abcdef", -1, 1), "f");
+  VS(f_substr("abcdef", 6), false);
+  VS(f_substr("abcdef", 3, 0), "");
   return Count(true);
 }
 

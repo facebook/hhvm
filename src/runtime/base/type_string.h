@@ -116,7 +116,8 @@ public:
    * Take a sub-string from start with specified length. Note, read
    * http://www.php.net/substr about meanings of negative start or length.
    */
-  String substr(int start, int length = 0x7FFFFFFF) const;
+  String substr(int start, int length = 0x7FFFFFFF,
+                bool nullable = false) const;
 
   /**
    * Find a character or a substring and return its position. "pos" has to be

@@ -103,10 +103,14 @@ void String::assign(const char *data, int len, StringDataMode mode) {
 ///////////////////////////////////////////////////////////////////////////////
 // informational
 
-String String::substr(int start, int length /* = 0x7FFFFFFF */) const {
+String String::substr(int start, int length /* = 0x7FFFFFFF */,
+                      bool nullable /* = false */) const {
   int len = size();
-  char *ret = string_substr(data(), len, start, length);
-  return String(ret, len, AttachString);
+  char *ret = string_substr(data(), len, start, length, nullable);
+  if (ret) {
+    return String(ret, len, AttachString);
+  }
+  return String();
 }
 
 int String::find(char ch, int pos /* = 0 */,

@@ -81,6 +81,7 @@ public:
   /**
    * Optional virtual functions to implement.
    */
+  virtual bool seekable() { return false;}
   virtual bool seek(int64 offset, int whence = SEEK_SET);
   virtual int64 tell();
   virtual bool eof();
@@ -129,6 +130,8 @@ protected:
   // fields only useful for buffered reads
   int64 m_writepos; // where we have read from lower level
   int64 m_readpos;  // where we have given to upper level
+
+  // fields useful for both reads and writes
   int64 m_position; // the current cursor position
 
   void closeImpl();

@@ -88,6 +88,11 @@ bool f_error_log(CStrRef message, int message_type /* = 0 */,
     Logger::Error(line);
   } else {
     Logger::RawError(line);
+
+    // otherwise errors will go to error log without displaying on screen
+    if (Logger::UseLogFile && Logger::Output) {
+      std::cerr << line;
+    }
   }
   return true;
 }

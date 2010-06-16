@@ -252,6 +252,10 @@ class ArrayData : public Countable {
 
   void setPosition(ssize_t p) { m_pos = p; }
 
+  virtual ArrayData *escalate(bool mutableIteration = false) const {
+    return const_cast<ArrayData *>(this);
+  }
+
  protected:
   ssize_t m_pos;
 

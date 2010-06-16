@@ -469,5 +469,11 @@ void VectorVariant::onSetStatic() {
   }
 }
 
+ArrayData *VectorVariant::escalate(bool mutableIteration /* = false */) const {
+  // Assume ZendArray is not used.
+  ASSERT(!RuntimeOption::UseZendArray);
+  return NEW(MapVariant)(this);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

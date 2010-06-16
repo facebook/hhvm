@@ -101,6 +101,8 @@ class VectorVariant : public ArrayData {
 
   virtual void onSetStatic();
 
+  virtual ArrayData *escalate(bool mutableIteration = false) const;
+
   /**
    * Low level access to underlying data. Should be limited in use.
    */

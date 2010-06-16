@@ -87,7 +87,7 @@ class ProcessSharedVariant : public SharedVariant {
   int getIndex(CVarRef key);
   SharedVariant* get(CVarRef key);
   bool exists(CVarRef key);
-  void loadElems(ArrayData *&elems, CArrRef cache);
+  void loadElems(ArrayData *&elems, CArrRef cache, bool keepRef = false);
 
   virtual SharedVariant* getKey(ssize_t pos) const;
   virtual SharedVariant* getValue(ssize_t pos) const;

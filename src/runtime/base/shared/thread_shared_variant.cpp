@@ -284,12 +284,13 @@ bool ThreadSharedVariant::exists(CVarRef key) {
   return it != map().end();
 }
 
-void ThreadSharedVariant::loadElems(ArrayData *&elems, CArrRef cache) {
+void ThreadSharedVariant::loadElems(ArrayData *&elems, CArrRef cache,
+                                    bool keepRef /* = false */) {
   ASSERT(is(KindOfArray));
   SharedVariant** ks = keys();
   SharedVariant** vs = vals();
   uint count = map().size();
-  ArrayInit ai(count);
+  ArrayInit ai(count, false, keepRef);
   for (uint i = 0; i < count; i++) {
     SharedVariant *k = ks[i];
     int64 key = (int64)k;

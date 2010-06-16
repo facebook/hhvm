@@ -106,7 +106,7 @@ public:
   virtual CVarRef currentRef();
   virtual CVarRef endRef();
 
-  ArrayData *escalate() const;
+  virtual ArrayData *escalate(bool mutableIteration = false) const;
 
   DECLARE_SMART_ALLOCATION_NOCALLBACKS(SmallArray);
 
@@ -164,6 +164,8 @@ private:
     if (m_nListHead < 0) m_nListHead = p;
     if (m_pos < 0) m_pos = p;
   }
+
+  ArrayData *escalateToZendArray() const;
 
   inline int find(int64 h) const;
   inline int find(const char *k, int len) const;

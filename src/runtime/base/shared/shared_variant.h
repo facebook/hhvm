@@ -56,7 +56,8 @@ public:
   virtual int getIndex(CVarRef key) = 0;
   virtual SharedVariant* get(CVarRef key) = 0;
   virtual bool exists(CVarRef key) = 0;
-  virtual void loadElems(ArrayData *&elems, CArrRef cache) = 0;
+  virtual void loadElems(ArrayData *&elems, CArrRef cache,
+                         bool keepRef = false) = 0;
   virtual SharedVariant* getKey(ssize_t pos) const = 0;
   virtual SharedVariant* getValue(ssize_t pos) const = 0;
 

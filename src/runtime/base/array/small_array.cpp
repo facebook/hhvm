@@ -372,7 +372,16 @@ ssize_t SmallArray::getIndex(CVarRef k, int64 prehash /* = -1 */) const {
 ///////////////////////////////////////////////////////////////////////////////
 // append/insert/update
 
-ArrayData *SmallArray::escalate() const {
+ArrayData *SmallArray::escalate(bool mutableIteration /* = false */) const {
+  if (mutableIteration) {
+    // Let ZendArray handle all the quirky cases.
+    return escalateToZendArray();
+  }
+  // SmallArray doesn't need to be escalated for most of the time.
+  return const_cast<SmallArray *>(this);
+}
+
+ArrayData *SmallArray::escalateToZendArray() const {
   // Assume UseZendArray for now
   ASSERT(RuntimeOption::UseZendArray);
   ZendArray *ret = NEW(ZendArray)(m_nNumOfElements);
@@ -485,7 +494,7 @@ ArrayData *SmallArray::lval(int64 k, Variant *&ret, bool copy,
   SmallArray *result = NULL;
   if (pb->kind == Empty) {
     if (m_nNumOfElements >= SARR_SIZE) {
-      ArrayData *a = escalate();
+      ArrayData *a = escalateToZendArray();
       a->lval(k, ret, false, prehash);
       return a;
     }
@@ -517,7 +526,7 @@ ArrayData *SmallArray::lval(litstr k, Variant *&ret, bool copy,
   SmallArray *result = NULL;
   if (pb->kind == Empty) {
     if (m_nNumOfElements >= SARR_SIZE) {
-      ArrayData *a = escalate();
+      ArrayData *a = escalateToZendArray();
       a->lval(k, ret, false, prehash);
       return a;
     }
@@ -549,7 +558,7 @@ ArrayData *SmallArray::lval(CStrRef k, Variant *&ret, bool copy,
   SmallArray *result = NULL;
   if (pb->kind == Empty) {
     if (m_nNumOfElements >= SARR_SIZE) {
-      ArrayData *a = escalate();
+      ArrayData *a = escalateToZendArray();
       a->lval(k, ret, false, prehash);
       return a;
     }
@@ -591,7 +600,7 @@ ArrayData *SmallArray::set(int64 k, CVarRef v, bool copy,
   SmallArray *result = NULL;
   if (pb->kind == Empty) {
     if (m_nNumOfElements >= SARR_SIZE) {
-      ArrayData *a = escalate();
+      ArrayData *a = escalateToZendArray();
       a->set(k, v, false, prehash);
       return a;
     }
@@ -622,7 +631,7 @@ ArrayData *SmallArray::set(litstr k, CVarRef v, bool copy,
   SmallArray *result = NULL;
   if (pb->kind == Empty) {
     if (m_nNumOfElements >= SARR_SIZE) {
-      ArrayData *a = escalate();
+      ArrayData *a = escalateToZendArray();
       a->set(k, v, false, prehash);
       return a;
     }
@@ -653,7 +662,7 @@ ArrayData *SmallArray::set(CStrRef k, CVarRef v, bool copy,
   SmallArray *result = NULL;
   if (pb->kind == Empty) {
     if (m_nNumOfElements >= SARR_SIZE) {
-      ArrayData *a = escalate();
+      ArrayData *a = escalateToZendArray();
       a->set(k, v, false, prehash);
       return a;
     }
@@ -700,7 +709,7 @@ void SmallArray::nextInsert(CVarRef v) {
 
 ArrayData *SmallArray::append(CVarRef v, bool copy) {
   if (m_nNumOfElements >= SARR_SIZE) {
-    ArrayData *a = escalate();
+    ArrayData *a = escalateToZendArray();
     a->append(v, false);
     return a;
   }
@@ -745,7 +754,7 @@ ArrayData *SmallArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
   ssize_t elems_size = elems->size();
   if (elems_size == 0) return NULL;
   if (m_nNumOfElements + elems_size >= SARR_SIZE) {
-    ArrayData *a = escalate();
+    ArrayData *a = escalateToZendArray();
     a->append(elems, op, false);
     return a;
   }
@@ -811,7 +820,7 @@ ArrayData *SmallArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
 
 ArrayData *SmallArray::prepend(CVarRef v, bool copy) {
   if (m_nNumOfElements >= SARR_SIZE) {
-    ArrayData *a = escalate();
+    ArrayData *a = escalateToZendArray();
     a->prepend(v, false);
     return a;
   }

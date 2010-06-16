@@ -223,12 +223,13 @@ ProcessSharedVariant::~ProcessSharedVariant() {
   }
 }
 
-void ProcessSharedVariant::loadElems(ArrayData *&elems, CArrRef cache) {
+void ProcessSharedVariant::loadElems(ArrayData *&elems, CArrRef cache,
+                                     bool keepRef /* = false */) {
   ASSERT(is(KindOfArray));
   const SharedMemoryVector<SharedVariant*>& ks = keys();
   const SharedMemoryVector<SharedVariant*>& vs = vals();
   uint count = ks.size();
-  ArrayInit ai(count);
+  ArrayInit ai(count, false, keepRef);
   for (uint i = 0; i < count; i++) {
     SharedVariant *k = getPtr(ks[i]);
     int64 key = (int64)k;

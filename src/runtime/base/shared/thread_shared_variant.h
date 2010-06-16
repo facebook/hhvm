@@ -79,7 +79,7 @@ class ThreadSharedVariant : public SharedVariant {
   SharedVariant* get(CVarRef key);
   bool exists(CVarRef key);
 
-  void loadElems(ArrayData *&elems, CArrRef cache);
+  void loadElems(ArrayData *&elems, CArrRef cache, bool keepRef = false);
 
   virtual SharedVariant* getKey(ssize_t pos) const {
     ASSERT(is(KindOfArray));

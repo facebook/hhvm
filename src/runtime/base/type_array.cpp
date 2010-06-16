@@ -360,29 +360,8 @@ bool Array::more(CVarRef v2) const {
 // iterator
 
 void Array::escalate(bool mutableIteration /* = false */) {
-  // TODO make escalate() a virtual method, and avoid dynamic_casts.
   if (m_px) {
-    SharedMap *mapShared = dynamic_cast<SharedMap *>(m_px);
-    if (mapShared) {
-      SmartPtr<ArrayData>::operator=(mapShared->escalate());
-    }
-    if (mutableIteration) {
-      SmallArray *small = dynamic_cast<SmallArray *>(m_px);
-      if (small) {
-        SmartPtr<ArrayData>::operator=(small->escalate());
-        return;
-      }
-    }
-    if (!RuntimeOption::UseZendArray) {
-      VectorVariant *vecVariant = dynamic_cast<VectorVariant *>(m_px);
-      if (vecVariant) {
-        SmartPtr<ArrayData>::operator=(NEW(MapVariant)(vecVariant));
-        return;
-      }
-
-      ASSERT(dynamic_cast<VectorVariant *>(m_px) ||
-             dynamic_cast<MapVariant *>(m_px));
-    }
+    SmartPtr<ArrayData>::operator=(m_px->escalate(mutableIteration));
   }
 }
 

@@ -207,9 +207,9 @@ ArrayData *SharedMap::prepend(CVarRef v, bool copy) {
   return escalated;
 }
 
-ArrayData *SharedMap::escalate() const {
+ArrayData *SharedMap::escalate(bool mutableIteration /* = false */) const {
   ArrayData *ret = NULL;
-  m_arr->loadElems(ret, m_localCache);
+  m_arr->loadElems(ret, m_localCache, mutableIteration);
   ASSERT(!ret->isStatic());
   return ret;
 }

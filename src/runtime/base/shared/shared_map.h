@@ -134,7 +134,7 @@ public:
   void restore(const char *&data) { m_arr->incRef();}
   void sweep() { m_arr->decRef();}
 
-  ArrayData *escalate() const;
+  virtual ArrayData *escalate(bool mutableIteration = false) const;
   MapVariant *escalateToMapVariant() const;
 
 private:

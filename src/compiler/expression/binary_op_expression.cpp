@@ -15,6 +15,7 @@
 */
 
 #include <compiler/expression/binary_op_expression.h>
+#include <compiler/expression/array_element_expression.h>
 #include <compiler/expression/unary_op_expression.h>
 #include <compiler/parser/hphp.tab.hpp>
 #include <compiler/expression/scalar_expression.h>
@@ -55,6 +56,7 @@ BinaryOpExpression::BinaryOpExpression
     m_assign = true;
     m_exp1->setContext(Expression::LValue);
     m_exp1->setContext(Expression::OprLValue);
+    m_exp1->setContext(Expression::DeepOprLValue);
     if (m_exp1->is(Expression::KindOfObjectPropertyExpression)) {
       m_exp1->setContext(Expression::NoLValueWrapper);
     }
@@ -793,6 +795,7 @@ static void outputStringBufExprs(ExpressionPtrVec &ev,
 
 bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                       int state) {
+  if (isOpEqual()) return Expression::preOutputCPP(cg, ar, state);
   bool effect2 = m_exp2->hasEffect();
   const char *prefix = 0;
   if (effect2 || m_exp1->hasEffect()) {
@@ -899,8 +902,75 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   return fix_e1 || fix_e2;
 }
 
+bool BinaryOpExpression::isOpEqual() {
+  switch (m_op) {
+  case T_CONCAT_EQUAL:
+  case T_PLUS_EQUAL:
+  case T_MINUS_EQUAL:
+  case T_MUL_EQUAL:
+  case T_DIV_EQUAL:
+  case T_MOD_EQUAL:
+  case T_AND_EQUAL:
+  case T_OR_EQUAL:
+  case T_XOR_EQUAL:
+  case T_SL_EQUAL:
+  case T_SR_EQUAL:
+    return true;
+  default:
+    break;
+  }
+  return false;
+}
+
+bool BinaryOpExpression::outputCPPImplOpEqual(CodeGenerator &cg,
+                                              AnalysisResultPtr ar) {
+  if (!m_exp1->is(Expression::KindOfArrayElementExpression)) return false;
+  ArrayElementExpressionPtr exp =
+    dynamic_pointer_cast<ArrayElementExpression>(m_exp1);
+  if (exp->isSuperGlobal() || exp->isDynamicGlobal()) return false;
+  bool linemap = outputLineMap(cg, ar);
+
+  // turning $a['elem'] Op= $b into $a.setOpEqual('elem', $b);
+  exp->getVariable()->outputCPP(cg, ar);
+  if (exp->getOffset()) {
+    cg_printf(".setOpEqual(%d, ", m_op);
+    exp->getOffset()->outputCPP(cg, ar);
+    cg_printf(", (");
+  } else {
+    cg_printf(".appendOpEqual(%d, (", m_op);
+  }
+  m_exp2->outputCPP(cg, ar);
+  cg_printf(")");
+  ExpressionPtr off = exp->getOffset();
+  if (off) {
+    ScalarExpressionPtr sc = dynamic_pointer_cast<ScalarExpression>(off);
+    if (sc) {
+      int64 hash = sc->getHash();
+      if (hash >= 0) {
+        cg_printf(", 0x%016llXLL", hash);
+      } else {
+        cg_printf(", -1");
+      }
+      if (sc->isLiteralString()) {
+        String s(sc->getLiteralString());
+        int64 n;
+        if (!s.get()->isStrictlyInteger(n)) {
+          cg_printf(", true"); // skip toKey() at run time
+        }
+      }
+    }
+  }
+  cg_printf(")");
+
+  if (linemap) cg_printf(")");
+  return true;
+}
+
 void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
+
+  if (isOpEqual() && outputCPPImplOpEqual(cg, ar)) return;
+
   bool linemap = outputLineMap(cg, ar);
 
   bool wrapped = true;

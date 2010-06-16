@@ -362,6 +362,9 @@ void Construct::dump(int spc, AnalysisResultPtr ar) {
     if (c & Expression::OprLValue) {
       scontext += "|OprLValue";
     }
+    if (c & Expression::DeepOprLValue) {
+      scontext += "|DeepOprLValue";
+    }
 
     if (scontext != "") {
       scontext = " (" + scontext.substr(1) + ")";

@@ -92,11 +92,12 @@ public:
     InvokeArgument = 0x800,      // Invoke arguments
     RefParameter   = 0x1000,     // eg f(&$x)
     OprLValue = 0x2000,          // Lhs of op=, or operand of ++,--
-    DeadStore = 0x4000,          // This is an assignment, op=, or ++/--
+    DeepOprLValue = 0x4000,      // LHS of op=, or operand of ++,--, deep
+    DeadStore = 0x8000,          // This is an assignment, op=, or ++/--
                                  // which can be killed
-    CondExpr = 0x8000,           // Used by alias manager to track expressions
+    CondExpr = 0x10000,          // Used by alias manager to track expressions
                                  // which are conditionally executed
-    AssignmentRHS = 0x10000      // RHS in assignment
+    AssignmentRHS = 0x20000      // RHS in assignment
   };
 
   enum Order {

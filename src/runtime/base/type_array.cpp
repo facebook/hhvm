@@ -31,6 +31,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/ext/ext_iconv.h>
 #include <unicode/coll.h> // icu
+#include <compiler/parser/hphp.tab.hpp>
 
 using namespace std;
 
@@ -660,6 +661,38 @@ Variant Array::append(CVarRef v) {
     }
   }
   return v;
+}
+
+Variant Array::appendOpEqual(int op, CVarRef v) {
+  if (!m_px) {
+    SmartPtr<ArrayData>::operator=(ArrayData::Create());
+  }
+  if (v.isContagious()) {
+    escalate();
+  }
+  ArrayData *escalated =
+    m_px->append(null_variant, (m_px->getCount() > 1));
+  if (escalated) {
+    SmartPtr<ArrayData>::operator=(escalated);
+  }
+  Variant *cv = NULL;
+  m_px->lval(cv, (m_px->getCount() > 1));
+  ASSERT(cv);
+  switch (op) {
+  case T_CONCAT_EQUAL: return concat_assign((*cv), v);
+  case T_PLUS_EQUAL:  return ((*cv) += v);
+  case T_MINUS_EQUAL: return ((*cv) -= v);
+  case T_MUL_EQUAL:   return ((*cv) *= v);
+  case T_DIV_EQUAL:   return ((*cv) /= v);
+  case T_MOD_EQUAL:   return ((*cv) %= v);
+  case T_AND_EQUAL:   return ((*cv) &= v);
+  case T_OR_EQUAL:    return ((*cv) |= v);
+  case T_XOR_EQUAL:   return ((*cv) ^= v);
+  case T_SL_EQUAL:    return ((*cv) <<= v);
+  case T_SR_EQUAL:    return ((*cv) >>= v);
+  default:
+    throw FatalErrorException("invalid operator %d", op);
+  }
 }
 
 Variant Array::pop() {

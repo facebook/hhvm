@@ -413,6 +413,7 @@ class Array : public SmartPtr<ArrayData> {
   void clear() { removeAll();}
 
   Variant append(CVarRef v);
+  Variant appendOpEqual(int op, CVarRef v);
   Variant pop();
   Variant dequeue();
   void prepend(CVarRef v);

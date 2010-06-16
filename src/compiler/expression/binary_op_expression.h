@@ -51,13 +51,15 @@ public:
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                     int state);
 
+  bool outputCPPImplOpEqual(CodeGenerator &cg, AnalysisResultPtr ar);
+
   static int getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
                            bool &hasVoid, bool &hasLitStr);
 
 private:
   ExpressionPtr simplifyLogical(AnalysisResultPtr ar);
   ExpressionPtr simplifyArithmetic(AnalysisResultPtr ar);
-
+  bool isOpEqual();
   ExpressionPtr m_exp1;
   ExpressionPtr m_exp2;
   int m_op;

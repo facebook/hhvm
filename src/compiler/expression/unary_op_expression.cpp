@@ -49,6 +49,7 @@ UnaryOpExpression::UnaryOpExpression
   case T_DEC:
     m_localEffects = AssignEffect;
     m_exp->setContext(Expression::OprLValue);
+    m_exp->setContext(Expression::DeepOprLValue);
     // this is hacky, what we need is LValueWrapper
     if (!m_exp->is(Expression::KindOfSimpleVariable)) {
       m_exp->setContext(Expression::LValue);

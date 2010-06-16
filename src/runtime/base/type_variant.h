@@ -687,6 +687,25 @@ class Variant {
 
   CVarRef append(CVarRef v);
 
+  CVarRef setOpEqual(int op, bool key, CVarRef v, int64 prehash = -1);
+  CVarRef setOpEqual(int op, char key, CVarRef v, int64 prehash = -1) {
+    return setOpEqual(op, (int64)key, v, prehash);
+  }
+  CVarRef setOpEqual(int op, short key, CVarRef v, int64 prehash = -1) {
+    return setOpEqual(op, (int64)key, v, prehash);
+  }
+  CVarRef setOpEqual(int op, int key, CVarRef v, int64 prehash = -1) {
+    return setOpEqual(op, (int64)key, v, prehash);
+  }
+  CVarRef setOpEqual(int op, int64 key, CVarRef v, int64 prehash = -1);
+  CVarRef setOpEqual(int op, double  key, CVarRef v, int64 prehash = -1);
+  CVarRef setOpEqual(int op, litstr  key, CVarRef v, int64 prehash = -1,
+                     bool isString = false);
+  CVarRef setOpEqual(int op, CStrRef key, CVarRef v, int64 prehash = -1,
+                     bool isString = false);
+  CVarRef setOpEqual(int op, CVarRef key, CVarRef v, int64 prehash = -1);
+  CVarRef appendOpEqual(int op, CVarRef v);
+
   template<typename T>
   void removeImpl(const T &key, int64 prehash) {
     switch (getType()) {

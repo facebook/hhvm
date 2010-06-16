@@ -23,6 +23,7 @@
 #include <runtime/base/externals.h>
 #include <runtime/ext/ext_variable.h>
 #include <runtime/base/runtime_option.h>
+#include <compiler/parser/hphp.tab.hpp>
 
 using namespace std;
 
@@ -2480,6 +2481,78 @@ ObjectOffset Variant::o_lval(CStrRef propName, int64 prehash /*= -1 */) {
   }                                                                     \
   return v;                                                             \
 
+#define IMPLEMENT_SETAT_OPEQUAL                                         \
+check_array:                                                            \
+  if (m_type == KindOfArray) {                                          \
+    Variant *cv = NULL;                                                 \
+    ASSERT(!v.isContagious());                                          \
+    ArrayData *escalated =                                              \
+      m_data.parr->lval(key, cv, (m_data.parr->getCount() > 1), prehash); \
+    if (escalated) {                                                    \
+      set(escalated);                                                   \
+    }                                                                   \
+    ASSERT(cv);                                                         \
+    switch (op) {                                                       \
+    case T_CONCAT_EQUAL: return concat_assign((*cv), v);                \
+    case T_PLUS_EQUAL:  return ((*cv) += v);                            \
+    case T_MINUS_EQUAL: return ((*cv) -= v);                            \
+    case T_MUL_EQUAL:   return ((*cv) *= v);                            \
+    case T_DIV_EQUAL:   return ((*cv) /= v);                            \
+    case T_MOD_EQUAL:   return ((*cv) %= v);                            \
+    case T_AND_EQUAL:   return ((*cv) &= v);                            \
+    case T_OR_EQUAL:    return ((*cv) |= v);                            \
+    case T_XOR_EQUAL:   return ((*cv) ^= v);                            \
+    case T_SL_EQUAL:    return ((*cv) <<= v);                           \
+    case T_SR_EQUAL:    return ((*cv) >>= v);                           \
+    default:                                                            \
+      throw FatalErrorException("invalid operator %d", op);             \
+    }                                                                   \
+  }                                                                     \
+  switch (m_type) {                                                     \
+  case KindOfBoolean:                                                   \
+    if (toBoolean()) {                                                  \
+      throw_bad_type_exception("not array objects");                    \
+      break;                                                            \
+    }                                                                   \
+    /* Fall through */                                                  \
+  case KindOfNull:                                                      \
+    set(ArrayData::Create(ToKey(key), null));                           \
+    goto check_array;                                                   \
+  case KindOfVariant:                                                   \
+    m_data.pvar->setOpEqual(op, key, v);                                \
+    break;                                                              \
+  case LiteralString:                                                   \
+  case KindOfStaticString:                                              \
+  case KindOfString:                                                    \
+    throw_bad_type_exception("not array objects");                      \
+    break;                                                              \
+  case KindOfObject: {                                                  \
+    ObjectData *aa = getArrayAccess();                                  \
+    Variant &cv = aa->___offsetget_lval(key);                           \
+    switch (op) {                                                       \
+    case T_CONCAT_EQUAL: concat_assign(cv, v); break;                   \
+    case T_PLUS_EQUAL:   cv += v;              break;                   \
+    case T_MINUS_EQUAL:  cv -= v;              break;                   \
+    case T_MUL_EQUAL:    cv *= v;              break;                   \
+    case T_DIV_EQUAL:    cv /= v;              break;                   \
+    case T_MOD_EQUAL:    cv %= v;              break;                   \
+    case T_AND_EQUAL:    cv &= v;              break;                   \
+    case T_OR_EQUAL:     cv |= v;              break;                   \
+    case T_XOR_EQUAL:    cv ^= v;              break;                   \
+    case T_SL_EQUAL:     cv <<= v;             break;                   \
+    case T_SR_EQUAL:     cv >= v;              break;                   \
+    default:                                                            \
+      throw FatalErrorException("invalid operator %d", op);             \
+    }                                                                   \
+    aa->o_invoke("offsetset", CREATE_VECTOR2(key, cv), -1);             \
+    return cv;                                                          \
+  }                                                                     \
+  default:                                                              \
+    throw_bad_type_exception("not array objects");                      \
+    break;                                                              \
+  }                                                                     \
+  return v;                                                             \
+
 CVarRef Variant::set(bool key, CVarRef v, int64 prehash /* = -1 */) {
   IMPLEMENT_SETAT;
 }
@@ -2503,6 +2576,38 @@ CVarRef Variant::set(CStrRef key, CVarRef v, int64 prehash /* = -1 */,
 
 CVarRef Variant::set(CVarRef key, CVarRef v, int64 prehash /* = -1 */) {
   IMPLEMENT_SETAT;
+}
+
+CVarRef Variant::setOpEqual(int op, bool key, CVarRef v,
+                            int64 prehash /* = -1 */) {
+  IMPLEMENT_SETAT_OPEQUAL;
+}
+
+CVarRef Variant::setOpEqual(int op, int64 key, CVarRef v,
+                            int64 prehash /* = -1 */) {
+  IMPLEMENT_SETAT_OPEQUAL;
+}
+
+CVarRef Variant::setOpEqual(int op, double  key, CVarRef v,
+                            int64 prehash /* = -1 */) {
+  IMPLEMENT_SETAT_OPEQUAL;
+}
+
+CVarRef Variant::setOpEqual(int op, litstr key, CVarRef v,
+                            int64 prehash /* = -1 */,
+                            bool isString /* = false */) {
+  IMPLEMENT_SETAT_OPEQUAL;
+}
+
+CVarRef Variant::setOpEqual(int op, CStrRef key, CVarRef v,
+                            int64 prehash /* = -1 */,
+                            bool isString /* = false */) {
+  IMPLEMENT_SETAT_OPEQUAL;
+}
+
+CVarRef Variant::setOpEqual(int op, CVarRef key, CVarRef v,
+                            int64 prehash /* = -1 */) {
+  IMPLEMENT_SETAT_OPEQUAL;
 }
 
 CVarRef Variant::append(CVarRef v) {
@@ -2545,13 +2650,96 @@ CVarRef Variant::append(CVarRef v) {
       Array params = CREATE_VECTOR2(null, v);
       m_data.pobj->o_invoke("offsetset", params, -1);
     }
-    break;
   case LiteralString:
   case KindOfStaticString:
   case KindOfString:
     if (toString().empty()) {
       set(ArrayData::Create(v));
       return v;
+    }
+    // fall through to throw
+  default:
+    throw_bad_type_exception("[] operator not supported for this type");
+  }
+  return v;
+}
+
+CVarRef Variant::appendOpEqual(int op, CVarRef v) {
+check_array:
+  if (m_type == KindOfArray) {
+    bool contagious = false;
+    if (v.isContagious()) {
+      escalate();
+      contagious = true;
+    }
+    ArrayData *escalated =
+      m_data.parr->append(null_variant, (m_data.parr->getCount() > 1));
+    if (escalated) {
+      set(escalated);
+    }
+    Variant *cv = NULL;
+    m_data.parr->lval(cv, (m_data.parr->getCount() > 1));
+    ASSERT(cv);
+    switch (op) {
+    case T_CONCAT_EQUAL: return concat_assign((*cv), v);
+    case T_PLUS_EQUAL:  return ((*cv) += v);
+    case T_MINUS_EQUAL: return ((*cv) -= v);
+    case T_MUL_EQUAL:   return ((*cv) *= v);
+    case T_DIV_EQUAL:   return ((*cv) /= v);
+    case T_MOD_EQUAL:   return ((*cv) %= v);
+    case T_AND_EQUAL:   return ((*cv) &= v);
+    case T_OR_EQUAL:    return ((*cv) |= v);
+    case T_XOR_EQUAL:   return ((*cv) ^= v);
+    case T_SL_EQUAL:    return ((*cv) <<= v);
+    case T_SR_EQUAL:    return ((*cv) >>= v);
+    default:
+      throw FatalErrorException("invalid operator %d", op);
+    }
+    return v;
+  }
+  switch (m_type) {
+  case KindOfNull:
+    set(ArrayData::Create());
+    goto check_array;
+  case KindOfBoolean:
+    if (!toBoolean()) {
+      set(ArrayData::Create());
+      goto check_array;
+    } else {
+      throw_bad_type_exception("[] operator not supported for this type");
+    }
+    break;
+  case KindOfVariant:
+    m_data.pvar->appendOpEqual(op, v);
+    break;
+  case KindOfObject: {
+    ObjectData *aa = getArrayAccess();
+    Variant &cv = aa->___offsetget_lval(null_variant);
+    switch (op) {
+    case T_CONCAT_EQUAL: concat_assign(cv, v); break;
+    case T_PLUS_EQUAL:   cv += v;              break;
+    case T_MINUS_EQUAL:  cv -= v;              break;
+    case T_MUL_EQUAL:    cv *= v;              break;
+    case T_DIV_EQUAL:    cv /= v;              break;
+    case T_MOD_EQUAL:    cv %= v;              break;
+    case T_AND_EQUAL:    cv &= v;              break;
+    case T_OR_EQUAL:     cv |= v;              break;
+    case T_XOR_EQUAL:    cv ^= v;              break;
+    case T_SL_EQUAL:     cv <<= v;             break;
+    case T_SR_EQUAL:     cv >= v;              break;
+      break;
+    default:
+      throw FatalErrorException("invalid operator %d", op);
+    }
+    aa->o_invoke("offsetset", CREATE_VECTOR2(null_variant, cv), -1);
+    return cv;
+  }
+  case LiteralString:
+  case KindOfStaticString:
+  case KindOfString:
+    if (toString().empty()) {
+      set(ArrayData::Create());
+      goto check_array;
     }
     // fall through to throw
   default:

@@ -579,7 +579,8 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
   case Expression::KindOfStaticMemberExpression:
     if (!(e->getContext() & (Expression::AssignmentLHS|
                              Expression::DeepAssignmentLHS|
-                             Expression::OprLValue))) {
+                             Expression::OprLValue|
+                             Expression::DeepOprLValue))) {
       if (!(e->getContext() & (Expression::LValue|
                                Expression::RefValue|
                                Expression::RefParameter|

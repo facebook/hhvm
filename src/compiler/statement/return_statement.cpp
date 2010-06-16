@@ -125,6 +125,12 @@ void ReturnStatement::inferTypes(AnalysisResultPtr ar) {
     } else {
       m_exp->inferAndCheck(ar, Type::Int64, false);
     }
+  } else {
+    FunctionScopePtr funcScope = ar->getFunctionScope();
+    if (funcScope->getReturnType()) {
+      // return; means return null;
+      funcScope->setReturnType(ar, Type::Variant);
+    }
   }
 }
 

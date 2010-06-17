@@ -155,9 +155,9 @@ void StringData::append(const char *s, int len) {
 
 StringData *StringData::copy(bool sharedMemory /* = false */) const {
   if (sharedMemory) {
-    if (isLiteral()) {
-      return new StringData(m_data, size(), AttachLiteral);
-    }
+    // Even if it's literal, it might come from hphpi's class info
+    // which will be freed at the end of the request, and so must be
+    // copied.
     return new StringData(m_data, size(), CopyString);
   } else {
     if (isLiteral()) {

@@ -369,6 +369,7 @@ class Variant {
    * getValueRef() can be called to take a reference to an array element.
    */
   ArrayIterPtr begin(const char *context = NULL) const;
+  ArrayIterPtr beginFe(const char *context = NULL) const;
   // used by generated code
   MutableArrayIterPtr begin(Variant *key, Variant &val);
 
@@ -776,11 +777,10 @@ class Variant {
    */
   Variant array_iter_reset();
   Variant array_iter_prev();
-  Variant array_iter_current() const;
+  Variant array_iter_current();
   Variant array_iter_next();
   Variant array_iter_end();
-  Variant array_iter_key() const;
-  Variant array_iter_value(ssize_t &pos) const;
+  Variant array_iter_key();
   Variant array_iter_each();
 
   /**

@@ -598,7 +598,7 @@ Array c_reflectionfunctionabstract::t_getparameters() {
   {
     LOOP_COUNTER(1);
     Variant map2 = m_info.rvalAt("params", 0x6E4C9E151F21AC62LL, true, true);
-    for (ArrayIterPtr iter3 = map2.begin("reflectionfunctionabstract"); !iter3->end(); iter3->next()) {
+    for (ArrayIterPtr iter3 = map2.beginFe("reflectionfunctionabstract"); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_info);
       v_name = iter3->first();
@@ -634,7 +634,7 @@ int64 c_reflectionfunctionabstract::t_getnumberofrequiredparameters() {
   }
   {
     LOOP_COUNTER(6);
-    for (ArrayIter iter8 = v_params.begin("reflectionfunctionabstract"); !iter8.end(); ++iter8) {
+    for (ArrayIterFe iter8 = v_params.beginFe("reflectionfunctionabstract"); !iter8.end(); ++iter8) {
       LOOP_COUNTER_CHECK(6);
       iter8.second(v_param);
       v_name = iter8.first();
@@ -3954,7 +3954,7 @@ Variant c_reflectionclass::t_fetch(CVarRef v_what) {
       {
         LOOP_COUNTER(14);
         Variant map15 = m_info.rvalAt("interfaces", 0x0C5BD661CFB9E254LL, true, true);
-        for (ArrayIterPtr iter16 = map15.begin("reflectionclass"); !iter16->end(); iter16->next()) {
+        for (ArrayIterPtr iter16 = map15.beginFe("reflectionclass"); !iter16->end(); iter16->next()) {
           LOOP_COUNTER_CHECK(14);
           iter16->second(v__);
           v_interface = iter16->first();
@@ -4154,7 +4154,7 @@ Array c_reflectionclass::t_getmethods(CVarRef v_filter //  = 65535LL
   }
   {
     LOOP_COUNTER(32);
-    for (ArrayIterPtr iter34 = v_methods.begin("reflectionclass"); !iter34->end(); iter34->next()) {
+    for (ArrayIterPtr iter34 = v_methods.beginFe("reflectionclass"); !iter34->end(); iter34->next()) {
       LOOP_COUNTER_CHECK(32);
       iter34->second(v__);
       v_name = iter34->first();
@@ -4216,7 +4216,7 @@ Array c_reflectionclass::t_getproperties() {
   {
     LOOP_COUNTER(40);
     Variant map41 = t_fetch("properties");
-    for (ArrayIterPtr iter42 = map41.begin("reflectionclass"); !iter42->end(); iter42->next()) {
+    for (ArrayIterPtr iter42 = map41.beginFe("reflectionclass"); !iter42->end(); iter42->next()) {
       LOOP_COUNTER_CHECK(40);
       iter42->second(v__);
       v_name = iter42->first();
@@ -4268,7 +4268,7 @@ Variant c_reflectionclass::t_getinterfaces() {
   {
     LOOP_COUNTER(46);
     Variant map47 = t_fetch("interfaces");
-    for (ArrayIterPtr iter48 = map47.begin("reflectionclass"); !iter48->end(); iter48->next()) {
+    for (ArrayIterPtr iter48 = map47.beginFe("reflectionclass"); !iter48->end(); iter48->next()) {
       LOOP_COUNTER_CHECK(46);
       iter48->second(v__);
       v_name = iter48->first();
@@ -4303,7 +4303,7 @@ Array c_reflectionclass::t_getinterfacenames() {
   {
     LOOP_COUNTER(52);
     Variant map53 = t_fetch("interfaces");
-    for (ArrayIterPtr iter54 = map53.begin("reflectionclass"); !iter54->end(); iter54->next()) {
+    for (ArrayIterPtr iter54 = map53.beginFe("reflectionclass"); !iter54->end(); iter54->next()) {
       LOOP_COUNTER_CHECK(52);
       iter54->second(v__);
       v_name = iter54->first();
@@ -4397,7 +4397,7 @@ Variant c_reflectionclass::t_issubclassof(Variant v_cls) {
   {
     LOOP_COUNTER(61);
     Variant map62 = t_fetch("interfaces");
-    for (ArrayIterPtr iter63 = map62.begin("reflectionclass"); !iter63->end(); iter63->next()) {
+    for (ArrayIterPtr iter63 = map62.beginFe("reflectionclass"); !iter63->end(); iter63->next()) {
       LOOP_COUNTER_CHECK(61);
       iter63->second(v__);
       v_name = iter63->first();
@@ -4443,7 +4443,7 @@ Variant c_reflectionclass::t_getstaticproperties() {
   {
     LOOP_COUNTER(68);
     Variant map69 = t_getproperties();
-    for (ArrayIterPtr iter70 = map69.begin("reflectionclass"); !iter70->end(); iter70->next()) {
+    for (ArrayIterPtr iter70 = map69.beginFe("reflectionclass"); !iter70->end(); iter70->next()) {
       LOOP_COUNTER_CHECK(68);
       iter70->second(v_prop);
       {
@@ -4486,7 +4486,7 @@ Variant c_reflectionclass::t_getdefaultproperties() {
   {
     LOOP_COUNTER(72);
     Variant map73 = t_getproperties();
-    for (ArrayIterPtr iter74 = map73.begin("reflectionclass"); !iter74->end(); iter74->next()) {
+    for (ArrayIterPtr iter74 = map73.beginFe("reflectionclass"); !iter74->end(); iter74->next()) {
       LOOP_COUNTER_CHECK(72);
       iter74->second(v_prop);
       {
@@ -4525,7 +4525,7 @@ bool c_reflectionclass::t_implementsinterface(Variant v_cls) {
   {
     LOOP_COUNTER(77);
     Variant map78 = t_fetch("interfaces");
-    for (ArrayIterPtr iter79 = map78.begin("reflectionclass"); !iter79->end(); iter79->next()) {
+    for (ArrayIterPtr iter79 = map78.beginFe("reflectionclass"); !iter79->end(); iter79->next()) {
       LOOP_COUNTER_CHECK(77);
       iter79->second(v__);
       v_name = iter79->first();
@@ -5235,7 +5235,7 @@ Array c_reflectionextension::t_getclassnames() {
   {
     LOOP_COUNTER(82);
     Variant map83 = m_info.rvalAt("classes", 0x6EF08968EDA9B7FBLL, true, true);
-    for (ArrayIterPtr iter84 = map83.begin("reflectionextension"); !iter84->end(); iter84->next()) {
+    for (ArrayIterPtr iter84 = map83.beginFe("reflectionextension"); !iter84->end(); iter84->next()) {
       LOOP_COUNTER_CHECK(82);
       iter84->second(v_cls);
       {

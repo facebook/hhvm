@@ -240,7 +240,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf("); %s%d->advance();", Option::IterPrefix, iterId);
   } else {
     if (passTemp) {
-      cg_printf("ArrayIterPtr %s%d = %s%d.begin(",
+      cg_printf("ArrayIterPtr %s%d = %s%d.beginFe(",
                 Option::IterPrefix, iterId,
                 Option::MapPrefix, mapId);
       ClassScopePtr cls = ar->getClassScope();
@@ -255,7 +255,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       TypePtr actualType = m_array->getActualType();
       if (actualType && actualType->is(Type::KindOfArray)) {
         isArray = true;
-        cg_printf("ArrayIter %s%d = ", Option::IterPrefix, iterId);
+        cg_printf("ArrayIterFe %s%d = ", Option::IterPrefix, iterId);
       } else {
         cg_printf("ArrayIterPtr %s%d = ", Option::IterPrefix, iterId);
       }
@@ -264,7 +264,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       m_array->setExpectedType(TypePtr());
       m_array->outputCPP(cg, ar);
       m_array->setExpectedType(expectedType);
-      cg_printf(".begin(");
+      cg_printf(".beginFe(");
       ClassScopePtr cls = ar->getClassScope();
       if (cls) {
         cg_printf("\"%s\"", cls->getName().c_str());

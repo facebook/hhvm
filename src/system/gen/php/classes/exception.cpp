@@ -4599,7 +4599,7 @@ String c_exception::t_gettraceasstring() {
     Variant map9 = t_gettrace();
     {
       StringBuffer tmp_sbuf_v_s(512);
-      for (ArrayIterPtr iter10 = map9.begin("exception"); !iter10->end(); iter10->next()) {
+      for (ArrayIterPtr iter10 = map9.beginFe("exception"); !iter10->end(); iter10->next()) {
         LOOP_COUNTER_CHECK(8);
         iter10->second(v_frame);
         {

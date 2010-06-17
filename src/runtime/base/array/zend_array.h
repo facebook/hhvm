@@ -109,6 +109,10 @@ public:
   virtual CVarRef currentRef();
   virtual CVarRef endRef();
 
+  virtual void setPosition(ssize_t p) {
+    m_pos = (p != ArrayData::invalid_index) ? p : 0;
+  }
+
   class Bucket {
   public:
     Bucket();

@@ -31,7 +31,7 @@ ForEachStatement::ForEachStatement(STATEMENT_ARGS, ExpressionPtr source,
 void ForEachStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
   Variant map(m_source->eval(env));
-  for (ArrayIterPtr iter = map.begin(env.currentContext()); !iter->end();
+  for (ArrayIterPtr iter = map.beginFe(env.currentContext()); !iter->end();
        iter->next()) {
     Variant &v = m_value->lval(env);
     v = iter->second();

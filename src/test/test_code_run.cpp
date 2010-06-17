@@ -8174,7 +8174,6 @@ bool TestCodeRun::TestEvalOrder() {
        "  $a['foo'] = new C;"
        "  $a['foo']['bar'] = new C;"
        "  $a['foo']['bar']['goo'] = f();"
-       "  $a[f2()]['bar']['goo'] .= f();"
        "}"
        "foo(new C);");
 

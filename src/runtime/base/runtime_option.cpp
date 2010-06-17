@@ -270,6 +270,7 @@ DefaultRuntimeOptionLoader DefaultRuntimeOptionLoader::Loader;
 ///////////////////////////////////////////////////////////////////////////////
 
 void RequestInjection::pauseAndExit() {
+  // NOTE: This is marked as __attribute__((noreturn)) in base/types.h
   // Signal sent, nothing can be trusted, don't do anything, as we might
   // write bad data, including calling exit handlers or destructors until the
   // signal handler (StackTrace) has had a chance to exit.

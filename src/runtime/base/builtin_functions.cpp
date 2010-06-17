@@ -242,8 +242,8 @@ void throw_infinite_recursion_exception() {
     throw UncatchableException("infinite recursion detected");
   }
 }
-void throw_request_timeout_exception(ThreadInfo *info) {
-  ASSERT(info);
+void throw_request_timeout_exception() {
+  ThreadInfo *info = ThreadInfo::s_threadInfo.get();
   RequestInjectionData &data = info->m_reqInjectionData;
   if (data.timeoutSeconds > 0) {
     ASSERT(data.timedout);
@@ -259,8 +259,10 @@ void throw_request_timeout_exception(ThreadInfo *info) {
   }
 }
 
-void throw_memory_exceeded_exception(ThreadInfo *info) {
-  ASSERT(info);
+void throw_memory_exceeded_exception() {
+  // NOTE: This is marked as __attribute__((noreturn))
+  // in base/types.h AND base/builtin_functions.h
+  ThreadInfo *info = ThreadInfo::s_threadInfo.get();
   RequestInjectionData &data = info->m_reqInjectionData;
   data.memExceeded = false;
   throw UncatchableException("request has exceeded memory limit");

@@ -606,10 +606,10 @@ void throw_invalid_argument(const char *fmt, ...);
 /**
  * Exceptions injected code throws
  */
-void throw_infinite_loop_exception();
-void throw_infinite_recursion_exception();
-void throw_request_timeout_exception(ThreadInfo *info);
-void throw_memory_exceeded_exception(ThreadInfo *info);
+void throw_infinite_loop_exception() __attribute__((cold));
+void throw_infinite_recursion_exception() __attribute__((cold));
+void throw_request_timeout_exception() __attribute__((cold));
+void throw_memory_exceeded_exception() __attribute__((cold, noreturn));
 
 /**
  * Cloning an object.

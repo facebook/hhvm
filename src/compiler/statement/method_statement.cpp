@@ -157,6 +157,9 @@ FunctionScopePtr MethodStatement::onParseImpl(AnalysisResultPtr ar) {
       } else if (m_name == "__call") {
         funcScope->setOverriding(Type::Variant, Type::String, Type::Array);
         paramCount = 2;
+      } else if (m_name == "__callstatic") {
+        funcScope->setOverriding(Type::Variant, Type::String, Type::Array);
+        paramCount = 2;
       } else if (m_name == "__set") {
         funcScope->setOverriding(Type::Variant, Type::String, Type::Variant);
         paramCount = 2;
@@ -226,6 +229,8 @@ void MethodStatement::onParse(AnalysisResultPtr ar) {
 
   if (m_name == "__call") {
     classScope->setAttribute(ClassScope::HasUnknownMethodHandler);
+  } else if(m_name == "__callstatic") {
+    classScope->setAttribute(ClassScope::HasUnknownStaticMethodHandler);
   } else if (m_name == "__get") {
     classScope->setAttribute(ClassScope::HasUnknownPropHandler);
   }

@@ -159,6 +159,8 @@ extern StaticString literalStrings[];
 
 extern unsigned int *getRTTICounter(int id);
 
+extern const ObjectStaticCallbacks * get_object_static_callbacks(const char *s);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

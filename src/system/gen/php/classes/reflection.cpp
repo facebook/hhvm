@@ -532,6 +532,7 @@ struct ObjectStaticCallbacks cw_reflectionfunctionabstract = {
   c_reflectionfunctionabstract::os_lval,
   c_reflectionfunctionabstract::os_invoke,
   c_reflectionfunctionabstract::os_constant,
+  c_reflectionfunctionabstract::doCallStatic
 };
 void c_reflectionfunctionabstract::init() {
   m_info = null;
@@ -1969,6 +1970,7 @@ struct ObjectStaticCallbacks cw_reflectionobject = {
   c_reflectionobject::os_lval,
   c_reflectionobject::os_invoke,
   c_reflectionobject::os_constant,
+  c_reflectionobject::doCallStatic
 };
 void c_reflectionobject::init() {
   c_reflectionclass::init();
@@ -2379,6 +2381,7 @@ struct ObjectStaticCallbacks cw_reflectionexception = {
   c_reflectionexception::os_lval,
   c_reflectionexception::os_invoke,
   c_reflectionexception::os_constant,
+  c_reflectionexception::doCallStatic
 };
 void c_reflectionexception::init() {
   c_exception::init();
@@ -3900,6 +3903,7 @@ struct ObjectStaticCallbacks cw_reflectionclass = {
   c_reflectionclass::os_lval,
   c_reflectionclass::os_invoke,
   c_reflectionclass::os_constant,
+  c_reflectionclass::doCallStatic
 };
 void c_reflectionclass::init() {
   m_name = null;
@@ -5158,6 +5162,7 @@ struct ObjectStaticCallbacks cw_reflectionextension = {
   c_reflectionextension::os_lval,
   c_reflectionextension::os_invoke,
   c_reflectionextension::os_constant,
+  c_reflectionextension::doCallStatic
 };
 void c_reflectionextension::init() {
   m_name = null;
@@ -6319,6 +6324,7 @@ struct ObjectStaticCallbacks cw_reflectionmethod = {
   c_reflectionmethod::os_lval,
   c_reflectionmethod::os_invoke,
   c_reflectionmethod::os_constant,
+  c_reflectionmethod::doCallStatic
 };
 void c_reflectionmethod::init() {
   c_reflectionfunctionabstract::init();
@@ -7220,6 +7226,7 @@ struct ObjectStaticCallbacks cw_reflectionproperty = {
   c_reflectionproperty::os_lval,
   c_reflectionproperty::os_invoke,
   c_reflectionproperty::os_constant,
+  c_reflectionproperty::doCallStatic
 };
 void c_reflectionproperty::init() {
   m_info = null;
@@ -8084,6 +8091,7 @@ struct ObjectStaticCallbacks cw_reflectionfunction = {
   c_reflectionfunction::os_lval,
   c_reflectionfunction::os_invoke,
   c_reflectionfunction::os_constant,
+  c_reflectionfunction::doCallStatic
 };
 void c_reflectionfunction::init() {
   c_reflectionfunctionabstract::init();
@@ -8765,6 +8773,7 @@ struct ObjectStaticCallbacks cw_reflectionparameter = {
   c_reflectionparameter::os_lval,
   c_reflectionparameter::os_invoke,
   c_reflectionparameter::os_constant,
+  c_reflectionparameter::doCallStatic
 };
 void c_reflectionparameter::init() {
   m_info = null;

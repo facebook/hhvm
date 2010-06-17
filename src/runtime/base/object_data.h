@@ -205,6 +205,8 @@ class ObjectData : public Countable {
 
   virtual Variant doGet(Variant v_name, bool error);
 
+  static Variant doCallStatic(Variant v_name, Variant v_arguments);
+
   // magic methods
   // __construct is handled in a special way
   virtual Variant t___destruct();
@@ -272,6 +274,7 @@ struct ObjectStaticCallbacks {
   Variant (*os_invoke)(const char *c, const char *s,
                            CArrRef params, int64 hash, bool fatal);
   Variant (*os_constant)(const char *s);
+  Variant (*doCallStatic)(Variant v_name, Variant v_arguments);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

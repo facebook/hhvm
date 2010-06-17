@@ -70,6 +70,8 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     if (f->getName() == "__construct") setAttribute(HasConstructor);
     else if (f->getName() == "__destruct") setAttribute(HasDestructor);
     else if (f->getName() == "__call") setAttribute(HasUnknownMethodHandler);
+    else if (f->getName() == "__callstatic")
+      setAttribute(HasUnknownStaticMethodHandler);
     else if (f->getName() == "__get") setAttribute(HasUnknownPropHandler);
     addFunction(ar, f);
   }
@@ -983,6 +985,32 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     cg_indentEnd("}\n");
   }
 
+  // doCallStatic
+  ClassScopePtr csparent = getParentScope(ar);
+  if (getAttribute(ClassScope::HasUnknownStaticMethodHandler) ||
+      (csparent && csparent->isRedeclaring())) {
+    cg_indentBegin("Variant %s%s::doCallStatic(Variant v_name, Variant "
+                   "v_arguments) {\n",
+                   Option::ClassPrefix, clsName);
+
+    if (getAttribute(ClassScope::HasUnknownStaticMethodHandler)) {
+
+      cg_printf("return t___callstatic(v_name, !v_arguments.isNull() ? "
+                "v_arguments : Variant(Array::Create()));\n");
+
+    } else {
+      string parentName = m_parent.empty() ? string("ObjectData") : m_parent;
+      string parent = string("g->") + Option::ClassStaticsObjectPrefix +
+        parentName + "->";
+
+      cg_printf("DECLARE_GLOBAL_VARIABLES(g);\n");
+      cg_printf("return %sdoCallStatic(v_name, v_arguments);\n",
+        parent.c_str());
+    }
+
+    cg_indentEnd("}\n");
+  }
+
   // doGet
   if (getAttribute(ClassScope::HasUnknownPropHandler)) {
     cg_indentBegin("Variant %s%s::doGet(Variant v_name, bool error) {\n",
@@ -1062,6 +1090,7 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
             Option::ObjectStaticPrefix);
   cg_printf("%s%s::%sconstant,\n", Option::ClassPrefix, id.c_str(),
             Option::ObjectStaticPrefix);
+  cg_printf("%s%s::doCallStatic\n", Option::ClassPrefix, id.c_str());
   cg_indentEnd("};\n");
 }
 

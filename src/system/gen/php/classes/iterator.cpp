@@ -918,6 +918,7 @@ struct ObjectStaticCallbacks cw_arrayiterator = {
   c_arrayiterator::os_lval,
   c_arrayiterator::os_invoke,
   c_arrayiterator::os_constant,
+  c_arrayiterator::doCallStatic
 };
 void c_arrayiterator::init() {
   m_arr = null;
@@ -1576,6 +1577,7 @@ struct ObjectStaticCallbacks cw_appenditerator = {
   c_appenditerator::os_lval,
   c_appenditerator::os_invoke,
   c_appenditerator::os_constant,
+  c_appenditerator::doCallStatic
 };
 void c_appenditerator::init() {
   m_iterators = null;
@@ -2923,6 +2925,7 @@ struct ObjectStaticCallbacks cw_recursivedirectoryiterator = {
   c_recursivedirectoryiterator::os_lval,
   c_recursivedirectoryiterator::os_invoke,
   c_recursivedirectoryiterator::os_constant,
+  c_recursivedirectoryiterator::doCallStatic
 };
 void c_recursivedirectoryiterator::init() {
   c_directoryiterator::init();
@@ -4104,6 +4107,7 @@ struct ObjectStaticCallbacks cw_directoryiterator = {
   c_directoryiterator::os_lval,
   c_directoryiterator::os_invoke,
   c_directoryiterator::os_constant,
+  c_directoryiterator::doCallStatic
 };
 void c_directoryiterator::init() {
   c_splfileinfo::init();
@@ -4562,6 +4566,7 @@ struct ObjectStaticCallbacks cw_recursiveiteratoriterator = {
   c_recursiveiteratoriterator::os_lval,
   c_recursiveiteratoriterator::os_invoke,
   c_recursiveiteratoriterator::os_constant,
+  c_recursiveiteratoriterator::doCallStatic
 };
 void c_recursiveiteratoriterator::init() {
 }
@@ -4728,6 +4733,7 @@ struct ObjectStaticCallbacks cw_filteriterator = {
   c_filteriterator::os_lval,
   c_filteriterator::os_invoke,
   c_filteriterator::os_constant,
+  c_filteriterator::doCallStatic
 };
 void c_filteriterator::init() {
 }

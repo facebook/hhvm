@@ -562,6 +562,7 @@ struct ObjectStaticCallbacks cw_pear_error = {
   c_pear_error::os_lval,
   c_pear_error::os_invoke,
   c_pear_error::os_constant,
+  c_pear_error::doCallStatic
 };
 void c_pear_error::init() {
 }

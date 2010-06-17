@@ -56,7 +56,8 @@ public:
     System = 8,
     Extension = 16,
     classNameConstructor = 32,
-    HasUnknownPropHandler = 64
+    HasUnknownPropHandler = 64,
+    HasUnknownStaticMethodHandler = 128
   };
   enum Modifier {
     Public = 1,

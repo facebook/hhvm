@@ -3408,6 +3408,20 @@ bool TestCodeRun::TestObjectMagicMethod() {
        "var_dump($a,$b);");
 #endif
 
+  MVCR("<?php\n"
+       "class A {\n"
+       "  var $a;\n"
+       "  function __set($n, $v) { $this->a[$n] = $v; }\n"
+       "  function __get($n) { return $this->a[$n]; }\n"
+       "  function f() { $this->f = 100; $this->f += 100; }\n"
+       "}\n"
+       "function test() {\n"
+       "  $a = new A();\n"
+       "  $a->f();\n"
+       "  var_dump($a);\n"
+       "}\n"
+       "test();\n");
+
   return true;
 }
 

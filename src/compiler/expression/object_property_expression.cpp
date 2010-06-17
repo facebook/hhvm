@@ -302,10 +302,14 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
                                                     AnalysisResultPtr ar,
                                                     bool directVariant) {
   bool bThis = m_object->isThis();
+  bool useGetThis = false;
   if (bThis) {
     FunctionScopePtr func = ar->getFunctionScope();
     if (func && func->isStatic()) {
-      cg.printf("GET_THIS()->");
+      cg_printf("GET_THIS()->");
+    } else {
+      // in order for __set() and __get() to be called
+      useGetThis = true;
     }
   }
 
@@ -342,6 +346,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
           // cannot be declared as a class variable (var $val), $this->val
           // refers to a non-static class variable and has to use get/lval.
           uint64 hash = hash_string(propName);
+          if (useGetThis) cg_printf("const_cast<Object *>(&GET_THIS())->");
           cg_printf("%s(", func.c_str());
           int stringId = cg.checkLiteralString(propName, ar);
           if (stringId >= 0) {
@@ -372,6 +377,8 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
           m_object->outputCPP(cg, ar);
         }
         cg_printf(op);
+      } else {
+        if (useGetThis) cg_printf("const_cast<Object *>(&GET_THIS())->");
       }
       uint64 hash = hash_string(propName);
       cg_printf("%s(", func.c_str());
@@ -396,6 +403,8 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
         m_object->outputCPP(cg, ar);
       }
       cg_printf(op);
+    } else {
+      if (useGetThis) cg_printf("const_cast<Object *>(&GET_THIS())->");
     }
     cg_printf("%s(", func.c_str());
     m_property->outputCPP(cg, ar);

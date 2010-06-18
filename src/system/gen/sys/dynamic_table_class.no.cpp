@@ -13987,6 +13987,12 @@ Variant c_simplexmlelement::o_invoke(const char *s, CArrRef params, int64 hash, 
         return (t___get(params[0]));
       }
       break;
+    case 16:
+      HASH_GUARD(0x5CEFA5A265104D10LL, count) {
+        if (count > 0) return throw_toomany_arguments("count", 0, 1);
+        return (t_count());
+      }
+      break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
@@ -14132,6 +14138,12 @@ Variant c_simplexmlelement::o_invoke_few_args(const char *s, int64 hash, int cou
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
+      }
+      break;
+    case 16:
+      HASH_GUARD(0x5CEFA5A265104D10LL, count) {
+        if (count > 0) return throw_toomany_arguments("count", 0, 1);
+        return (t_count());
       }
       break;
     case 19:
@@ -14316,6 +14328,20 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
           (*it)->eval(env);
         }
         return (t___get(a0));
+      }
+      break;
+    case 16:
+      HASH_GUARD(0x5CEFA5A265104D10LL, count) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("count", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_count());
       }
       break;
     case 19:

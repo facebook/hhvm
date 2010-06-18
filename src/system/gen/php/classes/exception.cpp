@@ -3994,14 +3994,14 @@ void c_exception::t___construct(Variant v_message //  = ""
 
   (m_message = v_message);
   (m_code = v_code);
-  (o_lval("trace", 0x0253015494C8CE77LL) = x_debug_backtrace());
+  (const_cast<Object *>(&GET_THIS())->o_lval("trace", 0x0253015494C8CE77LL) = x_debug_backtrace());
   LOOP_COUNTER(1);
   {
-    while (!(empty(o_get("trace", 0x0253015494C8CE77LL, false)))) {
+    while (!(empty(const_cast<Object *>(&GET_THIS())->o_get("trace", 0x0253015494C8CE77LL, false)))) {
       LOOP_COUNTER_CHECK(1);
       {
         {
-          Variant tmp2((o_get("trace", 0x0253015494C8CE77LL).rvalAt(0LL, 0x77CFA1EEF01BCA90LL, true)));
+          Variant tmp2((const_cast<Object *>(&GET_THIS())->o_get("trace", 0x0253015494C8CE77LL).rvalAt(0LL, 0x77CFA1EEF01BCA90LL, true)));
           (v_top = tmp2);
         }
         {
@@ -4025,7 +4025,7 @@ void c_exception::t___construct(Variant v_message //  = ""
           }
         }
         {
-          const Variant &tmp7((x_array_shift(ref(lval(o_lval("trace", 0x0253015494C8CE77LL))))));
+          const Variant &tmp7((x_array_shift(ref(lval(const_cast<Object *>(&GET_THIS())->o_lval("trace", 0x0253015494C8CE77LL))))));
           (v_frame = tmp7);
         }
       }
@@ -4062,7 +4062,7 @@ Variant c_exception::t_getline() {
 /* SRC: classes/exception.php line 52 */
 Variant c_exception::t_gettrace() {
   INSTANCE_METHOD_INJECTION(Exception, Exception::getTrace);
-  return o_get("trace", 0x0253015494C8CE77LL);
+  return const_cast<Object *>(&GET_THIS())->o_get("trace", 0x0253015494C8CE77LL);
 } /* function */
 /* SRC: classes/exception.php line 57 */
 String c_exception::t_gettraceasstring() {
@@ -4086,24 +4086,26 @@ String c_exception::t_gettraceasstring() {
             continue;
           }
           {
-            tmp_sbuf_v_s.append("#", 1);
-            tmp_sbuf_v_s.append(toString(v_i));
-            tmp_sbuf_v_s.append(" ", 1);
-            tmp_sbuf_v_s.append(toString(v_frame.rvalAt("file", 0x08C19339767C0884LL, true, true)));
-            tmp_sbuf_v_s.append("(", 1);
-            tmp_sbuf_v_s.append(toString(v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true)));
-            tmp_sbuf_v_s.append("): ", 3);
-            Variant tmp11;
+            StringBuffer tmp11_buf;
+            tmp11_buf.append("#", 1);
+            tmp11_buf.append(toString(v_i));
+            tmp11_buf.append(" ", 1);
+            tmp11_buf.append(toString(v_frame.rvalAt("file", 0x08C19339767C0884LL, true, true)));
+            tmp11_buf.append("(", 1);
+            tmp11_buf.append(toString(v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true)));
+            tmp11_buf.append("): ", 3);
+            Variant tmp12;
             if (isset(v_frame, "class", 0x45397FE5C82CBD12LL, true)) {
-              String tmp12((toString(v_frame.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
-              tmp11 = (concat(tmp12, toString(v_frame.rvalAt("type", 0x508FC7C8724B760ALL, true, true))));
+              String tmp13((toString(v_frame.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
+              tmp12 = (concat(tmp13, toString(v_frame.rvalAt("type", 0x508FC7C8724B760ALL, true, true))));
             } else {
-              tmp11 = ("");
+              tmp12 = ("");
             }
-            tmp_sbuf_v_s.append(toString(tmp11));
-            tmp_sbuf_v_s.append(toString(v_frame.rvalAt("function", 0x736D912A52413931LL, true, true)));
-            tmp_sbuf_v_s.append("()\n", 3);
-            ;
+            tmp11_buf.append(toString(tmp12));
+            tmp11_buf.append(toString(v_frame.rvalAt("function", 0x736D912A52413931LL, true, true)));
+            tmp11_buf.append("()\n", 3);
+            CStrRef tmp11(tmp11_buf.detach());
+            tmp_sbuf_v_s.add(tmp11);
           }
           v_i++;
         }

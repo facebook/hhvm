@@ -32,7 +32,8 @@ f('libxml_disable_entity_loader', Boolean,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c('SimpleXMLElement', null, array('ArrayAccess', 'IteratorAggregate'),
+c('SimpleXMLElement', null,
+  array('ArrayAccess', 'IteratorAggregate', 'Countable'),
   array(
     m(PublicMethod, '__construct', NULL,
       array('data' => String,
@@ -50,6 +51,7 @@ c('SimpleXMLElement', null, array('ArrayAccess', 'IteratorAggregate'),
     m(PublicMethod, 'offsetUnset', NULL,
       array('index' => Variant)),
     m(PublicMethod, 'getIterator', Variant),
+    m(PublicMethod, 'count', Int64),
     m(PublicMethod, 'xpath', Variant,
       array('path' => String)),
     m(PublicMethod, 'registerXPathNamespace', Boolean,

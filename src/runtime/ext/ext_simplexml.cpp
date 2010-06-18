@@ -644,6 +644,9 @@ Variant &c_simplexmlelement::___lval(Variant v_name) {
 Variant c_simplexmlelement::t___get(Variant name) {
   INSTANCE_METHOD_INJECTION(simplexmlelement, simplexmlelement::__get);
   Variant ret = m_children[name];
+  if (ret.isArray()) {
+    ret = ret[0];
+  }
   if (ret.isObject()) {
     c_simplexmlelement *elem = ret.toObject().getTyped<c_simplexmlelement>();
     c_simplexmlelement *e = NEW(c_simplexmlelement)();
@@ -654,6 +657,9 @@ Variant c_simplexmlelement::t___get(Variant name) {
     e->m_is_text = elem->m_is_text;
     e->m_is_property = true;
     return e;
+  }
+  if (ret.isNull()) {
+    return NEW(c_simplexmlelement)();
   }
   return ret;
 }
@@ -785,6 +791,21 @@ Variant c_simplexmlelement::t_getiterator() {
   return Object(iter);
 }
 
+int64 c_simplexmlelement::t_count() {
+  INSTANCE_METHOD_INJECTION(simplexmlelement, simplexmlelement::count);
+  if (m_is_attribute) {
+    return m_attributes.size();
+  }
+  if (m_is_property) {
+    int64 n = 0; Variant var(this);
+    for (ArrayIterPtr iter = var.begin(); !iter->end(); iter->next()) {
+      ++n;
+    }
+    return n;
+  }
+  return m_children.size();
+}
+
 Variant c_simplexmlelement::t___destruct() {
   INSTANCE_METHOD_INJECTION(simplexmlelement, simplexmlelement::__destruct);
   return null;
@@ -795,17 +816,26 @@ Variant c_simplexmlelement::t___destruct() {
 
 bool c_simplexmlelement::t_offsetexists(CVarRef index) {
   INSTANCE_METHOD_INJECTION(simplexmlelement, simplexmlelement::offsetexists);
-  if (index.isInteger() && index.toInt64() == 0) {
-    return m_children.exists(index);
+  if (index.isInteger()) {
+    int64 n = 0; int64 nIndex = index.toInt64(); Variant var(this);
+    for (ArrayIterPtr iter = var.begin(); !iter->end(); iter->next()) {
+      if (n++ == nIndex) {
+        return true;
+      }
+    }
+    return false;
   }
   return m_attributes.exists(index);
 }
 
 Variant c_simplexmlelement::t_offsetget(CVarRef index) {
   INSTANCE_METHOD_INJECTION(simplexmlelement, simplexmlelement::offsetget);
-  if (index.isInteger() && index.toInt64() == 0) {
-    if (m_children.exists(index)) {
-      return m_children[index];
+  if (index.isInteger()) {
+    int64 n = 0; int64 nIndex = index.toInt64(); Variant var(this);
+    for (ArrayIterPtr iter = var.begin(); !iter->end(); iter->next()) {
+      if (n++ == nIndex) {
+        return iter->second();
+      }
     }
     return this;
   }
@@ -814,8 +844,8 @@ Variant c_simplexmlelement::t_offsetget(CVarRef index) {
 
 void c_simplexmlelement::t_offsetset(CVarRef index, CVarRef newvalue) {
   INSTANCE_METHOD_INJECTION(simplexmlelement, simplexmlelement::offsetset);
-  if (index.isInteger() && index.toInt64() == 0) {
-    m_children.set(index, newvalue);
+  if (index.isInteger()) {
+    raise_error("unable to replace a SimpleXMLElement node");
     return;
   }
   m_attributes.set(index, newvalue);
@@ -823,8 +853,8 @@ void c_simplexmlelement::t_offsetset(CVarRef index, CVarRef newvalue) {
 
 void c_simplexmlelement::t_offsetunset(CVarRef index) {
   INSTANCE_METHOD_INJECTION(simplexmlelement, simplexmlelement::offsetunset);
-  if (index.isInteger() && index.toInt64() == 0) {
-    m_children.remove(index);
+  if (index.isInteger()) {
+    raise_error("unable to remove a SimpleXMLElement node");
     return;
   }
   m_attributes.remove(index);

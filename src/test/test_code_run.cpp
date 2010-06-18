@@ -9954,6 +9954,18 @@ bool TestCodeRun::TestSimpleXML() {
   MVCR("<?php $a = simplexml_load_string('<?xml version=\"1.0\" encoding=\"utf-8\"?><?mso-application progid=\"Excel.Sheet\"?><node><subnode><subsubnode>test</subsubnode></subnode></node>');"
       "var_dump((string)($a->subnode->subsubnode[0]));"
       );
+
+  MVCR("<?php\n"
+       "$xml = '<?xml version=\"1.0\" encoding=\"UTF-8\"?><response><t a=\"apple\" b=\"banana\">6</t><t>7</t><t>8</t></response>';\n"
+       "$sxml = simplexml_load_string($xml);\n"
+       "var_dump(count($sxml->t));\n"
+       "var_dump((string)$sxml->t[0]);\n"
+       "var_dump((string)$sxml->t[1]);\n"
+       "var_dump((string)$sxml->t[2]);\n"
+       "var_dump(count($sxml->t->bogus));\n"
+       "var_dump(count($sxml->t->attributes()));\n"
+       "foreach ($sxml->bogus as $v) {}");
+
   return true;
 }
 

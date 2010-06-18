@@ -1319,6 +1319,10 @@ bool TestCodeRun::TestArray() {
       "unset($array['1'][2]);"
       "var_dump($array['1']);");
 
+  MVCR("<?php "
+      "$x['1'] += 1;"
+      "var_dump($x);");
+
   return true;
 }
 

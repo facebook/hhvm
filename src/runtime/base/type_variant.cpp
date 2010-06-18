@@ -2487,7 +2487,8 @@ check_array:                                                            \
     Variant *cv = NULL;                                                 \
     ASSERT(!v.isContagious());                                          \
     ArrayData *escalated =                                              \
-      m_data.parr->lval(key, cv, (m_data.parr->getCount() > 1), prehash); \
+      m_data.parr->lval(ToKey(key), cv, (m_data.parr->getCount() > 1),  \
+          prehash);                                                     \
     if (escalated) {                                                    \
       set(escalated);                                                   \
     }                                                                   \

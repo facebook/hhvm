@@ -281,7 +281,11 @@ endif
 
 ifdef RELEASE
 CPPFLAGS += -DRELEASE
+ifdef WWW_INTERN
+OPT = -Os
+else
 OPT = -O3
+endif
 endif
 
 ifdef INFINITE_LOOP_DETECTION

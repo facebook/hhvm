@@ -229,8 +229,6 @@ const char *CodeGenerator::getGlobals(AnalysisResultPtr ar) {
 }
 
 std::string CodeGenerator::formatLabel(const std::string &name) {
-  ASSERT(name.find(Option::IdPrefix) == string::npos);
-
   string ret;
   ret.reserve(name.size());
   for (size_t i = 0; i < name.size(); i++) {

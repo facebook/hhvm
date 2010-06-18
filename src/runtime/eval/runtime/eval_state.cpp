@@ -284,11 +284,13 @@ bool RequestEvalState::includeFile(Variant &res, CStrRef path, bool once,
     if (rpath && rpath != spath) {
       it = self->m_evaledFiles.find(rpath);
       if (it != self->m_evaledFiles.end()) {
+        self->m_evaledFiles[spath] = efile = it->second;
+        efile->incRef();
         if (once) {
+          free(rpath);
           res = true;
           return true;
         }
-        self->m_evaledFiles[spath] = efile = it->second;
       }
     } else {
       free(rpath);

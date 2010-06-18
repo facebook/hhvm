@@ -249,21 +249,21 @@ Array ObjectData::o_toIterArray(const char *context,
     contextClassInfo->getAllProperties(contextProperties);
   }
   Array dynamics = o_getDynamicProperties();
-  for (ClassInfo::PropertyVec::const_iterator iter = properties.begin();
-       iter != properties.end(); ++iter) {
-    if ((*iter)->attribute & ClassInfo::IsStatic) continue;
+  for (unsigned int i = 0; i < properties.size(); i++) {
+    ClassInfo::PropertyInfo *prop = properties[i];
+    if (prop->attribute & ClassInfo::IsStatic) continue;
 
     bool visible = false;
     switch (category) {
     case 1:
-      visible = ((*iter)->attribute & ClassInfo::IsPublic);
+      visible = (prop->attribute & ClassInfo::IsPublic);
       break;
     case 2:
-      if (((*iter)->attribute & ClassInfo::IsPrivate) == 0) {
+      if ((prop->attribute & ClassInfo::IsPrivate) == 0) {
         visible = true;
       } else {
         ClassInfo::PropertyMap::const_iterator iterProp =
-          contextProperties.find((*iter)->name);
+          contextProperties.find(prop->name);
         if (iterProp != contextProperties.end() &&
             iterProp->second->owner == contextClassInfo) {
           visible = true;
@@ -273,25 +273,25 @@ Array ObjectData::o_toIterArray(const char *context,
       }
       break;
     case 3:
-      if (((*iter)->attribute & ClassInfo::IsPrivate) == 0 ||
-          (*iter)->owner == classInfo) {
+      if ((prop->attribute & ClassInfo::IsPrivate) == 0 ||
+          prop->owner == classInfo) {
         visible = true;
       }
       break;
     default:
       ASSERT(false);
     }
-    if (visible) {
+    if (visible && o_exists(prop->name, -1, context)) {
       if (getRef) {
-        Variant &ov = o_lval((*iter)->name, -1, context);
-        Variant &av = ret.lvalAt((*iter)->name, -1, false, true);
+        Variant &ov = o_lval(prop->name, -1, context);
+        Variant &av = ret.lvalAt(prop->name, -1, false, true);
         av = ref(ov);
       } else {
-        ret.set((*iter)->name, o_getUnchecked((*iter)->name, -1,
-                (*iter)->owner->getName()));
+        ret.set(prop->name, o_getUnchecked(prop->name, -1,
+                prop->owner->getName()));
       }
     }
-    dynamics.remove((*iter)->name);
+    dynamics.remove(prop->name);
   }
   if (dynamics.size()) {
     if (getRef) {

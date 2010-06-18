@@ -2649,6 +2649,7 @@ CVarRef Variant::append(CVarRef v) {
     {
       Array params = CREATE_VECTOR2(null, v);
       m_data.pobj->o_invoke("offsetset", params, -1);
+      break;
     }
   case LiteralString:
   case KindOfStaticString:

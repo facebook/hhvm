@@ -229,12 +229,16 @@ bool Expression::CheckNeeded(AnalysisResultPtr ar,
   TypePtr type = value ? value->getType() : TypePtr();
   if (value && value->isScalar()) needed = false;
   if (type && type->isNoObjectInvolved()) needed = false;
-  if (needed && variable->is(Expression::KindOfSimpleVariable)) {
+  if (variable->is(Expression::KindOfSimpleVariable)) {
     SimpleVariablePtr var =
       dynamic_pointer_cast<SimpleVariable>(variable);
     const std::string &name = var->getName();
     VariableTablePtr variables = ar->getScope()->getVariables();
-    variables->addNeeded(name);
+    if (needed) {
+      variables->addNeeded(name);
+    } else {
+      needed = variables->isNeeded(name);
+    }
   }
   return needed;
 }

@@ -146,14 +146,20 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultPtr ar) {
         if (value->is(Expression::KindOfScalarExpression)) {
           ScalarExpressionPtr exp =
             dynamic_pointer_cast<ScalarExpression>(Clone(value));
+          bool annotate = Option::FlAnnotate;
+          Option::FlAnnotate = false; // avoid nested comments on getText
           exp->setComment(getText());
+          Option::FlAnnotate = annotate;
           exp->setLocation(getLocation());
           return exp;
         } else if (value->is(Expression::KindOfConstantExpression)) {
           // inline the value
           ConstantExpressionPtr exp =
             dynamic_pointer_cast<ConstantExpression>(Clone(value));
+          bool annotate = Option::FlAnnotate;
+          Option::FlAnnotate = false; // avoid nested comments on getText
           exp->setComment(getText());
+          Option::FlAnnotate = annotate;
           exp->setLocation(getLocation());
           return exp;
         }

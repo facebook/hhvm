@@ -791,7 +791,8 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
   }
 
   stringstream callss;
-  callss << retrn << (m_refReturn ? "ref(" : "(") << funcPrefix << name << "(";
+  callss << retrn << (m_refReturn ? "ref(" : "(") << funcPrefix <<
+    cg.formatLabel(name) << "(";
   if (extraArg) {
     callss << extraArg;
     if (variable) {
@@ -916,7 +917,7 @@ void FunctionScope::outputCPPEvalInvoke(CodeGenerator &cg,
   bool variable = isVariableArgument();
   stringstream callss;
   callss << retrn << ((ret && m_refReturn) ? "ref(" : "(") << funcPrefix <<
-    name << "(";
+    cg.formatLabel(name) << "(";
   if (extraArg) {
     callss << extraArg;
     if (variable) {

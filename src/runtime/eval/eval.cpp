@@ -38,36 +38,15 @@ Variant eval(LVariableTable *vars, CObjRef self, CStrRef code_str,
   String code_str2 = prepend_php ? concat("<?php ", code_str) : code_str;
   Eval::StatementPtr s = Eval::Parser::parseString(code_str2.data(), statics);
   Block blk(statics);
-  StatementListStatementPtr sl = s->cast<StatementListStatement>();
-  if (sl) {
-    const std::vector<Eval::StatementPtr> &stmts = sl->stmts();
-    std::vector<Eval::ClassStatementPtr> cls;
-    std::vector<Eval::FunctionStatementPtr> funcs;
-    for (std::vector<Eval::StatementPtr>::const_iterator it = stmts.begin();
-         it != stmts.end(); ++it) {
-      Eval::ClassStatementPtr cl = (*it)->cast<Eval::ClassStatement>();
-      if (cl) {
-        cls.push_back(cl);
-      } else {
-        Eval::FunctionStatementPtr fn = (*it)->cast<Eval::FunctionStatement>();
-        if (fn) {
-          funcs.push_back(fn);
-        } else {
-          // Classes and funcs are all at the start
-          break;
-        }
-      }
-    }
-    if (cls.size() > 0 || funcs.size() > 0) {
-      // install string code container to globals
-      StringCodeContainer *scc =
-        new StringCodeContainer(cls, funcs);
-      RequestEvalState::addCodeContainer(scc);
-    }
-  }
+  // install string code container to globals
+  StringCodeContainer *scc = new StringCodeContainer(s);
+  RequestEvalState::addCodeContainer(scc);
   // todo: pass in params
   NestedVariableEnvironment env(vars, blk, Array(), self);
   s->eval(env);
+  if (env.isReturning()) {
+    return env.getRet();
+  }
   return true;
 }
 

@@ -29,6 +29,7 @@ namespace Eval {
 DECLARE_AST_PTR(ClassStatement);
 DECLARE_AST_PTR(FunctionStatement);
 DECLARE_AST_PTR(MethodStatement);
+DECLARE_AST_PTR(Statement);
 class PhpFile;
 class Function;
 class EvalObjectData;
@@ -73,23 +74,13 @@ private:
 class CodeContainer {
 public:
   virtual ~CodeContainer() {}
-  virtual void addDeclarations(hphp_const_char_imap<ClassEvalState>
-                               &classes,
-                               hphp_const_char_imap<const FunctionStatement*>
-                               &m_functions) = 0;
 };
 
 class StringCodeContainer : public CodeContainer {
 public:
-  StringCodeContainer(const std::vector<ClassStatementPtr> &classes,
-                      const std::vector<FunctionStatementPtr> &functions);
-  virtual void addDeclarations(hphp_const_char_imap<ClassEvalState>
-                               &classes,
-                               hphp_const_char_imap<const FunctionStatement*>
-                               &functions);
+  StringCodeContainer(StatementPtr s);
 private:
-  std::vector<ClassStatementPtr> m_classes;
-  std::vector<FunctionStatementPtr> m_functions;
+  StatementPtr m_s;
 };
 
  class ClassInfoEvaled : public ClassInfo {

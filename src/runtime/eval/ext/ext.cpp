@@ -221,11 +221,9 @@ Variant EvalCreateFunction::invokeImpl(VariableEnvironment &env,
   FunctionStatementPtr f = bodyAst->cast<StatementListStatement>()->stmts()[0];
   ASSERT(f);
   f->changeName(nameStream.str());
-  vector<FunctionStatementPtr> fs;
-  fs.push_back(f);
-  vector<ClassStatementPtr> cls;
-  StringCodeContainer *cc = new StringCodeContainer(cls, fs);
+  StringCodeContainer *cc = new StringCodeContainer(bodyAst);
   RequestEvalState::addCodeContainer(cc);
+  RequestEvalState::declareFunction(f.get());
   f->eval(env);
   return String(f->name().c_str(), f->name().size(), AttachLiteral);
 }

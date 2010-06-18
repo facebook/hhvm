@@ -34,23 +34,7 @@ namespace Eval {
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
-StringCodeContainer::StringCodeContainer
-(const vector<ClassStatementPtr> &classes,
- const vector<FunctionStatementPtr> &functions)
-  : m_classes(classes), m_functions(functions) {}
-
-void StringCodeContainer::
-addDeclarations(hphp_const_char_imap<ClassEvalState> &classes,
-                hphp_const_char_imap<const FunctionStatement*> &functions) {
-  for (vector<ClassStatementPtr>::const_iterator it = m_classes.begin();
-       it != m_classes.end(); ++it) {
-    classes[(*it)->lname().c_str()].init(it->get());
-  }
-  for (vector<FunctionStatementPtr>::const_iterator it = m_functions.begin();
-       it != m_functions.end(); ++it) {
-    functions[(*it)->lname().c_str()] = it->get();
-  }
-}
+StringCodeContainer::StringCodeContainer(StatementPtr s) : m_s(s) {}
 
 void ClassEvalState::init(const ClassStatement *cls) {
   m_class = cls;
@@ -141,7 +125,6 @@ void RequestEvalState::destructObjects() {
 void RequestEvalState::addCodeContainer(CodeContainer *cc) {
   RequestEvalState *self = s_res.get();
   self->m_codeContainers.push_back(cc);
-  cc->addDeclarations(self->m_classes, self->m_functions);
 }
 
 ClassEvalState &RequestEvalState::declareClass(const ClassStatement *cls) {

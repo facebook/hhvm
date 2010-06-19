@@ -102,6 +102,11 @@ TypePtr SimpleVariable::inferTypes(AnalysisResultPtr ar, TypePtr type,
   return TypePtr();
 }
 
+bool SimpleVariable::checkUnused(AnalysisResultPtr ar) const {
+  VariableTablePtr variables = ar->getScope()->getVariables();
+  return !m_superGlobal && variables->checkUnused(m_name);
+}
+
 TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                       bool coerce) {
   TypePtr ret;

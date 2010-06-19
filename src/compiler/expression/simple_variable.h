@@ -39,6 +39,7 @@ public:
   const std::string &getName() const { return m_name;}
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                       int state);
+  bool checkUnused(AnalysisResultPtr) const;
 private:
   std::string m_name;
   std::string m_text;

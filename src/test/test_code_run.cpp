@@ -5810,16 +5810,23 @@ bool TestCodeRun::TestInvalidArgument() {
 
 bool TestCodeRun::TestSuperGlobals() {
   MVCR("<?php function foo() { "
-      "file_get_contents('http://example.com');"
-      "var_dump(empty($http_response_header));"
-      "} foo();");
+       "file_get_contents('http://example.com');"
+       "var_dump(empty($http_response_header));"
+       "} foo();");
   MVCR("<?php "
-      "function test() {"
-      "  unset($GLOBALS['_SERVER']);"
-      "  $GLOBALS['_SERVER']['foo'] = 'bar';"
-      "  var_dump($_SERVER['foo']);"
-      "  }"
-      "test();");
+       "function test() {"
+       "  unset($GLOBALS['_SERVER']);"
+       "  $GLOBALS['_SERVER']['foo'] = 'bar';"
+       "  var_dump($_SERVER['foo']);"
+       "  }"
+       "test();");
+  MVCR("<?php ;"
+       "function test() {"
+       "  $_POST = array('HELLO' => 1);"
+       "}"
+       "test();"
+       "var_dump($_POST);");
+
   return true;
 }
 

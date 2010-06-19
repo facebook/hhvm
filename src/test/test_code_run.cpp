@@ -7405,6 +7405,26 @@ bool TestCodeRun::TestRedeclaredFunctions() {
 }
 
 bool TestCodeRun::TestRedeclaredClasses() {
+  MVCR(
+    "<?php\n"
+    "$b = 123;\n"
+    "if ($b) {\n"
+    "  class Exception1 extends Exception {}\n"
+    "} else {\n"
+    "  class Exception1 extends Exception {}\n"
+    "}\n"
+    "class Exception2 extends Exception1 {}\n"
+    "\n"
+    "function foo() {\n"
+    "  try {\n"
+    "    throw new Exception2();\n"
+    "  } catch (Exception $e) {\n"
+    "    var_dump($e->getCode());\n"
+    "  }\n"
+    "}\n"
+    "foo();\n"
+  );
+
   MVCR("<?php "
       "class base1 {}"
       "class base2 {}"

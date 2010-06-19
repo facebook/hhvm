@@ -102,17 +102,15 @@ void CatchStatement::inferTypes(AnalysisResultPtr ar) {
   ClassScopePtr cls = ar->findClass(m_className);
   TypePtr type;
   m_valid = cls;
-  if (!m_valid) {
-    if (ar->isFirstPass()) {
-      ConstructPtr self = shared_from_this();
-      ar->getCodeError()->record(self, CodeError::UnknownClass, self);
-    }
-    type = NEW_TYPE(Object);
-  } else if (cls->isRedeclaring()) {
-    type = NEW_TYPE(Object);
-  } else {
-    type = Type::CreateObjectType(m_className);
+  if (!m_valid && ar->isFirstPass()) {
+    ConstructPtr self = shared_from_this();
+    ar->getCodeError()->record(self, CodeError::UnknownClass, self);
   }
+
+  // This can never be a specific exception type, because a future exception
+  // class may be re-declaring, then generated code like this won't work with
+  // DynamicObjectData: p_exception v_e = e;
+  type = NEW_TYPE(Object);
 
   BlockScopePtr scope = ar->getScope();
   VariableTablePtr variables = scope->getVariables();

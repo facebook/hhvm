@@ -340,7 +340,13 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
   setReferenced(false);
   switch (m_type) {
   case PrintR:
-    m_buf->append("*RECURSION*");
+    if (!m_objClass.empty()) {
+      m_buf->append(m_objClass);
+      m_buf->append(" Object\n");
+    } else {
+      m_buf->append("Array\n");
+    }
+    m_buf->append(" *RECURSION*");
     break;
   case VarExport:
     throw NestingLevelTooDeepException();
@@ -702,7 +708,7 @@ void VariableSerializer::indent() {
     m_buf->append(' ');
   }
   if (m_referenced) {
-    if (m_indent > 0) m_buf->append('&');
+    if (m_indent > 0 && m_type == VarDump) m_buf->append('&');
     m_referenced = false;
   }
 }

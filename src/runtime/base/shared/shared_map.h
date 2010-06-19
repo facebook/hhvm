@@ -143,7 +143,7 @@ private:
 
   Variant getLocal(SharedVariant *sv) const {
     ASSERT(sv);
-    if (!sv->hasObject()) return sv->toLocal();
+    if (!sv->shouldCache()) return sv->toLocal();
     int64 key = (int64)sv;
     key = ((key & 0xfll) << 60) | (key >> 4);
     if (m_localCache.exists(key)) {

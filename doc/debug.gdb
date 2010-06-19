@@ -7,6 +7,7 @@
   set detach-on-fork off
   handle SIGPIPE nostop noprint pass
   dump binary memory [filename] [start_addr] [end_addr]
+  symbol-file [un-stripped binary OR symbol file from strip]
 
 =  b main.no.cpp:55
 

@@ -32,7 +32,7 @@ class SharedVariant
 #endif
 {
 public:
-  SharedVariant() : m_ref(1), m_hasObject(false) {}
+  SharedVariant() : m_ref(1), m_shouldCache(false), m_serializedArray(false) {}
   virtual ~SharedVariant() {}
 
   bool is(DataType d) const {
@@ -64,11 +64,13 @@ public:
   int countReachable();
 
   // whether it is an object, or an array that recursively contains an object
-  bool hasObject() { return m_hasObject; }
+  // or an array with circular reference
+  bool shouldCache() { return m_shouldCache; }
 
  protected:
   int m_ref;
-  bool m_hasObject;
+  bool m_shouldCache;
+  bool m_serializedArray;
   DataType m_type;
 };
 

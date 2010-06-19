@@ -77,6 +77,20 @@ ProcessSharedVariant::ProcessSharedVariant(CVarRef source,
     {
       ASSERT(lock);
       m_type = KindOfArray;
+
+      ArrayData *arr = source.getArrayData();
+      PointerSet seen;
+      if (arr->hasInternalReference(seen)) {
+        m_serializedArray = true;
+        m_shouldCache = true;
+        String s = f_serialize(source);
+        m_data.str = putPtr(SharedMemoryManager::GetSegment()
+                            ->construct<SharedMemoryString>
+                            (boost::interprocess::anonymous_instance)
+                            (s.data(), s.size()));
+        break;
+      }
+
       uint i = 0;
       ProcessSharedVariantMapData* mapData = SharedMemoryManager::GetSegment()
         ->construct<ProcessSharedVariantMapData>
@@ -105,7 +119,7 @@ ProcessSharedVariant::ProcessSharedVariant(CVarRef source,
           ->construct<ProcessSharedVariant>
           (boost::interprocess::anonymous_instance)
           (it->second(), getLock());
-        if (val->hasObject()) m_hasObject = true;
+        if (val->shouldCache()) m_shouldCache = true;
         (*map)[key] = i++;
         keys->push_back(putPtr(key));
         vals->push_back(putPtr(val));
@@ -115,7 +129,7 @@ ProcessSharedVariant::ProcessSharedVariant(CVarRef source,
   default:
     {
       m_type = KindOfObject;
-      m_hasObject = true;
+      m_shouldCache = true;
       String s = f_serialize(source);
       m_data.str = putPtr(SharedMemoryManager::GetSegment()
                           ->construct<SharedMemoryString>
@@ -147,6 +161,10 @@ Variant ProcessSharedVariant::toLocal() {
     }
   case KindOfArray:
     {
+      if (m_serializedArray) {
+        return f_unserialize(String(m_data.str->data(), m_data.str->size(),
+                                    AttachLiteral));
+      }
       return NEW(SharedMap)(this);
     }
   default:
@@ -182,8 +200,13 @@ void ProcessSharedVariant::dump(std::string &out) {
     out += stringData();
     break;
   case KindOfArray:
-    incRef();
-    SharedMap(this).dump(out);
+    if (m_serializedArray) {
+      out += "array: ";
+      out += getString()->c_str();
+    } else {
+      incRef();
+      SharedMap(this).dump(out);
+    }
     break;
   default:
     out += "object: ";
@@ -205,6 +228,13 @@ ProcessSharedVariant::~ProcessSharedVariant() {
     break;
   case KindOfArray:
     {
+      if (m_serializedArray) {
+        if (getLock()) {
+          SharedMemoryManager::GetSegment()->destroy_ptr(getString());
+        }
+        break;
+      }
+
       ASSERT(getLock());
       BOOST_FOREACH(SharedVariant* v, keys()) {
         getPtr(v)->decRef();

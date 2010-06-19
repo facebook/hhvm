@@ -263,6 +263,36 @@ void ArrayData::serialize(VariableSerializer *serializer) const {
   serializer->decNestedLevel((void*)this);
 }
 
+bool ArrayData::hasInternalReference(PointerSet &vars) const {
+  if (supportValueRef()) {
+    for (ArrayIter iter(this); iter; ++iter) {
+      CVarRef var = iter.secondRef();
+      if (var.isReferenced()) {
+        Variant *pvar = var.getVariantData();
+        if (vars.find(pvar) != vars.end()) {
+          return true;
+        }
+        vars.insert(pvar);
+      }
+      if (var.isObject()) {
+        ObjectData *pobj = var.getObjectData();
+        if (vars.find(pobj) != vars.end()) {
+          return true;
+        }
+        vars.insert(pobj);
+
+        if (pobj->o_toArray().get()->hasInternalReference(vars)) {
+          return true;
+        }
+      } else if (var.isArray() &&
+                 var.getArrayData()->hasInternalReference(vars)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 void ArrayData::dump() {
   string out; dump(out); printf("%s", out.c_str());
 }

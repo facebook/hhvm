@@ -96,6 +96,12 @@ class ArrayData : public Countable {
   virtual bool supportValueRef() const { return false;}
 
   /**
+   * Whether or not this array has a referenced Variant or Object appearing
+   * twice. This is mainly for APC to decide whether to serialize an array.
+   */
+  bool hasInternalReference(PointerSet &seen) const;
+
+  /**
    * Position-based iterations.
    */
   virtual Variant reset();

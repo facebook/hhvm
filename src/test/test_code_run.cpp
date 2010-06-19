@@ -474,6 +474,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestExtIterator);
   RUN_TEST(TestExtSoap);
   RUN_TEST(TestFiber);
+  RUN_TEST(TestAPC);
 
   // PHP 5.3 features
   RUN_TEST(TestVariableClassName);
@@ -11584,6 +11585,46 @@ bool TestCodeRun::TestFiber() {
         "int(123)\n"
         "int(234)\n"
        );
+
+  return true;
+}
+
+bool TestCodeRun::TestAPC() {
+  MVCR("<?php "
+       "$a = array();\n"
+       "$a[] =& $a;\n"
+       "print_r($a);\n"
+       "apc_store('table', $a);\n"
+      );
+
+  // PHP doesn't have APC for CLI mode, so have to use MVCRO
+  MVCRO("<?php "
+        "$a = array(1);\n"
+        "$a[] =& $a[0];\n"
+        "$a[0] = 2;\n"
+        "print_r($a);\n"
+        "\n"
+        "apc_store('table', $a);\n"
+        "$b = apc_fetch('table', $b);\n"
+        "print_r($b);\n"
+        "$b[0] = 3;\n"
+        "print_r($b);\n",
+        "Array\n"
+        "(\n"
+        "    [0] => 2\n"
+        "    [1] => 2\n"
+        ")\n"
+        "Array\n"
+        "(\n"
+        "    [0] => 2\n"
+        "    [1] => 2\n"
+        ")\n"
+        "Array\n"
+        "(\n"
+        "    [0] => 3\n"
+        "    [1] => 3\n"
+        ")\n"
+      );
 
   return true;
 }

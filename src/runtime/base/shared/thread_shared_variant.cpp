@@ -74,7 +74,18 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized)
   case KindOfArray:
     {
       m_type = KindOfArray;
-      size_t size = source.getArrayData()->size();
+
+      ArrayData *arr = source.getArrayData();
+      PointerSet seen;
+      if (arr->hasInternalReference(seen)) {
+        m_serializedArray = true;
+        m_shouldCache = true;
+        String s = f_serialize(source);
+        m_data.str = new StringData(s.data(), s.size(), CopyString);
+        break;
+      }
+
+      size_t size = arr->size();
       ThreadSharedVariantMapData* mapData = new ThreadSharedVariantMapData();
       ThreadSharedVariantToIntMap map;
       SharedVariant** keys = new SharedVariant*[size];
@@ -86,7 +97,7 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized)
           = createAnother(it->first(), false);
         ThreadSharedVariant* val
           = createAnother(it->second(), false);
-        if (val->hasObject()) m_hasObject = true;
+        if (val->shouldCache()) m_shouldCache = true;
         keys[i] = key;
         vals[i] = val;
         map[key] = i++;
@@ -100,7 +111,7 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized)
   default:
     {
       m_type = KindOfObject;
-      m_hasObject = true;
+      m_shouldCache = true;
       String s = f_serialize(source);
       m_data.str = new StringData(s.data(), s.size(), CopyString);
       break;
@@ -129,6 +140,10 @@ Variant ThreadSharedVariant::toLocal() {
     }
   case KindOfArray:
     {
+      if (m_serializedArray) {
+        return f_unserialize(String(m_data.str->data(), m_data.str->size(),
+                                    AttachLiteral));
+      }
       return NEW(SharedMap)(this);
     }
   default:
@@ -164,7 +179,12 @@ void ThreadSharedVariant::dump(std::string &out) {
     out += stringData();
     break;
   case KindOfArray:
-    SharedMap(this).dump(out);
+    if (m_serializedArray) {
+      out += "array: ";
+      out += m_data.str->data();
+    } else {
+      SharedMap(this).dump(out);
+    }
     break;
   default:
     out += "object: ";
@@ -184,6 +204,13 @@ ThreadSharedVariant::~ThreadSharedVariant() {
     break;
   case KindOfArray:
     {
+      if (m_serializedArray) {
+        if (m_owner) {
+          delete m_data.str;
+        }
+        break;
+      }
+
       ASSERT(m_owner);
       ThreadSharedVariantMapData* map = m_data.map;
       size_t size = map->map.size();

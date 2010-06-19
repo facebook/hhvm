@@ -1128,10 +1128,12 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
       }
     }
     if (forEval) {
-      func->outputCPPEvalInvoke(cg, ar, prefix, name, extra, true,
-          func->isConstructor(self));
+      func->outputCPPEvalInvoke(cg, ar, prefix,
+                                cg.formatLabel(name).c_str(), extra, true,
+                                func->isConstructor(self));
     } else {
-      func->outputCPPDynamicInvoke(cg, ar, prefix, name, false, fewArgs,
+      func->outputCPPDynamicInvoke(cg, ar, prefix,
+                                   cg.formatLabel(name).c_str(), false, fewArgs,
                                    true, extra, func->isConstructor(self));
     }
     cg_indentEnd("}\n");

@@ -1456,7 +1456,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
                            hash_string_i(name), name);
             FunctionScope::OutputCPPDynamicInvokeCount(cg);
             func->outputCPPDynamicInvoke(cg, ar, Option::BuiltinFunctionPrefix,
-                                         name);
+                                         cg.formatLabel(name).c_str());
             cg_indentEnd("}\n");
             cg_printf("return invoke_failed(s, params, hash, fatal);\n");
             cg_indentEnd("}\n");
@@ -1465,7 +1465,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
                            Option::InvokePrefix, name);
             FunctionScope::OutputCPPDynamicInvokeCount(cg);
             func->outputCPPDynamicInvoke(cg, ar, Option::BuiltinFunctionPrefix,
-                                         name);
+                                         cg.formatLabel(name).c_str());
             cg_indentEnd("}\n");
           }
         }

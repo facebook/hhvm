@@ -105,7 +105,8 @@ void FunctionContainer::outputCPPJumpTableSupport
           cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
                           hash_string_i(name), name);
           FunctionScope::OutputCPPDynamicInvokeCount(cg);
-          func->outputCPPDynamicInvoke(cg, ar, funcPrefix, name);
+          func->outputCPPDynamicInvoke(cg, ar, funcPrefix,
+                                       cg.formatLabel(name).c_str());
           cg_indentEnd("}\n");
           cg_printf("return invoke_builtin(s, params, hash, fatal);\n");
           cg_indentEnd("}\n");
@@ -118,7 +119,8 @@ void FunctionContainer::outputCPPJumpTableSupport
         cg_printf("FUNCTION_INJECTION(%s);\n", name);
       }
       FunctionScope::OutputCPPDynamicInvokeCount(cg);
-      func->outputCPPDynamicInvoke(cg, ar, funcPrefix, name);
+      func->outputCPPDynamicInvoke(cg, ar, funcPrefix,
+                                   cg.formatLabel(name).c_str());
       cg_indentEnd("}\n");
     } else {
       hasRedeclared = true;
@@ -174,7 +176,8 @@ void FunctionContainer::outputCPPJumpTableEvalSupport
       cg_indentBegin("Variant %s%s(Eval::VariableEnvironment &env, "
                      "const Eval::FunctionCallExpression *caller) {\n",
                      Option::EvalInvokePrefix, cg.formatLabel(name).c_str());
-      func->outputCPPEvalInvoke(cg, ar, funcPrefix, name);
+      func->outputCPPEvalInvoke(cg, ar, funcPrefix,
+                                cg.formatLabel(name).c_str());
       cg_indentEnd("}\n");
     } else {
       hasRedeclared = true;

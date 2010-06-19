@@ -792,7 +792,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
 
   stringstream callss;
   callss << retrn << (m_refReturn ? "ref(" : "(") << funcPrefix <<
-    cg.formatLabel(name) << "(";
+    name << "(";
   if (extraArg) {
     callss << extraArg;
     if (variable) {
@@ -917,7 +917,7 @@ void FunctionScope::outputCPPEvalInvoke(CodeGenerator &cg,
   bool variable = isVariableArgument();
   stringstream callss;
   callss << retrn << ((ret && m_refReturn) ? "ref(" : "(") << funcPrefix <<
-    cg.formatLabel(name) << "(";
+    name << "(";
   if (extraArg) {
     callss << extraArg;
     if (variable) {
@@ -1089,7 +1089,8 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
   cg_indentBegin("if (construct) {\n");
   cg_printf("CountableHelper h(this);\n");
   OutputCPPDynamicInvokeCount(cg);
-  outputCPPDynamicInvoke(cg, ar, Option::MethodPrefix,consName,
+  outputCPPDynamicInvoke(cg, ar, Option::MethodPrefix,
+                         cg.formatLabel(consName).c_str(),
                          true, false, false, NULL, true);
   cg_indentEnd("}\n");
   cg_printf("return this;\n");
@@ -1099,7 +1100,8 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
                    Option::ClassPrefix, clsName);
     OutputCPPDynamicInvokeCount(cg);
     outputCPPDynamicInvoke(cg, ar, Option::MethodPrefix,
-                           consName, true, false, false, NULL, true);
+                           cg.formatLabel(consName).c_str(),
+                           true, false, false, NULL, true);
     cg_indentEnd("}\n");
     if (cg.getOutput() == CodeGenerator::SystemCPP ||
         Option::EnableEval >= Option::LimitedEval) {
@@ -1108,7 +1110,7 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
                      "const Eval::FunctionCallExpression *caller) {\n",
                      Option::ClassPrefix, clsName);
       outputCPPEvalInvoke(cg, ar, Option::MethodPrefix,
-                          consName, NULL, false);
+                          cg.formatLabel(consName).c_str(), NULL, false);
       cg_indentEnd("}\n");
     }
   }

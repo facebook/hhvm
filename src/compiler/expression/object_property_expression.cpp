@@ -306,7 +306,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
   if (bThis) {
     FunctionScopePtr func = ar->getFunctionScope();
     if (func && func->isStatic()) {
-      cg_printf("GET_THIS()->");
+      cg_printf("GET_THIS_ARROW()");
     } else {
       // in order for __set() and __get() to be called
       useGetThis = true;
@@ -346,7 +346,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
           // cannot be declared as a class variable (var $val), $this->val
           // refers to a non-static class variable and has to use get/lval.
           uint64 hash = hash_string(propName);
-          if (useGetThis) cg_printf("const_cast<Object *>(&GET_THIS())->");
+          if (useGetThis) cg_printf("GET_THIS_DOT()");
           cg_printf("%s(", func.c_str());
           int stringId = cg.checkLiteralString(propName, ar);
           if (stringId >= 0) {
@@ -378,7 +378,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
         }
         cg_printf(op);
       } else {
-        if (useGetThis) cg_printf("const_cast<Object *>(&GET_THIS())->");
+        if (useGetThis) cg_printf("GET_THIS_DOT()");
       }
       uint64 hash = hash_string(propName);
       cg_printf("%s(", func.c_str());
@@ -404,7 +404,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       }
       cg_printf(op);
     } else {
-      if (useGetThis) cg_printf("const_cast<Object *>(&GET_THIS())->");
+      if (useGetThis) cg_printf("GET_THIS_DOT()");
     }
     cg_printf("%s(", func.c_str());
     m_property->outputCPP(cg, ar);
@@ -420,7 +420,7 @@ void ObjectPropertyExpression::outputCPPExistTest(CodeGenerator &cg,
     if (bThis) {
       FunctionScopePtr func = ar->getFunctionScope();
       if (func && func->isStatic()) {
-        cg.printf("GET_THIS()->");
+        cg.printf("GET_THIS_ARROW()");
       }
     } else {
       m_object->outputCPP(cg, ar);
@@ -448,7 +448,7 @@ void ObjectPropertyExpression::outputCPPUnset(CodeGenerator &cg,
   if (bThis) {
     FunctionScopePtr func = ar->getFunctionScope();
     if (func && func->isStatic()) {
-      cg.printf("GET_THIS()->");
+      cg.printf("GET_THIS_ARROW()");
     }
   } else {
     m_object->outputCPP(cg, ar);

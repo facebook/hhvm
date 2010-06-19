@@ -162,11 +162,21 @@ Array FrameInjection::getArgs() {
   return Array();
 }
 
-CObjRef FrameInjection::getObjectRef() {
+Object &FrameInjection::getThis() {
   if (m_object.get() && m_object->o_getId()) {
     return m_object;
   }
-  return null_object;
+
+  static Object s_black_hole_object;
+  ASSERT(s_black_hole_object.isNull()); // in case callers modified me
+  return s_black_hole_object;
+}
+
+Object &FrameInjection::getThisForArrow() {
+  if (m_object.get() && m_object->o_getId()) {
+    return m_object;
+  }
+  throw FatalErrorException("Using $this when not in object context");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

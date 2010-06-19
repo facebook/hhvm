@@ -56,7 +56,16 @@ public:
   int flags;
 
   virtual Array getArgs();
-  CObjRef getObjectRef();
+
+  // This function checks object ID to make sure it's not 0. If it's 0, it
+  // returns a null object. Otherwise, it returns "this";
+  Object &getThis();
+
+  // This function checks object ID to make sure it's not 0. If it's 0, it
+  // was a fake object created just for calling an instance method with a form
+  // of ClassName::MethodName(). Then it will throw a "using this in non-
+  // object context" fatal.
+  Object &getThisForArrow();
 
 public:
   // what does "static::" resolve to?

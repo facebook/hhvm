@@ -223,7 +223,6 @@ Variant EvalCreateFunction::invokeImpl(VariableEnvironment &env,
   f->changeName(nameStream.str());
   StringCodeContainer *cc = new StringCodeContainer(bodyAst);
   RequestEvalState::addCodeContainer(cc);
-  RequestEvalState::declareFunction(f.get());
   f->eval(env);
   return String(f->name().c_str(), f->name().size(), AttachLiteral);
 }

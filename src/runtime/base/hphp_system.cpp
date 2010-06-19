@@ -15,9 +15,44 @@
 */
 #include <runtime/base/hphp_system.h>
 
-namespace HPHP {
 using namespace std;
+
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+CVarRef Globals::declareConstant(const char *name, Variant &constant,
+                                 CVarRef value) {
+  if (!m_dynamicConstants.exists(name)) {
+    m_dynamicConstants.set(String(name, CopyString), value);
+    constant = value;
+  }
+  return value;
+}
+
+void Globals::declareFunction(const char *name) {
+  String func(Util::toLower(name));
+  if (m_volatileFunctions.exists(func)) {
+    raise_error("Cannot redeclare %s()", name);
+  } else {
+    m_volatileFunctions.set(func, true);
+  }
+}
+
+bool Globals::defined(const char *name) {
+  return m_dynamicConstants.exists(name);
+}
+
+Variant Globals::getConstant(const char *name) {
+  return m_dynamicConstants[name];
+}
+
+Array Globals::getDynamicConstants() const {
+  return m_dynamicConstants;
+}
+
+bool Globals::function_exists(const char *name) {
+  return m_volatileFunctions.exists(Util::toLower(name).c_str());
+}
 
 bool Globals::class_exists(const char *name) {
   return false;

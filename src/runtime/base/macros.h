@@ -25,7 +25,9 @@ namespace HPHP {
 #define LITSTR_INIT(str)    (true ? (str) : ("" str "")), (sizeof(str)-1)
 #define LITSTR(index, str)  (literalStrings[index])
 
-#define GET_THIS()        (fi.getObjectRef())
+#define GET_THIS()         fi.getThis()
+#define GET_THIS_ARROW()   fi.getThisForArrow()->
+#define GET_THIS_DOT()     fi.getThisForArrow().
 
 #define FORWARD_DECLARE_CLASS(cls)                      \
   class c_##cls;                                        \

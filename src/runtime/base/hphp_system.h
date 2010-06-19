@@ -48,33 +48,12 @@ namespace HPHP {
 
 class Globals : public LVariableTable {
 public:
-  CVarRef declareConstant(const char *name, Variant &constant, CVarRef value) {
-    if (!m_dynamicConstants.exists(name)) {
-      m_dynamicConstants.set(String(name, CopyString), value);
-      constant = value;
-    }
-    return value;
-  }
-
-  void declareFunction(const char *name) {
-    m_volatileFunctions.set(String(Util::toLower(name)), true);
-  }
-
-  bool defined(const char *name) {
-    return m_dynamicConstants.exists(name);
-  }
-
-  Variant getConstant(const char *name) {
-    return m_dynamicConstants[name];
-  }
-
-  Array getDynamicConstants() const {
-    return m_dynamicConstants;
-  }
-
-  bool function_exists(const char *name) {
-    return m_volatileFunctions.exists(Util::toLower(name).c_str());
-  }
+  CVarRef declareConstant(const char *name, Variant &constant, CVarRef value);
+  void declareFunction(const char *name);
+  bool defined(const char *name);
+  Variant getConstant(const char *name);
+  Array getDynamicConstants() const;
+  bool function_exists(const char *name);
 
   virtual bool class_exists(const char *name);
 

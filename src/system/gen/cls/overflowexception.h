@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 89 */
+/* SRC: classes/exception.php line 100 */
 class c_overflowexception : public c_runtimeexception {
   BEGIN_CLASS_MAP(overflowexception)
     PARENT_CLASS(exception)

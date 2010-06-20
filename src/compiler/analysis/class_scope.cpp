@@ -1027,8 +1027,8 @@ void ClassScope::outputCPPStaticMethodWrappers(CodeGenerator &cg,
   for (StringToFunctionScopePtrVecMap::const_iterator it = fmap.begin();
        it != fmap.end(); ++it) {
     if (done.find(it->first) != done.end()) continue;
-    MethodStatementPtr m = dynamic_pointer_cast<MethodStatement>(it->second[0]->
-                                                                 getStmt());
+    MethodStatementPtr m =
+      dynamic_pointer_cast<MethodStatement>(it->second[0]->getStmt());
     if (!m) continue; // system classes
     m->outputCPPStaticMethodWrapper(cg, ar, cls);
     done.insert(it->first);

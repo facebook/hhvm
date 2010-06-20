@@ -1,21 +1,27 @@
 <?php
 
 class Exception {
-  protected $message = 'Unknown exception';   // exception message
-  protected $code = 0;                        // user defined exception code
-  protected $file;                            // source filename of exception
-  protected $line;                            // source line of exception
+  protected $message = '';  // exception message
+  protected $code = 0;      // user defined exception code
+  protected $file;          // source filename of exception
+  protected $line;          // source line of exception
+  protected $trace;         // full stacktrace
 
-  function __construct($message = '', $code = 0) {
-    $this->message = $message;
-    $this->code = $code;
+  /**
+   * This may not be implemented in __construct(), because a sub-exception
+   * can implement its own __construct(), losing the stacktrace. Instead,
+   * the compiler will generate a call to this method inside C++ constructor,
+   * just to make sure $this->trace is always populated.
+   */
+  final function __init__() {
     $this->trace = debug_backtrace();
 
     // removing exception constructor stacks to be consistent with PHP
     while (!empty($this->trace)) {
       $top = $this->trace[0];
       if (empty($top['class']) ||
-          (strcasecmp($top['function'], '__construct') &&
+          (strcasecmp($top['function'], '__init__') &&
+           strcasecmp($top['function'], '__construct') &&
            strcasecmp($top['function'], $top['class'])) ||
           (strcasecmp($top['class'], 'exception') &&
            !is_subclass_of($top['class'], 'exception'))) {
@@ -26,6 +32,11 @@ class Exception {
 
     if (isset($frame['file'])) $this->file = $frame['file'];
     if (isset($frame['line'])) $this->line = $frame['line'];
+  }
+
+  function __construct($message = '', $code = 0) {
+    $this->message = $message;
+    $this->code = $code;
   }
 
   // message of exception

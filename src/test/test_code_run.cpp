@@ -706,6 +706,23 @@ bool TestCodeRun::TestListAssignment() {
 
 bool TestCodeRun::TestExceptions() {
   MVCR("<?php\n"
+       "class MyException extends Exception {\n"
+       "  public function __construct() {\n"
+       "  }\n"
+       "}\n"
+       "function thrower() {\n"
+       "  throw new MyException();\n"
+       "}\n"
+       "try {\n"
+       "  thrower();\n"
+       "} catch (Exception $exn) {\n"
+       "  $a = $exn->getTrace(); foreach($a as &$b) $b['file'] = 'string';\n"
+       "  var_dump($a);\n"
+       "  var_dump($exn->getLine());\n"
+       "}\n"
+      );
+
+  MVCR("<?php\n"
        "\n"
        "class Exception1 extends Exception {\n"
        "  public function __Construct() {\n"

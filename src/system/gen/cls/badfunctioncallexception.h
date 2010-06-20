@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 81 */
+/* SRC: classes/exception.php line 92 */
 class c_badfunctioncallexception : public c_logicexception {
   BEGIN_CLASS_MAP(badfunctioncallexception)
     PARENT_CLASS(exception)

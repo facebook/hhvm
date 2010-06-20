@@ -207,6 +207,12 @@ Variant c_pdoexception::o_invoke(const char *s, CArrRef params, int64 hash, bool
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
+      }
+      break;
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
@@ -269,6 +275,12 @@ Variant c_pdoexception::o_invoke(const char *s, CArrRef params, int64 hash, bool
 Variant c_pdoexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
+      }
+      break;
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
@@ -336,6 +348,20 @@ Variant c_pdoexception::os_invoke(const char *c, const char *s, CArrRef params, 
 Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___init__(), null);
+      }
+      break;
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -21515,6 +21541,12 @@ Variant c_domexception::o_invoke(const char *s, CArrRef params, int64 hash, bool
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
+      }
+      break;
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
@@ -21579,6 +21611,12 @@ Variant c_domexception::o_invoke(const char *s, CArrRef params, int64 hash, bool
 Variant c_domexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
+      }
+      break;
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
@@ -21648,6 +21686,20 @@ Variant c_domexception::os_invoke(const char *c, const char *s, CArrRef params, 
 Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___init__(), null);
+      }
+      break;
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -25793,6 +25845,12 @@ Variant c_soapfault::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
+      }
+      break;
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
@@ -25859,6 +25917,12 @@ Variant c_soapfault::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
 Variant c_soapfault::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
+      }
+      break;
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
@@ -25930,6 +25994,20 @@ Variant c_soapfault::os_invoke(const char *c, const char *s, CArrRef params, int
 Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___init__(), null);
+      }
+      break;
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();

@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 84 */
+/* SRC: classes/exception.php line 95 */
 class c_invalidargumentexception : public c_logicexception {
   BEGIN_CLASS_MAP(invalidargumentexception)
     PARENT_CLASS(exception)

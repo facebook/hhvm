@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 94 */
+/* SRC: classes/exception.php line 105 */
 class c_errorexception : public c_exception {
   BEGIN_CLASS_MAP(errorexception)
     PARENT_CLASS(exception)

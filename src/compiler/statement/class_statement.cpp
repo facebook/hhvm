@@ -670,6 +670,15 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     cg.setContext(CodeGenerator::CppConstructor);
     if (m_stmt) m_stmt->outputCPP(cg, ar);
+
+    // This is lame. Exception base class needs to prepare stacktrace outside
+    // of its PHP constructor. Every subclass of exception also needs this
+    // stacktrace, so we're adding an artificial __init__ in exception.php
+    // and calling it here.
+    if (m_name == "exception") {
+      cg_printf("{CountableHelper h(this); t___init__();}\n");
+    }
+
     cg_indentEnd("}\n");
 
     if (classScope->needStaticInitializer()) {

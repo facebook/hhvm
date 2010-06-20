@@ -77,6 +77,8 @@ class c_exception : public ExtObjectData {
   public: Variant m_code;
   public: Variant m_file;
   public: Variant m_line;
+  public: Variant m_trace;
+  public: void t___init__();
   public: void t___construct(Variant v_message = "", Variant v_code = 0LL);
   public: c_exception *create(Variant v_message = "", Variant v_code = 0LL);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);

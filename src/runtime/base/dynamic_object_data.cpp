@@ -28,7 +28,10 @@ namespace HPHP {
 DynamicObjectData::DynamicObjectData(const char* pname,
                                      ObjectData* r /* = NULL */) :
   root(r ? r : this) {
-  if (pname) parent = create_object(pname, Array(), false, root);
+  if (pname) {
+    CountableHelper h(root);
+    parent = create_object(pname, Array(), false, root);
+  }
 }
 
 void DynamicObjectData::init() {

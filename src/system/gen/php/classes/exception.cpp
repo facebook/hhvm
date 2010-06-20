@@ -24,7 +24,7 @@ namespace HPHP {
 
 /* preface starts */
 /* preface finishes */
-/* SRC: classes/exception.php line 92 */
+/* SRC: classes/exception.php line 103 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_unexpectedvalueexception
 Variant c_unexpectedvalueexception::os_getInit(const char *s, int64 hash) {
   return c_runtimeexception::os_getInit(s, hash);
@@ -123,18 +123,14 @@ void c_unexpectedvalueexception::cloneSet(c_unexpectedvalueexception *clone) {
 Variant c_unexpectedvalueexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -145,27 +141,43 @@ Variant c_unexpectedvalueexception::o_invoke(const char *s, CArrRef params, int6
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(params[0]), null);
         return (t___construct(params[0], params[1]), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -177,18 +189,14 @@ Variant c_unexpectedvalueexception::o_invoke(const char *s, CArrRef params, int6
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_unexpectedvalueexception
 Variant c_unexpectedvalueexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -199,27 +207,43 @@ Variant c_unexpectedvalueexception::o_invoke_few_args(const char *s, int64 hash,
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -236,34 +260,22 @@ Variant c_unexpectedvalueexception::os_invoke(const char *c, const char *s, CArr
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_unexpectedvalueexception
 Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_getmessage());
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -290,6 +302,50 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
         }
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -303,7 +359,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -317,7 +373,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         Variant a1;
@@ -340,18 +396,6 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
       break;
     default:
       break;
@@ -371,7 +415,7 @@ struct ObjectStaticCallbacks cw_unexpectedvalueexception = {
 void c_unexpectedvalueexception::init() {
   c_runtimeexception::init();
 }
-/* SRC: classes/exception.php line 89 */
+/* SRC: classes/exception.php line 100 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_overflowexception
 Variant c_overflowexception::os_getInit(const char *s, int64 hash) {
   return c_runtimeexception::os_getInit(s, hash);
@@ -470,18 +514,14 @@ void c_overflowexception::cloneSet(c_overflowexception *clone) {
 Variant c_overflowexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -492,27 +532,43 @@ Variant c_overflowexception::o_invoke(const char *s, CArrRef params, int64 hash,
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(params[0]), null);
         return (t___construct(params[0], params[1]), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -524,18 +580,14 @@ Variant c_overflowexception::o_invoke(const char *s, CArrRef params, int64 hash,
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_overflowexception
 Variant c_overflowexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -546,27 +598,43 @@ Variant c_overflowexception::o_invoke_few_args(const char *s, int64 hash, int co
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -583,34 +651,22 @@ Variant c_overflowexception::os_invoke(const char *c, const char *s, CArrRef par
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_overflowexception
 Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_getmessage());
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -637,6 +693,50 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
         }
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -650,7 +750,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -664,7 +764,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         Variant a1;
@@ -687,18 +787,6 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
       break;
     default:
       break;
@@ -718,7 +806,7 @@ struct ObjectStaticCallbacks cw_overflowexception = {
 void c_overflowexception::init() {
   c_runtimeexception::init();
 }
-/* SRC: classes/exception.php line 88 */
+/* SRC: classes/exception.php line 99 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_outofboundsexception
 Variant c_outofboundsexception::os_getInit(const char *s, int64 hash) {
   return c_runtimeexception::os_getInit(s, hash);
@@ -817,18 +905,14 @@ void c_outofboundsexception::cloneSet(c_outofboundsexception *clone) {
 Variant c_outofboundsexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -839,27 +923,43 @@ Variant c_outofboundsexception::o_invoke(const char *s, CArrRef params, int64 ha
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(params[0]), null);
         return (t___construct(params[0], params[1]), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -871,18 +971,14 @@ Variant c_outofboundsexception::o_invoke(const char *s, CArrRef params, int64 ha
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofboundsexception
 Variant c_outofboundsexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -893,27 +989,43 @@ Variant c_outofboundsexception::o_invoke_few_args(const char *s, int64 hash, int
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -930,34 +1042,22 @@ Variant c_outofboundsexception::os_invoke(const char *c, const char *s, CArrRef 
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofboundsexception
 Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_getmessage());
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -984,6 +1084,50 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
         }
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -997,7 +1141,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -1011,7 +1155,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         Variant a1;
@@ -1034,18 +1178,6 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
       break;
     default:
       break;
@@ -1065,7 +1197,7 @@ struct ObjectStaticCallbacks cw_outofboundsexception = {
 void c_outofboundsexception::init() {
   c_runtimeexception::init();
 }
-/* SRC: classes/exception.php line 80 */
+/* SRC: classes/exception.php line 91 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_logicexception
 Variant c_logicexception::os_getInit(const char *s, int64 hash) {
   return c_exception::os_getInit(s, hash);
@@ -1164,18 +1296,14 @@ void c_logicexception::cloneSet(c_logicexception *clone) {
 Variant c_logicexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -1186,27 +1314,43 @@ Variant c_logicexception::o_invoke(const char *s, CArrRef params, int64 hash, bo
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(params[0]), null);
         return (t___construct(params[0], params[1]), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -1218,18 +1362,14 @@ Variant c_logicexception::o_invoke(const char *s, CArrRef params, int64 hash, bo
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_logicexception
 Variant c_logicexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -1240,27 +1380,43 @@ Variant c_logicexception::o_invoke_few_args(const char *s, int64 hash, int count
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -1277,34 +1433,22 @@ Variant c_logicexception::os_invoke(const char *c, const char *s, CArrRef params
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_logicexception
 Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_getmessage());
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -1331,6 +1475,50 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         }
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -1344,7 +1532,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -1358,7 +1546,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         Variant a1;
@@ -1381,18 +1569,6 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
       break;
     default:
       break;
@@ -1412,7 +1588,7 @@ struct ObjectStaticCallbacks cw_logicexception = {
 void c_logicexception::init() {
   c_exception::init();
 }
-/* SRC: classes/exception.php line 90 */
+/* SRC: classes/exception.php line 101 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_rangeexception
 Variant c_rangeexception::os_getInit(const char *s, int64 hash) {
   return c_runtimeexception::os_getInit(s, hash);
@@ -1511,18 +1687,14 @@ void c_rangeexception::cloneSet(c_rangeexception *clone) {
 Variant c_rangeexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -1533,27 +1705,43 @@ Variant c_rangeexception::o_invoke(const char *s, CArrRef params, int64 hash, bo
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(params[0]), null);
         return (t___construct(params[0], params[1]), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -1565,18 +1753,14 @@ Variant c_rangeexception::o_invoke(const char *s, CArrRef params, int64 hash, bo
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_rangeexception
 Variant c_rangeexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -1587,27 +1771,43 @@ Variant c_rangeexception::o_invoke_few_args(const char *s, int64 hash, int count
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -1624,34 +1824,22 @@ Variant c_rangeexception::os_invoke(const char *c, const char *s, CArrRef params
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_rangeexception
 Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_getmessage());
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -1678,6 +1866,50 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         }
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -1691,7 +1923,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -1705,7 +1937,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         Variant a1;
@@ -1728,18 +1960,6 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
       break;
     default:
       break;
@@ -1759,7 +1979,7 @@ struct ObjectStaticCallbacks cw_rangeexception = {
 void c_rangeexception::init() {
   c_runtimeexception::init();
 }
-/* SRC: classes/exception.php line 84 */
+/* SRC: classes/exception.php line 95 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_invalidargumentexception
 Variant c_invalidargumentexception::os_getInit(const char *s, int64 hash) {
   return c_logicexception::os_getInit(s, hash);
@@ -1858,18 +2078,14 @@ void c_invalidargumentexception::cloneSet(c_invalidargumentexception *clone) {
 Variant c_invalidargumentexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -1880,27 +2096,43 @@ Variant c_invalidargumentexception::o_invoke(const char *s, CArrRef params, int6
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(params[0]), null);
         return (t___construct(params[0], params[1]), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -1912,18 +2144,14 @@ Variant c_invalidargumentexception::o_invoke(const char *s, CArrRef params, int6
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_invalidargumentexception
 Variant c_invalidargumentexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -1934,27 +2162,43 @@ Variant c_invalidargumentexception::o_invoke_few_args(const char *s, int64 hash,
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -1971,34 +2215,22 @@ Variant c_invalidargumentexception::os_invoke(const char *c, const char *s, CArr
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_invalidargumentexception
 Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_getmessage());
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2025,6 +2257,50 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
         }
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2038,7 +2314,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2052,7 +2328,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         Variant a1;
@@ -2075,18 +2351,6 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
       break;
     default:
       break;
@@ -2106,7 +2370,7 @@ struct ObjectStaticCallbacks cw_invalidargumentexception = {
 void c_invalidargumentexception::init() {
   c_logicexception::init();
 }
-/* SRC: classes/exception.php line 91 */
+/* SRC: classes/exception.php line 102 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_underflowexception
 Variant c_underflowexception::os_getInit(const char *s, int64 hash) {
   return c_runtimeexception::os_getInit(s, hash);
@@ -2205,18 +2469,14 @@ void c_underflowexception::cloneSet(c_underflowexception *clone) {
 Variant c_underflowexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -2227,27 +2487,43 @@ Variant c_underflowexception::o_invoke(const char *s, CArrRef params, int64 hash
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(params[0]), null);
         return (t___construct(params[0], params[1]), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -2259,18 +2535,14 @@ Variant c_underflowexception::o_invoke(const char *s, CArrRef params, int64 hash
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_underflowexception
 Variant c_underflowexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -2281,27 +2553,43 @@ Variant c_underflowexception::o_invoke_few_args(const char *s, int64 hash, int c
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -2318,34 +2606,22 @@ Variant c_underflowexception::os_invoke(const char *c, const char *s, CArrRef pa
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_underflowexception
 Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_getmessage());
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2372,6 +2648,50 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
         }
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2385,7 +2705,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2399,7 +2719,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         Variant a1;
@@ -2422,18 +2742,6 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
       break;
     default:
       break;
@@ -2453,7 +2761,7 @@ struct ObjectStaticCallbacks cw_underflowexception = {
 void c_underflowexception::init() {
   c_runtimeexception::init();
 }
-/* SRC: classes/exception.php line 86 */
+/* SRC: classes/exception.php line 97 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_outofrangeexception
 Variant c_outofrangeexception::os_getInit(const char *s, int64 hash) {
   return c_logicexception::os_getInit(s, hash);
@@ -2552,18 +2860,14 @@ void c_outofrangeexception::cloneSet(c_outofrangeexception *clone) {
 Variant c_outofrangeexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -2574,27 +2878,43 @@ Variant c_outofrangeexception::o_invoke(const char *s, CArrRef params, int64 has
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(params[0]), null);
         return (t___construct(params[0], params[1]), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -2606,18 +2926,14 @@ Variant c_outofrangeexception::o_invoke(const char *s, CArrRef params, int64 has
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofrangeexception
 Variant c_outofrangeexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -2628,27 +2944,43 @@ Variant c_outofrangeexception::o_invoke_few_args(const char *s, int64 hash, int 
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -2665,34 +2997,22 @@ Variant c_outofrangeexception::os_invoke(const char *c, const char *s, CArrRef p
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofrangeexception
 Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_getmessage());
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2719,6 +3039,50 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
         }
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2732,7 +3096,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2746,7 +3110,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         Variant a1;
@@ -2769,18 +3133,6 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
       break;
     default:
       break;
@@ -2800,7 +3152,7 @@ struct ObjectStaticCallbacks cw_outofrangeexception = {
 void c_outofrangeexception::init() {
   c_logicexception::init();
 }
-/* SRC: classes/exception.php line 82 */
+/* SRC: classes/exception.php line 93 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_badmethodcallexception
 Variant c_badmethodcallexception::os_getInit(const char *s, int64 hash) {
   return c_badfunctioncallexception::os_getInit(s, hash);
@@ -2899,18 +3251,14 @@ void c_badmethodcallexception::cloneSet(c_badmethodcallexception *clone) {
 Variant c_badmethodcallexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -2921,27 +3269,43 @@ Variant c_badmethodcallexception::o_invoke(const char *s, CArrRef params, int64 
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(params[0]), null);
         return (t___construct(params[0], params[1]), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -2953,18 +3317,14 @@ Variant c_badmethodcallexception::o_invoke(const char *s, CArrRef params, int64 
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badmethodcallexception
 Variant c_badmethodcallexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -2975,27 +3335,43 @@ Variant c_badmethodcallexception::o_invoke_few_args(const char *s, int64 hash, i
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -3012,34 +3388,22 @@ Variant c_badmethodcallexception::os_invoke(const char *c, const char *s, CArrRe
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badmethodcallexception
 Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_getmessage());
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3066,6 +3430,50 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
         }
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3079,7 +3487,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3093,7 +3501,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         Variant a1;
@@ -3116,18 +3524,6 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
       break;
     default:
       break;
@@ -3147,7 +3543,7 @@ struct ObjectStaticCallbacks cw_badmethodcallexception = {
 void c_badmethodcallexception::init() {
   c_badfunctioncallexception::init();
 }
-/* SRC: classes/exception.php line 87 */
+/* SRC: classes/exception.php line 98 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_runtimeexception
 Variant c_runtimeexception::os_getInit(const char *s, int64 hash) {
   return c_exception::os_getInit(s, hash);
@@ -3246,18 +3642,14 @@ void c_runtimeexception::cloneSet(c_runtimeexception *clone) {
 Variant c_runtimeexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -3268,27 +3660,43 @@ Variant c_runtimeexception::o_invoke(const char *s, CArrRef params, int64 hash, 
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(params[0]), null);
         return (t___construct(params[0], params[1]), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -3300,18 +3708,14 @@ Variant c_runtimeexception::o_invoke(const char *s, CArrRef params, int64 hash, 
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_runtimeexception
 Variant c_runtimeexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -3322,27 +3726,43 @@ Variant c_runtimeexception::o_invoke_few_args(const char *s, int64 hash, int cou
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -3359,34 +3779,22 @@ Variant c_runtimeexception::os_invoke(const char *c, const char *s, CArrRef para
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_runtimeexception
 Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_getmessage());
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3413,6 +3821,50 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         }
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3426,7 +3878,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3440,7 +3892,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         Variant a1;
@@ -3462,18 +3914,6 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
       }
       break;
     default:
@@ -3499,18 +3939,24 @@ void c_runtimeexception::init() {
 Variant c_exception::os_getInit(const char *s, int64 hash) {
   DECLARE_SYSTEM_GLOBALS(g);
   if (hash < 0) hash = hash_string(s);
-  switch (hash & 7) {
+  switch (hash & 15) {
     case 4:
       HASH_RETURN(0x08C19339767C0884LL, 
                   null, "file");
+      break;
+    case 7:
+      HASH_RETURN(0x33997C0BC1E6CC87LL, 
+                  0LL, "code");
+      HASH_RETURN(0x0253015494C8CE77LL, 
+                  null, "trace");
+      break;
+    case 12:
       HASH_RETURN(0x21093C71DDF9728CLL, 
                   null, "line");
       break;
-    case 7:
+    case 15:
       HASH_RETURN(0x3EAA4B97155266DFLL, 
-                  "Unknown exception", "message");
-      HASH_RETURN(0x33997C0BC1E6CC87LL, 
-                  0LL, "code");
+                  "", "message");
       break;
     default:
       break;
@@ -3534,6 +3980,7 @@ void c_exception::o_get(Array &props) const {
   if (isInitialized(m_code)) props.set("code", m_code.isReferenced() ? ref(m_code) : m_code, 0x33997C0BC1E6CC87LL, true);
   if (isInitialized(m_file)) props.set("file", m_file.isReferenced() ? ref(m_file) : m_file, 0x08C19339767C0884LL, true);
   if (isInitialized(m_line)) props.set("line", m_line.isReferenced() ? ref(m_line) : m_line, 0x21093C71DDF9728CLL, true);
+  if (isInitialized(m_trace)) props.set("trace", m_trace.isReferenced() ? ref(m_trace) : m_trace, 0x0253015494C8CE77LL, true);
   c_ObjectData::o_get(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_exception
@@ -3545,18 +3992,24 @@ Variant c_exception::o_get(CStrRef prop, int64 phash, bool error /* = true */, c
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_exception
 Variant c_exception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
   if (hash < 0) hash = hash_string(s.data(), s.length());
-  switch (hash & 7) {
+  switch (hash & 15) {
     case 4:
       HASH_RETURN_STRING(0x08C19339767C0884LL, m_file,
                          "file", 4);
+      break;
+    case 7:
+      HASH_RETURN_STRING(0x33997C0BC1E6CC87LL, m_code,
+                         "code", 4);
+      HASH_RETURN_STRING(0x0253015494C8CE77LL, m_trace,
+                         "trace", 5);
+      break;
+    case 12:
       HASH_RETURN_STRING(0x21093C71DDF9728CLL, m_line,
                          "line", 4);
       break;
-    case 7:
+    case 15:
       HASH_RETURN_STRING(0x3EAA4B97155266DFLL, m_message,
                          "message", 7);
-      HASH_RETURN_STRING(0x33997C0BC1E6CC87LL, m_code,
-                         "code", 4);
       break;
     default:
       break;
@@ -3577,14 +4030,19 @@ bool c_exception::o_exists(CStrRef prop, int64 phash, const char *context /* = N
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_exception
 bool c_exception::o_existsPublic(CStrRef s, int64 hash) const {
   if (hash < 0) hash = hash_string(s.data(), s.length());
-  switch (hash & 7) {
+  switch (hash & 15) {
     case 4:
       HASH_EXISTS_STRING(0x08C19339767C0884LL, "file", 4);
-      HASH_EXISTS_STRING(0x21093C71DDF9728CLL, "line", 4);
       break;
     case 7:
-      HASH_EXISTS_STRING(0x3EAA4B97155266DFLL, "message", 7);
       HASH_EXISTS_STRING(0x33997C0BC1E6CC87LL, "code", 4);
+      HASH_EXISTS_STRING(0x0253015494C8CE77LL, "trace", 5);
+      break;
+    case 12:
+      HASH_EXISTS_STRING(0x21093C71DDF9728CLL, "line", 4);
+      break;
+    case 15:
+      HASH_EXISTS_STRING(0x3EAA4B97155266DFLL, "message", 7);
       break;
     default:
       break;
@@ -3605,18 +4063,24 @@ Variant c_exception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /*
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_exception
 Variant c_exception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
   if (hash < 0) hash = hash_string(s.data(), s.length());
-  switch (hash & 7) {
+  switch (hash & 15) {
     case 4:
       HASH_SET_STRING(0x08C19339767C0884LL, m_file,
                       "file", 4);
+      break;
+    case 7:
+      HASH_SET_STRING(0x33997C0BC1E6CC87LL, m_code,
+                      "code", 4);
+      HASH_SET_STRING(0x0253015494C8CE77LL, m_trace,
+                      "trace", 5);
+      break;
+    case 12:
       HASH_SET_STRING(0x21093C71DDF9728CLL, m_line,
                       "line", 4);
       break;
-    case 7:
+    case 15:
       HASH_SET_STRING(0x3EAA4B97155266DFLL, m_message,
                       "message", 7);
-      HASH_SET_STRING(0x33997C0BC1E6CC87LL, m_code,
-                      "code", 4);
       break;
     default:
       break;
@@ -3637,18 +4101,24 @@ Variant& c_exception::o_lval(CStrRef prop, int64 phash, const char *context /* =
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_exception
 Variant& c_exception::o_lvalPublic(CStrRef s, int64 hash) {
   if (hash < 0) hash = hash_string(s.data(), s.length());
-  switch (hash & 7) {
+  switch (hash & 15) {
     case 4:
       HASH_RETURN_STRING(0x08C19339767C0884LL, m_file,
                          "file", 4);
+      break;
+    case 7:
+      HASH_RETURN_STRING(0x33997C0BC1E6CC87LL, m_code,
+                         "code", 4);
+      HASH_RETURN_STRING(0x0253015494C8CE77LL, m_trace,
+                         "trace", 5);
+      break;
+    case 12:
       HASH_RETURN_STRING(0x21093C71DDF9728CLL, m_line,
                          "line", 4);
       break;
-    case 7:
+    case 15:
       HASH_RETURN_STRING(0x3EAA4B97155266DFLL, m_message,
                          "message", 7);
-      HASH_RETURN_STRING(0x33997C0BC1E6CC87LL, m_code,
-                         "code", 4);
       break;
     default:
       break;
@@ -3726,24 +4196,21 @@ void c_exception::cloneSet(c_exception *clone) {
   clone->m_code = m_code.isReferenced() ? ref(m_code) : m_code;
   clone->m_file = m_file.isReferenced() ? ref(m_file) : m_file;
   clone->m_line = m_line.isReferenced() ? ref(m_line) : m_line;
+  clone->m_trace = m_trace.isReferenced() ? ref(m_trace) : m_trace;
   ObjectData::cloneSet(clone);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_exception
 Variant c_exception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -3754,27 +4221,43 @@ Variant c_exception::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(params[0]), null);
         return (t___construct(params[0], params[1]), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -3786,18 +4269,14 @@ Variant c_exception::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_exception
 Variant c_exception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -3808,27 +4287,43 @@ Variant c_exception::o_invoke_few_args(const char *s, int64 hash, int count, CVa
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -3845,34 +4340,22 @@ Variant c_exception::os_invoke(const char *c, const char *s, CArrRef params, int
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_exception
 Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_getmessage());
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3899,6 +4382,50 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         }
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3912,7 +4439,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3926,7 +4453,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         Variant a1;
@@ -3949,18 +4476,6 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
       break;
     default:
       break;
@@ -3978,30 +4493,27 @@ struct ObjectStaticCallbacks cw_exception = {
   c_exception::os_constant,
 };
 void c_exception::init() {
-  m_message = "Unknown exception";
+  m_message = "";
   m_code = 0LL;
   m_file = null;
   m_line = null;
+  m_trace = null;
+  {CountableHelper h(this); t___init__();}
 }
-/* SRC: classes/exception.php line 9 */
-void c_exception::t___construct(Variant v_message //  = ""
-, Variant v_code //  = 0LL
-) {
-  INSTANCE_METHOD_INJECTION(Exception, Exception::__construct);
-  bool oldInCtor = gasInCtor(true);
+/* SRC: classes/exception.php line 16 */
+void c_exception::t___init__() {
+  INSTANCE_METHOD_INJECTION(Exception, Exception::__init__);
   Variant v_top;
   Variant v_frame;
 
-  (m_message = v_message);
-  (m_code = v_code);
-  (const_cast<Object *>(&GET_THIS())->o_lval("trace", 0x0253015494C8CE77LL) = x_debug_backtrace());
+  (m_trace = x_debug_backtrace());
   LOOP_COUNTER(1);
   {
-    while (!(empty(const_cast<Object *>(&GET_THIS())->o_get("trace", 0x0253015494C8CE77LL, false)))) {
+    while (!(empty(m_trace))) {
       LOOP_COUNTER_CHECK(1);
       {
         {
-          Variant tmp2((const_cast<Object *>(&GET_THIS())->o_get("trace", 0x0253015494C8CE77LL).rvalAt(0LL, 0x77CFA1EEF01BCA90LL, true)));
+          Variant tmp2((m_trace.rvalAt(0LL, 0x77CFA1EEF01BCA90LL, true)));
           (v_top = tmp2);
         }
         {
@@ -4009,7 +4521,7 @@ void c_exception::t___construct(Variant v_message //  = ""
           {
             bool tmp4 = (empty(v_top, "class", 0x45397FE5C82CBD12LL, true));
             if (!tmp4) {
-              bool tmp5 = (toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true)), "__construct")));
+              bool tmp5 = (toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true)), "__init__")) && toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true)), "__construct")));
               if (tmp5) {
                 String tmp6((toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true))));
                 tmp5 = (toBoolean(x_strcasecmp(tmp6, toString(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)))));
@@ -4025,7 +4537,7 @@ void c_exception::t___construct(Variant v_message //  = ""
           }
         }
         {
-          const Variant &tmp7((x_array_shift(ref(lval(const_cast<Object *>(&GET_THIS())->o_lval("trace", 0x0253015494C8CE77LL))))));
+          const Variant &tmp7((x_array_shift(ref(lval(m_trace)))));
           (v_frame = tmp7);
         }
       }
@@ -4037,34 +4549,43 @@ void c_exception::t___construct(Variant v_message //  = ""
   if (isset(v_frame, "line", 0x21093C71DDF9728CLL, true)) {
     (m_line = v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true));
   }
+} /* function */
+/* SRC: classes/exception.php line 37 */
+void c_exception::t___construct(Variant v_message //  = ""
+, Variant v_code //  = 0LL
+) {
+  INSTANCE_METHOD_INJECTION(Exception, Exception::__construct);
+  bool oldInCtor = gasInCtor(true);
+  (m_message = v_message);
+  (m_code = v_code);
   gasInCtor(oldInCtor);
 } /* function */
-/* SRC: classes/exception.php line 32 */
+/* SRC: classes/exception.php line 43 */
 Variant c_exception::t_getmessage() {
   INSTANCE_METHOD_INJECTION(Exception, Exception::getMessage);
   return m_message;
 } /* function */
-/* SRC: classes/exception.php line 37 */
+/* SRC: classes/exception.php line 48 */
 Variant c_exception::t_getcode() {
   INSTANCE_METHOD_INJECTION(Exception, Exception::getCode);
   return m_code;
 } /* function */
-/* SRC: classes/exception.php line 42 */
+/* SRC: classes/exception.php line 53 */
 Variant c_exception::t_getfile() {
   INSTANCE_METHOD_INJECTION(Exception, Exception::getFile);
   return m_file;
 } /* function */
-/* SRC: classes/exception.php line 47 */
+/* SRC: classes/exception.php line 58 */
 Variant c_exception::t_getline() {
   INSTANCE_METHOD_INJECTION(Exception, Exception::getLine);
   return m_line;
 } /* function */
-/* SRC: classes/exception.php line 52 */
+/* SRC: classes/exception.php line 63 */
 Variant c_exception::t_gettrace() {
   INSTANCE_METHOD_INJECTION(Exception, Exception::getTrace);
-  return const_cast<Object *>(&GET_THIS())->o_get("trace", 0x0253015494C8CE77LL);
+  return m_trace;
 } /* function */
-/* SRC: classes/exception.php line 57 */
+/* SRC: classes/exception.php line 68 */
 String c_exception::t_gettraceasstring() {
   INSTANCE_METHOD_INJECTION(Exception, Exception::getTraceAsString);
   int64 v_i = 0;
@@ -4116,12 +4637,12 @@ String c_exception::t_gettraceasstring() {
   concat_assign(v_s, concat3("#", toString(v_i), " {main}"));
   return v_s;
 } /* function */
-/* SRC: classes/exception.php line 75 */
+/* SRC: classes/exception.php line 86 */
 String c_exception::t___tostring() {
   INSTANCE_METHOD_INJECTION(Exception, Exception::__toString);
   return toString(t_getmessage());
 } /* function */
-/* SRC: classes/exception.php line 94 */
+/* SRC: classes/exception.php line 105 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_errorexception
 Variant c_errorexception::os_getInit(const char *s, int64 hash) {
   DECLARE_SYSTEM_GLOBALS(g);
@@ -4341,6 +4862,12 @@ Variant c_errorexception::o_invoke(const char *s, CArrRef params, int64 hash, bo
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
+      }
+      break;
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
@@ -4408,6 +4935,12 @@ Variant c_errorexception::o_invoke(const char *s, CArrRef params, int64 hash, bo
 Variant c_errorexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
+      }
+      break;
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
@@ -4480,6 +5013,20 @@ Variant c_errorexception::os_invoke(const char *c, const char *s, CArrRef params
 Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
   switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___init__(), null);
+      }
+      break;
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4648,7 +5195,7 @@ void c_errorexception::init() {
   c_exception::init();
   m_severity = null;
 }
-/* SRC: classes/exception.php line 96 */
+/* SRC: classes/exception.php line 107 */
 void c_errorexception::t___construct(Variant v_message //  = ""
 , Variant v_code //  = 0LL
 , Variant v_severity //  = 0LL
@@ -4671,12 +5218,12 @@ void c_errorexception::t___construct(Variant v_message //  = ""
   }
   gasInCtor(oldInCtor);
 } /* function */
-/* SRC: classes/exception.php line 108 */
+/* SRC: classes/exception.php line 119 */
 Variant c_errorexception::t_getseverity() {
   INSTANCE_METHOD_INJECTION(ErrorException, ErrorException::getSeverity);
   return m_severity;
 } /* function */
-/* SRC: classes/exception.php line 81 */
+/* SRC: classes/exception.php line 92 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_badfunctioncallexception
 Variant c_badfunctioncallexception::os_getInit(const char *s, int64 hash) {
   return c_logicexception::os_getInit(s, hash);
@@ -4775,18 +5322,14 @@ void c_badfunctioncallexception::cloneSet(c_badfunctioncallexception *clone) {
 Variant c_badfunctioncallexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -4797,27 +5340,43 @@ Variant c_badfunctioncallexception::o_invoke(const char *s, CArrRef params, int6
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(params[0]), null);
         return (t___construct(params[0], params[1]), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -4829,18 +5388,14 @@ Variant c_badfunctioncallexception::o_invoke(const char *s, CArrRef params, int6
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badfunctioncallexception
 Variant c_badfunctioncallexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -4851,27 +5406,43 @@ Variant c_badfunctioncallexception::o_invoke_few_args(const char *s, int64 hash,
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -4888,34 +5459,22 @@ Variant c_badfunctioncallexception::os_invoke(const char *c, const char *s, CArr
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badfunctioncallexception
 Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_getmessage());
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4942,6 +5501,50 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
         }
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4955,7 +5558,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4969,7 +5572,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         Variant a1;
@@ -4992,18 +5595,6 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
       break;
     default:
       break;
@@ -5023,7 +5614,7 @@ struct ObjectStaticCallbacks cw_badfunctioncallexception = {
 void c_badfunctioncallexception::init() {
   c_logicexception::init();
 }
-/* SRC: classes/exception.php line 85 */
+/* SRC: classes/exception.php line 96 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_lengthexception
 Variant c_lengthexception::os_getInit(const char *s, int64 hash) {
   return c_logicexception::os_getInit(s, hash);
@@ -5122,18 +5713,14 @@ void c_lengthexception::cloneSet(c_lengthexception *clone) {
 Variant c_lengthexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -5144,27 +5731,43 @@ Variant c_lengthexception::o_invoke(const char *s, CArrRef params, int64 hash, b
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(params[0]), null);
         return (t___construct(params[0], params[1]), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -5176,18 +5779,14 @@ Variant c_lengthexception::o_invoke(const char *s, CArrRef params, int64 hash, b
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_lengthexception
 Variant c_lengthexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -5198,27 +5797,43 @@ Variant c_lengthexception::o_invoke_few_args(const char *s, int64 hash, int coun
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -5235,34 +5850,22 @@ Variant c_lengthexception::os_invoke(const char *c, const char *s, CArrRef param
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_lengthexception
 Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_getmessage());
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5289,6 +5892,50 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         }
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5302,7 +5949,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5316,7 +5963,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         Variant a1;
@@ -5339,18 +5986,6 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
       break;
     default:
       break;
@@ -5370,7 +6005,7 @@ struct ObjectStaticCallbacks cw_lengthexception = {
 void c_lengthexception::init() {
   c_logicexception::init();
 }
-/* SRC: classes/exception.php line 83 */
+/* SRC: classes/exception.php line 94 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domainexception
 Variant c_domainexception::os_getInit(const char *s, int64 hash) {
   return c_logicexception::os_getInit(s, hash);
@@ -5469,18 +6104,14 @@ void c_domainexception::cloneSet(c_domainexception *clone) {
 Variant c_domainexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -5491,27 +6122,43 @@ Variant c_domainexception::o_invoke(const char *s, CArrRef params, int64 hash, b
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(params[0]), null);
         return (t___construct(params[0], params[1]), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -5523,18 +6170,14 @@ Variant c_domainexception::o_invoke(const char *s, CArrRef params, int64 hash, b
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domainexception
 Variant c_domainexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
-        return (t_getmessage());
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
         return (t_getline());
@@ -5545,27 +6188,43 @@ Variant c_domainexception::o_invoke_few_args(const char *s, int64 hash, int coun
         if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        return (t_getcode());
       }
       break;
     default:
@@ -5582,34 +6241,22 @@ Variant c_domainexception::os_invoke(const char *c, const char *s, CArrRef param
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domainexception
 Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string_i(s);
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x625661A755F425C0LL, __init__) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_getmessage());
+        return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5636,6 +6283,50 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         }
         return (t_gettraceasstring());
       }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5649,7 +6340,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         return (t_gettrace());
       }
       break;
-    case 14:
+    case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5663,7 +6354,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         return (t_getfile());
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         Variant a0;
         Variant a1;
@@ -5685,18 +6376,6 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         if (count <= 0) return (t___construct(), null);
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
-      }
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
       }
       break;
     default:

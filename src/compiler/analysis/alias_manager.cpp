@@ -1134,7 +1134,7 @@ void AliasManager::popStringScope(StatementPtr s) {
     for (unsigned i = li1.m_inner.size(); i--; ) {
       if (LoopStatementPtr inner = dpc(LoopStatement, li1.m_inner[i])) {
         if (inner->numStringBufs()) {
-          li2.m_inner.push_back(s);
+          li2.m_inner.push_back(inner);
         }
       }
     }

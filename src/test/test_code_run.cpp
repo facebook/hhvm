@@ -8964,6 +8964,22 @@ bool TestCodeRun::TestConstructorDestructor() {
 }
 
 bool TestCodeRun::TestConcat() {
+  MVCR("<?php\n"
+       "$str = '';\n"
+       "$arr1 = array('a', 'b');\n"
+       "$arr2 = $arr1;\n"
+       "foreach ($arr1 as $v1) {\n"
+       "  $str .= $v1;\n"
+       "  switch ($v1) {\n"
+       "  default:\n"
+       "    foreach ($arr2 as $v2) {\n"
+       "      $str .= $v2;\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "var_dump($str);\n"
+       );
+
   MVCR("<?php "
       "function foo($where_clause)"
       "{"

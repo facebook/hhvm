@@ -266,6 +266,11 @@ public:
                    char delimiter1 = '"');
 
   /**
+   * Check TheStaticStringSet, and upgrade itself to an existing StaticString.
+   */
+  bool checkStatic();
+
+  /**
    * Marshaling/Unmarshaling between request thread and fiber thread.
    */
   String fiberCopy() const;
@@ -303,8 +308,8 @@ struct zend_hash {
 struct zend_eqstr {
   bool operator()(CStrRef s1, CStrRef s2) const {
     int len = s1.size();
-    if (s2.size() != len)
-      return false;
+    if (s2.size() != len) return false;
+    if (s1.data() == s2.data()) return true;
     return !memcmp(s1.data(), s2.data(), len);
   }
 };
@@ -316,6 +321,25 @@ typedef hphp_hash_set<String, zend_hash, zend_eqstr> StringSet;
 typedef hphp_hash_map<String, int, zend_hash, zend_eqstr> MapStringToInt;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+struct string_data_hash {
+  size_t operator()(const StringData *s) const {
+    if (s->isStatic()) return s->getStaticHash();
+    return hash_string(s->data(), s->size());
+  }
+};
+
+struct string_data_equal {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    int len = s1->size();
+    if (s2->size() != len) return false;
+    if (s1->data() == s2->data()) return true;
+    return !memcmp(s1->data(), s2->data(), len);
+  }
+};
+
+typedef hphp_hash_set<StringData *, string_data_hash, string_data_equal>
+  StringDataSet;
 
 /**
  * A StaticString can be co-accessed by multiple threads, therefore they are
@@ -339,11 +363,17 @@ public:
   }
   StaticString& operator=(const StaticString &str);
 
-  static StringSet &TheStaticStringSet() { return s_stringSet; }
+  static StringDataSet &TheStaticStringSet() { return s_stringSet; }
+  static void FinishInit() {
+    // release the memory
+    StringDataSet empty;
+    s_stringSet.swap(empty);
+  }
+
 private:
   void init(litstr s, int length);
   StringData m_data;
-  static StringSet s_stringSet;
+  static StringDataSet s_stringSet;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

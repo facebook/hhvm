@@ -3001,10 +3001,10 @@ void AnalysisResult::outputCPPLiteralStringPrecomputation() {
       cg_printf("init_%d();\n", i);
     }
     if (Option::ScalarArrayCompression) {
-      cg_printf("StringSet &set = StaticString::TheStaticStringSet();\n");
+      cg_printf("StringDataSet &set = StaticString::TheStaticStringSet();\n");
       cg_indentBegin("for (int i = 0; i < %d; i++) {\n",
                      m_stringLiterals.size());
-      cg_printf("set.insert(literalStrings[i]);\n");
+      cg_printf("set.insert(literalStrings[i].get());\n");
       cg_indentEnd("}\n");
     }
     cg_indentEnd("}\n");

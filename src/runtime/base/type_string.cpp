@@ -626,13 +626,21 @@ void String::unserialize(std::istream &in,
     throw Exception("Expected '%c' but got '%c'", delimiter1, ch);
   }
 
-  StringSet &set = StaticString::TheStaticStringSet();
+  checkStatic();
+}
+
+bool String::checkStatic() {
+  ASSERT(m_px);
+  StringDataSet &set = StaticString::TheStaticStringSet();
   if (!set.empty()) {
-    StringSet::iterator it = set.find(*this);
+    // no need to upgrade when the initialization is done.
+    StringDataSet::iterator it = set.find(m_px);
     if (it != set.end()) {
       SmartPtr<StringData>::operator=(*it);
+      return true;
     }
   }
+  return false;
 }
 
 String String::fiberCopy() const {
@@ -659,24 +667,36 @@ void String::dump() {
 StaticString::StaticString(litstr s) : m_data(s) {
   String::operator=(&m_data);
   m_px->setStatic();
+  if (!checkStatic()) {
+    s_stringSet.insert(m_px);
+  }
 }
 
 StaticString::StaticString(litstr s, int length)
   : m_data(s, length, AttachLiteral) {
   String::operator=(&m_data);
   m_px->setStatic();
+  if (!checkStatic()) {
+    s_stringSet.insert(m_px);
+  }
 }
 
-StaticString::StaticString(std::string s) : m_data(s.c_str(), s.size(),
-                                                   CopyString) {
+StaticString::StaticString(std::string s)
+  : m_data(s.c_str(), s.size(), CopyString) {
   String::operator=(&m_data);
   m_px->setStatic();
+  if (!checkStatic()) {
+    s_stringSet.insert(m_px);
+  }
 }
 
 StaticString::StaticString(const StaticString &str)
   : m_data(str.m_data.data(), str.m_data.size(), AttachLiteral) {
   String::operator=(&m_data);
   m_px->setStatic();
+  if (!checkStatic()) {
+    s_stringSet.insert(m_px);
+  }
 }
 
 StaticString& StaticString::operator=(const StaticString &str) {
@@ -693,9 +713,12 @@ void StaticString::init(litstr s, int length) {
   ASSERT(!m_px);
   String::operator=(&m_data);
   m_px->setStatic();
+  if (!checkStatic()) {
+    s_stringSet.insert(m_px);
+  }
 }
 
-StringSet StaticString::s_stringSet;
+StringDataSet StaticString::s_stringSet;
 
 //////////////////////////////////////////////////////////////////////////////
 }

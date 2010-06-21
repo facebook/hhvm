@@ -38,7 +38,7 @@
 #include <compiler/statement/exp_statement.h>
 #include <compiler/analysis/alias_manager.h>
 #include <compiler/analysis/variable_table.h>
-#include <runtime/eval/parser/hphp.tab.hpp>
+#include <compiler/parser/hphp.tab.hpp>
 #include <util/util.h>
 
 #define spc(T,p) boost::static_pointer_cast<T>(p)

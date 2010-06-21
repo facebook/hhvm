@@ -40,7 +40,6 @@ using namespace HPHP;
 %nonassoc T_INSTANCEOF
 %right '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right '['
-%left T_HPHP_NOTE
 
 %nonassoc T_NEW T_CLONE
 %token T_EXIT
@@ -115,6 +114,7 @@ using namespace HPHP;
 %token T_CURLY_OPEN
 %token T_PAAMAYIM_NEKUDOTAYIM
 
+%left T_HPHP_NOTE
 %token T_HPHP_NOTE
 %token T_HPHP_DECLARE
 

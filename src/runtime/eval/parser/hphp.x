@@ -478,12 +478,12 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 <ST_COMMENT>"*/" {
         STEPPOS;
         BEGIN(ST_IN_SCRIPTING);
-        /*
+#ifdef HPHP_NOTE
         if (yyleng > 6 && yytext[2] == '|' && yytext[yyleng-3] == '|') {
                 _scanner->setToken(yytext, yyleng, yytext+3, yyleng-6);
                 return T_HPHP_NOTE;
         }
-        */
+#endif
         return T_COMMENT;
 }
 

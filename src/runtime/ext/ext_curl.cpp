@@ -45,24 +45,23 @@ private:
 
   class WriteHandler {
   public:
-    WriteHandler() : method(0), fp(0), type(0) {}
+    WriteHandler() : method(0), type(0) {}
 
-    int          method;
-    Variant      callback;
-    FILE        *fp;
-    StringBuffer buf;
-    String       content;
-    int          type;
+    int                method;
+    Variant            callback;
+    SmartObject<File>  fp;
+    StringBuffer       buf;
+    String             content;
+    int                type;
   };
 
   class ReadHandler {
   public:
-    ReadHandler() : method(0), fp(0), fd(0) {}
+    ReadHandler() : method(0) {}
 
-    int          method;
-    Variant      callback;
-    FILE        *fp;
-    long         fd;
+    int                method;
+    Variant            callback;
+    SmartObject<File>  fp;
   };
 
   DECLARE_BOOST_TYPES(ToFree);
@@ -123,8 +122,8 @@ public:
 
     if (!url.empty()) {
 #if LIBCURL_VERSION_NUM >= 0x071100
-      /* Strings passed to libcurl as 'char *' arguments, are copied by the library...
-         NOTE: before 7.17.0 strings were not copied. */
+      /* Strings passed to libcurl as 'char *' arguments, are copied by
+         the library... NOTE: before 7.17.0 strings were not copied. */
       curl_easy_setopt(m_cp, CURLOPT_URL, url.c_str());
 #else
       char *urlcopy = strndup(url.data(), url.size());
@@ -149,7 +148,6 @@ public:
     m_write.fp        = src->m_write.fp;
     m_write_header.fp = src->m_write_header.fp;
     m_read.fp         = src->m_read.fp;
-    m_read.fd         = src->m_read.fd;
 
     m_write.callback = src->m_write.callback;
     m_read.callback = src->m_read.callback;
@@ -330,8 +328,8 @@ public:
       {
         String svalue = value.toString();
 #if LIBCURL_VERSION_NUM >= 0x071100
-        /* Strings passed to libcurl as 'char *' arguments, are copied by the library...
-           NOTE: before 7.17.0 strings were not copied. */
+        /* Strings passed to libcurl as 'char *' arguments, are copied
+           by the library... NOTE: before 7.17.0 strings were not copied. */
         m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, svalue.c_str());
 #else
         char *copystr = strndup(svalue.data(), svalue.size());
@@ -350,31 +348,34 @@ public:
         }
 
         Object obj = value.toObject();
-        if (obj.isNull() || obj.getTyped<PlainFile>(true) == NULL) {
-          return false;
-        }
-        FILE *fp = obj.getTyped<PlainFile>()->getStream();
-        if (!fp) {
+        if (obj.isNull() || obj.getTyped<File>(true) == NULL) {
           return false;
         }
 
         switch (option) {
-        case CURLOPT_FILE:
-          m_write.fp = fp;
-          m_write.method = PHP_CURL_FILE;
-          break;
-        case CURLOPT_WRITEHEADER:
-          m_write_header.fp = fp;
-          m_write_header.method = PHP_CURL_FILE;
-          break;
-        case CURLOPT_INFILE:
-          m_read.fp = fp;
-          m_read.fd = obj.getTyped<File>()->fd();
-          m_emptyPost = false;
-          break;
-        default:
-          m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, fp);
-          break;
+          case CURLOPT_FILE:
+            m_write.fp = obj;
+            m_write.method = PHP_CURL_FILE;
+            break;
+          case CURLOPT_WRITEHEADER:
+            m_write_header.fp = obj;
+            m_write_header.method = PHP_CURL_FILE;
+            break;
+          case CURLOPT_INFILE:
+            m_read.fp = obj;
+            m_emptyPost = false;
+            break;
+          default: {
+            if (obj.getTyped<PlainFile>(true) == NULL) {
+              return false;
+            }
+            FILE *fp = obj.getTyped<PlainFile>()->getStream();
+            if (!fp) {
+              return false;
+            }
+            m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, fp);
+            break;
+          }
         }
       }
       break;
@@ -472,7 +473,10 @@ public:
         m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, slist);
 
       } else {
-        raise_warning("You must pass either an object or an array with the CURLOPT_HTTPHEADER, CURLOPT_QUOTE, CURLOPT_HTTP200ALIASES and CURLOPT_POSTQUOTE arguments");
+        raise_warning("You must pass either an object or an array with "
+                      "the CURLOPT_HTTPHEADER, CURLOPT_QUOTE, "
+                      "CURLOPT_HTTP200ALIASES and CURLOPT_POSTQUOTE "
+                      "arguments");
         return false;
       }
       break;
@@ -513,15 +517,20 @@ public:
     int length = -1;
     switch (t->method) {
     case PHP_CURL_DIRECT:
-      if (t->fp) {
-        length = fread(data, size, nmemb, t->fp);
+      if (!t->fp.isNull()) {
+        int data_size = size * nmemb;
+        String ret = t->fp->read(data_size);
+        length = ret.size();
+        if (length) {
+          memcpy(data, ret.data(), length);
+        }
       }
       break;
     case PHP_CURL_USER:
       {
         int data_size = size * nmemb;
         Variant ret = f_call_user_func_array
-          (t->callback, CREATE_VECTOR3(Object(ch), t->fd, data_size));
+          (t->callback, CREATE_VECTOR3(Object(ch), t->fp->fd(), data_size));
         if (ret.isString()) {
           String sret = ret.toString();
           length = data_size < sret.size() ? data_size : sret.size();
@@ -543,7 +552,7 @@ public:
       echo(String(data, length, AttachLiteral));
       break;
     case PHP_CURL_FILE:
-      return fwrite(data, size, nmemb, t->fp);
+      return t->fp->write(String(data, length, AttachLiteral), length);
     case PHP_CURL_RETURN:
       if (length > 0) {
         t->buf.append(data, (int)length);
@@ -578,7 +587,7 @@ public:
       }
       break;
     case PHP_CURL_FILE:
-      return fwrite(data, size, nmemb, t->fp);
+      return t->fp->write(String(data, length, AttachLiteral), length);
     case PHP_CURL_USER:
       {
         Variant ret = f_call_user_func_array

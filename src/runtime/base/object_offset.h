@@ -59,6 +59,16 @@ class ObjectOffset {
   }
 
   /**
+   * Unset an object's property.
+   */
+  void unset() const {
+    if (!m_data) {
+      throw NullPointerException();
+    }
+    m_data->t___unset(m_property);
+  }
+
+  /**
    * Assignement operator. Almost the whole purpose for having this offset
    * class.
    */

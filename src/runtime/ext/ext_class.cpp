@@ -155,7 +155,7 @@ bool f_method_exists(CVarRef class_or_object, CStrRef method_name) {
 bool f_property_exists(CVarRef class_or_object, CStrRef property) {
   if (class_or_object.isObject()) {
     // Call o_exists for objects, to include dynamic properties.
-    return class_or_object.toObject()->o_exists(property, -1);
+    return class_or_object.toObject()->o_propExists(property);
   }
   const ClassInfo *classInfo =
     ClassInfo::FindClass(get_classname(class_or_object));

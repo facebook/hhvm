@@ -22,8 +22,14 @@ __destruct method.
 (2) unset
 
 In PHP, a data member that is unset will not appear at all in vardump or
-serialize.
-In HipHop, it will still appear, as null.
+serialize. Also, unsetting a data member and then resetting it will alter its
+order in foreach iterations.
+
+In HipHop, it will still appear in vardump or serialize as null. It will
+not appear in foreach iteration, so it's consistent with PHP. When unsetting
+a data member and then resetting it, it's order is not altered in foreach
+iteration. When unsetting then resetting to NULL, HipHop will be confused to
+think the property is still not present (bug).
 
 3. Eval Issues
 
@@ -72,9 +78,3 @@ Can return classes in different order from PHP's.
 
 If an uninitialized variable is being used before it's assigned with a value,
 and this variable is inferred as integers, it will be 0, instead of null.
-
-(3) calling a function with wrong number of parameters
-
-Currently it's a fatal, and we should change it to warnings as what PHP does.
-This only applies to functions that don't have variable arguments, meaning
-func_get_arg() or func_get_args() is not called inside the function.

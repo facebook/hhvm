@@ -159,6 +159,14 @@ class ObjectData : public Countable {
   virtual Variant &o_lvalPublic(CStrRef s, int64 hash);
   void o_set(const Array properties);
 
+  /**
+   * This is different from o_exists(), which is isset() semantics. This one
+   * is property_exists() semantics that check whether it was unset before.
+   * This is used for deciding what property_exists() returns and whether or
+   * not this property should be part of an iteration in foreach ($obj as ...)
+   */
+  bool o_propExists(CStrRef s, int64 hash = -1, const char *context = NULL);
+
   static Object FromArray(ArrayData *properties);
 
   CVarRef set(CStrRef s, CVarRef v);
@@ -230,6 +238,7 @@ class ObjectData : public Countable {
  protected:
   int o_id;                      // a numeric identifier of this object
   mutable Array *o_properties;   // dynamic properties
+  mutable Array *o_unsetprops;   // properties that were unset
  private:
   mutable int16  o_attribute;    // vairous flags
 

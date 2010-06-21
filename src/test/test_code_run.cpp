@@ -2556,6 +2556,47 @@ bool TestCodeRun::TestObject() {
 bool TestCodeRun::TestObjectProperty() {
   MVCR("<?php\n"
        "class A {\n"
+       "  public $a = 'apple';\n"
+       "  public $b = 'banana';\n"
+       "}\n"
+       "\n"
+       "$old = new A;\n"
+       "unset($old->a);\n"
+       "var_dump($old);\n"
+       "\n"
+       "$new = new A;\n"
+       "unset($new->b);\n"
+       "var_dump($new);\n"
+       "\n"
+       "foreach ($new as $property => $value) {\n"
+       "  $old->$property = $value;\n"
+       "}\n"
+       "var_dump($old->a);\n"
+       "var_dump($old->b);\n"
+       // We can't really maintain the same order as PHP does, even though we
+       // can move unset and reset properties to the back of the list, but
+       // then we can't really tell who's added back first if there are two :-(
+       //"var_dump($old);\n"
+       );
+  MVCR("<?php\n"
+       "class A {\n"
+       "  public $a = 'apple';\n"
+       "}\n"
+       "$obj = new A;\n"
+       "var_dump(isset($obj->a), property_exists($obj, 'a'));\n"
+       "$obj->a = null;\n"
+       "var_dump(isset($obj->a), property_exists($obj, 'a'));\n"
+       "unset($obj->a);\n"
+       "var_dump(isset($obj->a), property_exists($obj, 'a'));\n"
+       "$obj->a = 123;\n"
+       "var_dump(isset($obj->a), property_exists($obj, 'a'));\n"
+       // This isn't going to work, but treating this as rare rare rare event:
+       //"$obj->a = null;\n"
+       //"var_dump(isset($obj->a), property_exists($obj, 'a'));\n"
+       );
+
+  MVCR("<?php\n"
+       "class A {\n"
        "  private $prop = 'test';\n"
        "\n"
        "  function __get($name) {\n"

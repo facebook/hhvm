@@ -465,7 +465,7 @@ bool isset(CVarRef v, CStrRef offset, int64 prehash = -1,
            bool isString = false);
 
 inline Variant unset(Variant &v)               { v.unset();   return null;}
-inline Variant unset(const ObjectOffset &v)    { return unset(v.lval());}
+inline Variant unset(const ObjectOffset &v)    { v.unset();   return null;}
 inline Variant unset(CVarRef v)                {              return null;}
 inline Variant setNull(Variant &v)             { v.setNull(); return null;}
 

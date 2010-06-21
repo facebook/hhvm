@@ -36,13 +36,17 @@ static IMPLEMENT_THREAD_LOCAL(int, os_max_id);
 ///////////////////////////////////////////////////////////////////////////////
 // constructor/destructor
 
-ObjectData::ObjectData() : o_properties(NULL), o_attribute(0) {
+ObjectData::ObjectData()
+    : o_properties(NULL), o_unsetprops(NULL), o_attribute(0) {
   o_id = ++(*os_max_id.get());
 }
 
 ObjectData::~ObjectData() {
   if (o_properties) {
     o_properties->release();
+  }
+  if (o_unsetprops) {
+    o_unsetprops->release();
   }
   int *pmax = os_max_id.get();
   if (o_id == *pmax) {
@@ -281,19 +285,19 @@ Array ObjectData::o_toIterArray(const char *context,
     default:
       ASSERT(false);
     }
-    if (visible && o_exists(prop->name, -1, context)) {
+    if (visible && o_propExists(prop->name, -1, context)) {
       if (getRef) {
         Variant &ov = o_lval(prop->name, -1, context);
         Variant &av = ret.lvalAt(prop->name, -1, false, true);
         av = ref(ov);
       } else {
         ret.set(prop->name, o_getUnchecked(prop->name, -1,
-                prop->owner->getName()));
+                                           prop->owner->getName()));
       }
     }
     dynamics.remove(prop->name);
   }
-  if (dynamics.size()) {
+  if (!dynamics.empty()) {
     if (getRef) {
       for (ArrayIter iter(o_getDynamicProperties()); iter; ++iter) {
         // Object property names are always strings.
@@ -553,15 +557,36 @@ Variant &ObjectData::___offsetget_lval(Variant v_name) {
   return ___lval(v_name);
 }
 bool ObjectData::t___isset(Variant v_name) {
-  if (!o_exists(v_name.toString(), -1)) return false;
-  Variant v = o_get(v_name.toString(), -1, false);
+  String sname = v_name.toString();
+  if (!o_exists(sname, -1)) return false;
+  Variant v = o_get(sname, -1, false);
   return isset(v);
 }
 
 Variant ObjectData::t___unset(Variant v_name) {
-  unset(o_lval(v_name.toString(), -1));
-  if (o_properties) o_properties->weakRemove(v_name);
+  String sname = v_name.toString();
+  unset(o_lval(sname, -1));
+  if (o_properties && o_properties->exists(sname, -1, true)) {
+    o_properties->weakRemove(sname);
+  } else {
+    if (!o_unsetprops) {
+      o_unsetprops = NEW(Array)();
+    }
+    o_unsetprops->set(sname, true, -1, true);
+  }
   return null;
+}
+
+bool ObjectData::o_propExists(CStrRef s, int64 hash /* = -1 */,
+                              const char *context /* = NULL */) {
+  if (o_unsetprops && o_unsetprops->exists(s, -1, true)) {
+    // This is to make sure if the property is assigned with a value later,
+    // we will still return true. BUG: if it's re-assigned with "null", we
+    // really have no easy way to tell. We can't possibly instrument all
+    // "m_member = whatever" code to unset o_unsetprops.
+    return !o_get(s, -1, false).isNull();
+  }
+  return o_exists(s, hash, context);
 }
 
 Variant ObjectData::t___sleep() {

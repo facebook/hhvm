@@ -40,7 +40,7 @@ Variant *hphpGet(HphpSession *, Variant *, Variant *);
 
 void hphpAppend(HphpSession *, Variant *, Variant *);
 
-void hphpIncludeFile(HphpSession *, const char *);
+bool hphpIncludeFile(HphpSession *, const char *);
 
 Variant *hphpInvoke(HphpSession *, const char *, Variant *);
 

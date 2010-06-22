@@ -23,6 +23,8 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/program_functions.h>
 #include <runtime/base/hphp_system.h>
+#include <util/logger.h>
+#include <runtime/base/util/extended_logger.h>
 
 #define SWIG_NO_LLONG_MAX 1
 
@@ -258,37 +260,70 @@ bool hphpIsset(HPHP::HphpSession *s, HPHP::Variant *arr, HPHP::Variant *key) {
 ///////////////////////////////////////////////////////////////////////////////
 // dynamic invocation of files and functions
 
-void hphpIncludeFile(HPHP::HphpSession *s, const char *file) {
-  hphp_ffi_include_file(file);
+bool hphpIncludeFile(HPHP::HphpSession *s, const char *file) {
+  try {
+    hphp_ffi_include_file(file);
+    return true;
+  } catch (const HPHP::Exception &e) {
+    HPHP::Logger::Error("%s", e.getMessage().c_str());
+    const HPHP::ExtendedException *ee =
+      dynamic_cast<const HPHP::ExtendedException *>(&e);
+    if (ee) HPHP::ExtendedLogger::Log(*ee->getBackTrace());
+    return false;
+  }
 }
 
 HPHP::Variant *hphpInvoke(HPHP::HphpSession *s, const char *func,
                           HPHP::Variant *args) {
-  void *result;
-  int kind = hphp_ffi_invoke_function(&result, func, args->getArrayData());
-  HPHP::Variant *ret = hphpBuildVariant(kind, result);
-  s->addVariant(ret);
-  return ret;
+  try {
+    void *result;
+    int kind = hphp_ffi_invoke_function(&result, func, args->getArrayData());
+    HPHP::Variant *ret = hphpBuildVariant(kind, result);
+    s->addVariant(ret);
+    return ret;
+  } catch (const HPHP::Exception &e) {
+    HPHP::Logger::Error("%s", e.getMessage().c_str());
+    const HPHP::ExtendedException *ee =
+      dynamic_cast<const HPHP::ExtendedException *>(&e);
+    if (ee) HPHP::ExtendedLogger::Log(*ee->getBackTrace());
+    return NULL;
+  }
 }
 
 HPHP::Variant *hphpInvokeMethod(HPHP::HphpSession *s, HPHP::Variant *target,
                                 const char *func, HPHP::Variant *args) {
-  void *result;
-  int kind = hphp_ffi_invoke_object_method(&result, target->getObjectData(),
-                                           func, args->getArrayData());
-  HPHP::Variant *ret = hphpBuildVariant(kind, result);
-  s->addVariant(ret);
-  return ret;
+  try {
+    void *result;
+    int kind = hphp_ffi_invoke_object_method(&result, target->getObjectData(),
+                                             func, args->getArrayData());
+    HPHP::Variant *ret = hphpBuildVariant(kind, result);
+    s->addVariant(ret);
+    return ret;
+  } catch (const HPHP::Exception &e) {
+    HPHP::Logger::Error("%s", e.getMessage().c_str());
+    const HPHP::ExtendedException *ee =
+      dynamic_cast<const HPHP::ExtendedException *>(&e);
+    if (ee) HPHP::ExtendedLogger::Log(*ee->getBackTrace());
+    return NULL;
+  }
 }
 
 HPHP::Variant *hphpInvokeStaticMethod(HPHP::HphpSession *s, const char *cls,
                                       const char *func, HPHP::Variant *args) {
-  void *result;
-  int kind = hphp_ffi_invoke_static_method(&result, cls, func,
-                                           args->getArrayData());
-  HPHP::Variant *ret = hphpBuildVariant(kind, result);
-  s->addVariant(ret);
-  return ret;
+  try {
+    void *result;
+    int kind = hphp_ffi_invoke_static_method(&result, cls, func,
+                                             args->getArrayData());
+    HPHP::Variant *ret = hphpBuildVariant(kind, result);
+    s->addVariant(ret);
+    return ret;
+  } catch (const HPHP::Exception &e) {
+    HPHP::Logger::Error("%s", e.getMessage().c_str());
+    const HPHP::ExtendedException *ee =
+      dynamic_cast<const HPHP::ExtendedException *>(&e);
+    if (ee) HPHP::ExtendedLogger::Log(*ee->getBackTrace());
+    return NULL;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

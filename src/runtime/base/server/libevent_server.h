@@ -150,12 +150,24 @@ public:
                          evbuffer *chunk, bool firstChunk);
   void onChunkedResponseEnd(int worker, evhttp_request *request);
 
+  /**
+   * To enable SSL of the current server, it will listen to an additional
+   * port as specified in parameter.
+   */
+  virtual bool enableSSL(const std::string &certFile,
+                         const std::string &keyFile, int port);
+
 protected:
   virtual int getAcceptSocket();
+  virtual int getAcceptSocketSSL();
 
   int m_accept_sock;
+  int m_accept_sock_ssl;
   event_base *m_eventBase;
   evhttp *m_server;
+
+  evhttp *m_server_ssl;
+  int m_port_ssl;
 
   // signal to stop the thread
   event m_eventStop;

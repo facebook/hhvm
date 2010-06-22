@@ -136,12 +136,14 @@ LibEventServer::LibEventServer(const std::string &address, int port,
                                int thread, int timeoutSeconds)
   : Server(address, port, thread),
     m_accept_sock(-1),
+    m_accept_sock_ssl(-1),
     m_timeoutThreadData(thread, timeoutSeconds),
     m_timeoutThread(&m_timeoutThreadData, &TimeoutThread::run),
     m_dispatcher(thread, this),
     m_dispatcherThread(this, &LibEventServer::dispatch) {
   m_eventBase = event_base_new();
   m_server = evhttp_new(m_eventBase);
+  m_server_ssl = NULL;
   evhttp_set_gencb(m_server, on_request, this);
   m_responseQueue.create(m_eventBase);
 }
@@ -161,8 +163,14 @@ LibEventServer::~LibEventServer() {
 // implementing HttpServer
 
 int LibEventServer::getAcceptSocket() {
-  m_accept_sock = evhttp_bind_socket(m_server, m_address.c_str(), m_port);
-  return m_accept_sock;
+  int ret;
+  ret = evhttp_bind_socket_with_fd(m_server, m_address.c_str(), m_port);
+  if (ret < 0) {
+    Logger::Error("Fail to bind port %d", m_port);
+    return -1;
+  }
+  m_accept_sock = ret;
+  return 0;
 }
 
 void LibEventServer::start() {
@@ -170,6 +178,17 @@ void LibEventServer::start() {
 
   if (getAcceptSocket() != 0) {
     throw FailedToListenException(m_address, m_port);
+  }
+
+  if (m_server_ssl != NULL && m_accept_sock_ssl != -2) {
+    // m_accept_sock_ssl here serves as a flag to indicate whether it is
+    // called from subclass (LibEventServerWithTakeover). If it is (==-2)
+    // we delay the getAcceptSocketSSL();
+    if (getAcceptSocketSSL() != 0) {
+      Logger::Error("Fail to listen on ssl port %d", m_port_ssl);
+      throw FailedToListenException(m_address, m_port_ssl);
+    }
+    Logger::Info("Listen on ssl port %d",m_port_ssl);
   }
 
   setStatus(RUNNING);
@@ -246,6 +265,41 @@ void LibEventServer::stop() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// SSL handling
+
+bool LibEventServer::enableSSL(const std::string &certFile,
+    const std::string &keyFile,
+    int port) {
+  struct ssl_config config;
+  if (certFile == "" || keyFile == "") {
+    Logger::Error("Invalid certificate file or key file");
+    return false;
+  }
+  config.cert_file = (char*)certFile.c_str();
+  config.pk_file = (char*)keyFile.c_str();
+  m_server_ssl = evhttp_new_openssl(m_eventBase, &config);
+  if (m_server_ssl == NULL) {
+    Logger::Error("evhttp_new_openssl failed");
+    return false;
+  }
+  m_port_ssl = port;
+  evhttp_set_gencb(m_server_ssl, on_request, this);
+  return true;
+}
+
+int LibEventServer::getAcceptSocketSSL() {
+  int ret = evhttp_bind_socket_with_fd(m_server_ssl, m_address.c_str(),
+      m_port_ssl);
+  if (ret < 0) {
+    Logger::Error("Failed to bind port %s for SSL", m_port_ssl);
+    return -1;
+  }
+  Logger::Info("SSL enabled");
+  m_accept_sock_ssl = ret;
+  return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // request/response handling
 
 void LibEventServer::onThreadEnter() {
@@ -271,7 +325,8 @@ void LibEventServer::onRequest(struct evhttp_request *request) {
 void LibEventServer::onResponse(int worker, evhttp_request *request,
                                 int code) {
   int nwritten = 0;
-  if (RuntimeOption::LibEventSyncSend) {
+  if (RuntimeOption::LibEventSyncSend &&
+      !evhttp_is_connection_ssl(request->evcon)) {
     const char *reason = HttpProtocol::GetReasonString(code);
     nwritten = evhttp_send_reply_sync_begin(request, code, reason, NULL);
   }

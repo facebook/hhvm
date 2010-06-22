@@ -100,6 +100,11 @@ int RuntimeOption::ExpiresDefault = 2592000;
 std::string RuntimeOption::DefaultCharsetName = "UTF-8";
 bool RuntimeOption::ForceServerNameToHeader = false;
 
+bool RuntimeOption::EnableSSL = false;
+int RuntimeOption::SSLPort = 443;
+std::string RuntimeOption::SSLCertificateFile;
+std::string RuntimeOption::SSLCertificateKeyFile;
+
 VirtualHostPtrVec RuntimeOption::VirtualHosts;
 IpBlockMapPtr RuntimeOption::IpBlocks;
 SatelliteServerInfoPtrVec RuntimeOption::SatelliteServerInfos;
@@ -461,6 +466,11 @@ void RuntimeOption::Load(Hdf &config) {
     ExpiresDefault = server["ExpiresDefault"].getInt32(2592000);
     if (ExpiresDefault < 0) ExpiresDefault = 2592000;
     DefaultCharsetName = server["DefaultCharsetName"].getString("UTF-8");
+
+    EnableSSL = server["EnableSSL"].getBool(false);
+    SSLPort = server["SSLPort"].getInt16(443);
+    SSLCertificateFile = server["SSLCertificateFile"].getString();
+    SSLCertificateKeyFile = server["SSLCertificateKeyFile"].getString();
 
     SourceRoot = server["SourceRoot"].getString();
     if (!SourceRoot.empty() && SourceRoot[SourceRoot.length() - 1] != '/') {

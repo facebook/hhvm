@@ -74,6 +74,12 @@ HttpServer::HttpServer()
     m_pageServer = ServerPtr(server);
   }
 
+  if (RuntimeOption::EnableSSL) {
+    m_pageServer->enableSSL(RuntimeOption::SSLCertificateFile,
+        RuntimeOption::SSLCertificateKeyFile,
+        RuntimeOption::SSLPort);
+  }
+
   m_adminServer = ServerPtr
     (new TypedServer<LibEventServer, AdminRequestHandler>
      (RuntimeOption::ServerIP, RuntimeOption::AdminServerPort,

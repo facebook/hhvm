@@ -102,6 +102,11 @@ public:
   static IpBlockMapPtr IpBlocks;
   static SatelliteServerInfoPtrVec SatelliteServerInfos;
 
+  static bool EnableSSL;
+  static int SSLPort;
+  static std::string SSLCertificateFile;
+  static std::string SSLCertificateKeyFile;
+
   static int XboxServerThreadCount;
   static int XboxServerPort;
   static int XboxDefaultLocalTimeoutMilliSeconds;

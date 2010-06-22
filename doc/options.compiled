@@ -185,6 +185,12 @@ flood error logs.
     EvilShutdown = true
     DanglingWait = 0
 
+    # SSL options
+    EnableSSL = false
+    SSLPort = 443
+    SSLCertificateFile = <certificate file> # similar to apache
+    SSLCertificateKeyFile = <certificate file> # similar to apache
+
 - GracefulShutdownWait, HarshShutdown, EvilShutdown
 
 Graceful shutdown will try admin /stop command and it waits for number of

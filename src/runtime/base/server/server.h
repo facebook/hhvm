@@ -167,6 +167,13 @@ public:
    */
   virtual bool shouldHandle(const std::string &cmd);
 
+  /**
+   * To enable SSL of the current server, it will listen to an additional
+   * port as specified in parameter.
+   */
+  virtual bool enableSSL(const std::string &certFile,
+                         const std::string &keyFile, int port) = 0;
+
 protected:
   std::string m_address;
   int m_port;

@@ -121,6 +121,22 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
       return -1;
     }
     m_accept_sock = -1;
+
+    // Close SSL server
+    if (m_server_ssl) {
+      ASSERT(m_accept_sock_ssl > 0);
+      ret = evhttp_del_accept_socket(m_server_ssl, m_accept_sock_ssl);
+      if (ret < 0) {
+        Logger::Error("Unable to delete accept socket for SSL in evhttp");
+        return -1;
+      }
+      ret = close(m_accept_sock_ssl);
+      if (ret < 0) {
+        Logger::Error("Unable to close accept socket for SSL");
+        return -1;
+      }
+    }
+
     ret = afdt_close_server(m_delete_handle);
     if (ret < 0) {
       Logger::Error("Unable to close afdt server");
@@ -180,7 +196,7 @@ int LibEventServerWithTakeover::getAcceptSocket() {
 
   ret = evhttp_bind_socket_with_fd(m_server, m_address.c_str(), m_port);
   if (ret >= 0) {
-    Logger::Info("takeover: bound directly to port");
+    Logger::Info("takeover: bound directly to port %d", m_port);
     m_accept_sock = ret;
     return 0;
   } else if (errno != EADDRINUSE) {
@@ -239,6 +255,13 @@ int LibEventServerWithTakeover::getAcceptSocket() {
 }
 
 void LibEventServerWithTakeover::start() {
+
+  if (m_server_ssl) {
+    // Set a flag to prevent parent class from trying to listen to ssl
+    // before the old server releases the port
+    m_accept_sock_ssl = -2;
+  }
+
   LibEventServer::start();
 
   if (m_took_over) {
@@ -279,6 +302,14 @@ void LibEventServerWithTakeover::start() {
     } else {
       Logger::Info("takeover: old satellites have shut down");
     }
+  }
+
+  if (m_server_ssl) {
+    if (getAcceptSocketSSL() != 0) {
+      Logger::Error("Fail to listen on ssl port %d", m_port_ssl);
+      throw FailedToListenException(m_address, m_port_ssl);
+    }
+    Logger::Info("Listen on ssl port %d",m_port_ssl);
   }
 
   setupFdServer();

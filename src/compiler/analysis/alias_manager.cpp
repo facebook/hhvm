@@ -152,6 +152,7 @@ void BucketMapEntry::stash(size_t from, ExpressionPtrList &to) {
 }
 
 void BucketMapEntry::import(ExpressionPtrList &from) {
+  m_num += from.size();
   m_exprs.splice(m_exprs.end(), from);
 }
 

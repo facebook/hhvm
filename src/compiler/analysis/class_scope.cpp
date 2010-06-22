@@ -469,7 +469,7 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
             getOriginalName(), m_parent.c_str());
 
   if (!m_docComment.empty()) {
-    char *dc = string_cplus_escape(m_docComment.c_str());
+    char *dc = string_cplus_escape(m_docComment.c_str(), m_docComment.size());
     cg_printf("\"%s\",\n", dc);
     free(dc);
   }

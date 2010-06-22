@@ -2149,12 +2149,13 @@ char *string_escape_shell_cmd(const char *str) {
   return cmd;
 }
 
-char *string_cplus_escape(const char *s)
+char *string_cplus_escape(const char *s, int len)
 {
   StringBuffer sb;
   static const char digits[] = "01234567";
 
-  while (unsigned char uc = *s++) {
+  for (int i = 0; i < len; i++) {
+    unsigned char uc = *s++;
     switch (uc) {
       case '"':  sb.append("\\\"", 2); break;
       case '\\': sb.append("\\\\", 2); break;
@@ -2177,7 +2178,6 @@ char *string_cplus_escape(const char *s)
     }
   }
 
-  int len;
   return sb.detach(len);
 }
 

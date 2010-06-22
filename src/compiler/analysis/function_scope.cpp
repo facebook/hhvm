@@ -1142,7 +1142,7 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
             getOriginalName().c_str());
 
   if (!m_docComment.empty()) {
-    char *dc = string_cplus_escape(m_docComment.c_str());
+    char *dc = string_cplus_escape(m_docComment.c_str(), m_docComment.size());
     cg_printf("\"%s\",\n", dc);
     free(dc);
   }
@@ -1173,7 +1173,8 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
       } else {
         defArg = "1";
       }
-      char *s = string_cplus_escape(f_serialize(defArg).data());
+      String str = f_serialize(defArg);
+      char *s = string_cplus_escape(str.data(), str.size());
       cg_printf("\"%s\",\n", s);
       free(s);
     } else {

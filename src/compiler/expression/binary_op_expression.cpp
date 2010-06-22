@@ -796,7 +796,7 @@ static void outputStringExpr(CodeGenerator &cg, AnalysisResultPtr ar,
                              ExpressionPtr exp, bool asLitStr) {
   if (asLitStr && exp->isLiteralString()) {
     const std::string &s = exp->getLiteralString();
-    char *enc = string_cplus_escape(s.c_str());
+    char *enc = string_cplus_escape(s.c_str(), s.size());
     cg_printf("\"%s\", %d", enc, s.size());
     free(enc);
     return;

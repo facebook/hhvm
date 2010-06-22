@@ -1033,6 +1033,7 @@ bool TestCodeRun::TestString() {
 
   // serialization of binary string
   MVCR("<?php var_dump(bin2hex(serialize(\"a\\x00b\")));");
+  MVCR("<?php var_dump(json_encode(\"\\0001\"));");
 
   MVCR("<?php "
       "$a = array('x'=>'foo');"

@@ -263,7 +263,7 @@ std::string CodeGenerator::escapeLabel(const std::string &name,
       case '\b': ret += "\\b";  break;
       case '\f': ret += "\\f";  break;
       case '\v': ret += "\\v";  break;
-      case '\0': ret += "\\0";  if (binary) *binary = true; break;
+      case '\0': ret += "\\000";if (binary) *binary = true; break;
       case '\"': ret += "\\\""; break;
       case '\\': ret += "\\\\"; break;
       case '?':  ret += "\\?";  break; // avoiding trigraph errors

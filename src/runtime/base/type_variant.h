@@ -708,7 +708,7 @@ class Variant {
   CVarRef appendOpEqual(int op, CVarRef v);
 
   template<typename T>
-  void removeImpl(const T &key, int64 prehash) {
+  void removeImpl(const T &key, int64 prehash, bool isString = false) {
     switch (getType()) {
     case KindOfNull:
       break;
@@ -716,8 +716,13 @@ class Variant {
       {
         ArrayData *arr = getArrayData();
         if (arr) {
-          ArrayData *escalated = arr->remove(ToKey(key),
-              (arr->getCount() > 1), prehash);
+          ArrayData *escalated;
+          if (isString) {
+            escalated = arr->remove(key, (arr->getCount() > 1), prehash);
+          } else {
+            escalated = arr->remove(ToKey(key), (arr->getCount() > 1),
+                                    prehash);
+          }
           if (escalated) {
             set(escalated);
           }
@@ -738,14 +743,31 @@ class Variant {
   void remove(int     key, int64 prehash = -1) { remove((int64)key, prehash);}
   void remove(int64   key, int64 prehash = -1) { removeImpl(key, prehash);}
   void remove(double  key, int64 prehash = -1) { removeImpl(key, prehash);}
-  void remove(litstr  key, int64 prehash = -1);
-  void remove(CStrRef key, int64 prehash = -1);
+  void remove(litstr  key, int64 prehash = -1, bool isString = false) {
+    removeImpl(key, prehash, isString);
+  }
+  void remove(CStrRef key, int64 prehash = -1, bool isString = false) {
+    removeImpl(key, prehash, isString);
+  }
   void remove(CVarRef key, int64 prehash = -1);
 
-  void weakRemove(litstr key, int64 prehash = -1) {
+  void weakRemove(litstr key, int64 prehash = -1, bool isStr = false) {
     if (is(KindOfArray) ||
         (is(KindOfObject) && getObjectData()->o_instanceof("arrayaccess"))) {
-      remove(key, prehash);
+      remove(key, prehash, isStr);
+      return;
+    }
+    if (isString()) {
+      raise_error("Cannot unset string offsets");
+      return;
+    }
+  }
+
+  void weakRemove(CStrRef key, int64 prehash = -1, bool isStr = false) {
+    if (is(KindOfArray) ||
+        (is(KindOfObject) && getObjectData()->o_instanceof("arrayaccess"))) {
+      remove(key, prehash, isStr);
+      return;
     }
     if (isString()) {
       raise_error("Cannot unset string offsets");
@@ -758,6 +780,7 @@ class Variant {
     if (is(KindOfArray) ||
         (is(KindOfObject) && getObjectData()->o_instanceof("arrayaccess"))) {
       remove(key, prehash);
+      return;
     }
     if (isString()) {
       raise_error("Cannot unset string offsets");

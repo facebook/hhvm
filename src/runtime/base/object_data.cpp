@@ -567,7 +567,7 @@ Variant ObjectData::t___unset(Variant v_name) {
   String sname = v_name.toString();
   unset(o_lval(sname, -1));
   if (o_properties && o_properties->exists(sname, -1, true)) {
-    o_properties->weakRemove(sname);
+    o_properties->weakRemove(sname, -1, true);
   } else {
     if (!o_unsetprops) {
       o_unsetprops = NEW(Array)();

@@ -2777,13 +2777,6 @@ check_array:
   return v;
 }
 
-void Variant::remove(litstr  key, int64 prehash /* = -1 */) {
-  removeImpl(key, prehash);
-}
-void Variant::remove(CStrRef key, int64 prehash /* = -1 */) {
-  removeImpl(key, prehash);
-}
-
 void Variant::remove(CVarRef key, int64 prehash /* = -1 */) {
   switch(key.getType()) {
   case KindOfByte:

@@ -377,7 +377,8 @@ class Array : public SmartPtr<ArrayData> {
   template<typename T>
   void removeImpl(const T &key, int64 prehash) {
     if (m_px) {
-      ArrayData *escalated = m_px->remove(key, (m_px->getCount() > 1), prehash);
+      ArrayData *escalated =
+        m_px->remove(key, (m_px->getCount() > 1), prehash);
       if (escalated) {
         SmartPtr<ArrayData>::operator=(escalated);
       }
@@ -401,9 +402,16 @@ class Array : public SmartPtr<ArrayData> {
   void remove(double  key, int64 prehash = -1) {
     removeImpl((int64)key, prehash);
   }
-  void remove(litstr  key, int64 prehash = -1);
-  void remove(CStrRef key, int64 prehash = -1);
+  void remove(litstr  key, int64 prehash = -1, bool isString = false);
+  void remove(CStrRef key, int64 prehash = -1, bool isString = false);
   void remove(CVarRef key, int64 prehash = -1);
+
+  void weakRemove(litstr  key, int64 prehash = -1, bool isString = false) {
+    if (m_px) remove(key, prehash, isString);
+  }
+  void weakRemove(CStrRef key, int64 prehash = -1, bool isString = false) {
+    if (m_px) remove(key, prehash, isString);
+  }
 
   template<typename T>
   void weakRemove(const T &key, int64 prehash = -1) {

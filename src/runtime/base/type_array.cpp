@@ -619,11 +619,21 @@ bool Array::exists(CVarRef key, int64 prehash /* = -1 */) const {
   return false;
 }
 
-void Array::remove(litstr  key, int64 prehash /* = -1 */) {
-  removeImpl(String(key).toKey(), prehash);
+void Array::remove(litstr  key, int64 prehash /* = -1 */,
+                   bool isString /* = false */) {
+  if (isString) {
+    removeImpl(key, prehash);
+  } else {
+    removeImpl(String(key).toKey(), prehash);
+  }
 }
-void Array::remove(CStrRef key, int64 prehash /* = -1 */) {
-  removeImpl(key.toKey(), prehash);
+void Array::remove(CStrRef key, int64 prehash /* = -1 */,
+                   bool isString /* = false */) {
+  if (isString) {
+    removeImpl(key, prehash);
+  } else {
+    removeImpl(key.toKey(), prehash);
+  }
 }
 
 void Array::remove(CVarRef key, int64 prehash /* = -1 */) {

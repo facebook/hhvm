@@ -24,7 +24,7 @@ using namespace std;
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
                                    const string &value)
-  : Expression(EXPRESSION_PASS), m_svalue(value) {
+  : Expression(EXPRESSION_PASS), m_svalue(value, false) {
   switch (type) {
   case T_NUM_STRING: {
     const char *s = value.c_str();
@@ -61,7 +61,7 @@ ScalarExpression::ScalarExpression(EXPRESSION_ARGS, bool b)
   m_num.num = b ? 1 : 0;
 }
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, const string &s)
-  : Expression(EXPRESSION_PASS), m_svalue(s), m_kind(SString) {}
+  : Expression(EXPRESSION_PASS), m_svalue(s, false), m_kind(SString) {}
 
 Variant ScalarExpression::eval(VariableEnvironment &env) const {
   return getValue();

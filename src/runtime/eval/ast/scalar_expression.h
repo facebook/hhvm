@@ -42,6 +42,7 @@ private:
     SDouble,
     SString
   };
+  // FIXME shouldn't have a StaticString destructed with its container!
   StaticString m_svalue;
   union {
     int64 num;

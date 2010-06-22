@@ -355,7 +355,7 @@ public:
   StaticString() { }
   StaticString(litstr s);
   StaticString(litstr s, int length); // binary string
-  StaticString(std::string s);
+  StaticString(std::string s, bool intern = true);
   StaticString(const StaticString &str);
   ~StaticString() {
     // prevent ~SmartPtr from calling decRefCount after data is released

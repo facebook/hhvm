@@ -52,7 +52,7 @@ StringName::StringName(CONSTRUCT_ARGS, const string &name,
   : Name(CONSTRUCT_PASS), m_name(name),
     m_hash(hash_string(m_name.c_str(), m_name.size())),
     m_hashLwr(hash_string_i(m_name.c_str(), m_name.size())),
-    m_sname(m_name.c_str(), m_name.size()), m_isSp(isSp) {}
+    m_sname(m_name, false), m_isSp(isSp) {}
 
 String StringName::get(VariableEnvironment &env) const {
   return getStatic();

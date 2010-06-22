@@ -55,6 +55,7 @@ private:
   std::string m_name;
   int64 m_hash;
   int64 m_hashLwr;
+  // FIXME shouldn't have a StaticString destructed with its container!
   StaticString m_sname;
   bool m_isSp;
 };

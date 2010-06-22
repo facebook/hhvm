@@ -270,10 +270,19 @@ bool MySQL::connect(CStrRef host, int port, CStrRef socket, CStrRef username,
   }
   IOStatusHelper io("mysql::connect", host.data(), port);
   m_xaction_count = 0;
-  return mysql_real_connect(m_conn, host.data(), username.data(),
-                            password.data(), NULL, port,
-                            socket.empty() ? NULL : socket.data(),
-                            client_flags);
+  bool ret = mysql_real_connect(m_conn, host.data(), username.data(),
+                                password.data(), NULL, port,
+                                socket.empty() ? NULL : socket.data(),
+                                client_flags);
+  if (ret && RuntimeOption::MySQLWaitTimeout > 0) {
+    String query("set session wait_timeout=");
+    query += String((int64)(RuntimeOption::MySQLWaitTimeout / 1000));
+    if (mysql_real_query(m_conn, query.data(), query.size())) {
+      raise_notice("MySQL::connect: failed setting session wait timeout: %s",
+                   mysql_error(m_conn));
+    }
+  }
+  return ret;
 }
 
 bool MySQL::reconnect(CStrRef host, int port, CStrRef socket, CStrRef username,

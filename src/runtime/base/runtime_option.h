@@ -158,6 +158,7 @@ public:
   static bool MySQLLocalize;  // whether to localize MySQL query results
   static int  MySQLConnectTimeout;
   static int  MySQLReadTimeout;
+  static int  MySQLWaitTimeout;
   static int  MySQLSlowQueryThreshold;
   static bool MySQLKillOnTimeout;
 

@@ -21,10 +21,19 @@ Follow existing code when in doubt.
   };
   }}
 
-- Switch-cases don't introduce indentations:
+- Switch-cases indentations:
 
   switch (...) {
-  case: // no indentation here
+    case: {
+    }
+    default: {
+    }
+  }
+
+- Function parameter indentations:
+
+  void foo(int param1,
+           int param2) {
   }
 
 (3) Column Widths

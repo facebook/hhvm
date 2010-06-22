@@ -685,9 +685,7 @@ void RuntimeOption::Load(Hdf &config) {
   {
     Hdf debug = config["Debug"];
     NativeStackTrace = debug["NativeStackTrace"].getBool();
-    if (!NativeStackTrace) {
-      StackTrace::Enabled = false;
-    }
+    StackTrace::Enabled = NativeStackTrace;
     FullBacktrace = debug["FullBacktrace"].getBool();
     ServerStackTrace = debug["ServerStackTrace"].getBool();
     ServerErrorMessage = debug["ServerErrorMessage"].getBool();

@@ -140,7 +140,7 @@ public:
   bool callUserErrorHandler(const Exception &e, int errnum,
                             bool swallowExceptions);
   void recordLastError(const Exception &e);
-  void onFatalError(const Exception &e);
+  bool onFatalError(const Exception &e); // returns handled
   void onUnhandledException(Object e);
   int getErrorState();
   void setErrorState(int state);

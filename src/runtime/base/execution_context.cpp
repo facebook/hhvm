@@ -522,7 +522,7 @@ void ExecutionContext::recordLastError(const Exception &e) {
   data->lastError = String(e.getMessage());
 }
 
-void ExecutionContext::onFatalError(const Exception &e) {
+bool ExecutionContext::onFatalError(const Exception &e) {
   recordLastError(e);
   if (RuntimeOption::AlwaysLogUnhandledExceptions) {
     Logger::Log("HipHop Fatal error: ", e);
@@ -535,6 +535,7 @@ void ExecutionContext::onFatalError(const Exception &e) {
   if (!handled && !RuntimeOption::AlwaysLogUnhandledExceptions) {
     Logger::Log("HipHop Fatal error: ", e);
   }
+  return handled;
 }
 
 void ExecutionContext::onUnhandledException(Object e) {

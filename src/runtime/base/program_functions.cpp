@@ -261,11 +261,12 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
       errorMsg += e.getMessage();
     }
     if (where == InvokeException) {
-      context->onFatalError(e);
+      ret = context->onFatalError(e);
+      error = !ret;
     } else {
+      error = true;
       Logger::Error("%s", errorMsg.c_str());
     }
-    error = true;
   } catch (const Object &e) {
     if (where == HandlerException) {
       errorMsg = "Exception handler threw an object exception: ";

@@ -7501,6 +7501,12 @@ Variant i_drawgetstrokelinecap(CArrRef params) {
   if (count != 1) return throw_wrong_arguments("drawgetstrokelinecap", count, 1, 1, 1);
   return (f_drawgetstrokelinecap(params[0]));
 }
+Variant i_hphp_clear_unflushed(CArrRef params) {
+  FUNCTION_INJECTION(hphp_clear_unflushed);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("hphp_clear_unflushed", 0, 1);
+  return (f_hphp_clear_unflushed(), null);
+}
 Variant i_magickscaleimage(CArrRef params) {
   FUNCTION_INJECTION(magickscaleimage);
   int count __attribute__((__unused__)) = params.size();
@@ -15614,6 +15620,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 2517:
       HASH_INVOKE(0x245860A2FE4CB9D5LL, socket_set_blocking);
+      break;
+    case 2519:
+      HASH_INVOKE(0x7628053EFCC0C9D7LL, hphp_clear_unflushed);
       break;
     case 2523:
       HASH_INVOKE(0x48B2E069B89489DBLL, magickappendimages);
@@ -41404,6 +41413,18 @@ Variant ei_drawgetstrokelinecap(Eval::VariableEnvironment &env, const Eval::Func
   }
   return (x_drawgetstrokelinecap(a0));
 }
+Variant ei_hphp_clear_unflushed(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("hphp_clear_unflushed", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_hphp_clear_unflushed(), null);
+}
 Variant ei_magickscaleimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -60672,6 +60693,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2517:
       HASH_INVOKE_FROM_EVAL(0x245860A2FE4CB9D5LL, socket_set_blocking);
+      break;
+    case 2519:
+      HASH_INVOKE_FROM_EVAL(0x7628053EFCC0C9D7LL, hphp_clear_unflushed);
       break;
     case 2523:
       HASH_INVOKE_FROM_EVAL(0x48B2E069B89489DBLL, magickappendimages);

@@ -133,6 +133,12 @@ void f_hphp_throw_fatal_error(CStrRef error_msg) {
   raise_error(msg);
 }
 
+void f_hphp_clear_unflushed() {
+  g_context->obEndAll();
+  g_context->obStart();
+  g_context->obProtect(true);
+}
+
 bool f_trigger_error(CStrRef error_msg,
                      int error_type /* = k_E_USER_NOTICE */) {
   std::string msg = error_msg.data();

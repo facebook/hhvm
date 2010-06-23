@@ -80,6 +80,8 @@ ClassScopePtr ObjectMethodExpression::resolveClass(AnalysisResultPtr ar,
 // static analysis functions
 
 void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
+  Expression::analyzeProgram(ar);
+
   m_params->analyzeProgram(ar);
   m_object->analyzeProgram(ar);
   m_nameExp->analyzeProgram(ar);

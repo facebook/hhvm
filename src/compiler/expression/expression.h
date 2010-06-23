@@ -155,6 +155,8 @@ public:
   const std::string &cppTemp() const { return m_cppTemp; }
   std::string genCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar);
   void setCPPTemp(const std::string &s) { m_cppTemp = s; }
+  ClassScopePtr getOriginalScope(AnalysisResultPtr ar);
+
   /**
     * For generic walks
     */
@@ -201,6 +203,8 @@ public:
    */
   virtual void addElement(ExpressionPtr exp);
   virtual void insertElement(ExpressionPtr exp, int index = 0);
+
+  virtual void analyzeProgram(AnalysisResultPtr ar);                    \
 
   /**
    * Called before type inference.
@@ -302,6 +306,8 @@ protected:
  private:
   void outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar);
 
+  boost::weak_ptr<ClassScope> m_originalScope;
+  bool m_originalScopeSet;
   unsigned m_canon_id;
   ExpressionPtr m_canonPtr;
   mutable int m_error;

@@ -68,15 +68,24 @@ void ObjectPropertyExpression::setContext(Context context) {
       context == Expression::DeepOprLValue) {
     m_object->setContext(context);
   }
+
+  if (m_context & (LValue|RefValue)) {
+    setEffect(CreateEffect);
+  }
 }
 void ObjectPropertyExpression::clearContext(Context context) {
   m_context &= ~context;
   if (context == Expression::LValue) {
     m_object->clearContext(Expression::LValue);
   }
+  if (!(m_context & (LValue|RefValue))) {
+    clearEffect(CreateEffect);
+  }
 }
 
 void ObjectPropertyExpression::analyzeProgram(AnalysisResultPtr ar) {
+  Expression::analyzeProgram(ar);
+
   m_object->analyzeProgram(ar);
   m_property->analyzeProgram(ar);
 }
@@ -145,8 +154,6 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   ConstructPtr self = shared_from_this();
   TypePtr objectType = m_object->inferAndCheck(ar, NEW_TYPE(Object), true);
 
-  if (hasContext(LValue) || hasContext(RefValue)) setEffect(CreateEffect);
-
   if (!m_property->is(Expression::KindOfScalarExpression)) {
     // if dynamic property or method, we have nothing to find out
     if (ar->isFirstPass()) {
@@ -159,7 +166,6 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     // all class variables.
     if (m_context & (LValue | RefValue)) {
       ar->forceClassVariants();
-      setEffect(CreateEffect);
     }
 
     return Type::Variant; // we have to use a variant to hold dynamic value
@@ -174,20 +180,20 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   ClassScopePtr cls;
   if (objectType && !objectType->getName().empty()) {
     // what object-> has told us
-    cls = ar->findClass(objectType->getName());
-    ASSERT(cls);
+    cls = ar->findExactClass(objectType->getName());
   } else {
     // what ->property has told us
     cls = ar->findClass(name, AnalysisResult::PropertyName);
-    if (!cls) {
-      if (m_context & (LValue | RefValue)) {
-        ar->forceClassVariants(name);
-        setEffect(CreateEffect);
-      }
-      return Type::Variant;
+    if (cls) {
+      m_object->inferAndCheck(ar, Type::CreateObjectType(cls->getName()), true);
     }
+  }
 
-    m_object->inferAndCheck(ar, Type::CreateObjectType(cls->getName()), true);
+  if (!cls) {
+    if (m_context & (LValue | RefValue)) {
+      ar->forceClassVariants(name);
+    }
+    return Type::Variant;
   }
 
   const char *accessorName = hasContext(DeepAssignmentLHS) ? "__set" :
@@ -215,11 +221,12 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     }
   }
 
-  TypePtr ret = cls->checkProperty(name, type, coerce, ar, self, present);
+  TypePtr ret;
   if (!cls->derivesFromRedeclaring()) { // Have to use dynamic.
+    ret = cls->checkProperty(name, type, coerce, ar, self, present);
     // Private only valid if in the defining class
-    if (present && (ar->getClassScope().get() == cls.get() ||
-          !(present & VariableTable::VariablePrivate))) {
+    if (present && (getOriginalScope(ar) == cls ||
+                    !(present & VariableTable::VariablePrivate))) {
       m_valid = true;
       m_static = present & VariableTable::VariableStatic;
       if (m_static) {
@@ -233,7 +240,6 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   // get() will return Variant
   if (!m_valid || !m_object->getType()->isSpecificObject()) {
     m_actualType = Type::Variant;
-    if (m_context & (LValue | RefValue)) setEffect(CreateEffect);
     return m_actualType;
   }
 

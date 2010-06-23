@@ -50,6 +50,7 @@ ExpressionPtr SimpleVariable::clone() {
 // static analysis functions
 
 void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
+  Expression::analyzeProgram(ar);
   if (m_name == "argc" || m_name == "argv") {
     // special case: they are NOT superglobals when not in global scope
     if (ar->getScope() == ar) {
@@ -124,7 +125,7 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
   }
   if (m_name == "this") {
-    ClassScopePtr cls = ar->getClassScope();
+    ClassScopePtr cls = getOriginalScope(ar);
     if (cls) {
       bool isStaticFunc = false;
       FunctionScopePtr func = dynamic_pointer_cast<FunctionScope>(scope);

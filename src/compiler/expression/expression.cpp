@@ -39,7 +39,7 @@ using namespace boost;
 
 Expression::Expression(LocationPtr loc, KindOf kindOf)
   : Construct(loc), m_kindOf(kindOf), m_context(RValue),
-    m_canon_id(0), m_canonPtr(), m_error(0) {
+    m_originalScopeSet(false), m_canon_id(0), m_canonPtr(), m_error(0) {
 }
 
 void Expression::deepCopy(ExpressionPtr exp) {
@@ -142,6 +142,21 @@ TypePtr Expression::propagateTypes(AnalysisResultPtr ar, TypePtr inType) {
   }
 
   return ret;
+}
+
+void Expression::analyzeProgram(AnalysisResultPtr ar) {
+  if (ar->isFirstPass()) {
+    m_originalScope = ar->getClassScope();
+    m_originalScopeSet = true;
+  }
+}
+
+ClassScopePtr Expression::getOriginalScope(AnalysisResultPtr ar) {
+  if (!m_originalScopeSet) {
+    m_originalScopeSet = true;
+    m_originalScope = ar->getClassScope();
+  }
+  return m_originalScope.lock();
 }
 
 TypePtr Expression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,

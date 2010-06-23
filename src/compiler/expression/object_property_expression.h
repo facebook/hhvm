@@ -57,6 +57,7 @@ private:
   bool m_static; // whether m_property is actually a static property
   int m_localEffects;
   ClassScopePtr m_class; // when m_object's type was inferred
+
   // for avoiding code generate toObject(Variant)
   bool directVariantProxy(AnalysisResultPtr ar);
   void outputCPPObjProperty(CodeGenerator &cg, AnalysisResultPtr ar,

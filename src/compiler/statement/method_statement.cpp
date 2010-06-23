@@ -548,10 +548,10 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (m_stmt->hasBody()) {
         if (m_modifiers->isStatic()) {
           cg_printf("STATIC_METHOD_INJECTION(%s, %s);\n",
-                    scope->getOriginalName(), origFuncName.c_str());
+                    scope->getOriginalName().c_str(), origFuncName.c_str());
         } else {
           cg_printf("INSTANCE_METHOD_INJECTION(%s, %s);\n",
-                    scope->getOriginalName(), origFuncName.c_str());
+                    scope->getOriginalName().c_str(), origFuncName.c_str());
         }
       }
       if (Option::GenRTTIProfileData && m_params) {
@@ -1062,7 +1062,7 @@ void MethodStatement::outputJavaFFICPPStub(CodeGenerator &cg,
   if (inClass) {
     // uses capitalized original class name
     ClassScopePtr cls = ar->findClass(m_className);
-    clsName = cls->getOriginalName();
+    clsName = cls->getOriginalName().c_str();
   }
   else {
     clsName = "HphpMain";

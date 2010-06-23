@@ -81,12 +81,12 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
   ASSERT(m_parent.empty() || (!m_bases.empty() && m_bases[0] == m_parent));
 }
 
-const char *ClassScope::getOriginalName() const {
+std::string ClassScope::getOriginalName() const {
   if (m_stmt) {
     return dynamic_pointer_cast<InterfaceStatement>(m_stmt)->
-      getOriginalName().c_str();
+      getOriginalName();
   }
-  return m_name.c_str();
+  return m_name;
 }
 
 std::string ClassScope::getId(CodeGenerator &cg) const {
@@ -468,7 +468,7 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_kindOf == KindOfFinalClass) attribute |= ClassInfo::IsFinal;
   if (!m_docComment.empty()) attribute |= ClassInfo::HasDocComment;
   cg_printf("(const char *)0x%04X, \"%s\", \"%s\",\n", attribute,
-            getOriginalName(), m_parent.c_str());
+            getOriginalName().c_str(), m_parent.c_str());
 
   if (!m_docComment.empty()) {
     char *dc = string_cplus_escape(m_docComment.c_str(), m_docComment.size());

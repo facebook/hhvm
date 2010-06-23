@@ -765,7 +765,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
     } else {
       int paramCount = m_params ? m_params->getCount() : 0;
       if (m_name == "get_class" && ar->getClassScope() && paramCount == 0) {
-        cg_printf("(\"%s\"", ar->getClassScope()->getOriginalName());
+        cg_printf("(\"%s\"", ar->getClassScope()->getOriginalName().c_str());
       } else if (m_name == "get_parent_class" && ar->getClassScope() &&
                  paramCount == 0) {
         const std::string parentClass = ar->getClassScope()->getParent();

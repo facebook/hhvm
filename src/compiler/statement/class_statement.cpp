@@ -152,14 +152,14 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
           (cls->isInterface() && (!m_parent.empty() && i == 0 ))) {
         ar->getCodeError()->record(CodeError::InvalidDerivation,
                                    shared_from_this(), ConstructPtr(),
-                                   cls->getOriginalName());
+                                   cls->getOriginalName().c_str());
       }
       if (dependencies->checkCircle(DependencyGraph::KindOfClassDerivation,
                                     m_originalName,
                                     cls->getOriginalName())) {
         ar->getCodeError()->record(CodeError::InvalidDerivation,
                                    shared_from_this(), ConstructPtr(),
-                                   cls->getOriginalName());
+                                   cls->getOriginalName().c_str());
         m_parent = "";
         m_base = ExpressionListPtr();
         classScope->clearBases();
@@ -393,7 +393,8 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
          it != bases.end(); ++it) {
       ClassScopePtr base = ar->findClass(*it);
       if (base && base->isVolatile()) {
-        cg_printf("checkClassExists(\"%s\", g);\n", base->getOriginalName());
+        cg_printf("checkClassExists(\"%s\", g);\n",
+                  base->getOriginalName().c_str());
       }
     }
     return;
@@ -777,7 +778,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           && parCls && parCls->isUserClass() && !parCls->isRedeclaring()) {
         // system classes are not supported in static FFI translation
         // they shouldn't appear as superclasses as well
-        cgCls.printf("extends %s", parCls->getOriginalName());
+        cgCls.printf("extends %s", parCls->getOriginalName().c_str());
       }
       else {
         cgCls.printf("extends HphpObject");
@@ -798,7 +799,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
             else {
               cgCls.printf(", ");
             }
-            cgCls.printf(intfClassScope->getOriginalName());
+            cgCls.printf(intfClassScope->getOriginalName().c_str());
           }
         }
       }

@@ -97,7 +97,7 @@ public:
   bool classNameCtor() const {
     return getAttribute(classNameConstructor);
   }
-  const char *getOriginalName() const;
+  std::string getOriginalName() const;
 
 
   virtual std::string getId(CodeGenerator &cg) const;

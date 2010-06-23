@@ -147,22 +147,22 @@ void InterfaceStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
       if (!cls->isInterface()) {
         ar->getCodeError()->record(CodeError::InvalidDerivation,
                                    shared_from_this(), ConstructPtr(),
-                                   cls->getOriginalName());
+                                   cls->getOriginalName().c_str());
       }
       if (dependencies->checkCircle(DependencyGraph::KindOfClassDerivation,
                                     m_originalName,
-                                    cls->getOriginalName())) {
+                                    cls->getOriginalName().c_str())) {
         ClassScopePtr classScope = m_classScope.lock();
         ar->getCodeError()->record(CodeError::InvalidDerivation,
                                    shared_from_this(), ConstructPtr(),
-                                   cls->getOriginalName());
+                                   cls->getOriginalName().c_str());
         m_base = ExpressionListPtr();
         classScope->clearBases();
       } else if (cls->isUserClass()) {
         dependencies->add(DependencyGraph::KindOfClassDerivation,
                           ar->getName(),
                           m_originalName, shared_from_this(),
-                          cls->getOriginalName(), cls->getStmt());
+                          cls->getOriginalName().c_str(), cls->getStmt());
       }
     }
   }
@@ -377,7 +377,7 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) 
             else {
               cgCls.printf(", ");
             }
-            cgCls.printf(intfClassScope->getOriginalName());
+            cgCls.printf(intfClassScope->getOriginalName().c_str());
           }
         }
       }

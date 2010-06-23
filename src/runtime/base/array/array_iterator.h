@@ -78,30 +78,6 @@ private:
   void create();
 };
 
-class ArrayIterFe : public IArrayIterator {
-public:
-  /**
-   * Constructors.
-   */
-  ArrayIterFe(const ArrayData *data);
-  ArrayIterFe(const ArrayIterFe &iter);
-  ArrayIterFe(CArrRef array);
-  ~ArrayIterFe();
-
-  bool end();
-  void next();
-  Variant first();
-  Variant second();
-  void second(Variant & v);
-  CVarRef secondRef();
-
-private:
-  ArrayData *m_data;
-  ssize_t m_pos;
-
-  void create();
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 
 struct FullPos {

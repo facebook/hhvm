@@ -256,7 +256,7 @@ class ArrayData : public Countable {
    */
   int compare(const ArrayData *v2, bool strict) const;
 
-  virtual void setPosition(ssize_t p) { m_pos = p; }
+  void setPosition(ssize_t p) { m_pos = p; }
 
   virtual ArrayData *escalate(bool mutableIteration = false) const {
     return const_cast<ArrayData *>(this);

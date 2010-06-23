@@ -555,7 +555,7 @@ bool c_splobjectstorage::t_contains(CVarRef v_obj) {
       {
         LOOP_COUNTER(1);
         Variant map2 = m_storage;
-        for (ArrayIterPtr iter3 = map2.beginFe("splobjectstorage"); !iter3->end(); iter3->next()) {
+        for (ArrayIterPtr iter3 = map2.begin("splobjectstorage"); !iter3->end(); iter3->next()) {
           LOOP_COUNTER_CHECK(1);
           iter3->second(v_object);
           {
@@ -592,7 +592,7 @@ void c_splobjectstorage::t_detach(CVarRef v_obj) {
       {
         LOOP_COUNTER(4);
         Variant map5 = m_storage;
-        for (ArrayIterPtr iter6 = map5.beginFe("splobjectstorage"); !iter6->end(); iter6->next()) {
+        for (ArrayIterPtr iter6 = map5.begin("splobjectstorage"); !iter6->end(); iter6->next()) {
           LOOP_COUNTER_CHECK(4);
           iter6->second(v_object);
           v_idx = iter6->first();

@@ -47,7 +47,6 @@ ArrayIter::~ArrayIter() {
 void ArrayIter::create() {
   if (m_data) {
     m_data->incRefCount();
-    // Set this iterator to point to the first element
     m_pos = m_data->iter_begin();
   } else {
     m_pos = ArrayData::invalid_index;
@@ -61,8 +60,6 @@ bool ArrayIter::end() {
 void ArrayIter::next() {
   ASSERT(m_data);
   ASSERT(m_pos != ArrayData::invalid_index);
-  // Move this iterator to point to the element for the
-  // upcoming iteration
   m_pos = m_data->iter_advance(m_pos);
 }
 
@@ -85,77 +82,6 @@ void ArrayIter::second(Variant & v) {
 }
 
 CVarRef ArrayIter::secondRef() {
-  ASSERT(m_data);
-  ASSERT(m_pos != ArrayData::invalid_index);
-  return m_data->getValueRef(m_pos);
-}
-
-ArrayIterFe::ArrayIterFe(const ArrayData *data)
-  : m_data(const_cast<ArrayData*>(data)), m_pos(0) {
-  create();
-}
-
-ArrayIterFe::ArrayIterFe(const ArrayIterFe &iter)
-  : m_data(iter.m_data), m_pos(0) {
-  create();
-}
-
-ArrayIterFe::ArrayIterFe(CArrRef array)
-  : m_data(array.get()), m_pos(0) {
-  create();
-}
-
-ArrayIterFe::~ArrayIterFe() {
-  if (m_data) {
-    m_data->decRefCount();
-  }
-}
-
-void ArrayIterFe::create() {
-  if (m_data) {
-    m_data->incRefCount();
-    // Set this iterator to point to the first element
-    m_pos = m_data->iter_begin();
-    // Set the array's internal pointer to point to element
-    // after the first element
-    m_data->reset();
-    m_data->next();
-  } else {
-    m_pos = ArrayData::invalid_index;
-  }
-}
-
-bool ArrayIterFe::end() {
-  return m_pos == ArrayData::invalid_index;
-}
-
-void ArrayIterFe::next() {
-  ASSERT(m_data);
-  ASSERT(m_pos != ArrayData::invalid_index);
-  m_pos = m_data->iter_advance(m_pos);
-  // Increment the array's internal pointer
-  m_data->next();
-}
-
-Variant ArrayIterFe::first() {
-  ASSERT(m_data);
-  ASSERT(m_pos != ArrayData::invalid_index);
-  return m_data->getKey(m_pos);
-}
-
-Variant ArrayIterFe::second() {
-  ASSERT(m_data);
-  ASSERT(m_pos != ArrayData::invalid_index);
-  return m_data->getValue(m_pos);
-}
-
-void ArrayIterFe::second(Variant & v) {
-  ASSERT(m_data);
-  ASSERT(m_pos != ArrayData::invalid_index);
-  m_data->fetchValue(m_pos, v);
-}
-
-CVarRef ArrayIterFe::secondRef() {
   ASSERT(m_data);
   ASSERT(m_pos != ArrayData::invalid_index);
   return m_data->getValueRef(m_pos);

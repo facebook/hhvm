@@ -143,7 +143,6 @@ class Array : public SmartPtr<ArrayData> {
    * getValueRef() can be called to take a reference to an array element.
    */
   ArrayIter begin(const char *context = NULL) const { return m_px;}
-  ArrayIterFe beginFe(const char *context = NULL) const { return m_px;}
 
   void escalate(bool mutableIteration = false);
 

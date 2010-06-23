@@ -606,15 +606,9 @@ Variant Variant::array_iter_prev() {
   return false;
 }
 
-Variant Variant::array_iter_current() {
+Variant Variant::array_iter_current() const {
   if (is(KindOfArray)) {
-    ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1) {
-      arr = arr->copy();
-      set(arr);
-      ASSERT(arr == getArrayData());
-    }
-    return arr->current();
+    return getArrayData()->current();
   }
   throw_bad_type_exception("expecting an array");
   return false;
@@ -648,18 +642,20 @@ Variant Variant::array_iter_end() {
   return false;
 }
 
-Variant Variant::array_iter_key() {
+Variant Variant::array_iter_key() const {
   if (is(KindOfArray)) {
-    ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1) {
-      arr = arr->copy();
-      set(arr);
-      ASSERT(arr == getArrayData());
-    }
-    return arr->key();
+    return getArrayData()->key();
   }
   throw_bad_type_exception("expecting an array");
   return false;
+}
+
+Variant Variant::array_iter_value(ssize_t &pos) const {
+  if (is(KindOfArray)) {
+    return getArrayData()->value(pos);
+  }
+  throw_bad_type_exception("expecting an array");
+  return null_variant;
 }
 
 Variant Variant::array_iter_each() {
@@ -1494,29 +1490,6 @@ ArrayIterPtr Variant::begin(const char *context /* = NULL */) const {
   }
   raise_warning("Invalid argument supplied for foreach()");
   return new ArrayIter(NULL);
-}
-
-ArrayIterPtr Variant::beginFe(const char *context /* = NULL */) const {
-  if (is(KindOfArray)) {
-    return new ArrayIterFe(getArrayData());
-  }
-  if (is(KindOfObject)) {
-    ObjectData *obj = getObjectData();
-    if (obj->o_instanceof("iterator")) {
-      return new ObjectArrayIter(obj);
-    }
-    while (obj->o_instanceof("iteratoraggregate")) {
-      Variant iterator = obj->o_invoke("getiterator", Array(), -1);
-      if (!iterator.isObject()) break;
-      if (iterator.instanceof("iterator")) {
-        return new ObjectArrayIter(iterator.getObjectData(), &iterator);
-      }
-      obj = iterator.getObjectData();
-    }
-    return new ArrayIterFe(obj->o_toIterArray(context));
-  }
-  raise_warning("Invalid argument supplied for foreach()");
-  return new ArrayIterFe(NULL);
 }
 
 MutableArrayIterPtr Variant::begin(Variant *key, Variant &val) {

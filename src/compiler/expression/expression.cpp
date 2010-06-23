@@ -794,5 +794,5 @@ void Expression::outputCPPExistTest(CodeGenerator &cg, AnalysisResultPtr ar,
 void Expression::outputCPPUnset(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf("unset(");
   outputCPP(cg, ar);
-  cg_printf(");\n");
+  cg_printf(")");
 }

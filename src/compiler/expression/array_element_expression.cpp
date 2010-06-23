@@ -461,6 +461,6 @@ void ArrayElementExpression::outputCPPUnset(CodeGenerator &cg,
         cg_printf(", 0x%016llXLL", hash);
       }
     }
-    cg_printf(");\n");
+    cg_printf(")");
   }
 }

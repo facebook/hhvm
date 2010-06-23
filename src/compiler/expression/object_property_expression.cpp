@@ -469,5 +469,5 @@ void ObjectPropertyExpression::outputCPPUnset(CodeGenerator &cg,
   if (direct) {
     cg_printf("\"");
   }
-  cg_printf(");\n");
+  cg_printf(")");
 }

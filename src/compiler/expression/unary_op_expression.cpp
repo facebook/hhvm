@@ -67,6 +67,10 @@ UnaryOpExpression::UnaryOpExpression
   case T_EVAL:
     m_localEffects = UnknownEffect;
     break;
+  case T_UNSET:
+    m_localEffects = AssignEffect;
+    m_exp->setContext(UnsetContext);
+    break;
   case T_ARRAY:
   default:
     break;
@@ -301,6 +305,14 @@ ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultPtr ar) {
   }
 
   ar->setInsideScalarArray(insideScalarArray);
+
+  if (m_op == T_UNSET_CAST && !hasEffect()) {
+    return CONSTANT("null");
+  } else if (m_op == T_UNSET && m_exp->is(KindOfExpressionList) &&
+             !static_pointer_cast<ExpressionList>(m_exp)->getCount()) {
+    return CONSTANT("null");
+  }
+
   return ExpressionPtr();
 }
 
@@ -308,12 +320,15 @@ void UnaryOpExpression::setExistContext() {
   if (m_exp) {
     if (m_exp->is(Expression::KindOfExpressionList)) {
       ExpressionListPtr exps = dynamic_pointer_cast<ExpressionList>(m_exp);
-      for (int i = 0; i < exps->getCount(); i++) {
-        (*exps)[i]->setContext(Expression::ExistContext);
+      if (exps->getListKind() == ExpressionList::ListKindParam) {
+        for (int i = 0; i < exps->getCount(); i++) {
+          (*exps)[i]->setContext(Expression::ExistContext);
+        }
+        return;
       }
-    } else {
-      m_exp->setContext(Expression::ExistContext);
     }
+
+    m_exp->setContext(Expression::ExistContext);
   }
 }
 
@@ -340,6 +355,7 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_OBJECT_CAST:   et = rt = NEW_TYPE(Object);                      break;
   case T_BOOL_CAST:     et = rt = Type::Boolean;                         break;
   case T_UNSET_CAST:    et = NEW_TYPE(Some);      rt = Type::Variant;    break;
+  case T_UNSET:         et = NEW_TYPE(Some);      rt = Type::Variant;    break;
   case T_EXIT:          et = NEW_TYPE(Primitive); rt = Type::Variant;    break;
   case T_PRINT:         et = Type::String;        rt = Type::Boolean;    break;
   case T_ISSET:         et = Type::Variant;       rt = Type::Boolean;
@@ -613,19 +629,31 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     return;
   }
 
-  if ((m_op == T_ISSET || m_op == T_EMPTY) && m_exp) {
+  if ((m_op == T_ISSET || m_op == T_EMPTY || m_op == T_UNSET) && m_exp) {
     if (m_exp->is(Expression::KindOfExpressionList)) {
       ExpressionListPtr exps = dynamic_pointer_cast<ExpressionList>(m_exp);
-      if (exps->getCount() > 1) {
-        cg_printf("(");
+      if (exps->getListKind() == ExpressionList::ListKindParam) {
+        int count = exps->getCount();
+        if (count > 1) {
+          cg_printf("(");
+        }
+        for (int i = 0; i < count; i++) {
+          if (m_op == T_UNSET) {
+            if (i > 0) cg_printf(", ");
+            (*exps)[i]->outputCPPUnset(cg, ar);
+          } else {
+            if (i > 0) cg_printf(" && ");
+            (*exps)[i]->outputCPPExistTest(cg, ar, m_op);
+          }
+        }
+        if (exps->getCount() > 1) {
+          cg_printf(")");
+        }
+        return;
       }
-      for (int i = 0; i < exps->getCount(); i++) {
-        if (i > 0) cg_printf(" && ");
-        (*exps)[i]->outputCPPExistTest(cg, ar, m_op);
-      }
-      if (exps->getCount() > 1) {
-        cg_printf(")");
-      }
+    }
+    if (m_op == T_UNSET) {
+      m_exp->outputCPPUnset(cg, ar);
     } else {
       m_exp->outputCPPExistTest(cg, ar, m_op);
     }
@@ -648,7 +676,7 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     case T_ARRAY_CAST:    cg_printf("(");          break;
     case T_OBJECT_CAST:   cg_printf("(");          break;
     case T_BOOL_CAST:     cg_printf("(");          break;
-    case T_UNSET_CAST:    cg_printf("unset(");     break;
+    case T_UNSET_CAST:    cg_printf("(");          break;
     case T_EXIT:          cg_printf("f_exit(");    break;
     case T_ARRAY:
       if (ar->getInsideScalarArray()) {
@@ -726,6 +754,8 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
         cg_printf(")");
       }
       break;
+    case T_UNSET_CAST:
+      cg_printf(",null");
     case T_CLONE:
     case '!':
     case '(':
@@ -736,7 +766,6 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     case T_ARRAY_CAST:
     case T_OBJECT_CAST:
     case T_BOOL_CAST:
-    case T_UNSET_CAST:
     case T_EXIT:
     case T_PRINT:
     case T_EVAL:

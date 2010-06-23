@@ -127,6 +127,7 @@ void UnsetStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     ExpressionPtr exp = (*m_exp)[i];
     exp->outputCPPBegin(cg, ar);
     exp->outputCPPUnset(cg, ar);
+    cg_printf(";\n");
     exp->outputCPPEnd(cg, ar);
   }
   if (m_exp->getCount() > 1) cg_indentEnd("}\n");

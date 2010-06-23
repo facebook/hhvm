@@ -116,6 +116,8 @@ public:
    */
   StackTrace(const std::string &hexEncoded);
 
+  StackTrace(const char *hexEncoded);
+
   /**
    * Generate an output of the written stack trace.
    */
@@ -136,6 +138,11 @@ private:
    * Record bt pointers.
    */
   void create();
+
+  /**
+   * Init by hex string
+   */
+  void initFromHex(const char *);
 };
 
 // Do not use heap here, so this will still work if called during a heap error

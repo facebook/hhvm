@@ -146,12 +146,20 @@ StackTraceNoHeap::StackTraceNoHeap(bool trace) {
   }
 }
 
-StackTrace::StackTrace(const std::string &hexEncoded) {
+void StackTrace::initFromHex(const char *hexEncoded) {
   vector<string> frames;
-  Util::split(':', hexEncoded.c_str(), frames);
+  Util::split(':', hexEncoded, frames);
   for (unsigned int i = 0; i < frames.size(); i++) {
     m_bt_pointers.push_back((void*)strtoll(frames[i].c_str(), NULL, 16));
   }
+}
+
+StackTrace::StackTrace(const std::string &hexEncoded) {
+  initFromHex(hexEncoded.c_str());
+}
+
+StackTrace::StackTrace(const char *hexEncoded) {
+  initFromHex(hexEncoded);
 }
 
 void StackTrace::create() {

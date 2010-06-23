@@ -1178,8 +1178,11 @@ void AliasManager::stringOptsRecur(ExpressionPtr e, bool ok) {
     {
       ExpressionListPtr el(spc(ExpressionList,e));
       if (el->getListKind() != ExpressionList::ListKindParam) {
-        for (int i = 0, n = el->getCount(); i < n; i++) {
-          stringOptsRecur((*el)[i], i < n - 1 || ok);
+        int n = el->getCount();
+        int chk = el->getListKind() == ExpressionList::ListKindLeft ?
+          0 : n - 1;
+        for (int i = 0; i < n; i++) {
+          stringOptsRecur((*el)[i], i != chk || ok);
         }
         return;
       }

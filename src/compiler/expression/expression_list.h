@@ -29,7 +29,8 @@ public:
   enum ListKind {
     ListKindParam,
     ListKindComma,
-    ListKindWrapped
+    ListKindWrapped,
+    ListKindLeft
   };
 
   ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,

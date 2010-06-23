@@ -147,7 +147,9 @@ bool ExpressionList::getScalarValue(Variant &value) {
   }
   if (m_kind != ListKindParam && !hasEffect()) {
     int i = m_exps.size();
-    if (i) return m_exps[i-1]->getScalarValue(value);
+    if (i) {
+      return m_exps[m_kind == ListKindLeft ? 0 : i-1]->getScalarValue(value);
+    }
   }
   return false;
 }
@@ -249,8 +251,9 @@ bool ExpressionList::optimize(AnalysisResultPtr ar) {
   bool changed = false;
   size_t i = m_exps.size();
   if (m_kind != ListKindParam) {
-    if (i--) {
-      while (i--) {
+    size_t skip = m_kind == ListKindLeft ? 0 : i - 1;
+    while (i--) {
+      if (i != skip) {
         ExpressionPtr &e = m_exps[i];
         if (!e || e->getContainedEffects() == NoEffect) {
           ar->incOptCounter();
@@ -262,21 +265,20 @@ bool ExpressionList::optimize(AnalysisResultPtr ar) {
         }
       }
     }
-    return changed;
-  }
-
-  if (hasContext(UnsetContext) &&
-      ar->getPhase() >= AnalysisResult::PostOptimize) {
-    while (i--) {
-      ExpressionPtr &e = m_exps[i];
-      if (e->is(Expression::KindOfSimpleVariable)) {
-        SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(e);
-        if (var->checkUnused(ar)) {
-          const std::string &name = var->getName();
-          VariableTablePtr variables = ar->getScope()->getVariables();
-          if (!variables->isNeeded(name)) {
-            removeElement(i);
-            changed = true;
+  } else {
+    if (hasContext(UnsetContext) &&
+        ar->getPhase() >= AnalysisResult::PostOptimize) {
+      while (i--) {
+        ExpressionPtr &e = m_exps[i];
+        if (e->is(Expression::KindOfSimpleVariable)) {
+          SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(e);
+          if (var->checkUnused(ar)) {
+            const std::string &name = var->getName();
+            VariableTablePtr variables = ar->getScope()->getVariables();
+            if (!variables->isNeeded(name)) {
+              removeElement(i);
+              changed = true;
+            }
           }
         }
       }
@@ -304,14 +306,19 @@ ExpressionPtr ExpressionList::postOptimize(AnalysisResultPtr ar) {
 TypePtr ExpressionList::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                    bool coerce) {
   size_t size = m_exps.size();
-  bool commaList = size && (m_kind == ListKindComma ||
-                            m_kind == ListKindWrapped);
-
+  bool commaList = size && (m_kind != ListKindParam);
+  size_t ix = m_kind == ListKindLeft ? 0 : size - 1;
   TypePtr tmp = commaList ? NEW_TYPE(Some) : type;
   for (size_t i = 0; i < size; i++) {
-    TypePtr t = i + 1 < size ? tmp : type;
-    bool c = coerce && !(commaList && i + 1 < size);
-    if (m_exps[i]) m_exps[i]->inferAndCheck(ar, t, c);
+    TypePtr t = i != ix ? tmp : type;
+    bool c = coerce && (!commaList || i == ix);
+    if (ExpressionPtr e = m_exps[i]) {
+      e->inferAndCheck(ar, t, c);
+      if (commaList && i  == ix) {
+        e->setExpectedType(TypePtr());
+        type = e->getType();
+      }
+    }
   }
   return type;
 }
@@ -346,13 +353,16 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     return Expression::preOutputCPP(cg, ar, state|StashKidVars);
   }
 
+  unsigned n = m_exps.size();
   bool inExpression = ar->inExpression();
   ar->setInExpression(false);
   bool ret = false;
   if (m_arrayElements) {
     ret = Expression::preOutputCPP(cg, ar, state);
+  } else if (m_kind == ListKindLeft) {
+    ret = true;
   } else {
-    for (unsigned int i = 0; i < m_exps.size(); i++) {
+    for (unsigned int i = 0; i < n; i++) {
       if (m_exps[i]->preOutputCPP(cg, ar, 0)) {
         ret = true;
         break;
@@ -370,14 +380,21 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     setCPPTemp(genCPPTemp(cg, ar));
     outputCPPInternal(cg, ar, true, true);
   } else {
-    for (unsigned int i = 0, n = m_exps.size(); i < n; i++) {
+    unsigned ix = m_kind == ListKindLeft ? 0 : n - 1;
+    for (unsigned int i = 0; i < n; i++) {
       ExpressionPtr e = m_exps[i];
       e->preOutputCPP(cg, ar, state);
-      if (i < n - 1) {
+      if (i != ix) {
         if (e->outputCPPUnneeded(cg, ar)) {
           cg_printf(";\n");
         }
         e->setCPPTemp("/**/");
+      } else if (!i && m_kind == ListKindLeft) {
+        e->Expression::preOutputStash(cg, ar, state | FixOrder);
+        if (!(state & FixOrder)) {
+          cg_printf("id(%s);\n", e->cppTemp().c_str());
+        }
+        setCPPTemp(e->cppTemp());
       }
     }
   }
@@ -408,6 +425,7 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
   }
 
   unsigned i = 0, s = m_exps.size();
+  unsigned ix = m_kind == ListKindLeft ? 0 : s - 1;
   for ( ; i < s; i++) {
     cg.setItemIndex(i);
     if (ExpressionPtr exp = m_exps[i]) {
@@ -432,7 +450,7 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
           cg_printf(";\n");
         }
         needsComma = true;
-      } else if (m_kind != ListKindParam && (i + 1 < s || !needed)) {
+      } else if (m_kind != ListKindParam && (i != ix || !needed)) {
         needsComma = exp->outputCPPUnneeded(cg, ar);
       } else {
         exp->outputCPP(cg, ar);

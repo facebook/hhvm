@@ -994,6 +994,21 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs) {
   } else {
     StatementPtr s = spc(Statement, cs);
     switch (s->getKindOf()) {
+    case Statement::KindOfGlobalStatement:
+    case Statement::KindOfStaticStatement:
+      {
+        ExpressionListPtr vars = dpc(ExpressionList, s->getNthKid(0));
+        for (int i = 0, n = vars->getCount(); i < n; i++) {
+          ExpressionPtr e = (*vars)[i];
+          if (AssignmentExpressionPtr ae = dpc(AssignmentExpression, e)) {
+            e = ae->getVariable();
+          }
+          if (SimpleVariablePtr sv = dpc(SimpleVariable, e)) {
+            m_aliasInfo[sv->getName()].setIsGlobal();
+          }
+        }
+        break;
+      }
     case Statement::KindOfCatchStatement:
       {
         const std::string &name = spc(CatchStatement, s)->getVariable();
@@ -1046,7 +1061,8 @@ bool AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
 
   for (AliasInfoMap::iterator it = m_aliasInfo.begin(),
          end = m_aliasInfo.end(); it != end; ++it) {
-    if (m_variables->isGlobal(it->first) ||
+    if (m_variables->isPseudoMainTable() ||
+        m_variables->isGlobal(it->first) ||
         m_variables->isStatic(it->first)) {
       it->second.setIsGlobal();
     }

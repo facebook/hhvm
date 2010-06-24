@@ -169,7 +169,7 @@ PDOBoundParam::PDOBoundParam()
 
 PDOBoundParam::~PDOBoundParam() {
   /* tell the driver that it is going away */
-  if (stmt.get() && stmt->support(PDOStatement::MethodParamHook)) {
+  if (stmt && stmt->support(PDOStatement::MethodParamHook)) {
     stmt->paramHook(this, PDO_PARAM_EVT_FREE);
   }
 }

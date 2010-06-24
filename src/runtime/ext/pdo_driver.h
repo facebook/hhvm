@@ -425,7 +425,7 @@ public:
 
   Variant driver_params;   /* optional parameter(s) for the driver */
 
-  sp_PDOStatement stmt;    /* for convenience in dtor */
+  PDOStatement *stmt;      /* for convenience in dtor */
   bool is_param;           /* parameter or column ? */
 
   void *driver_data;

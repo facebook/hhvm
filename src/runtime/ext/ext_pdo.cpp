@@ -1570,7 +1570,7 @@ static bool really_register_bound_param(PDOBoundParam *param,
              param->parameter.isInteger()) {
     param->parameter = param->parameter.toBoolean();
   }
-  param->stmt = stmt;
+  param->stmt = stmt.get();
   param->is_param = is_param;
 
   if (!is_param && !param->name.empty() && !stmt->columns.empty()) {

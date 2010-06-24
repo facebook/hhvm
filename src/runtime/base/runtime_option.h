@@ -165,6 +165,7 @@ public:
   static int  HttpDefaultTimeout;
   static int  HttpSlowQueryThreshold;
 
+  static bool TranslateLeakStackTrace;
   static bool NativeStackTrace;
   static bool FullBacktrace;
   static bool ServerStackTrace;

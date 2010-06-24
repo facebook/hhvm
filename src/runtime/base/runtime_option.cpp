@@ -167,6 +167,7 @@ bool RuntimeOption::MySQLKillOnTimeout = false;
 int RuntimeOption::HttpDefaultTimeout = 30;
 int RuntimeOption::HttpSlowQueryThreshold = 5000; // ms
 
+bool RuntimeOption::TranslateLeakStackTrace = false;
 bool RuntimeOption::NativeStackTrace = false;
 bool RuntimeOption::FullBacktrace = false;
 bool RuntimeOption::ServerStackTrace = false;
@@ -688,6 +689,7 @@ void RuntimeOption::Load(Hdf &config) {
     Hdf debug = config["Debug"];
     NativeStackTrace = debug["NativeStackTrace"].getBool();
     StackTrace::Enabled = NativeStackTrace;
+    TranslateLeakStackTrace = debug["TranslateLeakStackTrace"].getBool();
     FullBacktrace = debug["FullBacktrace"].getBool();
     ServerStackTrace = debug["ServerStackTrace"].getBool();
     ServerErrorMessage = debug["ServerErrorMessage"].getBool();

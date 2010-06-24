@@ -19,6 +19,7 @@
 #include <runtime/base/server/server_stats.h>
 #include <malloc.h>
 #include <tbb/concurrent_hash_map.h>
+#include <runtime/base/runtime_option.h>
 #ifdef GOOGLE_HEAP_PROFILER
 #include <util/atomic.h>
 #include <google/malloc_hook.h>
@@ -169,6 +170,7 @@ DECLARE_BOOST_TYPES(StackTrace);
 struct AllocRecord {
   time_t time;
   StackTracePtr st;
+  size_t size;
 };
 
 static Mutex sampling_mutex;
@@ -187,6 +189,7 @@ static void hphp_malloc_hook(const void *ptr, size_t size) {
     AllocRecord &alloc = acc->second;
     alloc.time = time(NULL);
     alloc.st = StackTracePtr(new StackTrace());
+    alloc.size = size;
     MallocHook::SetNewHook(hphp_malloc_hook);
   }
 }
@@ -213,6 +216,7 @@ public:
   LeakStats() : count(0) {}
   string hash;
   int count;
+  size_t totalSize;
   vector<string> examples;
 };
 static bool SortByCount(const LeakStats *s1, const LeakStats *s2) {
@@ -242,7 +246,9 @@ void LeakDetectable::EndMallocSampling(std::string &dumps, int cutoff) {
       LeakStats &stats = leaked_stacks[hash];
       if (stats.count++ == 0) {
         stats.hash = hash;
+        stats.totalSize = 0;
       }
+      stats.totalSize += iter->second.size;
       if (stats.examples.size() < 5) {
         stats.examples.push_back(st.hexEncode());
       }
@@ -264,15 +270,18 @@ void LeakDetectable::EndMallocSampling(std::string &dumps, int cutoff) {
   int totalGroup = 0;
   for (unsigned int i = 0; i < stats.size(); i++) {
     LeakStats *stat = stats[i];
-
-    string translated = translate_stack(stat->hash.c_str());
+    string translated("");
+    if (RuntimeOption::TranslateLeakStackTrace) {
+      translated = translate_stack(stat->hash.c_str());
+    }
     if (!SuppressStackTrace(translated)) {
       totalLeaked += stat->count;
       totalGroup++;
 
       dumps += "---------------------------------------------------------\n";
       dumps += lexical_cast<string>(i + 1) + ". Leaked ";
-      dumps += lexical_cast<string>(stat->count) + " ";
+      dumps += lexical_cast<string>(stat->count) + " objects ";
+      dumps += lexical_cast<string>(stat->totalSize) + " bytes, ";
       dumps += stat->hash + ":\n\n";
       for (unsigned int j = 0; j < stat->examples.size(); j++) {
         dumps += "  (";

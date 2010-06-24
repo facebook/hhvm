@@ -484,9 +484,7 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
     dstType = srcType;
   }
 
-  if (!dstType) {
-    dstType = Type::Variant;
-  } else {
+  if (dstType) {
     switch (dstType->getKindOf()) {
     case Type::KindOfAny:
     case Type::KindOfSome:
@@ -497,81 +495,88 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
     }
   }
 
-  bool constRef = (m_context & (RefValue|RefParameter)) ||
-    (isTemporary() && !dstType->isPrimitive());
-
-  if (isLvalue &&
-      dynamic_cast<FunctionCall*>(this)) {
-    constRef = true;
-  }
+  bool constRef = dstType &&
+    ((m_context & (RefValue|RefParameter)) ||
+     (isTemporary() && !dstType->isPrimitive()) ||
+     (isLvalue && dynamic_cast<FunctionCall*>(this)));
 
   ar->wrapExpressionBegin(cg);
   if (constRef) {
     cg_printf("const ");
   }
-  dstType->outputCPPDecl(cg, ar);
-  std::string t = genCPPTemp(cg, ar);
-  const char *ref = (isLvalue || constRef) ? "&" : "";
-  /*
-    Note that double parens are necessary:
-    type_name1 tmp27(type_name2(foo));
-    type_name1 tmp28((type_name2(foo)));
 
-    tmp27 is a function returning a type_name1 taking a parameter of
-    type type_name2 (not what we want!)
+  if (dstType) {
+    dstType->outputCPPDecl(cg, ar);
+    std::string t = genCPPTemp(cg, ar);
+    const char *ref = (isLvalue || constRef) ? "&" : "";
+    /*
+      Note that double parens are necessary:
+      type_name1 tmp27(type_name2(foo));
+      type_name1 tmp28((type_name2(foo)));
 
-    tmp28 is an object of type type_name1, initialized by type_name2(foo)
-  */
-  cg_printf(" %s%s((", ref, t.c_str());
+      tmp27 is a function returning a type_name1 taking a parameter of
+      type type_name2 (not what we want!)
 
-  /*
-    In c++ a temporary bound to a reference gets the lifetime of the reference.
-    So "const Variant &tmp27 = foo()" generates a temporary, binds it to v,
-    with the lifetime of v. But "const Variant &tmp27 = ref(foo())", creates a
-    temporary, binds it to ref's parameter, returns a reference to that, and
-    binds it to v; but the temporary gets destroyed at the end of the
-    statement.
-    So we clear the ref context here, and output the ref when we output the use
-    of the temporary (top of outputCPP, below), but in that case, we also need
-    to set the lval context, otherwise, rvalAt would be generated for array
-    elements and object properties.
-  */
-  int save = m_context;
-  if (m_context & RefValue) {
-    m_context &= ~RefValue;
-    if ((is(KindOfArrayElementExpression) ||
-         is(KindOfObjectPropertyExpression)) &&
-        !(m_context & InvokeArgument)) {
-      m_context |= LValue;
-      m_context &= ~NoLValueWrapper;
+      tmp28 is an object of type type_name1, initialized by type_name2(foo)
+    */
+    cg_printf(" %s%s((", ref, t.c_str());
+
+    /*
+      In c++ a temporary bound to a reference gets the lifetime of the
+      reference.
+      So "const Variant &tmp27 = foo()" generates a temporary, and binds it
+      to v, with the lifetime of v.
+      But "const Variant &tmp27 = ref(foo())", creates a temporary, binds it
+      to ref's parameter, returns a reference to that, and binds that to v;
+      but the temporary gets destroyed at the end of the statement.
+
+      So we clear the ref context here, and output the ref when we output the
+      use of the temporary (top of outputCPP, below), but in that case, we also
+      need to set the lval context, otherwise, rvalAt would be generated for
+      array elements and object properties.
+    */
+    int save = m_context;
+    if (m_context & RefValue) {
+      m_context &= ~RefValue;
+      if ((is(KindOfArrayElementExpression) ||
+           is(KindOfObjectPropertyExpression)) &&
+          !(m_context & InvokeArgument)) {
+        m_context |= LValue;
+        m_context &= ~NoLValueWrapper;
+      }
     }
-  }
-  TypePtr et = m_expectedType;
-  TypePtr at = m_actualType;
-  TypePtr it = m_implementedType;
-  if (killCast) {
-    m_actualType = dstType;
-    m_implementedType.reset();
-    m_expectedType.reset();
-  }
-  outputCPP(cg, ar);
-  if (killCast) {
-    m_actualType = at;
-    m_expectedType = et;
-    m_implementedType = it;
-  }
-  m_context = save;
+    TypePtr et = m_expectedType;
+    TypePtr at = m_actualType;
+    TypePtr it = m_implementedType;
+    if (killCast) {
+      m_actualType = dstType;
+      m_implementedType.reset();
+      m_expectedType.reset();
+    }
+    outputCPP(cg, ar);
+    if (killCast) {
+      m_actualType = at;
+      m_expectedType = et;
+      m_implementedType = it;
+    }
+    m_context = save;
 
-  cg_printf("));\n");
-  if (isLvalue && constRef) {
-    dstType->outputCPPDecl(cg, ar);
-    cg_printf(" &%s_lv = const_cast<", t.c_str());
-    dstType->outputCPPDecl(cg, ar);
-    cg_printf("&>(%s);\n", t.c_str());
-    t += "_lv";
-  }
+    cg_printf("));\n");
+    if (isLvalue && constRef) {
+      dstType->outputCPPDecl(cg, ar);
+      cg_printf(" &%s_lv = const_cast<", t.c_str());
+      dstType->outputCPPDecl(cg, ar);
+      cg_printf("&>(%s);\n", t.c_str());
+      t += "_lv";
+    }
 
-  m_cppTemp = t;
+    m_cppTemp = t;
+  } else {
+    if (outputCPPUnneeded(cg, ar)) {
+      cg_printf(";\n");
+    }
+    m_cppTemp = "null";
+  }
 }
 
 bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,

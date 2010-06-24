@@ -501,6 +501,7 @@ Variant getDynamicConstant(CVarRef v, CStrRef name);
 String getUndefinedConstant(CStrRef name);
 
 inline bool isset(CVarRef v) { return !v.isNull();}
+inline bool isset(CObjRef v) { return !v.isNull();}
 bool isset(CVarRef v, bool    offset, int64 prehash = -1);
 bool isset(CVarRef v, char    offset, int64 prehash = -1);
 bool isset(CVarRef v, short   offset, int64 prehash = -1);
@@ -519,6 +520,7 @@ inline Variant unset(Variant &v)               { v.unset();   return null;}
 inline Variant unset(const ObjectOffset &v)    { v.unset();   return null;}
 inline Variant unset(CVarRef v)                {              return null;}
 inline Variant setNull(Variant &v)             { v.setNull(); return null;}
+inline Variant unset(Object &v)                { v.reset();   return null;}
 
 ///////////////////////////////////////////////////////////////////////////////
 // special variable contexts

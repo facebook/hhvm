@@ -619,7 +619,7 @@ class Variant {
   Variant refvalAt(CStrRef key, int64 prehash = -1, bool isString = false);
   Variant refvalAt(CVarRef key, int64 prehash = -1);
 
-  Variant &bindClass(ThreadInfo *info);
+  Variant &bindClass(ThreadInfo *info) const;
 
   Variant o_get(CStrRef propName, int64 prehash = -1,
                 bool error = true) const;

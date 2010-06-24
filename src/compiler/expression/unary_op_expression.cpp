@@ -478,6 +478,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_ARRAY_CAST:    cg_printf("(array)");       break;
     case T_OBJECT_CAST:   cg_printf("(object)");      break;
     case T_BOOL_CAST:     cg_printf("(bool)");        break;
+    case T_UNSET:         cg_printf("unset(");        break;
     case T_UNSET_CAST:    cg_printf("(unset)");       break;
     case T_EXIT:          cg_printf("exit(");         break;
     case '@':             cg_printf("@");             break;
@@ -501,6 +502,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_front) {
     switch (m_op) {
     case '(':
+    case T_UNSET:
     case T_EXIT:
     case T_ARRAY:
     case T_ISSET:

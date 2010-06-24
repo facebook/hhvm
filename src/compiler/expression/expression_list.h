@@ -41,6 +41,7 @@ public:
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
+  virtual void setContext(Context context);
   void setListKind(ListKind kind) { m_kind = kind; }
   ListKind getListKind() const { return m_kind; }
   virtual void addElement(ExpressionPtr exp);
@@ -79,7 +80,7 @@ public:
                     int state);
   bool outputCPPUnneeded(CodeGenerator &cg, AnalysisResultPtr ar);
 private:
-  bool optimize(AnalysisResultPtr ar);
+  void optimize(AnalysisResultPtr ar);
   void outputCPPInternal(CodeGenerator &cg,
                          AnalysisResultPtr ar, bool needed, bool pre);
 

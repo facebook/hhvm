@@ -156,11 +156,9 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size) {
   xmlCleanupParser();
 */
 
-/*
   if (ret) {
     cleanup_xml_node((xmlNodePtr)ret);
   }
-*/
   return ret;
 }
 

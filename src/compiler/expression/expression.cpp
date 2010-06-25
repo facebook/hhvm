@@ -721,12 +721,12 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("ref(");
       closeParen++;
     }
+    bool isArray = is(Expression::KindOfArrayElementExpression);
     if (((((m_context & LValue) != 0) &&
           ((m_context & NoLValueWrapper) == 0)) ||
-         ((m_context & RefValue) != 0) &&
-         ((m_context & InvokeArgument) == 0)) &&
-        (is(Expression::KindOfArrayElementExpression) ||
-         is(Expression::KindOfObjectPropertyExpression))) {
+         (m_context & RefValue) &&
+         (!(m_context & InvokeArgument) || !isArray) ) &&
+        (isArray || is(Expression::KindOfObjectPropertyExpression))) {
       cg_printf("lval(");
       closeParen++;
     }

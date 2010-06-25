@@ -2754,6 +2754,21 @@ bool TestCodeRun::TestObjectProperty() {
       "unset($a->$f);\n"
       "var_dump($a);\n");
 
+  MVCR("<?php "
+       "class X {"
+       "  public $x = 0;"
+       "  function y(&$a) {"
+       "    $a++;"
+       "  }"
+       "};"
+       "if (0) { class X{} }"
+       "function test() {"
+       "  $x = new X;"
+       "  $x->y($x->x);"
+       "  var_dump($x);"
+       "}"
+       "test();");
+
   return true;
 }
 

@@ -619,7 +619,7 @@ public:
   virtual void beginFrameEx() {
     m_stack->m_tsc_start = tsc();
 
-    if (m_flags & (TrackVtsc | TrackCPU)) {
+    if (m_flags & TrackCPU) {
       m_stack->m_vtsc_start = vtsc(m_cur_cpu_id);
     }
 
@@ -638,7 +638,7 @@ public:
     counts.count++;
     counts.wall_time += tsc() - m_stack->m_tsc_start;
 
-    if (m_flags & (TrackCPU | TrackVtsc)) {
+    if (m_flags & TrackCPU) {
       counts.cpu += vtsc(m_cur_cpu_id) - m_stack->m_vtsc_start;
     }
 
@@ -659,7 +659,7 @@ public:
       Array arr;
       arr.set("ct",  counts.count);
       arr.set("wt",  cycles_to_usec(counts.wall_time, m_cur_cpu_id));
-      if (m_flags & (TrackCPU| TrackVtsc)) {
+      if (m_flags & TrackCPU) {
         arr.set("cpu", cycles_to_usec(counts.cpu, m_cur_cpu_id));
       }
       if (m_flags & TrackMemory) {
@@ -898,11 +898,11 @@ Variant f_phprof_disable() {
 void f_xhprof_enable(int flags/* = 0 */,
                      CArrRef args /* = null_array */) {
 #ifdef HOTPROFILER
-  if (flags & HierarchicalProfiler::TrackMemory) {
-    flags |= HierarchicalProfiler::TrackVtsc;
-  }
   if (vtsc_syscall.num <= 0) {
     flags &= ~HierarchicalProfiler::TrackVtsc;
+  }
+  if (flags & HierarchicalProfiler::TrackVtsc) {
+    flags |= HierarchicalProfiler::TrackCPU;
   }
   s_factory->start(ProfilerFactory::Hierarchical, flags);
 #endif

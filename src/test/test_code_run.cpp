@@ -5415,6 +5415,8 @@ bool TestCodeRun::TestCompilation() {
        "$x = new ReflectionClass($className);"
        "return $x->newInstance()->loadAll(); }");
 
+  MVCR("<?php var_dump(array(1,2,3)+array(4,5,6));");
+
   return true;
 }
 

@@ -451,7 +451,8 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultPtr ar) {
       return CONSTANT("null");
     } else if (result.isBoolean()) {
       return CONSTANT(result ? "true" : "false");
-    } else if (result.isDouble() && !finite(result.getDouble())) {
+    } else if (result.isDouble() && !finite(result.getDouble()) ||
+               result.isArray()) {
       return ExpressionPtr();
     } else {
       return ScalarExpressionPtr

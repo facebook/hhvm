@@ -218,13 +218,11 @@ static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
   ASSERT(sockets.is(KindOfArray));
   Array sock_array = sockets.toArray();
   Array ret;
-  int count = 0;
   for (ArrayIter iter(sock_array); iter; ++iter) {
-    pollfd &fd = fds[count++];
+    pollfd &fd = fds[nfds++];
     ASSERT(fd.fd == iter.second().toObject().getTyped<File>()->fd());
     if (fd.revents & flag) {
       ret.append(iter.second());
-      nfds++;
     }
   }
   sockets = ret;

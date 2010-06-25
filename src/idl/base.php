@@ -400,6 +400,22 @@ function generateFuncArgsCPPHeader($func, $f, $forceRef = false,
   fprintf($f, ")");
 }
 
+function generateFuncArgsCall($func, $f, $forceRef = false) {
+  $var_arg = ($func['flags'] & VarArgsMask);
+  $args = $func['args'];
+  if ($var_arg) {
+    fprintf($f, '_argc, ');
+  }
+  for ($i = 0; $i < count($args); $i++) {
+    $arg = $args[$i];
+    fprintf($f, ', ');
+    fprintf($f, '%s', $arg['name']);
+  }
+  if ($var_arg) {
+    fprintf($f, ', _argv');
+  }
+}
+
 function generateFuncCPPHeader($func, $f, $method = false, $forceref = false,
                                $static = false) {
   fprintf($f, '%s%s %s_%s', $static ? 'static ' : '',
@@ -407,6 +423,14 @@ function generateFuncCPPHeader($func, $f, $method = false, $forceref = false,
           $func['name']);
   generateFuncArgsCPPHeader($func, $f, $forceref, $static);
   fprintf($f, ";\n");
+
+  if ($static && $method) {
+    fprintf($f, '  public: static %s t_%s', typename($func['return']), $func['name']);
+    generateFuncArgsCPPHeader($func, $f, $forceref, $static);
+    fprintf($f, " {\n    return ti_%s(\"%s\"", $func['name'], $func['name']);
+    generateFuncArgsCall($func, $f, $forceref);
+    fprintf($f, ");\n  }\n");
+  }
 }
 
 function generateFuncProfileHeader($func, $f) {

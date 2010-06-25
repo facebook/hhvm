@@ -52,13 +52,20 @@ class c_normalizer : public ExtObjectData, public Sweepable {
   public: ~c_normalizer();
   public: void t___construct();
   public: static Variant ti_isnormalized(const char* cls , CStrRef input, int64 form = q_normalizer_FORM_C);
+  public: static Variant t_isnormalized(const char* cls , CStrRef input, int64 form = q_normalizer_FORM_C) {
+    return ti_isnormalized("isnormalized", input, form);
+  }
   public: static Variant ti_normalize(const char* cls , CStrRef input, int64 form = q_normalizer_FORM_C);
+  public: static Variant t_normalize(const char* cls , CStrRef input, int64 form = q_normalizer_FORM_C) {
+    return ti_normalize("normalize", input, form);
+  }
   public: Variant t___destruct();
 
   // implemented by HPHP
   public: c_normalizer *create();
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
+  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
+                                    const Eval::FunctionCallExpression *call);
   public: virtual void destruct();
 
 };

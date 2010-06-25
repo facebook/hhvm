@@ -67,7 +67,8 @@ class c_datetime : public ExtObjectData {
   public: c_datetime *create(String time = "now",
                              Object timezone = null_object);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
+  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
+                                    const Eval::FunctionCallExpression *call);
   public: virtual void destruct();
 
   // Helper for DateTime -> c_datetime conversion
@@ -125,10 +126,10 @@ class c_datetimezone : public ExtObjectData {
   public: int64 t_getoffset(CObjRef datetime);
   public: Array t_gettransitions();
   public: static Array ti_listabbreviations(const char* cls);
-  public: static Array ti_listidentifiers(const char* cls);
   public: static Array t_listabbreviations() {
     return ti_listabbreviations("datetimezone");
   }
+  public: static Array ti_listidentifiers(const char* cls);
   public: static Array t_listidentifiers() {
     return ti_listidentifiers("datetimezone");
   }
@@ -137,7 +138,8 @@ class c_datetimezone : public ExtObjectData {
   // implemented by HPHP
   public: c_datetimezone *create(String timezone);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
+  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
+                                    const Eval::FunctionCallExpression *call);
   public: virtual void destruct();
 
   // Helper for TimeZone -> c_datetimezone conversion

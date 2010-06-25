@@ -139,6 +139,9 @@ class c_pdo : public ExtObjectData, public Sweepable {
   public: Variant t___wakeup();
   public: Variant t___sleep();
   public: static Array ti_getavailabledrivers(const char* cls );
+  public: static Array t_getavailabledrivers(const char* cls ) {
+    return ti_getavailabledrivers("getavailabledrivers");
+  }
   public: Variant t___destruct();
 
   // implemented by HPHP

@@ -116,6 +116,19 @@ bool TestExtPdo::test_pdo_sqlite() {
     VS(e, null);
   }
 
+  {
+    string source = "sqlite:/tmp/foo.db";
+    sp_pdo dbh((NEW(c_pdo)())->
+               create(source.c_str(), TEST_USERNAME, TEST_PASSWORD,
+                      CREATE_MAP1(q_pdo_ATTR_PERSISTENT, false)));
+    dbh->t_query("CREATE TABLE IF NOT EXISTS foobar (id INT)");
+    dbh->t_query("INSERT INTO foobar (id) VALUES (1)");
+    Variant res = dbh->t_query("SELECT id FROM foobar LIMIT 1");
+    c_pdostatement *stmt = res.toObject().getTyped<c_pdostatement>();
+    Variant ret = stmt->t_fetch();
+    VS(ret["id"], "1");
+  }
+
   CleanupSqliteTestTable();
   return Count(true);
 }

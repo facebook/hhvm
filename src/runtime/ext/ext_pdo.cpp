@@ -2671,7 +2671,7 @@ Variant c_pdostatement::t_execute(CArrRef params /* = null_array */) {
   return false;
 }
 
-Variant c_pdostatement::t_fetch(int64 how /* = q_pdo_FETCH_USE_DEFAULT */,
+Variant c_pdostatement::t_fetch(int64 how /* = q_pdo_FETCH_BOTH */,
                                 int64 orientation /* = q_pdo_FETCH_ORI_NEXT */,
                                 int64 offset /* = 0 */) {
   INSTANCE_METHOD_INJECTION(pdostatement, pdostatement::fetch);
@@ -2746,7 +2746,7 @@ Variant c_pdostatement::t_fetchcolumn(int64 column_numner /* = 0 */) {
   return ret;
 }
 
-Variant c_pdostatement::t_fetchall(int64 how /* = q_pdo_FETCH_USE_DEFAULT */,
+Variant c_pdostatement::t_fetchall(int64 how /* = q_pdo_FETCH_BOTH */,
                                    CVarRef class_name /* = null */,
                                    CVarRef ctor_args /* = null */) {
   INSTANCE_METHOD_INJECTION(pdostatement, pdostatement::fetchall);

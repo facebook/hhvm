@@ -496,6 +496,7 @@ bool TestCodeRun::TestSanity() {
       "Hello, World! # comments\n"
       "<?php\n"
       "print 'hello'; # comments");
+  MVCR("<?php if (true) { ?>#<?php } ?>");
   return true;
 }
 

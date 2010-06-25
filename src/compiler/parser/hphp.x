@@ -7,6 +7,7 @@
 #define SETTOKEN _scanner->setToken(yytext, yyleng, yytext, yyleng)
 %}
 
+%x ST_IN_HTML
 %x ST_IN_SCRIPTING
 %x ST_DOUBLE_QUOTES
 %x ST_BACKQUOTE
@@ -318,15 +319,16 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 
 <INITIAL>"#"[^\n]*"\n" {
         SETTOKEN;
+        BEGIN(ST_IN_HTML);
         return T_INLINE_HTML;
 }
 
-<INITIAL>(([^<]|"<"[^?%s<]){1,400})|"<s"|"<" {
+<INITIAL,ST_IN_HTML>(([^<]|"<"[^?%s<]){1,400})|"<s"|"<" {
         SETTOKEN;
         return T_INLINE_HTML;
 }
 
-<INITIAL>"<?"|"<script"{WHITESPACE}+"language"{WHITESPACE}*"="{WHITESPACE}*("php"|"\"php\""|"\'php\'"){WHITESPACE}*">" {
+<INITIAL,ST_IN_HTML>"<?"|"<script"{WHITESPACE}+"language"{WHITESPACE}*"="{WHITESPACE}*("php"|"\"php\""|"\'php\'"){WHITESPACE}*">" {
         SETTOKEN;
         if (_scanner->shortTags() || yyleng > 2) {
                 BEGIN(ST_IN_SCRIPTING);
@@ -336,7 +338,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         }
 }
 
-<INITIAL>"<%="|"<?=" {
+<INITIAL,ST_IN_HTML>"<%="|"<?=" {
         SETTOKEN;
         if ((yytext[1]=='%' && _scanner->aspTags()) ||
             (yytext[1]=='?' && _scanner->shortTags())) {
@@ -347,7 +349,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         }
 }
 
-<INITIAL>"<%" {
+<INITIAL,ST_IN_HTML>"<%" {
         SETTOKEN;
         if (_scanner->aspTags()) {
                 BEGIN(ST_IN_SCRIPTING);
@@ -357,7 +359,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         }
 }
 
-<INITIAL>"<?php"([ \t]|{NEWLINE}) {
+<INITIAL,ST_IN_HTML>"<?php"([ \t]|{NEWLINE}) {
         SETTOKEN;
         BEGIN(ST_IN_SCRIPTING);
         return T_OPEN_TAG;
@@ -491,14 +493,14 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 
 <ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">"){NEWLINE}? {
         SETTOKEN;
-        BEGIN(INITIAL);
+        BEGIN(ST_IN_HTML);
         return ';'; //return T_CLOSE_TAG;
 }
 
 <ST_IN_SCRIPTING>"%>"{NEWLINE}? {
         if (_scanner->aspTags()) {
                 SETTOKEN;
-                BEGIN(INITIAL);
+                BEGIN(ST_IN_HTML);
                 return ';'; //return T_CLOSE_TAG;
         } else {
                 yyless(1);

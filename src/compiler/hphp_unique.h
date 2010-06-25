@@ -32,6 +32,8 @@ enum HphpHookUniqueId {
   afterDependencyGraphAdd,
   onPackageAddDirectory,
   onScalarExpressionParse,
+  onSimpleFunctionCallPreOptimize,
+  onSimpleFunctionCallPostOptimize
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -39,7 +39,7 @@ using namespace boost;
 IncludeExpression::IncludeExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp, int op)
   : UnaryOpExpression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES, exp, op, true),
-    m_documentRoot(false) {
+    m_documentRoot(false), m_privateScope(false) {
 }
 
 ExpressionPtr IncludeExpression::clone() {
@@ -69,7 +69,6 @@ std::string IncludeExpression::getCurrentInclude(AnalysisResultPtr ar) {
 
 void IncludeExpression::analyzeInclude(AnalysisResultPtr ar,
                                        const std::string &include) {
-  ASSERT(ar->getPhase() == AnalysisResult::AnalyzeInclude);
   ConstructPtr self = shared_from_this();
   FileScopePtr file = ar->findFileScope(include, true);
   if (!file) {
@@ -112,7 +111,8 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
       analyzeInclude(ar, include);
     }
   }
-  if (!ar->getScope()->inPseudoMain()) {
+  if (!ar->getScope()->inPseudoMain() &&
+      !m_privateScope) {
     VariableTablePtr var = ar->getScope()->getVariables();
     var->setAttribute(VariableTable::ContainsLDynamicVariable);
     var->forceVariants(ar);
@@ -122,7 +122,18 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr IncludeExpression::preOptimize(AnalysisResultPtr ar) {
-  return UnaryOpExpression::preOptimize(ar);
+  if (ExpressionPtr rep = UnaryOpExpression::preOptimize(ar)) {
+    return rep;
+  }
+  if (m_include.empty() && ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
+    m_include = ar->getDependencyGraph()->add
+      (DependencyGraph::KindOfPHPInclude, shared_from_this(), m_exp,
+       ar->getCodeError(), m_documentRoot);
+    if (!m_include.empty()) {
+      analyzeInclude(ar, m_include);
+    }
+  }
+  return ExpressionPtr();
 }
 
 ExpressionPtr IncludeExpression::postOptimize(AnalysisResultPtr ar) {
@@ -165,13 +176,17 @@ void IncludeExpression::outputCPPImpl(CodeGenerator &cg,
     if (linemap) cg_printf(")");
     return;
   }
+  const char *vars = m_privateScope ?
+    "lvar_ptr(LVariableTable())" : "variables";
   bool require = (m_op == T_REQUIRE || m_op == T_REQUIRE_ONCE);
   bool once = (m_op == T_INCLUDE_ONCE || m_op == T_REQUIRE_ONCE);
   if (!getCurrentInclude(ar).empty()) {
     FileScopePtr fs = ar->findFileScope(getCurrentInclude(ar), false);
     if (fs) {
-      cg_printf("%s%s(%s, variables)", Option::PseudoMainPrefix,
-                fs->pseudoMainName().c_str(), once ? "true" : "false");
+      cg_printf("%s%s(%s, %s)", Option::PseudoMainPrefix,
+                fs->pseudoMainName().c_str(),
+                once ? "true" : "false",
+                vars);
       if (linemap) cg_printf(")");
       return;
     }
@@ -192,7 +207,9 @@ void IncludeExpression::outputCPPImpl(CodeGenerator &cg,
   // fallback to dynamic include
   cg_printf("%s(", require ? "require" : "include");
   m_exp->outputCPP(cg, ar);
-  cg_printf(", %s, variables, %s)", once ? "true" : "false",
+  cg_printf(", %s, %s, %s)",
+            once ? "true" : "false",
+            vars,
             currentDir.c_str());
   if (linemap) cg_printf(")");
 }

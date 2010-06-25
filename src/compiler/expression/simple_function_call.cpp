@@ -42,14 +42,11 @@ using namespace boost;
 
 std::map<std::string, int>SimpleFunctionCall::FunctionTypeMap;
 
-#define CHECK_HOOK(n) \
-do { \
-  if (SimpleFunctionCall::m_hookHandler) { \
-    SimpleFunctionCall::m_hookHandler(ar, this, n); \
-  } \
-} while (0)
+#define CHECK_HOOK(n)                                   \
+  (SimpleFunctionCall::m_hookHandler ?                  \
+   SimpleFunctionCall::m_hookHandler(ar, this, n) : 0)
 
-void (*SimpleFunctionCall::m_hookHandler)
+Expression *(*SimpleFunctionCall::m_hookHandler)
   (AnalysisResultPtr ar, SimpleFunctionCall *call, HphpHookUniqueId id);
 
 void SimpleFunctionCall::InitFunctionTypeMap() {
@@ -382,6 +379,14 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
   }
   ar->preOptimize(m_nameExp);
   ar->preOptimize(m_params);
+  if (ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
+    if (Expression *rep = CHECK_HOOK(onSimpleFunctionCallPreOptimize)) {
+      ExpressionPtr tmp(rep);
+      ar->preOptimize(tmp);
+      return tmp;
+    }
+  }
+
   if (ar->getPhase() != AnalysisResult::SecondPreOptimize) {
     return ExpressionPtr();
   }

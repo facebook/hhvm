@@ -37,7 +37,8 @@ public:
 
   void setDocumentRoot() { m_documentRoot = true;}
   bool isDocumentRoot() { return m_documentRoot;}
-
+  void setPrivateScope() { m_privateScope = true; }
+  bool getPrivateScope() const { return m_privateScope; }
 private:
   /**
    * There are 3 forms of include paths:
@@ -47,6 +48,7 @@ private:
    *   3. "<relative_path>" + m_documentRoot == true: relative to doc root
    */
   bool m_documentRoot;
+  bool m_privateScope;
   std::string m_include;
 
   std::string getCurrentInclude(AnalysisResultPtr ar);

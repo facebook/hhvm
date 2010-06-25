@@ -674,6 +674,10 @@ inline const SmartObject<T> &id(const SmartObject<T> &v) { return v; }
  */
 inline Variant wrap_variant(CVarRef x) { return x; }
 
+inline LVariableTable *lvar_ptr(const LVariableTable &vt) {
+  return const_cast<LVariableTable*>(&vt);
+}
+
 bool function_exists(CStrRef function_name);
 
 /**

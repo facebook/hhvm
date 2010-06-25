@@ -48,9 +48,10 @@ public:
   virtual void onParse(AnalysisResultPtr ar);
 
   void *getHookData() { return m_hookData;}
-  static void setHookHandler(void (*hookHandler)(AnalysisResultPtr ar,
-                                                 SimpleFunctionCall *call,
-                                                 HphpHookUniqueId id)) {
+  static void setHookHandler(
+    Expression *(*hookHandler)(AnalysisResultPtr ar,
+                               SimpleFunctionCall *call,
+                               HphpHookUniqueId id)) {
     m_hookHandler = hookHandler;
   }
 
@@ -92,9 +93,9 @@ private:
   bool m_invokeFewArgsDecision;
   bool m_dynamicInvoke;
   // hook
-  static void (*m_hookHandler)(AnalysisResultPtr ar,
-                               SimpleFunctionCall *call,
-                               HphpHookUniqueId id);
+  static Expression* (*m_hookHandler)(AnalysisResultPtr ar,
+                                      SimpleFunctionCall *call,
+                                      HphpHookUniqueId id);
   void *m_hookData;
 };
 

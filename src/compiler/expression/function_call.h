@@ -48,6 +48,7 @@ public:
   void setFunctionAndClassScope(FunctionScopePtr fsp, ClassScopePtr csp);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                     int state);
+  void deepCopy(FunctionCallPtr exp);
 
   FunctionScopePtr getFuncScope() const { return m_funcScope; }
 protected:

@@ -118,7 +118,7 @@ SimpleFunctionCall::~SimpleFunctionCall() {
 ExpressionPtr SimpleFunctionCall::clone() {
   SimpleFunctionCallPtr exp(new SimpleFunctionCall(*this));
   FunctionCall::deepCopy(exp);
-  exp->m_params = Clone(m_params);
+  exp->m_hookData = 0;
   return exp;
 }
 

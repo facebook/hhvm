@@ -41,7 +41,6 @@ DynamicFunctionCall::DynamicFunctionCall
 ExpressionPtr DynamicFunctionCall::clone() {
   DynamicFunctionCallPtr exp(new DynamicFunctionCall(*this));
   FunctionCall::deepCopy(exp);
-  exp->m_params = Clone(m_params);
   return exp;
 }
 

@@ -48,10 +48,8 @@ ObjectMethodExpression::ObjectMethodExpression
 
 ExpressionPtr ObjectMethodExpression::clone() {
   ObjectMethodExpressionPtr exp(new ObjectMethodExpression(*this));
-  Expression::deepCopy(exp);
-  exp->m_params = Clone(m_params);
+  FunctionCall::deepCopy(exp);
   exp->m_object = Clone(m_object);
-  exp->m_nameExp = Clone(m_nameExp);
   return exp;
 }
 

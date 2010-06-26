@@ -42,7 +42,6 @@ NewObjectExpression::NewObjectExpression
 ExpressionPtr NewObjectExpression::clone() {
   NewObjectExpressionPtr exp(new NewObjectExpression(*this));
   FunctionCall::deepCopy(exp);
-  exp->m_params = Clone(m_params);
   return exp;
 }
 

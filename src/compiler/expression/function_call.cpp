@@ -70,6 +70,13 @@ bool FunctionCall::isTemporary() const {
   return m_funcScope && !m_funcScope->isRefReturn();
 }
 
+void FunctionCall::deepCopy(FunctionCallPtr exp) {
+  Expression::deepCopy(exp);
+  exp->m_class = Clone(m_class);
+  exp->m_params = Clone(m_params);
+  exp->m_nameExp = Clone(m_nameExp);
+}
+
 ConstructPtr FunctionCall::getNthKid(int n) const {
   switch (n) {
     case 0:

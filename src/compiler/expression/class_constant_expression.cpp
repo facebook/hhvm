@@ -45,6 +45,7 @@ ClassConstantExpression::ClassConstantExpression
 ExpressionPtr ClassConstantExpression::clone() {
   ClassConstantExpressionPtr exp(new ClassConstantExpression(*this));
   Expression::deepCopy(exp);
+  exp->m_class = Clone(m_class);
   return exp;
 }
 

@@ -45,6 +45,7 @@ IncludeExpression::IncludeExpression
 ExpressionPtr IncludeExpression::clone() {
   IncludeExpressionPtr exp(new IncludeExpression(*this));
   Expression::deepCopy(exp);
+  exp->m_exp = Clone(m_exp);
   return exp;
 }
 

@@ -46,6 +46,7 @@ ParameterExpression::ParameterExpression
 ExpressionPtr ParameterExpression::clone() {
   ParameterExpressionPtr exp(new ParameterExpression(*this));
   Expression::deepCopy(exp);
+  exp->m_defaultValue = Clone(m_defaultValue);
   return exp;
 }
 

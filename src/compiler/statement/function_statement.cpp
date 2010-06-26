@@ -49,6 +49,7 @@ StatementPtr FunctionStatement::clone() {
   FunctionStatementPtr stmt(new FunctionStatement(*this));
   stmt->m_stmt = Clone(m_stmt);
   stmt->m_params = Clone(m_params);
+  stmt->m_modifiers = Clone(m_modifiers);
   return stmt;
 }
 

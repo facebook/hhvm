@@ -40,6 +40,7 @@ ExpressionPtr ListAssignment::clone() {
   ListAssignmentPtr exp(new ListAssignment(*this));
   Expression::deepCopy(exp);
   exp->m_variables = Clone(m_variables);
+  exp->m_array = Clone(m_array);
   return exp;
 }
 

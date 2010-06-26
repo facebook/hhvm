@@ -56,7 +56,52 @@ public:
 template<class K, class V, class H, class E,
          class D = LFUNullDestructor<K, V> >
 class LFUTable {
+  class Node {
+  public:
+    Node(const K &k) : key(k), prev(NULL), next(NULL), hits(0), heapIndex(0),
+                       immortal(false), m_freq(0), m_timestamp(time(NULL)) {}
+    Node(const K &k, const V &v)
+      : key(k), val(v), prev(NULL), next(NULL),  hits(0), heapIndex(0),
+        immortal(false), m_freq(0), m_timestamp(time(NULL))  {}
+    ~Node() {
+      D d;
+      d(key, val);
+    }
+    const K &key;
+    V val;
+    Node *prev;
+    Node *next;
+    uint64 hits;
+    uint heapIndex;
+    bool immortal;
+
+
+    // Frequency updates must be accompanied by heap updates since otherwise
+    // it may break the heap property. It should probably be under lock too.
+    bool updateFrequency() {
+      double lifetime = time(NULL) - m_timestamp;
+      double oldFreq = m_freq;
+      if (lifetime > 0) {
+        m_freq = hits / lifetime;
+      }
+      return m_freq > oldFreq;
+    }
+    double frequency() const {
+      return m_freq;
+    }
+    time_t timestamp() {
+      return m_timestamp;
+    }
+  private:
+    double m_freq;
+    time_t m_timestamp;
+  };
+  // The map
+  class Map : public hphp_hash_map<K, Node*, H, E>  {};
+  //typedef std::map<K, Node*> Map;
+
 public:
+  class LFUTableConstIterator;
   class LFUTableIterator {
   public:
     LFUTableIterator(typename LFUTable::Map::iterator &it) : m_it(it) {}
@@ -327,46 +372,6 @@ public:
   }
 
 private:
-  class Node {
-  public:
-    Node(const K &k) : key(k), prev(NULL), next(NULL), hits(0), heapIndex(0),
-                       immortal(false), m_freq(0), m_timestamp(time(NULL)) {}
-    Node(const K &k, const V &v)
-      : key(k), val(v), prev(NULL), next(NULL),  hits(0), heapIndex(0),
-        immortal(false), m_freq(0), m_timestamp(time(NULL))  {}
-    ~Node() {
-      D d;
-      d(key, val);
-    }
-    const K &key;
-    V val;
-    Node *prev;
-    Node *next;
-    uint64 hits;
-    uint heapIndex;
-    bool immortal;
-
-
-    // Frequency updates must be accompanied by heap updates since otherwise
-    // it may break the heap property. It should probably be under lock too.
-    bool updateFrequency() {
-      double lifetime = time(NULL) - m_timestamp;
-      double oldFreq = m_freq;
-      if (lifetime > 0) {
-        m_freq = hits / lifetime;
-      }
-      return m_freq > oldFreq;
-    }
-    double frequency() const {
-      return m_freq;
-    }
-    time_t timestamp() {
-      return m_timestamp;
-    }
-  private:
-    double m_freq;
-    time_t m_timestamp;
-  };
 
 private:
   //////////////////////////////////////////////////////////////////////////////
@@ -614,9 +619,6 @@ private:
   Node *m_tail;
   // The heap
   std::vector<Node*> m_heap;
-  // The map
-  typedef hphp_hash_map<K, Node*, H, E> Map;
-  //typedef std::map<K, Node*> Map;
   Map m_map;
   size_t m_immortalCount;
 

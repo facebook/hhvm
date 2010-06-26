@@ -36,14 +36,12 @@ class SharedVariant;
  */
 class StringData {
  private:
-  enum BitMask {
-    IsLiteral = (1 << 31), // literal string
-    IsShared  = (1 << 30), // shared memory string
-    IsLinear  = (1 << 29), // linear allocator's memory
+    const static unsigned int IsLiteral = (1 << 31); // literal string
+    const static unsigned int IsShared  = (1 << 30); // shared memory string
+    const static unsigned int IsLinear  = (1 << 29); // linear allocator memory
 
-    IsMask = IsLiteral | IsShared | IsLinear,
-    LenMask = ~IsMask,
-  };
+    const static unsigned int IsMask = IsLiteral | IsShared | IsLinear;
+    const static unsigned int LenMask = ~IsMask;
 
  public:
 

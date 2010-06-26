@@ -59,7 +59,7 @@ Variant f_stream_get_contents(CObjRef handle, int maxlen /* = 0 */,
   }
 
   File *file = handle.getTyped<File>();
-  if (offset > 0 && file->seek(offset, SEEK_SET) < 0) {
+  if (offset > 0 && !file->seek(offset, SEEK_SET) ) {
     raise_warning("Failed to seek to position %ld in the stream", offset);
     return false;
   }

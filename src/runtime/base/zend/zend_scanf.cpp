@@ -383,7 +383,7 @@ notXpg:
 mixedXPG:
       if (nassign != staticAssign) free((char *)nassign);
       throw_invalid_argument
-        ("format: cannot mix \"\%\" and \"\%n$\" conversion specifiers");
+        ("format: cannot mix \"%\" and \"%n$\" conversion specifiers");
       return SCAN_ERROR_INVALID_FORMAT;
     }
 

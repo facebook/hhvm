@@ -915,7 +915,7 @@ static struct gfxinfo *php_handle_jpc(CObjRef stream) {
 #endif
 
   result->channels = php_read2(stream); /* Csiz */
-  if (result->channels < 0 || result->channels > 256) {
+  if (result->channels > 256) {
     IM_FREE(result);
     return NULL;
   }

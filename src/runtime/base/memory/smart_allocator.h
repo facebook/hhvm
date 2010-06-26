@@ -426,6 +426,16 @@ inline void *operator new(size_t sizeT, HPHP::ObjectAllocatorBase *a) {
   return a->alloc();
 }
 
+template<typename T, int TNameEnum, int F>
+inline void operator delete
+(void *p, HPHP::SmartAllocator<T, TNameEnum, F> *a) {
+  a->release((T*)p);
+}
+
+inline void operator delete(void *p , HPHP::ObjectAllocatorBase *a) {
+  a->release(p);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #endif // __HPHP_SMART_ALLOCATOR_H__

@@ -157,6 +157,13 @@ extern "C" {
   void hphp_ffi_set_global(const char *name, HPHP::Variant *value);
 
   /**
+   * Gets constants
+   */
+  int hphp_ffi_get_constant(void **ret, const char *constant);
+  int hphp_ffi_get_class_constant(void **ret, const char *cls,
+                                  const char *constant);
+
+  /**
    * Initializes static constants and runtime options.
    */
   void hphp_ffi_init();

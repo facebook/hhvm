@@ -79,4 +79,8 @@ Variant *hphpGetGlobal(HphpSession *, const char *);
 
 void hphpSetGlobal(HphpSession *, const char *, Variant *);
 
+Variant *hphpGetConstant(HphpSession *, const char *);
+
+Variant *hphpGetClassConstant(HphpSession *, const char *, const char *);
+
 void hphpDump(HphpSession *, Variant *);

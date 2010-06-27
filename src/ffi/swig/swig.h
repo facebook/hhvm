@@ -364,7 +364,7 @@ bool hphpIssetField(HPHP::HphpSession *s, HPHP::Variant *obj,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// global variables
+// global variables and constants
 
 HPHP::Variant *hphpGetGlobal(HPHP::HphpSession *s, const char *name) {
   void *result;
@@ -377,6 +377,23 @@ HPHP::Variant *hphpGetGlobal(HPHP::HphpSession *s, const char *name) {
 void hphpSetGlobal(HPHP::HphpSession *s, const char *name,
                    HPHP::Variant *value) {
   hphp_ffi_set_global(name, value);
+}
+
+HPHP::Variant *hphpGetConstant(HPHP::HphpSession *s, const char *constant) {
+  void *result;
+  int kind = hphp_ffi_get_constant(&result, constant);
+  HPHP::Variant *ret = hphpBuildVariant(kind, result);
+  s->addVariant(ret);
+  return ret;
+}
+
+HPHP::Variant *hphpGetClassConstant(HPHP::HphpSession *s, const char *cls,
+                                    const char *constant) {
+  void *result;
+  int kind = hphp_ffi_get_class_constant(&result, cls, constant);
+  HPHP::Variant *ret = hphpBuildVariant(kind, result);
+  s->addVariant(ret);
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

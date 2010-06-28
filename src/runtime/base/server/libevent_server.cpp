@@ -277,6 +277,7 @@ bool LibEventServer::enableSSL(const std::string &certFile,
   }
   config.cert_file = (char*)certFile.c_str();
   config.pk_file = (char*)keyFile.c_str();
+#ifdef _EVENT_USE_OPENSSL
   m_server_ssl = evhttp_new_openssl(m_eventBase, &config);
   if (m_server_ssl == NULL) {
     Logger::Error("evhttp_new_openssl failed");
@@ -285,13 +286,17 @@ bool LibEventServer::enableSSL(const std::string &certFile,
   m_port_ssl = port;
   evhttp_set_gencb(m_server_ssl, on_request, this);
   return true;
+#else
+  Logger::Error("A SSL enabled libevent is required");
+  return false;
+#endif
 }
 
 int LibEventServer::getAcceptSocketSSL() {
   int ret = evhttp_bind_socket_with_fd(m_server_ssl, m_address.c_str(),
       m_port_ssl);
   if (ret < 0) {
-    Logger::Error("Failed to bind port %s for SSL", m_port_ssl);
+    Logger::Error("Failed to bind port %d for SSL", m_port_ssl);
     return -1;
   }
   Logger::Info("SSL enabled");
@@ -325,8 +330,12 @@ void LibEventServer::onRequest(struct evhttp_request *request) {
 void LibEventServer::onResponse(int worker, evhttp_request *request,
                                 int code) {
   int nwritten = 0;
-  if (RuntimeOption::LibEventSyncSend &&
-      !evhttp_is_connection_ssl(request->evcon)) {
+  bool skip_sync = false;
+#ifdef _EVENT_USE_OPENSSL
+  skip_sync = evhttp_is_connection_ssl(request->evcon);
+#endif
+
+  if (RuntimeOption::LibEventSyncSend && !skip_sync) {
     const char *reason = HttpProtocol::GetReasonString(code);
     nwritten = evhttp_send_reply_sync_begin(request, code, reason, NULL);
   }

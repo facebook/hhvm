@@ -270,6 +270,7 @@ void LibEventServer::stop() {
 bool LibEventServer::enableSSL(const std::string &certFile,
     const std::string &keyFile,
     int port) {
+#ifdef _EVENT_USE_OPENSSL
   struct ssl_config config;
   if (certFile == "" || keyFile == "") {
     Logger::Error("Invalid certificate file or key file");
@@ -277,7 +278,6 @@ bool LibEventServer::enableSSL(const std::string &certFile,
   }
   config.cert_file = (char*)certFile.c_str();
   config.pk_file = (char*)keyFile.c_str();
-#ifdef _EVENT_USE_OPENSSL
   m_server_ssl = evhttp_new_openssl(m_eventBase, &config);
   if (m_server_ssl == NULL) {
     Logger::Error("evhttp_new_openssl failed");

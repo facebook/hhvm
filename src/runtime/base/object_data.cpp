@@ -37,16 +37,13 @@ static IMPLEMENT_THREAD_LOCAL(int, os_max_id);
 // constructor/destructor
 
 ObjectData::ObjectData()
-    : o_properties(NULL), o_unsetprops(NULL), o_attribute(0) {
+    : o_properties(NULL), o_attribute(0) {
   o_id = ++(*os_max_id.get());
 }
 
 ObjectData::~ObjectData() {
   if (o_properties) {
     o_properties->release();
-  }
-  if (o_unsetprops) {
-    o_unsetprops->release();
   }
   int *pmax = os_max_id.get();
   if (o_id == *pmax) {
@@ -585,25 +582,17 @@ Variant ObjectData::t___unset(Variant v_name) {
   unset(o_lval(sname, -1));
   if (o_properties && o_properties->exists(sname, -1, true)) {
     o_properties->weakRemove(sname, -1, true);
-  } else {
-    if (!o_unsetprops) {
-      o_unsetprops = NEW(Array)();
-    }
-    o_unsetprops->set(sname, true, -1, true);
   }
   return null;
 }
 
 bool ObjectData::o_propExists(CStrRef s, int64 hash /* = -1 */,
                               const char *context /* = NULL */) {
-  if (o_unsetprops && o_unsetprops->exists(s, -1, true)) {
-    // This is to make sure if the property is assigned with a value later,
-    // we will still return true. BUG: if it's re-assigned with "null", we
-    // really have no easy way to tell. We can't possibly instrument all
-    // "m_member = whatever" code to unset o_unsetprops.
-    return !o_get(s, -1, false).isNull();
-  }
-  return o_exists(s, hash, context);
+  // Exists and the value is not null or it is null but also initialized.
+  // Can't just do isInitialized because type inferred properties may not
+  // be in the o_lval table.
+  return o_exists(s, hash, context) && (!o_get(s, hash, context).isNull() ||
+      o_lval(s, hash, context).isInitialized());
 }
 
 Variant ObjectData::t___sleep() {

@@ -240,7 +240,6 @@ class ObjectData : public Countable {
  protected:
   int o_id;                      // a numeric identifier of this object
   mutable Array *o_properties;   // dynamic properties
-  mutable Array *o_unsetprops;   // properties that were unset
  private:
   mutable int16  o_attribute;    // vairous flags
 

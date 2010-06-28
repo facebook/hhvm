@@ -118,7 +118,9 @@ void EvalObjectData::o_get(Array &props) const {
     prefix += zero;
     for (ArrayIter it2(it.second()); !it2.end(); it2.next()) {
       CVarRef v = it2.secondRef();
-      props.set(prefix + it2.first(), v.isReferenced() ? ref(v) : v);
+      if (v.isInitialized()) {
+        props.set(prefix + it2.first(), v.isReferenced() ? ref(v) : v);
+      }
     }
   }
   DynamicObjectData::o_get(props);

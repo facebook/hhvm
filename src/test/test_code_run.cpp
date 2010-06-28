@@ -2539,9 +2539,8 @@ bool TestCodeRun::TestObjectProperty() {
        "var_dump(isset($obj->a), property_exists($obj, 'a'));\n"
        "$obj->a = 123;\n"
        "var_dump(isset($obj->a), property_exists($obj, 'a'));\n"
-       // This isn't going to work, but treating this as rare rare rare event:
-       //"$obj->a = null;\n"
-       //"var_dump(isset($obj->a), property_exists($obj, 'a'));\n"
+       "$obj->a = null;\n"
+       "var_dump(isset($obj->a), property_exists($obj, 'a'));\n"
        );
 
   MVCR("<?php\n"
@@ -2768,6 +2767,20 @@ bool TestCodeRun::TestObjectProperty() {
        "  var_dump($x);"
        "}"
        "test();");
+  MVCR("<?php "
+      "class A {"
+      "  private $a = array('apple');"
+      "  private $b = 'banana';"
+      "  function foo() {"
+      "    $b = new A();"
+      "    unset($b->b);"
+      "    var_dump($b);"
+      "    foreach ($b as $prop => $value) {"
+      "      var_dump($prop);"
+      "    }"
+      "  }"
+      "}"
+      "A::foo();");
 
   return true;
 }

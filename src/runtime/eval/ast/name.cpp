@@ -49,17 +49,17 @@ NamePtr Name::LateStatic(CONSTRUCT_ARGS) {
 
 StringName::StringName(CONSTRUCT_ARGS, const string &name,
     bool isSp /* = false */)
-  : Name(CONSTRUCT_PASS), m_name(name),
-    m_hash(hash_string(m_name.c_str(), m_name.size())),
-    m_hashLwr(hash_string_i(m_name.c_str(), m_name.size())),
-    m_sname(m_name, false), m_isSp(isSp) {}
+  : Name(CONSTRUCT_PASS), m_hash(hash_string(name.c_str(), name.size())),
+    m_hashLwr(hash_string_i(name.c_str(), name.size())),
+    m_name(name), m_isSp(isSp) {
+}
 
 String StringName::get(VariableEnvironment &env) const {
   return getStatic();
 }
 
 String StringName::getStatic() const {
-  return m_sname;
+  return String(m_name.c_str(), m_name.size(), AttachLiteral);
 }
 
 int64 StringName::hash() const {
@@ -72,7 +72,7 @@ int64 StringName::hashLwr() const {
 bool StringName::isSp() const { return m_isSp; }
 
 void StringName::dump() const {
-  printf("%s", m_name.c_str());
+  printf("%s", m_name.data());
 }
 
 ExprName::ExprName(CONSTRUCT_ARGS, ExpressionPtr name)

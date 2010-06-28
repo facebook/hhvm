@@ -52,11 +52,9 @@ public:
   virtual bool isSp() const;
   virtual void dump() const;
 private:
-  std::string m_name;
   int64 m_hash;
   int64 m_hashLwr;
-  // FIXME shouldn't have a StaticString destructed with its container!
-  StaticString m_sname;
+  std::string m_name;
   bool m_isSp;
 };
 

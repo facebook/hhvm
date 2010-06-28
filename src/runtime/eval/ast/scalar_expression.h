@@ -42,8 +42,7 @@ private:
     SDouble,
     SString
   };
-  // FIXME shouldn't have a StaticString destructed with its container!
-  StaticString m_svalue;
+  std::string m_value;
   union {
     int64 num;
     double dbl;

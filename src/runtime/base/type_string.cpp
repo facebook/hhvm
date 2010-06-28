@@ -681,11 +681,11 @@ StaticString::StaticString(litstr s, int length)
   }
 }
 
-StaticString::StaticString(std::string s, bool intern /* = true */)
+StaticString::StaticString(std::string s)
   : m_data(s.c_str(), s.size(), CopyString) {
   String::operator=(&m_data);
   m_px->setStatic();
-  if (intern && !checkStatic()) {
+  if (!checkStatic()) {
     s_stringSet.insert(m_px);
   }
 }

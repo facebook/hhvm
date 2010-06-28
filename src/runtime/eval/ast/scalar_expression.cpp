@@ -24,7 +24,7 @@ using namespace std;
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
                                    const string &value)
-  : Expression(EXPRESSION_PASS), m_svalue(value, false) {
+  : Expression(EXPRESSION_PASS), m_value(value) {
   switch (type) {
   case T_NUM_STRING: {
     const char *s = value.c_str();
@@ -42,7 +42,7 @@ ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
     break;
   }
   case T_DNUMBER: {
-    m_num.dbl = m_svalue.toDouble();
+    m_num.dbl = String(m_value).toDouble();
     m_kind = SDouble;
     break;
   }
@@ -61,7 +61,7 @@ ScalarExpression::ScalarExpression(EXPRESSION_ARGS, bool b)
   m_num.num = b ? 1 : 0;
 }
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, const string &s)
-  : Expression(EXPRESSION_PASS), m_svalue(s, false), m_kind(SString) {}
+  : Expression(EXPRESSION_PASS), m_value(s), m_kind(SString) {}
 
 Variant ScalarExpression::eval(VariableEnvironment &env) const {
   return getValue();
@@ -74,7 +74,7 @@ Variant ScalarExpression::getValue() const {
   case SBool:
     return (bool)m_num.num;
   case SString:
-    return m_svalue;
+    return m_value.c_str();
   case SInt:
     return m_num.num;
   case SDouble:
@@ -94,7 +94,7 @@ void ScalarExpression::dump() const {
     printf("%s", m_num.num ? "true" : "false");
     break;
   case SString:
-    printf("\"%s\"", m_svalue.c_str());
+    printf("\"%s\"", m_value.c_str());
     break;
   case SInt:
     printf("%lld", m_num.num);

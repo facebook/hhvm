@@ -214,7 +214,7 @@ static void sock_array_to_fd_set(CArrRef sockets, pollfd *fds, int &nfds,
 }
 
 static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
-                                   short flag) {
+                                   int &count, short flag) {
   ASSERT(sockets.is(KindOfArray));
   Array sock_array = sockets.toArray();
   Array ret;
@@ -223,6 +223,7 @@ static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
     ASSERT(fd.fd == iter.second().toObject().getTyped<File>()->fd());
     if (fd.revents & flag) {
       ret.append(iter.second());
+      count++;
     }
   }
   sockets = ret;
@@ -636,9 +637,16 @@ Variant f_socket_select(Variant read, Variant write, Variant except,
   }
 
   count = 0;
-  if (!read.isNull()) sock_array_from_fd_set(read, fds, count, POLLIN);
-  if (!write.isNull()) sock_array_from_fd_set(write, fds, count, POLLOUT);
-  if (!except.isNull()) sock_array_from_fd_set(except, fds, count, POLLPRI);
+  int nfds = 0;
+  if (!read.isNull()) {
+    sock_array_from_fd_set(read, fds, nfds, count, POLLIN);
+  }
+  if (!write.isNull()) {
+    sock_array_from_fd_set(write, fds, nfds, count, POLLOUT);
+  }
+  if (!except.isNull()) {
+    sock_array_from_fd_set(except, fds, nfds, count, POLLPRI);
+  }
 
   free(fds);
   return count;

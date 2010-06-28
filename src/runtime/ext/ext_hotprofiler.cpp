@@ -931,6 +931,13 @@ Variant f_xhprof_sample_disable() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// constants
+const int64 k_XHPROF_FLAGS_NO_BUILTINS = HierarchicalProfiler::TrackBuiltins;
+const int64 k_XHPROF_FLAGS_CPU = HierarchicalProfiler::TrackCPU;
+const int64 k_XHPROF_FLAGS_MEMORY = HierarchicalProfiler::TrackMemory;
+const int64 k_XHPROF_FLAGS_VTSC = HierarchicalProfiler::TrackVtsc;
+
+///////////////////////////////////////////////////////////////////////////////
 // injected code
 
 ProfilerInjection::ProfilerInjection(ThreadInfo *info, const char *symbol)

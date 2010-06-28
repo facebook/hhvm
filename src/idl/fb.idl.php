@@ -50,6 +50,12 @@ f('fb_get_code_coverage', Variant);
 
 ///////////////////////////////////////////////////////////////////////////////
 // xhprof
+
+k("XHPROF_FLAGS_NO_BUILTINS", Int64);
+k("XHPROF_FLAGS_CPU", Int64);
+k("XHPROF_FLAGS_MEMORY", Int64);
+k("XHPROF_FLAGS_VTSC", Int64);
+
 f('xhprof_enable',  NULL,
   array('flags' => Int32,
         'args' => array(StringVec, 'null_array')));

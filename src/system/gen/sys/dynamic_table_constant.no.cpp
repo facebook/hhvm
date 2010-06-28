@@ -584,12 +584,10 @@ extern const int64 k_MW_ResourceLimitWarning;
 extern const int64 k_MW_XYZColorspace;
 extern const int64 k_MW_ConcatenateMode;
 extern const int64 k_SIG_ERR;
-extern const int64 k_XHPROF_FLAGS_MEMORY;
 extern const int64 k_GLOB_NOESCAPE;
 extern const int64 k_T_LOGICAL_OR;
 extern const StaticString k_MCC_ARG_DGRAM_TMO_WEIGHT;
 extern const int64 k_T_DOC_COMMENT;
-extern const int64 k_XHPROF_FLAGS_NO_BUILTINS;
 extern const int64 k_STREAM_FILTER_READ;
 extern const int64 k_SORT_REGULAR;
 extern const int64 k_MW_ThresholdCompositeOp;
@@ -1632,7 +1630,6 @@ extern const int64 k_SO_RCVTIMEO;
 extern const int64 k_XSD_NONNEGATIVEINTEGER;
 extern const int64 k_CURLE_WRITE_ERROR;
 extern const int64 k_ALT_DIGITS;
-extern const int64 k_XHPROF_FLAGS_CPU;
 extern const int64 k_MCC_TCP_INACTIVITY_TMO_DEFAULT;
 extern const int64 k_MW_SquareCap;
 extern const int64 k_MCC_POOLPREFIX_LEN;
@@ -3975,6 +3972,7 @@ Variant get_builtin_constant(CStrRef name) {
       HASH_RETURN(0x67353F89EB4BF5FDLL, k_MYSQLI_OPT_LOCAL_INFILE, "MYSQLI_OPT_LOCAL_INFILE");
       break;
     case 1534:
+      HASH_RETURN(0x59EC563A560E35FELL, k_XHPROF_FLAGS_VTSC, "XHPROF_FLAGS_VTSC");
       HASH_RETURN(0x7CFDCB01D09825FELL, k_MW_LuminizeCompositeOp, "MW_LuminizeCompositeOp");
       break;
     case 1537:

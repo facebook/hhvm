@@ -3,8 +3,8 @@ Index: include/curl/multi.h
 RCS file: /cvsroot/curl/curl/include/curl/multi.h,v
 retrieving revision 1.45
 diff -u -r1.45 multi.h
---- include/curl/multi.h	20 May 2008 10:21:50 -0000	1.45
-+++ include/curl/multi.h	29 Jan 2010 23:45:18 -0000
+--- curl-old/include/curl/multi.h	20 May 2008 10:21:50 -0000	1.45
++++ curl-new/include/curl/multi.h	29 Jan 2010 23:45:18 -0000
 @@ -135,6 +135,19 @@
                                         int *max_fd);
  
@@ -30,8 +30,8 @@ Index: lib/multi.c
 RCS file: /cvsroot/curl/curl/lib/multi.c,v
 retrieving revision 1.210
 diff -u -r1.210 multi.c
---- lib/multi.c	28 Jan 2010 15:34:18 -0000	1.210
-+++ lib/multi.c	29 Jan 2010 23:45:19 -0000
+--- curl-old/lib/multi.c	28 Jan 2010 15:34:18 -0000	1.210
++++ curl-new/lib/multi.c	29 Jan 2010 23:45:19 -0000
 @@ -42,6 +42,7 @@
  #include "sendf.h"
  #include "timeval.h"

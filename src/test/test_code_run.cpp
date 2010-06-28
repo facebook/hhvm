@@ -7885,9 +7885,6 @@ bool TestCodeRun::TestRedeclaredClasses() {
        "} catch (A $e) {"
        "  echo $e->a, '\n';"
        "}} test();");
-  MVCR("<?php "
-       "class X extends Y {}"
-       "function test() { return new x;}");
   MVCR("<?php;"
        "function nop($en,$es){};set_error_handler('nop');"
        "class X { function bar() { var_dump($this); } }"

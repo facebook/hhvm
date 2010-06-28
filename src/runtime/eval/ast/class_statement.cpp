@@ -26,6 +26,7 @@
 #include <runtime/eval/eval.h>
 #include <util/util.h>
 #include <runtime/eval/ast/array_expression.h>
+#include <runtime/ext/ext_class.h>
 
 namespace HPHP {
 namespace Eval {
@@ -689,6 +690,8 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
 
   if (parent) {
     parent->semanticCheck(cls);
+  } else if (!m_parent.empty() && !f_class_exists(m_parent.c_str(), false)) {
+    raise_error("Class '%s' does not exist.", m_parent.c_str());
   }
   for (vector<string>::const_iterator it = m_basesVec.begin();
        it != m_basesVec.end(); ++it) {

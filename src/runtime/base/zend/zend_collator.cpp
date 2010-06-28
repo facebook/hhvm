@@ -206,7 +206,7 @@ static long collator_u_strtol(const UChar *nptr, UChar **endptr,
 
 
 static DataType collator_is_numeric(UChar *str, int length, long *lval,
-                                    double *dval, bool allow_errors ) {
+                                    double *dval, int allow_errors ) {
   long local_lval;
   double local_dval;
   UChar *end_ptr_long, *end_ptr_double;
@@ -302,7 +302,7 @@ static Variant collator_convert_string_to_number_if_possible(CVarRef str) {
 
   DataType ret = collator_is_numeric((UChar*)(str.toString().data()),
                                      UCHARS(str.toString().length()),
-                                     &lval, &dval, true);
+                                     &lval, &dval, 1);
   if (ret == KindOfInt64) return lval;
   if (ret == KindOfDouble) return dval;
   return false;

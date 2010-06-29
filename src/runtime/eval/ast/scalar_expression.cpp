@@ -74,7 +74,7 @@ Variant ScalarExpression::getValue() const {
   case SBool:
     return (bool)m_num.num;
   case SString:
-    return m_value.c_str();
+    return String(m_value);
   case SInt:
     return m_num.num;
   case SDouble:

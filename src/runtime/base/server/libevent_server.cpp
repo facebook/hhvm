@@ -448,6 +448,11 @@ void PendingResponseQueue::process() {
     evhttp_request *request = res.request;
     int code = res.code;
 
+    bool skip_sync = false;
+#ifdef _EVENT_USE_OPENSSL
+    skip_sync = evhttp_is_connection_ssl(request->evcon);
+#endif
+
     if (res.chunked) {
       if (res.chunk) {
         if (res.firstChunk) {
@@ -458,7 +463,7 @@ void PendingResponseQueue::process() {
       } else {
         evhttp_send_reply_end(request);
       }
-    } else if (RuntimeOption::LibEventSyncSend) {
+    } else if (RuntimeOption::LibEventSyncSend && !skip_sync) {
       evhttp_send_reply_sync_end(res.nwritten, request);
     } else {
       const char *reason = HttpProtocol::GetReasonString(code);

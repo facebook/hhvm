@@ -21,6 +21,21 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+// resources have a separate id space
+static IMPLEMENT_THREAD_LOCAL(int, os_max_resource_id);
+
+ResourceData::ResourceData() : ObjectData(true) {
+  o_id = ++(*os_max_resource_id.get());
+}
+
+ResourceData::~ResourceData() {
+  int *pmax = os_max_resource_id.get();
+  if (o_id == *pmax) {
+    --(*pmax);
+  }
+  o_id = -1;
+}
+
 String ResourceData::t___tostring() {
   return String("Resource id #") + String(o_getId());
 }

@@ -27,6 +27,10 @@
 
 namespace HPHP {
 using namespace std;
+
+const double k_INF = numeric_limits<double>::infinity();
+const double k_NAN = numeric_limits<double>::quiet_NaN();
+
 ///////////////////////////////////////////////////////////////////////////////
 
 int f_connection_aborted() {
@@ -83,7 +87,8 @@ Variant f_constant(CStrRef name) {
       return null;
     }
   } else {
-    const ClassInfo::ConstantInfo *cinfo = ClassInfo::FindConstant(name.data());
+    const ClassInfo::ConstantInfo *cinfo =
+      ClassInfo::FindConstant(name.data());
     // system/uniquely defined scalar constant (must be valid)
     if (cinfo) return cinfo->value;
     // dynamic/redeclared constant

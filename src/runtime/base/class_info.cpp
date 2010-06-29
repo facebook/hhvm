@@ -585,6 +585,15 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
       } catch (Exception &e) {
         ASSERT(false);
       }
+    } else if (m_name) {
+      const ObjectStaticCallbacks *cwo = get_object_static_callbacks(m_name);
+      if (cwo) {
+        constant->value = cwo->os_constant(constant->name);
+      } else {
+        ASSERT(false);
+      }
+    } else {
+      constant->value = get_constant(constant->name);
     }
 
     ASSERT(m_constants.find(constant->name) == m_constants.end());

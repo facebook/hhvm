@@ -4,6 +4,9 @@ include_once 'base.php';
 
 ///////////////////////////////////////////////////////////////////////////////
 
+k('INF', Double);
+k('NAN', Double);
+
 f('connection_aborted', Int32);
 f('connection_status', Int32);
 f('connection_timeout', Int32);

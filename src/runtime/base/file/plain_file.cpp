@@ -171,27 +171,34 @@ bool PlainFile::truncate(int64 size) {
 
 IMPLEMENT_REQUEST_LOCAL(BuiltinFiles, g_builtin_files);
 
+void BuiltinFiles::requestInit() {
+  // Ensure STDIN, STDOUT, and STDERR are the first 3 resources.
+  GetSTDIN();
+  GetSTDOUT();
+  GetSTDERR();
+}
+
 void BuiltinFiles::requestShutdown() {
   m_stdin.reset();
   m_stdout.reset();
   m_stderr.reset();
 }
 
-CVarRef BuiltinFiles::getSTDIN() {
+CVarRef BuiltinFiles::GetSTDIN() {
   if (g_builtin_files->m_stdin.isNull()) {
     g_builtin_files->m_stdin = NEW(PlainFile)(stdin);
   }
   return g_builtin_files->m_stdin;
 }
 
-CVarRef BuiltinFiles::getSTDOUT() {
+CVarRef BuiltinFiles::GetSTDOUT() {
   if (g_builtin_files->m_stdout.isNull()) {
     g_builtin_files->m_stdout = NEW(PlainFile)(stdout);
   }
   return g_builtin_files->m_stdout;
 }
 
-CVarRef BuiltinFiles::getSTDERR() {
+CVarRef BuiltinFiles::GetSTDERR() {
   if (g_builtin_files->m_stderr.isNull()) {
     g_builtin_files->m_stderr = NEW(PlainFile)(stderr);
   }

@@ -1661,11 +1661,6 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
       cg_indentEnd("}\n");
     }
 
-    if (system) {
-      strings.push_back("INF");
-      strings.push_back("NAN");
-    }
-
     if (strings.size() > 0) {
       cg_printf("const char* s = name.data();\n");
       for (JumpTable jt(cg, strings, false, false, false); jt.ready();
@@ -1678,14 +1673,6 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
           cg_printf("HASH_RETURN(0x%016llXLL, g->%s, \"%s\");\n",
                     hash_string(name), varName.c_str(),
                     cg.escapeLabel(name).c_str());
-        } else if (!strcmp(name, "INF")) {
-          cg_printf("HASH_RETURN(0x%016llXLL, %s, \"%s\");\n",
-                    hash_string(name), "Limits::inf_double",
-                    cg.escapeLabel(name).c_str());
-        } else if (!strcmp(name, "NAN")) {
-          cg_printf("HASH_RETURN(0x%016llXLL, %s, \"%s\");\n",
-                    hash_string(name), "Limits::nan_double",
-                    cg.escapeLabel(name).c_str());
         } else {
           cg_printf("HASH_RETURN(0x%016llXLL, %s, \"%s\");\n",
                     hash_string(name), varName.c_str(),
@@ -1696,7 +1683,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
 
     if (system) {
       cg_printf("raise_notice(\"Use of undefined constant %%s -- "
-              "assumed '%%s'.\", s, s);\n"),
+                "assumed '%%s'.\", s, s);\n"),
       cg_printf("return name;\n");
     } else {
       cg_printf("return get_builtin_constant(name);\n");

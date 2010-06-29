@@ -512,11 +512,11 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
       free(buf);
     } else if (isnan(dval)) {
-      cg_printf("Limits::nan_double");
+      cg_printf("%sNAN", Option::ConstantPrefix);
     } else if (dval > 0) {
-      cg_printf("Limits::inf_double");
+      cg_printf("%sINF", Option::ConstantPrefix);
     } else {
-      cg_printf("-Limits::inf_double");
+      cg_printf("-%sINF", Option::ConstantPrefix);
     }
     break;
   }

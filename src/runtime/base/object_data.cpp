@@ -36,9 +36,11 @@ static IMPLEMENT_THREAD_LOCAL(int, os_max_id);
 ///////////////////////////////////////////////////////////////////////////////
 // constructor/destructor
 
-ObjectData::ObjectData()
+ObjectData::ObjectData(bool isResource /* = false */)
     : o_properties(NULL), o_attribute(0) {
-  o_id = ++(*os_max_id.get());
+  if (!isResource) {
+    o_id = ++(*os_max_id.get());
+  }
 }
 
 ObjectData::~ObjectData() {

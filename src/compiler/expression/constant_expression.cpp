@@ -28,13 +28,13 @@
 #include <compiler/parser/parser.h>
 #include <compiler/parser/hphp.tab.hpp>
 #include <compiler/expression/scalar_expression.h>
+#include <runtime/ext/ext_misc.h>
 
 using namespace HPHP;
 using namespace std;
 using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
-
 // constructors/destructors
 
 ConstantExpression::ConstantExpression
@@ -76,9 +76,9 @@ bool ConstantExpression::getScalarValue(Variant &value) {
   if (isBoolean()) {
     value = getBooleanValue();
   } else if (m_name == "INF") {
-    value = Limits::inf_double;
+    return k_INF;
   } else if (m_name == "NAN") {
-    value = Limits::nan_double;
+    return k_NAN;
   } else {
     value.unset();
   }
@@ -240,18 +240,10 @@ void ConstantExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void ConstantExpression::outputCPPImpl(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
-  // special cases: STDIN, STDOUT, STDERR
-  if (m_name == "STDIN" || m_name == "STDOUT" || m_name == "STDERR") {
-    cg_printf("%s", m_name.c_str());
-    return;
-  }
-
-  if (m_name == "INF") {
-    cg_printf("Limits::inf_double");
-    return;
-  }
-  if (m_name == "NAN") {
-    cg_printf("Limits::nan_double");
+  // special cases: STDIN, STDOUT, STDERR, INF, and NAN
+  if (m_name == "STDIN" || m_name == "STDOUT" || m_name == "STDERR" ||
+      m_name == "INF" || m_name == "NAN") {
+    cg_printf("%s%s", Option::ConstantPrefix, m_name.c_str());
     return;
   }
 

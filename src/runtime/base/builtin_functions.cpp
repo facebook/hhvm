@@ -575,9 +575,6 @@ Variant require(CStrRef file, bool once /* = false */,
 ///////////////////////////////////////////////////////////////////////////////
 // class Limits
 
-double Limits::inf_double = numeric_limits<double>::infinity();
-double Limits::nan_double = numeric_limits<double>::quiet_NaN();
-
 bool function_exists(CStrRef function_name) {
   const char *name = function_name.data();
 

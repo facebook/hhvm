@@ -5570,6 +5570,9 @@ Variant get_builtin_constant(CStrRef name) {
     case 2805:
       HASH_RETURN(0x7D611D4AD51BEAF5LL, k_T_SL, "T_SL");
       break;
+    case 2808:
+      HASH_RETURN(0x2AB6F17C3B1C6AF8LL, k_STDIN, "STDIN");
+      break;
     case 2809:
       HASH_RETURN(0x432BB874244D0AF9LL, k_U_MISPLACED_QUANTIFIER, "U_MISPLACED_QUANTIFIER");
       break;
@@ -5821,6 +5824,9 @@ Variant get_builtin_constant(CStrRef name) {
     case 3028:
       HASH_RETURN(0x7519B55D31C72BD4LL, k_MCC_ACCESSPOINT_UP, "MCC_ACCESSPOINT_UP");
       break;
+    case 3029:
+      HASH_RETURN(0x741254207D913BD5LL, k_STDERR, "STDERR");
+      break;
     case 3031:
       HASH_RETURN(0x14512FCEEEC3CBD7LL, k_MW_AlphaChannel, "MW_AlphaChannel");
       break;
@@ -5964,7 +5970,7 @@ Variant get_builtin_constant(CStrRef name) {
       HASH_RETURN(0x26A39406E1861C49LL, k_CURLE_FTP_WEIRD_227_FORMAT, "CURLE_FTP_WEIRD_227_FORMAT");
       break;
     case 3147:
-      HASH_RETURN(0x4C6391DC0DF45C4BLL, Limits::nan_double, "NAN");
+      HASH_RETURN(0x4C6391DC0DF45C4BLL, k_NAN, "NAN");
       break;
     case 3148:
       HASH_RETURN(0x65EE60F110DEDC4CLL, k_LOG_PERROR, "LOG_PERROR");
@@ -6045,7 +6051,7 @@ Variant get_builtin_constant(CStrRef name) {
       HASH_RETURN(0x4DB8D52E50925C89LL, k_UPLOAD_ERR_NO_FILE, "UPLOAD_ERR_NO_FILE");
       break;
     case 3214:
-      HASH_RETURN(0x5C284C48FC36BC8ELL, Limits::inf_double, "INF");
+      HASH_RETURN(0x5C284C48FC36BC8ELL, k_INF, "INF");
       break;
     case 3215:
       HASH_RETURN(0x5F1CAF039934BC8FLL, k_MW_UndefinedMode, "MW_UndefinedMode");
@@ -6073,6 +6079,9 @@ Variant get_builtin_constant(CStrRef name) {
       break;
     case 3232:
       HASH_RETURN(0x6C3F56D5C0CFCCA0LL, k_PHP_CONFIG_FILE_PATH, "PHP_CONFIG_FILE_PATH");
+      break;
+    case 3233:
+      HASH_RETURN(0x58FD519A0C8C2CA1LL, k_STDOUT, "STDOUT");
       break;
     case 3234:
       HASH_RETURN(0x2DFED526B1931CA2LL, k_T_STATIC, "T_STATIC");

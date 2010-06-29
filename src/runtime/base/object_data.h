@@ -62,7 +62,7 @@ class ObjectData : public Countable {
     InSet         = 8, // __set()
   };
 
-  ObjectData();
+  ObjectData(bool isResource = false);
   virtual ~ObjectData(); // all PHP classes need virtual tables
 
   bool getAttribute(Attribute attr) const { return o_attribute & attr; }

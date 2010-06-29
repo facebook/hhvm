@@ -22,6 +22,13 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// constants
+
+#define k_STDIN (BuiltinFiles::GetSTDIN())
+#define k_STDOUT (BuiltinFiles::GetSTDOUT())
+#define k_STDERR (BuiltinFiles::GetSTDERR())
+
+///////////////////////////////////////////////////////////////////////////////
 // file handle based file operations
 
 Variant f_fopen(CStrRef filename, CStrRef mode, bool use_include_path = false,

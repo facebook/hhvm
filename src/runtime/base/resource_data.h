@@ -29,7 +29,8 @@ namespace HPHP {
  */
 class ResourceData: public ObjectData, public UnsafePointer {
 public:
-  ResourceData() {}
+  ResourceData();
+  virtual ~ResourceData();
 
   // implementing ObjectData
   virtual bool o_instanceof(const char *s) const { return false;}
@@ -53,7 +54,6 @@ public:
   virtual Object fiberUnmarshal(FiberReferenceMap &refMap) const;
 
 protected:
-  int rsrc_id; // resource id, not used yet.
   virtual ObjectData* cloneImpl();
 };
 

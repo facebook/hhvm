@@ -94,6 +94,9 @@
 "scandir", T(Variant), S(0), "directory", T(String), NULL, S(0), "descending", T(Boolean), "false", S(0), "context", T(Object), "null", S(0), NULL, S(0), 
 "closedir", T(Void), S(0), "dir_handle", T(Object), NULL, S(0), NULL, S(0), 
 #elif EXT_TYPE == 1
+"STDIN", T(Object),
+"STDOUT", T(Object),
+"STDERR", T(Object),
 #elif EXT_TYPE == 2
 #elif EXT_TYPE == 3
 

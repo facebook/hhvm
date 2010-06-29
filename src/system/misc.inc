@@ -27,6 +27,8 @@
 "token_get_all", T(Array), S(0), "source", T(String), NULL, S(0), NULL, S(0), 
 "token_name", T(String), S(0), "token", T(Int64), NULL, S(0), NULL, S(0), 
 #elif EXT_TYPE == 1
+"INF", T(Double),
+"NAN", T(Double),
 #elif EXT_TYPE == 2
 #elif EXT_TYPE == 3
 

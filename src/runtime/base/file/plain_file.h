@@ -23,10 +23,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#define STDIN  (BuiltinFiles::getSTDIN())
-#define STDOUT (BuiltinFiles::getSTDOUT())
-#define STDERR (BuiltinFiles::getSTDERR())
-
 /**
  * A file system file that's nothing but ordinary. A simple FILE* wrapper.
  */
@@ -74,12 +70,12 @@ protected:
  */
 class BuiltinFiles : public RequestEventHandler {
 public:
-  virtual void requestInit() { }
+  virtual void requestInit();
   virtual void requestShutdown();
 
-  static CVarRef getSTDIN();
-  static CVarRef getSTDOUT();
-  static CVarRef getSTDERR();
+  static CVarRef GetSTDIN();
+  static CVarRef GetSTDOUT();
+  static CVarRef GetSTDERR();
 
 private:
   Variant m_stdin;

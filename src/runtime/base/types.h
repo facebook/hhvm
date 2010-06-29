@@ -254,14 +254,6 @@ private:
   ThreadInfo *m_info;
 };
 
-// definitions for various numeric limits
-// implemented in runtime/base/builtin_functions.cpp
-class Limits {
-public:
-  static double inf_double;
-  static double nan_double;
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

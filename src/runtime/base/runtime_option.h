@@ -87,6 +87,8 @@ public:
   static bool EnableMagicQuotesGpc;
   static bool EnableKeepAlive;
   static int ConnectionTimeoutSeconds;
+  static bool EnableOutputBuffering;
+  static std::string OutputHandler;
   static bool EnableEarlyFlush;
   static bool ForceChunkedEncoding;
   static int MaxPostSize;

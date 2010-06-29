@@ -234,6 +234,13 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                                            SourceRootInfo &sourceRootInfo,
                                            bool cachableDynamicContent) {
   ExecutionContext *context = hphp_context_init();
+  if (RuntimeOption::EnableOutputBuffering) {
+    if (RuntimeOption::OutputHandler.empty()) {
+      context->obStart();
+    } else {
+      context->obStart(String(RuntimeOption::OutputHandler));
+    }
+  }
   context->setTransport(transport);
 
   string file = reqURI.absolutePath().c_str();

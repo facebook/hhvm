@@ -88,6 +88,8 @@ int RuntimeOption::GzipCompressionLevel = 3;
 bool RuntimeOption::EnableMagicQuotesGpc = false;
 bool RuntimeOption::EnableKeepAlive = true;
 int RuntimeOption::ConnectionTimeoutSeconds = -1;
+bool RuntimeOption::EnableOutputBuffering = false;
+std::string RuntimeOption::OutputHandler;
 bool RuntimeOption::EnableEarlyFlush = true;
 bool RuntimeOption::ForceChunkedEncoding = false;
 int RuntimeOption::MaxPostSize;
@@ -454,6 +456,8 @@ void RuntimeOption::Load(Hdf &config) {
     EnableMagicQuotesGpc = server["EnableMagicQuotesGpc"].getBool();
     EnableKeepAlive = server["EnableKeepAlive"].getBool(true);
     ConnectionTimeoutSeconds = server["ConnectionTimeoutSeconds"].getInt16(-1);
+    EnableOutputBuffering = server["EnableOutputBuffering"].getBool();
+    OutputHandler = server["OutputHandler"].getString();
     EnableEarlyFlush = server["EnableEarlyFlush"].getBool(true);
     ForceChunkedEncoding = server["ForceChunkedEncoding"].getBool();
     MaxPostSize = (server["MaxPostSize"].getInt32(150)) * (1 << 20);

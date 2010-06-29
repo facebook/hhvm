@@ -206,6 +206,8 @@ How long to wait for dangling server to respond.
     GzipCompressionLevel = 3
     EnableMagicQuotesGpc = false
     EnableKeepAlive = true
+    EnableOutputBuffering = false
+    OutputHandler =
     EnableEarlyFlush = true
     ForceChunkedEncoding = false
     MaxPostSize = 8  # in MB

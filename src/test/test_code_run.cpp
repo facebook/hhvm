@@ -5409,6 +5409,8 @@ bool TestCodeRun::TestCompilation() {
        "function f() { return 3; }"
        "@g(f(),f());");
 
+  MVCR("<?php for ($i = 0; $i++,$i - 10;) {}");
+
   return true;
 }
 

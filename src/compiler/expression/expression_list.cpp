@@ -467,9 +467,11 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
 }
 
 void ExpressionList::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (m_kind == ListKindWrapped) cg_printf("(");
+  bool wrapped = m_kind == ListKindWrapped ||
+    (m_kind == ListKindComma && getCount() > 1);
+  if (wrapped) cg_printf("(");
   outputCPPInternal(cg, ar, true, false);
-  if (m_kind == ListKindWrapped) cg_printf(")");
+  if (wrapped) cg_printf(")");
 }
 
 bool ExpressionList::outputCPPUnneeded(CodeGenerator &cg,

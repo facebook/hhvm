@@ -833,4 +833,27 @@ Variant f_fb_get_code_coverage() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void f_fb_taint(CStrRef str){
+  #ifdef TAINTED
+  str.taint();
+  str.setPlaceTainted(FrameInjection::GetContainingFileName(true).data(),
+                      FrameInjection::GetLine(true));
+  #endif
+}
+
+void f_fb_untaint(CStrRef str){
+  #ifdef TAINTED
+  str.untaint();
+  #endif
+}
+
+bool f_fb_is_tainted(CStrRef str){
+  #ifdef TAINTED
+  return str.isTainted();
+  #else
+  return false;
+  #endif
+}
+
 }

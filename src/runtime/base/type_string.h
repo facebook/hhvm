@@ -297,6 +297,30 @@ public:
   static void compileTimeAssertions() {
     CT_ASSERT(offsetof(String, m_px) == offsetof(Value, m_data));
   }
+
+  #ifdef TAINTED
+  /**
+   * Tainting dynamic analysis
+   */
+ public:
+  bool isTainted() const {
+    return m_px ? m_px->isTainted() : false;
+    // a null pointer should be considered untainted
+  }
+  void taint() const {
+    if(m_px) { m_px->taint(); }
+  }
+  void untaint() const {
+    if(m_px) { m_px->untaint(); }
+  }
+
+  void setPlaceTainted(const char* name, int line) const {
+    m_px->setPlaceTainted(name, line);
+  }
+  FilePlace getPlaceTainted() const {
+    return m_px->getPlaceTainted();
+  }
+  #endif
 };
 
 struct zend_hash {

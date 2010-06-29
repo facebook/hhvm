@@ -28,6 +28,11 @@ namespace HPHP {
 class SharedVariant;
 ///////////////////////////////////////////////////////////////////////////////
 
+struct FilePlace {
+  const char* name;
+  int line;
+};
+
 /**
  * Inner data class for String type. As a coding guideline, String and
  * StringOffset classes should delegate real string work to this class,
@@ -76,6 +81,11 @@ class StringData {
   }
 
   StringData() : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
+    #ifdef TAINTED
+    m_tainted = false;
+    m_place_tainted.name = NULL;
+    m_place_tainted.line = -1;
+    #endif
   }
 
   /**
@@ -85,6 +95,10 @@ class StringData {
   StringData(const char *data, StringDataMode mode = AttachLiteral);
   StringData(const char *data, int len, StringDataMode mode);
   StringData(SharedVariant *shared);
+  #ifdef TAINTED
+  StringData(const char *data, int len, StringDataMode mode,
+             bool taint, FilePlace place_tainted);
+  #endif
   void assign(const char *data, StringDataMode mode);
   void assign(const char *data, int len, StringDataMode mode);
   void assign(SharedVariant *shared);
@@ -112,6 +126,23 @@ class StringData {
   }
   bool isZero() const { return size() == 1 && m_data[0] == '0'; }
   bool isValidVariableName() const;
+
+  #ifdef TAINTED
+  /**
+   * Tainting dynamic analysis
+   */
+  bool isTainted() const { return m_tainted; }
+  void taint() { m_tainted = true; }
+  void untaint() { m_tainted = false; }
+
+  void setPlaceTainted(const char* name, int line) {
+    m_place_tainted.name = name;
+    m_place_tainted.line = line;
+  }
+  FilePlace getPlaceTainted() const {
+    return m_place_tainted;
+  }
+  #endif
 
   /**
    * Mutations.
@@ -161,6 +192,10 @@ class StringData {
     SharedVariant *m_shared;
     mutable int64  m_hash;   // precompute hash codes for static strings
   };
+  #ifdef TAINTED
+  bool m_tainted;
+  FilePlace m_place_tainted;
+  #endif
 
   void releaseData();
 

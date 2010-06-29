@@ -332,7 +332,13 @@ String concat3(CStrRef s1, CStrRef s2, CStrRef s3) {
   memcpy(buf + len1, s2.data(), len2);
   memcpy(buf + len1 + len2, s3.data(), len3);
   buf[len] = 0;
+  #ifndef TAINTED
   return String(buf, len, AttachString);
+  #else
+  String res = String(buf, len, AttachString);
+  propagate_tainting3(s1, s2, s3, res);
+  return res;
+  #endif
 }
 
 String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4) {
@@ -347,7 +353,13 @@ String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4) {
   memcpy(buf + len1 + len2, s3.data(), len3);
   memcpy(buf + len1 + len2 + len3, s4.data(), len4);
   buf[len] = 0;
+  #ifndef TAINTED
   return String(buf, len, AttachString);
+  #else
+  String res = String(buf, len, AttachString);
+  propagate_tainting4(s1, s2, s3, s4, res);
+  return res;
+  #endif
 }
 
 String concat5(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5) {
@@ -364,7 +376,13 @@ String concat5(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5) {
   memcpy(buf + len1 + len2 + len3, s4.data(), len4);
   memcpy(buf + len1 + len2 + len3 + len4, s5.data(), len5);
   buf[len] = 0;
+  #ifndef TAINTED
   return String(buf, len, AttachString);
+  #else
+  String res = String(buf, len, AttachString);
+  propagate_tainting5(s1, s2, s3, s4, s5, res);
+  return res;
+  #endif
 }
 
 String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
@@ -384,13 +402,22 @@ String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
   memcpy(buf + len1 + len2 + len3 + len4, s5.data(), len5);
   memcpy(buf + len1 + len2 + len3 + len4 + len5, s6.data(), len6);
   buf[len] = 0;
+  #ifndef TAINTED
   return String(buf, len, AttachString);
+  #else
+  String res = String(buf, len, AttachString);
+  propagate_tainting6(s1, s2, s3, s4, s5, s6, res);
+  return res;
+  #endif
 }
 
 String concat_assign(ObjectOffset v1, CStrRef s2) {
   Variant &v = v1.lval();
   String s1 = v.toString();
   s1 += s2;
+  #ifdef TAINTED
+  propagate_tainting2(s1, s2, s1);
+  #endif
   v1 = s1;
   return s1;
 }

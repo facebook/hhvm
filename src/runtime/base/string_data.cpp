@@ -35,18 +35,46 @@ IMPLEMENT_SMART_ALLOCATION(StringData, SmartAllocatorImpl::NeedRestoreOnce);
 StringData::StringData(const char *data,
                        StringDataMode mode /* = AttachLiteral */)
   : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
+  #ifdef TAINTED
+  m_tainted = false;
+  m_place_tainted.name = NULL;
+  m_place_tainted.line = -1;
+  #endif
   assign(data, mode);
 }
 
 StringData::StringData(SharedVariant *shared)
   : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
+  #ifdef TAINTED
+  m_tainted = false;
+  m_place_tainted.name = NULL;
+  m_place_tainted.line = -1;
+  #endif
   assign(shared);
 }
 
 StringData::StringData(const char *data, int len, StringDataMode mode)
   : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
+  #ifdef TAINTED
+  m_tainted = false;
+  m_place_tainted.name = NULL;
+  m_place_tainted.line = -1;
+  #endif
   assign(data, len, mode);
 }
+
+#ifdef TAINTED
+StringData::StringData(const char *data, int len, StringDataMode mode,
+  bool taint, FilePlace place_tainted)
+  : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
+  #ifdef TAINTED
+  m_tainted = taint;
+  m_place_tainted.name = place_tainted.name;
+  m_place_tainted.line = place_tainted.line;
+  #endif
+  assign(data, len, mode);
+}
+#endif
 
 StringData::~StringData() {
   releaseData();

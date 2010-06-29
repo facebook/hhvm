@@ -141,6 +141,17 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
   return bt;
 }
 
+int FrameInjection::GetLine(bool skip /* = false */) {
+  FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
+  if (t && skip) {
+    t = t->m_prev;
+  }
+  if (t) {
+    return t->line;
+  }
+  return -1;
+}
+
 String FrameInjection::getFileName() {
   if (flags & PseudoMain) {
     return m_name + 10;

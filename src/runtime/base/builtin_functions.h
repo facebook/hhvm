@@ -26,6 +26,8 @@
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/runtime_option.h>
 #include <util/case_insensitive.h>
+#include <runtime/base/tainting.h>
+
 /**
  * This file contains a list of functions that HPHP generates to wrap around
  * different expressions to maintain semantics. If we read through all types of
@@ -326,10 +328,36 @@ inline int64   negate(int64 v)   { return -v; }
 inline double  negate(double v)  { return -v; }
 inline Variant negate(CVarRef v) { return -(Variant)v; }
 
-inline String concat(CStrRef s1, CStrRef s2)         { return s1 + s2;}
-inline String concat_rev(CStrRef s2, CStrRef s1)     { return s1 + s2;}
-inline String &concat_assign(String &s1, litstr s2)  { return s1 += s2;}
-inline String &concat_assign(String &s1, CStrRef s2) { return s1 += s2;}
+inline String concat(CStrRef s1, CStrRef s2)         {
+  #ifndef TAINTED
+  return s1 + s2;
+  #else
+  String res = s1 + s2;
+  propagate_tainting2(s1, s2, res);
+  return res;
+  #endif
+}
+inline String concat_rev(CStrRef s2, CStrRef s1)     {
+  #ifndef TAINTED
+  return s1 + s2;
+  #else
+  String res = s1 + s2;
+  propagate_tainting2(s1, s2, res);
+  return res;
+  #endif
+}
+inline String &concat_assign(String &s1, litstr s2)  {
+  return s1 += s2;
+  // nothing to be done for tainting
+}
+inline String &concat_assign(String &s1, CStrRef s2) {
+  #ifndef TAINTED
+  return s1 += s2;
+  #else
+  propagate_tainting2(s1, s2, s1 += s2);
+  return s1;
+  #endif
+}
 
 #define MAX_CONCAT_ARGS 6
 String concat3(CStrRef s1, CStrRef s2, CStrRef s3);
@@ -343,12 +371,14 @@ inline Variant &concat_assign(Variant &v1, litstr s2) {
     StringData *data = v1.getStringData();
     if (data->getCount() == 1) {
       data->append(s2, strlen(s2));
+      // nothing to be done for tainting
       return v1;
     }
   }
   String s1 = v1.toString();
   s1 += s2;
   v1 = s1;
+  // nothing to be done for tainting
   return v1;
 }
 
@@ -357,11 +387,20 @@ inline Variant &concat_assign(Variant &v1, CStrRef s2) {
     StringData *data = v1.getStringData();
     if (data->getCount() == 1) {
       data->append(s2.data(), s2.size());
+      #ifndef TAINTED
       return v1;
+      #else
+      String s1 = v1.toString();
+      propagate_tainting2(s1, s2, s1);
+      return v1;
+      #endif
     }
   }
   String s1 = v1.toString();
   s1 += s2;
+  #ifdef TAINTED
+  propagate_tainting2(s1, s2, s1);
+  #endif
   v1 = s1;
   return v1;
 }
@@ -435,6 +474,18 @@ inline void echo(litstr  s) {
   g_context->out() << s;
 }
 inline void echo(CStrRef s) {
+  #ifdef TAINTED
+  if( s.isTainted() ) {
+    // in the future, raise some kind of exception
+    printf("Warning, echoing a tainted string:\n");
+    printf("  it was tainted in file %s, line %d;\n",
+           s.getPlaceTainted().name,
+           s.getPlaceTainted().line );
+    printf("  it was echoed in file %s, line %d.\n",
+           (const char*)FrameInjection::GetContainingFileName(),
+           FrameInjection::GetLine());
+  }
+  #endif
   g_context->out().write((const char *)s, s.length());
 }
 

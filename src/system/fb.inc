@@ -16,6 +16,9 @@
 "fb_load_local_databases", T(Void), S(0), "servers", T(Array), NULL, S(0), NULL, S(0), 
 "fb_parallel_query", T(Array), S(0), "sql_map", T(Array), NULL, S(0), "max_thread", T(Int32), "50", S(0), "combine_result", T(Boolean), "true", S(0), "retry_query_on_fail", T(Boolean), "true", S(0), "connect_timeout", T(Int32), "-1", S(0), "read_timeout", T(Int32), "-1", S(0), "timeout_in_ms", T(Boolean), "false", S(0), NULL, S(0), 
 "fb_crossall_query", T(Array), S(0), "sql", T(String), NULL, S(0), "max_thread", T(Int32), "50", S(0), "retry_query_on_fail", T(Boolean), "true", S(0), "connect_timeout", T(Int32), "-1", S(0), "read_timeout", T(Int32), "-1", S(0), "timeout_in_ms", T(Boolean), "false", S(0), NULL, S(0), 
+"fb_taint", T(Void), S(0), "str", T(String), NULL, S(0), NULL, S(0), 
+"fb_untaint", T(Void), S(0), "str", T(String), NULL, S(0), NULL, S(0), 
+"fb_is_tainted", T(Boolean), S(0), "str", T(String), NULL, S(0), NULL, S(0), 
 #elif EXT_TYPE == 1
 "FB_UNSERIALIZE_NONSTRING_VALUE", T(Int64),
 "FB_UNSERIALIZE_UNEXPECTED_END", T(Int64),

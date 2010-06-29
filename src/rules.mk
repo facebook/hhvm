@@ -343,6 +343,10 @@ ifdef NO_TLS
 CPPFLAGS += -DNO_TLS
 endif
 
+ifdef TAINTED
+CPPFLAGS += -DTAINTED
+endif
+
 # facebook specific stuff
 CPPFLAGS += -DHAVE_PHPT
 

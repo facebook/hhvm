@@ -87,3 +87,12 @@ f('fb_crossall_query', VariantMap,
         'connect_timeout' => array(Int32, '-1'),
         'read_timeout' => array(Int32, '-1'),
         'timeout_in_ms' => array(Boolean, 'false')));
+
+/////////////
+// tainting
+
+f('fb_taint', null, array('str' => String));
+
+f('fb_untaint', null, array('str' => String));
+
+f('fb_is_tainted', Boolean, array('str' => String));

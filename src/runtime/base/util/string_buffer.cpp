@@ -17,6 +17,7 @@
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/file/file.h>
 #include <runtime/base/zend/zend_functions.h>
+#include <runtime/base/tainting.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,6 +26,11 @@ StringBuffer::StringBuffer(int initialSize /* = 256 */)
   : m_size(initialSize), m_pos(0) {
   ASSERT(initialSize > 0);
   m_buffer = (char *)malloc(initialSize + 1);
+  #ifdef TAINTED
+  m_tainted = false;
+  m_place_tainted.name = NULL;
+  m_place_tainted.line = -1;
+  #endif
 }
 
 StringBuffer::StringBuffer(const char *filename)
@@ -45,10 +51,20 @@ StringBuffer::StringBuffer(const char *filename)
       fclose(f);
     }
   }
+  #ifdef TAINTED
+  m_tainted = false;
+  m_place_tainted.name = NULL;
+  m_place_tainted.line = -1;
+  #endif
 }
 
 StringBuffer::StringBuffer(char *data, int len)
   : m_buffer(data), m_size(len), m_pos(len) {
+  #ifdef TAINTED
+  m_tainted = false;
+  m_place_tainted.name = NULL;
+  m_place_tainted.line = -1;
+  #endif
 }
 
 StringBuffer::~StringBuffer() {
@@ -96,6 +112,9 @@ String StringBuffer::detach() {
     String ret(m_buffer, m_pos, AttachString);
     m_buffer = NULL;
     m_pos = 0;
+    #ifdef TAINTED
+    propagate_tainting1_buf(*this, ret);
+    #endif
     return ret;
   }
   return String("");
@@ -148,6 +167,14 @@ void StringBuffer::append(char ch) {
     grow(m_pos + 1);
   }
   m_buffer[m_pos++] = ch;
+}
+
+
+void StringBuffer::append(CStrRef s) {
+  append(s.data(), s.size());
+  #ifdef TAINTED
+  propagate_tainting2_buf(s, *this, *this);
+  #endif
 }
 
 void StringBuffer::append(const char *s, int len) {

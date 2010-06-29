@@ -72,7 +72,7 @@ public:
   void append(char c);
   void append(unsigned char c) { append((char)c);}
   void append(litstr  s) { ASSERT(s); append(s, strlen(s));}
-  void append(CStrRef s) { append(s.data(), s.size());}
+  void append(CStrRef s);
   void append(const char *s, int len);
   void append(const std::string &s) { append(s.data(), s.size());}
   StringBuffer &operator+=(int n)     { append(n); return *this;}
@@ -94,6 +94,23 @@ public:
   void read(FILE *in, int page_size = 1024);
   void read(File *in, int page_size = 1024);
 
+  #ifdef TAINTED
+  /**
+   * Tainting dynamic analysis
+   */
+  bool isTainted() const { return m_tainted; }
+  void taint() { m_tainted = true; }
+  void untaint() { m_tainted = false; }
+
+  void setPlaceTainted(const char* name, int line) {
+    m_place_tainted.name = name;
+    m_place_tainted.line = line;
+  }
+  FilePlace getPlaceTainted() const {
+    return m_place_tainted;
+  }
+  #endif
+
 private:
   // disabling copy constructor and assignment
   StringBuffer(const StringBuffer &sb) { ASSERT(false);}
@@ -102,6 +119,10 @@ private:
   char *m_buffer;
   int m_size;
   int m_pos;
+  #ifdef TAINTED
+  bool m_tainted;
+  FilePlace m_place_tainted;
+  #endif
 
   void grow(int minSize);
 };

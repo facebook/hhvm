@@ -49,6 +49,7 @@ public:
   static Object GetThis(bool skip = false);
   static String GetContainingFileName(bool skip = false);
   static Array GetBacktrace(bool skip = false, bool withSelf = false);
+  static int GetLine(bool skip = false);
 
   virtual String getFileName();
 

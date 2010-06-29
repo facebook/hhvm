@@ -411,40 +411,12 @@ public:
   /**
    * Start a new frame with the specified symbol.
    */
-  void beginFrame(const char *symbol) __attribute__ ((noinline)) {
-    Frame *current = createFrame(symbol);
-
-    // NOTE(cjiang): use hash code to fend off most of call-stack traversal
-    int recursion_level = 0;
-    if (m_func_hash_counters[current->m_hash_code] > 0) {
-      // Find this symbols recurse level
-      for (Frame *p = current->m_parent; p; p = p->m_parent) {
-        if (strcmp(current->m_name, p->m_name) == 0) {
-          recursion_level = p->m_recursion + 1;
-          break;
-        }
-      }
-    }
-    current->m_recursion = recursion_level;
-
-    m_func_hash_counters[current->m_hash_code]++;
-    beginFrameEx();
-  }
+  void beginFrame(const char *symbol) __attribute__ ((noinline)) ;
 
   /**
    * End top of the stack.
    */
-  void endFrame(bool endMain = false) __attribute__ ((noinline)) {
-    if (m_stack) {
-      // special case for main() frame that's only ended by endAllFrames()
-      if (!endMain && m_stack->m_parent == NULL) {
-        return;
-      }
-      endFrameEx();
-      m_func_hash_counters[m_stack->m_hash_code]--;
-      releaseFrame();
-    }
-  }
+  void endFrame(bool endMain = false) __attribute__ ((noinline)) ;
 
   void endAllFrames() {
     while (m_stack) {
@@ -495,6 +467,41 @@ private:
   }
 };
 bool Profiler::s_rand_initialized = false;
+
+void Profiler::beginFrame(const char *symbol) {
+  Frame *current = createFrame(symbol);
+
+  // NOTE(cjiang): use hash code to fend off most of call-stack traversal
+  int recursion_level = 0;
+  if (m_func_hash_counters[current->m_hash_code] > 0) {
+    // Find this symbols recurse level
+    for (Frame *p = current->m_parent; p; p = p->m_parent) {
+      if (strcmp(current->m_name, p->m_name) == 0) {
+        recursion_level = p->m_recursion + 1;
+        break;
+      }
+    }
+  }
+  current->m_recursion = recursion_level;
+
+  m_func_hash_counters[current->m_hash_code]++;
+  beginFrameEx();
+}
+
+/**
+ * End top of the stack.
+ */
+void Profiler::endFrame(bool endMain) {
+  if (m_stack) {
+    // special case for main() frame that's only ended by endAllFrames()
+    if (!endMain && m_stack->m_parent == NULL) {
+      return;
+    }
+    endFrameEx();
+    m_func_hash_counters[m_stack->m_hash_code]--;
+    releaseFrame();
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // SimpleProfiler

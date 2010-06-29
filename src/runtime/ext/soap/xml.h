@@ -76,7 +76,7 @@ void parse_namespace(const xmlChar *inval, std::string &value,
     if (n == NULL) {                            \
       break;                                    \
     }                                           \
-    if (c) {                                    \
+    if (c!=NULL) {                              \
       i = get_node_ex(n,c,NULL);                \
     } else {                                    \
       i = n;                                    \

@@ -93,6 +93,10 @@ public:
   static int UploadMaxFileSize;
   static std::string UploadTmpDir;
   static bool EnableFileUploads;
+  static bool EnableUploadProgress;
+  static int Rfc1867Freq;
+  static std::string Rfc1867Prefix;
+  static std::string Rfc1867Name;
   static bool LibEventSyncSend;
   static bool ExpiresActive;
   static int ExpiresDefault;

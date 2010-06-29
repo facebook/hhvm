@@ -20,6 +20,7 @@
 
 #include <runtime/base/base_includes.h>
 #include <runtime/base/shared/shared_store.h>
+#include <runtime/base/server/upload.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,6 +85,25 @@ void apc_load_impl(const char **int_keys, int64 *int_values,
                    const char **char_keys, char *char_values,
                    const char **strings, const char **objects,
                    const char **thrifts, const char **others);
+
+class apc_rfc1867_data {
+public:
+  std::string tracking_key;
+  int64 content_length;
+  std::string filename;
+  std::string name;
+  char *temp_filename;
+  int cancel_upload;
+  double start_time;
+  int64 bytes_processed;
+  int64 prev_bytes_processed;
+  int update_freq;
+  double rate;
+};
+
+// file uploading progress support
+int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
+                         unsigned int event, void *event_data, void **extra);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

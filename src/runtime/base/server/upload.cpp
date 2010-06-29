@@ -21,6 +21,7 @@
 #include <runtime/base/hphp_system.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/zend/zend_printf.h>
+#include <runtime/ext/ext_apc.h>
 #include <util/logger.h>
 
 using namespace std;
@@ -34,9 +35,15 @@ class Rfc1867Data : public RequestEventHandler {
 public:
   std::set<string> rfc1867ProtectedVariables;
   std::set<string> rfc1867UploadedFiles;
-  int (*rfc1867Callback)(unsigned int event, void *event_data, void **extra);
+  apc_rfc1867_data rfc1867ApcData;
+  int (*rfc1867Callback)(apc_rfc1867_data *rfc1867ApcData,
+                         unsigned int event, void *event_data, void **extra);
   virtual void requestInit() {
-    rfc1867Callback = NULL;
+    if (RuntimeOption::EnableUploadProgress) {
+      rfc1867Callback = apc_rfc1867_progress;
+    } else {
+      rfc1867Callback = NULL;
+    }
   }
   virtual void requestShutdown() {
     if (!rfc1867UploadedFiles.empty()) destroy_uploaded_files();
@@ -659,14 +666,16 @@ void rfc1867PostHandler(Variant &post, Variant &files, int content_length,
 
   uploaded_files.clear();
 
-  int (*php_rfc1867_callback)(unsigned int event, void *event_data,
+  int (*php_rfc1867_callback)(apc_rfc1867_data *rfc1867ApcData,
+                              unsigned int event, void *event_data,
                               void **extra) = s_rfc1867_data->rfc1867Callback;
 
   if (php_rfc1867_callback != NULL) {
     multipart_event_start event_start;
 
     event_start.content_length = content_length;
-    if (php_rfc1867_callback(MULTIPART_EVENT_START, &event_start,
+    if (php_rfc1867_callback(&s_rfc1867_data->rfc1867ApcData,
+                             MULTIPART_EVENT_START, &event_start,
                              &event_extra_data) == FAILURE) {
       goto fileupload_done;
     }
@@ -739,7 +748,8 @@ void rfc1867PostHandler(Variant &post, Variant &files, int content_length,
           event_formdata.value = &value;
           event_formdata.length = new_val_len;
           event_formdata.newlength = &newlength;
-          if (php_rfc1867_callback(MULTIPART_EVENT_FORMDATA, &event_formdata,
+          if (php_rfc1867_callback(&s_rfc1867_data->rfc1867ApcData,
+                                   MULTIPART_EVENT_FORMDATA, &event_formdata,
                                    &event_extra_data) == FAILURE) {
             free(param);
             free(value);
@@ -827,7 +837,8 @@ void rfc1867PostHandler(Variant &post, Variant &files, int content_length,
         event_file_start.post_bytes_processed = mbuff->read_post_bytes;
         event_file_start.name = param;
         event_file_start.filename = &filename;
-        if (php_rfc1867_callback(MULTIPART_EVENT_FILE_START,
+        if (php_rfc1867_callback(&s_rfc1867_data->rfc1867ApcData,
+                                 MULTIPART_EVENT_FILE_START,
                                  &event_file_start,
                                  &event_extra_data) == FAILURE) {
           if (temp_filename) {
@@ -869,7 +880,8 @@ void rfc1867PostHandler(Variant &post, Variant &files, int content_length,
           event_file_data.data = buff;
           event_file_data.length = blen;
           event_file_data.newlength = &blen;
-          if (php_rfc1867_callback(MULTIPART_EVENT_FILE_DATA,
+          if (php_rfc1867_callback(&s_rfc1867_data->rfc1867ApcData,
+                                   MULTIPART_EVENT_FILE_DATA,
                                    &event_file_data,
                                    &event_extra_data) == FAILURE) {
             cancel_upload = UPLOAD_ERROR_X;
@@ -925,7 +937,8 @@ void rfc1867PostHandler(Variant &post, Variant &files, int content_length,
         event_file_end.post_bytes_processed = mbuff->read_post_bytes;
         event_file_end.temp_filename = temp_filename;
         event_file_end.cancel_upload = cancel_upload;
-        if (php_rfc1867_callback(MULTIPART_EVENT_FILE_END,
+        if (php_rfc1867_callback(&s_rfc1867_data->rfc1867ApcData,
+                                 MULTIPART_EVENT_FILE_END,
                                  &event_file_end,
                                  &event_extra_data) == FAILURE) {
           cancel_upload = UPLOAD_ERROR_X;
@@ -1117,7 +1130,8 @@ fileupload_done:
     multipart_event_end event_end;
 
     event_end.post_bytes_processed = mbuff->read_post_bytes;
-    php_rfc1867_callback(MULTIPART_EVENT_END, &event_end, &event_extra_data);
+    php_rfc1867_callback(&s_rfc1867_data->rfc1867ApcData,
+                         MULTIPART_EVENT_END, &event_end, &event_extra_data);
   }
   if (lbuf) free(lbuf);
   s_rfc1867_data->rfc1867ProtectedVariables.clear();

@@ -374,5 +374,173 @@ void apc_load_impl(const char **int_keys, int64 *int_values,
   }
 }
 
+static double my_time() {
+  struct timeval a;
+  double t;
+  gettimeofday(&a, NULL);
+  t = a.tv_sec + (a.tv_usec/1000000.00);
+  return t;
+}
+
+
+#define RFC1867_TRACKING_KEY_MAXLEN 63
+#define RFC1867_NAME_MAXLEN 63
+#define RFC1867_FILENAME_MAXLEN 127
+
+int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
+                         unsigned int event, void *event_data,
+                         void **extra) {
+  switch (event) {
+  case MULTIPART_EVENT_START: {
+    multipart_event_start *data = (multipart_event_start *) event_data;
+    rfc1867ApcData->content_length = data->content_length;
+    rfc1867ApcData->tracking_key.clear();
+    rfc1867ApcData->name.clear();
+    rfc1867ApcData->cancel_upload = 0;
+    rfc1867ApcData->temp_filename = NULL;
+    rfc1867ApcData->start_time = my_time();
+    rfc1867ApcData->bytes_processed = 0;
+    rfc1867ApcData->rate = 0;
+    rfc1867ApcData->update_freq = RuntimeOption::Rfc1867Freq;
+
+    if (rfc1867ApcData->update_freq < 0) {
+      ASSERT(false); // TODO: support percentage
+      // frequency is a percentage, not bytes
+      rfc1867ApcData->update_freq =
+        rfc1867ApcData->content_length * RuntimeOption::Rfc1867Freq / 100;
+    }
+    break;
+  }
+
+  case MULTIPART_EVENT_FORMDATA: {
+    multipart_event_formdata *data = (multipart_event_formdata *)event_data;
+    if (data->name &&
+        !strncasecmp(data->name, RuntimeOption::Rfc1867Name.c_str(),
+                     RuntimeOption::Rfc1867Name.size() &&
+        data->value && data->length &&
+        data->length < RFC1867_TRACKING_KEY_MAXLEN -
+                       RuntimeOption::Rfc1867Prefix.size())) {
+      int len = RuntimeOption::Rfc1867Prefix.size();
+      if (len > RFC1867_TRACKING_KEY_MAXLEN) {
+        len = RFC1867_TRACKING_KEY_MAXLEN;
+      }
+      rfc1867ApcData->tracking_key =
+        string(RuntimeOption::Rfc1867Prefix.c_str(), len);
+      len = strlen(*data->value);
+      int rem = RFC1867_TRACKING_KEY_MAXLEN -
+                rfc1867ApcData->tracking_key.size();
+      if (len > rem) len = rem;
+      rfc1867ApcData->tracking_key +=
+        string(*data->value, len);
+      rfc1867ApcData->bytes_processed = data->post_bytes_processed;
+    }
+    /* Facebook: Temporary fix for a bug in PHP's rfc1867 code,
+       fixed here for convenience:
+       http://cvs.php.net/viewvc.cgi/php-src/main/
+       rfc1867.c?r1=1.173.2.1.2.11&r2=1.173.2.1.2.12 */
+    (*data->newlength) = data->length;
+    break;
+  }
+
+  case MULTIPART_EVENT_FILE_START:
+    if (!rfc1867ApcData->tracking_key.empty()) {
+      multipart_event_file_start *data =
+        (multipart_event_file_start *)event_data;
+
+      rfc1867ApcData->bytes_processed = data->post_bytes_processed;
+      int len = strlen(*data->filename);
+      if (len > RFC1867_FILENAME_MAXLEN) len = RFC1867_FILENAME_MAXLEN;
+      rfc1867ApcData->filename = string(*data->filename, len);
+      rfc1867ApcData->temp_filename = NULL;
+      len = strlen(data->name);
+      if (len > RFC1867_NAME_MAXLEN) len = RFC1867_NAME_MAXLEN;
+      rfc1867ApcData->name = string(data->name, len);
+      Array track;
+      track.set("total", rfc1867ApcData->content_length);
+      track.set("current", rfc1867ApcData->bytes_processed);
+      track.set("filename", rfc1867ApcData->filename);
+      track.set("name", rfc1867ApcData->name);
+      track.set("done", 0);
+      track.set("start_time", rfc1867ApcData->start_time);
+      f_apc_store(rfc1867ApcData->tracking_key, track, 3600);
+    }
+    break;
+
+  case MULTIPART_EVENT_FILE_DATA:
+    if (!rfc1867ApcData->tracking_key.empty()) {
+      multipart_event_file_data *data =
+        (multipart_event_file_data *) event_data;
+      rfc1867ApcData->bytes_processed = data->post_bytes_processed;
+      if (rfc1867ApcData->bytes_processed -
+          rfc1867ApcData->prev_bytes_processed >
+          rfc1867ApcData->update_freq) {
+        Variant v;
+        if (s_apc_store[0].get(rfc1867ApcData->tracking_key, v)) {
+          if (v.is(KindOfArray) &&
+              v.toArray().exists(String(rfc1867ApcData->tracking_key))) {
+            Array track;
+            track.set("total", rfc1867ApcData->content_length);
+            track.set("current", rfc1867ApcData->bytes_processed);
+            track.set("filename", rfc1867ApcData->filename);
+            track.set("name", rfc1867ApcData->name);
+            track.set("done", 0);
+            track.set("start_time", rfc1867ApcData->start_time);
+            f_apc_store(rfc1867ApcData->tracking_key, track, 3600);
+          }
+          rfc1867ApcData->prev_bytes_processed =
+            rfc1867ApcData->bytes_processed;
+        }
+      }
+    }
+    break;
+
+  case MULTIPART_EVENT_FILE_END:
+    if (!rfc1867ApcData->tracking_key.empty()) {
+      multipart_event_file_end *data =
+        (multipart_event_file_end *)event_data;
+      rfc1867ApcData->bytes_processed = data->post_bytes_processed;
+      rfc1867ApcData->cancel_upload = data->cancel_upload;
+      rfc1867ApcData->temp_filename = data->temp_filename;
+      Array track;
+      track.set("total", rfc1867ApcData->content_length);
+      track.set("current", rfc1867ApcData->bytes_processed);
+      track.set("filename", rfc1867ApcData->filename);
+      track.set("name", rfc1867ApcData->name);
+      track.set("temp_filename", rfc1867ApcData->temp_filename, CopyString);
+      track.set("cancel_upload", rfc1867ApcData->cancel_upload);
+      track.set("done", 0);
+      track.set("start_time", rfc1867ApcData->start_time);
+      f_apc_store(rfc1867ApcData->tracking_key, track, 3600);
+    }
+    break;
+
+  case MULTIPART_EVENT_END:
+    if (!rfc1867ApcData->tracking_key.empty()) {
+      double now = my_time();
+      multipart_event_end *data = (multipart_event_end *)event_data;
+      rfc1867ApcData->bytes_processed = data->post_bytes_processed;
+      if(now>rfc1867ApcData->start_time) {
+        rfc1867ApcData->rate =
+          8.0*rfc1867ApcData->bytes_processed/(now-rfc1867ApcData->start_time);
+      } else {
+        rfc1867ApcData->rate =
+          8.0*rfc1867ApcData->bytes_processed;  /* Too quick */
+        Array track;
+        track.set("total", rfc1867ApcData->content_length);
+        track.set("current", rfc1867ApcData->bytes_processed);
+        track.set("rate", rfc1867ApcData->rate);
+        track.set("filename", rfc1867ApcData->filename);
+        track.set("name", rfc1867ApcData->name);
+        track.set("cancel_upload", rfc1867ApcData->cancel_upload);
+        track.set("done", 1);
+        track.set("start_time", rfc1867ApcData->start_time);
+        f_apc_store(rfc1867ApcData->tracking_key, track, 3600);
+      }
+    }
+    break;
+  }
+  return 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -94,6 +94,10 @@ int RuntimeOption::MaxPostSize;
 int RuntimeOption::UploadMaxFileSize;
 std::string RuntimeOption::UploadTmpDir;
 bool RuntimeOption::EnableFileUploads;
+bool RuntimeOption::EnableUploadProgress;
+int RuntimeOption::Rfc1867Freq;
+std::string RuntimeOption::Rfc1867Prefix;
+std::string RuntimeOption::Rfc1867Name;
 bool RuntimeOption::LibEventSyncSend = true;
 bool RuntimeOption::ExpiresActive = true;
 int RuntimeOption::ExpiresDefault = 2592000;
@@ -460,6 +464,11 @@ void RuntimeOption::Load(Hdf &config) {
       ImageMemoryMaxBytes = UploadMaxFileSize * 2;
     }
     EnableFileUploads = server["EnableFileUploads"].getBool(true);
+    EnableUploadProgress = server["EnableUploadProgress"].getBool(false);
+    Rfc1867Freq = server["Rfc1867Freq"].getInt32(256 * 1024);
+    if (Rfc1867Freq < 0) Rfc1867Freq = 256 * 1024;
+    Rfc1867Prefix = server["Rfc1867Prefix"].getString("vupload_");
+    Rfc1867Name = server["Rfc1867Name"].getString("video_ptoken");
     LibEventSyncSend = server["LibEventSyncSend"].getBool(true);
     TakeoverFilename = server["TakeoverFilename"].getString();
     ExpiresActive = server["ExpiresActive"].getBool(true);

@@ -129,17 +129,21 @@ void RequestEvalState::addCodeContainer(CodeContainer *cc) {
 
 ClassEvalState &RequestEvalState::declareClass(const ClassStatement *cls) {
   RequestEvalState *self = s_res.get();
-  ClassEvalState &ce = self->m_classes[cls->lname().c_str()];
+  const string &name = cls->name();
+  if (self->m_classes.find(name.c_str()) != self->m_classes.end()) {
+    raise_error("Cannot redeclare class %s", name.c_str());
+  }
+  ClassEvalState &ce = self->m_classes[name.c_str()];
   ce.init(cls);
   return ce;
 }
 void RequestEvalState::declareFunction(const FunctionStatement *fn) {
   RequestEvalState *self = s_res.get();
-  string lname = fn->lname();
-  if (self->m_functions.find(lname.c_str()) != self->m_functions.end()) {
+  const string &name = fn->name();
+  if (self->m_functions.find(name.c_str()) != self->m_functions.end()) {
     raise_error("Cannot redeclare %s()", fn->name().c_str());
   }
-  self->m_functions[lname.c_str()] = fn;
+  self->m_functions[name.c_str()] = fn;
 }
 
 bool RequestEvalState::declareConstant(CStrRef name, CVarRef val) {

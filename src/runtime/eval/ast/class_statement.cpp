@@ -89,7 +89,8 @@ ClassStatement::ClassStatement(STATEMENT_ARGS, const string &name,
   : Statement(STATEMENT_PASS), m_name(name),
     m_lname(Util::toLower(m_name)),
     m_modifiers(0), m_parent(parent), m_docComment(doc),
-    m_marker(new ClassStatementMarker(STATEMENT_PASS, this)) {}
+    m_marker(new ClassStatementMarker(STATEMENT_PASS, this)),
+    m_delayDeclaration(false) {}
 
 void ClassStatement::finish() {
 }
@@ -170,10 +171,32 @@ loadMethodTable(ClassEvalState &ce) const {
 }
 
 void ClassStatement::eval(VariableEnvironment &env) const {
+  if (m_delayDeclaration) return;
+  if (!isBaseClass() && !m_marker) {
+    // Class might not be valid to declare yet. If the parent and bases
+    // have not been defined then don't declare until execution hits the
+    // marker.
+    if (!m_parent.empty() && !f_class_exists(m_parent.c_str(), false)) {
+      return;
+    }
+    for (uint i = 0; i < m_basesVec.size(); ++i) {
+      if (!f_interface_exists(m_basesVec[i].c_str())) return;
+    }
+  }
+  evalImpl(env);
+}
+
+void ClassStatement::evalImpl(VariableEnvironment &env) const {
   ENTER_STMT;
   RequestEvalState::declareClass(this);
 
   const ClassStatement* parent_cls;
+  if (!m_marker) {
+    // Not a top level, immediately do semantic check
+    ClassEvalState *ce = RequestEvalState::findClassState(name().c_str());
+    ASSERT(ce);
+    ce->semanticCheck();
+  }
   if (RuntimeOption::EnableStrict && (parent_cls = parentStatement())) {
     for (vector<MethodStatementPtr>::const_iterator it = m_methodsVec.begin();
          it != m_methodsVec.end(); ++it) {
@@ -714,6 +737,11 @@ ClassStatementMarker::ClassStatementMarker(STATEMENT_ARGS,
 void ClassStatementMarker::eval(VariableEnvironment &env) const {
   ClassEvalState *ce = RequestEvalState::findClassState(m_class->
                                                         name().c_str());
+  if (!ce || ce->getClass() != m_class) {
+    // Delayed due to volatility
+    m_class->evalImpl(env);
+    ce = RequestEvalState::findClassState(m_class->name().c_str());
+  }
   ASSERT(ce);
   ce->semanticCheck();
 }

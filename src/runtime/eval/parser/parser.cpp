@@ -882,16 +882,10 @@ void Parser::saveParseTree(Token &tree) {
     std::vector<StatementPtr> scopes;
     std::vector<StatementPtr> rest;
     const std::vector<StatementPtr> &svec = s->stmts();
-    hphp_const_char_map<bool> seen;
     for (std::vector<StatementPtr>::const_iterator it = svec.begin();
          it != svec.end(); ++it) {
       ClassStatementPtr cs = (*it)->cast<ClassStatement>();
-      if (cs) {
-        seen[cs->name().c_str()] = true;
-      }
-      if ((cs && (cs->isBaseClass() ||
-              seen.find(cs->parent().c_str()) != seen.end())) ||
-            (*it)->cast<FunctionStatement>()) {
+      if (cs || (*it)->cast<FunctionStatement>()) {
         scopes.push_back(*it);
       } else {
         rest.push_back(*it);
@@ -902,6 +896,20 @@ void Parser::saveParseTree(Token &tree) {
     }
     rest.insert(rest.begin(), scopes.begin(), scopes.end());
     m_tree = StatementPtr(new StatementListStatement(this, rest));
+    // Classes that have a parent declared after them must be evaluated at
+    // the marker position. I don't know why.
+    hphp_const_char_map<bool> seen;
+    for (int i = svec.size() - 1; i >= 0; --i) {
+      ClassStatementPtr cs = svec[i]->cast<ClassStatement>();
+      if (cs) {
+        seen[cs->name().c_str()] = true;
+        if (!cs->parent().empty()) {
+          if (seen.find(cs->parent().c_str()) != seen.end()) {
+            cs->delayDeclaration();
+          }
+        }
+      }
+    }
   } else {
     m_tree = tree->stmt();
   }

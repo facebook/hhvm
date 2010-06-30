@@ -95,6 +95,7 @@ public:
 
   // Eval is called at declaration, not invocation
   virtual void eval(VariableEnvironment &env) const;
+  void evalImpl(VariableEnvironment &env) const;
   // Called by create_class
   Object create(ClassEvalState &ce, CArrRef params, bool init,
                 ObjectData* root = NULL) const;
@@ -123,6 +124,7 @@ public:
   void loadMethodTable(ClassEvalState &ce) const;
   void semanticCheck(const ClassStatement *cls) const;
   ClassStatementMarkerPtr getMarker() const;
+  void delayDeclaration() { m_delayDeclaration = true; }
 protected:
   std::string m_name;
   std::string m_lname;
@@ -140,6 +142,7 @@ protected:
 
   std::string m_docComment;
   ClassStatementMarkerPtr m_marker;
+  bool m_delayDeclaration;
 
   void loadProperties(ClassInfoEvaled &info) const;
 

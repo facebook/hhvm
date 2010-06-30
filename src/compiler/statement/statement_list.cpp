@@ -25,6 +25,7 @@
 #include <compiler/statement/exp_statement.h>
 #include <compiler/statement/method_statement.h>
 #include <compiler/statement/class_statement.h>
+#include <compiler/statement/return_statement.h>
 #include <compiler/parser/hphp.tab.hpp>
 #include <compiler/expression/binary_op_expression.h>
 #include <compiler/expression/assignment_expression.h>
@@ -98,6 +99,23 @@ bool StatementList::hasImpl() const {
     if (m_stmts[i]->hasImpl()) return true;
   }
   return false;
+}
+
+ExpressionPtr StatementList::getEffectiveImpl(AnalysisResultPtr ar) const {
+  for (unsigned int i = 0; i < m_stmts.size(); i++) {
+    StatementPtr s = m_stmts[i];
+    if (s->is(KindOfReturnStatement)) {
+      ExpressionPtr e = static_pointer_cast<ReturnStatement>(s)->getRetExp();
+      if (!e) {
+        e = Expression::MakeConstant(ar, s->getLocation(), "null");
+      } else if (!e->isScalar()) {
+        break;
+      }
+      return e;
+    }
+    if (m_stmts[i]->hasImpl()) break;
+  }
+  return ExpressionPtr();
 }
 
 bool StatementList::hasBody() const {
@@ -354,11 +372,13 @@ StatementPtr StatementList::postOptimize(AnalysisResultPtr ar) {
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     StatementPtr &s = m_stmts[i];
     ar->postOptimize(s);
-    if (AliasManager::doDeadCodeElim() &&
-        s->is(KindOfExpStatement) && !s->hasEffect()) {
-      removeElement(i--);
-      changed = true;
-      continue;
+    if (s->is(KindOfExpStatement) && !s->hasEffect()) {
+      if (AliasManager::doDeadCodeElim() ||
+          static_pointer_cast<ExpStatement>(s)->getExpression()->isScalar()) {
+        removeElement(i--);
+        changed = true;
+        continue;
+      }
     }
   }
   return changed ? static_pointer_cast<Statement>(shared_from_this())

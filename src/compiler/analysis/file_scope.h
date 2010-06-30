@@ -87,6 +87,7 @@ public:
    * have CPP implementation.
    */
   bool hasImpl(AnalysisResultPtr ar) const;
+  ExpressionPtr getEffectiveImpl(AnalysisResultPtr ar) const;
 
   /**
    * Parser functions. Parser only deals with a FileScope object, and these

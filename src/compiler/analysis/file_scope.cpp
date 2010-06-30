@@ -121,6 +121,11 @@ int FileScope::getGlobalAttribute() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+ExpressionPtr FileScope::getEffectiveImpl(AnalysisResultPtr ar) const {
+  if (m_tree) return m_tree->getEffectiveImpl(ar);
+  return ExpressionPtr();
+}
+
 bool FileScope::hasImpl(AnalysisResultPtr ar) const {
   return m_tree && m_tree->hasImpl();
 }

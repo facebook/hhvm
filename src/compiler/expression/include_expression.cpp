@@ -141,11 +141,11 @@ ExpressionPtr IncludeExpression::postOptimize(AnalysisResultPtr ar) {
   if (!m_include.empty()) {
     FileScopePtr fs = ar->findFileScope(m_include, false);
     if (fs) {
-      if (!Option::KeepStatementsWithNoEffect && !fs->hasImpl(ar)) {
-        return ScalarExpressionPtr
-          (new ScalarExpression(getLocation(),
-                                Expression::KindOfScalarExpression,
-                                1));
+      if (!Option::KeepStatementsWithNoEffect) {
+        if (ExpressionPtr rep = fs->getEffectiveImpl(ar)) {
+          recomputeEffects();
+          return rep;
+        }
       }
       m_exp.reset();
     }

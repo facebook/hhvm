@@ -586,11 +586,13 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
         ASSERT(false);
       }
     } else if (m_name) {
-      const ObjectStaticCallbacks *cwo = get_object_static_callbacks(m_name);
-      if (cwo) {
-        constant->value = cwo->os_constant(constant->name);
-      } else {
-        ASSERT(false);
+      if (!(m_attribute & IsVolatile)) {
+        const ObjectStaticCallbacks *cwo = get_object_static_callbacks(m_name);
+        if (cwo) {
+          constant->value = cwo->os_constant(constant->name);
+        } else {
+          ASSERT(false);
+        }
       }
     } else {
       constant->value = get_constant(constant->name);

@@ -72,7 +72,7 @@ class ReflectionParameter implements Reflector {
   }
 
   public function isDefaultValueAvailable() {
-    return isset($this->info['default']);
+    return array_key_exists('default', $this->info);
   }
 
   public function getDefaultValue() {

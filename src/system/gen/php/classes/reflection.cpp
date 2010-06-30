@@ -8874,7 +8874,7 @@ bool c_reflectionparameter::t_isoptional() {
 /* SRC: classes/reflection.php line 74 */
 bool c_reflectionparameter::t_isdefaultvalueavailable() {
   INSTANCE_METHOD_INJECTION(ReflectionParameter, ReflectionParameter::isDefaultValueAvailable);
-  return isset(m_info, "default", 0x1575CB56409781E3LL, true);
+  return x_array_key_exists("default", m_info);
 } /* function */
 /* SRC: classes/reflection.php line 78 */
 Variant c_reflectionparameter::t_getdefaultvalue() {

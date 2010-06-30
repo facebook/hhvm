@@ -5479,6 +5479,12 @@ bool TestCodeRun::TestReflection() {
   MVCR("<?php class A { static $a = 10; public $b = 20;}"
       "$obj = new A(); var_dump(get_object_vars($obj));");
 
+  MVCR("<?php\n"
+       "function foo($a = null) {}\n"
+       "$func = new ReflectionFunction('foo');\n"
+       "$params = $func->getParameters();\n"
+       "var_dump($params[0]->isDefaultValueAvailable());\n");
+
   return true;
 }
 

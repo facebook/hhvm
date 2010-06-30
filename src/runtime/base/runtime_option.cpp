@@ -460,19 +460,11 @@ void RuntimeOption::Load(Hdf &config) {
     OutputHandler = server["OutputHandler"].getString();
     EnableEarlyFlush = server["EnableEarlyFlush"].getBool(true);
     ForceChunkedEncoding = server["ForceChunkedEncoding"].getBool();
-    MaxPostSize = (server["MaxPostSize"].getInt32(150)) * (1 << 20);
-    UploadMaxFileSize = (server["UploadMaxFileSize"].getInt32(10)) * (1 << 20);
-    UploadTmpDir = server["UploadTmpDir"].getString("/tmp");
+    MaxPostSize = (server["MaxPostSize"].getInt32(100)) * (1 << 20);
     ImageMemoryMaxBytes = server["ImageMemoryMaxBytes"].getInt32(0);
     if (ImageMemoryMaxBytes == 0) {
       ImageMemoryMaxBytes = UploadMaxFileSize * 2;
     }
-    EnableFileUploads = server["EnableFileUploads"].getBool(true);
-    EnableUploadProgress = server["EnableUploadProgress"].getBool(false);
-    Rfc1867Freq = server["Rfc1867Freq"].getInt32(256 * 1024);
-    if (Rfc1867Freq < 0) Rfc1867Freq = 256 * 1024;
-    Rfc1867Prefix = server["Rfc1867Prefix"].getString("vupload_");
-    Rfc1867Name = server["Rfc1867Name"].getString("video_ptoken");
     LibEventSyncSend = server["LibEventSyncSend"].getBool(true);
     TakeoverFilename = server["TakeoverFilename"].getString();
     ExpiresActive = server["ExpiresActive"].getBool(true);
@@ -545,7 +537,6 @@ void RuntimeOption::Load(Hdf &config) {
         RuntimeOption::AllowedDirectories.push_back(resolved_path);
       }
     }
-    RuntimeOption::AllowedDirectories.push_back(UploadTmpDir);
     server["AllowedFiles"].get(AllowedFiles);
 
     server["ForbiddenFileExtensions"].get(ForbiddenFileExtensions);
@@ -599,6 +590,18 @@ void RuntimeOption::Load(Hdf &config) {
     DnsCacheMaximumCapacity = dns["MaximumCapacity"].getInt64(0);
     DnsCacheKeyFrequencyUpdatePeriod = dns["KeyFrequencyUpdatePeriod"].
       getInt32(1000);
+
+    Hdf upload = server["Upload"];
+    UploadMaxFileSize =
+      (upload["UploadMaxFileSize"].getInt32(100)) * (1 << 20);
+    UploadTmpDir = upload["UploadTmpDir"].getString("/tmp");
+    RuntimeOption::AllowedDirectories.push_back(UploadTmpDir);
+    EnableFileUploads = upload["EnableFileUploads"].getBool(true);
+    EnableUploadProgress = upload["EnableUploadProgress"].getBool(false);
+    Rfc1867Freq = upload["Rfc1867Freq"].getInt32(256 * 1024);
+    if (Rfc1867Freq < 0) Rfc1867Freq = 256 * 1024;
+    Rfc1867Prefix = upload["Rfc1867Prefix"].getString("vupload_");
+    Rfc1867Name = upload["Rfc1867Name"].getString("video_ptoken");
 
     SharedStores::Create();
 

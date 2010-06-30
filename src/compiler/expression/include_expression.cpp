@@ -70,7 +70,8 @@ std::string IncludeExpression::getCurrentInclude(AnalysisResultPtr ar) {
 void IncludeExpression::analyzeInclude(AnalysisResultPtr ar,
                                        const std::string &include) {
   ConstructPtr self = shared_from_this();
-  FileScopePtr file = ar->findFileScope(include, true);
+  FileScopePtr file = ar->findFileScope(include, ar->getPhase() <=
+                                        AnalysisResult::AnalyzeInclude);
   if (!file) {
     ar->getCodeError()->record(self, CodeError::PHPIncludeFileNotFound, self);
     return;

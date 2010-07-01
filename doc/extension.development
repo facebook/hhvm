@@ -63,7 +63,7 @@ PHP code. To do this, prepare a configuration HDF file like this,
       # optional: default to lib[name].so
       soname = libmhash.so
 
-      # optional: default to $(PROJECT_ROOT)/srcruntime/ext/sep/[name]
+      # optional: default to $(PROJECT_ROOT)/src/runtime/ext/sep/[name]
       include = /var/users/hzhao/hphp2/src/runtime/ext/sep/mhash
 
       # optional: default to use LD_LIBRARY_PATH or ldconfig to locate the .so
@@ -97,7 +97,7 @@ All commands and directories are from src/ in this guide.
 1. Find the right extension name
 
 Find the best "extension" under idl/*.idl.php to add your function(s) to.
-cpp/ext/README has a good list of categorized extension names. If nothing
+runtime/ext/README has a good list of categorized extension names. If nothing
 fits, create a new IDL file with a good name.
 
 2. Update IDL
@@ -132,8 +132,8 @@ This will modify several files with the new function/classes.
 
 Some files are not automatically updated, including
 
-  cpp/ext/ext_[name].h
-  cpp/ext/ext_[name].cpp
+  runtime/ext/ext_[name].h
+  runtime/ext/ext_[name].cpp
 
 They are created under idl/ to serve as templates that one can copy portions
 of them manually. These are the two files that you will add implementation to.
@@ -164,4 +164,4 @@ Follow all steps after step 3 at above.
 
 7. After compiling once, do this to update compiler with the latest functions:
 
-  make -C lib/system
+  make -C system

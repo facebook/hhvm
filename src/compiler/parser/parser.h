@@ -31,7 +31,8 @@ namespace HPHP {
   DECLARE_BOOST_TYPES(Parser);
   DECLARE_BOOST_TYPES(AnalysisResult);
 
-  struct Location {
+  class Location {
+  public:
     const char *file;
     int line0;
     int char0;

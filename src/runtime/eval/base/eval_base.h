@@ -29,7 +29,8 @@ namespace Eval {
 
 class VariableEnvironment;
 
-struct Location {
+class Location {
+public:
   const char *file;
   int line1;
   int char1;

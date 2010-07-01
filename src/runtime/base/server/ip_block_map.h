@@ -44,7 +44,8 @@ private:
   typedef std::vector<IpRange> IpRangeVec;
 
   DECLARE_BOOST_TYPES(Acl);
-  struct Acl {
+  class Acl {
+  public:
     IpMap ips; // ip => true: allow; false: deny
     IpRangeVec ranges; // (start, end) => true: allow; false: deny
   };

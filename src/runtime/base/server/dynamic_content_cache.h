@@ -44,7 +44,8 @@ public:
 private:
   ReadWriteMutex m_mutex;
 
-  struct ResourceFile {
+  class ResourceFile {
+  public:
     StringBufferPtr file;
     StringBufferPtr compressed;
   };

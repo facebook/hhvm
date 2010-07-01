@@ -838,20 +838,20 @@ bool TestCodeRun::TestPredefined() {
 
 bool TestCodeRun::TestLabels() {
   MVCR("<?php\n"
-       "$modalité = 'extended ASCII'; var_dump($modalité);\n"
+       "$modalit\xe9 = 'extended ASCII'; var_dump($modalit\xe9);\n"
        "${\"a-b\"} = 'dash'; var_dump(${\"a-b\"});\n"
        "${'a\"b'} = 'quote'; var_dump(${'a\"b'});\n"
        "${'a$b'} = 'dollar'; var_dump(${'a$b'});\n");
 
   MVCR("<?php\n"
-       "define('modalité', 123); var_dump(modalité);");
+       "define('modalit\xe9', 123); var_dump(modalit\xe9);");
 
   MVCR("<?php\n"
-       "function modalité($a) { var_dump($a);} modalité(123);");
+       "function modalit\xe9($a) { var_dump($a);} modalit\xe9(123);");
 
   MVCR("<?php\n"
-       "class modalité { static function odalité() { var_dump(123);} } "
-       "modalité::odalité();");
+       "class modalit\xe9 { static function odalit\xe9() { var_dump(123);} } "
+       "modalit\xe9::odalit\xe9();");
 
   return true;
 }

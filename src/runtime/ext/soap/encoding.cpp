@@ -1233,7 +1233,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
     node = node->next;
   }
   if (any) {
-    ret.set(name ? name : "any", any);
+    ret.toObject()->o_set(name ? name : "any", -1, any);
   }
 }
 

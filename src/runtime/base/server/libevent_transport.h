@@ -35,6 +35,8 @@ public:
   virtual const char *getUrl();
   virtual const char *getRemoteHost();
   virtual const void *getPostData(int &size);
+  virtual bool hasMorePostData();
+  virtual const void *getMorePostData(int &size);
   virtual Method getMethod();
   virtual const char *getExtendedMethod();
   virtual std::string getHTTPVersion() const;

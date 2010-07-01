@@ -33,6 +33,22 @@ using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// helper functions
+
+static const void *copy_buffer(const void *src, int size) {
+  void *s = malloc(size + 1); // '\0' in the end
+  memcpy(s, src, size + 1);
+  return s;
+}
+
+static void append_buffer(const void *&buf, int size,
+                          const void *extra, int delta) {
+  void *s = realloc(const_cast<void *>(buf), size + delta + 1);
+  memcpy((char *)s + size, extra, delta + 1);
+  buf = s;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 const VirtualHost *HttpProtocol::GetVirtualHost(Transport *transport) {
   if (!RuntimeOption::VirtualHosts.empty()) {
@@ -84,14 +100,25 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   string contentLength = transport->getHeader("Content-Length");
   // $_POST and $_REQUEST
   if (transport->getMethod() == Transport::POST) {
+    bool needDelete = false;
     int size = 0;
     const void *data = transport->getPostData(size);
     if (data && size) {
       ASSERT(((char*)data)[size] == 0); // we need a NULL terminated string
+      if (transport->hasMorePostData()) {
+        needDelete = true;
+        data = copy_buffer(data, size);
+        do {
+          int delta = 0;
+          const void *extra = transport->getMorePostData(delta);
+          append_buffer(data, size, extra, delta);
+          size += delta;
+        } while (transport->hasMorePostData());
+      }
       string boundary;
+      int content_length = atoi(contentLength.c_str());
       bool rfc1867Post = IsRfc1867(contentType, boundary);
       if (rfc1867Post) {
-        int content_length = atoi(contentLength.c_str());
         if (content_length > RuntimeOption::MaxPostSize) {
           // $_POST and $_FILES are empty
           Logger::Warning("POST Content-Length of %d bytes exceeds "
@@ -105,7 +132,11 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
         DecodeParameters(g->gv__POST, (const char*)data, size, true);
       }
       CopyParams(request, g->gv__POST);
-      g->gv_HTTP_RAW_POST_DATA = String((char*)data, size, AttachLiteral);
+      if (needDelete) {
+        g->gv_HTTP_RAW_POST_DATA = String((char*)data, size, AttachString);
+      } else {
+        g->gv_HTTP_RAW_POST_DATA = String((char*)data, size, AttachLiteral);
+      }
     }
   }
 

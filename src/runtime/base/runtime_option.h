@@ -108,6 +108,10 @@ public:
   static IpBlockMapPtr IpBlocks;
   static SatelliteServerInfoPtrVec SatelliteServerInfos;
 
+  // If a request has a body over this limit, switch to on-demand reading.
+  // -1 for no limit.
+  static int RequestBodyReadLimit;
+
   static bool EnableSSL;
   static int SSLPort;
   static std::string SSLCertificateFile;

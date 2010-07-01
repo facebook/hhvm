@@ -94,6 +94,8 @@ public:
    * POST request's data.
    */
   virtual const void *getPostData(int &size) = 0;
+  virtual bool hasMorePostData() { return false; }
+  virtual const void *getMorePostData(int &size) { size = 0; return NULL; }
 
   /**
    * Is this a GET, POST or anything?

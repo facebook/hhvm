@@ -23,6 +23,15 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+static void on_resume(struct evhttp_request *request, void *obj) {
+  ASSERT(obj);
+  Synchronizable *sync = (Synchronizable *)obj;
+  Lock lock(sync->getMutex());
+  sync->notify();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 // libevent is not exposing this data structure, but we need it.
 struct m_evkeyvalq {
   struct evkeyval *tqh_first;
@@ -87,11 +96,40 @@ const char *LibEventTransport::getRemoteHost() {
   return m_remote_host.c_str();
 }
 
-void const *LibEventTransport::getPostData(int &size) {
+const void *LibEventTransport::getPostData(int &size) {
   evbuffer *buf = m_request->input_buffer;
 
   ASSERT(buf);
   size = EVBUFFER_LENGTH(buf);
+  return EVBUFFER_DATA(buf);
+}
+
+bool LibEventTransport::hasMorePostData() {
+  return m_request->ntoread > 0;
+}
+
+const void *LibEventTransport::getMorePostData(int &size) {
+  if (m_request->ntoread == 0) {
+    size = 0;
+    return NULL;
+  }
+
+  evbuffer *buf = m_request->input_buffer;
+  ASSERT(buf);
+  evbuffer_drain(buf, EVBUFFER_LENGTH(buf));
+
+  Synchronizable sync;
+  if (!evhttp_resume_reading(m_request, on_resume, &sync)) {
+    Lock lock(sync.getMutex());
+    sync.wait();
+  }
+
+  buf = m_request->input_buffer;
+  ASSERT(buf);
+  size = EVBUFFER_LENGTH(buf);
+  evbuffer_expand(buf, size + 1); // allowing NULL termination
+  // EVBUFFER_DATA(buf) might change after evbuffer_expand
+  ((char*)EVBUFFER_DATA(buf))[size] = '\0';
   return EVBUFFER_DATA(buf);
 }
 

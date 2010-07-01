@@ -145,6 +145,7 @@ LibEventServer::LibEventServer(const std::string &address, int port,
   m_server = evhttp_new(m_eventBase);
   m_server_ssl = NULL;
   evhttp_set_gencb(m_server, on_request, this);
+  evhttp_set_read_limit(m_server, RuntimeOption::RequestBodyReadLimit);
   m_responseQueue.create(m_eventBase);
 }
 

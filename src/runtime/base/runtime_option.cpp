@@ -106,6 +106,8 @@ int RuntimeOption::ExpiresDefault = 2592000;
 std::string RuntimeOption::DefaultCharsetName = "UTF-8";
 bool RuntimeOption::ForceServerNameToHeader = false;
 
+int RuntimeOption::RequestBodyReadLimit = -1;
+
 bool RuntimeOption::EnableSSL = false;
 int RuntimeOption::SSLPort = 443;
 std::string RuntimeOption::SSLCertificateFile;
@@ -471,6 +473,8 @@ void RuntimeOption::Load(Hdf &config) {
     ExpiresDefault = server["ExpiresDefault"].getInt32(2592000);
     if (ExpiresDefault < 0) ExpiresDefault = 2592000;
     DefaultCharsetName = server["DefaultCharsetName"].getString("UTF-8");
+
+    RequestBodyReadLimit = server["RequestBodyReadLimit"].getInt32(-1);
 
     EnableSSL = server["EnableSSL"].getBool(false);
     SSLPort = server["SSLPort"].getInt16(443);

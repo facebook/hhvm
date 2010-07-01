@@ -28,6 +28,10 @@
 #include "neo_files.h"
 #include "ulist.h"
 
+static NEOERR* hdf_read_file_internal (HDF *hdf, const char *path,
+                                       int include_handle);
+
+
 static char *_read_file(FILE *f) {
   int size = 1024;
   char *ret = malloc(size + 1);
@@ -78,7 +82,7 @@ static UINT32 hash_hdf_hash(const void *a)
 }
 
 static NEOERR *_alloc_hdf (HDF **hdf, const char *name, size_t nlen,
-                           const char *value, int dup, int wf, HDF *top)
+                           const char *value, int dupl, int wf, HDF *top)
 {
   *hdf = calloc (1, sizeof (HDF));
   if (*hdf == NULL)
@@ -104,7 +108,7 @@ static NEOERR *_alloc_hdf (HDF **hdf, const char *name, size_t nlen,
   }
   if (value != NULL)
   {
-    if (dup)
+    if (dupl)
     {
       (*hdf)->alloc_value = 1;
       (*hdf)->value = strdup(value);
@@ -594,7 +598,7 @@ NEOERR* _hdf_hash_level(HDF *hdf)
 }
 
 static NEOERR* _set_value (HDF *hdf, const char *name, const char *value,
-                           int dup, int wf, int link, HDF_ATTR *attr,
+                           int dupl, int wf, int lnk, HDF_ATTR *attr,
                            HDF **set_node)
 {
   NEOERR *err;
@@ -623,6 +627,9 @@ static NEOERR* _set_value (HDF *hdf, const char *name, const char *value,
     {
       _merge_attr(hdf->attr, attr);
     }
+    /* set link flag */
+    if (lnk) hdf->link = 1;
+    else hdf->link = 0;
     /* if we're setting ourselves to ourselves... */
     if (hdf->value == value)
     {
@@ -639,7 +646,7 @@ static NEOERR* _set_value (HDF *hdf, const char *name, const char *value,
       hdf->alloc_value = 0;
       hdf->value = NULL;
     }
-    else if (dup)
+    else if (dupl)
     {
       hdf->alloc_value = 1;
       hdf->value = strdup(value);
@@ -674,7 +681,7 @@ static NEOERR* _set_value (HDF *hdf, const char *name, const char *value,
     strcpy(new_name, hdf->value);
     strcat(new_name, ".");
     strcat(new_name, name);
-    err = _set_value (hdf->top, new_name, value, dup, wf, link, attr, set_node);
+    err = _set_value (hdf->top, new_name, value, dupl, wf, lnk, attr, set_node);
     free(new_name);
     return nerr_pass(err);
   }
@@ -743,8 +750,8 @@ skip_search:
       }
       else
       {
-	err = _alloc_hdf (&hp, n, x, value, dup, wf, hdf->top);
-	if (link) hp->link = 1;
+	err = _alloc_hdf (&hp, n, x, value, dupl, wf, hdf->top);
+	if (lnk) hp->link = 1;
 	else hp->link = 0;
 	hp->attr = attr;
       }
@@ -794,7 +801,7 @@ skip_search:
 	  hp->alloc_value = 0;
 	  hp->value = NULL;
 	}
-	else if (dup)
+	else if (dupl)
 	{
 	  hp->alloc_value = 1;
 	  hp->value = strdup(value);
@@ -808,7 +815,7 @@ skip_search:
 	  hp->value = (char *)value;
 	}
       }
-      if (link) hp->link = 1;
+      if (lnk) hp->link = 1;
       else hp->link = 0;
     }
     else if (hp->link)
@@ -820,7 +827,7 @@ skip_search:
       }
       strcpy(new_name, hp->value);
       strcat(new_name, s);
-      err = _set_value (hdf->top, new_name, value, dup, wf, link, attr, set_node);
+      err = _set_value (hdf->top, new_name, value, dupl, wf, lnk, attr, set_node);
       free(new_name);
       return nerr_pass(err);
     }
@@ -1324,7 +1331,7 @@ NEOERR *hdf_write_file_atomic (HDF *hdf, const char *path)
 {
   NEOERR *err;
   FILE *fp;
-  char tpath[_POSIX_PATH_MAX];
+  char tpath[PATH_BUF_SIZE];
   static int count = 0;
 
   snprintf(tpath, sizeof(tpath), "%s.%5.5f.%d", path, ne_timef(), count++);
@@ -1429,17 +1436,17 @@ static NEOERR *_copy_line_advance(const char **s, STRING *line)
 
 char *_strndup(const char *s, int len) {
   int x;
-  char *dup;
+  char *dupl;
   if (s == NULL) return NULL;
-  dup = (char *) malloc(len+1);
-  if (dup == NULL) return NULL;
+  dupl = (char *) malloc(len+1);
+  if (dupl == NULL) return NULL;
   for (x = 0; x < len && s[x]; x++)
   {
-    dup[x] = s[x];
+    dupl[x] = s[x];
   }
-  dup[x] = '\0';
-  dup[len] = '\0';
-  return dup;
+  dupl[x] = '\0';
+  dupl[len] = '\0';
+  return dupl;
 }
 
 /* attributes are of the form [key1, key2, key3=value, key4="repr"] */
@@ -1582,9 +1589,10 @@ static NEOERR* parse_attr(char **str, HDF_ATTR **attr)
   return STATUS_OK;
 }
 
-#define INCLUDE_ERROR 0
-#define INCLUDE_IGNORE 1
-#define INCLUDE_FILE 2
+#define INCLUDE_ERROR -1
+#define INCLUDE_IGNORE -2
+#define INCLUDE_FILE 0
+#define INCLUDE_MAX_DEPTH 50
 
 static NEOERR* _hdf_read_string (HDF *hdf, const char **str, STRING *line,
                                  const char *path, int *lineno,
@@ -1605,7 +1613,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, STRING *line,
     (*lineno)++;
     s = line->buf;
     SKIPWS(s);
-    if (!strncmp(s, "#include ", 9) || !strncmp(s, "-include ", 9))
+    if ((!strncmp(s, "#include ", 9) || !strncmp(s, "-include ", 9)) && include_handle != INCLUDE_IGNORE)
     {
       int required = !strncmp(s, "#include ", 9);
       if (include_handle == INCLUDE_ERROR)
@@ -1614,7 +1622,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, STRING *line,
                            "[%d]: #include not supported in string parse",
                            *lineno);
       }
-      else if (include_handle == INCLUDE_FILE)
+      else if (include_handle < INCLUDE_MAX_DEPTH)
       {
         int l;
         s += 9;
@@ -1642,11 +1650,17 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, STRING *line,
           }
           name = fullpath;
         }
-        err = hdf_read_file(hdf, name);
+        err = hdf_read_file_internal(hdf, name, include_handle + 1);
         if (err != STATUS_OK && required)
         {
           return nerr_pass_ctx(err, "In file %s:%d", path, *lineno);
         }
+      }
+      else {
+        return nerr_raise (NERR_MAX_RECURSION,
+                           "[%d]: Too many recursion levels.",
+                           *lineno
+                           );
       }
     }
     else if (s[0] == '#')
@@ -1835,14 +1849,17 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, STRING *line,
 	  msize += strlen(m+msize);
 	  if (msize + l + 10 > mmax)
 	  {
+	    void *new_ptr;
 	    mmax += 128;
-	    m = (char *) realloc (m, mmax * sizeof(char));
-	    if (m == NULL)
-            {
+	    new_ptr = realloc (m, mmax * sizeof(char));
+	    if (new_ptr == NULL)
+	    {
+        free(m);
 	      return nerr_raise(NERR_NOMEM,
 		  "[%s:%d] Unable to allocate memory for multi-line assignment to %s: size=%d",
 		  path, *lineno, name, mmax);
-            }
+      }
+      m = (char *) new_ptr;
 	  }
 	}
 	err = _set_value (hdf, name, m, 0, 1, 0, attr, NULL);
@@ -1893,7 +1910,7 @@ NEOERR * hdf_read_string_ignore (HDF *hdf, const char *str, int ignore)
 }
 
 /* The search path is part of the HDF by convention */
-NEOERR* hdf_search_path (HDF *hdf, const char *path, char *full)
+NEOERR* hdf_search_path (HDF *hdf, const char *path, char *full, int full_len)
 {
   HDF *paths;
   struct stat s;
@@ -1902,7 +1919,7 @@ NEOERR* hdf_search_path (HDF *hdf, const char *path, char *full)
       paths;
       paths = hdf_obj_next (paths))
   {
-    snprintf (full, _POSIX_PATH_MAX, "%s/%s", hdf_obj_value(paths), path);
+    snprintf (full, full_len, "%s/%s", hdf_obj_value(paths), path);
     errno = 0;
     if (stat (full, &s) == -1)
     {
@@ -1915,7 +1932,7 @@ NEOERR* hdf_search_path (HDF *hdf, const char *path, char *full)
     }
   }
 
-  strncpy (full, path, _POSIX_PATH_MAX);
+  strncpy (full, path, full_len);
   if (stat (full, &s) == -1)
   {
     if (errno != ENOENT)
@@ -1926,11 +1943,12 @@ NEOERR* hdf_search_path (HDF *hdf, const char *path, char *full)
   return nerr_raise (NERR_NOT_FOUND, "Path %s not found", path);
 }
 
-NEOERR* hdf_read_file (HDF *hdf, const char *path)
+static NEOERR* hdf_read_file_internal (HDF *hdf, const char *path,
+                                       int include_handle)
 {
   NEOERR *err;
   int lineno = 0;
-  char fpath[_POSIX_PATH_MAX];
+  char fpath[PATH_BUF_SIZE];
   char *ibuf = NULL;
   const char *ptr = NULL;
   HDF *top = hdf->top;
@@ -1949,7 +1967,7 @@ NEOERR* hdf_read_file (HDF *hdf, const char *path)
   {
     if (path[0] != '/')
     {
-      err = hdf_search_path (hdf, path, fpath);
+      err = hdf_search_path (hdf, path, fpath, PATH_BUF_SIZE);
       if (err != STATUS_OK) return nerr_pass(err);
       path = fpath;
     }
@@ -1959,9 +1977,16 @@ NEOERR* hdf_read_file (HDF *hdf, const char *path)
   if (err) return nerr_pass(err);
 
   ptr = ibuf;
-  err = _hdf_read_string(hdf, &ptr, &line, path, &lineno, INCLUDE_FILE, 0);
+  err = _hdf_read_string(hdf, &ptr, &line, path, &lineno, include_handle, 0);
   free(ibuf);
   string_clear(&line);
+  return nerr_pass(err);
+}
+
+NEOERR* hdf_read_file (HDF *hdf, const char *path)
+{
+  NEOERR *err;
+  err = hdf_read_file_internal (hdf, path, INCLUDE_FILE);
   return nerr_pass(err);
 }
 

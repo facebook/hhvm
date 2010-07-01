@@ -39,7 +39,7 @@ char *neos_strip (char *s)
   while (x>=0 && isspace(s[x])) s[x--] = '\0';
 
   while (*s && isspace(*s)) s++;
-  
+
   return s;
 }
 
@@ -95,14 +95,19 @@ static NEOERR* string_check_length (STRING *str, int l)
   }
   else if (str->len + l >= str->max)
   {
+    void *new_ptr;
+    int new_max = str->max;
     do
     {
-      str->max *= 2;
-    } while (str->len + l >= str->max);
-    str->buf = (char *) realloc (str->buf, sizeof(char) * str->max);
-    if (str->buf == NULL)
+      new_max *= 2;
+    } while (str->len + l >= new_max);
+    new_ptr = realloc (str->buf, sizeof(char) * new_max);
+    if (new_ptr == NULL) {
       return nerr_raise (NERR_NOMEM, "Unable to allocate STRING buf of size %d",
-	  str->max);
+	                       new_max);
+    }
+    str->buf = (char *) new_ptr;
+    str->max = new_max;
     /* ne_warn("Growing string %x to %d (%5.2fK)", str, str->max, (str->max / 1024.0)); */
   }
   return STATUS_OK;
@@ -142,7 +147,7 @@ NEOERR *string_appendn (STRING *str, const char *buf, int l)
 }
 
 /* this is much more efficient with C99 snprintfs... */
-NEOERR *string_appendvf (STRING *str, const char *fmt, va_list ap) 
+NEOERR *string_appendvf (STRING *str, const char *fmt, va_list ap)
 {
   NEOERR *err;
   char buf[4096];
@@ -164,7 +169,7 @@ NEOERR *string_appendvf (STRING *str, const char *fmt, va_list ap)
     va_copy(tmp, ap);
     a_buf = vnsprintf_alloc(size*2, fmt, tmp);
     if (a_buf == NULL)
-      return nerr_raise(NERR_NOMEM, 
+      return nerr_raise(NERR_NOMEM,
 	  "Unable to allocate memory for formatted string");
     err = string_append(str, a_buf);
     free(a_buf);
@@ -211,7 +216,7 @@ void string_array_init (STRING_ARRAY *arr)
   arr->max = 0;
 }
 
-NEOERR *string_array_split (ULIST **list, char *s, const char *sep, 
+NEOERR *string_array_split (ULIST **list, char *s, const char *sep,
                             int max)
 {
   NEOERR *err;
@@ -219,7 +224,7 @@ NEOERR *string_array_split (ULIST **list, char *s, const char *sep,
   int sl;
   int x = 0;
 
-  if (sep[0] == '\0') 
+  if (sep[0] == '\0')
     return nerr_raise (NERR_ASSERT, "separator must be at least one character");
 
   err = uListInit (list, 10, 0);
@@ -235,7 +240,7 @@ NEOERR *string_array_split (ULIST **list, char *s, const char *sep,
     n = strdup(f);
     *p = sep[0];
     if (n) err = uListAppend (*list, n);
-    else err = nerr_raise(NERR_NOMEM, 
+    else err = nerr_raise(NERR_NOMEM,
 	"Unable to allocate memory to split %s", s);
     if (err) goto split_err;
     f = p+sl;
@@ -245,7 +250,7 @@ NEOERR *string_array_split (ULIST **list, char *s, const char *sep,
   /* Handle remainder */
   n = strdup(f);
   if (n) err = uListAppend (*list, n);
-  else err = nerr_raise(NERR_NOMEM, 
+  else err = nerr_raise(NERR_NOMEM,
       "Unable to allocate memory to split %s", s);
   if (err) goto split_err;
   return STATUS_OK;
@@ -283,6 +288,7 @@ int vnisprintf_alloc (char **buf, int start_size, const char *fmt, va_list ap)
   if (*buf == NULL) return 0;
   while (1)
   {
+    void *new_ptr;
     va_copy(tmp, ap);
     bl = vsnprintf (*buf, size, fmt, tmp);
     if (bl > -1 && bl < size)
@@ -291,8 +297,13 @@ int vnisprintf_alloc (char **buf, int start_size, const char *fmt, va_list ap)
       size = bl + 1;
     else
       size *= 2;
-    *buf = (char *) realloc (*buf, size * sizeof(char));
-    if (*buf == NULL) return 0;
+    new_ptr = realloc (*buf, size * sizeof(char));
+    if (new_ptr == NULL) {
+      free(*buf);
+      *buf = NULL;
+      return 0;
+    }
+    *buf = (char *) new_ptr;
   }
 }
 
@@ -314,7 +325,7 @@ int visprintf_alloc (char **buf, const char *fmt, va_list ap)
 /* PPC doesn't like you re-using a va_list... and it might not be
  * supposed to work at all */
   va_copy(tmp, ap);
-  
+
   size = sizeof (ibuf);
   bl = vsnprintf (ibuf, sizeof (ibuf), fmt, tmp);
   if (bl > -1 && bl < size)
@@ -367,7 +378,7 @@ char *sprintf_alloc (const char *fmt, ...)
 /* This is mostly just here for completeness, I doubt anyone would use
  * this (its more efficient (time-wise) if start_size is bigger than the
  * resulting string.  Its less efficient than sprintf_alloc if we have a
- * C99 snprintf and it doesn't fit in start_size. 
+ * C99 snprintf and it doesn't fit in start_size.
  * BTW: If you are really worried about the efficiency of these
  * functions, maybe you shouldn't be using them in the first place... */
 char *nsprintf_alloc (int start_size, const char *fmt, ...)
@@ -418,7 +429,7 @@ NEOERR *string_readline (STRING *str, FILE *fp)
   return STATUS_OK;
 }
 
-NEOERR* neos_escape(UINT8 *buf, int buflen, char esc_char, const char *escape, 
+NEOERR* neos_escape(UINT8 *buf, int buflen, char esc_char, const char *escape,
                     char **esc)
 {
   int nl = 0;
@@ -432,7 +443,7 @@ NEOERR* neos_escape(UINT8 *buf, int buflen, char esc_char, const char *escape,
     if (buf[l] == esc_char)
     {
       nl += 2;
-    } 
+    }
     else
     {
       x = 0;
@@ -451,8 +462,8 @@ NEOERR* neos_escape(UINT8 *buf, int buflen, char esc_char, const char *escape,
   }
 
   s = (char *) malloc (sizeof(char) * (nl + 1));
-  if (s == NULL) 
-    return nerr_raise (NERR_NOMEM, "Unable to allocate memory to escape %s", 
+  if (s == NULL)
+    return nerr_raise (NERR_NOMEM, "Unable to allocate memory to escape %s",
 	buf);
 
   nl = 0; l = 0;
@@ -501,7 +512,7 @@ UINT8 *neos_unescape (UINT8 *s, int buflen, char esc_char)
   if (s == NULL) return s;
   while (i < buflen)
   {
-    if (s[i] == esc_char && (i+2 < buflen) && 
+    if (s[i] == esc_char && (i+2 < buflen) &&
 	isxdigit(s[i+1]) && isxdigit(s[i+2]))
     {
       UINT8 num;
@@ -592,11 +603,12 @@ char *repr_string_alloc (const char *s)
   return rs;
 }
 
-// List of all characters that must be escaped
-// List based on http://www.blooberry.com/indexdot/html/topics/urlencoding.htm
+/* List of all characters that must be escaped
+ * List based on http://www.blooberry.com/indexdot/html/topics/urlencoding.htm
+ */
 static char EscapedChars[] = "$&+,/:;=?@ \"<>#%{}|\\^~[]`'";
 
-// Check if a single character needs to be escaped
+/* Check if a single character needs to be escaped */
 static BOOL is_reserved_char(char c)
 {
   int i = 0;
@@ -792,7 +804,7 @@ NEOERR *neos_html_escape (const char *src, int slen,
     }
     if (err != STATUS_OK) break;
   }
-  if (err) 
+  if (err)
   {
     string_clear (&out_s);
     return nerr_pass (err);
@@ -820,9 +832,9 @@ NEOERR *neos_url_validate (const char *in, char **esc)
    * <a href="//b:80"> or <a href="a/b:80"> are allowed by browsers
    * and ":" is treated as part of the path, while
    * <a href="www.google.com:80"> is an invalid url
-   * and ":" is treated as a scheme separator. 
+   * and ":" is treated as a scheme separator.
    *
-   * Hence allow for ":" in the path part of a url (after /) 
+   * Hence allow for ":" in the path part of a url (after /)
    */
   slashpos = memchr(in, '/', inlen);
   if (slashpos == NULL) {
@@ -835,32 +847,32 @@ NEOERR *neos_url_validate (const char *in, char **esc)
   colonpos = memchr(in, ':', i);
 
   if (colonpos == NULL) {
-    // no scheme in 'in': so this is a relative url
+    /* no scheme in 'in': so this is a relative url */
     valid = 1;
   }
   else {
     for (i = 0; i < num_protocols; i++)
     {
-      if ((inlen >= strlen(URL_PROTOCOLS[i])) && 
-          strncmp(in, URL_PROTOCOLS[i], strlen(URL_PROTOCOLS[i])) == 0) {
-        // 'in' starts with one of the allowed protocols
+      if ((inlen >= strlen(URL_PROTOCOLS[i])) &&
+          strncasecmp(in, URL_PROTOCOLS[i], strlen(URL_PROTOCOLS[i])) == 0) {
+        /* 'in' starts with one of the allowed protocols */
         valid = 1;
         break;
       }
 
     }
-  }  
+  }
  
   if (valid)
     return neos_html_escape(in, inlen, esc);
 
-  // 'in' contains an unsupported scheme, replace with '#' 
+  /* 'in' contains an unsupported scheme, replace with '#' */
   string_init(&out_s);
   err = string_append (&out_s, "#");
   if (err) return nerr_pass (err);
-  
+
   *esc = out_s.buf;
-  return STATUS_OK;    
+  return STATUS_OK;
 
 }
 

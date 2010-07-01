@@ -46,8 +46,9 @@ extern NERR_TYPE NERR_IO;
 extern NERR_TYPE NERR_LOCK;
 extern NERR_TYPE NERR_DB;
 extern NERR_TYPE NERR_EXISTS;
+extern NERR_TYPE NERR_MAX_RECURSION;
 
-typedef struct _neo_err 
+typedef struct _neo_err
 {
   int error;
   int err_stack;
@@ -84,8 +85,8 @@ typedef struct _neo_err
  *          NEOERR fails
  */
 #if defined(USE_C99_VARARG_MACROS)
-#define nerr_raise(e,f,...) \
-   nerr_raisef(__PRETTY_FUNCTION__,__FILE__,__LINE__,e,f,__VA_ARGS__)
+#define nerr_raise(e,...) \
+   nerr_raisef(__PRETTY_FUNCTION__,__FILE__,__LINE__,e,__VA_ARGS__)
 #elif defined(USE_GNUC_VARARG_MACROS)
 #define nerr_raise(e,f,a...) \
    nerr_raisef(__PRETTY_FUNCTION__,__FILE__,__LINE__,e,f,##a)
@@ -94,22 +95,22 @@ typedef struct _neo_err
 NEOERR *nerr_raisef (const char *func, const char *file, int lineno,
                      NERR_TYPE error, const char *fmt, ...)
                      ATTRIBUTE_PRINTF(5,6);
-  
+
 
 
 #if defined(USE_C99_VARARG_MACROS)
-#define nerr_raise_errno(e,f,...) \
-   nerr_raise_errnof(__PRETTY_FUNCTION__,__FILE__,__LINE__,e,f,__VA_ARGS__)
+#define nerr_raise_errno(e,...) \
+   nerr_raise_errnof(__PRETTY_FUNCTION__,__FILE__,__LINE__,e,__VA_ARGS__)
 #elif defined(USE_GNUC_VARARG_MACROS)
-#define nerr_raise_errno(e,f,a...) \
-   nerr_raise_errnof(__PRETTY_FUNCTION__,__FILE__,__LINE__,e,f,##a)
+#define nerr_raise_errno(e,a...) \
+   nerr_raise_errnof(__PRETTY_FUNCTION__,__FILE__,__LINE__,e,##a)
 #endif
 
 NEOERR *nerr_raise_errnof (const char *func, const char *file, int lineno,
                            int error, const char *fmt, ...)
                            ATTRIBUTE_PRINTF(5,6);
 
-/* function: nerr_pass
+/* function: nerr_pass - pass a clearsilver error up a level in the call chain
  * description: this function is used to pass an error up a level in the
  *              call chain (ie, if the error isn't handled at the
  *              current level).  This allows us to track the traceback
@@ -122,9 +123,10 @@ NEOERR *nerr_raise_errnof (const char *func, const char *file, int lineno,
    nerr_passf(__PRETTY_FUNCTION__,__FILE__,__LINE__,e)
 
 NEOERR *nerr_passf (const char *func, const char *file, int lineno,
-                    NEOERR *err);
+                    NEOERR *nerr);
 
-/* function: nerr_pass_ctx
+/* function: nerr_pass_ctx - pass a clearsilver error up a level in the call
+ *           chain with additional information
  * description: this function is used to pass an error up a level in the
  *              call chain (ie, if the error isn't handled at the
  *              current level).  This allows us to track the traceback
@@ -138,48 +140,48 @@ NEOERR *nerr_passf (const char *func, const char *file, int lineno,
  * returns: a pointer to an error
  */
 #if defined(USE_C99_VARARG_MACROS)
-#define nerr_pass_ctx(e,f,...) \
-   nerr_pass_ctxf(__PRETTY_FUNCTION__,__FILE__,__LINE__,e,f,__VA_ARGS__)
+#define nerr_pass_ctx(e,...) \
+   nerr_pass_ctxf(__PRETTY_FUNCTION__,__FILE__,__LINE__,e,__VA_ARGS__)
 #elif defined(USE_GNUC_VARARG_MACROS)
-#define nerr_pass_ctx(e,f,a...) \
-   nerr_pass_ctxf(__PRETTY_FUNCTION__,__FILE__,__LINE__,e,f,##a)
+#define nerr_pass_ctx(e,a...) \
+   nerr_pass_ctxf(__PRETTY_FUNCTION__,__FILE__,__LINE__,e,##a)
 #endif
 
 NEOERR *nerr_pass_ctxf (const char *func, const char *file, int lineno,
-                        NEOERR *err, const char *fmt, ...)
+                        NEOERR *nerr, const char *fmt, ...)
                         ATTRIBUTE_PRINTF(5,6);
 
-/* function: nerr_log_error
- * description: currently, this prints out the error to stderr, and
- *             free's the error chain
+/* function: nerr_log_error - print the error chain to stderr
+ * description: prints out the error traceback to stderr
  */
-void nerr_log_error (NEOERR *err);
+void nerr_log_error (NEOERR *nerr);
 
 #include "neo_str.h"
-/* function: nerr_error_string
+/* function: nerr_error_string - returns the string associated with an error
  * description: returns the string associated with an error (the bottom
  *              level of the error chain)
- * arguments: err - error
+ * arguments: nerr - error
  *            str - string to which the data is appended
  * returns: None - errors appending to the string are ignored
  */
-void nerr_error_string (NEOERR *err, STRING *str);
+void nerr_error_string (NEOERR *nerr, STRING *str);
 
-/* function: nerr_error_traceback
+/* function: nerr_error_traceback - returns the full trackeback of the error
+ *          chain
  * description: returns the full traceback of the error chain
- * arguments: err - error
+ * arguments: nerr - error
  *            str - string to which the data is appended
  * returns: None - errors appending to the string are ignored
  */
-void nerr_error_traceback (NEOERR *err, STRING *str);
+void nerr_error_traceback (NEOERR *nerr, STRING *str);
 
-/* function: nerr_ignore
+/* function: nerr_ignore - free the error chain
  * description: you should only call this if you actually handle the
  *              error (should I rename it?).  Free's the error chain.
  */
 void nerr_ignore (NEOERR **err);
 
-/* function: nerr_register
+/* function: nerr_register - register a NEOERR type
  * description: register an error type.  This will assign a numeric value
  *              to the type, and keep track of the "pretty name" for it.
  * arguments: err - pointer to a NERR_TYPE
@@ -188,30 +190,30 @@ void nerr_ignore (NEOERR **err);
  */
 NEOERR *nerr_register (NERR_TYPE *err, const char *name);
 
-/* function: nerr_init
+/* function: nerr_init - initialize the NEOERR error subsystem
  * description: initialize the NEOERR system.  Can be called more than once.
- *              Is not thread safe.  This registers all of the built in
- *              error types as defined at the top of this file.  If you don't
- *              call this, all exceptions will be returned as UnknownError.
+ *              This registers all of the built in error types as defined at
+ *              the top of this file.  If you don't call this, all exceptions
+ *              will be returned as UnknownError.
  * arguments: None
  * returns: possibly NERR_NOMEM, but somewhat unlikely.  Possibly an
  *          UnknownError if NERR_NOMEM hasn't been registered yet.
  */
 NEOERR *nerr_init (void);
 
-/* function: nerr_match
+/* function: nerr_match - walk the NEOERR chain for a matching error ("catch")
  * description: nerr_match is used to walk the NEOERR chain and match
  *              the error against a specific error type.  In exception
  *              parlance, this would be the equivalent of "catch".
  *              Typically, you can just compare a NEOERR against STATUS_OK
  *              or just test for true if you are checking for any error.
- * arguments: err - the NEOERR that has an error.
+ * arguments: nerr - the NEOERR that has an error.
  *            type - the NEOERR type, as registered with nerr_register
  * returns: true on match
  */
-int nerr_match (NEOERR *err, NERR_TYPE type);
+int nerr_match (NEOERR *nerr, NERR_TYPE type);
 
-/* function: nerr_handle
+/* function: nerr_handle - walk the NEOERR chain for a matching error
  * description: nerr_handle is a convenience function.  It is the equivalent
  *              of nerr_match, but it will also deallocate the error chain
  *              on a match.

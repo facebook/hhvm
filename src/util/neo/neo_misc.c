@@ -34,7 +34,7 @@ void ne_vwarn (const char *fmt, va_list ap)
 
   localtime_r(&now, &my_tm);
 
-  strftime(tbuf, sizeof(tbuf), "%m/%d %T", &my_tm);
+  strftime(tbuf, sizeof(tbuf), "%m/%d %H:%M:%S", &my_tm);
 
   vsnprintf (buf, sizeof(buf), fmt, ap);
   len = strlen(buf);
@@ -149,7 +149,7 @@ double ne_timef (void) {
   return time(NULL);
 }
 
-#else 
+#else
 
 double ne_timef (void)
 {
@@ -212,7 +212,7 @@ static const UINT32 CRCTable[256] = {
 0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D
 };
 
-UINT32 ne_crc (UINT8 *data, UINT32 bytes) 
+UINT32 ne_crc (UINT8 *data, UINT32 bytes)
 {
   UINT32 crc, i;
 

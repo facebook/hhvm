@@ -34,6 +34,7 @@ int NERR_IO = 0;
 int NERR_LOCK = 0;
 int NERR_DB = 0;
 int NERR_EXISTS = 0;
+int NERR_MAX_RECURSION = 0;
 
 static NEOERR *FreeList = NULL;
 static ULIST *Errors = NULL;
@@ -94,7 +95,7 @@ static int _err_free (NEOERR *err)
   return 0;
 }
 
-NEOERR *nerr_raisef (const char *func, const char *file, int lineno, int error, 
+NEOERR *nerr_raisef (const char *func, const char *file, int lineno, int error,
                     const char *fmt, ...)
 {
   NEOERR *err;
@@ -116,7 +117,7 @@ NEOERR *nerr_raisef (const char *func, const char *file, int lineno, int error,
   return err;
 }
 
-NEOERR *nerr_raise_errnof (const char *func, const char *file, int lineno, 
+NEOERR *nerr_raise_errnof (const char *func, const char *file, int lineno,
     			   int error, const char *fmt, ...)
 {
   NEOERR *err;
@@ -132,7 +133,7 @@ NEOERR *nerr_raise_errnof (const char *func, const char *file, int lineno,
   va_end(ap);
 
   l = strlen(err->desc);
-  snprintf (err->desc + l, sizeof(err->desc)-l, ": [%d] %s", errno, 
+  snprintf (err->desc + l, sizeof(err->desc)-l, ": [%d] %s", errno,
       strerror (errno));
 
   err->error = error;
@@ -163,7 +164,7 @@ NEOERR *nerr_passf (const char *func, const char *file, int lineno, NEOERR *err)
   return nerr;
 }
 
-NEOERR *nerr_pass_ctxf (const char *func, const char *file, int lineno, 
+NEOERR *nerr_pass_ctxf (const char *func, const char *file, int lineno,
 			NEOERR *err, const char *fmt, ...)
 {
   NEOERR *nerr;
@@ -229,12 +230,12 @@ void nerr_log_error (NEOERR *err)
 	}
       }
 
-      fprintf (stderr, "  File \"%s\", line %d, in %s()\n%s: %s\n", err->file, 
+      fprintf (stderr, "  File \"%s\", line %d, in %s()\n%s: %s\n", err->file,
 	  err->lineno, err->func, err_name, err->desc);
     }
     else
     {
-      fprintf (stderr, "  File \"%s\", line %d, in %s()\n", err->file, 
+      fprintf (stderr, "  File \"%s\", line %d, in %s()\n", err->file,
 	  err->lineno, err->func);
       if (err->desc[0])
       {
@@ -328,14 +329,14 @@ void nerr_error_traceback (NEOERR *err, STRING *str)
 	}
       }
 
-      snprintf (buf2, sizeof(buf2), 
-	  "  File \"%s\", line %d, in %s()\n%s: %s\n", err->file, 
+      snprintf (buf2, sizeof(buf2),
+	  "  File \"%s\", line %d, in %s()\n%s: %s\n", err->file,
 	  err->lineno, err->func, err_name, err->desc);
       string_append(str, buf2);
     }
     else
     {
-      snprintf (buf2, sizeof(buf2), "  File \"%s\", line %d, in %s()\n", 
+      snprintf (buf2, sizeof(buf2), "  File \"%s\", line %d, in %s()\n",
 	  err->file, err->lineno, err->func);
       string_append(str, buf2);
       if (err->desc[0])
@@ -459,6 +460,8 @@ NEOERR *nerr_init (void)
     err = nerr_register (&NERR_DB, "DBError");
     if (err != STATUS_OK) return nerr_pass(err);
     err = nerr_register (&NERR_EXISTS, "ExistsError");
+    if (err != STATUS_OK) return nerr_pass(err);
+    err = nerr_register (&NERR_MAX_RECURSION, "MaxRecursionError");
     if (err != STATUS_OK) return nerr_pass(err);
 
     Inited = 1;

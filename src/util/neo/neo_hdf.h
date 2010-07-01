@@ -25,14 +25,14 @@ typedef struct _hdf HDF;
 /* HDFFILELOAD is a callback function to intercept file load requests and
  * provide templates via another mechanism.  This way you can load templates
  * that you compiled-into your binary, from in-memory caches, or from a
- * zip file, etc.  The HDF is provided so you can choose to use the 
+ * zip file, etc.  The HDF is provided so you can choose to use the
  * hdf_search_path function to find the file.  contents should return
  * a full malloc copy of the contents of the file, which the parser will
  * own and free.  Use hdf_register_fileload to set this function for
  * your top level HDF node.
- * NOTE: Technically, we shouldn't need a separate copy for each parse, but 
+ * NOTE: Technically, we shouldn't need a separate copy for each parse, but
  * using the separate copy makes this equivalent to the CSFILELOAD function.  We
- * can change this if we really want to save that copy at the expense of 
+ * can change this if we really want to save that copy at the expense of
  * slightly more complicated code. */
 typedef NEOERR* (*HDFFILELOAD)(void *ctx, HDF *hdf, const char *filename,
                               char **contents);
@@ -75,7 +75,7 @@ struct _hdf
 /*
  * Function: hdf_init - Initialize an HDF data set
  * Description: hdf_init initializes an HDF data set and returns the
- *              pointer to the top node in the data set. 
+ *              pointer to the top node in the data set.
  * Input: hdf - pointer to an HDF pointer
  * Output: hdf - allocated hdf node
  * Returns: NERR_NOMEM - unable to allocate memory for dataset
@@ -102,7 +102,7 @@ void hdf_destroy (HDF **hdf);
  * Description: hdf_get_int_value walks the HDF data set pointed to by
  *              hdf to name, and returns the value of that node
  *              converted to an integer.  If that node does not exist,
- *              or it does not contain a number, the defval is returned.  
+ *              or it does not contain a number, the defval is returned.
  * Input: hdf -> a node in an HDF data set
  *        name -> the name of a node to walk to in the data set
  *        defval -> value to return in case of error or if the node
@@ -363,7 +363,7 @@ NEOERR* hdf_set_valuevf (HDF *hdf, const char *fmt, va_list ap);
 NEOERR* hdf_set_int_value (HDF *hdf, const char *name, int value);
 
 /*
- * Function: hdf_set_copy -> Copy a value from one location in the
+ * Function: hdf_set_copy - Copy a value from one location in the
  *           dataset to another
  * Description: hdf_set_copy first walks the hdf dataset to the named src
  *              node, and then copies that value to the named dest node.
@@ -557,11 +557,12 @@ NEOERR* hdf_copy (HDF *dest_hdf, const char *name, HDF *src);
  *              hdf.loadpaths.
  * Input: hdf -> the hdf dataset to use
  *        path -> the relative path
- *        full -> a pointer to a _POSIX_PATH_MAX buffer
+ *        full -> a pointer to a buffer
+ *        full_len -> size of full buffer
  * Output: full -> the full path of the file
  * Returns: NERR_NOT_FOUND if the file wasn't found in the search path
  */
-NEOERR* hdf_search_path (HDF *hdf, const char *path, char *full);
+NEOERR* hdf_search_path (HDF *hdf, const char *path, char *full, int full_len);
 
 /*
  * Function: hdf_register_fileload - register a fileload function

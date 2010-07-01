@@ -32,9 +32,7 @@
 #endif
 #endif
 
-#ifndef _POSIX_PATH_MAX
-#define _POSIX_PATH_MAX 255
-#endif
+#define PATH_BUF_SIZE 512
 
 #ifndef S_IXGRP
 #define S_IXGRP S_IXUSR

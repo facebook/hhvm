@@ -61,11 +61,15 @@ Variant ArrayUtil::Combine(CArrRef keys, CArrRef values) {
 
   Array ret = Array::Create();
   for (ArrayIter iter1(keys), iter2(values); iter1; ++iter1, ++iter2) {
-    CVarRef v(iter2.secondRef());
-    if (v.isReferenced()) {
-      ret.set(iter1.second(), ref(v));
+    if (values->supportValueRef()) {
+      CVarRef v(iter2.secondRef());
+      if (v.isReferenced()) {
+        ret.set(iter1.second(), ref(v));
+      } else {
+        ret.set(iter1.second(), v);
+      }
     } else {
-      ret.set(iter1.second(), v);
+      ret.set(iter1.second(), iter2.second());
     }
   }
   return ret;

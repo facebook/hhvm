@@ -463,10 +463,6 @@ void RuntimeOption::Load(Hdf &config) {
     EnableEarlyFlush = server["EnableEarlyFlush"].getBool(true);
     ForceChunkedEncoding = server["ForceChunkedEncoding"].getBool();
     MaxPostSize = (server["MaxPostSize"].getInt32(100)) * (1 << 20);
-    ImageMemoryMaxBytes = server["ImageMemoryMaxBytes"].getInt32(0);
-    if (ImageMemoryMaxBytes == 0) {
-      ImageMemoryMaxBytes = UploadMaxFileSize * 2;
-    }
     LibEventSyncSend = server["LibEventSyncSend"].getBool(true);
     TakeoverFilename = server["TakeoverFilename"].getString();
     ExpiresActive = server["ExpiresActive"].getBool(true);
@@ -607,6 +603,10 @@ void RuntimeOption::Load(Hdf &config) {
     Rfc1867Prefix = upload["Rfc1867Prefix"].getString("vupload_");
     Rfc1867Name = upload["Rfc1867Name"].getString("video_ptoken");
 
+    ImageMemoryMaxBytes = server["ImageMemoryMaxBytes"].getInt32(0);
+    if (ImageMemoryMaxBytes == 0) {
+      ImageMemoryMaxBytes = UploadMaxFileSize * 2;
+    }
     SharedStores::Create();
 
     LightProcessFilePrefix =

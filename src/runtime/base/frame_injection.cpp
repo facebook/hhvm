@@ -180,6 +180,7 @@ Object &FrameInjection::getThis() {
 
   static Object s_black_hole_object;
   ASSERT(s_black_hole_object.isNull()); // in case callers modified me
+  s_black_hole_object.reset();
   return s_black_hole_object;
 }
 

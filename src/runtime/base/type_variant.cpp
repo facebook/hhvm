@@ -2235,11 +2235,13 @@ Variant &Variant::lvalAt(CVarRef k, int64 prehash /* = -1 */,
 
 Variant &Variant::lvalInvalid() {
   throw_bad_type_exception("not array objects");
-  return ((Globals*)get_global_variables())->__lvalProxy;
+  return lvalBlackHole();
 }
 
 Variant &Variant::lvalBlackHole() {
-  return ((Globals*)get_global_variables())->__lvalProxy;
+  Variant &bh = ((Globals*)get_global_variables())->__lvalProxy;
+  bh.unset();
+  return bh;
 }
 
 Variant Variant::refvalAt(bool    key, int64 prehash /* = -1 */) {

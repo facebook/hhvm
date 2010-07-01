@@ -364,6 +364,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
   // parse all PHP files under system/classes
   if (!extOnly) {
     ar = AnalysisResultPtr(new AnalysisResult());
+    ar->loadBuiltinFunctions();
     for (const char **cls = SystemClasses; *cls; cls++) {
       string phpBaseName = "/system/classes/";
       phpBaseName += *cls;
@@ -468,15 +469,11 @@ void BuiltinSymbols::LoadFunctions(AnalysisResultPtr ar,
   ASSERT(Loaded);
   for (StringToFunctionScopePtrMap::const_iterator it = s_functions.begin();
        it != s_functions.end(); ++it) {
-    functions[it->first].push_back(it->second);
-  }
-
-  // we are adding these builtin functions, so that user-defined functions
-  // will not overwrite them with their own file and line number information
-  for (StringToFunctionScopePtrMap::const_iterator iter =
-         s_functions.begin(); iter != s_functions.end(); ++iter) {
-    ar->getDependencyGraph()->addParent(DependencyGraph::KindOfFunctionCall,
-                                        "", iter->first, StatementPtr());
+    if (functions.find(it->first) == functions.end()) {
+      functions[it->first].push_back(it->second);
+      ar->getDependencyGraph()->addParent(DependencyGraph::KindOfFunctionCall,
+                                          "", it->first, StatementPtr());
+    }
   }
 }
 
@@ -485,7 +482,9 @@ void BuiltinSymbols::LoadHelperFunctions(AnalysisResultPtr ar,
   ASSERT(Loaded);
   for (StringToFunctionScopePtrMap::const_iterator it =
           s_helperFunctions.begin(); it != s_helperFunctions.end(); ++it) {
-    functions[it->first].push_back(it->second);
+    if (functions.find(it->first) == functions.end()) {
+      functions[it->first].push_back(it->second);
+    }
   }
 }
 

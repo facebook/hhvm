@@ -5411,6 +5411,10 @@ bool TestCodeRun::TestCompilation() {
 
   MVCR("<?php for ($i = 0; $i++,$i - 10;) {}");
 
+  MVCR("<?php function test($className) {"
+       "$x = new ReflectionClass($className);"
+       "return $x->newInstance()->loadAll(); }");
+
   return true;
 }
 

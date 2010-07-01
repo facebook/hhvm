@@ -518,6 +518,12 @@ void AnalysisResult::addCallee(StatementPtr stmt) {
 
 ///// Program ////////////////////////////
 
+void AnalysisResult::loadBuiltinFunctions() {
+  AnalysisResultPtr ar = shared_from_this();
+  BuiltinSymbols::LoadFunctions(ar, m_functions);
+  BuiltinSymbols::LoadHelperFunctions(ar, m_helperFunctions);
+}
+
 void AnalysisResult::loadBuiltins() {
   AnalysisResultPtr ar = shared_from_this();
   BuiltinSymbols::LoadFunctions(ar, m_functions);

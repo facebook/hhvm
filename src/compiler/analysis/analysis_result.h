@@ -111,6 +111,7 @@ public:
   void addEntryPoint(const std::string &name);
   void addEntryPoints(const std::vector<std::string> &names);
 
+  void loadBuiltinFunctions();
   void loadBuiltins();
   void analyzeProgram();
   void analyzeProgramFinal();

@@ -168,8 +168,11 @@ void FunctionContainer::outputCPPJumpTableEvalSupport
          m_functions.begin(); iter != m_functions.end(); ++iter) {
     if (!iter->second[0]->isRedeclaring()) {
       FunctionScopePtr func = iter->second[0];
-      if (func->inPseudoMain() || !(systemcpp || func->isSepExtension() ||
-                                    func->isDynamic())) continue;
+      if (func->inPseudoMain() ||
+          (!systemcpp && (!func->isUserFunction() ||
+                          !(func->isSepExtension() || func->isDynamic())))) {
+        continue;
+      }
       const char *name = iter->first.c_str();
       if (funcs) funcs->push_back(name);
 

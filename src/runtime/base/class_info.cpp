@@ -586,7 +586,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
         ASSERT(false);
       }
     } else if (m_name) {
-      if (!(m_attribute & IsVolatile)) {
+      if (!(m_attribute & IsVolatile) && !(m_attribute & IsLazyInit)) {
         const ObjectStaticCallbacks *cwo = get_object_static_callbacks(m_name);
         if (cwo) {
           constant->value = cwo->os_constant(constant->name);

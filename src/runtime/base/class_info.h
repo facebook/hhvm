@@ -53,7 +53,9 @@ public:
     IsOptional   = (1 << 12), //                                        x
 
     IsNothing    = (1 << 13), // need a non-zero number for const char * maps
-    HasDocComment= (1 << 14)  //                      x        x
+    HasDocComment= (1 << 14), //                      x        x
+
+    IsLazyInit   = (1 << 15)  //    x
   };
 
   struct ConstantInfo {

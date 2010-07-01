@@ -467,6 +467,7 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_kindOf == KindOfAbstractClass) attribute |= ClassInfo::IsAbstract;
   if (m_kindOf == KindOfFinalClass) attribute |= ClassInfo::IsFinal;
   if (!m_docComment.empty()) attribute |= ClassInfo::HasDocComment;
+  if (needLazyStaticInitializer()) attribute |= ClassInfo::IsLazyInit;
   cg_printf("(const char *)0x%04X, \"%s\", \"%s\",\n", attribute,
             getOriginalName().c_str(), m_parent.c_str());
 

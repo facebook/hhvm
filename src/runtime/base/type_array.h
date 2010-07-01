@@ -33,10 +33,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#define null_array Array::s_nullArray
-
-///////////////////////////////////////////////////////////////////////////////
-
 // forward declaration
 CVarRef ref(CVarRef v);
 
@@ -66,8 +62,6 @@ class Array : public SmartPtr<ArrayData> {
 
  public:
   Array() {}
-
-  static const Array s_nullArray;
 
   /**
    * Constructors. Those that take "arr" or "var" are copy constructors, taking

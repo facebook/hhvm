@@ -37,7 +37,7 @@ using namespace std;
 
 namespace HPHP {
 
-const Array Array::s_nullArray = Array();
+const Array null_array = Array();
 
 IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(Array);
 ///////////////////////////////////////////////////////////////////////////////

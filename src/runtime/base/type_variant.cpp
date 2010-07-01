@@ -29,7 +29,7 @@ using namespace std;
 
 namespace HPHP {
 
-const Variant g_nullVariant = Variant();
+const Variant null_variant = Variant();
 
 IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(Variant);
 

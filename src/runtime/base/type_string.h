@@ -31,8 +31,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#define null_string String::s_nullString
-
 /**
  * String type wrapping around StringData to implement copy-on-write and
  * literal string handling (to avoid string copying).
@@ -44,8 +42,6 @@ public:
 
 public:
   String() {}
-
-  static const String s_nullString;
 
   /**
    * Constructors
@@ -322,6 +318,8 @@ public:
   }
   #endif
 };
+
+extern const String null_string;
 
 struct zend_hash {
   size_t operator()(CStrRef s) const {

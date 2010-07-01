@@ -27,7 +27,7 @@ namespace HPHP {
 
 #define SERIALIZE_MAX_SIZE (64*1024*1024)
 
-const String String::s_nullString = String();
+const String null_string = String();
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics

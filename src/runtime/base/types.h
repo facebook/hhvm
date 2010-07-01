@@ -47,8 +47,9 @@ typedef Variant Sequence;
  * Macros related to Variant that are needed by StringData, ObjectData,
  * and ArrayData.
  */
-extern const Variant g_nullVariant;
-#define null_variant (g_nullVariant)
+extern const Variant null_variant;
+extern const String null_string;
+extern const Array null_array;
 #if defined(__GNUC__)
 #define FAST_REFCOUNT_FOR_VARIANT
 #define FAST_REFCOUNT_OFFSET (sizeof(void*))

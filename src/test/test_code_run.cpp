@@ -4348,6 +4348,16 @@ bool TestCodeRun::TestReference() {
        "$a = 789;"
        "var_dump($a, $foo);");
 
+  MVCR("<?php "
+       "function &test(&$x) {"
+       "  $x = 1;"
+       "  return $x;"
+       "}"
+       "$x = 0;"
+       "$y = &test($x);"
+       "$y++;"
+       "var_dump($x, $y);");
+
   return true;
 }
 

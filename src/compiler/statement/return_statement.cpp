@@ -47,7 +47,15 @@ StatementPtr ReturnStatement::clone() {
 // static analysis functions
 
 void ReturnStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
-  if (m_exp) m_exp->analyzeProgram(ar);
+  if (m_exp) {
+    FunctionScopePtr funcScope = ar->getFunctionScope();
+    if (funcScope) {
+      if (funcScope->isRefReturn()) {
+        m_exp->setContext(Expression::RefValue);
+      }
+    }
+    m_exp->analyzeProgram(ar);
+  }
 }
 
 ConstructPtr ReturnStatement::getNthKid(int n) const {
@@ -97,12 +105,8 @@ StatementPtr ReturnStatement::postOptimize(AnalysisResultPtr ar) {
 
 void ReturnStatement::inferTypes(AnalysisResultPtr ar) {
   if (m_exp) {
-    FunctionScopePtr funcScope =
-      dynamic_pointer_cast<FunctionScope>(ar->getScope());
+    FunctionScopePtr funcScope = ar->getFunctionScope();
     if (funcScope) {
-      if (funcScope->isRefReturn()) {
-        m_exp->setContext(Expression::RefValue);
-      }
       TypePtr ret;
       if (funcScope->isOverriding()) {
         if (funcScope->getReturnType()) {

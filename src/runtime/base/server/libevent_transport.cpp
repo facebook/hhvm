@@ -23,12 +23,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef EVHTTP_READ_LIMITING
 static void on_resume(struct evhttp_request *request, void *obj) {
   ASSERT(obj);
   Synchronizable *sync = (Synchronizable *)obj;
   Lock lock(sync->getMutex());
   sync->notify();
 }
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -105,10 +107,15 @@ const void *LibEventTransport::getPostData(int &size) {
 }
 
 bool LibEventTransport::hasMorePostData() {
+#ifdef EVHTTP_READ_LIMITING
   return m_request->ntoread > 0;
+#else
+  return false;
+#endif
 }
 
 const void *LibEventTransport::getMorePostData(int &size) {
+#ifdef EVHTTP_READ_LIMITING
   if (m_request->ntoread == 0) {
     size = 0;
     return NULL;
@@ -131,6 +138,10 @@ const void *LibEventTransport::getMorePostData(int &size) {
   // EVBUFFER_DATA(buf) might change after evbuffer_expand
   ((char*)EVBUFFER_DATA(buf))[size] = '\0';
   return EVBUFFER_DATA(buf);
+#else
+  size = 0;
+  return NULL;
+#endif
 }
 
 Transport::Method LibEventTransport::getMethod() {

@@ -1306,7 +1306,11 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
   }
 
   if (getAttribute(ContainsGetDefinedVars)) {
-    cg_indentBegin("virtual Array getDefinedVars() {\n");
+    if (m_allVariants) {
+      cg_indentBegin("virtual Array getDefinedVars() {\n");
+    } else {
+      cg_indentBegin("virtual Array getDefinedVars() const {\n");
+    }
     cg_printf("Array ret = %sVariableTable::getDefinedVars();\n",
               m_allVariants ? "L" : "R");
     for (unsigned int i = 0; i < m_symbols.size(); i++) {

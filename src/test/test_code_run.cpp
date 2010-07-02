@@ -4419,6 +4419,13 @@ bool TestCodeRun::TestDynamicVariables() {
       "} test(); ");
 
   // get_defined_vars
+  MVCR("<?php\n"
+       "function simple_getdefined_test() {\n"
+       "  $a = 'a';\n"
+       "  var_dump(get_defined_vars());\n"
+       "}\n"
+       "simple_getdefined_test();\n"
+       );
   MVCR("<?php "
       "function foo() {"
       "  static $b = 20;"

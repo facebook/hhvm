@@ -231,6 +231,7 @@ Variant f_unserialize(CStrRef str);
 
 Array f_get_defined_vars();
 Array get_defined_vars(LVariableTable *variables);
+Array get_defined_vars(RVariableTable *variables);
 
 bool f_import_request_variables(CStrRef types, CStrRef prefix = "");
 

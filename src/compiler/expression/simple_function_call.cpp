@@ -160,6 +160,7 @@ void SimpleFunctionCall::onParse(AnalysisResultPtr ar) {
       ar->getCodeError()->record(self, CodeError::UseShellExec, self);
       break;
     case GetDefinedVarsFunction:
+      ar->getFileScope()->setAttribute(FileScope::ContainsDynamicVariable);
       ar->getFileScope()->setAttribute(FileScope::ContainsGetDefinedVars);
       ar->getFileScope()->setAttribute(FileScope::ContainsCompact);
       break;

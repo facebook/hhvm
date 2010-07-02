@@ -117,6 +117,10 @@ Array get_defined_vars(LVariableTable *variables) {
   return variables->getDefinedVars();
 }
 
+Array get_defined_vars(RVariableTable *variables) {
+  return variables->getDefinedVars();
+}
+
 bool f_import_request_variables(CStrRef types, CStrRef prefix /* = "" */) {
   throw NotSupportedException(__func__, "It is bad coding practice to remove scoping of variables just to achieve coding convenience, esp. in a language that encourages global variables. This is possible to implement though, by declaring those global variables beforehand and assign with scoped ones when this function is called.");
 }

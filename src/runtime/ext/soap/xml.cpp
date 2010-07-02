@@ -70,35 +70,6 @@ static void soap_Comment(void *ctx, const xmlChar *value) {
 }
 
 xmlDocPtr soap_xmlParseFile(const char *filename) {
-  if (strstr(filename, "://") && !strstr(filename, "https://")) {
-    xmlDocPtr ret = NULL;
-    xmlParserCtxtPtr ctxt = xmlCreateFileParserCtxt(filename);
-    if (ctxt) {
-      ctxt->keepBlanks = 0;
-      ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
-      ctxt->sax->comment = soap_Comment;
-      ctxt->sax->warning = NULL;
-      ctxt->sax->error = NULL;
-      /*ctxt->sax->fatalError = NULL;*/
-      xmlParseDocument(ctxt);
-      if (ctxt->wellFormed) {
-        ret = ctxt->myDoc;
-        if (ret->URL == NULL && ctxt->directory != NULL) {
-          ret->URL = xmlCharStrdup(ctxt->directory);
-        }
-      } else {
-        ret = NULL;
-        xmlFreeDoc(ctxt->myDoc);
-        ctxt->myDoc = NULL;
-      }
-      xmlFreeParserCtxt(ctxt);
-    }
-    if (ret) {
-      cleanup_xml_node((xmlNodePtr)ret);
-      return ret;
-    }
-  }
-
   String cache_key("HPHP.SOAP.WSDL.");
   cache_key += filename;
 

@@ -211,6 +211,8 @@ void AliasManager::mergeScope() {
     CondStackElem &cs = m_stack.back();
     BucketMapEntry &bm = m_bucketMap[0];
     bm.stash(cs.m_size, cs.m_exprs);
+  } else {
+    clear();
   }
 }
 

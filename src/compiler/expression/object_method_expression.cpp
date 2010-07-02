@@ -97,34 +97,7 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
 
-    ExpressionList &params = *m_params;
-    if (func) {
-      int mpc = func->getMaxParamCount();
-      for (int i = params.getCount(); i--; ) {
-        ExpressionPtr p = params[i];
-        if (i < mpc ? func->isRefParam(i) :
-            func->isReferenceVariableArgument()) {
-          p->setContext(Expression::RefValue);
-        }
-      }
-    } else if (!m_name.empty()) {
-      FunctionScope::RefParamInfoPtr info =
-        FunctionScope::GetRefParamInfo(m_name);
-      if (info) {
-        for (int i = params.getCount(); i--; ) {
-          if (info->isRefParam(i)) {
-            m_params->markParam(i, canInvokeFewArgs());
-          }
-        }
-      }
-      // If we cannot find information of the so-named function, it might not
-      // exist, or it might go through __call(), either of which cannot have
-      // reference parameters.
-    } else {
-      for (int i = params.getCount(); i--; ) {
-        m_params->markParam(i, canInvokeFewArgs());
-      }
-    }
+    markRefParams(func, m_name, canInvokeFewArgs());
   }
 }
 

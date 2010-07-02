@@ -473,12 +473,14 @@ void BuiltinSymbols::LoadFunctions(AnalysisResultPtr ar,
       functions[it->first].push_back(it->second);
       ar->getDependencyGraph()->addParent(DependencyGraph::KindOfFunctionCall,
                                           "", it->first, StatementPtr());
+      FunctionScope::RecordRefParamInfo(it->first, it->second);
     }
   }
 }
 
-void BuiltinSymbols::LoadHelperFunctions(AnalysisResultPtr ar,
-                                         StringToFunctionScopePtrVecMap &functions) {
+void BuiltinSymbols::LoadHelperFunctions(
+  AnalysisResultPtr ar,
+  StringToFunctionScopePtrVecMap &functions) {
   ASSERT(Loaded);
   for (StringToFunctionScopePtrMap::const_iterator it =
           s_helperFunctions.begin(); it != s_helperFunctions.end(); ++it) {
@@ -499,6 +501,11 @@ void BuiltinSymbols::LoadClasses(AnalysisResultPtr ar,
          s_classes.begin(); iter != s_classes.end(); ++iter) {
     ar->getDependencyGraph()->addParent(DependencyGraph::KindOfClassDerivation,
                                         "", iter->first, StatementPtr());
+    const StringToFunctionScopePtrVecMap &funcs = iter->second->getFunctions();
+    for (StringToFunctionScopePtrVecMap::const_iterator iter =
+           funcs.begin(); iter != funcs.end(); ++iter) {
+      FunctionScope::RecordRefParamInfo(iter->first, iter->second.back());
+    }
   }
 }
 

@@ -52,13 +52,20 @@ ExpressionPtr NewObjectExpression::clone() {
 // static analysis functions
 
 void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
+  FunctionScopePtr func;
   if (!m_name.empty()) {
     addUserClass(ar, m_name);
+    if (ClassScopePtr cls = ar->resolveClass(m_name)) {
+      if (!cls->isRedeclaring()) {
+        func = cls->findConstructor(ar, true);
+      }
+    }
   }
 
   m_nameExp->analyzeProgram(ar);
   if (m_params) {
     m_params->analyzeProgram(ar);
+    markRefParams(func, "", false);
   }
 }
 

@@ -113,6 +113,39 @@ void FunctionCall::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
+void FunctionCall::markRefParams(FunctionScopePtr func,
+                                 const std::string &name,
+                                 bool canInvokeFewArgs) {
+  ExpressionList &params = *m_params;
+  if (func) {
+    int mpc = func->getMaxParamCount();
+    for (int i = params.getCount(); i--; ) {
+      ExpressionPtr p = params[i];
+      if (i < mpc ? func->isRefParam(i) :
+          func->isReferenceVariableArgument()) {
+        p->setContext(Expression::RefValue);
+      }
+    }
+  } else if (!m_name.empty()) {
+    FunctionScope::RefParamInfoPtr info =
+      FunctionScope::GetRefParamInfo(m_name);
+    if (info) {
+      for (int i = params.getCount(); i--; ) {
+        if (info->isRefParam(i)) {
+          m_params->markParam(i, canInvokeFewArgs);
+        }
+      }
+    }
+    // If we cannot find information of the so-named function, it might not
+    // exist, or it might go through __call(), either of which cannot have
+    // reference parameters.
+  } else {
+    for (int i = params.getCount(); i--; ) {
+      m_params->markParam(i, canInvokeFewArgs);
+    }
+  }
+}
+
 ExpressionPtr FunctionCall::preOptimize(AnalysisResultPtr ar) {
   if (m_class) {
     ar->preOptimize(m_class);

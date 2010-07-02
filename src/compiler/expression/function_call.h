@@ -79,6 +79,9 @@ protected:
   int m_argArrayId;
   void optimizeArgArray(AnalysisResultPtr ar);
 
+  void markRefParams(FunctionScopePtr func, const std::string &name,
+                     bool canInvokeFewArgs);
+
   /**
    * Each program needs to reset this object's members to revalidate
    * a function call.

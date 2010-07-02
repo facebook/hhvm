@@ -320,35 +320,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
   if (m_params) {
     if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-      if (m_funcScope) {
-        ExpressionList &params = *m_params;
-        int mpc = m_funcScope->getMaxParamCount();
-        for (int i = params.getCount(); i--; ) {
-          ExpressionPtr p = params[i];
-          if (i < mpc ? m_funcScope->isRefParam(i) :
-              m_funcScope->isReferenceVariableArgument()) {
-            p->setContext(Expression::RefValue);
-          } else if (!(p->getContext() & Expression::RefParameter)) {
-            p->clearContext(Expression::InvokeArgument);
-            p->clearContext(Expression::RefValue);
-          }
-        }
-      } else {
-        FunctionScopePtr func = ar->findFunction(m_name);
-        if (func && func->isRedeclaring()) {
-          FunctionScope::RefParamInfoPtr info =
-            FunctionScope::GetRefParamInfo(m_name);
-          if (info) {
-            for (int i = m_params->getCount(); i--; ) {
-              if (info->isRefParam(i)) {
-                m_params->markParam(i, canInvokeFewArgs());
-              }
-            }
-          }
-        } else {
-          m_params->markParams(false);
-        }
-      }
+      markRefParams(m_funcScope, m_name, canInvokeFewArgs());
     }
 
     m_params->analyzeProgram(ar);

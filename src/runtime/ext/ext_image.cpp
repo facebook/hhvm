@@ -7575,11 +7575,13 @@ static void add_assoc_image_info(Array &value, bool sub_array,
   int i, ap, l, b, idx=0, unknown=0;
   image_info_value *info_value;
   image_info_data  *info_data;
-  Array tmpi, array;
+  Array tmp;
+  Array *tmpi = &tmp;
+  Array array;
 
   if (image_info->info_list[section_index].count) {
     if (!sub_array) {
-      tmpi = value;
+      tmpi = &value;
     }
 
     for(i=0; i<image_info->info_list[section_index].count; i++) {
@@ -7590,7 +7592,7 @@ static void add_assoc_image_info(Array &value, bool sub_array,
         name = uname;
       }
       if (info_data->length==0) {
-        tmpi.set(String(name, CopyString), null);
+        tmpi->set(String(name, CopyString), null);
       } else {
         switch (info_data->format) {
         default:
@@ -7603,10 +7605,10 @@ static void add_assoc_image_info(Array &value, bool sub_array,
         case TAG_FMT_SBYTE:
         case TAG_FMT_UNDEFINED:
           if (!info_value->s) {
-            tmpi.set(String(name, CopyString), "");
+            tmpi->set(String(name, CopyString), "");
           } else {
-            tmpi.set(String(name, CopyString),
-                     String(info_value->s, info_data->length, CopyString));
+            tmpi->set(String(name, CopyString),
+                      String(info_value->s, info_data->length, CopyString));
           }
           break;
 
@@ -7615,9 +7617,9 @@ static void add_assoc_image_info(Array &value, bool sub_array,
             val = "";
           }
           if (section_index==SECTION_COMMENT) {
-            tmpi.set(idx++, String(val, CopyString));
+            tmpi->set(idx++, String(val, CopyString));
           } else {
-            tmpi.set(String(name, CopyString), String(val, CopyString));
+            tmpi->set(String(name, CopyString), String(val, CopyString));
           }
           break;
 
@@ -7651,7 +7653,7 @@ static void add_assoc_image_info(Array &value, bool sub_array,
             case TAG_FMT_USHORT:
             case TAG_FMT_ULONG:
               if (l==1) {
-                tmpi.set(String(name, CopyString), (int)info_value->u);
+                tmpi->set(String(name, CopyString), (int)info_value->u);
               } else {
                 array.set(ap, (int)info_value->u);
               }
@@ -7661,8 +7663,8 @@ static void add_assoc_image_info(Array &value, bool sub_array,
               snprintf(buffer, sizeof(buffer), "%i/%i",
                        info_value->ur.num, info_value->ur.den);
               if (l==1) {
-                tmpi.set(String(name, CopyString),
-                         String(buffer, CopyString));
+                tmpi->set(String(name, CopyString),
+                          String(buffer, CopyString));
               } else {
                 array.set(ap, String(buffer, CopyString));
               }
@@ -7679,7 +7681,7 @@ static void add_assoc_image_info(Array &value, bool sub_array,
             case TAG_FMT_SSHORT:
             case TAG_FMT_SLONG:
               if (l==1) {
-                tmpi.set(String(name, CopyString), info_value->i);
+                tmpi->set(String(name, CopyString), info_value->i);
               } else {
                 array.set(ap, info_value->i);
               }
@@ -7689,8 +7691,8 @@ static void add_assoc_image_info(Array &value, bool sub_array,
               snprintf(buffer, sizeof(buffer), "%i/%i",
                        info_value->sr.num, info_value->sr.den);
               if (l==1) {
-                tmpi.set(String(name, CopyString),
-                         String(buffer, CopyString));
+                tmpi->set(String(name, CopyString),
+                          String(buffer, CopyString));
               } else {
                 array.set(ap, String(buffer, CopyString));
               }
@@ -7698,7 +7700,7 @@ static void add_assoc_image_info(Array &value, bool sub_array,
 
             case TAG_FMT_SINGLE:
               if (l==1) {
-                tmpi.set(String(name, CopyString), info_value->f);
+                tmpi->set(String(name, CopyString), info_value->f);
               } else {
                 array.set(ap, info_value->f);
               }
@@ -7706,7 +7708,7 @@ static void add_assoc_image_info(Array &value, bool sub_array,
 
             case TAG_FMT_DOUBLE:
               if (l==1) {
-                tmpi.set(String(name, CopyString), info_value->d);
+                tmpi->set(String(name, CopyString), info_value->d);
               } else {
                 array.set(ap, info_value->d);
               }
@@ -7715,14 +7717,14 @@ static void add_assoc_image_info(Array &value, bool sub_array,
             info_value = &info_data->value.list[ap];
           }
           if (l>1) {
-            tmpi.set(String(name, CopyString), array);
+            tmpi->set(String(name, CopyString), array);
           }
           break;
         }
       }
     }
     if (sub_array) {
-      value.set(exif_get_sectionname(section_index), tmpi);
+      value.set(exif_get_sectionname(section_index), tmp);
     }
   }
 }
@@ -7890,7 +7892,7 @@ Variant f_exif_read_data(CStrRef filename,
   Array retarr;
   add_assoc_image_info(retarr, arrays, &ImageInfo,
                        SECTION_FILE);
-  add_assoc_image_info(retarr, 1,&ImageInfo,
+  add_assoc_image_info(retarr, true, &ImageInfo,
                        SECTION_COMPUTED);
   add_assoc_image_info(retarr, arrays, &ImageInfo,
                        SECTION_ANY_TAG);

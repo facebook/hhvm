@@ -5,6 +5,7 @@ PROJECT_NAME = hphp_analysis
 AUTO_SOURCES = 1
 SOURCE_SUBDIRS = expression statement analysis util parser
 INTERMEDIATE_FILES += $(OUT_DIR)analysis/code_error.inc $(OUT_DIR)analysis/dependency.inc
+ALWAYS_ASSERT = 1
 
 include $(PROJECT_ROOT)/src/dirs.mk
 include $(PROJECT_ROOT)/src/rules.mk

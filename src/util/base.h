@@ -182,12 +182,14 @@ struct file_closer {
 
 #include <assert.h>
 
-#ifndef ASSERT
 #ifdef RELEASE
+#ifndef ALWAYS_ASSERT
 #define ASSERT(x)
 #else
 #define ASSERT(x) assert(x)
 #endif
+#else
+#define ASSERT(x) assert(x)
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////

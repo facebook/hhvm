@@ -1,0 +1,16 @@
+
+HipHop Warning:  Echoing a tainted string:
+  the originally tainted string was : 'bad'
+  it was tainted at :
+    #0 fb_taint(), called at [/data/users/jjeannin/hphp/src/test/tainting/taint03.php:3]
+  it was successively modified at:
+    #0 at [/data/users/jjeannin/hphp/src/test/tainting/taint03.php:4]
+    ---
+  it was echoed at :
+    #0 at [/data/users/jjeannin/hphp/src/test/tainting/taint03.php:5]
+  the echoed string is : 'badgood'
+
+[end of the echoed string]
+
+
+badgood

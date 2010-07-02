@@ -152,5 +152,28 @@ void ExtendedLogger::PrintStackTrace(FILE *f, CArrRef stackTrace,
   fflush(f);
 }
 
+std::string ExtendedLogger::StringOfStackTrace(CArrRef stackTrace) {
+  std::ostringstream res;
+  int i = 0;
+  for (ArrayIter it(stackTrace); it; ++it, ++i) {
+    Array frame = it.second().toArray();
+    res << "    #" << i << " ";
+    if (frame.exists("function")) {
+      if (frame.exists("class")) {
+        res << frame["class"].toString().c_str()
+            << frame["type"].toString().c_str()
+            << frame["function"].toString().c_str()
+            << "(), called ";
+      } else {
+        res << frame["function"].toString().c_str()
+            << "(), called ";
+      }
+    }
+    res << "at [" << frame["file"].toString().c_str()
+        << ":" << frame["line"].toInt64() << "]\n";
+  }
+  std::string buff(res.str());
+  return buff;
+}
 ///////////////////////////////////////////////////////////////////////////////
 }

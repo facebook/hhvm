@@ -19,12 +19,26 @@
 
 #ifdef TAINTED
 
+/* The tainting library consists of three main parts:
+ * - booleans in StringData and StringBuffer allow to know whether a string
+ *   is tainted or not.
+ * - TaintedMetadata (in tainted_metadata.h / .cpp) allows to store
+ *   metadata about the tainting, such as where it was tainted, how
+ *   it was concatenated, etc.
+ * - This file allows to easily update and transfer taints and tainting
+ *   metadata.
+ */
+
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/util/string_buffer.h>
 
 namespace HPHP {
-
+/* 6 variants to avoid repetition:
+ * propagate_tainting<i> propagates the tainting to dest whenever one of the
+ * orig<j> is tainted; only the metadata and the tainting from the first
+ * one which was tainted is kept
+ */
 void propagate_tainting1(CStrRef orig, String& dest);
 void propagate_tainting2(CStrRef orig1, CStrRef orig2,
                            String& dest);
@@ -46,7 +60,7 @@ void propagate_tainting6(CStrRef orig1, CStrRef orig2,
 void propagate_tainting2_buf(CStrRef orig1, StringBuffer const &orig2,
                                             StringBuffer& dest);
 void propagate_tainting1_buf(StringBuffer const &orig, String& dest);
-
+void propagate_tainting1_bufbuf(StringBuffer const &orig, StringBuffer& dest);
 }
 
 #endif

@@ -22,7 +22,10 @@
 #include <runtime/base/util/alloc.h>
 #include <runtime/base/file/file.h>
 #include <runtime/base/zend/zend_functions.h>
+#ifdef TAINTED
 #include <runtime/base/tainting.h>
+#include <runtime/base/tainted_metadata.h>
+#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,8 +36,7 @@ StringBuffer::StringBuffer(int initialSize /* = 1024 */)
   m_buffer = (char *)Util::safe_malloc(initialSize + 1);
   #ifdef TAINTED
   m_tainted = false;
-  m_place_tainted.name = NULL;
-  m_place_tainted.line = -1;
+  m_tainted_metadata = NULL;
   #endif
 }
 
@@ -59,8 +61,7 @@ StringBuffer::StringBuffer(const char *filename)
   }
   #ifdef TAINTED
   m_tainted = false;
-  m_place_tainted.name = NULL;
-  m_place_tainted.line = -1;
+  m_tainted_metadata = NULL;
   #endif
 }
 
@@ -68,8 +69,7 @@ StringBuffer::StringBuffer(char *data, int len)
   : m_buffer(data), m_size(len), m_pos(len) {
   #ifdef TAINTED
   m_tainted = false;
-  m_place_tainted.name = NULL;
-  m_place_tainted.line = -1;
+  m_tainted_metadata = NULL;
   #endif
 }
 
@@ -137,8 +137,7 @@ void StringBuffer::absorb(StringBuffer &buf) {
     m_size = buf.m_size;
     m_pos = buf.m_pos;
 #ifdef TAINTED
-    m_tainted = buf.m_tainted;
-    m_place_tainted = buf.m_place_tainted;
+    propagate_tainting1_bufbuf( buf, *this );
 #endif
 
     buf.m_buffer = buffer;
@@ -153,8 +152,7 @@ void StringBuffer::reset() {
   m_pos = 0;
 #ifdef TAINTED
   m_tainted = false;
-  m_place_tainted.name = NULL;
-  m_place_tainted.line = -1;
+  m_tainted_metadata = NULL;
 #endif
 }
 
@@ -295,6 +293,24 @@ void StringBuffer::read(File* in, int page_size /* = 1024 */) {
     m_pos += len;
   }
 }
+
+#ifdef TAINTED
+void StringBuffer::taint() {
+  untaint(); // we erase all information, in particular metadata
+  m_tainted = true;
+  m_tainted_metadata = new TaintedMetadata();
+}
+void StringBuffer::untaint() {
+  m_tainted = false;
+  if(m_tainted_metadata != NULL) {
+    delete m_tainted_metadata;
+    m_tainted_metadata = NULL;
+  }
+}
+TaintedMetadata* StringBuffer::getTaintedMetadata() const {
+  return m_tainted_metadata;
+}
+#endif
 
 void StringBuffer::grow(int minSize) {
   int new_size = m_size;

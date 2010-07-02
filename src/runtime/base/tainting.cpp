@@ -14,10 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef TAINTED
+
 #include <runtime/base/tainting.h>
 #include <runtime/base/util/string_buffer.h>
-
-#ifdef TAINTED
+#include <runtime/base/tainted_metadata.h>
 
 using namespace std;
 
@@ -26,9 +27,18 @@ namespace HPHP {
 
 bool propagate_tainting_aux(CStrRef orig, String& dest) {
   if(orig.isTainted()){
-    dest.taint();
-    dest.setPlaceTainted(orig.getPlaceTainted().name,
-                         orig.getPlaceTainted().line);
+    // this test is to avoid deleting the dest's information
+    // whenever it's exactly the same as the orig
+    if(!(orig.get() == dest.get())){
+      dest.taint();
+    }
+    dest.getTaintedMetadata()->setTaintedOriginal(
+        orig.getTaintedMetadata()->getTaintedOriginal());
+    dest.getTaintedMetadata()->setTaintedPlace(
+        *(orig.getTaintedMetadata()->getTaintedPlace()));
+    dest.getTaintedMetadata()->setTaintedChanged(
+        orig.getTaintedMetadata()->getTaintedChanged());
+    dest.getTaintedMetadata()->addTaintedChanged();
     return true;
   }
   return false;
@@ -87,8 +97,13 @@ void propagate_tainting6(CStrRef orig1, CStrRef orig2,
 bool propagate_tainting2_buf_aux1(CStrRef orig, StringBuffer& dest) {
   if(orig.isTainted()){
     dest.taint();
-    dest.setPlaceTainted(orig.getPlaceTainted().name,
-                         orig.getPlaceTainted().line);
+    dest.getTaintedMetadata()->setTaintedOriginal(
+        orig.getTaintedMetadata()->getTaintedOriginal());
+    dest.getTaintedMetadata()->setTaintedPlace(
+        *(orig.getTaintedMetadata()->getTaintedPlace()));
+    dest.getTaintedMetadata()->setTaintedChanged(
+        orig.getTaintedMetadata()->getTaintedChanged());
+    dest.getTaintedMetadata()->addTaintedChanged();
     return true;
   }
   return false;
@@ -97,8 +112,13 @@ bool propagate_tainting2_buf_aux2(StringBuffer const &orig,
                                   StringBuffer& dest) {
   if(orig.isTainted()){
     dest.taint();
-    dest.setPlaceTainted(orig.getPlaceTainted().name,
-                         orig.getPlaceTainted().line);
+    dest.getTaintedMetadata()->setTaintedOriginal(
+        orig.getTaintedMetadata()->getTaintedOriginal());
+    dest.getTaintedMetadata()->setTaintedPlace(
+        *(orig.getTaintedMetadata()->getTaintedPlace()));
+    dest.getTaintedMetadata()->setTaintedChanged(
+        orig.getTaintedMetadata()->getTaintedChanged());
+    dest.getTaintedMetadata()->addTaintedChanged();
     return true;
   }
   return false;
@@ -113,14 +133,23 @@ void propagate_tainting2_buf(CStrRef orig1, StringBuffer const &orig2,
 bool propagate_tainting1_buf_aux(StringBuffer const &orig, String& dest) {
   if(orig.isTainted()){
     dest.taint();
-    dest.setPlaceTainted(orig.getPlaceTainted().name,
-                         orig.getPlaceTainted().line);
+    dest.getTaintedMetadata()->setTaintedOriginal(
+        orig.getTaintedMetadata()->getTaintedOriginal());
+    dest.getTaintedMetadata()->setTaintedPlace(
+        *(orig.getTaintedMetadata()->getTaintedPlace()));
+    dest.getTaintedMetadata()->setTaintedChanged(
+        orig.getTaintedMetadata()->getTaintedChanged());
+    dest.getTaintedMetadata()->addTaintedChanged();
     return true;
   }
   return false;
 }
 void propagate_tainting1_buf(const StringBuffer &orig, String& dest){
   if( propagate_tainting1_buf_aux(orig, dest) ) { }
+  else { dest.untaint(); }
+}
+void propagate_tainting1_bufbuf(const StringBuffer &orig, StringBuffer& dest){
+  if( propagate_tainting2_buf_aux2(orig, dest) ) { }
   else { dest.untaint(); }
 }
 

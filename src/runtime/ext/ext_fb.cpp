@@ -833,8 +833,6 @@ Variant f_fb_get_code_coverage() {
 void f_fb_taint(CStrRef str){
   #ifdef TAINTED
   str.taint();
-  str.setPlaceTainted(FrameInjection::GetContainingFileName(true).data(),
-                      FrameInjection::GetLine(true));
   #endif
 }
 

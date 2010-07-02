@@ -26,7 +26,9 @@
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/runtime_option.h>
 #include <util/case_insensitive.h>
+#ifdef TAINTED
 #include <runtime/base/tainting.h>
+#endif
 
 /**
  * This file contains a list of functions that HPHP generates to wrap around

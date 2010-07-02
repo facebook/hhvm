@@ -48,6 +48,7 @@ public:
   // Log additional injected stacktrace.
   static void Log(CArrRef stackTrace, bool escape = true,
                   bool escapeMore = false);
+  static std::string StringOfStackTrace(CArrRef stackTrace);
 
 protected:
   virtual void log(const char *type, const Exception &e,

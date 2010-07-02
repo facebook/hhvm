@@ -24,6 +24,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class File;
+class TaintedMetadata;
 
 /**
  * Efficient string concatenation.
@@ -107,16 +108,10 @@ public:
    * Tainting dynamic analysis
    */
   bool isTainted() const { return m_tainted; }
-  void taint() { m_tainted = true; }
-  void untaint() { m_tainted = false; }
+  void taint();
+  void untaint();
 
-  void setPlaceTainted(const char* name, int line) {
-    m_place_tainted.name = name;
-    m_place_tainted.line = line;
-  }
-  FilePlace getPlaceTainted() const {
-    return m_place_tainted;
-  }
+  TaintedMetadata* getTaintedMetadata() const;
   #endif
 
 private:
@@ -130,7 +125,7 @@ private:
   int m_pos;
   #ifdef TAINTED
   bool m_tainted;
-  FilePlace m_place_tainted;
+  TaintedMetadata* m_tainted_metadata;
   #endif
 
   void grow(int minSize);

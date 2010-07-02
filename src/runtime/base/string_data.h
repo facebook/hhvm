@@ -26,6 +26,9 @@
 namespace HPHP {
 
 class SharedVariant;
+class TaintedMetadata;
+class Array;
+class String;
 ///////////////////////////////////////////////////////////////////////////////
 
 struct FilePlace {
@@ -86,8 +89,7 @@ class StringData {
   StringData() : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
     #ifdef TAINTED
     m_tainted = false;
-    m_place_tainted.name = NULL;
-    m_place_tainted.line = -1;
+    m_tainted_metadata = NULL;
     #endif
   }
 
@@ -98,10 +100,7 @@ class StringData {
   StringData(const char *data, StringDataMode mode = AttachLiteral);
   StringData(const char *data, int len, StringDataMode mode);
   StringData(SharedVariant *shared);
-  #ifdef TAINTED
-  StringData(const char *data, int len, StringDataMode mode,
-             bool taint, FilePlace place_tainted);
-  #endif
+
   void assign(const char *data, StringDataMode mode);
   void assign(const char *data, int len, StringDataMode mode);
   void append(const char *s, int len);
@@ -133,17 +132,12 @@ class StringData {
   /**
    * Tainting dynamic analysis
    */
+  // These functions are directly called from the functions in type_string.h
+  // The real work is done here.
   bool isTainted() const { return m_tainted; }
-  void taint() { m_tainted = true; }
-  void untaint() { m_tainted = false; }
-
-  void setPlaceTainted(const char* name, int line) {
-    m_place_tainted.name = name;
-    m_place_tainted.line = line;
-  }
-  FilePlace getPlaceTainted() const {
-    return m_place_tainted;
-  }
+  void taint();
+  void untaint();
+  TaintedMetadata* getTaintedMetadata() const;
   #endif
 
   /**
@@ -219,7 +213,7 @@ class StringData {
   };
   #ifdef TAINTED
   bool m_tainted;
-  FilePlace m_place_tainted;
+  TaintedMetadata* m_tainted_metadata; // NULL iff m_tainted = false
   #endif
 
   void releaseData();

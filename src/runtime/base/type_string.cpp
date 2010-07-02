@@ -22,6 +22,7 @@
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/zend/zend_printf.h>
+#include <runtime/base/tainted_metadata.h>
 
 namespace HPHP {
 
@@ -661,6 +662,41 @@ void String::dump() {
     printf("(null)\n");
   }
 }
+
+  #ifdef TAINTED
+  /**
+   * Tainting dynamic analysis
+   */
+  bool String::isTainted() const {
+    return m_px ? m_px->isTainted() : false;
+    // a null pointer should be considered untainted
+  }
+  void String::taint() const {
+    if(m_px) {
+      m_px->taint();
+      getTaintedMetadata()->setTaintedOriginal(this);
+      getTaintedMetadata()->setTaintedPlace();
+    }
+  }
+  void String::taint(CStrRef msg) const {
+    if(m_px) {
+      m_px->taint();
+      getTaintedMetadata()->setTaintedOriginal(this);
+      getTaintedMetadata()->setTaintedPlace(msg.toKey());
+    }
+  }
+  void String::untaint() const {
+    if(m_px) { m_px->untaint(); }
+  }
+  TaintedMetadata* String::getTaintedMetadata() const {
+    if(m_px) {
+      return m_px->getTaintedMetadata();
+    } else {
+      return NULL;
+    }
+  }
+  #endif
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // StaticString

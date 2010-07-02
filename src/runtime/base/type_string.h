@@ -30,6 +30,9 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+class Array;
+class String;
+class TaintedMetadata;
 
 /**
  * String type wrapping around StringData to implement copy-on-write and
@@ -299,23 +302,19 @@ public:
    * Tainting dynamic analysis
    */
  public:
-  bool isTainted() const {
-    return m_px ? m_px->isTainted() : false;
-    // a null pointer should be considered untainted
-  }
-  void taint() const {
-    if(m_px) { m_px->taint(); }
-  }
-  void untaint() const {
-    if(m_px) { m_px->untaint(); }
-  }
-
-  void setPlaceTainted(const char* name, int line) const {
-    m_px->setPlaceTainted(name, line);
-  }
-  FilePlace getPlaceTainted() const {
-    return m_px->getPlaceTainted();
-  }
+  // These isTainted, taint and untain functions are directly called by the
+  // fb_is_tainted, fb_taint and fb_untaint functions of php.
+  // See src/runtime/ext/ext_fb.cpp, functions f_fb_taint,
+  // f_fb_untaint and f_fb_is_tainted for more details.
+  bool isTainted() const;
+  // a call to taint() sets up the tainted metadata
+  // taint() without argument is for a call to fb_taint in the PHP code
+  void taint() const;
+  // taint(msg) is for a tainting in the HPHP code with an error message
+  // e.g., when creating the _GET and _POST arrays
+  void taint(CStrRef msg) const;
+  void untaint() const;
+  TaintedMetadata* getTaintedMetadata() const;
   #endif
 };
 

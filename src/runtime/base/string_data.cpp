@@ -25,6 +25,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/builtin_functions.h>
+#include <runtime/base/tainted_metadata.h>
 
 namespace HPHP {
 
@@ -37,8 +38,7 @@ StringData::StringData(const char *data,
   : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
   #ifdef TAINTED
   m_tainted = false;
-  m_place_tainted.name = NULL;
-  m_place_tainted.line = -1;
+  m_tainted_metadata = NULL;
   #endif
   assign(data, mode);
 }
@@ -47,8 +47,7 @@ StringData::StringData(SharedVariant *shared)
   : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
   #ifdef TAINTED
   m_tainted = false;
-  m_place_tainted.name = NULL;
-  m_place_tainted.line = -1;
+  m_tainted_metadata = NULL;
   #endif
   ASSERT(shared);
   shared->incRef();
@@ -62,24 +61,10 @@ StringData::StringData(const char *data, int len, StringDataMode mode)
   : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
   #ifdef TAINTED
   m_tainted = false;
-  m_place_tainted.name = NULL;
-  m_place_tainted.line = -1;
+  m_tainted_metadata = NULL;
   #endif
   assign(data, len, mode);
 }
-
-#ifdef TAINTED
-StringData::StringData(const char *data, int len, StringDataMode mode,
-  bool taint, FilePlace place_tainted)
-  : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
-  #ifdef TAINTED
-  m_tainted = taint;
-  m_place_tainted.name = place_tainted.name;
-  m_place_tainted.line = place_tainted.line;
-  #endif
-  assign(data, len, mode);
-}
-#endif
 
 StringData::~StringData() {
   releaseData();
@@ -362,6 +347,24 @@ bool StringData::isInteger() const {
 bool StringData::isValidVariableName() const {
   return is_valid_var_name(data(), size());
 }
+
+#ifdef TAINTED
+void StringData::taint() {
+  untaint(); // we erase all information, in particular metadata
+  m_tainted = true;
+  m_tainted_metadata = new TaintedMetadata();
+}
+void StringData::untaint() {
+  m_tainted = false;
+  if(m_tainted_metadata != NULL) {
+    delete m_tainted_metadata;
+    m_tainted_metadata = NULL;
+  }
+}
+TaintedMetadata* StringData::getTaintedMetadata() const {
+  return m_tainted_metadata;
+}
+#endif
 
 bool StringData::toBoolean() const {
   return !empty() && !isZero();

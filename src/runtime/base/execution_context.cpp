@@ -31,6 +31,10 @@
 #include <util/process.h>
 #include <util/text_color.h>
 
+#ifdef TAINTED
+#include <runtime/base/tainted_metadata.h>
+#endif
+
 using namespace std;
 
 namespace HPHP {
@@ -172,18 +176,17 @@ void ExecutionContext::setRequestMemoryMaxBytes(int64 max) {
 // write()
 
 void ExecutionContext::write(CStrRef s) {
-#ifdef TAINTED
-  if (s.isTainted()) {
-    // in the future, raise some kind of exception
-    printf("Warning, echoing a tainted string:\n");
-    printf("  it was tainted in file %s, line %d;\n",
-           s.getPlaceTainted().name,
-           s.getPlaceTainted().line );
-    printf("  it was echoed in file %s, line %d.\n",
-           (const char*)FrameInjection::GetContainingFileName(),
-           FrameInjection::GetLine());
+  #ifdef TAINTED
+  /* called by the PHP function echo()
+   * main check point for the tainting analysis
+   */
+  if(s.isTainted()) {
+    std::string meta = s.getTaintedMetadata()->stringOfTaintedMetadata();
+    meta = meta + "  the echoed string is : '" + s.data()
+           + "'\n\n[end of the echoed string]\n";
+    raise_warning(meta);
   }
-#endif
+  #endif
   write(s.data(), s.size());
 }
 

@@ -50,7 +50,7 @@ EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
 }
 
 EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
-(CObjRef obj) : m_set(false) {
+(CObjRef obj) {
   FrameInjection::SetCallingObject(NULL, obj.get());
 }
 

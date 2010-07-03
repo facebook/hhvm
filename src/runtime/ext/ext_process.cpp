@@ -27,6 +27,8 @@
 #include <util/light_process.h>
 #include <runtime/base/util/request_local.h>
 
+using namespace std;
+
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -454,6 +456,10 @@ public:
   int mode;                // mode for proc_open code
   int mode_flags;          // mode flags for opening fds
 
+  static Mutex s_mutex;    // Prevents another thread from forking at the
+                           // same time, before FD_CLOEXEC is set on the fds.
+                           // NOTE: no need to lock with light processes.
+
   bool readFile(File *file) {
     mode = DESC_FILE;
     childend = dup(file->fd());
@@ -527,12 +533,11 @@ public:
   }
 };
 
-Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
-                    CStrRef cwd /* = null_string */,
-                    CVarRef env /* = null_variant */,
-                    CVarRef other_options /* = null_variant */) {
+Mutex DescriptorItem::s_mutex;
+
+static bool pre_proc_open(CArrRef descriptorspec,
+                          vector<DescriptorItem> &items) {
   /* walk the descriptor spec and set up files/pipes */
-  std::vector<DescriptorItem> items;
   items.resize(descriptorspec.size());
   int i = 0;
   for (ArrayIter iter(descriptorspec); iter; ++iter, ++i) {
@@ -541,60 +546,97 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
     String index = iter.first();
     if (!index.isNumeric()) {
       raise_warning("descriptor spec must be an integer indexed array");
-      return false;
+      break;
     }
     item.index = index.toInt32();
 
     Variant descitem = iter.second();
     if (descitem.isResource()) {
       File *file = descitem.toObject().getTyped<File>();
-      if (!item.readFile(file)) {
-        return false;
-      }
+      if (!item.readFile(file)) break;
     } else if (!descitem.is(KindOfArray)) {
       raise_warning("Descriptor must be either an array or a File-Handle");
-      return false;
+      break;
     } else {
       Array descarr = descitem.toArray();
       if (!descarr.exists(0LL)) {
         raise_warning("Missing handle qualifier in array");
-        return false;
+        break;
       }
       String ztype = descarr[0LL].toString();
       if (ztype == "pipe") {
         if (!descarr.exists(1LL)) {
           raise_warning("Missing mode parameter for 'pipe'");
-          return false;
+          break;
         }
-        if (!item.readPipe(descarr[1LL].toString())) {
-          return false;
-        }
+        if (!item.readPipe(descarr[1LL].toString())) break;
       } else if (ztype == "file") {
         if (!descarr.exists(1LL)) {
           raise_warning("Missing file name parameter for 'file'");
-          return false;
+          break;
         }
         if (!descarr.exists(2LL)) {
           raise_warning("Missing mode parameter for 'file'");
-          return false;
+          break;
         }
         if (!item.openFile(descarr[1LL].toString(), descarr[2LL].toString())) {
-          return false;
+          break;
         }
       } else {
         raise_warning("%s is not a valid descriptor spec", ztype.data());
-        return false;
+        break;
       }
     }
   }
 
+  if (i >= descriptorspec.size()) return true;
+  for (int j = 0; j < i; j++) {
+    items[j].cleanup();
+  }
+  return false;
+}
+
+static Variant post_proc_open(CStrRef cmd, Variant &pipes, CStrRef cwd,
+                              CVarRef env, vector<DescriptorItem> &items,
+                              pid_t child) {
+  if (child < 0) {
+    /* failed to fork() */
+    for (int i = 0; i < (int)items.size(); i++) {
+      items[i].cleanup();
+    }
+    raise_warning("fork failed - %s", Util::safe_strerror(errno).c_str());
+    return false;
+  }
+
+  /* we forked/spawned and this is the parent */
+  ChildProcess *proc = NEW(ChildProcess)();
+  proc->command = cmd;
+  proc->child = child;
+  proc->env = env;
+  for (int i = 0; i < (int)items.size(); i++) {
+    Object f = items[i].dupParent();
+    proc->pipes.append(f);
+    pipes.set(items[i].index, f);
+  }
+  return Object(proc);
+}
+
+Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
+                    CStrRef cwd /* = null_string */,
+                    CVarRef env /* = null_variant */,
+                    CVarRef other_options /* = null_variant */) {
+  std::vector<DescriptorItem> items;
+
   pid_t child;
 
   if (LightProcess::Available()) {
-    // light-weight process available
+    // light process available
+    // there is no need to do any locking, because the forking is delegated
+    // to the light process
+    if (!pre_proc_open(descriptorspec, items)) return false;
     std::vector<int> created;
     std::vector<int> intended;
-    for (i = 0; i < (int)items.size(); i++) {
+    for (int i = 0; i < (int)items.size(); i++) {
       created.push_back(items[i].childend);
       intended.push_back(items[i].index);
     }
@@ -610,55 +652,42 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
 
     child = LightProcess::proc_open(cmd.c_str(), created, intended,
                                     cwd.c_str(), envs);
+    ASSERT(child);
+    return post_proc_open(cmd, pipes, cwd, env, items, child);
   } else {
     /* the unix way */
+    Lock lock(DescriptorItem::s_mutex);
+    if (!pre_proc_open(descriptorspec, items)) return false;
     child = fork();
-    if (child == 0) {
-      /* this is the child process */
-
-      /* close those descriptors that we just opened for the parent stuff,
-       * dup new descriptors into required descriptors and close the original
-       * cruft */
-      for (i = 0; i < (int)items.size(); i++) {
-        items[i].dupChild();
-      }
-      if (!cwd.empty()) {
-        if (chdir(cwd) < 0) {
-          // chdir failed, the working directory remains unchanged
-        }
-      }
-      if (!env.isNull()) {
-        std::vector<String> senvs; // holding those char *
-        char **envp = build_envp(env.toArray(), senvs);
-        execle("/bin/sh", "sh", "-c", cmd.data(), NULL, envp);
-        free(envp);
-      } else {
-        execl("/bin/sh", "sh", "-c", cmd.data(), NULL);
-      }
-      _exit(127);
-
+    if (child) {
+      // the parent process
+      return post_proc_open(cmd, pipes, cwd, env, items, child);
     }
   }
-  if (child < 0) {
-    /* failed to fork() */
-    for (i = 0; i < (int)items.size(); i++) {
-      items[i].cleanup();
-    }
-    raise_warning("fork failed - %s", Util::safe_strerror(errno).c_str());
-    return false;
-  }
 
-  /* we forked/spawned and this is the parent */
-  ChildProcess *proc = NEW(ChildProcess)();
-  proc->command = cmd;
-  proc->child = child;
-  proc->env = env;
-  for (i = 0; i < (int)items.size(); i++) {
-    Object f = items[i].dupParent();
-    proc->pipes.append(f);
-    pipes.set(items[i].index, f);
+  ASSERT(child == 0);
+  /* this is the child process */
+
+  /* close those descriptors that we just opened for the parent stuff,
+   * dup new descriptors into required descriptors and close the original
+   * cruft */
+  for (int i = 0; i < (int)items.size(); i++) {
+    items[i].dupChild();
   }
-  return Object(proc);
+  if (!cwd.empty()) {
+    if (chdir(cwd) < 0) {
+      // chdir failed, the working directory remains unchanged
+    }
+  }
+  if (!env.isNull()) {
+    vector<String> senvs; // holding those char *
+    char **envp = build_envp(env.toArray(), senvs);
+    execle("/bin/sh", "sh", "-c", cmd.data(), NULL, envp);
+    free(envp);
+  } else {
+    execl("/bin/sh", "sh", "-c", cmd.data(), NULL);
+  }
+  _exit(127);
 }
 
 bool f_proc_terminate(CObjRef process, int signal /* = 0 */) {

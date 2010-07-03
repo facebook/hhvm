@@ -50,6 +50,14 @@ Variant pm_php$globals$symbols_php(bool incOnce /* = false */, LVariableTable* v
 
   setNull(v_argc);
   setNull(v_argv);
+  setNull(v__SERVER);
+  setNull(v__GET);
+  setNull(v__POST);
+  setNull(v__COOKIE);
+  setNull(v__FILES);
+  setNull(v__ENV);
+  setNull(v__REQUEST);
+  setNull(v__SESSION);
   (v__SERVER = SystemScalarArrays::ssa_[0]);
   (v__GET = SystemScalarArrays::ssa_[0]);
   (v__POST = SystemScalarArrays::ssa_[0]);

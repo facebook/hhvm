@@ -541,11 +541,13 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       funcScope->outputCPPParamsDecl(cg, ar, m_params, false);
       cg_indentBegin(") {\n");
       if (m_stmt->hasBody()) {
+        const char *sys =
+          (cg.getOutput() == CodeGenerator::SystemCPP ? "_BUILTIN" : "");
         if (m_modifiers->isStatic()) {
-          cg_printf("STATIC_METHOD_INJECTION(%s, %s);\n",
+          cg_printf("STATIC_METHOD_INJECTION%s(%s, %s);\n", sys,
                     scope->getOriginalName().c_str(), origFuncName.c_str());
         } else {
-          cg_printf("INSTANCE_METHOD_INJECTION(%s, %s);\n",
+          cg_printf("INSTANCE_METHOD_INJECTION%s(%s, %s);\n", sys,
                     scope->getOriginalName().c_str(), origFuncName.c_str());
         }
       }

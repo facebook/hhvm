@@ -612,6 +612,7 @@ inline Variant throw_missing_class(const char *cls) {
 inline Variant throw_missing_file(const char *cls) {
   throw PhpFileDoesNotExistException(cls);
 }
+void throw_instance_method_fatal(const char *name);
 
 /**
  * Argument count handling.

@@ -367,7 +367,7 @@ void c_directory::init() {
 }
 /* SRC: classes/directory.php line 7 */
 void c_directory::t___construct(Variant v_path) {
-  INSTANCE_METHOD_INJECTION(Directory, Directory::__construct);
+  INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::__construct);
   bool oldInCtor = gasInCtor(true);
   (m_path = v_path);
   (m_handle = x_opendir(toString(v_path)));
@@ -375,17 +375,17 @@ void c_directory::t___construct(Variant v_path) {
 } /* function */
 /* SRC: classes/directory.php line 12 */
 Variant c_directory::t_read() {
-  INSTANCE_METHOD_INJECTION(Directory, Directory::read);
+  INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::read);
   return x_readdir(toObject(m_handle));
 } /* function */
 /* SRC: classes/directory.php line 16 */
 Variant c_directory::t_rewind() {
-  INSTANCE_METHOD_INJECTION(Directory, Directory::rewind);
+  INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::rewind);
   return (x_rewinddir(toObject(m_handle)), null);
 } /* function */
 /* SRC: classes/directory.php line 20 */
 Variant c_directory::t_close() {
-  INSTANCE_METHOD_INJECTION(Directory, Directory::close);
+  INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::close);
   return (x_closedir(toObject(m_handle)), null);
 } /* function */
 Object co_directory(CArrRef params, bool init /* = true */) {

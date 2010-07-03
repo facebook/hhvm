@@ -4502,7 +4502,7 @@ void c_exception::init() {
 }
 /* SRC: classes/exception.php line 16 */
 void c_exception::t___init__() {
-  INSTANCE_METHOD_INJECTION(Exception, Exception::__init__);
+  INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__init__);
   Variant v_top;
   Variant v_frame;
 
@@ -4554,7 +4554,7 @@ void c_exception::t___init__() {
 void c_exception::t___construct(Variant v_message //  = ""
 , Variant v_code //  = 0LL
 ) {
-  INSTANCE_METHOD_INJECTION(Exception, Exception::__construct);
+  INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__construct);
   bool oldInCtor = gasInCtor(true);
   (m_message = v_message);
   (m_code = v_code);
@@ -4562,32 +4562,32 @@ void c_exception::t___construct(Variant v_message //  = ""
 } /* function */
 /* SRC: classes/exception.php line 43 */
 Variant c_exception::t_getmessage() {
-  INSTANCE_METHOD_INJECTION(Exception, Exception::getMessage);
+  INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getMessage);
   return m_message;
 } /* function */
 /* SRC: classes/exception.php line 48 */
 Variant c_exception::t_getcode() {
-  INSTANCE_METHOD_INJECTION(Exception, Exception::getCode);
+  INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getCode);
   return m_code;
 } /* function */
 /* SRC: classes/exception.php line 53 */
 Variant c_exception::t_getfile() {
-  INSTANCE_METHOD_INJECTION(Exception, Exception::getFile);
+  INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getFile);
   return m_file;
 } /* function */
 /* SRC: classes/exception.php line 58 */
 Variant c_exception::t_getline() {
-  INSTANCE_METHOD_INJECTION(Exception, Exception::getLine);
+  INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getLine);
   return m_line;
 } /* function */
 /* SRC: classes/exception.php line 63 */
 Variant c_exception::t_gettrace() {
-  INSTANCE_METHOD_INJECTION(Exception, Exception::getTrace);
+  INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getTrace);
   return m_trace;
 } /* function */
 /* SRC: classes/exception.php line 68 */
 String c_exception::t_gettraceasstring() {
-  INSTANCE_METHOD_INJECTION(Exception, Exception::getTraceAsString);
+  INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getTraceAsString);
   int64 v_i = 0;
   String v_s;
   Variant v_frame;
@@ -4639,7 +4639,7 @@ String c_exception::t_gettraceasstring() {
 } /* function */
 /* SRC: classes/exception.php line 86 */
 String c_exception::t___tostring() {
-  INSTANCE_METHOD_INJECTION(Exception, Exception::__toString);
+  INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__toString);
   return toString(t_getmessage());
 } /* function */
 /* SRC: classes/exception.php line 105 */
@@ -5202,7 +5202,7 @@ void c_errorexception::t___construct(Variant v_message //  = ""
 , Variant v_filename //  = null
 , Variant v_lineno //  = null
 ) {
-  INSTANCE_METHOD_INJECTION(ErrorException, ErrorException::__construct);
+  INSTANCE_METHOD_INJECTION_BUILTIN(ErrorException, ErrorException::__construct);
   bool oldInCtor = gasInCtor(true);
   c_exception::t___construct(v_message, v_code);
   (m_severity = v_severity);
@@ -5220,7 +5220,7 @@ void c_errorexception::t___construct(Variant v_message //  = ""
 } /* function */
 /* SRC: classes/exception.php line 119 */
 Variant c_errorexception::t_getseverity() {
-  INSTANCE_METHOD_INJECTION(ErrorException, ErrorException::getSeverity);
+  INSTANCE_METHOD_INJECTION_BUILTIN(ErrorException, ErrorException::getSeverity);
   return m_severity;
 } /* function */
 /* SRC: classes/exception.php line 92 */

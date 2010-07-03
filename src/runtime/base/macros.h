@@ -416,6 +416,7 @@ do { \
   FRAME_INJECTION(c, n)                         \
 
 #define INSTANCE_METHOD_INJECTION_BUILTIN(c, n) \
+  if (!o_id) throw_instance_method_fatal(#n);   \
   DECLARE_THREAD_INFO                           \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \

@@ -174,6 +174,12 @@ Variant o_invoke_failed(const char *cls, const char *meth,
   }
 }
 
+void throw_instance_method_fatal(const char *name) {
+  if (!strstr(name, "::__destruct")) {
+    raise_error("Non-static method %s() cannot be called statically", name);
+  }
+}
+
 Variant throw_missing_arguments(const char *fn, int num, int level /* = 0 */) {
   if (level == 2 || RuntimeOption::ThrowMissingArguments) {
     raise_error("Missing argument %d for %s()", num, fn);

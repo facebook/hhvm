@@ -16,14 +16,14 @@ foreach ($files as $file) {
   $pattern = '/c_(\w+)::t_(\w+)([^\{\}]*)\{([\n\t ]+)'.
     '(?:\w+INJECTION\([\w:, ]+\);[\n\t ]+)?([^\}])/s';
   $replace = "c_\${1}::t_\${2}\${3}{\n  ".
-    "INSTANCE_METHOD_INJECTION(\${1}, \${1}::\${2});\${4}\${5}";
+    "INSTANCE_METHOD_INJECTION_BUILTIN(\${1}, \${1}::\${2});\${4}\${5}";
 
   $replaced = preg_replace($pattern, $replace, $contents);
 
   $pattern = '/c_(\w+)::ti_(\w+)([^\{\}]*)\{([\n\t ]+)'.
     '(?:\w+INJECTION\([\w:, ]+\);[\n\t ]+)?([^\}])/s';
   $replace = "c_\${1}::ti_\${2}\${3}{\n  ".
-    "STATIC_METHOD_INJECTION(\${1}, \${1}::\${2});\${4}\${5}";
+    "STATIC_METHOD_INJECTION_BUILTIN(\${1}, \${1}::\${2});\${4}\${5}";
 
   $replaced = preg_replace($pattern, $replace, $replaced);
 

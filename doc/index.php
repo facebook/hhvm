@@ -139,6 +139,7 @@ function format_document($doc) {
 
   $doc = preg_replace('/\n\n/', '<p>', $doc);      // paragraphs
   $doc = preg_replace('/<T>/', '&lt;T&gt;', $doc); // C++ templates
+  $doc = preg_replace('/<\?/', '&lt;?', $doc);     // PHP start tags
 
   // copyright notice
   $doc .= '<p>&nbsp;<table width="100%"><tr><td class="footer" align=right>'.

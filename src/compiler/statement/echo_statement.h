@@ -30,7 +30,7 @@ public:
   EchoStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-
+  ExpressionListPtr getExpressionList() const { return m_exp; }
 private:
   ExpressionListPtr m_exp;
 };

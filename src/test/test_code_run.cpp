@@ -10034,6 +10034,14 @@ bool TestCodeRun::TestAssignment() {
        "}"
        "foo();");
 
+  MVCR("<?php ;"
+       "function e() { return 'hello'; }"
+       "function foo() {"
+       "  $expected = e();"
+       "  $list_expected = \"[$expected,$expected]\";"
+       "  var_dump($expected, $list_expected);"
+       "}"
+       "foo();");
   return true;
 }
 
@@ -10894,6 +10902,15 @@ bool TestCodeRun::TestTernary() {
   MVCR("<?php "
       "$a = 123;"
       "echo $a ? @mysql_data_seek(null, null) : false;");
+
+  MVCR("<?php "
+       "function foo($a) {"
+       "  $x = $a ? 1 : 0;"
+       "  return $x - 5;"
+       "}"
+       "var_dump(foo(1, 2, 3));"
+       "var_dump(foo(0, 2, 3));");
+
   return true;
 }
 
@@ -11971,6 +11988,19 @@ bool TestCodeRun::TestInlining() {
       "function &h(&$a) { return $a['foo']; }"
       "function i($a) { $x = &h($a); $x = 'hello'; return $a; }"
       "var_dump(i(false));");
+
+  MVCR("<?php "
+       "function bar($name) {"
+       "  $name = trim($name);"
+       "  var_dump($name);"
+       "}"
+       "function f($x, $y) { if ($x) return $x; return $y; }"
+       "function foo() {"
+       "  $name = 'ab.' . f('x', 'y');"
+       "  bar($name);"
+       "  bar($name);"
+       "}"
+       "foo();");
 
   Option::AutoInline = save;
   return true;

@@ -43,8 +43,33 @@ Expression::Expression(LocationPtr loc, KindOf kindOf)
     m_unused(false) {
 }
 
-void Expression::copyContext(ExpressionPtr from) {
-  unsigned val = from->m_context;
+ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
+  if (hasContext(Expression::RefValue) &&
+      isRefable(true) && !rep->isRefable(true)) {
+    /*
+      An assignment isRefable, but the rhs may not be. Need this to
+      prevent "bad pass by reference" errors.
+    */
+    ExpressionListPtr el(new ExpressionList(getLocation(),
+                                            Expression::KindOfExpressionList,
+                                            ExpressionList::ListKindWrapped));
+    el->addElement(rep);
+    rep = el;
+  }
+  rep->copyContext(m_context & ~DeadStore);
+  if (TypePtr t1 = getType()) {
+    if (TypePtr t2 = rep->getType()) {
+      if (!Type::SameType(t1, t2)) {
+        rep->setExpectedType(t1);
+      }
+    }
+  }
+
+  return rep;
+}
+
+void Expression::copyContext(int contexts) {
+  unsigned val = contexts;
   while (val) {
     unsigned next = val & (val - 1);
     unsigned low = val ^ next; // lowest set bit
@@ -160,8 +185,12 @@ TypePtr Expression::propagateTypes(AnalysisResultPtr ar, TypePtr inType) {
   TypePtr ret = inType;
 
   while (e) {
-    ret = Type::Inferred(ar, ret, e->m_actualType);
-    assert(ret);
+    TypePtr inferred = Type::Inferred(ar, ret, e->m_actualType);
+    if (!inferred) {
+      assert(ar->getPhase() != AnalysisResult::LastInference);
+    } else {
+      ret = inferred;
+    }
     e = e->m_canonPtr;
   }
 
@@ -266,6 +295,9 @@ bool Expression::CheckNeeded(AnalysisResultPtr ar,
   // so that objects are not destructed prematurely.
   bool needed = true;
   TypePtr type = value ? value->getType() : TypePtr();
+  if (type && (type->is(Type::KindOfSome) || type->is(Type::KindOfAny))) {
+    type = value->getActualType();
+  }
   if (value && value->isScalar()) needed = false;
   if (type && type->isNoObjectInvolved()) needed = false;
   if (variable->is(Expression::KindOfSimpleVariable)) {

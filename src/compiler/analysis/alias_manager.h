@@ -38,6 +38,7 @@ class BucketMapEntry {
   ExpressionPtrList::iterator end() { return m_exprs.end(); }
   ExpressionPtrList::reverse_iterator rbegin() { return m_exprs.rbegin(); }
   ExpressionPtrList::reverse_iterator rend() { return m_exprs.rend(); }
+  bool isLast(ExpressionPtr e) { return *rbegin() == e; }
   size_t size() { return m_num; }
   void stash(size_t from, ExpressionPtrList &to);
   void import(ExpressionPtrList &from);
@@ -133,7 +134,6 @@ class AliasManager {
   ExpressionPtr canonicalizeNode(ExpressionPtr e);
   ExpressionPtr canonicalizeNonNull(ExpressionPtr e);
   ExpressionPtr canonicalizeRecurNonNull(ExpressionPtr e);
-  ExpressionPtr replaceValue(ExpressionPtr orig, ExpressionPtr rep);
   ExpressionPtr canonicalizeRecur(ExpressionPtr e);
   int canonicalizeRecur(StatementPtr e);
 

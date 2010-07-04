@@ -184,7 +184,7 @@ ExpressionPtr AssignmentExpression::postOptimize(AnalysisResultPtr ar) {
       if (m_value->getContainedEffects() != getContainedEffects()) {
         s_effectsTag++;
       }
-      return m_value;
+      return replaceValue(m_value);
     }
   }
   return ExpressionPtr();

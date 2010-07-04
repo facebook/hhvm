@@ -295,7 +295,9 @@ void ObjectMethodExpression::outputPHP(CodeGenerator &cg,
 
 bool ObjectMethodExpression::directVariantProxy(AnalysisResultPtr ar) {
   TypePtr actualType = m_object->getActualType();
-  if (actualType && actualType->is(Type::KindOfVariant)) {
+  if (actualType && actualType->is(Type::KindOfVariant) &&
+      (!m_valid || m_name.empty() ||
+       !m_object->getType()->isSpecificObject())) {
     if (m_object->is(KindOfSimpleVariable)) {
       SimpleVariablePtr var =
         dynamic_pointer_cast<SimpleVariable>(m_object);

@@ -219,6 +219,7 @@ void QOpExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (!m_cppValue.empty()) {
     cg_printf("%s", m_cppValue.c_str());
   } else {
+    cg_printf("(");
     m_condition->outputCPP(cg, ar);
     TypePtr typeYes = m_expYes->getActualType();
     TypePtr typeNo = m_expNo->getActualType();
@@ -232,6 +233,6 @@ void QOpExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     m_expYes->outputCPP(cg, ar);
     cg_printf(")) : (%s(", castType);
     m_expNo->outputCPP(cg, ar);
-    cg_printf("))");
+    cg_printf(")))");
   }
 }

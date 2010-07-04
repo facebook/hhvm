@@ -252,6 +252,18 @@ void ExpressionList::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
+bool ExpressionList::kidUnused(int i) const {
+  if (m_kind == ListKindParam) {
+    return false;
+  }
+
+  if (m_kind == ListKindLeft) {
+    return i != 0;
+  }
+
+  return (i + 1u) != m_exps.size();
+}
+
 ConstructPtr ExpressionList::getNthKid(int n) const {
   if (n < (int)m_exps.size()) {
     return m_exps[n];

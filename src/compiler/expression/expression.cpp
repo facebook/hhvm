@@ -39,7 +39,8 @@ using namespace boost;
 
 Expression::Expression(LocationPtr loc, KindOf kindOf)
   : Construct(loc), m_kindOf(kindOf), m_context(RValue),
-    m_originalScopeSet(false), m_canon_id(0), m_canonPtr(), m_error(0) {
+    m_originalScopeSet(false), m_canon_id(0), m_canonPtr(), m_error(0),
+    m_unused(false) {
 }
 
 void Expression::copyContext(ExpressionPtr from) {
@@ -66,6 +67,7 @@ void Expression::deepCopy(ExpressionPtr exp) {
   exp->m_actualType = m_actualType;
   exp->m_expectedType = m_expectedType;
   exp->m_canon_id = 0;
+  exp->m_unused = false;
   exp->m_canonPtr.reset();
 };
 

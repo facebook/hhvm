@@ -955,7 +955,7 @@ int AliasManager::canonicalizeRecur(StatementPtr s) {
   return ret;
 }
 
-void AliasManager::collectAliasInfoRecur(ConstructPtr cs) {
+void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
   if (!cs) {
     return;
   }
@@ -978,11 +978,12 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs) {
   for (int i = 0; i < nkid; i++) {
     ConstructPtr kid = cs->getNthKid(i);
     if (kid) {
-      collectAliasInfoRecur(kid);
+      collectAliasInfoRecur(kid, cs->kidUnused(i));
     }
   }
 
   if (ExpressionPtr e = dpc(Expression, cs)) {
+    e->setUnused(unused);
     int context = e->getContext();
     switch (e->getKindOf()) {
     case Expression::KindOfAssignmentExpression:
@@ -1141,7 +1142,7 @@ bool AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
     }
   }
 
-  collectAliasInfoRecur(m->getStmts());
+  collectAliasInfoRecur(m->getStmts(), false);
   FunctionScopePtr func = ar->getFunctionScope();
   if (func) {
     if (m_inlineAsExpr) {

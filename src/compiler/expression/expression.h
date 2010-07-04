@@ -289,6 +289,9 @@ public:
   static bool CheckNeeded(AnalysisResultPtr ar, ExpressionPtr variable,
                           ExpressionPtr value);
 
+  bool isUnused() const { return m_unused; }
+  void setUnused(bool u) { m_unused = u; }
+
 protected:
   static bool IsIdentifier(const std::string &value);
 
@@ -316,6 +319,7 @@ protected:
   unsigned m_canon_id;
   ExpressionPtr m_canonPtr;
   mutable int m_error;
+  bool m_unused;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

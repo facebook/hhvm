@@ -43,6 +43,7 @@ public:
    */
   void analyzeShortCircuit(AnalysisResultPtr ar);
 
+  virtual bool kidUnused(int i) const { return i == 0; }
 private:
   ExpressionPtr m_exp;
 };

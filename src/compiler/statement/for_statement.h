@@ -36,6 +36,7 @@ public:
   virtual int getRecursiveCount() const {
     return 1 + (m_stmt ? m_stmt->getRecursiveCount() : 0);
   }
+  virtual bool kidUnused(int i) const { return i == 0 || i == 3; }
 private:
   ExpressionPtr m_exp1;
   ExpressionPtr m_exp2;

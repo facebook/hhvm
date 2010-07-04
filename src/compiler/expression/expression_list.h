@@ -53,6 +53,7 @@ public:
   void removeElement(int index);
   virtual bool getScalarValue(Variant &value);
   virtual bool isRefable(bool checkError = false) const;
+  virtual bool kidUnused(int i) const;
 
   bool isScalarArrayPairs() const;
 

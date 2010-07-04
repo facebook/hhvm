@@ -321,17 +321,7 @@ Array ObjectData::o_getDynamicProperties() const {
 
 Variant ObjectData::o_invoke(const char *s, CArrRef params, int64 hash,
                              bool fatal /* = true */) {
-  // should we call __call or __callStatic?
-  if (o_id != 0) {
-    // __call
-
-    return doRootCall(s, params, fatal);
-  } else {
-    // __callStatic
-
-    return (get_object_static_callbacks(o_getClassName())->doCallStatic)
-      (s, params);
-  }
+  return doRootCall(s, params, fatal);
 }
 
 Variant ObjectData::o_root_invoke(const char *s, CArrRef params, int64 hash,
@@ -521,13 +511,6 @@ Variant ObjectData::doGet(Variant v_name, bool error) {
                  v_name.toString().data());
   }
   return null_variant;
-}
-
-Variant ObjectData::doCallStatic(Variant v_name, Variant v_arguments) {
-  // FIXME: throw a better error
-  return o_invoke_failed("invoked "
-    /*(string("invoked ") + o_getClassName()).c_str()*/,
-    v_name.toString().data(), true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

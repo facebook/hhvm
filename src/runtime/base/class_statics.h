@@ -52,7 +52,6 @@ public:
                                       const Eval::FunctionCallExpression *call,
                                       int64 hash = -1,
                                       bool fatal = true);
-  virtual Variant doCallStatic(Variant v_name, Variant v_arguments);
 
   DECLARE_OBJECT_ALLOCATION(ClassStatics);
   void destruct() {} // artifact when not deriving from ObjectData

@@ -79,9 +79,5 @@ Variant ClassStatics::os_invoke_from_eval
   }
 }
 
-Variant ClassStatics::doCallStatic(Variant v_name, Variant v_arguments) {
-  throw FatalErrorException(m_msg);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

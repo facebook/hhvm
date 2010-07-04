@@ -508,7 +508,6 @@ struct ObjectStaticCallbacks cw_splobjectstorage = {
   c_splobjectstorage::os_lval,
   c_splobjectstorage::os_invoke,
   c_splobjectstorage::os_constant,
-  c_splobjectstorage::doCallStatic
 };
 void c_splobjectstorage::init() {
   m_storage = SystemScalarArrays::ssa_[0];

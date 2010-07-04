@@ -500,7 +500,6 @@ struct ObjectStaticCallbacks cw_pdoexception = {
   c_pdoexception::os_lval,
   c_pdoexception::os_invoke,
   c_pdoexception::os_constant,
-  c_pdoexception::doCallStatic
 };
 Object co_domdocumentfragment(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domdocumentfragment)())->dynCreate(params, init));
@@ -1360,7 +1359,6 @@ struct ObjectStaticCallbacks cw_domdocumentfragment = {
   c_domdocumentfragment::os_lval,
   c_domdocumentfragment::os_invoke,
   c_domdocumentfragment::os_constant,
-  c_domdocumentfragment::doCallStatic
 };
 Object co_domtext(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domtext)())->dynCreate(params, init));
@@ -2427,7 +2425,6 @@ struct ObjectStaticCallbacks cw_domtext = {
   c_domtext::os_lval,
   c_domtext::os_invoke,
   c_domtext::os_constant,
-  c_domtext::doCallStatic
 };
 Object co_domcdatasection(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domcdatasection)())->dynCreate(params, init));
@@ -3485,7 +3482,6 @@ struct ObjectStaticCallbacks cw_domcdatasection = {
   c_domcdatasection::os_lval,
   c_domcdatasection::os_invoke,
   c_domcdatasection::os_constant,
-  c_domcdatasection::doCallStatic
 };
 Object co_domdocumenttype(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domdocumenttype)())->dynCreate(params, init));
@@ -4324,7 +4320,6 @@ struct ObjectStaticCallbacks cw_domdocumenttype = {
   c_domdocumenttype::os_lval,
   c_domdocumenttype::os_invoke,
   c_domdocumenttype::os_constant,
-  c_domdocumenttype::doCallStatic
 };
 Object co_sqlite3stmt(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_sqlite3stmt)())->dynCreate(params, init));
@@ -4788,7 +4783,6 @@ struct ObjectStaticCallbacks cw_sqlite3stmt = {
   c_sqlite3stmt::os_lval,
   c_sqlite3stmt::os_invoke,
   c_sqlite3stmt::os_constant,
-  c_sqlite3stmt::doCallStatic
 };
 Object co_domnodelist(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domnodelist)())->dynCreate(params, init));
@@ -5135,7 +5129,6 @@ struct ObjectStaticCallbacks cw_domnodelist = {
   c_domnodelist::os_lval,
   c_domnodelist::os_invoke,
   c_domnodelist::os_constant,
-  c_domnodelist::doCallStatic
 };
 Object co_normalizer(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_normalizer)())->dynCreate(params, init));
@@ -5547,7 +5540,6 @@ struct ObjectStaticCallbacks cw_normalizer = {
   c_normalizer::os_lval,
   c_normalizer::os_invoke,
   c_normalizer::os_constant,
-  c_normalizer::doCallStatic
 };
 Object co_domcharacterdata(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domcharacterdata)())->dynCreate(params, init));
@@ -6550,7 +6542,6 @@ struct ObjectStaticCallbacks cw_domcharacterdata = {
   c_domcharacterdata::os_lval,
   c_domcharacterdata::os_invoke,
   c_domcharacterdata::os_constant,
-  c_domcharacterdata::doCallStatic
 };
 Object co_domentityreference(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domentityreference)())->dynCreate(params, init));
@@ -7394,7 +7385,6 @@ struct ObjectStaticCallbacks cw_domentityreference = {
   c_domentityreference::os_lval,
   c_domentityreference::os_invoke,
   c_domentityreference::os_constant,
-  c_domentityreference::doCallStatic
 };
 Object co_simplexmlelementiterator(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_simplexmlelementiterator)())->dynCreate(params, init));
@@ -7760,7 +7750,6 @@ struct ObjectStaticCallbacks cw_simplexmlelementiterator = {
   c_simplexmlelementiterator::os_lval,
   c_simplexmlelementiterator::os_invoke,
   c_simplexmlelementiterator::os_constant,
-  c_simplexmlelementiterator::doCallStatic
 };
 Object co_datetimezone(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_datetimezone)())->dynCreate(params, init));
@@ -8229,7 +8218,6 @@ struct ObjectStaticCallbacks cw_datetimezone = {
   c_datetimezone::os_lval,
   c_datetimezone::os_invoke,
   c_datetimezone::os_constant,
-  c_datetimezone::doCallStatic
 };
 Object co_domnodeiterator(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domnodeiterator)())->dynCreate(params, init));
@@ -8595,7 +8583,6 @@ struct ObjectStaticCallbacks cw_domnodeiterator = {
   c_domnodeiterator::os_lval,
   c_domnodeiterator::os_invoke,
   c_domnodeiterator::os_constant,
-  c_domnodeiterator::doCallStatic
 };
 Object co_domimplementation(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domimplementation)())->dynCreate(params, init));
@@ -8947,7 +8934,6 @@ struct ObjectStaticCallbacks cw_domimplementation = {
   c_domimplementation::os_lval,
   c_domimplementation::os_invoke,
   c_domimplementation::os_constant,
-  c_domimplementation::doCallStatic
 };
 Object co_soapheader(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapheader)())->dynCreate(params, init));
@@ -9235,7 +9221,6 @@ struct ObjectStaticCallbacks cw_soapheader = {
   c_soapheader::os_lval,
   c_soapheader::os_invoke,
   c_soapheader::os_constant,
-  c_soapheader::doCallStatic
 };
 Object co_domnotation(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domnotation)())->dynCreate(params, init));
@@ -10074,7 +10059,6 @@ struct ObjectStaticCallbacks cw_domnotation = {
   c_domnotation::os_lval,
   c_domnotation::os_invoke,
   c_domnotation::os_constant,
-  c_domnotation::doCallStatic
 };
 Object co_domcomment(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domcomment)())->dynCreate(params, init));
@@ -11088,7 +11072,6 @@ struct ObjectStaticCallbacks cw_domcomment = {
   c_domcomment::os_lval,
   c_domcomment::os_invoke,
   c_domcomment::os_constant,
-  c_domcomment::doCallStatic
 };
 Object co_sqlite3(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_sqlite3)())->dynCreate(params, init));
@@ -11836,7 +11819,6 @@ struct ObjectStaticCallbacks cw_sqlite3 = {
   c_sqlite3::os_lval,
   c_sqlite3::os_invoke,
   c_sqlite3::os_constant,
-  c_sqlite3::doCallStatic
 };
 Object co_domattr(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domattr)())->dynCreate(params, init));
@@ -12717,7 +12699,6 @@ struct ObjectStaticCallbacks cw_domattr = {
   c_domattr::os_lval,
   c_domattr::os_invoke,
   c_domattr::os_constant,
-  c_domattr::doCallStatic
 };
 Object co_soapvar(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapvar)())->dynCreate(params, init));
@@ -13019,7 +13000,6 @@ struct ObjectStaticCallbacks cw_soapvar = {
   c_soapvar::os_lval,
   c_soapvar::os_invoke,
   c_soapvar::os_constant,
-  c_soapvar::doCallStatic
 };
 Object co_domnamednodemap(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domnamednodemap)())->dynCreate(params, init));
@@ -13430,7 +13410,6 @@ struct ObjectStaticCallbacks cw_domnamednodemap = {
   c_domnamednodemap::os_lval,
   c_domnamednodemap::os_invoke,
   c_domnamednodemap::os_constant,
-  c_domnamednodemap::doCallStatic
 };
 Object co_sqlite3result(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_sqlite3result)())->dynCreate(params, init));
@@ -13837,7 +13816,6 @@ struct ObjectStaticCallbacks cw_sqlite3result = {
   c_sqlite3result::os_lval,
   c_sqlite3result::os_invoke,
   c_sqlite3result::os_constant,
-  c_sqlite3result::doCallStatic
 };
 Object co_simplexmlelement(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_simplexmlelement)())->dynCreate(params, init));
@@ -14781,7 +14759,6 @@ struct ObjectStaticCallbacks cw_simplexmlelement = {
   c_simplexmlelement::os_lval,
   c_simplexmlelement::os_invoke,
   c_simplexmlelement::os_constant,
-  c_simplexmlelement::doCallStatic
 };
 Object co_domprocessinginstruction(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domprocessinginstruction)())->dynCreate(params, init));
@@ -15642,7 +15619,6 @@ struct ObjectStaticCallbacks cw_domprocessinginstruction = {
   c_domprocessinginstruction::os_lval,
   c_domprocessinginstruction::os_invoke,
   c_domprocessinginstruction::os_constant,
-  c_domprocessinginstruction::doCallStatic
 };
 Object co_pdostatement(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_pdostatement)())->dynCreate(params, init));
@@ -16585,7 +16561,6 @@ struct ObjectStaticCallbacks cw_pdostatement = {
   c_pdostatement::os_lval,
   c_pdostatement::os_invoke,
   c_pdostatement::os_constant,
-  c_pdostatement::doCallStatic
 };
 Object co_soapclient(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapclient)())->dynCreate(params, init));
@@ -17219,7 +17194,6 @@ struct ObjectStaticCallbacks cw_soapclient = {
   c_soapclient::os_lval,
   c_soapclient::os_invoke,
   c_soapclient::os_constant,
-  c_soapclient::doCallStatic
 };
 Object co_soapparam(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapparam)())->dynCreate(params, init));
@@ -17465,7 +17439,6 @@ struct ObjectStaticCallbacks cw_soapparam = {
   c_soapparam::os_lval,
   c_soapparam::os_invoke,
   c_soapparam::os_constant,
-  c_soapparam::doCallStatic
 };
 Object co_datetime(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_datetime)())->dynCreate(params, init));
@@ -18015,7 +17988,6 @@ struct ObjectStaticCallbacks cw_datetime = {
   c_datetime::os_lval,
   c_datetime::os_invoke,
   c_datetime::os_constant,
-  c_datetime::doCallStatic
 };
 Object co_pdo(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_pdo)())->dynCreate(params, init));
@@ -18992,7 +18964,6 @@ struct ObjectStaticCallbacks cw_pdo = {
   c_pdo::os_lval,
   c_pdo::os_invoke,
   c_pdo::os_constant,
-  c_pdo::doCallStatic
 };
 Object co_domentity(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domentity)())->dynCreate(params, init));
@@ -19831,7 +19802,6 @@ struct ObjectStaticCallbacks cw_domentity = {
   c_domentity::os_lval,
   c_domentity::os_invoke,
   c_domentity::os_constant,
-  c_domentity::doCallStatic
 };
 Object co_xmlwriter(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_xmlwriter)())->dynCreate(params, init));
@@ -21413,7 +21383,6 @@ struct ObjectStaticCallbacks cw_xmlwriter = {
   c_xmlwriter::os_lval,
   c_xmlwriter::os_invoke,
   c_xmlwriter::os_constant,
-  c_xmlwriter::doCallStatic
 };
 Object co_domexception(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domexception)())->dynCreate(params, init));
@@ -21879,7 +21848,6 @@ struct ObjectStaticCallbacks cw_domexception = {
   c_domexception::os_lval,
   c_domexception::os_invoke,
   c_domexception::os_constant,
-  c_domexception::doCallStatic
 };
 Object co_domxpath(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domxpath)())->dynCreate(params, init));
@@ -22319,7 +22287,6 @@ struct ObjectStaticCallbacks cw_domxpath = {
   c_domxpath::os_lval,
   c_domxpath::os_invoke,
   c_domxpath::os_constant,
-  c_domxpath::doCallStatic
 };
 Object co_soapserver(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapserver)())->dynCreate(params, init));
@@ -22845,7 +22812,6 @@ struct ObjectStaticCallbacks cw_soapserver = {
   c_soapserver::os_lval,
   c_soapserver::os_invoke,
   c_soapserver::os_constant,
-  c_soapserver::doCallStatic
 };
 Object co_domnode(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domnode)())->dynCreate(params, init));
@@ -23684,7 +23650,6 @@ struct ObjectStaticCallbacks cw_domnode = {
   c_domnode::os_lval,
   c_domnode::os_invoke,
   c_domnode::os_constant,
-  c_domnode::doCallStatic
 };
 Object co_domdocument(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domdocument)())->dynCreate(params, init));
@@ -25471,7 +25436,6 @@ struct ObjectStaticCallbacks cw_domdocument = {
   c_domdocument::os_lval,
   c_domdocument::os_invoke,
   c_domdocument::os_constant,
-  c_domdocument::doCallStatic
 };
 Object co_libxmlerror(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_libxmlerror)())->dynCreate(params, init));
@@ -25701,7 +25665,6 @@ struct ObjectStaticCallbacks cw_libxmlerror = {
   c_libxmlerror::os_lval,
   c_libxmlerror::os_invoke,
   c_libxmlerror::os_constant,
-  c_libxmlerror::doCallStatic
 };
 Object co_soapfault(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_soapfault)())->dynCreate(params, init));
@@ -26211,7 +26174,6 @@ struct ObjectStaticCallbacks cw_soapfault = {
   c_soapfault::os_lval,
   c_soapfault::os_invoke,
   c_soapfault::os_constant,
-  c_soapfault::doCallStatic
 };
 Object co_domelement(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domelement)())->dynCreate(params, init));
@@ -27662,7 +27624,6 @@ struct ObjectStaticCallbacks cw_domelement = {
   c_domelement::os_lval,
   c_domelement::os_invoke,
   c_domelement::os_constant,
-  c_domelement::doCallStatic
 };
 Variant get_builtin_class_var_init(const char *s, const char *var) {
   DECLARE_SYSTEM_GLOBALS(g);

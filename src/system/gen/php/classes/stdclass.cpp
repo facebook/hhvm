@@ -148,7 +148,6 @@ struct ObjectStaticCallbacks cw_stdclass = {
   c_stdclass::os_lval,
   c_stdclass::os_invoke,
   c_stdclass::os_constant,
-  c_stdclass::doCallStatic
 };
 void c_stdclass::init() {
 }
@@ -276,7 +275,6 @@ struct ObjectStaticCallbacks cw___php_incomplete_class = {
   c___php_incomplete_class::os_lval,
   c___php_incomplete_class::os_invoke,
   c___php_incomplete_class::os_constant,
-  c___php_incomplete_class::doCallStatic
 };
 void c___php_incomplete_class::init() {
 }

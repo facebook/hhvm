@@ -1823,7 +1823,6 @@ struct ObjectStaticCallbacks cw_splfileobject = {
   c_splfileobject::os_lval,
   c_splfileobject::os_invoke,
   c_splfileobject::os_constant,
-  c_splfileobject::doCallStatic
 };
 void c_splfileobject::init() {
   c_splfileinfo::init();
@@ -2926,7 +2925,6 @@ struct ObjectStaticCallbacks cw_splfileinfo = {
   c_splfileinfo::os_lval,
   c_splfileinfo::os_invoke,
   c_splfileinfo::os_constant,
-  c_splfileinfo::doCallStatic
 };
 void c_splfileinfo::init() {
 }

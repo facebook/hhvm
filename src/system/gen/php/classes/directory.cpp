@@ -360,7 +360,6 @@ struct ObjectStaticCallbacks cw_directory = {
   c_directory::os_lval,
   c_directory::os_invoke,
   c_directory::os_constant,
-  c_directory::doCallStatic
 };
 void c_directory::init() {
   m_path = null;

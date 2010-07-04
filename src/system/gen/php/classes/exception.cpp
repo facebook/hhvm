@@ -411,7 +411,6 @@ struct ObjectStaticCallbacks cw_unexpectedvalueexception = {
   c_unexpectedvalueexception::os_lval,
   c_unexpectedvalueexception::os_invoke,
   c_unexpectedvalueexception::os_constant,
-  c_unexpectedvalueexception::doCallStatic
 };
 void c_unexpectedvalueexception::init() {
   c_runtimeexception::init();
@@ -803,7 +802,6 @@ struct ObjectStaticCallbacks cw_overflowexception = {
   c_overflowexception::os_lval,
   c_overflowexception::os_invoke,
   c_overflowexception::os_constant,
-  c_overflowexception::doCallStatic
 };
 void c_overflowexception::init() {
   c_runtimeexception::init();
@@ -1195,7 +1193,6 @@ struct ObjectStaticCallbacks cw_outofboundsexception = {
   c_outofboundsexception::os_lval,
   c_outofboundsexception::os_invoke,
   c_outofboundsexception::os_constant,
-  c_outofboundsexception::doCallStatic
 };
 void c_outofboundsexception::init() {
   c_runtimeexception::init();
@@ -1587,7 +1584,6 @@ struct ObjectStaticCallbacks cw_logicexception = {
   c_logicexception::os_lval,
   c_logicexception::os_invoke,
   c_logicexception::os_constant,
-  c_logicexception::doCallStatic
 };
 void c_logicexception::init() {
   c_exception::init();
@@ -1979,7 +1975,6 @@ struct ObjectStaticCallbacks cw_rangeexception = {
   c_rangeexception::os_lval,
   c_rangeexception::os_invoke,
   c_rangeexception::os_constant,
-  c_rangeexception::doCallStatic
 };
 void c_rangeexception::init() {
   c_runtimeexception::init();
@@ -2371,7 +2366,6 @@ struct ObjectStaticCallbacks cw_invalidargumentexception = {
   c_invalidargumentexception::os_lval,
   c_invalidargumentexception::os_invoke,
   c_invalidargumentexception::os_constant,
-  c_invalidargumentexception::doCallStatic
 };
 void c_invalidargumentexception::init() {
   c_logicexception::init();
@@ -2763,7 +2757,6 @@ struct ObjectStaticCallbacks cw_underflowexception = {
   c_underflowexception::os_lval,
   c_underflowexception::os_invoke,
   c_underflowexception::os_constant,
-  c_underflowexception::doCallStatic
 };
 void c_underflowexception::init() {
   c_runtimeexception::init();
@@ -3155,7 +3148,6 @@ struct ObjectStaticCallbacks cw_outofrangeexception = {
   c_outofrangeexception::os_lval,
   c_outofrangeexception::os_invoke,
   c_outofrangeexception::os_constant,
-  c_outofrangeexception::doCallStatic
 };
 void c_outofrangeexception::init() {
   c_logicexception::init();
@@ -3547,7 +3539,6 @@ struct ObjectStaticCallbacks cw_badmethodcallexception = {
   c_badmethodcallexception::os_lval,
   c_badmethodcallexception::os_invoke,
   c_badmethodcallexception::os_constant,
-  c_badmethodcallexception::doCallStatic
 };
 void c_badmethodcallexception::init() {
   c_badfunctioncallexception::init();
@@ -3939,7 +3930,6 @@ struct ObjectStaticCallbacks cw_runtimeexception = {
   c_runtimeexception::os_lval,
   c_runtimeexception::os_invoke,
   c_runtimeexception::os_constant,
-  c_runtimeexception::doCallStatic
 };
 void c_runtimeexception::init() {
   c_exception::init();
@@ -4501,7 +4491,6 @@ struct ObjectStaticCallbacks cw_exception = {
   c_exception::os_lval,
   c_exception::os_invoke,
   c_exception::os_constant,
-  c_exception::doCallStatic
 };
 void c_exception::init() {
   m_message = "";
@@ -5201,7 +5190,6 @@ struct ObjectStaticCallbacks cw_errorexception = {
   c_errorexception::os_lval,
   c_errorexception::os_invoke,
   c_errorexception::os_constant,
-  c_errorexception::doCallStatic
 };
 void c_errorexception::init() {
   c_exception::init();
@@ -5622,7 +5610,6 @@ struct ObjectStaticCallbacks cw_badfunctioncallexception = {
   c_badfunctioncallexception::os_lval,
   c_badfunctioncallexception::os_invoke,
   c_badfunctioncallexception::os_constant,
-  c_badfunctioncallexception::doCallStatic
 };
 void c_badfunctioncallexception::init() {
   c_logicexception::init();
@@ -6014,7 +6001,6 @@ struct ObjectStaticCallbacks cw_lengthexception = {
   c_lengthexception::os_lval,
   c_lengthexception::os_invoke,
   c_lengthexception::os_constant,
-  c_lengthexception::doCallStatic
 };
 void c_lengthexception::init() {
   c_logicexception::init();
@@ -6406,7 +6392,6 @@ struct ObjectStaticCallbacks cw_domainexception = {
   c_domainexception::os_lval,
   c_domainexception::os_invoke,
   c_domainexception::os_constant,
-  c_domainexception::doCallStatic
 };
 void c_domainexception::init() {
   c_logicexception::init();

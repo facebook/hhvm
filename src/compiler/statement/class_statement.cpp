@@ -555,18 +555,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("Variant doCall(Variant v_name, Variant v_arguments, "
                   "bool fatal);\n");
       }
-
-      // doCallStatic
-      ClassScopePtr classScope =
-        dynamic_pointer_cast<ClassScope>(ar->getScope());
-
-      ClassScopePtr csparent = classScope->getParentScope(ar);
-      if(classScope->getAttribute(ClassScope::HasUnknownStaticMethodHandler)
-          || (csparent && csparent->isRedeclaring())) {
-        cg_printf("static Variant doCallStatic(Variant v_name,"
-                                              "Variant v_arguments);\n");
-      }
-
       // doGet
       if (classScope->getAttribute(ClassScope::HasUnknownPropHandler)) {
         cg_printf("Variant doGet(Variant v_name, bool error);\n");
@@ -646,11 +634,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                   "fatal);\n",
                   Option::ClassPrefix, clsName,
                   Option::ObjectStaticPrefix);
-        cg_indentEnd("}\n");
-        cg_indentBegin("Variant doCallStatic(Variant v_name,"
-                                            "Variant v_arguments) {\n");
-        cg_printf("return %s%s::doCallStatic(v_name, v_arguments);\n",
-            Option::ClassPrefix, clsName);
         cg_indentEnd("}\n");
         cg_indentEnd("};\n");
       }

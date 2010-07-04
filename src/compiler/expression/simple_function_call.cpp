@@ -776,12 +776,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
           (clsThis->getName() != m_className &&
            !clsThis->derivesFrom(ar, m_className, true, false)) ||
           funcThis->isStatic()) {
-        // set the method static to avoid "unknown method" runtime exception
-        if (Option::StaticMethodAutoFix && !func->containsThis()) {
-          func->setStaticMethodAutoFixed();
-        } else {
-          func->setDynamic();
-        }
+        func->setDynamic();
         if (ar->isFirstPass()) {
           ar->getCodeError()->record(self, CodeError::MissingObjectContext,
                                      self);

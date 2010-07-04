@@ -477,7 +477,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
   reset();
 
   if (m_class) {
-    m_class->inferAndCheck(ar, Type::String, false);
+    m_class->inferAndCheck(ar, NEW_TYPE(Any), false);
   }
 
   ConstructPtr self = shared_from_this();
@@ -822,7 +822,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         }
       } else {
         if (m_class) {
-          cg_printf("INVOKE_STATIC_METHOD(toString(");
+          cg_printf("INVOKE_STATIC_METHOD(get_static_class_name(");
           if (m_class->is(KindOfScalarExpression)) {
             ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
                               getString().c_str(), "static") == 0);

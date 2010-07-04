@@ -168,7 +168,7 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
   ConstructPtr self = shared_from_this();
 
   if (m_class) {
-    m_class->inferAndCheck(ar, Type::String, false);
+    m_class->inferAndCheck(ar, NEW_TYPE(Any), false);
     return Type::Variant;
   }
 
@@ -246,7 +246,7 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
                         getString().c_str(), "static") == 0);
       cg_printf("FrameInjection::GetStaticClassName(info).data()");
     } else {
-      cg_printf("toString(");
+      cg_printf("get_static_class_name(");
       m_class->outputCPP(cg, ar);
       cg_printf(").data()");
     }

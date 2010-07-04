@@ -97,7 +97,7 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
     ar->getCodeError()->record(self, CodeError::UseDynamicFunction, self);
   }
   if (m_class) {
-    m_class->inferAndCheck(ar, Type::String, false);
+    m_class->inferAndCheck(ar, NEW_TYPE(Any), false);
   }
   m_nameExp->inferAndCheck(ar, Type::String, false);
   if (m_params) {
@@ -146,7 +146,7 @@ void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
   bool linemap = outputLineMap(cg, ar, true);
   if (m_class || !m_className.empty()) {
     if (m_class) {
-      cg_printf("INVOKE_STATIC_METHOD(toString(");
+      cg_printf("INVOKE_STATIC_METHOD(get_static_class_name(");
       if (m_class->is(KindOfScalarExpression)) {
         ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
                           getString().c_str(), "static") == 0);

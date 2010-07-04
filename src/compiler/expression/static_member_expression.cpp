@@ -135,7 +135,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
     if (m_context & (LValue | RefValue)) {
       ar->forceClassVariants();
     }
-    m_class->inferAndCheck(ar, Type::String, false);
+    m_class->inferAndCheck(ar, NEW_TYPE(Any), false);
     m_exp->inferAndCheck(ar, Type::String, false);
     return Type::Variant;
   }
@@ -274,7 +274,7 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
                         getString().c_str(), "static") == 0);
       cg_printf("FrameInjection::GetStaticClassName(info).data()");
     } else {
-      cg_printf("toString(");
+      cg_printf("get_static_class_name(");
       m_class->outputCPP(cg, ar);
       cg_printf(").data()");
     }

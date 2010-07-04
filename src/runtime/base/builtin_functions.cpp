@@ -63,6 +63,17 @@ bool class_exists(CStrRef class_name, bool autoload /* = true */) {
       CREATE_VECTOR2(class_name, autoload));
 }
 
+String get_static_class_name(CVarRef objOrClassName) {
+  if (objOrClassName.isString()) {
+    return objOrClassName.toString();
+  }
+  if (objOrClassName.isObject()) {
+    return objOrClassName.toObject()->o_getClassName();
+  }
+  raise_error("Class name must be a valid object or a string");
+  return "";
+}
+
 Variant getDynamicConstant(CVarRef v, CStrRef name) {
   if (isInitialized(v)) return v;
   raise_notice("Use of undefined constant %s -- assumed '%s'.",

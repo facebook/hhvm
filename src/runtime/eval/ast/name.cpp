@@ -79,7 +79,7 @@ ExprName::ExprName(CONSTRUCT_ARGS, ExpressionPtr name)
   : Name(CONSTRUCT_PASS), m_name(name) {}
 
 String ExprName::get(VariableEnvironment &env) const {
-  return m_name->eval(env).toString();
+  return get_static_class_name(m_name->eval(env));
 }
 
 void ExprName::dump() const {

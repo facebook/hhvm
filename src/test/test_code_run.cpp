@@ -11932,6 +11932,21 @@ bool TestCodeRun::TestLateStaticBinding() {
        "var_dump(X::bar());"
        "var_dump(gettype(X::baz()));");
 
+  MVCRO("<?php\n"
+        "class X {\n"
+        "  static function foo() { echo \"X::foo\n\"; }\n"
+        "  function bar() { $this::foo(); }\n"
+        "}\n"
+        "class Y extends X {\n"
+        "  static function foo() { echo \"Y::foo\n\"; }\n"
+        "  function baz() { X::bar(); }\n"
+        "}\n"
+        "$y = new Y;\n"
+        "$y->baz();\n",
+
+        "Y::foo\n"
+       );
+
   return true;
 }
 

@@ -342,6 +342,9 @@ Variant invoke_from_eval(const char *function, VariableEnvironment &env,
 }
 }
 
+const ObjectStaticCallbacks * get_object_static_callbacks(const char *s) {
+    return NULL;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

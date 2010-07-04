@@ -1066,7 +1066,6 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   case '%':                   cg_printf("modulo");        break;
   case T_INSTANCEOF:          cg_printf("instanceOf");    break;
   default:
-    wrapped = false;
     break;
   }
 

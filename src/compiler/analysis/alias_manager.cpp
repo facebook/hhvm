@@ -422,7 +422,11 @@ int AliasManager::findInterf(ExpressionPtr rv, bool isLoad,
     case Expression::KindOfDynamicFunctionCall:
     case Expression::KindOfSimpleFunctionCall:
     case Expression::KindOfNewObjectExpression:
-      return testAccesses(rv, e);
+      a = testAccesses(rv, e);
+      if (a == DisjointAccess) {
+        continue;
+      }
+      return a;
 
     case Expression::KindOfListAssignment: {
       ListAssignmentPtr la = spc(ListAssignment, e);
@@ -560,17 +564,51 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
       default:
         break;
       case Expression::KindOfAssignmentExpression:
-        {
+        if (Option::EliminateDeadCode) {
           AssignmentExpressionPtr a = spc(AssignmentExpression, rep);
           ExpressionPtr value = a->getValue();
-          if (a->getValue()->getContext() & Expression::RefValue) {
+          if (value->getContext() & Expression::RefValue) {
             break;
           }
+          if (!Expression::CheckNeeded(m_arp, a->getVariable(), value)) {
+            rep->setContext(Expression::DeadStore);
+          }
         }
-      case Expression::KindOfUnaryOpExpression:
+        break;
       case Expression::KindOfBinaryOpExpression:
         if (Option::EliminateDeadCode) {
-          rep->setContext(Expression::DeadStore);
+          BinaryOpExpressionPtr b = spc(BinaryOpExpression, rep);
+          bool ok = b->getType() && b->getType()->isNoObjectInvolved();
+          if (!ok) {
+            switch (b->getOp()) {
+            case T_PLUS_EQUAL:
+              // could be Array
+              break;
+            case T_MINUS_EQUAL:
+            case T_MUL_EQUAL:
+            case T_DIV_EQUAL:
+            case T_CONCAT_EQUAL:
+            case T_MOD_EQUAL:
+            case T_AND_EQUAL:
+            case T_OR_EQUAL:
+            case T_XOR_EQUAL:
+            case T_SL_EQUAL:
+            case T_SR_EQUAL:
+              ok = true;
+              break;
+            }
+          }
+          if (ok) {
+            rep->setContext(Expression::DeadStore);
+          }
+        }
+        break;
+      case Expression::KindOfUnaryOpExpression:
+        if (Option::EliminateDeadCode) {
+          UnaryOpExpressionPtr u = spc(UnaryOpExpression, rep);
+          if (u->getType() && u->getType()->isNoObjectInvolved()) {
+            rep->setContext(Expression::DeadStore);
+          }
         }
         break;
       }
@@ -603,8 +641,9 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
             return ExpressionPtr();
           }
           if (rep->getKindOf() == Expression::KindOfAssignmentExpression) {
-            ExpressionPtr rhs = spc(AssignmentExpression,rep)->getValue();
-            if (rhs->is(Expression::KindOfScalarExpression)) {
+            AssignmentExpressionPtr ae = spc(AssignmentExpression,rep);
+            ExpressionPtr rhs = ae->getValue();
+            if (rhs->isScalar()) {
               rhs = rhs->clone();
               getCanonical(rhs);
               return rhs;
@@ -644,7 +683,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
         if (interf == SameAccess &&
             alt->is(Expression::KindOfAssignmentExpression)) {
           ExpressionPtr op0 = spc(AssignmentExpression,alt)->getValue();
-          if (op0->is(Expression::KindOfScalarExpression)) {
+          if (op0->isScalar()) {
             ExpressionPtr op1 = bop->getExp2();
             ExpressionPtr rhs
               (new BinaryOpExpression(e->getLocation(),

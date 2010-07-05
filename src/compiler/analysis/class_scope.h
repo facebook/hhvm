@@ -105,6 +105,14 @@ public:
   std::string getHeaderFilename(CodeGenerator &cg);
 
   /**
+   * Returns topmost parent class that has the method.
+   */
+  ClassScopePtr getRootParent(AnalysisResultPtr ar,
+                              const std::string &methodName = "");
+  void getRootParents(AnalysisResultPtr ar, const std::string &methodName,
+                      ClassScopePtrVec &roots, ClassScopePtr curClass);
+
+  /**
    * Whether this is a user-defined class.
    */
   bool isUserClass() const { return !getAttribute(System);}

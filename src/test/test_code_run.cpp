@@ -376,6 +376,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestExceptions);
   RUN_TEST(TestPredefined);
   RUN_TEST(TestLabels);
+  RUN_TEST(TestPerfectVirtual);
   RUN_TEST(TestBoolean);
   RUN_TEST(TestInteger);
   RUN_TEST(TestDouble);
@@ -861,6 +862,45 @@ bool TestCodeRun::TestLabels() {
        "class modalit\xe9 { static function odalit\xe9() { var_dump(123);} } "
        "modalit\xe9::odalit\xe9();");
 
+  return true;
+}
+
+bool TestCodeRun::TestPerfectVirtual() {
+  MVCR("<?php "
+       "class A { function foo() { var_dump(__CLASS__);}} "
+       "class B extends A { function foo() { var_dump(__CLASS__);}} "
+       "function bar() { "
+       "  $obj = new A; $obj->foo();"
+       "  $obj = new B; $obj->foo();"
+       "} bar();"
+      );
+  MVCR("<?php "
+       "class A { function foo($a = 123) { var_dump(__CLASS__);}} "
+       "class B extends A { function foo($b = 123) { var_dump(__CLASS__);}} "
+       "function bar() { "
+       "  $obj = new A; $obj->foo();"
+       "  $obj = new B; $obj->foo();"
+       "} bar();"
+      );
+  MVCR("<?php "
+       "class A { function foo() { "
+       "$args = func_get_args(); var_dump(__CLASS__, $args);}} "
+       "class B extends A { function foo() { "
+       "$args = func_get_args(); var_dump(__CLASS__, $args);}} "
+       "function bar() { "
+       "  $obj = new A; $obj->foo(123);"
+       "  $obj = new B; $obj->foo(123, 456);"
+       "} bar();"
+      );
+  MVCR("<?php "
+       "class A { const X=1; function foo($a = self::X) { var_dump($a);}} "
+       "class B extends A { const X=2; function foo($b = self::X) {"
+       " var_dump($b);}} "
+       "function bar() { "
+       "  $obj = new A; $obj->foo();"
+       "  $obj = new B; $obj->foo();"
+       "} bar();"
+      );
   return true;
 }
 
@@ -4330,6 +4370,7 @@ bool TestCodeRun::TestReference() {
         "$w = 3;"
         "foo(&$u, &$v, $w);"
         "var_dump($u, $v, $w);");
+
   // reference self assignment
   MVCR("<?php "
        "class A {"

@@ -32,6 +32,7 @@ protected:
   std::string m_className;
 
   void updateClassName();
+  void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

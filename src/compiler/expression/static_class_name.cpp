@@ -16,6 +16,7 @@
 
 #include <compiler/expression/static_class_name.h>
 #include <compiler/expression/scalar_expression.h>
+#include <compiler/analysis/class_scope.h>
 #include <util/util.h>
 
 using namespace std;
@@ -40,6 +41,23 @@ void StaticClassName::updateClassName() {
       m_origClassName = className;
       m_class.reset();
     }
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void StaticClassName::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+  if (m_class) {
+    m_class->outputPHP(cg, ar);
+  } else {
+    if (ar && cg.getOutput() == CodeGenerator::PickledPHP) {
+      ClassScopePtr cls = ar->resolveClass(m_className);
+      if (cls) {
+        cg_printf("%s", cls->getName().c_str());
+        return;
+      }
+    }
+    cg_printf("%s", m_className.c_str());
   }
 }
 

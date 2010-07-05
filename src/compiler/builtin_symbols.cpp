@@ -384,7 +384,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
         Logger::Error("Unable to open file %s", fileName);
       }
     }
-    ar->analyzeProgram();
+    ar->analyzeProgram(true);
     ar->inferTypes();
     const StringToFileScopePtrMap &files = ar->getAllFiles();
     for (StringToFileScopePtrMap::const_iterator iterFile = files.begin();
@@ -459,7 +459,7 @@ AnalysisResultPtr BuiltinSymbols::LoadGlobalSymbols(const char *fileName) {
   } catch (std::runtime_error) {
     Logger::Error("Unable to open file %s", fileName);
   }
-  ar->analyzeProgram();
+  ar->analyzeProgram(true);
   ar->inferTypes();
   return ar;
 }

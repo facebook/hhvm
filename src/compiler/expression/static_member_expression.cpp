@@ -224,11 +224,7 @@ bool StaticMemberExpression::canonCompare(ExpressionPtr e) const {
 
 void StaticMemberExpression::outputPHP(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
-  if (m_class) {
-    m_class->outputPHP(cg, ar);
-  } else {
-    cg_printf("%s", m_className.c_str());
-  }
+  StaticClassName::outputPHP(cg, ar);
 
   cg_printf("::$");
   bool needsClose = false;

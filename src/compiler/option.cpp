@@ -138,6 +138,7 @@ int Option::ScalarArrayOverflowLimit = 2000;
 bool Option::SeparateCompilation = false;
 bool Option::SeparateCompLib = false;
 int Option::LiteralStringFileCount = 50;
+bool Option::AnalyzePerfectVirtuals = true;
 
 std::string Option::RTTIOutputFile;
 std::string Option::RTTIDirectory;

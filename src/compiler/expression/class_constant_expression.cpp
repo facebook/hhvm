@@ -229,12 +229,8 @@ bool ClassConstantExpression::canonCompare(ExpressionPtr e) const {
 
 void ClassConstantExpression::outputPHP(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
-  if (m_class) {
-    m_class->outputPHP(cg, ar);
-    cg_printf("::%s", m_varName.c_str());
-  } else {
-    cg_printf("%s::%s", m_className.c_str(), m_varName.c_str());
-  }
+  StaticClassName::outputPHP(cg, ar);
+  cg_printf("::%s", m_varName.c_str());
 }
 
 void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,

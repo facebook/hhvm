@@ -462,13 +462,14 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   switch (cg.getContext()) {
   case CodeGenerator::CppDeclaration:
     {
-      if (!m_stmt && !Option::UseVirtualDispatch) {
+      if (!m_stmt && !funcScope->isPerfectVirtual()) {
         cg_printf("// ");
       }
 
       m_modifiers->outputCPP(cg, ar);
 
-      if (!m_stmt || m_name == "__offsetget_lval") {
+      if (!m_stmt || m_name == "__offsetget_lval" ||
+          funcScope->isPerfectVirtual()) {
         cg_printf("virtual ");
       }
       TypePtr type = funcScope->getReturnType();
@@ -494,6 +495,8 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
       if (m_stmt) {
         cg_printf(");\n");
+      } else if (funcScope->isPerfectVirtual()) {
+        cg_printf(") { return throw_fatal(\"pure virtual\");}\n");
       } else {
         cg_printf(") = 0;\n");
       }

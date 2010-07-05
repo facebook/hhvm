@@ -89,7 +89,6 @@ public:
 
 public:
   AnalysisResult();
-  AnalysisResult(FileScopePtr file);
 
   void setPackage(Package *package) { m_package = package;}
   void setParseOnDemand(bool v) { m_parseOnDemand = v;}
@@ -129,8 +128,9 @@ public:
 
   void loadBuiltinFunctions();
   void loadBuiltins();
-  void analyzeProgram();
+  void analyzeProgram(bool system = false);
   void analyzeProgramFinal();
+  void analyzePerfectVirtuals();
   void inferTypes(int maxPass = 100);
   void dump();
   void visitFiles(void (*cb)(AnalysisResultPtr, StatementPtr, void*),
@@ -264,7 +264,8 @@ public:
    */
   bool declareFunction(FunctionScopePtr funcScope);
   bool declareClass(ClassScopePtr classScope);
-  bool declareConst(FileScopePtr fs, const std::string& name);
+  void declareUnknownClass(const std::string &name);
+  bool declareConst(FileScopePtr fs, const std::string &name);
 
   /**
    * Dependencies

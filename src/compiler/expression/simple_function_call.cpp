@@ -840,12 +840,8 @@ void SimpleFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   outputLineMap(cg, ar);
 
   if (m_class || !m_className.empty()) {
-    if (m_class) {
-      m_class->outputPHP(cg, ar);
-      cg_printf("::%s(", m_name.c_str());
-    } else {
-      cg_printf("%s::%s(", m_className.c_str(), m_name.c_str());
-    }
+    StaticClassName::outputPHP(cg, ar);
+    cg_printf("::%s(", m_name.c_str());
   } else {
 
     if (cg.getOutput() == CodeGenerator::InlinedPHP ||

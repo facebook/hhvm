@@ -111,6 +111,7 @@ public:
   static int ScalarArrayOverflowLimit;
   static int LiteralStringFileCount;
   static bool LiteralStringCompression;
+  static bool AnalyzePerfectVirtuals;
 
   /**
    * RTTI profiling metadata output file

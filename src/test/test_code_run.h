@@ -59,6 +59,7 @@ class TestCodeRun : public TestBase {
   bool TestExceptions();
   bool TestPredefined();
   bool TestLabels();
+  bool TestPerfectVirtual();
 
   // test types
   bool TestBoolean();

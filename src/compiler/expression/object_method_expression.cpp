@@ -257,7 +257,8 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
   }
 
   // invoke() will return Variant
-  if (func->isVirtual() || !m_object->getType()->isSpecificObject()) {
+  if (!m_object->getType()->isSpecificObject() ||
+      (func->isVirtual() && !func->isPerfectVirtual())) {
     valid = false;
   }
 

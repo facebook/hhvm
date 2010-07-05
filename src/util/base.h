@@ -132,6 +132,7 @@ class hphp_string_map :
     public hphp_hash_map<std::string, T, string_hash> {
 };
 
+typedef hphp_hash_set<std::string, string_hash> hphp_string_set;
 typedef hphp_hash_set<const char *, hphp_hash<const char *>,
                       eqstr> hphp_const_char_set;
 

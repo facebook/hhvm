@@ -221,19 +221,20 @@ ClassScopePtr AnalysisResult::findClass(const std::string &name,
   AnalysisResultPtr ar = shared_from_this();
   if (by == PropertyName) return ClassScopePtr();
 
+  string lname = Util::toLower(name);
   if (by == MethodName) {
     StringToClassScopePtrVecMap::iterator iter =
-      m_methodToClassDecs.find(name);
+      m_methodToClassDecs.find(lname);
     if (iter != m_methodToClassDecs.end()) {
       if (iter->second.size() == 1) {
-        iter->second[0]->findFunction(ar, name, true)->setDynamic();
+        iter->second[0]->findFunction(ar, lname, true)->setDynamic();
         return ClassScopePtr();
       } else {
         // The call to findClass by method name means all these
         // same-named methods should be dynamic since there will
         // be an invoke to call one of them.
         BOOST_FOREACH(ClassScopePtr cls, iter->second) {
-          FunctionScopePtr func = cls->findFunction(ar, name, true);
+          FunctionScopePtr func = cls->findFunction(ar, lname, true);
           // Something fishy here
           if (func) {
             func->setDynamic();
@@ -244,10 +245,10 @@ ClassScopePtr AnalysisResult::findClass(const std::string &name,
     }
   } else {
     StringToClassScopePtrMap::const_iterator sysIter =
-      m_systemClasses.find(name);
+      m_systemClasses.find(lname);
     if (sysIter != m_systemClasses.end()) return sysIter->second;
 
-    StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.find(name);
+    StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.find(lname);
     if (iter != m_classDecs.end() && iter->second.size()) {
       return iter->second.back();
     }
@@ -256,7 +257,15 @@ ClassScopePtr AnalysisResult::findClass(const std::string &name,
 }
 
 const ClassScopePtrVec &AnalysisResult::findClasses(const std::string &name) {
-  return m_classDecs[name];
+  ASSERT(name == Util::toLower(name));
+
+  StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.find(name);
+  if (iter == m_classDecs.end()) {
+    static ClassScopePtrVec empty;
+    empty.clear();
+    return empty;
+  }
+  return iter->second;
 }
 
 bool AnalysisResult::classMemberExists(const std::string &name,
@@ -416,7 +425,12 @@ bool AnalysisResult::declareClass(ClassScopePtr classScope) {
   return true;
 }
 
-bool AnalysisResult::declareConst(FileScopePtr fs, const string& name) {
+void AnalysisResult::declareUnknownClass(const std::string &name) {
+  ASSERT(name == Util::toLower(name));
+  m_classDecs.operator[](name);
+}
+
+bool AnalysisResult::declareConst(FileScopePtr fs, const string &name) {
   if (getConstants()->isPresent(name) ||
       m_constDecs.find(name) != m_constDecs.end()) {
     m_constRedeclared.insert(name);
@@ -427,7 +441,8 @@ bool AnalysisResult::declareConst(FileScopePtr fs, const string& name) {
   }
 }
 
-////// Dependencies /////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// Dependencies
 
 void AnalysisResult::link(FileScopePtr user, FileScopePtr provider) {
   if (user != provider) {
@@ -516,7 +531,8 @@ void AnalysisResult::addCallee(StatementPtr stmt) {
   }
 }
 
-///// Program ////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// Program
 
 void AnalysisResult::loadBuiltinFunctions() {
   AnalysisResultPtr ar = shared_from_this();
@@ -534,7 +550,7 @@ void AnalysisResult::loadBuiltins() {
   BuiltinSymbols::LoadBaseSysRsrcClasses(ar, m_baseSysRsrcClasses);
 }
 
-void AnalysisResult::analyzeProgram() {
+void AnalysisResult::analyzeProgram(bool system /* = false */) {
   AnalysisResultPtr ar = shared_from_this();
 
   getVariables()->forceVariants(ar);
@@ -608,8 +624,89 @@ void AnalysisResult::analyzeProgram() {
       m_methodToClassDecs[iterMethod->first].push_back(cls);
     }
   }
+
+  // Analyze perfect virtuals
+  if (Option::AnalyzePerfectVirtuals && !system) {
+    analyzePerfectVirtuals();
+  }
 }
 
+static void addClassRootMethods(AnalysisResultPtr ar, ClassScopePtr cls,
+                                hphp_string_set &methods) {
+  const StringToFunctionScopePtrVecMap &funcs = cls->getFunctions();
+  for (StringToFunctionScopePtrVecMap::const_iterator iter =
+         funcs.begin(); iter != funcs.end(); ++iter) {
+    ClassScopePtrVec roots;
+    cls->getRootParents(ar, iter->first, roots, cls);
+    for (unsigned int i = 0; i < roots.size(); i++) {
+      methods.insert(roots[i]->getName() + "::" + iter->first);
+    }
+  }
+}
+
+static void addClassRootMethods(AnalysisResultPtr ar, ClassScopePtr cls,
+                                StringToFunctionScopePtrVecMap &methods) {
+  const StringToFunctionScopePtrVecMap &funcs = cls->getFunctions();
+  for (StringToFunctionScopePtrVecMap::const_iterator iter =
+         funcs.begin(); iter != funcs.end(); ++iter) {
+    ClassScopePtr root = cls->getRootParent(ar, iter->first);
+    string cluster = root->getName() + "::" + iter->first;
+    FunctionScopePtrVec &fs = methods[cluster];
+    fs.insert(fs.end(), iter->second.begin(), iter->second.end());
+  }
+}
+
+void AnalysisResult::analyzePerfectVirtuals() {
+  AnalysisResultPtr ar = shared_from_this();
+
+  StringToFunctionScopePtrVecMap methods;
+  hphp_string_set redeclaringMethods;
+  for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
+       iter != m_classDecs.end(); ++iter) {
+    for (unsigned int i = 0; i < iter->second.size(); i++) {
+      ClassScopePtr cls = iter->second[i];
+
+      // being conservative, not to do redeclaring classes at all
+      if (cls->derivesFromRedeclaring()) {
+        addClassRootMethods(ar, cls, redeclaringMethods);
+        continue;
+      }
+
+      // classes derived from system or extension classes can be complicated
+      ClassScopePtr root = cls->getRootParent(ar);
+      if (!root->isUserClass() || root->isExtensionClass()) continue;
+
+      // cluster virtual methods by a root parent that also defined the method
+      addClassRootMethods(ar, cls, methods);
+    }
+  }
+    // if ANY class in the hierarchy is a reclaring one, ignore
+  for (hphp_string_set::const_iterator iter = redeclaringMethods.begin();
+       iter != redeclaringMethods.end(); ++iter) {
+    methods.erase(*iter);
+  }
+  for (StringToFunctionScopePtrVecMap::const_iterator iter = methods.begin();
+       iter != methods.end(); ++iter) {
+    // if it's unique, ignore
+    const FunctionScopePtrVec &funcs = iter->second;
+    if (funcs.size() < 2) {
+      continue;
+    }
+
+    bool perfect = true;
+    for (unsigned int i = 1; i < funcs.size(); i++) {
+      if (!funcs[0]->matchParams(funcs[i])) {
+        perfect = false;
+        break;
+      }
+    }
+    if (perfect) {
+      for (unsigned int i = 0; i < funcs.size(); i++) {
+        funcs[i]->setPerfectVirtual();
+      }
+    }
+  }
+}
 
 void AnalysisResult::analyzeProgramFinal() {
   AnalysisResultPtr ar = shared_from_this();

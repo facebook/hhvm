@@ -51,8 +51,8 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
     : BlockScope(name, docComment, stmt, BlockScope::FunctionScope),
       m_method(method), m_file(file), m_minParam(0), m_maxParam(0),
       m_attribute(attribute), m_refReturn(reference), m_modifiers(modifiers),
-      m_virtual(false), m_overriding(false), m_redeclaring(-1),
-      m_volatile(false), m_pseudoMain(inPseudoMain),
+      m_virtual(false), m_perfectVirtual(false), m_overriding(false),
+      m_redeclaring(-1), m_volatile(false), m_pseudoMain(inPseudoMain),
       m_magicMethod(false), m_system(false), m_inlineable(false), m_sep(false),
       m_containsThis(false), m_callTempCountMax(0), m_callTempCountCurrent(0),
       m_nrvoFix(true), m_inlineAsExpr(false), m_inlineIndex(0) {
@@ -124,15 +124,15 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
 
 FunctionScope::FunctionScope(bool method, const std::string &name,
                              bool reference)
-  : BlockScope(name, "", StatementPtr(), BlockScope::FunctionScope),
-    m_method(method), m_minParam(0), m_maxParam(0),
-    m_attribute(0), m_refReturn(reference),
-    m_modifiers(ModifierExpressionPtr()),
-    m_virtual(false), m_overriding(false), m_redeclaring(-1),
-    m_volatile(false), m_pseudoMain(false), m_magicMethod(false),
-    m_system(true), m_inlineable(false), m_sep(false),
-    m_containsThis(false), m_callTempCountMax(0), m_callTempCountCurrent(0),
-    m_nrvoFix(true), m_inlineAsExpr(false), m_inlineIndex(0) {
+    : BlockScope(name, "", StatementPtr(), BlockScope::FunctionScope),
+      m_method(method), m_minParam(0), m_maxParam(0),
+      m_attribute(0), m_refReturn(reference),
+      m_modifiers(ModifierExpressionPtr()),
+      m_virtual(false), m_perfectVirtual(false), m_overriding(false),
+      m_redeclaring(-1), m_volatile(false), m_pseudoMain(false),
+      m_magicMethod(false), m_system(true), m_inlineable(false), m_sep(false),
+      m_containsThis(false), m_callTempCountMax(0), m_callTempCountCurrent(0),
+      m_nrvoFix(true), m_inlineAsExpr(false), m_inlineIndex(0) {
   m_dynamic = Option::IsDynamicFunction(method, m_name);
 }
 
@@ -145,6 +145,7 @@ void FunctionScope::setParamCounts(AnalysisResultPtr ar, int minParam,
     m_paramNames.resize(m_maxParam);
     m_paramTypes.resize(m_maxParam);
     m_paramTypeSpecs.resize(m_maxParam);
+    m_paramDefaults.resize(m_maxParam);
     m_refs.resize(m_maxParam);
 
     if (m_stmt) {
@@ -158,6 +159,10 @@ void FunctionScope::setParamCounts(AnalysisResultPtr ar, int minParam,
           dynamic_pointer_cast<ParameterExpression>((*params)[i]);
         m_paramNames[i] = param->getName();
         m_paramTypeSpecs[i] = param->getTypeSpec(ar);
+        ExpressionPtr exp = param->defaultValue();
+        if (exp) {
+          m_paramDefaults[i] = exp->getText(false, false, ar);
+        }
       }
     }
   }
@@ -267,6 +272,49 @@ std::string FunctionScope::getFullName() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+bool FunctionScope::matchParams(FunctionScopePtr func) {
+  // leaving them alone for now
+  if (m_overriding || func->m_overriding) return false;
+  if (isStatic() || func->isStatic()) return false;
+
+  // conservative here, as we could normalize them into same counts.
+  if (m_minParam != func->m_minParam || m_maxParam != func->m_maxParam) {
+    return false;
+  }
+  if (isVariableArgument() != func->isVariableArgument() ||
+      isReferenceVariableArgument() != func->isReferenceVariableArgument() ||
+      isMixedVariableArgument() != func->isMixedVariableArgument()) {
+    return false;
+  }
+
+  // needs perfect match for ref, hint and defaults
+  for (int i = 0; i < m_maxParam; i++) {
+    if (m_refs[i] != func->m_refs[i]) return false;
+
+    TypePtr type1 = m_paramTypeSpecs[i];
+    TypePtr type2 = func->m_paramTypeSpecs[i];
+    if ((type1 && !type2) || (!type1 && type2) ||
+        (type1 && type2 && !Type::SameType(type1, type2))) return false;
+
+    if (m_paramDefaults[i] != func->m_paramDefaults[i]) return false;
+  }
+
+  return true;
+}
+
+void FunctionScope::setPerfectVirtual() {
+  m_virtual = true;
+  m_perfectVirtual = true;
+
+  // conservative here, as we could still try to infer types THEN only
+  // force variants on non-matching parameters
+  m_returnType = Type::Variant;
+  for (unsigned int i = 0; i < m_paramTypes.size(); i++) {
+    m_paramTypes[i] = Type::Variant;
+    m_variables->addLvalParam(m_paramNames[i]);
+  }
+}
 
 int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
                                    ExpressionListPtr params, bool &valid) {
@@ -782,8 +830,12 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
   }
 
   stringstream callss;
-  callss << retrn << (m_refReturn ? "ref(" : "(") << funcPrefix <<
-    name << "(";
+  callss << retrn << (m_refReturn ? "ref(" : "(");
+  if (m_perfectVirtual) {
+    ClassScopePtr cls = ar->getClassScope();
+    callss << Option::ClassPrefix << cls->getId(cg) << "::";
+  }
+  callss << funcPrefix << name << "(";
   if (extraArg) {
     callss << extraArg;
     if (variable) {

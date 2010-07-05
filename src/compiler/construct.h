@@ -127,7 +127,8 @@ public:
   /**
    * Get canonicalized PHP source code for this construct.
    */
-  std::string getText(bool useCache = false, bool translate = false);
+  std::string getText(bool useCache = false, bool translate = false,
+                      AnalysisResultPtr ar = AnalysisResultPtr());
 
   void addHphpNote(const std::string &s);
   bool hasHphpNote(const std::string &s) const {

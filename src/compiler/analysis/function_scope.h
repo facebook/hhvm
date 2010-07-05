@@ -157,10 +157,16 @@ public:
   TypePtr getReturnType() const { return m_returnType;}
 
   /**
-   * Whether this is a virtual function.
+   * Whether this is a virtual function that needs to go through invoke().
+   * A perfect virtual will be generated as C++ virtual function without
+   * going through invoke(), but rather directly generated as obj->foo().
+   * "Overriding" is only being used by magic methods, enforcing parameter
+   * and return types.
    */
   void setVirtual() { m_virtual = true;}
   bool isVirtual() const { return m_virtual;}
+  void setPerfectVirtual();
+  bool isPerfectVirtual() const { return m_perfectVirtual;}
   void setOverriding(TypePtr returnType, TypePtr param1 = TypePtr(),
                      TypePtr param2 = TypePtr());
   bool isOverriding() const { return m_overriding;}
@@ -189,6 +195,12 @@ public:
      for this function */
   void setNRVOFix(bool flag) { m_nrvoFix = flag; }
   bool getNRVOFix() const { return m_nrvoFix; }
+
+  /**
+   * Whether this function matches the specified one with same number of
+   * parameters and types and defaults, so to qualify for perfect virtuals.
+   */
+  bool matchParams(FunctionScopePtr func);
 
   /**
    * What is the inferred type of this function's parameter at specified
@@ -357,11 +369,13 @@ private:
   std::vector<std::string> m_paramNames;
   TypePtrVec m_paramTypes;
   TypePtrVec m_paramTypeSpecs;
+  std::vector<std::string> m_paramDefaults;
   bool m_refReturn; // whether it's "function &get_reference()"
   std::vector<bool> m_refs;
   TypePtr m_returnType;
   ModifierExpressionPtr m_modifiers;
   bool m_virtual;
+  bool m_perfectVirtual;
   bool m_dynamic;
   bool m_overriding; // overriding a virtual function
   int m_redeclaring; // multiple definition of the same function

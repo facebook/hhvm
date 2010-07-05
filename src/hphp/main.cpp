@@ -425,6 +425,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
 
   if (po.target == "cpp" && po.format == "sys") {
     BuiltinSymbols::NoSuperGlobals = true; // so to generate super globals
+    Option::AnalyzePerfectVirtuals = false;
   }
 
   Option::ProgramName = po.program;

@@ -62,13 +62,15 @@ int Construct::getContainedEffects() const {
 }
 
 std::string Construct::getText(bool useCache /* = false */,
-                               bool translate /* = false */) {
+                               bool translate /* = false */,
+                               AnalysisResultPtr ar
+                               /* = AnalysisResultPtr() */) {
   std::string &text = m_text;
   if (useCache && !text.empty()) return text;
   ostringstream o;
   CodeGenerator cg(&o, CodeGenerator::PickledPHP);
   cg.translatePredefined(translate);
-  outputPHP(cg, AnalysisResultPtr()); // we knew PickledPHP won't use ar
+  outputPHP(cg, ar);
   text = o.str();
   return text;
 }

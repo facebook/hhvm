@@ -254,7 +254,7 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
       ar->getCodeError()->record(CodeError::UnknownBaseClass, m_stmt,
                                  ConstructPtr(), base.c_str());
       if (base == m_parent) {
-        ar->findClasses(m_parent);
+        ar->declareUnknownClass(m_parent);
         m_derivesFromRedeclaring = DirectFromRedeclared;
         getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
         getVariables()->forceVariants(ar);
@@ -394,7 +394,7 @@ void ClassScope::setStaticDynamic(AnalysisResultPtr ar) {
   }
   if (!m_parent.empty()) {
     if (derivesFromRedeclaring() == DirectFromRedeclared) {
-      ClassScopePtrVec parents = ar->findClasses(m_parent);
+      const ClassScopePtrVec &parents = ar->findClasses(m_parent);
       BOOST_FOREACH(ClassScopePtr cl, parents) {
         cl->setStaticDynamic(ar);
       }
@@ -416,7 +416,7 @@ void ClassScope::setDynamic(AnalysisResultPtr ar, const std::string &name) {
     }
   } else if (!m_parent.empty()) {
     if (derivesFromRedeclaring() == DirectFromRedeclared) {
-      ClassScopePtrVec parents = ar->findClasses(m_parent);
+      const ClassScopePtrVec &parents = ar->findClasses(m_parent);
       BOOST_FOREACH(ClassScopePtr cl, parents) {
         cl->setDynamic(ar, name);
       }
@@ -851,6 +851,39 @@ void ClassScope::setRedeclaring(AnalysisResultPtr ar, int redecId) {
     }
   }
   m_variables->forceVariants(ar);
+}
+
+ClassScopePtr ClassScope::getRootParent(AnalysisResultPtr ar,
+                                        const std::string &methodName) {
+  ClassScopePtr root = dynamic_pointer_cast<ClassScope>(shared_from_this());
+  for (ClassScopePtr cls = getParentScope(ar); cls;
+       cls = cls->getParentScope(ar)) {
+    if (methodName.empty() ||
+        cls->m_functions.find(methodName) != cls->m_functions.end()) {
+      root = cls;
+    }
+  }
+  return root;
+}
+
+void ClassScope::getRootParents(AnalysisResultPtr ar,
+                                const std::string &methodName,
+                                ClassScopePtrVec &roots,
+                                ClassScopePtr curClass) {
+  ClassScopePtr root = dynamic_pointer_cast<ClassScope>(shared_from_this());
+  if (m_parent.empty()) {
+    roots.push_back(curClass);
+  } else {
+    const ClassScopePtrVec &parents = ar->findClasses(m_parent);
+    for (unsigned int i = 0; i < parents.size(); i++) {
+      ClassScopePtr cls = parents[i];
+      if (methodName.empty() ||
+          cls->m_functions.find(methodName) != cls->m_functions.end()) {
+        curClass = cls;
+      }
+      cls->getRootParents(ar, methodName, roots, curClass);
+    }
+  }
 }
 
 string ClassScope::getHeaderFilename(CodeGenerator &cg) {

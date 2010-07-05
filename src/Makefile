@@ -24,7 +24,7 @@ include $(PROJECT_ROOT)/src/rules.mk
 GIT_SHA1 := $(shell git describe --all --long --abbrev=40 --always)
 CPPFLAGS += -DCOMPILER_ID=\"$(GIT_SHA1)\"
 
-EXCEPTIONS := $(EXT_DIR)/mozilla/%.a #$(EXT_DIR)/libfbml/lib/libfbml.a
+EXCEPTIONS := $(EXT_DIR)/mozilla/%.a
 
 STATIC_LIBS := $(subst libsicu,libicu,$(filter-out $(EXCEPTIONS), $(ALL_LIBS)))
 

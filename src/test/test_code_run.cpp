@@ -1350,7 +1350,8 @@ bool TestCodeRun::TestArrayInit() {
   MVCR("<?php\n"
        "class MyClass { function __toString() { return 'foo'; } }\n"
        "$obj = new MyClass();\n"
-       "$arr = array($obj => 1);\n"
+       "$arr = array($obj => 1, new MyClass() => 2, "
+       "false => 3, true => 4, count(array(1,2,3)) => 5);\n"
        "var_dump($arr);\n");
   MVCR("<?php\n"
        "function f() { throw new Exception(); }\n"

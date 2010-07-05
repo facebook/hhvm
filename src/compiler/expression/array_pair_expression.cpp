@@ -113,7 +113,7 @@ ExpressionPtr ArrayPairExpression::postOptimize(AnalysisResultPtr ar) {
 TypePtr ArrayPairExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                         bool coerce) {
   if (m_name) {
-    m_name->inferAndCheck(ar, NEW_TYPE(Primitive), false);
+    m_name->inferAndCheck(ar, NEW_TYPE(Some), false);
   }
   m_value->inferAndCheck(ar, NEW_TYPE(Some), false);
   return type;

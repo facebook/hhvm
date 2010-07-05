@@ -7020,6 +7020,12 @@ bool TestCodeRun::TestOperationTypes() {
       "  var_dump($b);"
       "}"
       "bar();");
+
+  MVCR("<?php "
+       "$a = null;"
+       "$a += new Exception();"
+       "var_dump($a);");
+
   return true;
 }
 

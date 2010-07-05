@@ -332,6 +332,12 @@ void Construct::dump(int spc, AnalysisResultPtr ar) {
     if (c & Expression::RefValue) {
       scontext += "|RefValue";
     }
+    if (c & Expression::RefParameter) {
+      scontext += "|RefParameter";
+    }
+    if (c & Expression::DeepReference) {
+      scontext += "|DeepReference";
+    }
     if (c & Expression::NoRefWrapper) {
       scontext += "|NoRefWrapper";
     }
@@ -355,9 +361,6 @@ void Construct::dump(int spc, AnalysisResultPtr ar) {
     }
     if (c & Expression::InvokeArgument) {
       scontext += "|InvokeArgument";
-    }
-    if (c & Expression::RefParameter) {
-      scontext += "|RefParameter";
     }
     if (c & Expression::OprLValue) {
       scontext += "|OprLValue";

@@ -369,6 +369,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
 static bool isReadOnlyAccess(ExpressionPtr e) {
   if (e->getContext() & (Expression::UnsetContext|
                          Expression::RefValue|
+                         Expression::RefParameter|
                          Expression::LValue)) {
     return false;
   }
@@ -585,6 +586,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
       if (!(e->getContext() & (Expression::LValue|
                                Expression::RefValue|
                                Expression::RefParameter|
+                               Expression::DeepReference|
                                Expression::UnsetContext))) {
         ExpressionPtr rep;
         int interf = findInterf(e, true, rep);

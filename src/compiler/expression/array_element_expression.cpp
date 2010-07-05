@@ -71,7 +71,12 @@ void ArrayElementExpression::setContext(Context context) {
     case Expression::DeepOprLValue:
     case Expression::ExistContext:
     case Expression::UnsetContext:
+    case Expression::DeepReference:
       m_variable->setContext(context);
+      break;
+    case Expression::RefValue:
+    case Expression::RefParameter:
+      m_variable->setContext(DeepReference);
       break;
     default:
       break;
@@ -85,7 +90,13 @@ void ArrayElementExpression::clearContext(Context context) {
     case Expression::DeepOprLValue:
     case Expression::DeepAssignmentLHS:
     case Expression::UnsetContext:
-      m_variable->clearContext(Expression::LValue);
+    case Expression::DeepReference:
+      m_variable->clearContext(context);
+      break;
+    case Expression::RefValue:
+    case Expression::RefParameter:
+      m_variable->clearContext(DeepReference);
+      break;
     default:
       break;
   }

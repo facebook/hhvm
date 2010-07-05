@@ -59,14 +59,24 @@ ExpressionPtr ObjectPropertyExpression::clone() {
 
 void ObjectPropertyExpression::setContext(Context context) {
   m_context |= context;
-  if (context == Expression::LValue &&
-      !hasContext(Expression::UnsetContext)) {
-    m_object->setContext(Expression::LValue);
-  }
-  if (context == Expression::ExistContext ||
-      context == Expression::DeepAssignmentLHS ||
-      context == Expression::DeepOprLValue) {
-    m_object->setContext(context);
+  switch (context) {
+    case Expression::LValue:
+      if (!hasContext(Expression::UnsetContext)) {
+        m_object->setContext(Expression::LValue);
+      }
+      break;
+    case Expression::DeepAssignmentLHS:
+    case Expression::DeepOprLValue:
+    case Expression::ExistContext:
+    case Expression::DeepReference:
+      m_object->setContext(context);
+      break;
+    case Expression::RefValue:
+    case Expression::RefParameter:
+      m_object->setContext(DeepReference);
+      break;
+    default:
+      break;
   }
 
   if (m_context & (LValue|RefValue)) {
@@ -75,9 +85,22 @@ void ObjectPropertyExpression::setContext(Context context) {
 }
 void ObjectPropertyExpression::clearContext(Context context) {
   m_context &= ~context;
-  if (context == Expression::LValue) {
-    m_object->clearContext(Expression::LValue);
+  switch (context) {
+    case Expression::LValue:
+    case Expression::DeepOprLValue:
+    case Expression::DeepAssignmentLHS:
+    case Expression::UnsetContext:
+    case Expression::DeepReference:
+      m_object->clearContext(context);
+      break;
+    case Expression::RefValue:
+    case Expression::RefParameter:
+      m_object->clearContext(DeepReference);
+      break;
+    default:
+      break;
   }
+
   if (!(m_context & (LValue|RefValue))) {
     clearEffect(CreateEffect);
   }

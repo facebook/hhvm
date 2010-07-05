@@ -47,6 +47,7 @@ public:
   enum NameKind {
     StringName,
     ExprName,
+    StaticClassExprName,
     StaticName
   };
   static Mutex s_lock;

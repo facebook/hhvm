@@ -43,6 +43,9 @@ NamePtr Name::fromString(CONSTRUCT_ARGS, const string &name,
 NamePtr Name::fromExp(CONSTRUCT_ARGS, ExpressionPtr e) {
   return NamePtr(new ExprName(CONSTRUCT_PASS, e));
 }
+NamePtr Name::fromStaticClassExp(CONSTRUCT_ARGS, ExpressionPtr e) {
+  return NamePtr(new StaticClassExprName(CONSTRUCT_PASS, e));
+}
 NamePtr Name::LateStatic(CONSTRUCT_ARGS) {
   return NamePtr(new LateStaticName(CONSTRUCT_PASS));
 }
@@ -79,13 +82,20 @@ ExprName::ExprName(CONSTRUCT_ARGS, ExpressionPtr name)
   : Name(CONSTRUCT_PASS), m_name(name) {}
 
 String ExprName::get(VariableEnvironment &env) const {
-  return get_static_class_name(m_name->eval(env));
+  return m_name->eval(env).toString();
 }
 
 void ExprName::dump() const {
   printf("${");
   m_name->dump();
   printf("}");
+}
+
+StaticClassExprName::StaticClassExprName(CONSTRUCT_ARGS, ExpressionPtr name)
+  : ExprName(CONSTRUCT_PASS, name) {}
+
+String StaticClassExprName::get(VariableEnvironment &env) const {
+  return get_static_class_name(m_name->eval(env));
 }
 
 LateStaticName::LateStaticName(CONSTRUCT_ARGS) : Name(CONSTRUCT_PASS) {}

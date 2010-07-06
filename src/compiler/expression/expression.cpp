@@ -42,6 +42,26 @@ Expression::Expression(LocationPtr loc, KindOf kindOf)
     m_originalScopeSet(false), m_canon_id(0), m_canonPtr(), m_error(0) {
 }
 
+void Expression::copyContext(ExpressionPtr from) {
+  unsigned val = from->m_context;
+  while (val) {
+    unsigned next = val & (val - 1);
+    unsigned low = val ^ next; // lowest set bit
+    setContext((Context)low);
+    val = next;
+  }
+}
+
+void Expression::clearContext() {
+  unsigned val = m_context;
+  while (val) {
+    unsigned next = val & (val - 1);
+    unsigned low = val ^ next; // lowest set bit
+    clearContext((Context)low);
+    val = next;
+  }
+}
+
 void Expression::deepCopy(ExpressionPtr exp) {
   exp->m_actualType = m_actualType;
   exp->m_expectedType = m_expectedType;

@@ -385,7 +385,7 @@ static ExpressionPtr cloneForInlineRecur(ExpressionPtr exp,
         string name = prefix + sv->getName();
         ExpressionPtr rep(new SimpleVariable(exp->getLocation(),
                                              exp->getKindOf(), name));
-        rep->Expression::setContext((Expression::Context)exp->getContext());
+        rep->copyContext(exp);
         sepm[name] = rep;
         exp = rep;
       }
@@ -534,7 +534,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
     }
   }
 
-  elist->Expression::setContext((Expression::Context)getContext());
+  elist->copyContext(static_pointer_cast<Expression>(shared_from_this()));
   return elist;
 }
 

@@ -1346,6 +1346,15 @@ bool TestCodeRun::TestArray() {
       "$x['1'] += 1;"
       "var_dump($x);");
 
+  MVCR("<?php "
+       "function foo($x) { var_dump($x); }"
+       "function test() {"
+       "  $data = null;"
+       "  $data['bar']['baz'] = 1;"
+       "  foo($data);"
+       "}"
+       "test();");
+
   return true;
 }
 
@@ -4361,6 +4370,29 @@ bool TestCodeRun::TestReference() {
        "$y = &test($x);"
        "$y++;"
        "var_dump($x, $y);");
+
+  MVCR("<?php "
+       "function foo(&$a) { var_dump($a++); }"
+       "function test() {"
+       "  foo($a = 6);"
+       "  $a = null;"
+       "  foo($b += 5);"
+       "  $b = null;"
+       "  foo($c -= 5);"
+       "  $c = null;"
+       "  $e = 0;"
+       "  foo(++$e);"
+       "  $e = 5;"
+       "  $g = 0;"
+       "  foo(--$g);"
+       "  $g = 7;"
+       "  $h = null;"
+       "  foo($h += 5);"
+       "  $h = null;"
+       "  foo($h -= 5);"
+       "  $h = null;"
+       "}"
+       "test();");
 
   return true;
 }

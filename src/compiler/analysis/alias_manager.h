@@ -132,6 +132,8 @@ class AliasManager {
   void canonicalizeKid(ConstructPtr e, ExpressionPtr kid, int i);
   ExpressionPtr canonicalizeNode(ExpressionPtr e);
   ExpressionPtr canonicalizeNonNull(ExpressionPtr e);
+  ExpressionPtr canonicalizeRecurNonNull(ExpressionPtr e);
+  ExpressionPtr replaceValue(ExpressionPtr orig, ExpressionPtr rep);
   ExpressionPtr canonicalizeRecur(ExpressionPtr e);
   int canonicalizeRecur(StatementPtr e);
 

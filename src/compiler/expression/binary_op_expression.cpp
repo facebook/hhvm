@@ -95,6 +95,10 @@ bool BinaryOpExpression::isTemporary() const {
   return false;
 }
 
+bool BinaryOpExpression::isRefable(bool checkError /* = false */) const {
+  return checkError && m_assign;
+}
+
 bool BinaryOpExpression::isLiteralString() const {
   if (m_op == '.') {
     return m_exp1->isLiteralString() && m_exp2->isLiteralString();

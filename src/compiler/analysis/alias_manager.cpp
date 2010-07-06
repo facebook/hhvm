@@ -529,10 +529,32 @@ static int getOpForAssignmentOp(int op) {
   }
 }
 
-ExpressionPtr AliasManager::canonicalizeNonNull(ExpressionPtr e)
-{
+ExpressionPtr AliasManager::canonicalizeNonNull(ExpressionPtr e) {
   ExpressionPtr r = canonicalizeNode(e);
   return r ? r : e;
+}
+
+ExpressionPtr AliasManager::canonicalizeRecurNonNull(ExpressionPtr e) {
+  ExpressionPtr r = canonicalizeRecur(e);
+  return r ? r : e;
+}
+
+ExpressionPtr AliasManager::replaceValue(ExpressionPtr orig,
+                                         ExpressionPtr rep) {
+  if (orig->hasContext(Expression::RefValue) &&
+      !rep->isRefable(true)) {
+    /*
+      An assignment isRefable, but the rhs may not be. Need this to
+      prevent "bad pass by reference" errors.
+    */
+    ExpressionListPtr el(new ExpressionList(orig->getLocation(),
+                                            Expression::KindOfExpressionList,
+                                            ExpressionList::ListKindWrapped));
+    el->addElement(rep);
+    rep = el;
+  }
+  rep->copyContext(orig);
+  return rep;
 }
 
 ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
@@ -555,7 +577,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
     AssignmentExpressionPtr ae = spc(AssignmentExpression,e);
     if (e->getContext() & Expression::DeadStore) {
       Construct::recomputeEffects();
-      return ae->getValue();
+      return replaceValue(ae, ae->getValue());
     }
     ExpressionPtr rep;
     int interf = findInterf(ae->getVariable(), false, rep);
@@ -572,13 +594,15 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
           }
           if (!Expression::CheckNeeded(m_arp, a->getVariable(), value)) {
             rep->setContext(Expression::DeadStore);
+            m_changed++;
           }
         }
         break;
       case Expression::KindOfBinaryOpExpression:
         if (Option::EliminateDeadCode) {
           BinaryOpExpressionPtr b = spc(BinaryOpExpression, rep);
-          bool ok = b->getType() && b->getType()->isNoObjectInvolved();
+          bool ok = b->getActualType() &&
+            b->getActualType()->isNoObjectInvolved();
           if (!ok) {
             switch (b->getOp()) {
             case T_PLUS_EQUAL:
@@ -600,14 +624,16 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
           }
           if (ok) {
             rep->setContext(Expression::DeadStore);
+            m_changed++;
           }
         }
         break;
       case Expression::KindOfUnaryOpExpression:
         if (Option::EliminateDeadCode) {
           UnaryOpExpressionPtr u = spc(UnaryOpExpression, rep);
-          if (u->getType() && u->getType()->isNoObjectInvolved()) {
+          if (u->getActualType() && u->getActualType()->isInteger()) {
             rep->setContext(Expression::DeadStore);
+            m_changed++;
           }
         }
         break;
@@ -624,10 +650,16 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
   case Expression::KindOfObjectPropertyExpression:
   case Expression::KindOfStaticMemberExpression:
     if (!(e->getContext() & (Expression::AssignmentLHS|
-                             Expression::DeepAssignmentLHS|
-                             Expression::OprLValue|
-                             Expression::DeepOprLValue))) {
-      if (!(e->getContext() & (Expression::LValue|
+                             Expression::OprLValue))) {
+      /*
+        AssignmentLHS and OprLValue were already taken care of
+        by the respective Assignment += ++ operators etc
+        Dont add them to the chain again, or it will prevent dead
+        store elimination
+      */
+      if (!(e->getContext() & (Expression::DeepAssignmentLHS|
+                               Expression::DeepOprLValue|
+                               Expression::LValue|
                                Expression::RefValue|
                                Expression::RefParameter|
                                Expression::DeepReference|
@@ -664,45 +696,43 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
     int rop = getOpForAssignmentOp(bop->getOp());
     if (rop) {
       ExpressionPtr lhs = bop->getExp1();
-      ExpressionPtr rep;
       if (bop->getContext() & Expression::DeadStore) {
         Construct::recomputeEffects();
         ExpressionPtr rhs = bop->getExp2()->clone();
         lhs = lhs->clone();
-        lhs->clearContext(Expression::LValue);
-        lhs->clearContext(Expression::NoLValueWrapper);
-        lhs->clearContext(Expression::OprLValue);
-        rep = ExpressionPtr
-          (new BinaryOpExpression(e->getLocation(),
-                                  Expression::KindOfBinaryOpExpression,
-                                  lhs, rhs, rop));
+        lhs->clearContext();
 
-      } else {
-        ExpressionPtr alt;
-        int interf = findInterf(lhs, true, alt);
-        if (interf == SameAccess &&
-            alt->is(Expression::KindOfAssignmentExpression)) {
-          ExpressionPtr op0 = spc(AssignmentExpression,alt)->getValue();
-          if (op0->isScalar()) {
-            ExpressionPtr op1 = bop->getExp2();
-            ExpressionPtr rhs
+        return replaceValue(
+          bop, canonicalizeRecurNonNull(
+            ExpressionPtr(new BinaryOpExpression(
+                            e->getLocation(),
+                            Expression::KindOfBinaryOpExpression,
+                            lhs, rhs, rop))));
+      }
+
+      ExpressionPtr alt;
+      int interf = findInterf(lhs, true, alt);
+      if (interf == SameAccess &&
+          alt->is(Expression::KindOfAssignmentExpression)) {
+        ExpressionPtr op0 = spc(AssignmentExpression,alt)->getValue();
+        if (op0->isScalar()) {
+          ExpressionPtr op1 = bop->getExp2();
+          ExpressionPtr rhs(
               (new BinaryOpExpression(e->getLocation(),
                                       Expression::KindOfBinaryOpExpression,
-                                      op0->clone(), op1->clone(), rop));
+                                      op0->clone(), op1->clone(), rop)));
 
-            lhs = lhs->clone();
-            lhs->clearContext(Expression::OprLValue);
-            rep = ExpressionPtr
-              (new AssignmentExpression(e->getLocation(),
-                                        Expression::KindOfAssignmentExpression,
-                                        lhs, rhs, false));
-          }
+          lhs = lhs->clone();
+          lhs->clearContext(Expression::OprLValue);
+          return replaceValue(
+            bop, canonicalizeRecurNonNull(
+              ExpressionPtr(new AssignmentExpression(
+                              e->getLocation(),
+                              Expression::KindOfAssignmentExpression,
+                              lhs, rhs, false))));
         }
       }
-      if (rep) {
-        ExpressionPtr c = canonicalizeRecur(rep);
-        return c ? c : rep;
-      }
+
       add(m_bucketMap[0], e);
     } else {
       getCanonical(e);
@@ -719,9 +749,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
         if (uop->getContext() & Expression::DeadStore) {
           Construct::recomputeEffects();
           ExpressionPtr val = uop->getExpression()->clone();
-          val->clearContext(Expression::LValue);
-          val->clearContext(Expression::NoLValueWrapper);
-          val->clearContext(Expression::OprLValue);
+          val->clearContext();
           if (uop->getFront()) {
             ExpressionPtr inc
               (new ScalarExpression(uop->getLocation(),
@@ -736,8 +764,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
 
           }
 
-          ExpressionPtr r = canonicalizeRecur(val);
-          return r ? r : val;
+          return replaceValue(uop, canonicalizeRecurNonNull(val));
         }
         add(m_bucketMap[0], e);
         break;

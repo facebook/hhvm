@@ -87,6 +87,18 @@ void ExpressionList::removeElement(int index) {
   m_exps.erase(m_exps.begin() + index, m_exps.begin() + index + 1);
 }
 
+bool ExpressionList::isRefable(bool checkError /* = false */) const {
+  if (m_kind == ListKindWrapped || m_kind == ListKindLeft) {
+    // Its legal to ref a list...
+    if (checkError) return true;
+    // ...but we shouldnt apply ref() to it unless the corresponding
+    // arg is refable
+    int ix = m_kind == ListKindLeft ? 0 : m_exps.size() - 1;
+    return m_exps[ix]->isRefable(false);
+  }
+  return false;
+}
+
 bool ExpressionList::isScalar() const {
   if (m_arrayElements) {
     return isScalarArrayPairs();

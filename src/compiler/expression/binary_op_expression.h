@@ -35,6 +35,7 @@ public:
   virtual bool isLiteralString() const;
   virtual std::string getLiteralString() const;
 
+  virtual bool isRefable(bool checkError = false) const;
   bool isShortCircuitOperator() const;
   ExpressionPtr getExp1() { return m_exp1;}
   ExpressionPtr getExp2() { return m_exp2;}

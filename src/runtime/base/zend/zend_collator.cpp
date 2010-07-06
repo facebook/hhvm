@@ -463,7 +463,7 @@ static int collator_regular_compare_function(CVarRef v1, CVarRef v2,
     } else {
       /* str1 is numeric strings => passthru to PHP-compare. */
       norm1 = num1;
-      norm1 = num1;
+      norm2 = num2;
     }
   } else {
     /* num1 is not set if str1 or str2 is not a string => do normalization. */

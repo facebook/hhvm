@@ -97,6 +97,17 @@ bool isPowerOfTwo(int value);
  */
 int roundUpToPowerOfTwo(int value);
 
+/**
+ * Duplicate a buffer of given size, null-terminate the result.
+ */
+const void *buffer_duplicate(const void *src, int size);
+
+/**
+ * Append buf2 to buf2, null-terminate the result.
+ */
+const void *buffer_append(const void *buf1, int size1,
+                          const void *buf2, int size2);
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

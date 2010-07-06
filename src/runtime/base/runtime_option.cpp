@@ -98,6 +98,7 @@ bool RuntimeOption::ImplicitFlush = false;
 bool RuntimeOption::EnableEarlyFlush = true;
 bool RuntimeOption::ForceChunkedEncoding = false;
 int RuntimeOption::MaxPostSize;
+bool RuntimeOption::AlwaysPopulateRawPostData = true;
 int RuntimeOption::UploadMaxFileSize;
 std::string RuntimeOption::UploadTmpDir;
 bool RuntimeOption::EnableFileUploads;
@@ -474,6 +475,7 @@ void RuntimeOption::Load(Hdf &config) {
     EnableEarlyFlush = server["EnableEarlyFlush"].getBool(true);
     ForceChunkedEncoding = server["ForceChunkedEncoding"].getBool();
     MaxPostSize = (server["MaxPostSize"].getInt32(100)) * (1 << 20);
+    AlwaysPopulateRawPostData = server["AlwaysPopulateRawPostData"].getBool();
     LibEventSyncSend = server["LibEventSyncSend"].getBool(true);
     TakeoverFilename = server["TakeoverFilename"].getString();
     ExpiresActive = server["ExpiresActive"].getBool(true);

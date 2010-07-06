@@ -46,9 +46,9 @@ class StringData {
     const static unsigned int IsLinear  = (1 << 29); // linear allocator memory
 
     const static unsigned int IsMask = IsLiteral | IsShared | IsLinear;
-    const static unsigned int LenMask = ~IsMask;
 
  public:
+    const static unsigned int LenMask = ~IsMask;
 
   /**
    * StringData does not formally derive from Countable, however it has a

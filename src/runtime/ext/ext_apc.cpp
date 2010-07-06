@@ -476,8 +476,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
           rfc1867ApcData->update_freq) {
         Variant v;
         if (s_apc_store[0].get(rfc1867ApcData->tracking_key, v)) {
-          if (v.is(KindOfArray) &&
-              v.toArray().exists(String(rfc1867ApcData->tracking_key))) {
+          if (v.is(KindOfArray)) {
             Array track;
             track.set("total", rfc1867ApcData->content_length);
             track.set("current", rfc1867ApcData->bytes_processed);

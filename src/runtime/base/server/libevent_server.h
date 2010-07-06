@@ -184,11 +184,6 @@ private:
 
   PendingResponseQueue m_responseQueue;
 
-  event m_eventPost;
-  CPipe m_readyPost;
-  Mutex m_requestQueueMutex;
-  std::deque<evhttp_request*> m_requestQueue; // for chunked reads
-
   // dispatcher thread runs this function
   void dispatch();
 

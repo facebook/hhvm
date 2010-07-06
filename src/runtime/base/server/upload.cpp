@@ -23,6 +23,7 @@
 #include <runtime/base/zend/zend_printf.h>
 #include <runtime/ext/ext_apc.h>
 #include <util/logger.h>
+#include <runtime/base/string_util.h>
 
 using namespace std;
 
@@ -184,6 +185,7 @@ static void destroy_uploaded_files() {
 #define FILLUNIT (1024 * 5)
 
 typedef struct {
+  Transport *transport;
 
   /* read buffer */
   char *buffer;
@@ -199,6 +201,7 @@ typedef struct {
   /* post data */
   const char *post_data;
   int post_size;
+  int throw_size;
   char *cursor;
   int read_post_bytes;
 } multipart_buffer;
@@ -206,11 +209,50 @@ typedef struct {
 typedef std::list<std::pair<std::string, std::string> > header_list;
 
 static int read_post(multipart_buffer *self, char *buf, int bytes_to_read) {
-  int bytes_remaining = self->post_size - (self->cursor - self->post_data);
-  if (bytes_to_read > bytes_remaining) bytes_to_read = bytes_remaining;
-  memcpy(buf, self->cursor, bytes_to_read);
-  self->cursor += bytes_to_read;
-  return bytes_to_read;
+  assert(bytes_to_read > 0);
+  assert(self->post_data);
+  assert(self->cursor >= self->post_data);
+  int bytes_remaining = (self->post_size - self->throw_size) -
+                        (self->cursor - self->post_data);
+  assert(bytes_remaining >= 0);
+  if (bytes_to_read <= bytes_remaining) {
+    memcpy(buf, self->cursor, bytes_to_read);
+    self->cursor += bytes_to_read;
+    return bytes_to_read;
+  }
+
+  int bytes_read = bytes_remaining;
+  memcpy(buf, self->cursor, bytes_remaining);
+  bytes_to_read -= bytes_remaining;
+  assert(self->cursor = (char *)self->post_data +
+                        (self->post_size - self->throw_size));
+  while (bytes_to_read > 0 && self->transport->hasMorePostData()) {
+    int extra_byte_read = 0;
+    const void *extra = self->transport->getMorePostData(extra_byte_read);
+    if (extra_byte_read == 0) break;
+    if (RuntimeOption::AlwaysPopulateRawPostData) {
+      self->post_data = (const char *)Util::buffer_append(
+        self->post_data, self->post_size, extra, extra_byte_read);
+      self->cursor = (char*)self->post_data + self->post_size;
+    } else {
+      self->post_data =
+        (const char *)realloc((void *)self->post_data, extra_byte_read + 1);
+      memcpy((void *)self->post_data, extra, extra_byte_read);
+      ((char*)self->post_data)[extra_byte_read] = 0;
+      self->throw_size = self->post_size;
+      self->cursor = (char*)self->post_data;
+    }
+    self->post_size += extra_byte_read;
+    if (bytes_to_read <= extra_byte_read) {
+      memcpy(buf + bytes_read, self->cursor, bytes_to_read);
+      self->cursor += bytes_to_read;
+      return bytes_read + bytes_to_read;
+    }
+    memcpy(buf + bytes_read, self->cursor, extra_byte_read);
+    bytes_to_read -= extra_byte_read;
+    bytes_read += extra_byte_read;
+  }
+  return bytes_read;
 }
 
 
@@ -230,7 +272,8 @@ static int fill_buffer(multipart_buffer *self) {
 
   /* calculate the free space in the buffer */
   bytes_to_read = self->bufsize - self->bytes_in_buffer;
-
+  assert(self->bufsize > 0);
+  assert(self->bytes_in_buffer >= 0);
   /* read the required number of bytes */
   while (bytes_to_read > 0) {
 
@@ -240,6 +283,7 @@ static int fill_buffer(multipart_buffer *self) {
 
     /* update the buffer length */
     if (actual_read > 0) {
+      assert(bytes_to_read >= actual_read);
       self->bytes_in_buffer += actual_read;
       self->read_post_bytes += actual_read;
       total_read += actual_read;
@@ -264,11 +308,13 @@ static int multipart_buffer_eof(multipart_buffer *self) {
 
 
 /* create new multipart_buffer structure */
-static multipart_buffer *multipart_buffer_new(const char *data, int size,
+static multipart_buffer *multipart_buffer_new(Transport *transport,
+                                              const char *data, int size,
                                               string boundary) {
   multipart_buffer *self =
     (multipart_buffer *)calloc(1, sizeof(multipart_buffer));
 
+  self->transport = transport;
   int minsize = boundary.length() + 6;
   if (minsize < FILLUNIT) minsize = FILLUNIT;
 
@@ -286,6 +332,7 @@ static multipart_buffer *multipart_buffer_new(const char *data, int size,
   self->post_data = data;
   self->cursor = (char*)self->post_data;
   self->post_size = size;
+  self->throw_size = 0;
   return self;
 }
 
@@ -636,14 +683,14 @@ static char *multipart_buffer_read_body(multipart_buffer *self,
   return out;
 }
 
-
 /*
  * The combined READER/HANDLER
  *
  */
 
-void rfc1867PostHandler(Variant &post, Variant &files, int content_length,
-                        const char *data, int size, const string boundary) {
+void rfc1867PostHandler(Transport *transport,
+                        Variant &post, Variant &files, int content_length,
+                        const void *&data, int &size, const string boundary) {
   char *s=NULL, *start_arr=NULL;
   string array_index, abuf;
   char *temp_filename=NULL, *lbuf=NULL;
@@ -656,7 +703,8 @@ void rfc1867PostHandler(Variant &post, Variant &files, int content_length,
   unsigned int llen = 0;
 
   /* Initialize the buffer */
-  if (!(mbuff = multipart_buffer_new(data, size, boundary))) {
+  if (!(mbuff = multipart_buffer_new(transport,
+                                     (const char *)data, size, boundary))) {
     Logger::Warning("Unable to initialize the input buffer");
     return;
   }
@@ -681,8 +729,7 @@ void rfc1867PostHandler(Variant &post, Variant &files, int content_length,
     }
   }
 
-  while (!multipart_buffer_eof(mbuff))
-  {
+  while (!multipart_buffer_eof(mbuff)) {
     char buff[FILLUNIT];
     char *cd=NULL,*param=NULL,*filename=NULL, *tmp=NULL;
     size_t blen=0, wlen=0;
@@ -1126,6 +1173,8 @@ void rfc1867PostHandler(Variant &post, Variant &files, int content_length,
     }
   }
 fileupload_done:
+  data = mbuff->post_data;
+  size = mbuff->post_size;
   if (php_rfc1867_callback != NULL) {
     multipart_event_end event_end;
 

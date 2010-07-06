@@ -23,6 +23,7 @@
 #include <runtime/base/server/request_uri.h>
 #include <runtime/base/server/transport.h>
 #include <util/logger.h>
+#include <util/util.h>
 #include <system/gen/sys/system_globals.h>
 #include <system/gen/php/globals/symbols.h>
 #include <runtime/base/server/upload.h>
@@ -35,17 +36,19 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helper functions
 
-static const void *copy_buffer(const void *src, int size) {
-  void *s = malloc(size + 1); // '\0' in the end
-  memcpy(s, src, size + 1);
-  return s;
-}
-
-static void append_buffer(const void *&buf, int size,
-                          const void *extra, int delta) {
-  void *s = realloc(const_cast<void *>(buf), size + delta + 1);
-  memcpy((char *)s + size, extra, delta + 1);
-  buf = s;
+static bool read_all_post_data(Transport *transport,
+                               const void *&data, int &size) {
+  if (transport->hasMorePostData()) {
+    data = Util::buffer_duplicate(data, size);
+    do {
+      int delta = 0;
+      const void *extra = transport->getMorePostData(delta);
+      data = Util::buffer_append(data, size, extra, delta);
+      size += delta;
+    } while (transport->hasMorePostData());
+    return true;
+  }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,16 +108,6 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     const void *data = transport->getPostData(size);
     if (data && size) {
       ASSERT(((char*)data)[size] == 0); // we need a NULL terminated string
-      if (transport->hasMorePostData()) {
-        needDelete = true;
-        data = copy_buffer(data, size);
-        do {
-          int delta = 0;
-          const void *extra = transport->getMorePostData(delta);
-          append_buffer(data, size, extra, delta);
-          size += delta;
-        } while (transport->hasMorePostData());
-      }
       string boundary;
       int content_length = atoi(contentLength.c_str());
       bool rfc1867Post = IsRfc1867(contentType, boundary);
@@ -123,18 +116,29 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
           // $_POST and $_FILES are empty
           Logger::Warning("POST Content-Length of %d bytes exceeds "
                           "the limit of %ld bytes",
-                          size, RuntimeOption::MaxPostSize);
+                          content_length, RuntimeOption::MaxPostSize);
+          needDelete = read_all_post_data(transport, data, size);
         } else {
-          DecodeRfc1867(g->gv__POST, g->gv__FILES, content_length,
-                        (const char*)data, size, boundary);
+          if (transport->hasMorePostData()) {
+            needDelete = true;
+            data = Util::buffer_duplicate(data, size);
+          }
+          DecodeRfc1867(transport, g->gv__POST, g->gv__FILES,
+                        content_length, data, size, boundary);
         }
       } else {
+        needDelete = read_all_post_data(transport, data, size);
         DecodeParameters(g->gv__POST, (const char*)data, size, true);
       }
       CopyParams(request, g->gv__POST);
       if (needDelete) {
-        g->gv_HTTP_RAW_POST_DATA = String((char*)data, size, AttachString);
+        if (RuntimeOption::AlwaysPopulateRawPostData) {
+          g->gv_HTTP_RAW_POST_DATA = String((char*)data, size, AttachString);
+        } else {
+          free((void *)data);
+        }
       } else {
+        // For literal we disregard RuntimeOption::AlwaysPopulateRawPostData
         g->gv_HTTP_RAW_POST_DATA = String((char*)data, size, AttachLiteral);
       }
     }
@@ -452,10 +456,12 @@ bool HttpProtocol::IsRfc1867(const string contentType, string &boundary) {
   return true;
 }
 
-void HttpProtocol::DecodeRfc1867(Variant &post, Variant &files,
-                                 int contentLength, const char *data, int size,
-                                 string boundary) {
-  rfc1867PostHandler(post, files, contentLength, data, size, boundary);
+void HttpProtocol::DecodeRfc1867(Transport *transport,
+                                 Variant &post, Variant &files,
+                                 int contentLength, const void *&data,
+                                 int &size, string boundary) {
+  rfc1867PostHandler(transport, post, files, contentLength,
+                     data, size, boundary);
 }
 
 const char *HttpProtocol::GetReasonString(int code) {

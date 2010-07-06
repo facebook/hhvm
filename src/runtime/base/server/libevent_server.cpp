@@ -41,13 +41,6 @@ static void on_thread_stop(int fd, short events, void *context) {
   event_base_loopbreak((struct event_base *)context);
 }
 
-#ifdef EVHTTP_READ_LIMITING
-static void on_chunked_read(int fd, short events, void *context) {
-  ASSERT(context);
-  ((HPHP::LibEventServer*)context)->onChunkedRead();
-}
-#endif
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // LibEventJob
@@ -236,19 +229,10 @@ void LibEventServer::dispatch() {
   event_base_set(m_eventBase, &m_eventStop);
   event_add(&m_eventStop, NULL);
 
-#ifdef EVHTTP_READ_LIMITING
-  m_readyPost.open();
-  event_set(&m_eventPost, m_readyPost.getOut(), EV_READ|EV_PERSIST,
-            on_chunked_read, this);
-  event_base_set(m_eventBase, &m_eventPost);
-  event_add(&m_eventPost, NULL);
-#endif
-
   while (getStatus() != STOPPED) {
     event_base_loop(m_eventBase, EVLOOP_ONCE);
   }
 
-  event_del(&m_eventPost);
   event_del(&m_eventStop);
 
   // flushing all responses
@@ -370,38 +354,6 @@ void LibEventServer::onChunkedResponse(int worker, evhttp_request *request,
 void LibEventServer::onChunkedResponseEnd(int worker,
                                           evhttp_request *request) {
   m_responseQueue.enqueue(worker, request);
-}
-
-void LibEventServer::onChunkedRequest(evhttp_request *request) {
-#ifdef EVHTTP_READ_LIMITING
-  {
-    Lock lock(m_requestQueueMutex);
-    m_requestQueue.push_back(request);
-  }
-  // signal to call onChunkdedRead()
-  char buf[1];
-  if (write(m_readyPost.getIn(), buf, sizeof(buf)) < 0) {
-    // an error occured but nothing we can really do
-  }
-#endif
-}
-
-void LibEventServer::onChunkedRead() {
-#ifdef EVHTTP_READ_LIMITING
-  // clean up the pipe for next signals
-  char buf[512];
-  if (read(m_readyPost.getOut(), buf, sizeof(buf)) < 0) {
-    // an error occured but nothing we can really do
-  }
-  {
-    Lock lock(m_requestQueueMutex);
-    for (std::deque<evhttp_request*>::iterator iter = m_requestQueue.begin();
-         iter != m_requestQueue.end(); ++iter) {
-      evhttp_schedule_reading(*iter);
-    }
-    m_requestQueue.clear();
-  }
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

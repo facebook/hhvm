@@ -19,6 +19,7 @@
 #define __HPHP_UPLOAD_H__
 
 #include <string>
+#include <runtime/base/server/transport.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,8 +70,9 @@ typedef struct _multipart_event_end {
   size_t  post_bytes_processed;
 } multipart_event_end;
 
-void rfc1867PostHandler(Variant &post, Variant &files, int content_length,
-                        const char *data, int size,
+void rfc1867PostHandler(Transport *transport,
+                        Variant &post, Variant &files, int content_length,
+                        const void *&data, int &size,
                         const std::string boundary);
 
 bool is_uploaded_file(const std::string filename);

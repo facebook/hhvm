@@ -23,17 +23,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef EVHTTP_READ_LIMITING
-static void on_resume(struct evhttp_request *request, void *obj) {
-  ASSERT(obj);
-  Synchronizable *sync = (Synchronizable *)obj;
-  Lock lock(sync->getMutex());
-  sync->notify();
-}
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
-
 // libevent is not exposing this data structure, but we need it.
 struct m_evkeyvalq {
   struct evkeyval *tqh_first;
@@ -42,8 +31,8 @@ struct m_evkeyvalq {
 LibEventTransport::LibEventTransport(LibEventServer *server,
                                      evhttp_request *request,
                                      int workerId)
-  : m_server(server), m_request(request), m_workerId(workerId),
-    m_sendStarted(false), m_sendEnded(false) {
+  : m_server(server), m_request(request), m_epollfd(-1),
+    m_workerId(workerId), m_sendStarted(false), m_sendEnded(false) {
   // HttpProtocol::PrepareSystemVariables needs this
   evbuffer *buf = m_request->input_buffer;
   ASSERT(buf);
@@ -108,7 +97,14 @@ const void *LibEventTransport::getPostData(int &size) {
 
 bool LibEventTransport::hasMorePostData() {
 #ifdef EVHTTP_READ_LIMITING
-  return m_request->ntoread > 0;
+  if (m_request->ntoread <= 0) {
+    if (m_epollfd != -1) {
+      close(m_epollfd);
+      m_epollfd = -1;
+    }
+    return false;
+  }
+  return true;
 #else
   return false;
 #endif
@@ -125,20 +121,25 @@ const void *LibEventTransport::getMorePostData(int &size) {
   ASSERT(buf);
   evbuffer_drain(buf, EVBUFFER_LENGTH(buf));
 
-  Synchronizable sync;
-  if (!evhttp_resume_reading(m_request, on_resume, &sync)) {
-    m_server->onChunkedRequest(m_request);
-    Lock lock(sync.getMutex());
-    sync.wait();
+  if (evhttp_get_more_post_data(m_request, &m_epollfd, &m_epollevent)) {
+    buf = m_request->input_buffer;
+    ASSERT(buf);
+    size = EVBUFFER_LENGTH(buf);
+    evbuffer_expand(buf, size + 1); // allowing NULL termination
+    // EVBUFFER_DATA(buf) might change after evbuffer_expand
+    ((char*)EVBUFFER_DATA(buf))[size] = '\0';
+    if (m_request->ntoread == 0) {
+      evhttp_get_post_data_done(m_request);
+    }
+    return EVBUFFER_DATA(buf);
   }
-
-  buf = m_request->input_buffer;
-  ASSERT(buf);
-  size = EVBUFFER_LENGTH(buf);
-  evbuffer_expand(buf, size + 1); // allowing NULL termination
-  // EVBUFFER_DATA(buf) might change after evbuffer_expand
-  ((char*)EVBUFFER_DATA(buf))[size] = '\0';
-  return EVBUFFER_DATA(buf);
+  if (m_epollfd != -1) {
+    close(m_epollfd);
+    m_epollfd = -1;
+  }
+  evhttp_get_post_data_done(m_request);
+  size = 0;
+  return NULL;
 #else
   size = 0;
   return NULL;

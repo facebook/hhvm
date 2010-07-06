@@ -43,8 +43,10 @@ public:
 
   static void DecodeParameters(Variant &variables, const char *data, int size,
                                bool post = false);
-  static void DecodeRfc1867(Variant &post, Variant &files, int contentLength,
-                            const char *data, int size, std::string boundary);
+  static void DecodeRfc1867(Transport *transport,
+                            Variant &post, Variant &files, int contentLength,
+                            const void *&data, int &size,
+                            std::string boundary);
   static void DecodeCookies(Variant &variables, char *data);
   static bool IsRfc1867(const std::string contentType, std::string &boundary);
 

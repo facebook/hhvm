@@ -49,13 +49,12 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
                              FileScopePtr file,
                              bool inPseudoMain /* = false */)
     : BlockScope(name, docComment, stmt, BlockScope::FunctionScope),
-    m_method(method), m_file(file), m_minParam(0), m_maxParam(0),
-    m_attribute(attribute), m_refReturn(reference), m_modifiers(modifiers),
-    m_virtual(false), m_overriding(false), m_redeclaring(-1),
-    m_volatile(false), m_pseudoMain(inPseudoMain),
-    m_magicMethod(false), m_system(false), m_inlineable(false), m_sep(false),
-    m_containsThis(false), m_staticMethodAutoFixed(false),
-    m_callTempCountMax(0), m_callTempCountCurrent(0),
+      m_method(method), m_file(file), m_minParam(0), m_maxParam(0),
+      m_attribute(attribute), m_refReturn(reference), m_modifiers(modifiers),
+      m_virtual(false), m_overriding(false), m_redeclaring(-1),
+      m_volatile(false), m_pseudoMain(inPseudoMain),
+      m_magicMethod(false), m_system(false), m_inlineable(false), m_sep(false),
+      m_containsThis(false), m_callTempCountMax(0), m_callTempCountCurrent(0),
       m_nrvoFix(true), m_inlineAsExpr(false), m_inlineIndex(0) {
   bool canInline = true;
   if (inPseudoMain) {
@@ -132,8 +131,7 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
     m_virtual(false), m_overriding(false), m_redeclaring(-1),
     m_volatile(false), m_pseudoMain(false), m_magicMethod(false),
     m_system(true), m_inlineable(false), m_sep(false),
-    m_containsThis(false), m_staticMethodAutoFixed(false),
-    m_callTempCountMax(0), m_callTempCountCurrent(0),
+    m_containsThis(false), m_callTempCountMax(0), m_callTempCountCurrent(0),
     m_nrvoFix(true), m_inlineAsExpr(false), m_inlineIndex(0) {
   m_dynamic = Option::IsDynamicFunction(method, m_name);
 }
@@ -415,13 +413,6 @@ void FunctionScope::addModifier(int mod) {
                               Expression::KindOfModifierExpression));
   }
   m_modifiers->add(mod);
-}
-
-void FunctionScope::setStaticMethodAutoFixed() {
-  m_staticMethodAutoFixed = true;
-  if (!isStatic()) {
-    addModifier(T_STATIC);
-  }
 }
 
 void FunctionScope::setReturnType(AnalysisResultPtr ar, TypePtr type) {
@@ -1032,7 +1023,7 @@ void FunctionScope::serialize(JSON::OutputStream &out) const {
   ms.add("minArgs", m_minParam)
     .add("maxArgs", m_maxParam)
     .add("varArgs", isVariableArgument())
-    .add("static", isStatic() && !isStaticMethodAutoFixed())
+    .add("static", isStatic())
     .add("modifier", mod)
     .add("visibility", vis)
     .add("argIsRef", m_refs)
@@ -1131,7 +1122,7 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
     attribute |= ClassInfo::IsPublic;
   }
   if (isAbstract()) attribute |= ClassInfo::IsAbstract;
-  if (isStatic() && !isStaticMethodAutoFixed()) {
+  if (isStatic()) {
     attribute |= ClassInfo::IsStatic;
   }
   if (isFinal()) attribute |= ClassInfo::IsFinal;

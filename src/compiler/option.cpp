@@ -144,8 +144,6 @@ std::string Option::RTTIDirectory;
 bool Option::GenRTTIProfileData = false;
 bool Option::UseRTTIProfileData = false;
 
-bool Option::StaticMethodAutoFix = false;
-
 bool Option::GenerateCPPMacros = true;
 bool Option::GenerateCPPMain = false;
 bool Option::GenerateCPPComments = true;

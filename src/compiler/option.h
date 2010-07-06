@@ -126,11 +126,6 @@ public:
   static bool UseRTTIProfileData;
 
   /**
-   * Whether to change a method to static if it is called statically
-   */
-  static bool StaticMethodAutoFix;
-
-  /**
    * Separate compilation
    */
   static bool SeparateCompilation;

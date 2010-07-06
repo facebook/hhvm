@@ -67,7 +67,6 @@ public:
   bool isProtected() const;
   bool isPrivate() const;
   bool isStatic() const;
-  bool isStaticMethodAutoFixed() const { return m_staticMethodAutoFixed;}
   bool isAbstract() const;
   bool isFinal() const;
   bool isRefParam(int index) const;
@@ -102,8 +101,6 @@ public:
     m_system = true;
     m_volatile = false;
   }
-
-  void setStaticMethodAutoFixed();
 
   /**
    * Get original name of the function, without case being lowered.
@@ -375,7 +372,6 @@ private:
   bool m_inlineable;
   bool m_sep;
   bool m_containsThis; // contains a usage of $this?
-  bool m_staticMethodAutoFixed; // auto fixed static
   int m_callTempCountMax;
   int m_callTempCountCurrent;
   StatementPtr m_stmtCloned; // cloned method body stmt

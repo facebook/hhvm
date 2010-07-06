@@ -691,13 +691,14 @@ bool TestCodeRun::TestListAssignment() {
       "var_dump($x);"
       "var_dump($qq);");
 
-  if (Option::EnableEval < Option::FullEval) {
     MVCR("<?php "
          "function test($a) {"
          "  list($a[0], $a[1], $a) = $a;"
          "  var_dump($a);"
          "  }"
          "test(array('abc', 'cde', 'fgh'));");
+
+  if (Option::EnableEval < Option::FullEval) {
     MVCR("<?php "
          "function test($a, $b, $i) {"
          "  list($a[$i++], $a[$i++], $a[$i++]) = $b;"
@@ -11876,18 +11877,16 @@ bool TestCodeRun::TestInlining() {
        "  }"
        "var_dump(test(1,2,3));");
 
-  if (Option::EnableEval < Option::FullEval) {
-    MVCR("<?php "
-         "function g($a) { function t(){}; return $a ? array(1,2,3) : 'foo'; }"
-         "function f($a) { return g($a); }"
-         "function test($a) {"
-         "  return reset((f($a)));"
-         "  }"
-         "var_dump(test(1));"
-         "function &h(&$a) { return $a['foo']; }"
-         "function i($a) { $x = &h($a); $x = 'hello'; return $a; }"
-         "var_dump(i(false));");
-  }
+  MVCR("<?php "
+      "function g($a) { function t(){}; return $a ? array(1,2,3) : 'foo'; }"
+      "function f($a) { return g($a); }"
+      "function test($a) {"
+      "  return reset((f($a)));"
+      "  }"
+      "var_dump(test(1));"
+      "function &h(&$a) { return $a['foo']; }"
+      "function i($a) { $x = &h($a); $x = 'hello'; return $a; }"
+      "var_dump(i(false));");
 
   Option::AutoInline = save;
   return true;

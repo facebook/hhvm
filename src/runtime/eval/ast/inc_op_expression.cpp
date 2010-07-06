@@ -43,6 +43,15 @@ Variant IncOpExpression::eval(VariableEnvironment &env) const {
   }
 }
 
+Variant IncOpExpression::refval(VariableEnvironment &env,
+    int strict /* = 2 */) const {
+  if (m_front) {
+    return ref(eval(env));
+  } else {
+    return ref(Expression::refval(env, strict));
+  }
+}
+
 void IncOpExpression::dump() const {
   if (m_front) {
     if (m_inc)

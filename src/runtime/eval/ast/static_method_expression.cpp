@@ -19,6 +19,7 @@
 #include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/eval/runtime/eval_state.h>
 #include <runtime/eval/ast/method_statement.h>
+#include <runtime/eval/ast/class_statement.h>
 
 namespace HPHP {
 namespace Eval {
@@ -49,11 +50,22 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
                                                            name.data(),
                                                            foundClass);
   if (withinClass) {
-    if (m_construct && !ms) {
-      // In a class method doing __construct will go to the name constructor
-      ms = RequestEvalState::findMethod(cname.data(),
-                                        cname.data(),
-                                        foundClass);
+    if (m_construct) {
+      String name = cname;
+      while (true) {
+        ClassEvalState *ces = RequestEvalState::findClassState(name.data());
+        if (!ces) {
+          // possibly built in
+          cname = name;
+          break;
+        }
+        // Ugly but needed to populate the method table for the parent
+        ces->initializeInstance();
+        ms = ces->getConstructor();
+        if (ms) break;
+        name = ces->getClass()->parent().c_str();
+        if (name.empty()) break;
+      }
     }
     if (ms) {
       return ref(ms->invokeInstanceDirect(co, env, this));

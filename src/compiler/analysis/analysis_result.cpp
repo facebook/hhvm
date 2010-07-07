@@ -2592,6 +2592,7 @@ void AnalysisResult::outputCPPFiberGlobalState() {
       index++;
     }
   }
+  cg_printf("0\n");
   cg_indentEnd("};\n");
 
   cg_printf("int index = 0;\n");

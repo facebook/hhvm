@@ -142,24 +142,24 @@ std::vector<const char *> &CodeError::getErrorTexts() {
 }
 
 void ErrorInfo::serialize(JSON::OutputStream &out) const {
-  out.raw() << "{";
+ JSON::MapStream ms(out);
   if (m_construct1) {
-    out << Name("c1") << m_construct1; out.raw() << ',';
+    ms.add("c1", m_construct1);
   }
   if (m_construct2) {
-    out << Name("c2") << m_construct2; out.raw() << ',';
+    ms.add("c2", m_construct2);
   }
   if (m_expected != Type::KindOfSome && m_expected != Type::KindOfAny) {
-    out << Name("et") << m_expected; out.raw() << ',';
+    ms.add("et", m_expected);
   }
   if (m_actual != Type::KindOfSome && m_actual != Type::KindOfAny) {
-    out << Name("at") << m_actual; out.raw() << ',';
+    ms.add("at", m_actual);
   }
   if (!m_data.empty()) {
-    out << Name("d") << m_data; out.raw() << ',';
+    ms.add("d", m_data);
   }
-  out << Name("s") << m_suppressed; out.raw() << ',';
-  out.raw() << "}\n";
+  ms.add("s", m_suppressed);
+  ms.done();
 }
 
 void CodeError::serialize(JSON::OutputStream &out) const {
@@ -170,28 +170,29 @@ void CodeError::serialize(JSON::OutputStream &out) const {
     total += m_errors[i].size();
   }
 
-  out.raw() << "["; out << total; out.raw() << ", {\n";
-  bool comma = false;
+  JSON::ListStream ls(out);
+  ls << total;
+  ls.next();
+
+  JSON::MapStream ms(out);
   for (unsigned int i = 0; i < m_errors.size(); i++) {
     const ErrorInfoMap &errorMap = m_errors[i];
     if (errorMap.empty()) continue;
     if (filtered(i)) continue;
 
-    if (comma) {
-      out.raw() << ',';
-    } else {
-      comma = true;
-    }
-    out << Name(errorTexts[i]);
-    out.raw() << "\n[";
+    ms.add(errorTexts[i]);
+    JSON::ListStream ls2(out);
+
     for (ErrorInfoMap::const_iterator iter = errorMap.begin();
          iter != errorMap.end(); ++iter) {
-      if (iter != errorMap.begin()) out.raw() << ',';
-      out << iter->second;
+      ls2 << iter->second;
     }
-    out.raw() << "]\n";
+
+    ls2.done();
   }
-  out.raw() << "}]\n";
+
+  ms.done();
+  ls.done();
 }
 
 void CodeError::dump(bool verbose) const {

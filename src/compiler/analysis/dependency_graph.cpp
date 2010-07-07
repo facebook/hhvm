@@ -410,24 +410,24 @@ std::vector<const char *> &DependencyGraph::getDependencyTexts() {
 }
 
 void Dependency::serialize(JSON::OutputStream &out) const {
-  out.raw() << "{";
+  JSON::MapStream ms(out);
   if (m_parent) {
-    out << Name("p") << m_parent; out.raw() << ',';
+    ms.add("p", m_parent);
   }
   if (m_child) {
-    out << Name("c") << m_child; out.raw() << ',';
+    ms.add("c", m_child);
   }
-  out << Name("c") << m_programCount; out.raw() << ',';
-  out << Name("f") << m_programs;
-  out.raw() << "}\n";
+  ms.add("c", m_programCount)
+    .add("f", m_programs)
+    .done();
 }
 
 void DependencyGraph::serialize(JSON::OutputStream &out) const {
-  out.raw() << "{";
-  out << Name("Count") << m_total; out.raw() << ',';
-  out << Name("ParentToChildren") << m_forwards; out.raw() << ',';
-  out << Name("ChildToParents") << m_reverses; out.raw() << ',';
-  out.raw() << "}\n";
+  JSON::MapStream ms(out);
+  ms.add("Count", m_total)
+    .add("ParentToChildren", m_forwards)
+    .add("ChildToParents", m_reverses)
+    .done();
 }
 
 void DependencyGraph::saveToFiles(const char *dir) const {
@@ -441,10 +441,10 @@ void DependencyGraph::saveToFiles(const char *dir) const {
     ofstream f(file.c_str());
     if (f) {
       JSON::OutputStream o(f);
-      f << "{";
-      o << Name("ParentToChildren") << m_forwards[i]; f << ',';
-      o << Name("ChildToParents") << m_reverses[i]; f << ',';
-      f << "}\n";
+      JSON::MapStream ms(o);
+      ms.add("ParentToChildren", m_forwards[i])
+        .add("ChildToParents", m_reverses[i])
+        .done();
       f.close();
     }
   }

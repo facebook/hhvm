@@ -74,9 +74,10 @@ std::string Construct::getText(bool useCache /* = false */,
 }
 
 void Construct::serialize(JSON::OutputStream &out) const {
-  out.raw() << "[\"" << m_loc->file << "\"," <<
-    m_loc->line0 << "," << m_loc->char0 << "," <<
-    m_loc->line1 << "," << m_loc->char1 << "]";
+  JSON::ListStream ls(out);
+  ls << m_loc->file << m_loc->line0 << m_loc->char0 <<
+                       m_loc->line1 << m_loc->char1;
+  ls.done();
 }
 
 void Construct::addUserFunction(AnalysisResultPtr ar,

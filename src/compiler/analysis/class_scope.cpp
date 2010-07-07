@@ -573,9 +573,8 @@ void ClassScope::serialize(JSON::OutputStream &out) const {
     .add("properties", propMap)
     .add("functions", m_functions);
 
-  /* Super Sad */
-  out.raw() << ",";
-  out << JSON::Name("consts");
+  ms.add("consts");
+
   JSON::MapStream cs(out);
   BOOST_FOREACH(string cname, cnames) {
     TypePtr type =  m_constants->getType(cname, true);

@@ -72,10 +72,12 @@ public:
   template<typename K, typename T, typename C>
     OutputStream &operator<< (const __gnu_cxx::hash_map<K, T, C> &v);
 
-  std::ostream &raw() { return m_out;}
-
 private:
   std::ostream &m_out;
+  std::ostream &raw() { return m_out;}
+  friend class Name;
+  friend class MapStream;
+  friend class ListStream;
 };
 
 template<typename T>
@@ -162,6 +164,11 @@ public:
   template<typename T>
     MapStream &add(const std::string &n, T v);
 
+  MapStream &add(const std::string &n) {
+    init(n);
+    return *this;
+  }
+
   void done() {
     if (m_first) {
       m_out << "{";
@@ -191,6 +198,40 @@ template<typename T>
   m_jout << v;
   return *this;
 }
+
+class ListStream {
+public:
+  ListStream(OutputStream &jout)
+    : m_out(jout.raw()), m_jout(jout), m_first(true) {}
+
+  void next() {
+    if (m_first) {
+      m_out << "[";
+      m_first = false;
+    } else {
+      m_out << ",";
+    }
+  }
+
+  template<typename T>
+    ListStream &operator<< (T &v) {
+    next();
+    m_jout << v;
+    return *this;
+  }
+
+  void done() {
+    if (m_first) {
+      m_out << "[";
+    }
+    m_out << "]\n";
+  }
+
+private:
+  std::ostream &m_out;
+  OutputStream &m_jout;
+  bool m_first;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

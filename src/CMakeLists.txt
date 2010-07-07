@@ -87,7 +87,10 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 #auto_sources(TIMELIB_SOURCES "*.c" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/third_party/timelib")
 #add_library(timelib STATIC ${TIMELIB_SOURCES})
 
-add_subdirectory(third_party/xhp/xhp)
+if (NOT SKIP_BUNDLED_XHP)
+	add_subdirectory(third_party/xhp/xhp)
+endif()
+
 add_subdirectory(third_party/libafdt)
 add_subdirectory(third_party/libmbfl)
 add_subdirectory(third_party/libsqlite3)

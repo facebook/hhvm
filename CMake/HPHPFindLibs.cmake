@@ -92,11 +92,20 @@ include_directories(${EXPAT_INCLUDE_DIRS})
 # SQLite3 + timelib are bundled in HPHP sources
 include_directories("${HPHP_HOME}/src/third_party/libsqlite3")
 include_directories("${HPHP_HOME}/src/third_party/timelib")
-include_directories("${HPHP_HOME}/src/third_party/xhp/xhp")
 include_directories("${HPHP_HOME}/src/third_party/libafdt/src")
 include_directories("${HPHP_HOME}/src/third_party/libmbfl")
 include_directories("${HPHP_HOME}/src/third_party/libmbfl/mbfl")
 include_directories("${HPHP_HOME}/src/third_party/libmbfl/filter")
+
+FIND_LIBRARY(XHP_LIB xhp)
+FIND_PATH(XHP_INCLUDE_DIR xhp_preprocess.hpp)
+
+if (XHP_LIB AND XHP_INCLUDE_DIR)
+	include_directories(${XHP_INCLUDE_DIR})
+	set(SKIP_BUNDLED_XHP ON)
+else()
+	include_directories("${HPHP_HOME}/src/third_party/xhp/xhp")
+endif()
 
 # ICU
 find_package(ICU REQUIRED)
@@ -233,7 +242,13 @@ macro(hphp_link target)
 
 	target_link_libraries(${target} timelib)
 	target_link_libraries(${target} sqlite3)
-	target_link_libraries(${target} xhp)
+
+	if (SKIP_BUNDLED_XHP)
+		target_link_libraries(${target} ${XHP_LIB})
+	else()
+		target_link_libraries(${target} xhp)
+	endif()
+
 	target_link_libraries(${target} afdt)
 	target_link_libraries(${target} mbfl)
 endmacro()

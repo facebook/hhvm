@@ -460,7 +460,11 @@ LIBXML_LIBS = -lxml2 -lexpat
 
 TIME_LIBS = $(EXT_DIR)/timelib/lib/libtimelib.a
 
+ifdef DEBUG
+FBML_LIBS = $(EXT_DIR)/libfbml/lib/libfbml-debug.a $(MOZILLA_LIBS)
+else
 FBML_LIBS = $(EXT_DIR)/libfbml/lib/libfbml.a $(MOZILLA_LIBS)
+endif
 
 MBFL_LIBS = $(EXT_DIR)/libmbfl/lib/libmbfl.a \
 	$(EXT_DIR)/oniguruma/lib/libonig.a

@@ -62,7 +62,8 @@ public:
   /**
    * Get results of an async call. This is blocking until task is finished.
    */
-  static Variant Result(CObjRef func, Strategy strategy, CVarRef resolver);
+  static Variant Result(CObjRef func, Strategy default_strategy,
+                        CVarRef additional_strategies);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

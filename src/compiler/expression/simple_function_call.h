@@ -24,7 +24,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-
 DECLARE_BOOST_TYPES(SimpleFunctionCall);
 class SimpleFunctionCall : public FunctionCall, public IParseHandler {
   friend class SimpleFunctionCallHook;
@@ -55,6 +54,7 @@ public:
     m_hookHandler = hookHandler;
   }
 
+  void addDependencies(AnalysisResultPtr ar);
   const std::string &getName() const { return m_name;}
 private:
   enum FunctionType {
@@ -92,6 +92,8 @@ private:
   bool canInvokeFewArgs();
   bool m_invokeFewArgsDecision;
   bool m_dynamicInvoke;
+
+  ExpressionPtr optimize(AnalysisResultPtr ar);
   // hook
   static Expression* (*m_hookHandler)(AnalysisResultPtr ar,
                                       SimpleFunctionCall *call,

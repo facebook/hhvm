@@ -29,6 +29,7 @@ class UnaryOpExpression : public Expression {
 public:
   UnaryOpExpression(EXPRESSION_ARGS, ExpressionPtr exp, int op, bool front);
   virtual Variant eval(VariableEnvironment &env) const;
+  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
   virtual void dump() const;
 private:
   ExpressionPtr m_exp;

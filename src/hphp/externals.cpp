@@ -16,6 +16,8 @@
 
 #include <runtime/base/complex_types.h>
 
+using namespace std;
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -47,6 +49,8 @@ class LVariableTable;
 LVariableTable *get_variable_table() { return NULL;}
 class Globals;
 Globals *get_globals() { return NULL; }
+class SystemGlobals;
+SystemGlobals *get_system_globals() { return NULL;}
 void init_global_variables() {}
 void init_static_variables() {}
 void free_global_variables() {}
@@ -75,9 +79,6 @@ Variant *get_static_property_lv(const char *s, const char *prop) {
 Variant get_class_var_init(const char *s, const char *var) {
   return null;
 }
-Variant get_builtin_class_var_init(const char *s, const char *var) {
-  return null;
-}
 
 Array get_global_array_wrapper() {
   return Array();
@@ -92,6 +93,16 @@ Variant invoke_from_eval(const char *function, VariableEnvironment &env,
 
 const ObjectStaticCallbacks * get_object_static_callbacks(const char *s) {
   return NULL;
+}
+
+void fiber_marshal_global_state(GlobalVariables *g1, GlobalVariables *g2,
+                                FiberReferenceMap &refMap) {
+}
+
+void fiber_unmarshal_global_state(GlobalVariables *g1, GlobalVariables *g2,
+                                  FiberReferenceMap &refMap,
+                                  char defstrategy,
+                                  const vector<pair<string, char> > &resolver){
 }
 
 ///////////////////////////////////////////////////////////////////////////////

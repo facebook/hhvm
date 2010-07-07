@@ -52,6 +52,9 @@ public:
   virtual bool containsDynamicConstant(AnalysisResultPtr ar) const;
   void removeElement(int index);
   virtual bool getScalarValue(Variant &value);
+  virtual bool isRefable(bool checkError = false) const {
+    return m_kind == ListKindWrapped || m_kind == ListKindLeft;
+  }
 
   bool isScalarArrayPairs() const;
 

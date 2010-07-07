@@ -4490,7 +4490,7 @@ yyreduce:
   case 244:
 #line 612 "hphp.y"
     { _p->onName((yyval), (yyvsp[(1) - (1)]),
-                                          Parser::ExprName);;}
+                                          Parser::StaticClassExprName);;}
     break;
 
   case 245:

@@ -249,7 +249,7 @@ TypePtr Type::Cast(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
     case KindOfDouble:
     case KindOfString:
     case KindOfArray:       return from;
-    case KindOfObject:      return Type::Array;
+    case KindOfObject:      return to;
     case KindOfVariant:     return from;
     case KindOfNumeric:     return from;
     case KindOfPrimitive:   return CreateType(KindOfNumeric);

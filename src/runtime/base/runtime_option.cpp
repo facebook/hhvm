@@ -26,6 +26,7 @@
 #include <runtime/base/preg.h>
 #include <runtime/base/server/access_log.h>
 #include <runtime/base/util/extended_logger.h>
+#include <runtime/base/fiber_async_func.h>
 
 using namespace std;
 
@@ -670,6 +671,9 @@ void RuntimeOption::Load(Hdf &config) {
   {
     PageletServerThreadCount = config["PageletServer.ThreadCount"].getInt32(0);
     FiberCount = config["Fiber.ThreadCount"].getInt32(0);
+    if (FiberCount > 0) {
+      FiberAsyncFunc::Restart();
+    }
   }
   {
     Hdf content = config["StaticFile"];

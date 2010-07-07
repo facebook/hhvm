@@ -62,6 +62,15 @@ Variant UnaryOpExpression::eval(VariableEnvironment &env) const {
   }
 }
 
+Variant UnaryOpExpression::refval(VariableEnvironment &env,
+    int strict /* = 2 */) const {
+  if (m_op == '(') {
+    return ref(m_exp->refval(env, strict));
+  } else {
+    return ref(Expression::refval(env, strict));
+  }
+}
+
 void UnaryOpExpression::dump() const {
   if (m_op == '(') {
     printf("(");

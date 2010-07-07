@@ -17,6 +17,9 @@
 #include <runtime/base/fiber_async_func.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/resource_data.h>
+#include <runtime/base/fiber_reference_map.h>
+#include <runtime/ext/ext_array.h>
+#include <system/gen/php/globals/constants.h>
 #include <util/job_queue.h>
 #include <util/lock.h>
 #include <util/logger.h>
@@ -52,7 +55,9 @@ public:
            bool async)
       : m_thread(thread),
         m_unmarshaled_function(NULL), m_unmarshaled_params(NULL),
-        m_function(function), m_params(params), m_refCount(0),
+        m_unmarshaled_global_variables(NULL),
+        m_function(function), m_params(params),
+        m_global_variables(NULL), m_refCount(0),
         m_async(async), m_ready(false), m_done(false), m_delete(false),
         m_exit(false) {
     m_reqId = m_thread->m_reqId;
@@ -68,6 +73,7 @@ public:
       *m_unmarshaled_function = m_function;
       m_unmarshaled_params = NEW(Variant)();
       *m_unmarshaled_params = m_params;
+      m_unmarshaled_global_variables = get_global_variables();
     }
   }
 
@@ -106,6 +112,9 @@ public:
     if (m_async) {
       m_function = m_function.fiberMarshal(m_refMap);
       m_params = m_params.fiberMarshal(m_refMap);
+      m_global_variables = get_global_variables();
+      fiber_marshal_global_state(m_global_variables,
+                                 m_unmarshaled_global_variables, m_refMap);
 
       Lock lock(this);
       m_ready = true;
@@ -142,7 +151,8 @@ public:
     return m_return;
   }
 
-  Variant getResults(FiberAsyncFunc::Strategy strategy, CVarRef resolver) {
+  Variant getResults(FiberAsyncFunc::Strategy default_strategy,
+                     vector<pair<string, char> > &resolver) {
     if (!m_async) return syncGetResults();
 
     {
@@ -150,17 +160,17 @@ public:
       while (!m_done) wait();
     }
 
+    fiber_unmarshal_global_state(get_global_variables(), m_global_variables,
+                                 m_refMap, default_strategy, resolver);
+
     // these are needed in case they have references or objects
     if (!m_refMap.empty()) {
       m_function.fiberUnmarshal(m_refMap);
       m_params.fiberUnmarshal(m_refMap);
     }
 
-    Object unmarshaled_exception =
-      m_exception.fiberUnmarshal(m_refMap);
-    Variant unmarshaled_return =
-      m_return.fiberUnmarshal(m_refMap);
-
+    Object unmarshaled_exception = m_exception.fiberUnmarshal(m_refMap);
+    Variant unmarshaled_return = m_return.fiberUnmarshal(m_refMap);
     try {
       if (m_exit) {
         throw ExitException(0);
@@ -200,12 +210,14 @@ private:
   // holding references to them, so we can later restore their states safely
   Variant *m_unmarshaled_function;
   Variant *m_unmarshaled_params;
+  GlobalVariables *m_unmarshaled_global_variables;
 
   FiberReferenceMap m_refMap;
   int64 m_reqId;
 
   Variant m_function;
   Array m_params;
+  GlobalVariables *m_global_variables;
 
   Mutex m_mutex;
   int m_refCount;
@@ -290,7 +302,7 @@ void FiberAsyncFunc::Restart() {
   if (RuntimeOption::FiberCount > 0) {
     s_dispatcher = new JobQueueDispatcher<FiberJob*, FiberWorker>
       (RuntimeOption::FiberCount, NULL);
-    Logger::Info("fiber job dispatcher started");
+    Logger::Verbose("fiber job dispatcher started");
     s_dispatcher->start();
   }
 }
@@ -317,10 +329,40 @@ bool FiberAsyncFunc::Status(CObjRef func) {
   return handle->getJob()->isDone();
 }
 
-Variant FiberAsyncFunc::Result(CObjRef func, Strategy strategy,
-                               CVarRef resolver) {
+Variant FiberAsyncFunc::Result(CObjRef func, Strategy default_strategy,
+                               CVarRef additional_strategies) {
   FiberAsyncFuncHandle *handle = func.getTyped<FiberAsyncFuncHandle>();
-  return handle->getJob()->getResults(strategy, resolver);
+  if (!additional_strategies.isArray() && !additional_strategies.isNull()) {
+    raise_error("additional strategies need to be an array");
+  }
+
+  vector<pair<string, char> > resolver;
+  resolver.reserve(f_count(additional_strategies, true));
+
+  for (ArrayIter iter(additional_strategies); iter; ++iter) {
+    string prefix;
+    int kind = iter.first().toInt32();
+    if (kind == k_GLOBAL_SYMBOL_GLOBAL_VARIABLE) {
+      prefix = "gv_"; // Option::GlobalVariablePrefix;
+    } else if (kind == k_GLOBAL_SYMBOL_STATIC_VARIABLE) {
+      prefix = "sv_"; // Option::StaticVariablePrefix;
+    } else if (kind == k_GLOBAL_SYMBOL_CLASS_STATIC) {
+      prefix = "s_";  // Option::StaticPropertyPrefix;
+    } else {
+      raise_error("Unknown global symbol type: %d", kind);
+    }
+
+    Variant symbols = iter.second();
+    if (!symbols.isArray()) {
+      raise_error("additional strategies need to be an array of arrays");
+    }
+    for (ArrayIter iter2(symbols); iter2; ++iter2) {
+      string name = prefix + iter2.first().toString().data();
+      resolver.push_back(pair<string, char>(name, iter2.second().toByte()));
+    }
+  }
+
+  return handle->getJob()->getResults(default_strategy, resolver);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

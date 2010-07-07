@@ -22,7 +22,6 @@
 #include <runtime/base/memory/unsafe_pointer.h>
 #include <runtime/base/macros.h>
 #include <runtime/base/runtime_error.h>
-#include <runtime/base/fiber_reference_map.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -21,6 +21,7 @@
 #include <runtime/base/variable_serializer.h>
 #include <util/lock.h>
 #include <runtime/base/class_info.h>
+#include <runtime/base/fiber_reference_map.h>
 
 #include <runtime/eval/ast/function_call_expression.h>
 
@@ -48,7 +49,7 @@ ObjectData::~ObjectData() {
     o_properties->release();
   }
   int *pmax = os_max_id.get();
-  if (o_id == *pmax) {
+  if (o_id && o_id == *pmax) {
     --(*pmax);
   }
 }
@@ -92,7 +93,10 @@ Variant ObjectData::os_invoke(const char *c, const char *s,
                               CArrRef params, int64 hash,
                               bool fatal /* = true */) {
   Object obj = create_object(c, Array::Create(), false);
-  obj.get()->o_id = 0; // for isset($this) to tell whether this is a fake obj
+  int *pmax = os_max_id.get();
+  int &id = obj.get()->o_id;
+  if (id == *pmax) --(*pmax);
+  id = 0; // for isset($this) to tell whether this is a fake obj
   return obj->o_invoke(s, params, hash, fatal);
 }
 
@@ -619,7 +623,8 @@ Object ObjectData::fiberMarshal(FiberReferenceMap &refMap) const {
   ObjectData *px = (ObjectData*)refMap.lookup((void*)this);
   if (px == NULL) {
     Object copy = create_object(o_getClassName(), null_array);
-    refMap.insert((void*)this, copy.get()); // ahead of deep copy
+    // ahead of deep copy
+    refMap.insert(const_cast<ObjectData*>(this), copy.get());
     Array props;
     o_get(props);
     copy->o_set(props.fiberMarshal(refMap));
@@ -639,7 +644,8 @@ Object ObjectData::fiberUnmarshal(FiberReferenceMap &refMap) const {
       copy = create_object(o_getClassName(), null_array);
       px = copy.get();
     }
-    refMap.insert((void*)this, px); // ahead of deep copy
+    // ahead of deep copy
+    refMap.insert(const_cast<ObjectData*>(this), px);
     Array props;
     o_get(props);
     px->o_set(props.fiberUnmarshal(refMap));

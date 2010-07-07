@@ -30,6 +30,7 @@ class IncOpExpression : public Expression {
 public:
   IncOpExpression(EXPRESSION_ARGS, LvalExpressionPtr exp, bool inc, bool front);
   virtual Variant eval(VariableEnvironment &env) const;
+  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
   virtual void dump() const;
 private:
   LvalExpressionPtr m_exp;

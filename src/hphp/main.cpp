@@ -73,7 +73,6 @@ struct ProgramOptions {
   int revision;
   bool genStats;
   bool keepTempDir;
-  bool staticMethodAutoFix;
   string dbStats;
   bool noTypeInference;
   bool noMinInclude;
@@ -237,9 +236,6 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
      "whether to generate dependency graphs and code errors")
     ("keep-tempdir,k", value<bool>(&po.keepTempDir)->default_value(false),
      "whether to keep the temporary directory")
-    ("static-method-autofix",
-      value<bool>(&po.staticMethodAutoFix)->default_value(true),
-     "whether to change a method to static if it is called statically")
     ("db-stats", value<string>(&po.dbStats),
      "database connection string to save dependency graphs and code errors: "
      "<username>:<password>@<host>:<port>/<db>")
@@ -444,10 +440,6 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
   if (po.optimizeLevel > 0) {
     Option::PreOptimization = true;
     Option::PostOptimization = true;
-  }
-
-  if (po.staticMethodAutoFix) {
-    Option::StaticMethodAutoFix = true;
   }
 
   if (po.generateFFI) {

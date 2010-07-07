@@ -13,31 +13,32 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include <stdio.h>
 #include <stdlib.h>
 #include <dlfcn.h>
 #include <iostream>
 
 using namespace std;
 
-static void report_dlerror() {
-  const char *error;
-  if (error = dlerror()) {
-    cerr << dlerror() << endl;
+static bool report_dlerror() {
+  const char *error = dlerror();
+  if (error) {
+    fprintf(stderr, "dlerror: %s\n", error);
+    return true;
   }
+  return false;
 }
 
 int main(int argc, char **argv) {
   void *handle = dlopen(argv[argc - 1], RTLD_LAZY);
-  report_dlerror();
+  if (report_dlerror()) return -1;
 
   int(*php_main)(int, char **) = (int(*)(int, char **))dlsym(handle, "main");
-  report_dlerror();
+  if (report_dlerror()) return -1;
 
   argv[argc - 1] = NULL;
   int ret = php_main(argc - 1, argv);
 
   dlclose(handle);
-  report_dlerror();
-
   return ret;
 }

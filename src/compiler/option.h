@@ -126,11 +126,6 @@ public:
   static bool UseRTTIProfileData;
 
   /**
-   * Whether to change a method to static if it is called statically
-   */
-  static bool StaticMethodAutoFix;
-
-  /**
    * Separate compilation
    */
   static bool SeparateCompilation;
@@ -186,6 +181,7 @@ public:
   static const char *ClassPrefix;
   static const char *ClassStaticsPrefix;
   static const char *ClassStaticsObjectPrefix;
+  static const char *ClassStaticsCallbackPrefix;
   static const char *ClassStaticsIdGetterPrefix;
   static const char *ClassStaticInitializerPrefix;
   static const char *ClassStaticInitializerFlagPrefix;
@@ -303,6 +299,11 @@ public:
   static bool ControlEvalOrder;
   static bool GenerateSourceInfo;
   static bool UseVirtualDispatch;
+
+  static bool EliminateDeadCode;
+  static bool LocalCopyProp;
+  static bool StringLoopOpts;
+  static bool AutoInline;
 
   static bool FlAnnotate; // annotate emitted code withe compiler file-line info
 private:

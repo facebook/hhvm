@@ -75,7 +75,7 @@ class AliasInfo {
 
 class AliasManager {
  public:
-  AliasManager() : m_nextID(1), m_changed(false), m_wildRefs(0), m_nrvoFix(0) {}
+  AliasManager();
  public:
   void clear();
   void beginScope();
@@ -85,13 +85,6 @@ class AliasManager {
 
   bool optimize(AnalysisResultPtr ar, MethodStatementPtr s);
   void setChanged() { m_changed = true; }
-
-  static bool doLocalCopyProp() { return s_localCopyProp; }
-  static bool doDeadCodeElim() { return s_deadCodeElim; }
-  static bool doStringOpts() { return s_stringOpts; }
-  static void setLocalCopyProp(bool f) { s_localCopyProp = f; }
-  static void setDeadCodeElim(bool f) { s_deadCodeElim = f; }
-  static void setStringOpts(bool f) { s_stringOpts = f; }
 
   static bool parseOptimizations(const std::string &optimizations,
                                  std::string &errs);
@@ -165,9 +158,7 @@ class AliasManager {
   std::string           m_returnVar;
   int                   m_nrvoFix;
 
-  static bool           s_deadCodeElim;
-  static bool           s_localCopyProp;
-  static bool           s_stringOpts;
+  bool                  m_inlineAsExpr;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

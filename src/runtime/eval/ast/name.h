@@ -39,6 +39,7 @@ public:
   static NamePtr fromString(CONSTRUCT_ARGS, const std::string &name,
       bool isSp = false);
   static NamePtr fromExp(CONSTRUCT_ARGS, ExpressionPtr e);
+  static NamePtr fromStaticClassExp(CONSTRUCT_ARGS, ExpressionPtr e);
   static NamePtr LateStatic(CONSTRUCT_ARGS);
 };
 
@@ -63,8 +64,14 @@ public:
   ExprName(CONSTRUCT_ARGS, ExpressionPtr name);
   virtual String get(VariableEnvironment &env) const;
   virtual void dump() const;
-private:
+protected:
   ExpressionPtr m_name;
+};
+
+class StaticClassExprName : public ExprName {
+public:
+  StaticClassExprName(CONSTRUCT_ARGS, ExpressionPtr name);
+  virtual String get(VariableEnvironment &env) const;
 };
 
 class LateStaticName : public Name {

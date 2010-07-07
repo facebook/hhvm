@@ -39,7 +39,6 @@ TestCodeRun::TestCodeRun() : m_perfMode(false) {
   Option::GenerateCPPComments = true;
   Option::GenerateCPPNameSpace = true;
   Option::KeepStatementsWithNoEffect = false;
-  Option::StaticMethodAutoFix = true;
 }
 
 bool TestCodeRun::preTest() {
@@ -245,7 +244,9 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
       if (subdir) filearg = filearg + subdir + "/";
       filearg += "main.php";
       const char *argv[] = {"", filearg.c_str(),
-                            "--config=test/config.hdf", NULL};
+                            "--config=test/config.hdf",
+                            "-v Fiber.ThreadCount = 0",
+                            NULL};
       Process::Exec("hphpi/hphpi", argv, NULL, actual, &err);
     }
 
@@ -475,6 +476,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestExtSoap);
   RUN_TEST(TestFiber);
   RUN_TEST(TestAPC);
+  RUN_TEST(TestInlining);
 
   // PHP 5.3 features
   RUN_TEST(TestVariableClassName);
@@ -689,13 +691,14 @@ bool TestCodeRun::TestListAssignment() {
       "var_dump($x);"
       "var_dump($qq);");
 
-  if (Option::EnableEval < Option::FullEval) {
     MVCR("<?php "
          "function test($a) {"
          "  list($a[0], $a[1], $a) = $a;"
          "  var_dump($a);"
          "  }"
          "test(array('abc', 'cde', 'fgh'));");
+
+  if (Option::EnableEval < Option::FullEval) {
     MVCR("<?php "
          "function test($a, $b, $i) {"
          "  list($a[$i++], $a[$i++], $a[$i++]) = $b;"
@@ -7019,6 +7022,12 @@ bool TestCodeRun::TestOperationTypes() {
       "  var_dump($b);"
       "}"
       "bar();");
+
+  MVCR("<?php "
+       "$a = null;"
+       "$a += new Exception();"
+       "var_dump($a);");
+
   return true;
 }
 
@@ -8450,6 +8459,20 @@ bool TestCodeRun::TestEvalOrder() {
        "  $a['foo']['bar']['goo'] = f();"
        "}"
        "foo(new C);");
+
+  MVCR("<?php ;"
+       "class X {"
+       "  function __destruct() { var_dump('done'); }"
+       "}"
+       "function f() {"
+       "  $x = new X;"
+       "}"
+       "function g() {"
+       "  var_dump('start');"
+       "  f();"
+       "  var_dump('end');"
+       "}"
+       "g();");
 
  return true;
 }
@@ -11617,9 +11640,6 @@ bool TestCodeRun::TestExtSoap() {
 }
 
 bool TestCodeRun::TestFiber() {
-  RuntimeOption::FiberCount = 5;
-  FiberAsyncFunc::Restart();
-
   // test parameter and return value passing
   MVCRO("<?php "
         "function fiber($a) { var_dump($a); return 'fiber';}"
@@ -11717,6 +11737,36 @@ bool TestCodeRun::TestFiber() {
         "int(234)\n"
        );
 
+  // test global states
+  MVCRO("<?php "
+        "function fiber() { global $foo; $foo = 456;}"
+        "$foo = 123;"
+        "end_user_func_async(call_user_func_async('fiber'));"
+        "var_dump($foo);",
+
+        "int(456)\n"
+       );
+
+  // test dynamic globals
+  MVCRO("<?php "
+        "function fiber() { $a = 'foo'; global $$a; $$a = 456;}"
+        "$a = 'foo'; $$a = 123;"
+        "end_user_func_async(call_user_func_async('fiber'));"
+        "var_dump($$a);",
+
+        "int(456)\n"
+       );
+
+  // test static variables
+  MVCRO("<?php "
+        "function fiber() { static $a = 123; var_dump(++$a); }"
+        "end_user_func_async(call_user_func_async('fiber'));"
+        "fiber();",
+
+        "int(124)\n"
+        "int(125)\n"
+       );
+
   return true;
 }
 
@@ -11772,6 +11822,73 @@ bool TestCodeRun::TestAPC() {
         "int(100)\n"
       );
 
+  return true;
+}
+
+bool TestCodeRun::TestInlining() {
+  bool save = Option::AutoInline++;
+
+  MVCR("<?php "
+       "function id($x) {"
+       " return $x;"
+       " }"
+       "class X {"
+       "  public function f() { return 'hello'; }"
+       "}"
+       "function test($a, $b) {"
+       "  return $a ? $b : id(new X)->f();"
+       "}"
+       "var_dump(test());");
+
+  MVCR("<?php "
+       "function foo($e='e') {"
+       "  return '<a name=\"'.$e.'\" id=\"'.$e.'\"></a>';"
+       "}"
+       "function test() {"
+       "  echo foo();"
+       "}"
+       "test();");
+
+  MVCR("<?php "
+       "function foo($e, $m) {"
+       "  $_REQUEST['_foo'] = $e;"
+       "  $_REQUEST['_bar'] = $m;"
+       "  return $e;"
+       "}"
+       "function test($x) {"
+       "  return foo('a', $x);"
+       "}"
+       "var_dump(test('b'));");
+
+  MVCR("<?php "
+       "function h() { class X{}; }"
+       "function f($a, $b, $c) { return h(); }"
+       "function g($a, $b, $c) {"
+       "  return f($a++, $b++ + $a++, $c);"
+       "}");
+
+  MVCR("<?php "
+       "function f($name, $unique_id=false, $id=null) {"
+       "  $id = $id ? $id : ($unique_id ? uniqid($name) : $name);"
+       "  return $id;"
+       "  }"
+       "function test($a, $b, $c) {"
+       "  return f($name = 'status', $unique_id = true, $id = 'status_active');"
+       "  }"
+       "var_dump(test(1,2,3));");
+
+  MVCR("<?php "
+      "function g($a) { function t(){}; return $a ? array(1,2,3) : 'foo'; }"
+      "function f($a) { return g($a); }"
+      "function test($a) {"
+      "  return reset((f($a)));"
+      "  }"
+      "var_dump(test(1));"
+      "function &h(&$a) { return $a['foo']; }"
+      "function i($a) { $x = &h($a); $x = 'hello'; return $a; }"
+      "var_dump(i(false));");
+
+  Option::AutoInline = save;
   return true;
 }
 
@@ -11949,18 +12066,18 @@ bool TestCodeRun::TestLateStaticBinding() {
 
   MVCRO("<?php\n"
         "class X {\n"
-        "  static function foo() { echo \"X::foo\n\"; }\n"
-        "  function bar() { $this::foo(); }\n"
+        "  static function foo() { echo \"X::foo\\n\"; }\n"
+        "  function bar() { static::foo(); }\n"
         "}\n"
         "class Y extends X {\n"
-        "  static function foo() { echo \"Y::foo\n\"; }\n"
+        "  static function foo() { echo \"Y::foo\\n\"; }\n"
         "  function baz() { X::bar(); }\n"
         "}\n"
         "$y = new Y;\n"
-        "$y->baz();\n",
+        "$y->baz();\n"
+        "Y::baz();\n",
 
-        "Y::foo\n"
-       );
+        "Y::foo\nX::foo\n");
 
   return true;
 }

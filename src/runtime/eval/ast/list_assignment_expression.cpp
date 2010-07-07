@@ -15,6 +15,8 @@
 */
 
 #include <runtime/eval/ast/list_assignment_expression.h>
+#include <runtime/ext/ext_variable.h>
+#include <runtime/eval/ast/variable_expression.h>
 
 namespace HPHP {
 namespace Eval {
@@ -41,7 +43,7 @@ void SubListElement::set(VariableEnvironment &env, CVarRef val) const {
   for (int i = m_elems.size() - 1; i >= 0; i--) {
     const ListElementPtr &le = m_elems[i];
     if (le) {
-      le->set(env, val.rvalAt(i));
+      le->set(env, val[i]);
     }
   }
 }
@@ -56,9 +58,21 @@ ListAssignmentExpression::ListAssignmentExpression(EXPRESSION_ARGS,
   : Expression(EXPRESSION_PASS), m_lhs(lhs), m_rhs(rhs) {}
 
 Variant ListAssignmentExpression::eval(VariableEnvironment &env) const {
-  Variant rhs(m_rhs->eval(env));
-  m_lhs->set(env, rhs.is(KindOfArray) ? rhs : null_variant);
-  return rhs;
+  const VariableExpression *v =
+    dynamic_cast<const VariableExpression*>(m_rhs.get());
+  if (v) {
+    // Rhs has to be taken as lval if a variable in case there are references
+    // to that variable on the lhs.
+    CVarRef rhs(v->lval(env));
+    Variant tmp(ref(rhs));
+    if (!f_is_array(tmp)) tmp.unset();
+    m_lhs->set(env, tmp);
+    return rhs;
+  } else {
+    Variant rhs(m_rhs->eval(env));
+    m_lhs->set(env, rhs.is(KindOfArray) ? rhs : null_variant);
+    return rhs;
+  }
 }
 
 void ListAssignmentExpression::dump() const {

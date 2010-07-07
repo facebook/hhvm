@@ -610,7 +610,7 @@ static_class_name:
   | T_STATIC                           { _p->onName($$, $1,
                                           Parser::StaticName);}
   | reference_variable                 { _p->onName($$, $1,
-                                          Parser::ExprName);}
+                                          Parser::StaticClassExprName);}
 ;
 fully_qualified_class_name:
     T_STRING                           { $$ = $1;}

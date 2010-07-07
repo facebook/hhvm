@@ -1093,6 +1093,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
       outputCPPLiteralStringPrecomputation();
     }
     outputCPPGlobalState();
+    outputCPPFiberGlobalState();
     outputCPPSepExtensionMake();
   }
   if (Option::GenerateCPPMacros && output != CodeGenerator::SystemCPP) {
@@ -1867,9 +1868,10 @@ void AnalysisResult::outputCPPRedeclaredClassDecl(CodeGenerator &cg) {
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
     const char *name = iter->first.c_str();
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
-      cg_printf("ClassStaticsPtr %s%s;\n", Option::ClassStaticsObjectPrefix,
-                name);
-      cg.printf("ObjectStaticCallbacks * cwo_%s;\n", name);
+      cg_printf("ClassStaticsPtr %s%s;\n",
+                Option::ClassStaticsObjectPrefix, name);
+      cg.printf("ObjectStaticCallbacks * %s%s;\n",
+                Option::ClassStaticsCallbackPrefix, name);
     }
   }
 }
@@ -1881,7 +1883,7 @@ void AnalysisResult::outputCPPRedeclaredClassImpl(CodeGenerator &cg) {
       const char *name = iter->first.c_str();
       cg_printf("%s%s = ClassStaticsPtr(NEW(ClassStatics)(\"%s\"));\n",
                 Option::ClassStaticsObjectPrefix, name, name);
-      cg.printf("cwo_%s = NULL;\n", name);
+      cg.printf("%s%s = NULL;\n", Option::ClassStaticsCallbackPrefix, name);
     }
   }
 }
@@ -2377,6 +2379,9 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
   f.close();
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// output_global_state()
+
 void AnalysisResult::outputCPPGlobalStateBegin(CodeGenerator &cg,
                                                const char *section) {
   cg_indentBegin("static void output_%s(FILE *fp) {\n", section);
@@ -2394,59 +2399,14 @@ void AnalysisResult::outputCPPGlobalStateEnd(CodeGenerator &cg,
   cg_indentEnd("}\n\n");
 }
 
-void AnalysisResult::outputCPPGlobalStateDynamicConstants
-(CodeGenerator &cg) {
-  AnalysisResultPtr ar = shared_from_this();
-  const char *section = "dynamic_constants";
+void AnalysisResult::outputCPPGlobalStateSection
+(CodeGenerator &cg, const StringPairVec &names, const char *section,
+ const char *prefix /* = "g->" */, const char *name_prefix /* = "" */) {
   outputCPPGlobalStateBegin(cg, section);
-  getConstants()->outputCPPGlobalState(cg, ar);
-  for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
-       iter != m_files.end(); ++iter) {
-    iter->second->getConstants()->outputCPPGlobalState(cg, ar);
-  }
-  outputCPPGlobalStateEnd(cg, section);
-}
-
-void AnalysisResult::outputCPPGlobalStatePseudoMainVariables
-(CodeGenerator &cg) {
-  const char *section = "pseudomain_variables";
-  outputCPPGlobalStateBegin(cg, section);
-  BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
-    cg_printf("%s.set(\"run_%s%s\", g->run_%s%s);\n", section,
-              Option::PseudoMainPrefix, f->pseudoMainName().c_str(),
-              Option::PseudoMainPrefix, f->pseudoMainName().c_str());
-  }
-  outputCPPGlobalStateEnd(cg, section);
-}
-
-void AnalysisResult::outputCPPGlobalStateRedeclaredFunctions
-(CodeGenerator &cg) {
-  const char *section = "redeclared_functions";
-  outputCPPGlobalStateBegin(cg, section);
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
-         m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
-    const char *name = iter->first.c_str();
-    if (iter->second[0]->isRedeclaring()) {
-      cg_printf("%s.set(\"%s%s\", (int64)g->%s%s);\n", section,
-                Option::InvokePrefix, name, Option::InvokePrefix, name);
-    }
-  }
-  outputCPPGlobalStateEnd(cg, section);
-}
-
-void AnalysisResult::outputCPPGlobalStateRedeclaredClasses
-(CodeGenerator &cg) {
-  const char *section = "redeclared_classes";
-  outputCPPGlobalStateBegin(cg, section);
-  for (StringToClassScopePtrVecMap::const_iterator iter =
-         m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
-    const char *name = iter->first.c_str();
-    if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
-      cg_printf("%s.set(\"%s%s\", g->%s%s->getRedeclaringId());\n",
-                section,
-                Option::ClassStaticsObjectPrefix, name,
-                Option::ClassStaticsObjectPrefix, name);
-    }
+  for (unsigned int i = 0; i < names.size(); i++) {
+    cg_printf("%s.set(\"%s%s\", %s%s%s);\n", section,
+              name_prefix, names[i].first.c_str(),
+              prefix, name_prefix, names[i].second.c_str());
   }
   outputCPPGlobalStateEnd(cg, section);
 }
@@ -2474,11 +2434,33 @@ void AnalysisResult::outputCPPGlobalState() {
   cg_printf("echo(s);\n");
   cg_indentEnd("}\n");
 
-  outputCPPGlobalStateDynamicConstants(cg);
-  getVariables()->outputCPPGlobalState(cg, ar);
-  outputCPPGlobalStatePseudoMainVariables(cg);
-  outputCPPGlobalStateRedeclaredFunctions(cg);
-  outputCPPGlobalStateRedeclaredClasses(cg);
+  StringPairVecVec symbols(GlobalSymbolTypeCount);
+  getVariables()->collectCPPGlobalSymbols(symbols, cg, ar);
+  collectCPPGlobalSymbols(symbols, cg);
+
+  outputCPPGlobalStateSection(cg, symbols[KindOfStaticGlobalVariable],
+                              "static_global_variables");
+
+  const char *section = "dynamic_global_variables";
+  ar->outputCPPGlobalStateBegin(cg, section);
+  cg_printf("%s = *get_variable_table();\n", section);
+  ar->outputCPPGlobalStateEnd(cg, section);
+
+  outputCPPGlobalStateSection(cg, symbols[KindOfMethodStaticVariable],
+                              "method_static_variables");
+  outputCPPGlobalStateSection(cg, symbols[KindOfMethodStaticVariable],
+                              "method_static_inited", "g->",
+                              Option::InitPrefix);
+  outputCPPGlobalStateSection(cg, symbols[KindOfClassStaticVariable],
+                              "class_static_variables");
+  outputCPPGlobalStateSection(cg, symbols[KindOfDynamicConstant],
+                              "dynamic_constants");
+  outputCPPGlobalStateSection(cg, symbols[KindOfPseudoMain],
+                              "pseudomain_variables");
+  outputCPPGlobalStateSection(cg, symbols[KindOfRedeclaredFunction],
+                              "redeclared_functions", "(int64)g->");
+  outputCPPGlobalStateSection(cg, symbols[KindOfRedeclaredClassId],
+                              "redeclared_classes");
 
   cg_indentBegin("void output_global_state(FILE *fp) {\n");
   cg_printf("output_static_global_variables(fp);\n");
@@ -2495,6 +2477,219 @@ void AnalysisResult::outputCPPGlobalState() {
   cg.namespaceEnd();
   f.close();
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// fiber_marshal/unmarshal_global_state()
+
+void AnalysisResult::collectCPPGlobalSymbols(StringPairVecVec &symbols,
+                                             CodeGenerator &cg) {
+  AnalysisResultPtr ar = shared_from_this();
+
+  // dynamic constants
+  StringPairVec *names = &symbols[KindOfDynamicConstant];
+  getConstants()->collectCPPGlobalSymbols(*names, cg, ar);
+  for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
+       iter != m_files.end(); ++iter) {
+    iter->second->getConstants()->collectCPPGlobalSymbols(*names, cg, ar);
+  }
+
+  // pseudomain variables
+  names = &symbols[KindOfPseudoMain];
+  BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
+    string name = string("run_") + Option::PseudoMainPrefix +
+      f->pseudoMainName();
+    names->push_back(pair<string, string>(name, name));
+  }
+
+  // redeclared functions
+  names = &symbols[KindOfRedeclaredFunction];
+  for (StringToFunctionScopePtrVecMap::const_iterator iter =
+         m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
+    const char *name = iter->first.c_str();
+    if (iter->second[0]->isRedeclaring()) {
+      string varname = string(Option::InvokePrefix) + name;
+      names->push_back(pair<string, string>(varname, varname));
+    }
+  }
+
+  // redeclared classes
+  names = &symbols[KindOfRedeclaredClassId];
+  for (StringToClassScopePtrVecMap::const_iterator iter =
+         m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
+    const char *name = iter->first.c_str();
+    if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
+      string varname = string(Option::ClassStaticsObjectPrefix) + name;
+      string memname = varname + "->getRedeclaringId()";
+      names->push_back(pair<string, string>(varname, memname));
+    }
+  }
+  names = &symbols[KindOfRedeclaredClass];
+  for (StringToClassScopePtrVecMap::const_iterator iter =
+         m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
+    const char *name = iter->first.c_str();
+    if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
+      string varname = string(Option::ClassStaticsObjectPrefix) + name;
+      names->push_back(pair<string, string>(varname, varname));
+      varname = string(Option::ClassStaticsCallbackPrefix) + name;
+      names->push_back(pair<string, string>(varname, varname));
+    }
+  }
+
+  // volatile classes
+  names = &symbols[KindOfVolatileClass];
+  for (StringToClassScopePtrVecMap::const_iterator iter =
+         m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
+    const char *name = iter->first.c_str();
+    if (iter->second.size() && iter->second[0]->isVolatile()) {
+      string varname = string("CDEC(") + name + ")";
+      names->push_back(pair<string, string>(varname, varname));
+    }
+  }
+
+  // classes that need lazy static initializer
+  names = &symbols[KindOfLazyStaticInitializer];
+  for (StringToClassScopePtrVecMap::const_iterator iter =
+         m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
+    const char *name = iter->first.c_str();
+    if (iter->second.size() && iter->second[0]->needLazyStaticInitializer()) {
+      string varname = string(Option::ClassStaticInitializerFlagPrefix) + name;
+      names->push_back(pair<string, string>(varname, varname));
+    }
+  }
+}
+
+void AnalysisResult::outputCPPFiberGlobalState() {
+  string filename = m_outputPath + "/" + Option::SystemFilePrefix +
+    "global_state_fiber.no.cpp";
+  Util::mkdir(filename);
+  ofstream f(filename.c_str());
+  CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
+  AnalysisResultPtr ar = shared_from_this();
+
+  cg_printf("\n");
+  cg_printInclude("<runtime/base/hphp.h>");
+  cg_printInclude("<runtime/base/fiber_reference_map.h>");
+  cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
+  cg_printf("\n");
+  cg_printf("using namespace std;\n");
+  cg.namespaceBegin();
+
+  StringPairVecVec symbols(GlobalSymbolTypeCount);
+  getVariables()->collectCPPGlobalSymbols(symbols, cg, ar);
+  collectCPPGlobalSymbols(symbols, cg);
+
+  // generate a map from symbol name to its numeric index
+  int index = 0;
+  cg_printf("static hphp_const_char_map<int> s_gsmap;\n");
+  cg_indentBegin("class GlobalSymbolMapInitializer {\n");
+  cg_indentBegin("public: GlobalSymbolMapInitializer() {\n");
+
+  cg_indentBegin("static const char *names[] = {\n");
+  for (int i = 0; i < GlobalSymbolTypeCount; i++) {
+    StringPairVec &names = symbols[i];
+    for (unsigned int j = 0; j < names.size(); j++) {
+      cg_printf("\"%s\",\n", names[j].first.c_str());
+      index++;
+    }
+  }
+  cg_indentEnd("};\n");
+
+  cg_printf("int index = 0;\n");
+  cg_indentBegin("for (const char **p = names; *p; p++) {\n");
+  cg_printf("s_gsmap[*p] = index++;\n");
+  cg_indentEnd("}\n");
+
+  cg_indentEnd("}\n");
+  cg_indentEnd("};\n");
+  cg_printf("static GlobalSymbolMapInitializer s_gsmap_initializer;\n\n");
+
+  // generate fiber_marshal_global_state()
+  cg_indentBegin("void fiber_marshal_global_state"
+                 "(GlobalVariables *g1, GlobalVariables *g2,\n"
+                 " FiberReferenceMap &refMap) {\n");
+  for (int type = 0; type < GlobalSymbolTypeCount; type++) {
+    if (type == KindOfRedeclaredClassId) continue;
+
+    StringPairVec &names = symbols[type];
+    for (unsigned int i = 0; i < names.size(); i++) {
+      const char *name = names[i].second.c_str();
+      switch (type) {
+        case KindOfMethodStaticVariable:
+          cg_printf("refMap.marshal(g1->inited_%s, g2->inited_%s);\n",
+                    name, name);
+          cg_printf("refMap.marshal(g1->%s, g2->%s);\n", name, name);
+          break;
+        default:
+          cg_printf("refMap.marshal(g1->%s, g2->%s);\n", name, name);
+          break;
+      }
+    }
+  }
+  cg_printf("refMap.marshal((Array&)(*g1), (Array&)(*g2));\n");
+  cg_indentEnd("}\n");
+
+  // generate fiber_unmarshal_global_state()
+  cg_indentBegin("void fiber_unmarshal_global_state"
+                 "(GlobalVariables *g1, GlobalVariables *g2,\n"
+                 " FiberReferenceMap &refMap, char default_strategy,\n"
+                 " const vector<pair<string, char> > &resolver) {\n");
+  cg_printf("hphp_string_map<char> strategies;\n");
+  cg_printf("char r[%d]; memset(r, default_strategy, sizeof(r));\n", index);
+  cg_indentBegin("for (unsigned int i = 0; i < resolver.size(); i++) {\n");
+  cg_printf("hphp_const_char_map<int>::const_iterator it =\n");
+  cg_printf("  s_gsmap.find(resolver[i].first.c_str());\n");
+  cg_printf("if (it != s_gsmap.end()) r[it->second] = resolver[i].second;\n");
+  cg_printf("else strategies[resolver[i].first] = resolver[i].second;\n");
+  cg_indentEnd("}\n");
+  cg_printf("\n");
+  index = 0;
+  for (int type = 0; type < GlobalSymbolTypeCount; type++) {
+    if (type == KindOfRedeclaredClassId) continue;
+
+    StringPairVec &names = symbols[type];
+    for (unsigned int i = 0; i < names.size(); i++) {
+      const char *name = names[i].second.c_str();
+      switch (type) {
+        case KindOfRedeclaredFunction:
+          cg_printf("if (g2->%s) g1->%s = g2->%s;\n", name, name, name);
+          break;
+        case KindOfRedeclaredClass:
+          if (strncmp(name, "cso_", 4)) {
+            cg_printf("if (g2->%s) g1->%s = g2->%s;\n", name, name, name);
+          } else {
+            cg_printf("if (g2->%s.get()) g1->%s = g2->%s;\n",name, name, name);
+          }
+          break;
+        case KindOfPseudoMain:
+        case KindOfVolatileClass:
+        case KindOfLazyStaticInitializer:
+          cg_printf("if (g2->%s) g1->%s = true;\n", name, name);
+          break;
+        case KindOfMethodStaticVariable:
+          cg_indentBegin("if (toBoolean(g2->inited_%s)) {", name);
+          cg_printf("refMap.unmarshal(g1->%s, g2->%s, r[%d]);\n",
+                    name, name, index);
+          cg_printf("refMap.unmarshal(g1->inited_%s, g2->inited_%s, r[%d]);\n",
+                    name, name, index);
+          cg_indentEnd("}\n");
+          break;
+        default:
+          cg_printf("refMap.unmarshal(g1->%s, g2->%s, r[%d]);\n",
+                    name, name, index);
+      }
+      index++;
+    }
+  }
+  cg_printf("refMap.unmarshalDynamicGlobals((Array&)(*g1), (Array&)(*g2),"
+            " default_strategy, strategies);\n");
+  cg_indentEnd("}\n");
+
+
+  cg.namespaceEnd();
+  f.close();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 void AnalysisResult::outputCPPMain() {
   string mainPath = m_outputPath + "/" + Option::SystemFilePrefix +

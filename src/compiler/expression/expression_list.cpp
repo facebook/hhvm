@@ -343,7 +343,7 @@ TypePtr ExpressionList::inferTypes(AnalysisResultPtr ar, TypePtr type,
     bool c = coerce && (!commaList || i == ix);
     if (ExpressionPtr e = m_exps[i]) {
       e->inferAndCheck(ar, t, c);
-      if (commaList && i  == ix) {
+      if (commaList && i == ix) {
         e->setExpectedType(TypePtr());
         type = e->getType();
       }

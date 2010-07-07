@@ -223,6 +223,8 @@ void Parser::onName(Token &out, Token &name, Parser::NameKind kind) {
     out->name() = Name::fromString(this, name.getText());
   } else if (kind == ExprName) {
     out->name() = Name::fromExp(this, name->exp());
+  } else if (kind == StaticClassExprName) {
+    out->name() = Name::fromStaticClassExp(this, name->exp());
   } else if (kind == StaticName) {
     out->name() = Name::LateStatic(this);
   }

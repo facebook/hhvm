@@ -197,11 +197,11 @@ Object &FrameInjection::getThisForArrow() {
 String FrameInjection::GetStaticClassName(ThreadInfo *info) {
   if (!info) info = ThreadInfo::s_threadInfo.get();
   for (FrameInjection *t = info->m_top; t; t = t->m_prev) {
+    if (t == info->m_top && !t->m_object.isNull() && t->m_object->o_getId()) {
+      return t->m_object->o_getClassName();
+    }
     if (!t->m_staticClass.empty()) {
       return t->m_staticClass;
-    }
-    if (!t->m_object.isNull()) {
-      return t->m_object->o_getClassName();
     }
     if (t != info->m_top && !t->m_callingObject.isNull()) {
       return t->m_callingObject->o_getClassName();

@@ -55,25 +55,24 @@ please read on for call_user_func_async() series.
 
 3. call_user_func_async() and call_user_func_array_async()
 
-This is only a proposal now. Basically we want to be able to "fork" program
-into 2 or more threads at any time point of the execution from the same set
-of global states, then "join" when a thread finishes its execution. So it will
-look like this,
+"Fork" program into 2 or more threads at any time point of the execution from
+the same set of global states, then "join" when thread finishes its execution.
 
   // This is non-blocking, and global states will be duplicated here.
   $handle = <b>call_user_func_async</b>($func, $param1, $param2, ...);
   // Main thread can now do extra work while the other thread is running.
   do_main_thread_jobs();
-  $ret = <b>end_user_func_async</b>($handle, $strategy, $resolver);
+  $ret = <b>end_user_func_async</b>($handle, $default_strategy,
+                                    $additional_strategies);
 
 Please note that global states will be duplicated when call_user_func_async()
 is called, so that each thread (the main thread and the new thread) will have
 its own copy of the states. From then on, they never share anything (other than
 APC). When end_user_func_async() is called, the global state of the new
-thread will be "merged" back into main thread's depending on how options are
+thread will be "merged" back into main thread's depending on how strategies are
 specified.
 
-$strategy can be,
+$default_strategy can be,
 
 (1) GLOBAL_STATE_IGNORE
 
@@ -81,44 +80,40 @@ In this case, new thread's modifications of global states will be thrown away.
 
 (2) GLOBAL_STATE_OVERWRITE (default)
 
-In this case, new thread's modifications of global states will be merged into
-main thread's, and when there is a conflict, new thread's state will overwrite
-main thread's.
+In this case, new thread's modifications of global states will entirely
+replace main thread's.
 
 (3) GLOBAL_STATE_SKIP
 
 In this case, new thread's modifications of global states will be merged into
 main thread's, and when there is a conflict, new thread's state will not be
-merged at all.
+merged at all. "Conflict" is currently only defined as an array having the same
+first level key with different values. Then the new value under the key will
+be skipped. For example, if main thread has array('a' => 1, 'b' => 2) and
+new thread has array('a' => 3, 'b' => 4), after merge it would become
+array('a' => 1, 'b' => 4). Note that this is NOT recursive and it only applies
+to first level keys.
 
-(4) GLOBAL_STATE_RESOLVE_CONFLICT
+$additional_strategies can be used to specify finer granularity rules:
 
-In this case, new thread's modifications of global states will be merged into
-main thread's, and when there is a conflict, a PHP function can be provided to
-resolve the conflict. For example,
+  array({global symbol type} => array({name} => {strategy}, ...), ...);
 
-  $ret = <b>end_user_func_async</b>
-    ($handle, GLOBAL_STATE_RESOLVE_CONFLICT, 'my_merge_conflict_resolver'));
-  ...
-  function my_merge_conflict_resolver($name, &$value, $new_value) {
-    if ($name == 'CACHE') {
-      $value = $new_value; // same as GLOBAL_STATE_OVERWRITE
-    } else if ($name == 'user_id') {
-      // do nothing, same as GLOBAL_STATE_SKIP
-    } else if (is_array($value)) {
-      $value = array_merge($value, $new_value);
-    }
-  }
+where {global symbol type} can be any one of these,
 
-The global state is actually more complicated than just global variables. It
-also includes,
+- GLOBAL_SYMBOL_GLOBAL_VARIABLE
+- GLOBAL_SYMBOL_STATIC_VARIABLE
+- GLOBAL_SYMBOL_CLASS_STATIC
+- GLOBAL_SYMBOL_DYNAMIC_CONSTANT
+- GLOBAL_SYMBOL_FILE_INCLUDE
+- GLOBAL_SYMBOL_REDECLARED_FUNCTION
+- GLOBAL_SYMBOL_REDECLARED_CLASS
 
-- dynamic constants
-- function/method static variables
-- class static variables
-- files includes
-- redeclared functions
-- redeclared classes
+For example,
 
-Modifications to these states are all thrown away, without changing main
-thread's.
+  end_user_func_async($handle, GLOBAL_STATE_IGNORE,
+        array(GLOBAL_SYMBOL_GLOBAL_VARIABLE =>
+                array('CACHE' => GLOBAL_STATE_SKIP)));
+
+This will ignore all modifications from a new thread, except $GLOBALS['CACHE'],
+which will merge any values under $GLOBALS['CACHE'][$key] that are not present
+in main thread.

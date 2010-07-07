@@ -95,6 +95,7 @@ const char *Option::SystemScalarArrayName = "ssa_";
 const char *Option::ClassPrefix = "c_";
 const char *Option::ClassStaticsPrefix = "cs_";
 const char *Option::ClassStaticsObjectPrefix = "cso_";
+const char *Option::ClassStaticsCallbackPrefix = "cwo_";
 const char *Option::ClassStaticsIdGetterPrefix = "csig_";
 const char *Option::ClassStaticInitializerPrefix = "csi_";
 const char *Option::ClassStaticInitializerFlagPrefix = "csf_";
@@ -143,8 +144,6 @@ std::string Option::RTTIDirectory;
 bool Option::GenRTTIProfileData = false;
 bool Option::UseRTTIProfileData = false;
 
-bool Option::StaticMethodAutoFix = false;
-
 bool Option::GenerateCPPMacros = true;
 bool Option::GenerateCPPMain = false;
 bool Option::GenerateCPPComments = true;
@@ -180,6 +179,12 @@ StringBag Option::OptionStrings;
 
 bool Option::GenerateSourceInfo = false;
 bool Option::UseVirtualDispatch = false;
+
+bool Option::EliminateDeadCode = true;
+bool Option::LocalCopyProp = true;
+bool Option::StringLoopOpts = true;
+bool Option::AutoInline = false;
+
 bool Option::FlAnnotate = false;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -254,6 +259,7 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(ClassPrefix);
     READ_CG_OPTION(ClassStaticsPrefix);
     READ_CG_OPTION(ClassStaticsObjectPrefix);
+    READ_CG_OPTION(ClassStaticsCallbackPrefix);
     READ_CG_OPTION(ClassStaticsIdGetterPrefix);
     READ_CG_OPTION(ClassStaticInitializerPrefix);
     READ_CG_OPTION(ClassStaticInitializerFlagPrefix);
@@ -331,6 +337,11 @@ void Option::Load(Hdf &config) {
 
   GenerateSourceInfo = config["GenerateSourceInfo"].getBool(false);
   UseVirtualDispatch = config["UseVirtualDispatch"].getBool(false);
+
+  EliminateDeadCode  = config["EliminateDeadCode"].getBool(true);
+  LocalCopyProp      = config["LocalCopyProp"].getBool(true);
+  StringLoopOpts     = config["StringLoopOpts"].getBool(true);
+  AutoInline         = config["AutoInline"].getBool(false);
 
   OnLoad();
 }

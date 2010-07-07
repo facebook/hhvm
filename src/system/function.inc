@@ -6,7 +6,7 @@
 "call_user_func", T(Variant), S(0), "function", T(Variant), NULL, S(0), NULL, S(16), 
 "call_user_func_array_async", T(Object), S(0), "function", T(Variant), NULL, S(0), "params", T(Array), NULL, S(0), NULL, S(0), 
 "call_user_func_async", T(Object), S(0), "function", T(Variant), NULL, S(0), NULL, S(16), 
-"end_user_func_async", T(Variant), S(0), "handle", T(Object), NULL, S(0), "strategy", T(Int32), "k_GLOBAL_STATE_OVERWRITE", S(0), "resolver", T(Variant), "null", S(0), NULL, S(0), 
+"end_user_func_async", T(Variant), S(0), "handle", T(Object), NULL, S(0), "default_strategy", T(Int32), "k_GLOBAL_STATE_OVERWRITE", S(0), "additional_strategies", T(Variant), "null", S(0), NULL, S(0), 
 "forward_static_call_array", T(Variant), S(0), "function", T(Variant), NULL, S(0), "params", T(Array), NULL, S(0), NULL, S(0), 
 "forward_static_call", T(Variant), S(0), "function", T(Variant), NULL, S(0), NULL, S(16), 
 "create_function", T(String), S(0), "args", T(String), NULL, S(0), "code", T(String), NULL, S(0), NULL, S(0), 

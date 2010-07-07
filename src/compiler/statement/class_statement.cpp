@@ -381,8 +381,10 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                 Option::ClassStaticsObjectPrefix,
                 cg.formatLabel(m_name).c_str(),
                 Option::ClassStaticsPrefix, classScope->getId(cg).c_str());
-      cg_printf("g->cwo_%s = &cw_%s;\n",
+      cg_printf("g->%s%s = &%s%s;\n",
+                Option::ClassStaticsCallbackPrefix,
                 cg.formatLabel(m_name).c_str(),
+                Option::ClassWrapperFunctionPrefix,
                 classScope->getId(cg).c_str());
     }
     if (classScope->isVolatile()) {

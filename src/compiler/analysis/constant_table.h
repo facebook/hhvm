@@ -81,7 +81,9 @@ public:
   void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPDynamicDecl(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPDynamicImpl(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPGlobalState(CodeGenerator &cg, AnalysisResultPtr ar);
+
+  void collectCPPGlobalSymbols(StringPairVec &symbols, CodeGenerator &cg,
+                               AnalysisResultPtr ar);
 
   /**
    * Only used by redeclared classes

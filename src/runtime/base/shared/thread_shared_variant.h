@@ -94,7 +94,7 @@ private:
     ThreadSharedVariant **keys;
     ThreadSharedVariant **vals;
 
-    MapData(size_t s) : size(s) {
+    MapData(size_t s) : size(s), intMap(s), strMap(s) {
       keys = new ThreadSharedVariant *[s];
       vals = new ThreadSharedVariant *[s];
     }

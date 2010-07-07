@@ -60,9 +60,9 @@ inline Object x_call_user_func_async(int _argc, CVarRef function, CArrRef _argv 
   return f_call_user_func_async(_argc, function, _argv);
 }
 
-inline Variant x_end_user_func_async(CObjRef handle, int strategy = k_GLOBAL_STATE_OVERWRITE, CVarRef resolver = null) {
+inline Variant x_end_user_func_async(CObjRef handle, int default_strategy = k_GLOBAL_STATE_OVERWRITE, CVarRef additional_strategies = null) {
   FUNCTION_INJECTION_BUILTIN(end_user_func_async);
-  return f_end_user_func_async(handle, strategy, resolver);
+  return f_end_user_func_async(handle, default_strategy, additional_strategies);
 }
 
 inline Variant x_forward_static_call_array(CVarRef function, CArrRef params) {

@@ -38,6 +38,7 @@
 #include <cls/filteriterator.h>
 #include <php/classes/arrayaccess.h>
 #include <php/classes/splfile.h>
+#include <php/classes/exception.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

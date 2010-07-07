@@ -56,6 +56,7 @@ FORWARD_DECLARE_CLASS(filteriterator)
 ///////////////////////////////////////////////////////////////////////////////
 }
 #include <php/classes/arrayaccess.fw.h>
+#include <php/classes/exception.fw.h>
 #include <php/classes/splfile.fw.h>
 #include <php/globals/constants.fw.h>
 

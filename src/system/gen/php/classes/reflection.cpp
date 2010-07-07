@@ -3919,7 +3919,7 @@ void c_reflectionclass::t___construct(Variant v_name) {
   }
   else {
     {
-      if (!(toBoolean(x_call_user_func(2, "class_exists", Array(ArrayInit(1, true).setRef(0, v_name).create())))) && !(toBoolean(x_call_user_func(2, "interface_exists", Array(ArrayInit(1, true).setRef(0, v_name).create()))))) {
+      if ((!(toBoolean(x_call_user_func(2, "class_exists", Array(ArrayInit(1, true).setRef(0, v_name).create())))) && !(toBoolean(x_call_user_func(2, "interface_exists", Array(ArrayInit(1, true).setRef(0, v_name).create())))))) {
         {
           {
             c_reflectionexception *tmp12 = NEWOBJ(c_reflectionexception)();
@@ -3994,7 +3994,7 @@ bool c_reflectionclass::t_test(CVarRef v_what, CVarRef v_name) {
     const Variant &tmp21((t_fetch(v_what)));
     (v_v = tmp21);
   }
-  return toBoolean(v_v) && isset(v_v, v_name);
+  return (toBoolean(v_v) && isset(v_v, v_name));
 } /* function */
 /* SRC: classes/reflection.php line 255 */
 String c_reflectionclass::t___tostring() {
@@ -4163,7 +4163,7 @@ Array c_reflectionclass::t_getmethods(CVarRef v_filter //  = 65535LL
           const p_reflectionmethod &tmp35((t_getmethod(v_name)));
           (v_m = tmp35);
         }
-        if (toBoolean(((bitwise_and(v_filter, 256LL /* reflectionmethod::IS_PUBLIC */)))) && v_m->t_ispublic() || toBoolean(((bitwise_and(v_filter, 512LL /* reflectionmethod::IS_PROTECTED */)))) && v_m->t_isprotected() || toBoolean(((bitwise_and(v_filter, 1024LL /* reflectionmethod::IS_PRIVATE */)))) && v_m->t_isprivate() || toBoolean(((bitwise_and(v_filter, 1LL /* reflectionmethod::IS_STATIC */)))) && toBoolean(v_m->t_isstatic()) || toBoolean(((bitwise_and(v_filter, 4LL /* reflectionmethod::IS_FINAL */)))) && toBoolean(v_m->t_isfinal()) || ((toBoolean(bitwise_and(v_filter, 2LL /* reflectionmethod::IS_ABSTRACT */)) && toBoolean(v_m->t_isabstract())))) {
+        if (((((((toBoolean(((bitwise_and(v_filter, 256LL /* reflectionmethod::IS_PUBLIC */)))) && v_m->t_ispublic()) || (toBoolean(((bitwise_and(v_filter, 512LL /* reflectionmethod::IS_PROTECTED */)))) && v_m->t_isprotected())) || (toBoolean(((bitwise_and(v_filter, 1024LL /* reflectionmethod::IS_PRIVATE */)))) && v_m->t_isprivate())) || (toBoolean(((bitwise_and(v_filter, 1LL /* reflectionmethod::IS_STATIC */)))) && toBoolean(v_m->t_isstatic()))) || (toBoolean(((bitwise_and(v_filter, 4LL /* reflectionmethod::IS_FINAL */)))) && toBoolean(v_m->t_isfinal()))) || (((toBoolean(bitwise_and(v_filter, 2LL /* reflectionmethod::IS_ABSTRACT */)) && toBoolean(v_m->t_isabstract())))))) {
           {
             v_ret.append((v_m));
           }
@@ -4464,7 +4464,7 @@ Variant c_reflectionclass::t_getstaticproperties() {
 Variant c_reflectionclass::t_getstaticpropertyvalue(CVarRef v_name, CVarRef v_default //  = null_variant
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getStaticPropertyValue);
-  if (t_hasproperty(v_name) && toBoolean(t_getproperty(v_name)->t_isstatic())) {
+  if ((t_hasproperty(v_name) && toBoolean(t_getproperty(v_name)->t_isstatic()))) {
     {
       return x_hphp_get_static_property(toString(m_name), toString(v_name));
     }
@@ -6331,7 +6331,7 @@ void c_reflectionmethod::t___construct(Variant v_cls, Variant v_name) {
   bool oldInCtor = gasInCtor(true);
   Variant v_method;
 
-  if (toBoolean(v_cls) && toBoolean(v_name)) {
+  if ((toBoolean(v_cls) && toBoolean(v_name))) {
     {
       if (!(x_is_object(v_cls))) {
         {
@@ -7232,7 +7232,7 @@ void c_reflectionproperty::t___construct(Variant v_cls, Variant v_name) {
   bool oldInCtor = gasInCtor(true);
   Variant v_prop;
 
-  if (toBoolean(v_cls) && toBoolean(v_name)) {
+  if ((toBoolean(v_cls) && toBoolean(v_name))) {
     {
       if (!(x_is_object(v_cls))) {
         {
@@ -8775,7 +8775,7 @@ void c_reflectionparameter::t___construct(Variant v_func, Variant v_param) {
   bool oldInCtor = gasInCtor(true);
   Variant v_params;
 
-  if (toBoolean(v_func) && toBoolean(v_param)) {
+  if ((toBoolean(v_func) && toBoolean(v_param))) {
     {
       {
         Variant tmp122((v_func. BIND_CLASS_DOT o_invoke_few_args("getParameters", 0x3E62225132C2A32DLL, 0)));

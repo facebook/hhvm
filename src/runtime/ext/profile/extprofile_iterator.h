@@ -60,7 +60,7 @@ inline bool x_hphp_recursiveiteratoriterator_valid(CObjRef obj) {
   return f_hphp_recursiveiteratoriterator_valid(obj);
 }
 
-inline Object x_hphp_directoryiterator___construct(CObjRef obj, CStrRef path) {
+inline bool x_hphp_directoryiterator___construct(CObjRef obj, CStrRef path) {
   FUNCTION_INJECTION_BUILTIN(hphp_directoryiterator___construct);
   return f_hphp_directoryiterator___construct(obj, path);
 }
@@ -105,7 +105,7 @@ inline bool x_hphp_directoryiterator_isdot(CObjRef obj) {
   return f_hphp_directoryiterator_isdot(obj);
 }
 
-inline Object x_hphp_recursivedirectoryiterator___construct(CObjRef obj, CStrRef path, int64 flags) {
+inline bool x_hphp_recursivedirectoryiterator___construct(CObjRef obj, CStrRef path, int64 flags) {
   FUNCTION_INJECTION_BUILTIN(hphp_recursivedirectoryiterator___construct);
   return f_hphp_recursivedirectoryiterator___construct(obj, path, flags);
 }

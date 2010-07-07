@@ -273,10 +273,11 @@ bool f_hphp_recursiveiteratoriterator_valid(CObjRef obj) {
   throw NotImplementedException("this type of iterator");
 }
 
-Object f_hphp_directoryiterator___construct(CObjRef obj, CStrRef path) {
+bool f_hphp_directoryiterator___construct(CObjRef obj, CStrRef path) {
   c_directoryiterator *c_di = obj.getTyped<c_directoryiterator>();
-  c_di->m_rsrc = NEW(DirectoryIterator)(path);
-  return c_di;
+  SmartObject<DirectoryIterator> rsrc = NEW(DirectoryIterator)(path);
+  c_di->m_rsrc = rsrc;
+  return !rsrc->m_dir.isNull();
 }
 
 Variant f_hphp_directoryiterator_key(CObjRef obj) {
@@ -320,11 +321,14 @@ bool f_hphp_directoryiterator_isdot(CObjRef obj) {
   return di->isdot();
 }
 
-Object f_hphp_recursivedirectoryiterator___construct(CObjRef obj, CStrRef path, int64 flags) {
+bool f_hphp_recursivedirectoryiterator___construct(CObjRef obj, CStrRef path,
+    int64 flags) {
   c_recursivedirectoryiterator *c_rdi =
     obj.getTyped<c_recursivedirectoryiterator>();
-  c_rdi->m_rsrc = NEW(RecursiveDirectoryIterator)(path, flags);
-  return c_rdi;
+  SmartObject<RecursiveDirectoryIterator> rsrc =
+    NEW(RecursiveDirectoryIterator)(path, flags);
+  c_rdi->m_rsrc = rsrc;
+  return !rsrc->m_dir.isNull();
 }
 
 Variant f_hphp_recursivedirectoryiterator_key(CObjRef obj) {

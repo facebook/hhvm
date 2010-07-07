@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 266 */
+/* SRC: classes/iterator.php line 272 */
 class c_filteriterator : public ExtObjectData {
   BEGIN_CLASS_MAP(filteriterator)
     PARENT_CLASS(iterator)

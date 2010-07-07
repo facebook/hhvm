@@ -30,7 +30,7 @@ f('hphp_recursiveiteratoriterator_valid', Boolean,
 ///////////////////////////////////////////////////////////////////////////////
 // directoryiterator
 
-f('hphp_directoryiterator___construct', Resource,
+f('hphp_directoryiterator___construct', Boolean,
   array('obj' => Resource, 'path' => String));
 
 f('hphp_directoryiterator_key', Variant,
@@ -60,7 +60,7 @@ f('hphp_directoryiterator_isdot', Boolean,
 ///////////////////////////////////////////////////////////////////////////////
 // recursivedirectoryiterator
 
-f('hphp_recursivedirectoryiterator___construct', Resource,
+f('hphp_recursivedirectoryiterator___construct', Boolean,
   array('obj' => Resource, 'path' => String, 'flags' => Int64));
 
 f('hphp_recursivedirectoryiterator_key', Variant,

@@ -573,7 +573,7 @@ bool c_splobjectstorage::t_contains(CVarRef v_obj) {
 /* SRC: classes/splobjectstorage.php line 43 */
 void c_splobjectstorage::t_attach(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::attach);
-  if (x_is_object(v_obj) && !(t_contains(v_obj))) {
+  if ((x_is_object(v_obj) && !(t_contains(v_obj)))) {
     {
       m_storage.append((v_obj));
     }

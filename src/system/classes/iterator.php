@@ -168,7 +168,10 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
 class DirectoryIterator extends SplFileInfo implements Traversable,
   SeekableIterator {
   public function __construct($path) {
-    hphp_directoryiterator___construct($this, $path);
+    if (!hphp_directoryiterator___construct($this, $path)) {
+      throw new UnexpectedValueException(
+          "DirectoryIterator::__construct($path): failed to open dir");
+    }
   }
 
   public function current() {
@@ -215,7 +218,10 @@ class RecursiveDirectoryIterator extends DirectoryIterator
 
   function __construct($path,
     $flags = RecursiveDirectoryIterator::CURRENT_AS_FILEINFO) {
-    hphp_recursivedirectoryiterator___construct($this, $path, $flags);
+    if (!hphp_recursivedirectoryiterator___construct($this, $path, $flags)) {
+      throw new UnexpectedValueException(
+          "RecursiveDirectoryIterator::__construct($path): failed to open dir");
+    }
   }
 
   function current() {

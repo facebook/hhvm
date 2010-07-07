@@ -4521,14 +4521,14 @@ void c_exception::t___init__() {
           {
             bool tmp4 = (empty(v_top, "class", 0x45397FE5C82CBD12LL, true));
             if (!tmp4) {
-              bool tmp5 = (toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true)), "__init__")) && toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true)), "__construct")));
+              bool tmp5 = ((toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true)), "__init__")) && toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true)), "__construct"))));
               if (tmp5) {
                 String tmp6((toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true))));
                 tmp5 = (toBoolean(x_strcasecmp(tmp6, toString(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)))));
               }
               tmp4 = ((tmp5));
             }
-            tmp3 = (tmp4 || (toBoolean(x_strcasecmp(toString(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)), "exception")) && !(x_is_subclass_of(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true), "exception"))));
+            tmp3 = ((tmp4 || ((toBoolean(x_strcasecmp(toString(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)), "exception")) && !(x_is_subclass_of(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true), "exception"))))));
           }
           if (tmp3) {
             {

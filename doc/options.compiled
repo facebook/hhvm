@@ -204,6 +204,12 @@ How long to wait for dangling server to respond.
 
     # HTTP settings
     GzipCompressionLevel = 3
+    ForceCompression {
+      # force response to be compressed, even if there isn't accept-encoding
+      URL =         # if URL perfectly matches this
+      Cookie =      # if this cookie is present: "name" or "name=value"
+      Param =       # if this parameter in query string is present
+    }
     EnableMagicQuotesGpc = false
     EnableKeepAlive = true
     EnableOutputBuffering = false

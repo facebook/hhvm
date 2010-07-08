@@ -399,7 +399,7 @@ void HttpProtocol::DecodeCookies(Variant &variables, char *data) {
         if (RuntimeOption::EnableMagicQuotesGpc) {
           char *slashedvalue = string_addslashes(value, len);
           free(value);
-        value = slashedvalue;
+          value = slashedvalue;
         }
         String svalue(value, len, AttachString);
 

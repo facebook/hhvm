@@ -36,7 +36,8 @@ Transport::Transport()
   : m_url(NULL), m_postData(NULL), m_postDataParsed(false),
     m_chunkedEncoding(false), m_headerSent(false),
     m_responseCode(-1), m_responseSize(0), m_sendContentType(true),
-    m_compression(true), m_compressor(NULL), m_threadType(RequestThread) {
+    m_compression(true), m_compressor(NULL),
+    m_compressionDecision(ShouldNotCompress), m_threadType(RequestThread) {
 }
 
 Transport::~Transport() {
@@ -370,6 +371,47 @@ bool Transport::acceptEncoding(const char *encoding) {
   return header.find(encoding) != string::npos;
 }
 
+bool Transport::cookieExists(const char *name) {
+  ASSERT(name && *name);
+  string header = getHeader("Cookie");
+  int len = strlen(name);
+  bool hasValue = (strchr(name, '=') != NULL);
+  for (size_t pos = header.find(name); pos != string::npos;
+       pos = header.find(name, pos)) {
+    if (pos == 0 || isspace(header[pos-1]) || header[pos-1] == ';') {
+      pos += len;
+      if (hasValue) {
+        if (pos == header.size() || header[pos] == ';') return true;
+      } else {
+        if (header[pos] == '=') return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool Transport::decideCompression() {
+  ASSERT(m_compressionDecision == ShouldNotCompress);
+
+  if (!RuntimeOption::ForceCompressionURL.empty() &&
+      getCommand() == RuntimeOption::ForceCompressionURL) {
+    m_compressionDecision = HasToCompress;
+    return true;
+  }
+
+  if (acceptEncoding("gzip") ||
+      (!RuntimeOption::ForceCompressionCookie.empty() &&
+       cookieExists(RuntimeOption::ForceCompressionCookie.c_str())) ||
+      (!RuntimeOption::ForceCompressionParam.empty() &&
+       paramExists(RuntimeOption::ForceCompressionParam.c_str()))) {
+    m_compressionDecision = ShouldCompress;
+    return true;
+  }
+
+  m_compressionDecision = ShouldNotCompress;
+  return false;
+}
+
 std::string Transport::getHTTPVersion() const {
   return "1.1";
 }
@@ -498,23 +540,27 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
   // we don't use chunk encoding to send anything pre-compressed
   ASSERT(!compressed || !m_chunkedEncoding);
 
-  if (compressed || !isCompressionEnabled() || !acceptEncoding("gzip")) {
+  if (compressed || !isCompressionEnabled() ||
+      m_compressionDecision == ShouldNotCompress) {
     return response;
   }
 
   // There isn't that much need to gzip response, when it can fit into one
   // Ethernet packet (1500 bytes), unless we are doing chunked encoding,
   // where we don't really know if next chunk will benefit from compresseion.
-  if (m_chunkedEncoding || size > 1000) {
+  if (m_chunkedEncoding || size > 1000 ||
+      m_compressionDecision == HasToCompress) {
     if (m_compressor == NULL) {
       m_compressor = new StreamCompressor(RuntimeOption::GzipCompressionLevel,
                                          CODING_GZIP, true);
     }
     int len = size;
-    char *compressedData = m_compressor->compress((const char*)data, len, last);
+    char *compressedData =
+      m_compressor->compress((const char*)data, len, last);
     if (compressedData) {
       String deleter(compressedData, len, AttachString);
-      if (m_chunkedEncoding || len < size) {
+      if (m_chunkedEncoding || len < size ||
+          m_compressionDecision == HasToCompress) {
         response = deleter;
         compressed = true;
       }

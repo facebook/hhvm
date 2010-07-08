@@ -248,6 +248,16 @@ public:
   bool acceptEncoding(const char *encoding);
 
   /**
+   * Test whether cookie header has the "name=".
+   */
+  bool cookieExists(const char *name);
+
+  /**
+   * Test whether client is okay to accept compressed response.
+   */
+  bool decideCompression();
+
+  /**
    * Sending back a response.
    */
   void setResponse(int code) { m_responseCode = code;}
@@ -304,6 +314,13 @@ protected:
   bool m_sendContentType;
   bool m_compression;
   StreamCompressor *m_compressor;
+
+  enum CompressionDecision {
+    ShouldNotCompress,
+    ShouldCompress,
+    HasToCompress,
+  };
+  CompressionDecision m_compressionDecision;
 
   ThreadType m_threadType;
 

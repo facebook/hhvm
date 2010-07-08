@@ -84,6 +84,9 @@ public:
   static bool ServerHarshShutdown;
   static bool ServerEvilShutdown;
   static int GzipCompressionLevel;
+  static std::string ForceCompressionURL;
+  static std::string ForceCompressionCookie;
+  static std::string ForceCompressionParam;
   static bool EnableMagicQuotesGpc;
   static bool EnableKeepAlive;
   static int ConnectionTimeoutSeconds;

@@ -136,7 +136,9 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   string path = reqURI.path().data();
   string absPath = reqURI.absolutePath().data();
 
-  bool compressed = transport->acceptEncoding("gzip");
+  // determine whether we should compress response
+  bool compressed = transport->decideCompression();
+
   const char *data; int len;
   size_t pos = path.rfind('.');
   const char *ext = (pos != string::npos) ? (path.c_str() + pos + 1) : NULL;

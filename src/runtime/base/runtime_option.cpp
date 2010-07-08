@@ -86,6 +86,9 @@ bool RuntimeOption::ServerHarshShutdown = true;
 bool RuntimeOption::ServerEvilShutdown = true;
 int RuntimeOption::ServerDanglingWait;
 int RuntimeOption::GzipCompressionLevel = 3;
+std::string RuntimeOption::ForceCompressionURL;
+std::string RuntimeOption::ForceCompressionCookie;
+std::string RuntimeOption::ForceCompressionParam;
 bool RuntimeOption::EnableMagicQuotesGpc = false;
 bool RuntimeOption::EnableKeepAlive = true;
 int RuntimeOption::ConnectionTimeoutSeconds = -1;
@@ -457,6 +460,11 @@ void RuntimeOption::Load(Hdf &config) {
       ServerGracefulShutdownWait = ServerDanglingWait;
     }
     GzipCompressionLevel = server["GzipCompressionLevel"].getInt16(3);
+
+    ForceCompressionURL    = server["ForceCompression"]["URL"].getString();
+    ForceCompressionCookie = server["ForceCompression"]["Cookie"].getString();
+    ForceCompressionParam  = server["ForceCompression"]["Param"].getString();
+
     EnableMagicQuotesGpc = server["EnableMagicQuotesGpc"].getBool();
     EnableKeepAlive = server["EnableKeepAlive"].getBool(true);
     ConnectionTimeoutSeconds = server["ConnectionTimeoutSeconds"].getInt16(-1);

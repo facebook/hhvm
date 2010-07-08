@@ -93,8 +93,8 @@ c('SimpleXMLElement', null,
   " public:\n".
   "  Object m_doc;\n".
   "  xmlNodePtr m_node;\n".
-  "  Array m_children;\n".
-  "  Array m_attributes;\n".
+  "  Variant m_children;\n".
+  "  Variant m_attributes;\n".
   "  bool m_is_text;\n".
   "  bool m_free_text;\n".
   "  bool m_is_attribute;\n".

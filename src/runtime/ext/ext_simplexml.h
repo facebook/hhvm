@@ -87,8 +87,8 @@ class c_simplexmlelement : public ExtObjectData {
  public:
   Object m_doc;
   xmlNodePtr m_node;
-  Array m_children;
-  Array m_attributes;
+  Variant m_children;
+  Variant m_attributes;
   bool m_is_text;
   bool m_free_text;
   bool m_is_attribute;

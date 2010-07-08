@@ -456,7 +456,7 @@ Object c_simplexmlelement::t_children(CStrRef ns /* = "" */,
   elem->m_free_text = m_free_text;
   elem->m_is_children = true;
   if (ns.empty()) {
-    elem->m_children = m_children;
+    elem->m_children = ref(m_children);
   } else {
     Array props = Array::Create();
     for (ArrayIter iter(m_children); iter; ++iter) {
@@ -515,11 +515,11 @@ Object c_simplexmlelement::t_attributes(CStrRef ns /* = "" */,
   elem->m_doc = m_doc;
   elem->m_node = m_node;
   elem->m_is_attribute = true;
-  if (!m_attributes.empty()) {
+  if (!m_attributes.toArray().empty()) {
     if (!ns.empty()) {
       elem->m_attributes = collect_attributes(m_node, ns, is_prefix);
     } else {
-      elem->m_attributes = m_attributes;
+      elem->m_attributes = ref(m_attributes);
     }
     elem->m_children.set("@attributes", elem->m_attributes);
   }
@@ -573,6 +573,9 @@ Variant c_simplexmlelement::t_addchild(CStrRef qname,
   }
 
   Object child = create_element(m_doc, newnode, newns, false);
+  if (!m_children.toArray().exists(0)) {
+    m_children.set(0, ""); // so to make sure my "text" is empty
+  }
   m_children.set(newname, child);
   return child;
 }
@@ -652,8 +655,8 @@ Variant c_simplexmlelement::t___get(Variant name) {
     c_simplexmlelement *e = NEW(c_simplexmlelement)();
     e->m_doc = elem->m_doc;
     e->m_node = elem->m_node;
-    e->m_children = elem->m_children;
-    e->m_attributes = elem->m_attributes;
+    e->m_children = ref(elem->m_children);
+    e->m_attributes = ref(elem->m_attributes);
     e->m_is_text = elem->m_is_text;
     e->m_is_property = true;
     return e;
@@ -743,7 +746,8 @@ Variant c_simplexmlelement::t___set(Variant name, Variant value) {
   } else if (m_is_attribute) {
     if (name.isInteger()) {
       raise_warning("Cannot change attribute number %lld when only %d "
-                    "attributes exist", name.toInt64(), m_attributes.size());
+                    "attributes exist", name.toInt64(),
+                    m_attributes.toArray().size());
     } else {
       newnode = (xmlNodePtr)xmlNewProp(m_node, (xmlChar *)sname.data(), sv);
     }
@@ -794,7 +798,7 @@ Variant c_simplexmlelement::t_getiterator() {
 int64 c_simplexmlelement::t_count() {
   INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::count);
   if (m_is_attribute) {
-    return m_attributes.size();
+    return m_attributes.toArray().size();
   }
   if (m_is_property) {
     int64 n = 0; Variant var(this);
@@ -803,7 +807,7 @@ int64 c_simplexmlelement::t_count() {
     }
     return n;
   }
-  return m_children.size();
+  return m_children.toArray().size();
 }
 
 Variant c_simplexmlelement::t___destruct() {
@@ -825,7 +829,7 @@ bool c_simplexmlelement::t_offsetexists(CVarRef index) {
     }
     return false;
   }
-  return m_attributes.exists(index);
+  return m_attributes.toArray().exists(index);
 }
 
 Variant c_simplexmlelement::t_offsetget(CVarRef index) {
@@ -898,7 +902,7 @@ void c_simplexmlelementiterator::reset_iterator(c_simplexmlelement *parent) {
     return;
   }
 
-  if (m_parent->m_children.size() == 1) {
+  if (m_parent->m_children.toArray().size() == 1) {
     ArrayIter iter(m_parent->m_children);
     if (iter.second().isObject()) {
       c_simplexmlelement *elem = iter.second().toObject().

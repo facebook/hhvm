@@ -10031,6 +10031,20 @@ bool TestCodeRun::TestAssignment() {
 }
 
 bool TestCodeRun::TestSimpleXML() {
+  MVCR("<?php\n"
+       "$sxe = new SimpleXMLElement('<image-definition />');\n"
+       "$sxe->addChild('path', 'some/path/to/my.file');\n"
+       "$sxe->addChild('options');\n"
+       "$sxe->options->addChild('paddingbottom', 1);\n"
+       "var_dump((string)$sxe->path);\n"
+       "var_dump((string)$sxe->options->paddingbottom);\n"
+      );
+
+  MVCR("<?php\n"
+       "$x = new SimpleXMLElement('<foo/>');\n"
+       "$x->addChild('bar', 'whoops');\n"
+       "var_dump((string)$x);\n");
+
   MVCR(
     "<?php\n"
     "function convert_simplexml_to_array($sxml) {\n"

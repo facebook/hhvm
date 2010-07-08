@@ -20,7 +20,7 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(Pipe);
+IMPLEMENT_OBJECT_ALLOCATION(Pipe)
 ///////////////////////////////////////////////////////////////////////////////
 
 Pipe::Pipe() {

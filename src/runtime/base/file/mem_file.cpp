@@ -24,7 +24,7 @@ using namespace std;
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(MemFile);
+IMPLEMENT_OBJECT_ALLOCATION(MemFile)
 ///////////////////////////////////////////////////////////////////////////////
 
 MemFile::MemFile()

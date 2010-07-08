@@ -22,7 +22,7 @@ using namespace std;
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(TempFile);
+IMPLEMENT_OBJECT_ALLOCATION(TempFile)
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 

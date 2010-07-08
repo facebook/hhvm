@@ -27,6 +27,7 @@ namespace HPHP {
  * What it takes to connect to a MySQL server.
  */
 DECLARE_BOOST_TYPES(ServerData);
+
 class ServerData {
  public:
   static int DefaultPort;
@@ -146,6 +147,7 @@ class DBConn {
   unsigned int m_connectTimeout;
   unsigned int m_readTimeout;
 
+  DECLARE_BOOST_TYPES(QueryJob);
   class QueryJob {
   public:
     QueryJob(ServerDataPtr server, const std::string sql, int index,
@@ -167,7 +169,6 @@ class DBConn {
     int m_connectTimeout;
     int m_readTimeout;
   };
-  DECLARE_BOOST_TYPES(QueryJob);
 
   class QueryWorker {
   public:

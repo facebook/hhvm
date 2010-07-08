@@ -19,7 +19,7 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(ClassStatics);
+IMPLEMENT_OBJECT_ALLOCATION(ClassStatics)
 ///////////////////////////////////////////////////////////////////////////////
 
 ClassStatics::ClassStatics(int redecId) : m_redecId(redecId) {

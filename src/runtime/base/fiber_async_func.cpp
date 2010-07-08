@@ -317,7 +317,7 @@ private:
   FiberJob *m_job;
 };
 
-IMPLEMENT_OBJECT_ALLOCATION(FiberAsyncFuncHandle);
+IMPLEMENT_OBJECT_ALLOCATION(FiberAsyncFuncHandle)
 
 ///////////////////////////////////////////////////////////////////////////////
 

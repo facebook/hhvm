@@ -159,7 +159,7 @@ typedef std::vector<StringPairVec> StringPairVecVec;
   typedef __gnu_cxx::hash_map<std::string, classname ## Ptr,            \
     string_hash> StringTo ## classname ## PtrMap;                       \
   typedef __gnu_cxx::hash_map<std::string, classname ## PtrVec,         \
-    string_hash> StringTo ## classname ## PtrVecMap;                    \
+    string_hash> StringTo ## classname ## PtrVecMap                     \
 
 #endif
 

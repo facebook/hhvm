@@ -24,7 +24,7 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(TimeZone);
+IMPLEMENT_OBJECT_ALLOCATION(TimeZone)
 ///////////////////////////////////////////////////////////////////////////////
 
 class GuessedTimeZone {

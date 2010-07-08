@@ -1026,7 +1026,7 @@ public:
 
   LibEventHttpClientPtr m_client;
 };
-IMPLEMENT_OBJECT_ALLOCATION(LibEventHttpHandle);
+IMPLEMENT_OBJECT_ALLOCATION(LibEventHttpHandle)
 
 static LibEventHttpClientPtr prepare_client
 (CStrRef url, CStrRef data, CArrRef headers, int timeout,

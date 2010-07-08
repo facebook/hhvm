@@ -61,7 +61,7 @@ Variant ExtFunction::directInvoke(VariableEnvironment &env,
   public:                                                              \
     Variant invokeImpl(VariableEnvironment &env,                       \
                        CArrRef params) const;                          \
-  };
+  }
 
 
 #define EVAL_EXT_DYN(name)                                             \
@@ -72,7 +72,7 @@ Variant ExtFunction::directInvoke(VariableEnvironment &env,
       return invoke(params);                                           \
     }                                                                  \
     Variant invoke(CArrRef params) const;                              \
-  };
+  }
 
 EVAL_EXT(Extract);
 EVAL_EXT(Define);

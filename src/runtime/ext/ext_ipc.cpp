@@ -66,7 +66,7 @@ public:
   // overriding ResourceData
   const char *o_getClassName() const { return "MessageQueue";}
 };
-IMPLEMENT_OBJECT_ALLOCATION(MessageQueue);
+IMPLEMENT_OBJECT_ALLOCATION(MessageQueue)
 
 Variant f_msg_get_queue(int64 key, int64 perms /* = 0666 */) {
   int id = msgget(key, 0);

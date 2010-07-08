@@ -22,9 +22,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_OBJECT_ALLOCATION(DirectoryIterator);
-IMPLEMENT_OBJECT_ALLOCATION(RecursiveDirectoryIterator);
-IMPLEMENT_OBJECT_ALLOCATION(RecursiveIteratorIterator);
+IMPLEMENT_OBJECT_ALLOCATION(DirectoryIterator)
+IMPLEMENT_OBJECT_ALLOCATION(RecursiveDirectoryIterator)
+IMPLEMENT_OBJECT_ALLOCATION(RecursiveIteratorIterator)
 
 // helper
 static RecursiveIteratorIterator *

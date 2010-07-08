@@ -38,11 +38,10 @@ namespace HPHP {
  */
 
 #define IMPLEMENT_DEFAULT_EXTENSION(name)               \
-  class name ## Extension : public Extension {          \
+  static class name ## Extension : public Extension {   \
   public:                                               \
     name ## Extension() : Extension(#name) {}           \
-  };                                                    \
-  static name ## Extension s_ ## name ## _extension;    \
+  } s_ ## name ## _extension
 
 ///////////////////////////////////////////////////////////////////////////////
 

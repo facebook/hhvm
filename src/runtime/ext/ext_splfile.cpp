@@ -22,8 +22,8 @@ namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(SPL);
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_OBJECT_ALLOCATION(SplFileInfo);
-IMPLEMENT_OBJECT_ALLOCATION(SplFileObject);
+IMPLEMENT_OBJECT_ALLOCATION(SplFileInfo)
+IMPLEMENT_OBJECT_ALLOCATION(SplFileObject)
 
 static SplFileInfo *get_splfileinfo(CObjRef obj) {
   c_splfileinfo *c_splfi = obj.getTyped<c_splfileinfo>();

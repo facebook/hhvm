@@ -63,7 +63,7 @@ public:
   LDAP *link;
   Variant rebindproc;
 };
-IMPLEMENT_OBJECT_ALLOCATION(LdapLink);
+IMPLEMENT_OBJECT_ALLOCATION(LdapLink)
 
 class LdapResult : public SweepableResourceData {
 public:
@@ -84,7 +84,7 @@ public:
 
   LDAPMessage *data;
 };
-IMPLEMENT_OBJECT_ALLOCATION(LdapResult);
+IMPLEMENT_OBJECT_ALLOCATION(LdapResult)
 
 class LdapResultEntry : public SweepableResourceData {
 public:
@@ -107,7 +107,7 @@ public:
   LDAPMessage *data;
   BerElement *ber;
 };
-IMPLEMENT_OBJECT_ALLOCATION(LdapResultEntry);
+IMPLEMENT_OBJECT_ALLOCATION(LdapResultEntry)
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -210,7 +210,7 @@ namespace HPHP {
 #define CLASS_CHECK(exp) (checkClassExists(s, g), (exp))
 
 #define IMPLEMENT_CLASS(cls)                                            \
-  IMPLEMENT_OBJECT_ALLOCATION(c_##cls);                                 \
+  IMPLEMENT_OBJECT_ALLOCATION(c_##cls)
 
 //////////////////////////////////////////////////////////////////////////////
 // jump table entries

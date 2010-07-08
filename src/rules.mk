@@ -169,8 +169,12 @@ endif
 
 PREFIX := $(TIMECMD)$(if $(USE_CCACHE), ccache,$(if $(NO_DISTCC),, distcc))
 
-CC = $(PREFIX) gcc
-CXX = $(PREFIX) g++
+ifndef CXX
+CXX = g++
+CC = gcc
+endif
+P_CXX = $(PREFIX) $(CXX)
+P_CC = $(PREFIX) $(CC)
 
 # Both $(CC) and $(CXX) will now generate .d dependency files.
 CPPFLAGS += -MMD -fPIC
@@ -242,7 +246,10 @@ CXXFLAGS += -ftemplate-depth-60
 endif
 
 ifndef NO_WALL
-CXXFLAGS += -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof
+CXXFLAGS += -Wall -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof
+ifeq ($(findstring g++, $(CXX)), g++)
+CXXFLAGS += -Wno-parentheses 
+endif
 endif
 
 ifndef NO_WERROR
@@ -600,19 +607,19 @@ ifdef NOT_NOW
 endif
 
 $(call OBJECT_FILES,$(CXX_NOOPT_SOURCES) $(GENERATED_CXX_NOOPT_SOURCES),cpp): $(OUT_DIR)%.o:%.cpp
-	$(call COMPILE_IT,$(CXX),$(CXXFLAGS))
+	$(call COMPILE_IT,$(P_CXX),$(CXXFLAGS))
 
 $(call OBJECT_FILES,$(CXX_SOURCES) $(GENERATED_CXX_SOURCES),cpp): $(OUT_DIR)%.o:%.cpp
-	$(call COMPILE_IT,$(CXX),$(OPT) $(CXXFLAGS))
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
 
 $(call OBJECT_FILES,$(C_SOURCES) $(GENERATED_C_SOURCES),c): $(OUT_DIR)%.o:%.c
-	$(call COMPILE_IT,$(CC),$(OPT))
+	$(call COMPILE_IT,$(P_CC),$(OPT))
 
 $(call OBJECT_FILES,$(GENERATED_CPP_SOURCES),c): $(OUT_DIR)%.o:%.c
-	$(call COMPILE_IT,$(CXX),$(OPT) $(CXXFLAGS))
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
 
 $(OUT_DIR)%.o:$(OUT_DIR)%.cpp
-	$(call COMPILE_IT,$(CXX),$(OPT) $(CXXFLAGS))
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
 
 .EXPORT_ALL_VARIABLES:;
 unexport CXX_NOOPT_SOURCES CXX_SOURCES C_SOURCES GENERATED_CXX_NOOPT_SOURCES GENERATED_CXX_SOURCES GENERATED_C_SOURCES GENERATED_CPP_SOURCES ALL_SOURCES SOURCES OBJECTS DEPEND_FILES CPPFLAGS CXXFLAGS LDFLAGS PROGRAMS LIB_TARGETS DEP_LIBS
@@ -639,7 +646,7 @@ ifdef SHOW_LINK
 
 $(SHARED_LIB): $(OBJECTS)
 	$(if $(OUT_TOP),cd $(PROJECT_ROOT) &&) \
-		$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,lib$(PROJECT_NAME).so \
+		$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,lib$(PROJECT_NAME).so \
 			-o $(call STRIP_ROOT,$@ $(OBJECTS) $(EXTERNAL))
 
 $(STATIC_LIB): $(OBJECTS)
@@ -655,7 +662,7 @@ else
 $(SHARED_LIB): $(OBJECTS)
 	@echo 'Linking $@ ...'
 	$(V)$(if $(OUT_TOP),cd $(PROJECT_ROOT) &&) \
-		$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,lib$(PROJECT_NAME).so \
+		$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,lib$(PROJECT_NAME).so \
 			-o $(call STRIP_ROOT,$@ $(OBJECTS) $(EXTERNAL))
 
 $(STATIC_LIB): $(OBJECTS)

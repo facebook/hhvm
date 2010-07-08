@@ -24,7 +24,7 @@ using namespace std;
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(UrlFile);
+IMPLEMENT_OBJECT_ALLOCATION(UrlFile)
 ///////////////////////////////////////////////////////////////////////////////
 
 UrlFile::UrlFile(const char *method /* = "GET" */,

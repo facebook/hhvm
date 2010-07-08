@@ -21,7 +21,7 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(PlainFile);
+IMPLEMENT_OBJECT_ALLOCATION(PlainFile)
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor

@@ -96,15 +96,15 @@ NamePtr &TokenPayload::name() {
     return *m_data.data;                                \
   }
 
-  GETTER(IfBranch, ifBranches);
-  GETTER(Expression, exprs);
-  GETTER(CaseStatement, cases);
-  GETTER(ListElement, listElems);
-  GETTER(ArrayPair, arrayPairs);
-  GETTER(CatchBlock, catches);
-  GETTER(Parameter, params);
-  GETTER(Name, names);
-  GETTER(StaticVariable, staticVars);
+  GETTER(IfBranch, ifBranches)
+  GETTER(Expression, exprs)
+  GETTER(CaseStatement, cases)
+  GETTER(ListElement, listElems)
+  GETTER(ArrayPair, arrayPairs)
+  GETTER(CatchBlock, catches)
+  GETTER(Parameter, params)
+  GETTER(Name, names)
+  GETTER(StaticVariable, staticVars)
 
 #undef GETTER
 

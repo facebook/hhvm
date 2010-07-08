@@ -44,7 +44,7 @@ public:
 private:
   xmlDocPtr m_doc;
 };
-IMPLEMENT_OBJECT_ALLOCATION(XmlDocWrapper);
+IMPLEMENT_OBJECT_ALLOCATION(XmlDocWrapper)
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers

@@ -352,7 +352,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
     func = Option::ObjectStaticPrefix;
     error = "";
   }
-  if (m_context & (LValue | RefValue)) {
+  if (m_context & (LValue | RefValue | UnsetContext)) {
     func += "lval";
     error = "";
   } else {

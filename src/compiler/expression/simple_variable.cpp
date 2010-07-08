@@ -116,7 +116,7 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
   VariableTablePtr variables = scope->getVariables();
 
   // check function parameter that can occur in lval context
-  if (m_context & (LValue | RefValue)) {
+  if (m_context & (LValue | RefValue | UnsetContext | InvokeArgument)) {
     FunctionScopePtr func = dynamic_pointer_cast<FunctionScope>(scope);
     if (func) {
       if (variables->isParameter(m_name)) {

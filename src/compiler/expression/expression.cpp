@@ -783,13 +783,14 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
       closeParen++;
     }
     bool isArray = is(Expression::KindOfArrayElementExpression);
-    if (((((m_context & LValue) != 0) &&
-          ((m_context & NoLValueWrapper) == 0)) ||
-         (m_context & RefValue) &&
-         (!(m_context & InvokeArgument) || !isArray) ) &&
-        (isArray || is(Expression::KindOfObjectPropertyExpression))) {
-      cg_printf("lval(");
-      closeParen++;
+    bool isOP = is(Expression::KindOfObjectPropertyExpression);
+    if (isOP || isArray) {
+      if (((m_context & LValue) && !(m_context & NoLValueWrapper)) ||
+          ((m_context & RefValue) && (!(m_context & InvokeArgument) || isOP)) ||
+          ((m_context & UnsetContext) && !(m_context & LValue) && isOP)) {
+        cg_printf("lval(");
+        closeParen++;
+      }
     }
     outputCPPImpl(cg, ar);
   }

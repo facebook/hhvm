@@ -633,12 +633,58 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
     break;
   }
 
-  case Expression::KindOfConstantExpression:
   case Expression::KindOfSimpleVariable:
   case Expression::KindOfDynamicVariable:
   case Expression::KindOfArrayElementExpression:
   case Expression::KindOfObjectPropertyExpression:
   case Expression::KindOfStaticMemberExpression:
+    if (e->hasContext(Expression::UnsetContext) &&
+        e->hasContext(Expression::LValue)) {
+      if (Option::EliminateDeadCode) {
+        ExpressionPtr rep;
+        int interf = findInterf(e, false, rep);
+        if (interf == SameAccess) {
+          if (rep->getKindOf() == e->getKindOf()) {
+            // if we hit a previous unset of the same thing
+            // we can delete this one
+            if (rep->hasContext(Expression::UnsetContext) &&
+                rep->hasContext(Expression::LValue)) {
+              return canonicalizeRecurNonNull(
+                Expression::MakeConstant(m_arp, e->getLocation(), "null"));
+            }
+          } else {
+            switch (rep->getKindOf()) {
+            case Expression::KindOfAssignmentExpression:
+              {
+                if (e->is(Expression::KindOfSimpleVariable)) {
+                  const string &name = spc(SimpleVariable, e)->getName();
+                  AliasInfo &ai = m_aliasInfo[name];
+                  if (ai.getIsRefTo() || ai.getRefLevels()) {
+                    break;
+                  }
+                }
+                AssignmentExpressionPtr a = spc(AssignmentExpression, rep);
+                ExpressionPtr value = a->getValue();
+                if (value->getContext() & Expression::RefValue) {
+                  break;
+                }
+                if (!Expression::CheckNeeded(m_arp, a->getVariable(), value) ||
+                    m_bucketMap[0].isLast(a)) {
+                  rep->setContext(Expression::DeadStore);
+                  m_changed++;
+                }
+              }
+            default:
+              break;
+            }
+          }
+        }
+      }
+      add(m_bucketMap[0], e);
+      break;
+    }
+    // Fall through
+  case Expression::KindOfConstantExpression:
     if (!(e->getContext() & (Expression::AssignmentLHS|
                              Expression::OprLValue))) {
       /*
@@ -777,6 +823,18 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
       break;
     }
 
+  case Expression::KindOfExpressionList:
+    if (e->hasContext(Expression::UnsetContext) &&
+        spc(ExpressionList, e)->getListKind() ==
+        ExpressionList::ListKindParam) {
+      ExpressionListPtr el = spc(ExpressionList, e);
+      for (int i = el->getCount(); i--; ) {
+        if ((*el)[i]->isScalar()) {
+          el->removeElement(i);
+        }
+      }
+    }
+    // Fall through
   default:
     getCanonical(e);
     break;

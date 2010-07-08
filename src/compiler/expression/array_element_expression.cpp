@@ -53,7 +53,9 @@ void ArrayElementExpression::setContext(Context context) {
   m_context |= context;
   switch (context) {
     case Expression::LValue:
-      m_variable->setContext(Expression::LValue);
+      if (!hasContext(Expression::UnsetContext)) {
+        m_variable->setContext(Expression::LValue);
+      }
       if (m_variable->is(Expression::KindOfObjectPropertyExpression)) {
         m_variable->clearContext(Expression::NoLValueWrapper);
       }
@@ -269,7 +271,8 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
       return m_implementedType = Type::Variant; // so not to lose values
     }
   }
-  if (hasContext(LValue) || hasContext(RefValue)) {
+  if ((hasContext(LValue) || hasContext(RefValue)) &&
+      !hasContext(UnsetContext)) {
     m_variable->setContext(LValue);
   }
 
@@ -461,7 +464,24 @@ void ArrayElementExpression::outputCPPUnset(CodeGenerator &cg,
   if (isSuperGlobal()) {
     Expression::outputCPPUnset(cg, ar);
   } else {
+    TypePtr expected = m_variable->getExpectedType();
+    TypePtr implemented = m_variable->getImplementedType();
+    bool wrap = false;
+    if (TypePtr t = m_variable->getActualType()) {
+      if (t->is(Type::KindOfObject)) {
+        if (!m_variable->getImplementedType() ||
+            !m_variable->getImplementedType()->is(Type::KindOfVariant)) {
+          cg_printf("((Variant)(");
+          wrap = true;
+        }
+        m_variable->setImplementedType(TypePtr());
+        m_variable->setExpectedType(TypePtr());
+      }
+    }
     m_variable->outputCPP(cg, ar);
+    if (wrap) cg_printf("))");
+    m_variable->setExpectedType(expected);
+    m_variable->setImplementedType(implemented);
     cg_printf(".weakRemove(");
     m_offset->outputCPP(cg, ar);
     ScalarExpressionPtr sc =

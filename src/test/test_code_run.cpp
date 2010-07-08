@@ -1730,6 +1730,20 @@ bool TestCodeRun::TestArrayAccess() {
       "unset($data2['blank_array']);"
       "print_r($data2);");
 
+  MVCR("<?php "
+       "class X implements ArrayAccess {"
+       "  function offsetGet($f) { return $f; }"
+       "  function offsetSet($f, $v) {}"
+       "  function offsetUnset($f) {}"
+       "  function offsetExists($f) { return false; }"
+       "  }"
+       "function test() {"
+       "  $x = new X;"
+       "  unset($x['a']);"
+       "  return isset($x['b']);"
+       "}"
+       "var_dump(test());");
+
   return true;
 }
 
@@ -4415,7 +4429,17 @@ bool TestCodeRun::TestReference() {
        "}"
        "test();");
 
-  return true;
+  MVCR("<?php "
+       "function foo() {"
+       "  $perms = array('x' => 1);"
+       "  $t = &$perms;"
+       "  $t = $t['x'];"
+       "  unset($t);"
+       "  return $perms;"
+       "}"
+       "var_dump(foo());");
+
+ return true;
 }
 
 bool TestCodeRun::TestDynamicConstants() {
@@ -12001,6 +12025,20 @@ bool TestCodeRun::TestInlining() {
        "  bar($name);"
        "}"
        "foo();");
+
+  MVCR("<?php "
+       "function id($x) { return $x; }"
+       "class B { function __construct($x) { $this->x = $x; } }"
+       "class X extends B {"
+       "  function __construct() { parent::__construct(array()); }"
+       "  function foo() { echo \"foo\n\"; }"
+       "}"
+       "function bar($x=0) { if ($x) return 1; return ''; }"
+       "function test($foo) {"
+       "  id(new X(bar()))->foo();"
+       "  id(new $foo(bar()))->foo();"
+       "}"
+       "test('X');");
 
   Option::AutoInline = save;
   return true;

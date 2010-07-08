@@ -37,12 +37,6 @@ UnsetStatement::UnsetStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES), m_exp(exp) {
   exp->setContext(Expression::UnsetContext);
-  for (int i = 0; i < m_exp->getCount(); i++) {
-    ExpressionPtr exp = (*m_exp)[i];
-    exp->setContext(Expression::UnsetContext);
-    exp->setContext(Expression::LValue);
-    exp->setContext(Expression::NoLValueWrapper);
-  }
 }
 
 StatementPtr UnsetStatement::clone() {
@@ -89,6 +83,7 @@ void UnsetStatement::setNthKid(int n, ConstructPtr cp) {
 
 StatementPtr UnsetStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_exp);
+  if (m_exp->getCount() == 0) return NULL_STATEMENT();
   return StatementPtr();
 }
 

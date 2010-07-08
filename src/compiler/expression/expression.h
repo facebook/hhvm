@@ -280,6 +280,9 @@ public:
   void setExpectedType(TypePtr expectedType) {
     m_expectedType = expectedType;
   }
+  void setImplementedType(TypePtr implementedType) {
+    m_implementedType = implementedType;
+  }
   TypePtr getType();
 
   static ExpressionPtr MakeConstant(AnalysisResultPtr ar,

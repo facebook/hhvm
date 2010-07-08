@@ -26,6 +26,7 @@
 #include <util/logger.h>
 #include <util/json.h>
 #include <compiler/analysis/symbol_table.h>
+#include <compiler/analysis/variable_table.h>
 #include <compiler/option.h>
 #include <util/db_conn.h>
 #include <util/db_query.h>
@@ -394,28 +395,29 @@ void Package::saveStatsToFile(const char *filename, int totalSeconds) const {
   ofstream f(filename);
   if (f) {
     JSON::OutputStream o(f);
+    JSON::MapStream ms(o);
 
-    f << "var FileCount = " << getFileCount() << ";\n"
-      << "var LineCount = " << getLineCount() << ";\n"
-      << "var CharCount = " << getCharCount() << ";\n"
-      << "var FunctionCount = " << m_ar->getFunctionCount() << ";\n"
-      << "var ClassCount = " << m_ar->getClassCount() << ";\n"
-      << "var TotalTime = " << totalSeconds << ";\n";
+    ms.add("FileCount", getFileCount())
+      .add("LineCount", getLineCount())
+      .add("CharCount", getCharCount())
+      .add("FunctionCount", m_ar->getFunctionCount())
+      .add("ClassCount", m_ar->getClassCount())
+      .add("TotalTime", totalSeconds);
 
     if (getLineCount()) {
-      f << "var AvgCharPerLine = " << (getCharCount()/getLineCount()) << ";\n";
+      ms.add("AvgCharPerLine", getCharCount() / getLineCount());
     }
     if (m_ar->getFunctionCount()) {
-      f << "var AvgLinePerFunc = ";
-      f << (getLineCount()/m_ar->getFunctionCount()) << ";\n";
+      ms.add("AvgLinePerFunc", getLineCount()/m_ar->getFunctionCount());
     }
 
     std::map<std::string, int> counts;
     SymbolTable::CountTypes(counts);
     m_ar->countReturnTypes(counts);
-    f << "var SymbolTypes = ";
+
+    ms.add("SymbolTypes");
     o << counts;
-    f << ";\n";
+    ms.done();
 
     f.close();
   }

@@ -462,31 +462,12 @@ inline bool instanceOf(ObjectData *v, const char *s) {
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 
-inline int print(litstr  s) {
-  g_context->out() << s;
-  return 1;
-}
 inline int print(CStrRef s) {
-  g_context->out().write((const char *)s, s.length());
+  g_context->write(s.data(), s.size());
   return 1;
-}
-inline void echo(litstr  s) {
-  g_context->out() << s;
 }
 inline void echo(CStrRef s) {
-  #ifdef TAINTED
-  if( s.isTainted() ) {
-    // in the future, raise some kind of exception
-    printf("Warning, echoing a tainted string:\n");
-    printf("  it was tainted in file %s, line %d;\n",
-           s.getPlaceTainted().name,
-           s.getPlaceTainted().line );
-    printf("  it was echoed in file %s, line %d.\n",
-           (const char*)FrameInjection::GetContainingFileName(),
-           FrameInjection::GetLine());
-  }
-  #endif
-  g_context->out().write((const char *)s, s.length());
+  g_context->write(s.data(), s.size());
 }
 
 String get_source_filename(litstr path);

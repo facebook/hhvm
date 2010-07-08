@@ -91,6 +91,7 @@ bool RuntimeOption::EnableKeepAlive = true;
 int RuntimeOption::ConnectionTimeoutSeconds = -1;
 bool RuntimeOption::EnableOutputBuffering = false;
 std::string RuntimeOption::OutputHandler;
+bool RuntimeOption::ImplicitFlush = false;
 bool RuntimeOption::EnableEarlyFlush = true;
 bool RuntimeOption::ForceChunkedEncoding = false;
 int RuntimeOption::MaxPostSize;
@@ -461,6 +462,7 @@ void RuntimeOption::Load(Hdf &config) {
     ConnectionTimeoutSeconds = server["ConnectionTimeoutSeconds"].getInt16(-1);
     EnableOutputBuffering = server["EnableOutputBuffering"].getBool();
     OutputHandler = server["OutputHandler"].getString();
+    ImplicitFlush = server["ImplicitFlush"].getBool();
     EnableEarlyFlush = server["EnableEarlyFlush"].getBool(true);
     ForceChunkedEncoding = server["ForceChunkedEncoding"].getBool();
     MaxPostSize = (server["MaxPostSize"].getInt32(100)) * (1 << 20);

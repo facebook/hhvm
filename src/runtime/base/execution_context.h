@@ -85,10 +85,10 @@ public:
   ~ExecutionContext();
 
   /**
-   * Get current output buffer.
+   * Write to output.
    */
-  std::ostream &out() { return *m_out;}
-  std::ostream &err() { return *m_err;}
+  void write(const char *s, int len);
+  void write(const char *s) { write(s, strlen(s));}
 
   /**
    * Output buffering.

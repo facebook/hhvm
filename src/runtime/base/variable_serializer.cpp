@@ -64,7 +64,7 @@ Variant VariableSerializer::serialize(CVarRef v, bool ret) {
     return m_buf->detach();
   } else {
     String str = m_buf->detach();
-    g_context->out().write(str.c_str(), str.size());
+    g_context->write(str.c_str(), str.size());
   }
   return true;
 }

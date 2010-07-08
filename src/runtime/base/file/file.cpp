@@ -569,7 +569,7 @@ int64 File::print() {
     int64 len = readImpl(buffer, 1024);
     if (len == 0) break;
     total += len;
-    g_context->out().write(buffer, len);
+    g_context->write(buffer, len);
   }
   return total;
 }

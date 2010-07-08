@@ -208,6 +208,7 @@ How long to wait for dangling server to respond.
     EnableKeepAlive = true
     EnableOutputBuffering = false
     OutputHandler =
+    ImplicitFlush = false
     EnableEarlyFlush = true
     ForceChunkedEncoding = false
     MaxPostSize = 8  # in MB

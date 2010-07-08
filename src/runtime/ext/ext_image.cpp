@@ -1694,7 +1694,7 @@ static Variant php_open_plain_file(CStrRef filename, const char *mode,
 }
 
 static int php_write(void *buf, uint size) {
-  g_context->out().write((const char *)buf, size);
+  g_context->write((const char *)buf, size);
   return size;
 }
 
@@ -2175,7 +2175,7 @@ static bool _php_image_output(CObjRef image, CStrRef filename, int quality,
     fseek(tmp, 0, SEEK_SET);
 
     while ((b = fread(buf, 1, sizeof(buf), tmp)) > 0) {
-      g_context->out().write(buf, b);
+      g_context->write(buf, b);
     }
 
     fclose(tmp);
@@ -4242,7 +4242,7 @@ bool f_imageantialias(CObjRef image, bool on) {
 static int php_iptc_put1(File *file, int spool, unsigned char c,
                          unsigned char **spoolbuf) {
   if (spool > 0) {
-    g_context->out().write((const char *)&c, 1);
+    g_context->write((const char *)&c, 1);
   }
 
   if (spoolbuf) *(*spoolbuf)++ = c;
@@ -4260,7 +4260,7 @@ static int php_iptc_get1(File *file, int spool, unsigned char **spoolbuf) {
 
   if (spool > 0) {
     cc = c;
-    g_context->out().write((const char *)&cc, 1);
+    g_context->write((const char *)&cc, 1);
   }
 
   if (spoolbuf) *(*spoolbuf)++ = c;

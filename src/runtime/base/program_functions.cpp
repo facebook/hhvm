@@ -350,6 +350,7 @@ static int execute_command_line(ProgramOptions &po,
                                 const char * file, int argc, char **argv) {
   hphp_process_init();
   ExecutionContext *context = g_context.get();
+  context->obSetImplicitFlush(true);
   hphp_session_init();
 
   SystemGlobals *g = (SystemGlobals *)get_global_variables();

@@ -234,6 +234,9 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                                            SourceRootInfo &sourceRootInfo,
                                            bool cachableDynamicContent) {
   ExecutionContext *context = hphp_context_init();
+  if (RuntimeOption::ImplicitFlush) {
+    context->obSetImplicitFlush(true);
+  }
   if (RuntimeOption::EnableOutputBuffering) {
     if (RuntimeOption::OutputHandler.empty()) {
       context->obStart();

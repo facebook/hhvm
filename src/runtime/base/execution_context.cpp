@@ -137,6 +137,26 @@ ExecutionContext::~ExecutionContext() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// write()
+
+void ExecutionContext::write(const char *s, int len) {
+#ifdef TAINTED
+  if (s.isTainted()) {
+    // in the future, raise some kind of exception
+    printf("Warning, echoing a tainted string:\n");
+    printf("  it was tainted in file %s, line %d;\n",
+           s.getPlaceTainted().name,
+           s.getPlaceTainted().line );
+    printf("  it was echoed in file %s, line %d.\n",
+           (const char*)FrameInjection::GetContainingFileName(),
+           FrameInjection::GetLine());
+  }
+#endif
+  m_out->write(s, len);
+  if (m_implicitFlush) flush();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // output buffers
 
 void ExecutionContext::obProtect(bool on) {
@@ -219,8 +239,10 @@ bool ExecutionContext::obEnd() {
     delete m_buffers.back();
     m_buffers.pop_back();
     resetCurrentBuffer();
+    if (m_implicitFlush) flush();
     return true;
   }
+  if (m_implicitFlush) flush();
   return false;
 }
 
@@ -247,11 +269,12 @@ Array ExecutionContext::obGetHandlers() {
 }
 
 void ExecutionContext::flush() {
-  if (RuntimeOption::EnableEarlyFlush && m_protectedLevel &&
-      (m_transport == NULL ||
-       (m_transport->getHTTPVersion() == "1.1" &&
-        m_transport->getMethod() != Transport::HEAD)) &&
-      !m_buffers.empty()) {
+  if (m_buffers.empty()) {
+    fflush(stdout);
+  } else if (RuntimeOption::EnableEarlyFlush && m_protectedLevel &&
+             (m_transport == NULL ||
+              (m_transport->getHTTPVersion() == "1.1" &&
+               m_transport->getMethod() != Transport::HEAD))) {
     std::string content = m_buffers.front()->oss.str();
     if (!content.empty()) {
       m_buffers.front()->oss.str("");

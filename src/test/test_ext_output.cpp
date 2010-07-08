@@ -52,7 +52,7 @@ bool TestExtOutput::RunTests(const std::string &which) {
 bool TestExtOutput::test_ob_start() {
   f_ob_start();
   f_ob_start("strtolower");
-  g_context->out() << "TEst";
+  g_context->write("TEst");
   f_ob_end_flush();
   VS(f_ob_get_clean(), "test");
   return Count(true);
@@ -60,7 +60,7 @@ bool TestExtOutput::test_ob_start() {
 
 bool TestExtOutput::test_ob_clean() {
   f_ob_start();
-  g_context->out() << "test";
+  g_context->write("test");
   f_ob_clean();
   VS(f_ob_get_clean(), "");
   return Count(true);
@@ -69,7 +69,7 @@ bool TestExtOutput::test_ob_clean() {
 bool TestExtOutput::test_ob_flush() {
   f_ob_start();
   f_ob_start("strtolower");
-  g_context->out() << "TEst";
+  g_context->write("TEst");
   f_ob_flush();
   VS(f_ob_get_clean(), "");
   VS(f_ob_get_clean(), "test");
@@ -79,7 +79,7 @@ bool TestExtOutput::test_ob_flush() {
 bool TestExtOutput::test_ob_end_clean() {
   f_ob_start();
   f_ob_start("strtolower");
-  g_context->out() << "TEst";
+  g_context->write("TEst");
   f_ob_end_clean();
   VS(f_ob_get_clean(), "");
   return Count(true);
@@ -88,7 +88,7 @@ bool TestExtOutput::test_ob_end_clean() {
 bool TestExtOutput::test_ob_end_flush() {
   f_ob_start();
   f_ob_start("strtolower");
-  g_context->out() << "TEst";
+  g_context->write("TEst");
   f_ob_end_flush();
   VS(f_ob_get_clean(), "test");
   return Count(true);
@@ -97,7 +97,7 @@ bool TestExtOutput::test_ob_end_flush() {
 bool TestExtOutput::test_flush() {
   f_ob_start();
   f_ob_start("strtolower");
-  g_context->out() << ""; // we can't really verify what's written to stdout
+  g_context->write(""); // we can't really verify what's written to stdout
   f_flush();
   f_ob_end_clean();
   f_ob_end_clean();
@@ -107,7 +107,7 @@ bool TestExtOutput::test_flush() {
 bool TestExtOutput::test_ob_get_clean() {
   f_ob_start();
   f_ob_start();
-  g_context->out() << "test";
+  g_context->write("test");
   VS(f_ob_get_clean(), "test");
   VS(f_ob_get_clean(), "");
   VS(f_ob_get_clean(), "");
@@ -116,7 +116,7 @@ bool TestExtOutput::test_ob_get_clean() {
 
 bool TestExtOutput::test_ob_get_contents() {
   f_ob_start();
-  g_context->out() << "test";
+  g_context->write("test");
   VS(f_ob_get_contents(), "test");
   VS(f_ob_get_contents(), "test"); // verifying content stays
   f_ob_end_clean();
@@ -126,7 +126,7 @@ bool TestExtOutput::test_ob_get_contents() {
 bool TestExtOutput::test_ob_get_flush() {
   f_ob_start();
   f_ob_start();
-  g_context->out() << "test";
+  g_context->write("test");
   VS(f_ob_get_flush(), "test");
   VS(f_ob_get_flush(), "");
   f_ob_end_clean();
@@ -137,7 +137,7 @@ bool TestExtOutput::test_ob_get_flush() {
 
 bool TestExtOutput::test_ob_get_length() {
   f_ob_start();
-  g_context->out() << "test";
+  g_context->write("test");
   VS(f_ob_get_length(), 4);
   f_ob_end_clean();
   return Count(true);

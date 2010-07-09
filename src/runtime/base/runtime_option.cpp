@@ -78,7 +78,7 @@ int RuntimeOption::ServerThreadCount = 50;
 int RuntimeOption::PageletServerThreadCount = 0;
 int RuntimeOption::FiberCount = 0;
 int RuntimeOption::RequestTimeoutSeconds = 0;
-int RuntimeOption::RequestMemoryMaxBytes = 0;
+int RuntimeOption::RequestMemoryMaxBytes = -1;
 int RuntimeOption::ImageMemoryMaxBytes = 0;
 int RuntimeOption::ResponseQueueCount;
 int RuntimeOption::ServerGracefulShutdownWait;
@@ -446,7 +446,7 @@ void RuntimeOption::Load(Hdf &config) {
     ServerPort = server["Port"].getInt16(80);
     ServerThreadCount = server["ThreadCount"].getInt32(50);
     RequestTimeoutSeconds = server["RequestTimeoutSeconds"].getInt32(0);
-    RequestMemoryMaxBytes = server["RequestMemoryMaxBytes"].getInt32(0);
+    RequestMemoryMaxBytes = server["RequestMemoryMaxBytes"].getInt32(-1);
     ResponseQueueCount = server["ResponseQueueCount"].getInt32(0);
     if (ResponseQueueCount <= 0) {
       ResponseQueueCount = ServerThreadCount / 10;

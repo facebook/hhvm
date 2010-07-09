@@ -141,6 +141,7 @@ public:
    * Request handler called by evhttp library.
    */
   void onRequest(evhttp_request *request);
+  void onChunkedRead();
 
   /**
    * Called by LibEventTransport when a response is fully prepared.
@@ -149,6 +150,7 @@ public:
   void onChunkedResponse(int worker, evhttp_request *request, int code,
                          evbuffer *chunk, bool firstChunk);
   void onChunkedResponseEnd(int worker, evhttp_request *request);
+  void onChunkedRequest(evhttp_request *request);
 
   /**
    * To enable SSL of the current server, it will listen to an additional
@@ -181,6 +183,11 @@ private:
   AsyncFunc<LibEventServer> m_dispatcherThread;
 
   PendingResponseQueue m_responseQueue;
+
+  event m_eventPost;
+  CPipe m_readyPost;
+  Mutex m_requestQueueMutex;
+  std::deque<evhttp_request*> m_requestQueue; // for chunked reads
 
   // dispatcher thread runs this function
   void dispatch();

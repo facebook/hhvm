@@ -127,6 +127,7 @@ const void *LibEventTransport::getMorePostData(int &size) {
 
   Synchronizable sync;
   if (!evhttp_resume_reading(m_request, on_resume, &sync)) {
+    m_server->onChunkedRequest(m_request);
     Lock lock(sync.getMutex());
     sync.wait();
   }

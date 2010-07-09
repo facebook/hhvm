@@ -226,7 +226,7 @@ void StringData::dump() {
     if (isprint(ch)) {
       std::cout << ch;
     } else {
-      printf("\\%02x", ch);
+      printf("\\x%02x", ch);
     }
   }
   printf("]\n");

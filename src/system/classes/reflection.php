@@ -230,18 +230,29 @@ class ReflectionClass implements Reflector {
       if (empty($this->info)) {
         throw new ReflectionException("Class $name does not exist");
       }
-
-      // flattening the trees, so it's easier for lookups
-      foreach ($this->info['interfaces'] as $interface => $_) {
-        $p = new ReflectionClass($interface);
-        $this->info['methods'] += $p->fetch('methods');
-      }
-      if (!empty($this->info['parent'])) {
-        $p = new ReflectionClass($this->info['parent']);
-        $this->info['interfaces'] += $p->fetch('interfaces');
-        $this->info['properties'] += $p->info['properties'];
-        $this->info['methods']    += $p->info['methods'];
-        $this->info['constants']  += $p->info['constants'];
+      if ($this->isInterface()) {
+        if (!empty($this->info['parent'])) {
+          $p = new ReflectionClass($this->info['parent']);
+          $this->info['interfaces'][] = $this->info['parent'];
+          $this->info['interfaces'] += $p->fetch('interfaces');
+          $this->info['methods']    += $p->info['methods'];
+          $this->info['constants']  += $p->info['constants'];
+        }
+      } else {
+        // flattening the trees, so it's easier for lookups
+        foreach ($this->info['interfaces'] as $interface => $_) {
+          $p = new ReflectionClass($interface);
+          $this->info['methods'] += $p->fetch('methods');
+          $this->info['constants'] += $p->info['constants'];
+          $this->info['interfaces'] += $p->info['interfaces'];
+        }
+        if (!empty($this->info['parent'])) {
+          $p = new ReflectionClass($this->info['parent']);
+          $this->info['interfaces'] += $p->fetch('interfaces');
+          $this->info['properties'] += $p->info['properties'];
+          $this->info['methods']    += $p->info['methods'];
+          $this->info['constants']  += $p->info['constants'];
+        }
       }
     }
     return $this->info[$what];

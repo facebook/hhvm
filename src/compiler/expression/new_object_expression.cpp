@@ -141,7 +141,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   m_implementedType.reset();
   m_nameExp->inferAndCheck(ar, Type::String, false);
   if (m_params) m_params->inferAndCheck(ar, NEW_TYPE(Any), false);
-  return Type::Variant; //NEW_TYPE(Object);
+  return NEW_TYPE(Object);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -186,7 +186,6 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
       }
     }
   } else {
-    bool wrap = false;
     if (m_redeclared) {
       if (outsideClass) {
         ClassScope::OutputVolatileCheckBegin(cg, ar, m_origName);
@@ -194,11 +193,6 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
       cg_printf("g->%s%s->create(", Option::ClassStaticsObjectPrefix,
                 m_name.c_str());
     } else {
-      wrap = m_actualType && m_actualType->is(Type::KindOfVariant) &&
-        !m_expectedType && !m_implementedType;
-      if (wrap) {
-        cg_printf("((Variant)");
-      }
       cg_printf("create_object(");
       if (!m_name.empty()) {
         cg_printf("\"%s\"", m_name.c_str());
@@ -215,9 +209,6 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
       FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
     } else {
       cg_printf("Array()");
-    }
-    if (wrap) {
-      cg_printf(")");
     }
     cg_printf(")");
     if (m_redeclared && outsideClass) {

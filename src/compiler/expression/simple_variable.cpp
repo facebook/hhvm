@@ -138,7 +138,7 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       if (!isStaticFunc || (m_context & ObjectContext)) m_this = true;
     }
   }
-  if (m_context & (LValue|Declaration)) {
+  if ((m_context & (LValue|Declaration)) && !(m_context & ObjectContext)) {
     if (m_superGlobal) {
       ret = m_superGlobalType;
     } else if (m_superGlobalType) { // For system

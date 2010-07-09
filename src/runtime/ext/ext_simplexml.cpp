@@ -628,7 +628,6 @@ void c_simplexmlelement::t_addattribute(CStrRef qname,
 
 String c_simplexmlelement::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::__tostring);
-
   Variant prop;
   ArrayIter iter(m_children);
   if (iter) {

@@ -428,8 +428,8 @@ TypePtr Type::Coerce(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {
     break;
   case KindOfObject:
     if (type2->m_kindOf == KindOfObject) {
-      if (type1->m_name.empty()) return type2;
-      if (type2->m_name.empty()) return type1;
+      if (type1->m_name.empty()) return type1;
+      if (type2->m_name.empty()) return type2;
       ClassScopePtr cls1 = ar->findClass(type1->m_name);
       if (cls1 && !cls1->isRedeclaring() &&
           cls1->derivesFrom(ar, type2->m_name, true, false)) {

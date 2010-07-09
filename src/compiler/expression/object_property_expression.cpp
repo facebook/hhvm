@@ -175,7 +175,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   m_valid = false;
 
   ConstructPtr self = shared_from_this();
-  TypePtr objectType = m_object->inferAndCheck(ar, NEW_TYPE(Object), true);
+  TypePtr objectType = m_object->inferAndCheck(ar, NEW_TYPE(Object), false);
 
   if (!m_property->is(Expression::KindOfScalarExpression)) {
     // if dynamic property or method, we have nothing to find out
@@ -208,7 +208,8 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     // what ->property has told us
     cls = ar->findClass(name, AnalysisResult::PropertyName);
     if (cls) {
-      m_object->inferAndCheck(ar, Type::CreateObjectType(cls->getName()), true);
+      m_object->inferAndCheck(ar, Type::CreateObjectType(cls->getName()),
+                              false);
     }
   }
 

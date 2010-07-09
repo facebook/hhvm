@@ -175,7 +175,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
   reset();
 
   ConstructPtr self = shared_from_this();
-  TypePtr objectType = m_object->inferAndCheck(ar, NEW_TYPE(Object), true);
+  TypePtr objectType = m_object->inferAndCheck(ar, NEW_TYPE(Object), false);
   m_valid = true;
   m_bindClass = true;
 

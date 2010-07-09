@@ -2531,6 +2531,21 @@ bool TestCodeRun::TestObject() {
        "$abc = 'abc'; var_dump($abc instanceof Nothing); }"
       "test();");
 
+  MVCR("<?php "
+       "class X {"
+       "  public $x = 1;"
+       "  }"
+       "class Y {"
+       "  public $x = array();"
+       "}"
+       "function test() {"
+       "  $x = (object)new Y;"
+       "  var_dump($x->x);"
+       "  $x = new X;"
+       "  var_dump($x->x);"
+       "}"
+       "test();");
+
   return true;
 }
 
@@ -7689,6 +7704,7 @@ bool TestCodeRun::TestRedeclaredClasses() {
     "class Exception2 extends Exception1 {}\n"
     "\n"
     "function foo() {\n"
+    "  $e = new Exception();\n"
     "  try {\n"
     "    throw new Exception2();\n"
     "  } catch (Exception $e) {\n"

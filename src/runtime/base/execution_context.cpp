@@ -45,6 +45,7 @@ public:
   struct Data {
     int errorReportingLevel;
     String lastError;
+    int lastErrorNum;
     String timezone;
     String timezoneDefault;
     Array shutdowns;
@@ -71,6 +72,9 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(RequestData, s_request_data);
 
 String ExecutionContext::getLastError() {
   return s_request_data->data->lastError;
+}
+int ExecutionContext::getLastErrorNumber() {
+  return s_request_data->data->lastErrorNum;
 }
 int ExecutionContext::getErrorReportingLevel() {
   return s_request_data->data->errorReportingLevel;
@@ -479,7 +483,7 @@ void ExecutionContext::handleError(const std::string &msg,
   }
   ErrorStateHelper esh(this, newErrorState);
   ExtendedException ee(msg);
-  recordLastError(ee);
+  recordLastError(ee, errnum);
   bool handled = false;
   if (callUserHandler) {
     handled = callUserErrorHandler(ee, errnum, false);
@@ -540,9 +544,11 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
   return false;
 }
 
-void ExecutionContext::recordLastError(const Exception &e) {
+void ExecutionContext::recordLastError(const Exception &e,
+                                       int errnum /* = 0 */) {
   RequestData::Data *data = s_request_data->data;
   data->lastError = String(e.getMessage());
+  data->lastErrorNum = errnum;
 }
 
 bool ExecutionContext::onFatalError(const Exception &e) {

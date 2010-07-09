@@ -73,7 +73,8 @@ Array f_error_get_last() {
   if (lastError.isNull()) {
     return (ArrayData *)NULL;
   }
-  return CREATE_VECTOR1(g_context->getLastError());
+  return CREATE_MAP2("message", g_context->getLastError(),
+                     "type", g_context->getLastErrorNumber());
 }
 
 bool f_error_log(CStrRef message, int message_type /* = 0 */,

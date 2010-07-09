@@ -139,13 +139,14 @@ public:
                    const std::string &prefix);
   bool callUserErrorHandler(const Exception &e, int errnum,
                             bool swallowExceptions);
-  void recordLastError(const Exception &e);
+  void recordLastError(const Exception &e, int errnum = 0);
   bool onFatalError(const Exception &e); // returns handled
   void onUnhandledException(Object e);
   int getErrorState();
   void setErrorState(int state);
 
   String getLastError();
+  int getLastErrorNumber();
   int getErrorReportingLevel();
   void setErrorReportingLevel(int level);
   String getTimeZone();

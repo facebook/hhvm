@@ -316,7 +316,7 @@ bool XboxServer::PostMessage(CStrRef message,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class XboxTask : public ResourceData {
+class XboxTask : public ResourceData, public Sweepable {
 public:
   DECLARE_OBJECT_ALLOCATION(XboxTask);
 

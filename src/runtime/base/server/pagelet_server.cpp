@@ -190,7 +190,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class PageletTask : public ResourceData {
+class PageletTask : public ResourceData, public Sweepable {
 public:
   DECLARE_OBJECT_ALLOCATION(PageletTask);
 

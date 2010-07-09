@@ -265,7 +265,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class FiberAsyncFuncHandle : public ResourceData {
+class FiberAsyncFuncHandle : public ResourceData, public Sweepable {
 public:
   DECLARE_OBJECT_ALLOCATION(FiberAsyncFuncHandle);
 

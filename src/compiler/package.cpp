@@ -417,8 +417,15 @@ void Package::saveStatsToFile(const char *filename, int totalSeconds) const {
 
     ms.add("SymbolTypes");
     o << counts;
-    ms.done();
 
+    ms.add("VariableTableFunctions");
+    JSON::ListStream ls(o);
+    BOOST_FOREACH(const std::string &f, m_ar->m_variableTableFunctions) {
+      ls << f;
+    }
+    ls.done();
+
+    ms.done();
     f.close();
   }
 }

@@ -356,6 +356,8 @@ public:
 
   int getLiteralStringCount() { return m_stringLiterals.size(); }
 
+  std::set<std::string> m_variableTableFunctions;
+
 private:
   Package *m_package;
   bool m_parseOnDemand;

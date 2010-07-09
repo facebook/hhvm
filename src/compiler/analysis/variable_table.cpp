@@ -1203,6 +1203,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (Option::GenerateCPPMacros && getAttribute(ContainsDynamicVariable) &&
       cg.getOutput() != CodeGenerator::SystemCPP && !inPseudoMain) {
     outputCPPVariableTable(cg, ar);
+    ar->m_variableTableFunctions.insert(getScope()->getName());
   }
 }
 

@@ -81,8 +81,8 @@ struct RequestLocal {
 
 template<typename T>
 void RequestLocal<T>::createKey() {
-  if (m_node.m_delete_fn == NULL) {
-    m_node.m_delete_fn = RequestLocal<T>::OnThreadExit;
+  if (m_node.m_on_thread_exit_fn == NULL) {
+    m_node.m_on_thread_exit_fn = RequestLocal<T>::OnThreadExit;
     m_node.m_next = ThreadLocalManager::s_manager.getTop();
     ThreadLocalManager::s_manager.setTop((void*)(&m_node));
   }

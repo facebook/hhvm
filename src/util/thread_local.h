@@ -74,7 +74,7 @@ inline void ThreadLocalCreateKey(pthread_key_t *key, void (*del)(void*)) {
 template <typename T>
 struct ThreadLocalNode {
   T * m_p;
-  void (*m_delete_fn)(void * p);
+  void (*m_on_thread_exit_fn)(void * p);
   void * m_next;
 };
 
@@ -133,8 +133,8 @@ struct ThreadLocal {
 
 template<typename T>
 void ThreadLocal<T>::createKey() {
-  if (m_node.m_delete_fn == NULL) {
-    m_node.m_delete_fn = ThreadLocal<T>::OnThreadExit;
+  if (m_node.m_on_thread_exit_fn == NULL) {
+    m_node.m_on_thread_exit_fn = ThreadLocal<T>::OnThreadExit;
     m_node.m_next = ThreadLocalManager::s_manager.getTop();
     ThreadLocalManager::s_manager.setTop((void*)(&m_node));
   }
@@ -165,7 +165,7 @@ struct ThreadLocalCreate {
 
   static void OnThreadExit(void * p) {
     ThreadLocalNode<T> * pNode = (ThreadLocalNode<T>*)p;
-    T::Delete(pNode->m_p);
+    T::OnThreadExit(pNode->m_p);
     pNode->m_p = NULL;
   }
 
@@ -184,8 +184,8 @@ struct ThreadLocalCreate {
 
 template<typename T>
 void ThreadLocalCreate<T>::createKey() {
-  if (m_node.m_delete_fn == NULL) {
-    m_node.m_delete_fn = ThreadLocalCreate<T>::OnThreadExit;
+  if (m_node.m_on_thread_exit_fn == NULL) {
+    m_node.m_on_thread_exit_fn = ThreadLocalCreate<T>::OnThreadExit;
     m_node.m_next = ThreadLocalManager::s_manager.getTop();
     ThreadLocalManager::s_manager.setTop((void*)(&m_node));
   }
@@ -222,7 +222,7 @@ public:
   }
 
   static void OnThreadExit(void *obj) {
-    T::Delete((T*)obj);
+    T::OnThreadExit((T*)obj);
   }
 
   T *operator->() const {
@@ -400,7 +400,7 @@ public:
   }
 
   static void OnThreadExit(void *obj) {
-    T::Delete((T*)obj);
+    T::OnThreadExit((T*)obj);
   }
 
   /**
@@ -445,7 +445,7 @@ public:
   }
 
   static void OnThreadExit(void *obj) {
-    T::Delete((T*)obj);
+    T::OnThreadExit((T*)obj);
   }
 
   /**

@@ -669,6 +669,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
               "{ return NEW(GlobalVariables)(); }\n");
     cg_printf("static void Delete(GlobalVariables *p) "
               "{ DELETE(GlobalVariables)(p); }\n");
+    cg_printf("static void OnThreadExit(GlobalVariables *p) {}\n");
   }
   cg_printf("static void initialize();\n");
 

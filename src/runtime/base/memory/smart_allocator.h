@@ -382,6 +382,9 @@ public:
   static void Delete(ObjectAllocator *p) {
     delete p;
   }
+  static void OnThreadExit(ObjectAllocator *p) {
+    delete p;
+  }
 
   ObjectAllocator() : ObjectAllocatorBase(S) { }
 };

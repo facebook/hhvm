@@ -94,7 +94,6 @@ class c_simplexmlelement : public ExtObjectData {
   bool m_is_attribute;
   bool m_is_children;
   bool m_is_property;
-  bool m_is_root;
   virtual Array o_toArray() const;
   virtual int64 o_toInt64() const;
   virtual Variant &___lval(Variant v_name);

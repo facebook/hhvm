@@ -100,7 +100,6 @@ c('SimpleXMLElement', null,
   "  bool m_is_attribute;\n".
   "  bool m_is_children;\n".
   "  bool m_is_property;\n".
-  "  bool m_is_root;\n".
   "  virtual Array o_toArray() const;\n".
   "  virtual int64 o_toInt64() const;\n".
   "  virtual Variant &___lval(Variant v_name);\n".

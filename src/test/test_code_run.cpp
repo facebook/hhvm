@@ -10076,6 +10076,18 @@ bool TestCodeRun::TestAssignment() {
 
 bool TestCodeRun::TestSimpleXML() {
   MVCR("<?php\n"
+       "$node = simplexml_load_string('<foo><bar>whoops</bar></foo>');"
+       "var_dump((string)$node);");
+
+  MVCR("<?php\n"
+       "$node = new SimpleXMLElement('<foo><bar>whoops</bar></foo>');"
+       "var_dump((string)$node);");
+
+  MVCR("<?php\n"
+       "$node = new SimpleXMLElement('<foo>whoops</foo>');"
+       "var_dump((string)$node);");
+
+  MVCR("<?php\n"
        "$sxe = new SimpleXMLElement('<image-definition />');\n"
        "$sxe->addChild('path', 'some/path/to/my.file');\n"
        "$sxe->addChild('options');\n"

@@ -240,7 +240,6 @@ Variant f_simplexml_load_string(CStrRef data,
   }
   c_simplexmlelement *ret = create_element(Object(NEW(XmlDocWrapper)(doc)),
                                            root, ns, is_prefix);
-  ret->m_is_root = true;
   return Object(ret);
 }
 
@@ -258,7 +257,7 @@ Variant f_simplexml_load_file(CStrRef filename,
 c_simplexmlelement::c_simplexmlelement()
     : m_node(NULL), m_is_text(false), m_free_text(false),
       m_is_attribute(false), m_is_children(false), m_is_property(false),
-      m_is_root(false), m_xpath(NULL) {
+      m_xpath(NULL) {
   m_children = Array::Create();
 }
 
@@ -573,9 +572,6 @@ Variant c_simplexmlelement::t_addchild(CStrRef qname,
   }
 
   Object child = create_element(m_doc, newnode, newns, false);
-  if (!m_children.toArray().exists(0)) {
-    m_children.set(0, ""); // so to make sure my "text" is empty
-  }
   m_children.set(newname, child);
   return child;
 }
@@ -632,12 +628,23 @@ void c_simplexmlelement::t_addattribute(CStrRef qname,
 
 String c_simplexmlelement::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::__tostring);
+
   Variant prop;
   ArrayIter iter(m_children);
   if (iter) {
     prop = iter.second();
+    if (prop.isString()) {
+      return prop.toString();
+    }
+    if (prop.isObject()) {
+      c_simplexmlelement *elem =
+        prop.toObject().getTyped<c_simplexmlelement>();
+      if (elem->m_is_text && elem->m_free_text) {
+        return prop.toString();
+      }
+    }
   }
-  return prop.toString();
+  return "";
 }
 
 Variant &c_simplexmlelement::___lval(Variant v_name) {

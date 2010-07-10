@@ -348,10 +348,9 @@ void handle_destructor_exception() {
 
 static int execute_command_line(ProgramOptions &po,
                                 const char * file, int argc, char **argv) {
-  hphp_process_init();
+  hphp_session_init();
   ExecutionContext *context = g_context.get();
   context->obSetImplicitFlush(true);
-  hphp_session_init();
 
   SystemGlobals *g = (SystemGlobals *)get_global_variables();
   process_env_variables(g->gv__ENV);
@@ -608,6 +607,7 @@ int execute_program(int argc, char **argv) {
     new_argv[new_argc] = NULL;
 
     int ret = -1;
+    hphp_process_init();
     for (int i = 0; i < po.count; i++) {
       ret = execute_command_line(po, po.file.c_str(), new_argc, new_argv);
     }
@@ -802,24 +802,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
 void hphp_context_exit(ExecutionContext *context, bool psp,
                        bool shutdown /* = true */) {
   if (psp) {
-    ServerStats::SetThreadMode(ServerStats::PostProcessing);
-    try {
-      try {
-        ServerStatsHelper ssh("psp");
-        context->onShutdownPostSend();
-      } catch (const ExitException &e) {
-        // do nothing
-      } catch (const Exception &e) {
-        context->onFatalError(e);
-      } catch (const Object &e) {
-        context->onUnhandledException(e);
-      }
-    } catch (...) {
-      Logger::Error("unknown exception was thrown from psp");
-    }
-    ServerStats::SetThreadMode(ServerStats::Idling);
+    context->onShutdownPostSend();
   }
-
   Eval::RequestEvalState::DestructObjects();
   if (shutdown) {
     context->onRequestShutdown();

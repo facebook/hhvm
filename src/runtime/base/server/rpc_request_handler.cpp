@@ -31,6 +31,8 @@ namespace HPHP {
 
 RPCRequestHandler::RPCRequestHandler() : m_count(0), m_reset(false) {
   hphp_session_init();
+  m_context = hphp_context_init();
+  m_shutdowns = m_context->backupShutdowns();
   m_created = time(0);
 
   Logger::ResetRequestCount();
@@ -38,9 +40,7 @@ RPCRequestHandler::RPCRequestHandler() : m_count(0), m_reset(false) {
 }
 
 RPCRequestHandler::~RPCRequestHandler() {
-  // important to call requestShutdown()
-  hphp_context_exit(hphp_context_init(), true);
-
+  hphp_context_exit(m_context, false);
   hphp_session_exit();
 }
 
@@ -97,8 +97,6 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
 
 bool RPCRequestHandler::executePHPFunction(Transport *transport,
                                            SourceRootInfo &sourceRootInfo) {
-  ExecutionContext *context = hphp_context_init();
-
   // reset timeout counter
   ThreadInfo::s_threadInfo->m_reqInjectionData.started = time(0);
 
@@ -163,16 +161,16 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     }
     if (!warmupDoc.empty()) warmupDoc = canonicalize_path(warmupDoc, "", 0);
     if (!warmupDoc.empty()) warmupDoc = get_source_filename(warmupDoc.c_str());
-    bool ret = hphp_invoke(context, rpcFunc, true, params, ref(funcRet),
+    bool ret = hphp_invoke(m_context, rpcFunc, true, params, ref(funcRet),
                            warmupDoc, reqInitFunc, error, errorMsg);
     if (ret) {
       String response;
       switch (output) {
       case 0: response = f_json_encode(funcRet);   break;
-      case 1: response = context->obGetContents(); break;
+      case 1: response = m_context->obGetContents(); break;
       case 2:
         response =
-          f_json_encode(CREATE_MAP2("output", context->obGetContents(),
+          f_json_encode(CREATE_MAP2("output", m_context->obGetContents(),
                                     "return", f_json_encode(funcRet)));
         break;
       }
@@ -195,7 +193,8 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   transport->onSendEnd();
   ServerStats::LogPage(rpcFunc, code);
 
-  hphp_context_exit(context, true, false);
+  m_context->onShutdownPostSend();
+  m_context->restoreShutdowns(m_shutdowns);
   return !error;
 }
 

@@ -38,14 +38,6 @@ int f_connection_aborted() {
 }
 
 int f_connection_status() {
-  switch (g_context->getConnectionStatus()) {
-  case ExecutionContext::Normal:   return k_CONNECTION_NORMAL;
-  case ExecutionContext::Aborted:  return k_CONNECTION_ABORTED;
-  case ExecutionContext::TimedOut: return k_CONNECTION_TIMEOUT;
-  default:
-    ASSERT(false);
-    break;
-  }
   return k_CONNECTION_NORMAL;
 }
 

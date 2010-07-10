@@ -232,5 +232,16 @@ void Logger::ClearThreadLog() {
   threadData->log = NULL;
 }
 
+void Logger::SetNewOutput(FILE *output) {
+  ThreadData *threadData = s_threadData.get();
+  if (threadData->log) {
+    fclose(threadData->log);
+    threadData->log = output;
+  } else {
+    if (Output) fclose(Output);
+    Output = output;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

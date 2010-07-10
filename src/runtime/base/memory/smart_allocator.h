@@ -114,6 +114,7 @@ namespace HPHP {
  * Usage stats, all in bytes.
  */
 struct MemoryUsageStats {
+  int64 maxBytes;  // what's request's max bytes allowed
   int64 usage;     // how many bytes are currently being used
   int64 alloc;     // how many bytes are currently malloc-ed
   int64 peakUsage; // how many bytes have been dispensed at maximum

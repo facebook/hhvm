@@ -74,6 +74,7 @@ public:
 
   static bool SetThreadLog(const char *file);
   static void ClearThreadLog();
+  static void SetNewOutput(FILE *output);
 
   static void SetTheLogger(Logger* logger) {
     if (logger != NULL) {

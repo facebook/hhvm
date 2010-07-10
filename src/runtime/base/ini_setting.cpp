@@ -214,6 +214,13 @@ bool IniSetting::Get(CStrRef name, String &value) {
     value = String(uploadMaxFilesize);
     return true;
   }
+  if (name == "log_errors") {
+    value = g_context->getLogErrors() ? "1" : "0";
+    return true;
+  }
+  if (name == "error_log") {
+    value = g_context->getErrorLog();
+  }
   return false;
 }
 
@@ -244,6 +251,12 @@ bool IniSetting::Set(CStrRef name, CStrRef value) {
     return true;
   } else if (name == "arg_separator.output") {
     g_context->setArgSeparatorOutput(value);
+  } else if (name == "log_errors") {
+    bool log;
+    ini_on_update_bool(value, &log);
+    g_context->setLogErrors(log);
+  } else if (name == "error_log") {
+    g_context->setErrorLog(value);
   }
 
   return false;

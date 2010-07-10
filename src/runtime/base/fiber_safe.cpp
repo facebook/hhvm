@@ -14,53 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_RPC_REQUEST_HANDLER_H__
-#define __HPHP_RPC_REQUEST_HANDLER_H__
-
-#include <runtime/base/server/server.h>
-#include <runtime/base/execution_context.h>
+#include <runtime/base/fiber_safe.h>
 
 namespace HPHP {
-
-class SourceRootInfo;
-class RequestURI;
-class Transport;
-DECLARE_BOOST_TYPES(SatelliteServerInfo);
 ///////////////////////////////////////////////////////////////////////////////
 
-class RPCRequestHandler : public RequestHandler {
-public:
-  RPCRequestHandler();
-  virtual ~RPCRequestHandler();
+FiberLocal::FiberLocal() {
+}
 
-  void setServerInfo(SatelliteServerInfoPtr info) { m_serverInfo = info;}
-
-  // implementing RequestHandler
-  virtual void handleRequest(Transport *transport);
-
-  /**
-   * Count how many requests have been processed on this handler.
-   */
-  int incRequest() { return ++m_count;}
-
-  /**
-   * Whether state has been dirtied.
-   */
-  bool needReset() const;
-
-private:
-  ExecutionContext *m_context;
-  Array m_shutdowns;
-  SatelliteServerInfoPtr m_serverInfo;
-  int m_count;
-  bool m_reset;
-  time_t m_created;
-
-  bool executePHPFunction(Transport *transport,
-                          SourceRootInfo &sourceRootInfo);
-};
+FiberLocal::~FiberLocal() {
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-#endif // __HPHP_RPC_REQUEST_HANDLER_H__

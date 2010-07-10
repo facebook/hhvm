@@ -19,8 +19,9 @@
 
 #include <runtime/base/complex_types.h>
 #include <runtime/base/server/transport.h>
-#include <util/thread_local.h>
 #include <runtime/base/resource_data.h>
+#include <runtime/base/fiber_safe.h>
+#include <util/thread_local.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,29 +43,26 @@ public:
 
   // Priority of request shutdown call. Lower priority value means
   // requestShutdown is called earlier than higher priority values.
-  virtual int priority() const;
+  virtual int priority() const { return 0;}
 
 protected:
   bool m_inited;
 };
 
+///////////////////////////////////////////////////////////////////////////////
 /**
  * Put all global variables here so we can gather them into one thread-local
  * variable for easy access.
  */
 
-class ExecutionContext {
+class ExecutionContext : public FiberLocal {
 public:
-  enum ConnetionStatus {
-    Normal,
-    Aborted,
-    TimedOut,
-  };
-
   enum ShutdownType {
     ShutDown,
     PostSend,
     CleanUp,
+
+    ShutdownTypeCount
   };
 
   enum ErrorThrowMode {
@@ -83,6 +81,24 @@ public:
 public:
   ExecutionContext();
   ~ExecutionContext();
+
+  // implementing FiberSafe
+  virtual void fiberInit(FiberLocal *src, FiberReferenceMap &refMap);
+  virtual void fiberExit(FiberLocal *src, FiberReferenceMap &refMap);
+
+  /**
+   * System settings.
+   */
+  Transport *getTransport() { return m_transport;}
+  void setTransport(Transport *transport) { m_transport = transport;}
+  String getMimeType() const;
+  void setContentType(CStrRef mimetype, CStrRef charset);
+  int64 getRequestMemoryMaxBytes() const { return m_maxMemory; }
+  void setRequestMemoryMaxBytes(int64 max);
+  int64 getRequestTimeLimit() const { return m_maxTime; }
+  void setRequestTimeLimit(int64 limit) { m_maxTime = limit;}
+  String getCwd() const { return m_cwd;}
+  void setCwd(CStrRef cwd) { m_cwd = cwd;}
 
   /**
    * Write to output.
@@ -109,26 +125,27 @@ public:
   void flush();
 
   /**
-   * Program execution hooks.
+   * Request sequences and program execution hooks.
    */
+  void registerRequestEventHandler(RequestEventHandler *handler);
   void registerShutdownFunction(CVarRef function, Array arguments,
                                 ShutdownType type);
+  void onRequestShutdown();
+  void onShutdownPreSend();
+  void onShutdownPostSend();
   void registerTickFunction(CVarRef function, Array arguments);
   void unregisterTickFunction(CVarRef function);
+  void onTick();
+  Array backupShutdowns() const { return m_shutdowns;}
+  void restoreShutdowns(CArrRef shutdowns) { m_shutdowns = shutdowns;}
+
+  /**
+   * Error handling
+   */
   Variant pushUserErrorHandler(CVarRef function, int error_types);
   Variant pushUserExceptionHandler(CVarRef function);
   void popUserErrorHandler();
   void popUserExceptionHandler();
-
-  /**
-   * Request sequences.
-   */
-  void registerRequestEventHandler(RequestEventHandler *handler);
-  void onRequestShutdown();
-
-  void onShutdownPreSend();
-  void onShutdownPostSend();
-  void onTick();
   bool errorNeedsHandling(int errnum,
                           bool callUserHandler,
                           ErrorThrowMode mode);
@@ -142,63 +159,32 @@ public:
   void recordLastError(const Exception &e, int errnum = 0);
   bool onFatalError(const Exception &e); // returns handled
   void onUnhandledException(Object e);
-  int getErrorState();
-  void setErrorState(int state);
+  int getErrorState() const { return m_errorState;}
+  void setErrorState(int state) { m_errorState = state;}
+  String getLastError() const { return m_lastError;}
+  int getLastErrorNumber() const { return m_lastErrorNum;}
+  int getErrorReportingLevel() const { return m_errorReportingLevel;}
+  void setErrorReportingLevel(int level) { m_errorReportingLevel = level;}
+  String getErrorPage() const { return m_errorPage;}
+  void setErrorPage(CStrRef page) { m_errorPage = page;}
+  bool getLogErrors() const { return m_logErrors;}
+  void setLogErrors(bool on);
+  String getErrorLog() const { return m_errorLog;}
+  void setErrorLog(CStrRef filename);
 
-  String getLastError();
-  int getLastErrorNumber();
-  int getErrorReportingLevel();
-  void setErrorReportingLevel(int level);
-  String getTimeZone();
-  void setTimeZone(CStrRef timezone);
-  String getDefaultTimeZone();
-  String getCwd();
-  void setCwd(CStrRef cwd);
+  /**
+   * Misc. settings
+   */
+  String getenv(CStrRef name) const;
   void setenv(CStrRef name, CStrRef value);
-  String getenv(CStrRef name);
-
-  Transport *getTransport() { return m_transport;}
-  void setTransport(Transport *transport) { m_transport = transport;}
-  String getMimeType();
-  void setContentType(CStrRef mimetype, CStrRef charset);
-  // TODO: support these features
-  ConnetionStatus getConnectionStatus() { return m_connStatus;}
-
-  int64 getRequestMemoryMaxBytes() const { return m_requestMemoryMaxBytes; }
-  void setRequestMemoryMaxBytes(int64 max) {
-    m_requestMemoryMaxBytes = max;
-  }
-  int64 getRequestTimeLimit() const { return m_requestTimeLimit; }
-  void setRequestTimeLimit(int64 limit) {
-    m_requestTimeLimit = limit;
-  }
-
+  String getTimeZone() const { return m_timezone;}
+  void setTimeZone(CStrRef timezone) { m_timezone = timezone;}
+  String getDefaultTimeZone() const { return m_timezoneDefault;}
   String getArgSeparatorOutput() const {
     if (m_argSeparatorOutput.isNull()) return "&";
     return m_argSeparatorOutput;
   }
-  void setArgSeparatorOutput(CStrRef s) {
-    m_argSeparatorOutput = s;
-  }
-
-  // invoke which page on 500 errors
-  void setErrorPage(const char *page) { m_errorPage = page ? page : "";}
-  const std::string &getErrorPage() const { return m_errorPage;}
-
-  class ErrorStateHelper {
-  public:
-    ErrorStateHelper(ExecutionContext * context, int state) {
-      m_context = context;
-      m_originalState = m_context->getErrorState();
-      m_context->setErrorState(state);
-    }
-    ~ErrorStateHelper() {
-      m_context->setErrorState(m_originalState);
-    }
-  private:
-    ExecutionContext * m_context;
-    int m_originalState;
-  };
+  void setArgSeparatorOutput(CStrRef s) { m_argSeparatorOutput = s;}
 
 private:
   struct OutputBuffer {
@@ -206,28 +192,47 @@ private:
     Variant handler;
   };
 
-  std::ostream *m_err;                // current error log stream
+  // system settings
+  Transport *m_transport;
+  int64 m_maxMemory;
+  int64 m_maxTime;
+  String m_cwd;
+
+  // output buffering
   std::ostream *m_out;                // current output buffer
   std::list<OutputBuffer*> m_buffers; // a stack of output buffers
-  std::ofstream m_null;
   bool m_implicitFlush;
   int m_protectedLevel;
-  std::string m_errorPage;
 
+  // request handlers
   std::set<RequestEventHandler*> m_requestEventHandlerSet;
   std::vector<RequestEventHandler*> m_requestEventHandlers;
-  ConnetionStatus m_connStatus;
-  Transport *m_transport;
+  Array m_shutdowns;
+  Array m_ticks;
 
-  int64 m_requestMemoryMaxBytes;
-  // Only used for ini_get
-  int64 m_requestTimeLimit;
+  // error handling
+  std::vector<std::pair<Variant,int> > m_userErrorHandlers;
+  std::vector<Variant> m_userExceptionHandlers;
+  int m_errorState;
+  int m_errorReportingLevel;
+  String m_lastError;
+  int m_lastErrorNum;
+  std::string m_errorPage;
+  bool m_logErrors;
+  String m_errorLog;
 
+  // misc settings
+  Array m_envs;
+  String m_timezone;
+  String m_timezoneDefault;
   String m_argSeparatorOutput;
 
+  // helper functions
   void resetCurrentBuffer();
   void executeFunctions(CArrRef funcs);
 };
+
+///////////////////////////////////////////////////////////////////////////////
 
 class PersistentObjectStore {
 public:
@@ -246,6 +251,8 @@ private:
 
   void removeObject(ResourceData *data);
 };
+
+///////////////////////////////////////////////////////////////////////////////
 
 class Silencer {
 public:

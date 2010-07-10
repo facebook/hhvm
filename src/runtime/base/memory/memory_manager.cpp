@@ -33,6 +33,7 @@ MemoryManager::MemoryManager() : m_enabled(false), m_checkpoint(false) {
     m_enabled = true;
   }
   resetStats();
+  m_stats.maxBytes = 0;
 }
 
 void MemoryManager::resetStats() {

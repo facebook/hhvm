@@ -134,6 +134,8 @@ void Transport::parseQuery(char *query, ParamMap &params) {
 }
 
 void Transport::parseGetParams() {
+  FiberWriteLock lock(this);
+
   ASSERT(m_url == NULL);
   const char *url = getServerObject();
   ASSERT(url);
@@ -149,6 +151,8 @@ void Transport::parseGetParams() {
 }
 
 void Transport::parsePostParams() {
+  FiberWriteLock lock(this);
+
   ASSERT(!m_postDataParsed);
   ASSERT(m_postData == NULL);
   int size;
@@ -164,6 +168,7 @@ void Transport::parsePostParams() {
 
 bool Transport::paramExists(const char *name, Method method /* = GET */) {
   ASSERT(name && *name);
+  FiberReadLock lock(this);
 
   if (method == GET || method == AUTO) {
     if (m_url == NULL) {
@@ -188,6 +193,7 @@ bool Transport::paramExists(const char *name, Method method /* = GET */) {
 
 std::string Transport::getParam(const char *name,  Method method /* = GET */) {
   ASSERT(name && *name);
+  FiberReadLock lock(this);
 
   if (method == GET || method == AUTO) {
     if (m_url == NULL) {
@@ -232,6 +238,8 @@ long long Transport::getInt64Param(const char *name,
 void Transport::getArrayParam(const char *name,
                               std::vector<std::string> &values,
                               Method method /* = GET */) {
+  FiberReadLock lock(this);
+
   if (method == GET || method == AUTO) {
     if (m_url == NULL) {
       parseGetParams();
@@ -295,6 +303,7 @@ bool Transport::splitHeader(CStrRef header, String &name, const char *&value) {
 void Transport::addHeader(const char *name, const char *value) {
   ASSERT(name && *name);
   ASSERT(value);
+  FiberWriteLock lock(this);
 
   string svalue = value;
   Util::replaceAll(svalue, "\n", "");
@@ -326,6 +335,7 @@ void Transport::addHeader(CStrRef header) {
 void Transport::replaceHeader(const char *name, const char *value) {
   ASSERT(name && *name);
   ASSERT(value);
+  FiberWriteLock lock(this);
   m_responseHeaders[name].clear();
   addHeader(name, value);
 }
@@ -340,6 +350,7 @@ void Transport::replaceHeader(CStrRef header) {
 
 void Transport::removeHeader(const char *name) {
   if (name && *name) {
+    FiberWriteLock lock(this);
     m_responseHeaders.erase(name);
     if (strcasecmp(name, "Set-Cookie") == 0) {
       m_responseCookies.clear();
@@ -348,11 +359,13 @@ void Transport::removeHeader(const char *name) {
 }
 
 void Transport::removeAllHeaders() {
+  FiberWriteLock lock(this);
   m_responseHeaders.clear();
   m_responseCookies.clear();
 }
 
 void Transport::getResponseHeaders(HeaderMap &headers) {
+  FiberReadLock lock(this);
   headers = m_responseHeaders;
 
   vector<string> &cookies = headers["Set-Cookie"];
@@ -414,6 +427,16 @@ bool Transport::decideCompression() {
 
 std::string Transport::getHTTPVersion() const {
   return "1.1";
+}
+
+void Transport::setMimeType(CStrRef mimeType) {
+  FiberWriteLock lock(this);
+  m_mimeType = mimeType.data();
+}
+
+String Transport::getMimeType() {
+  FiberReadLock lock(this);
+  return String(m_mimeType);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -493,6 +516,7 @@ bool Transport::setCookie(CStrRef name, CStrRef value, int expire /* = 0 */,
     cookie += "; httponly";
   }
 
+  FiberWriteLock lock(this);
   m_responseCookies[name.data()] = cookie;
   return true;
 }
@@ -500,6 +524,7 @@ bool Transport::setCookie(CStrRef name, CStrRef value, int expire /* = 0 */,
 ///////////////////////////////////////////////////////////////////////////////
 
 void Transport::prepareHeaders(bool compressed) {
+  FiberReadLock lock(this);
   for (HeaderMap::const_iterator iter = m_responseHeaders.begin();
        iter != m_responseHeaders.end(); ++iter) {
     const vector<string> &values = iter->second;
@@ -578,6 +603,7 @@ void Transport::sendRaw(void *data, int size, int code /* = 200 */,
                         bool chunked /* = false */) {
   ASSERT(data || size == 0);
   ASSERT(size >= 0);
+  FiberWriteLock lock(this);
 
   if (!compressed && RuntimeOption::ForceChunkedEncoding) {
     chunked = true;
@@ -622,6 +648,7 @@ void Transport::sendRaw(void *data, int size, int code /* = 200 */,
 }
 
 void Transport::onSendEnd() {
+  FiberWriteLock lock(this);
   if (m_compressor && m_chunkedEncoding) {
     bool compressed = false;
     String response = prepareResponse("", 0, compressed, true);
@@ -631,6 +658,7 @@ void Transport::onSendEnd() {
 }
 
 void Transport::redirect(const char *location, int code /* = 302 */) {
+  FiberWriteLock lock(this);
   addHeaderImpl("Location", location);
   setResponse(code);
   sendString(location, code);

@@ -292,7 +292,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     } else if (error) {
       code = 500;
 
-      string errorPage = context->getErrorPage();
+      string errorPage = context->getErrorPage().data();
       if (errorPage.empty()) {
         errorPage = RuntimeOption::ErrorDocument500;
       }

@@ -15,6 +15,7 @@
 */
 
 #include <runtime/base/fiber_async_func.h>
+#include <runtime/base/program_functions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/resource_data.h>
 #include <runtime/base/fiber_reference_map.h>
@@ -53,7 +54,7 @@ class FiberJob : public Synchronizable {
 public:
   FiberJob(FiberAsyncFuncData *thread, CVarRef function, CArrRef params,
            bool async)
-      : m_thread(thread),
+      : m_thread(thread), m_context(NULL),
         m_unmarshaled_function(NULL), m_unmarshaled_params(NULL),
         m_unmarshaled_global_variables(NULL),
         m_function(function), m_params(params),
@@ -69,6 +70,8 @@ public:
     // Variant::fiberUnmarshal() code to tell who needs to set back to original
     // reference.
     if (m_async) {
+      m_context = g_context.get();
+      ASSERT(m_context);
       m_unmarshaled_function = NEW(Variant)();
       *m_unmarshaled_function = m_function;
       m_unmarshaled_params = NEW(Variant)();
@@ -84,6 +87,10 @@ public:
     if (m_unmarshaled_function) {
       Lock lock(m_thread->m_mutex);
       if (m_thread->m_reqId == m_reqId) {
+        ExecutionContext *context = g_context.get();
+        if (m_context && context) {
+          m_context->fiberExit(context, m_refMap);
+        }
         DELETE(Variant)(m_unmarshaled_function);
         DELETE(Variant)(m_unmarshaled_params);
         m_unmarshaled_function = NULL;
@@ -110,6 +117,10 @@ public:
   void run() {
     // make local copy of m_function and m_params
     if (m_async) {
+      ExecutionContext *context = g_context.get();
+      if (context && m_context) {
+        context->fiberInit(m_context, m_refMap);
+      }
       m_function = m_function.fiberMarshal(m_refMap);
       m_params = m_params.fiberMarshal(m_refMap);
       m_global_variables = get_global_variables();
@@ -208,6 +219,7 @@ private:
   FiberAsyncFuncData *m_thread;
 
   // holding references to them, so we can later restore their states safely
+  ExecutionContext *m_context; // main thread's
   Variant *m_unmarshaled_function;
   Variant *m_unmarshaled_params;
   GlobalVariables *m_unmarshaled_global_variables;
@@ -237,7 +249,14 @@ private:
 
 class FiberWorker : public JobQueueWorker<FiberJob*> {
 public:
+  FiberWorker() {
+    hphp_session_init();
+    hphp_context_init();
+  }
+
   ~FiberWorker() {
+    hphp_context_exit(g_context.get(), false, false);
+    hphp_session_exit();
   }
 
   virtual void doJob(FiberJob *job) {
@@ -257,6 +276,17 @@ public:
       }
       ++iter;
     }
+
+    // Finally we can take a breath releasing some memory. It's still possible
+    // we're suffocated to death, but in reality, fiber threads should be able
+    // to take breaks from time to time, or the count should be increased.
+    if (m_jobs.empty()) {
+      hphp_context_exit(g_context.get(), false, true);
+      hphp_session_exit();
+
+      hphp_session_init();
+      hphp_context_init();
+    }
   }
 
 private:
@@ -265,7 +295,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class FiberAsyncFuncHandle : public ResourceData, public Sweepable {
+class FiberAsyncFuncHandle : public SweepableResourceData {
 public:
   DECLARE_OBJECT_ALLOCATION(FiberAsyncFuncHandle);
 

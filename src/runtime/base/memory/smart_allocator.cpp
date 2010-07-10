@@ -19,7 +19,6 @@
 #include <runtime/base/resource_data.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/runtime_option.h>
-#include <runtime/base/execution_context.h>
 #include <util/logger.h>
 
 using namespace std;
@@ -173,9 +172,8 @@ void *SmartAllocatorImpl::allocHelper() {
 void SmartAllocatorImpl::checkMemUsage() {
   int64 prevPeakUsage = m_stats->peakUsage;
   m_stats->peakUsage = m_stats->usage;
-  int64 maxBytes = g_context->getRequestMemoryMaxBytes();
-  if (maxBytes > 0 && m_stats->peakUsage > maxBytes &&
-      prevPeakUsage <= maxBytes) {
+  if (m_stats->maxBytes > 0 && m_stats->peakUsage > m_stats->maxBytes &&
+      prevPeakUsage <= m_stats->maxBytes) {
     ThreadInfo::s_threadInfo->m_reqInjectionData.memExceeded = true;
   }
 }

@@ -21,6 +21,7 @@
 #include <util/compression.h>
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/fiber_safe.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,7 +39,7 @@ typedef std::map<std::string, std::string, stdltistr> CookieMap;
  * Note that one transport object is created for each request, and
  * one transport is ONLY accessed from one single thread.
  */
-class Transport {
+class Transport : public FiberSafe {
 public:
   enum Method {
     UnknownMethod,
@@ -128,8 +129,8 @@ public:
   /**
    * Content/MIME type related functions.
    */
-  void setMimeType(CStrRef mimeType) { m_mimeType = mimeType.data();}
-  String getMimeType() { return String(m_mimeType);}
+  void setMimeType(CStrRef mimeType);
+  String getMimeType();
   const char *getDefaultContentType() { return "text/html";}
   bool sendDefaultContentType() { return m_sendContentType;}
   void setDefaultContentType(bool send) { m_sendContentType = send;}

@@ -22,114 +22,32 @@
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/resource_data.h>
 #include <runtime/base/array/array_init.h>
-#include <util/logger.h>
-#include <util/process.h>
+#include <runtime/base/memory/memory_manager.h>
+#include <runtime/base/memory/sweepable.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/debug/backtrace.h>
-#include <runtime/base/memory/sweepable.h>
+#include <runtime/base/server/server_stats.h>
+#include <util/logger.h>
+#include <util/process.h>
 
 using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-// static
 
 IMPLEMENT_THREAD_LOCAL(ExecutionContext, g_context);
 
-int RequestEventHandler::priority() const { return 0; }
-
-class RequestData : public RequestEventHandler {
-public:
-  RequestData() : data(NULL) {}
-
-  struct Data {
-    int errorReportingLevel;
-    String lastError;
-    int lastErrorNum;
-    String timezone;
-    String timezoneDefault;
-    Array shutdowns;
-    Array ticks;
-    std::vector<std::pair<Variant,int> > userErrorHandlers;
-    std::vector<Variant> userExceptionHandlers;
-    String cwd;
-    int errorState;
-    Array envs;
-  };
-  Data *data;
-
-  virtual void requestInit() {
-    data = new Data();
-    data->errorReportingLevel = RuntimeOption::RuntimeErrorReportingLevel;
-    data->cwd = String(Process::CurrentWorkingDirectory);
-    data->errorState = ExecutionContext::NoError;
-  }
-  virtual void requestShutdown() {
-    delete data;
-  }
-};
-IMPLEMENT_STATIC_REQUEST_LOCAL(RequestData, s_request_data);
-
-String ExecutionContext::getLastError() {
-  return s_request_data->data->lastError;
-}
-int ExecutionContext::getLastErrorNumber() {
-  return s_request_data->data->lastErrorNum;
-}
-int ExecutionContext::getErrorReportingLevel() {
-  return s_request_data->data->errorReportingLevel;
-}
-void ExecutionContext::setErrorReportingLevel(int level) {
-  s_request_data->data->errorReportingLevel = level;
-}
-String ExecutionContext::getTimeZone() {
-  return s_request_data->data->timezone;
-}
-void ExecutionContext::setTimeZone(CStrRef timezone) {
-  s_request_data->data->timezone = timezone;
-}
-String ExecutionContext::getDefaultTimeZone() {
-  return s_request_data->data->timezoneDefault;
-}
-String ExecutionContext::getCwd() {
-  return s_request_data->data->cwd;
-}
-void ExecutionContext::setCwd(CStrRef cwd) {
-  s_request_data->data->cwd = cwd;
-}
-
-void ExecutionContext::setenv(CStrRef name, CStrRef value) {
-  s_request_data->data->envs.set(name, value);
-}
-
-String ExecutionContext::getenv(CStrRef name) {
-  if (s_request_data->data->envs.exists(name)) {
-    return s_request_data->data->envs[name];
-  }
-  char *value = ::getenv(name.data());
-  if (value) {
-    return String(value, CopyString);
-  }
-  return String();
-}
-
-void ExecutionContext::setErrorState(int state) {
-  s_request_data->data->errorState = state;
-}
-
-int ExecutionContext::getErrorState() {
-  return s_request_data->data->errorState;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 ExecutionContext::ExecutionContext()
-  : m_null("/dev/null"), m_implicitFlush(false), m_protectedLevel(0),
-    m_connStatus(Normal), m_transport(NULL),
-    m_requestMemoryMaxBytes(RuntimeOption::RequestMemoryMaxBytes),
-    m_requestTimeLimit(RuntimeOption::RequestTimeoutSeconds) {
+  : m_transport(NULL),
+    m_maxMemory(RuntimeOption::RequestMemoryMaxBytes),
+    m_maxTime(RuntimeOption::RequestTimeoutSeconds),
+    m_cwd(Process::CurrentWorkingDirectory),
+    m_implicitFlush(false), m_protectedLevel(0),
+    m_errorState(ExecutionContext::NoError),
+    m_errorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel),
+    m_lastErrorNum(0), m_logErrors(false) {
   m_out = &cout;
-  m_err = &cerr;
+  MemoryManager::TheMemoryManager()->getStats().maxBytes = m_maxMemory;
 }
 
 ExecutionContext::~ExecutionContext() {
@@ -138,6 +56,93 @@ ExecutionContext::~ExecutionContext() {
        iter != m_buffers.end(); ++iter) {
     delete *iter;
   }
+}
+
+void ExecutionContext::fiberInit(FiberLocal *src, FiberReferenceMap &refMap) {
+  ExecutionContext *ec = dynamic_cast<ExecutionContext*>(src);
+  ASSERT(ec);
+
+  m_transport = ec->m_transport;
+  if (m_transport) {
+    m_transport->incFiberCount();
+  }
+  m_maxMemory = ec->m_maxMemory;
+  m_maxTime = ec->m_maxTime;
+  m_cwd = ec->m_cwd.fiberCopy();
+
+  for (unsigned int i = 0; i < ec->m_userErrorHandlers.size(); i++) {
+    pair<Variant, int> &handler = ec->m_userErrorHandlers[i];
+    m_userErrorHandlers.push_back
+      (pair<Variant, int>(handler.first.fiberMarshal(refMap), handler.second));
+  }
+  for (unsigned int i = 0; i < ec->m_userExceptionHandlers.size(); i++) {
+    m_userExceptionHandlers.push_back
+      (ec->m_userExceptionHandlers[i].fiberMarshal(refMap));
+  }
+
+  m_timezone = ec->m_timezone.fiberCopy();
+  m_timezoneDefault = ec->m_timezoneDefault.fiberCopy();
+  m_argSeparatorOutput = ec->m_argSeparatorOutput.fiberCopy();
+}
+
+void ExecutionContext::fiberExit(FiberLocal *src, FiberReferenceMap &refMap) {
+  ExecutionContext *ec = dynamic_cast<ExecutionContext*>(src);
+  ASSERT(ec);
+
+  if (m_transport) {
+    m_transport->decFiberCount();
+  }
+
+  Array shutdowns = ec->m_shutdowns.fiberUnmarshal(refMap);
+  for (int i = 0; i < ShutdownTypeCount; i++) {
+    Variant newfuncs = shutdowns[i];
+    if (!newfuncs.isNull()) {
+      Variant funcs = m_shutdowns[i];
+      if (funcs.isNull()) {
+        m_shutdowns.set(i, newfuncs);
+      } else {
+        Array arr = funcs.toArray();
+        arr.merge(newfuncs.toArray());
+        m_shutdowns.set(i, arr);
+      }
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// system functions
+
+String ExecutionContext::getMimeType() const {
+  String mimetype;
+  if (m_transport) {
+    mimetype = m_transport->getMimeType();
+  }
+
+  if (strncasecmp(mimetype.data(), "text/", 5) == 0) {
+    int pos = mimetype.find(';');
+    if (pos != String::npos) {
+      mimetype = mimetype.substr(0, pos);
+    }
+  } else if (m_transport && m_transport->sendDefaultContentType()) {
+    mimetype = m_transport->getDefaultContentType();
+  }
+  return mimetype;
+}
+
+void ExecutionContext::setContentType(CStrRef mimetype, CStrRef charset) {
+  if (m_transport) {
+    String contentType = mimetype;
+    contentType += "; ";
+    contentType += "charset=";
+    contentType += charset;
+    m_transport->addHeader("Content-Type", contentType);
+    m_transport->setDefaultContentType(false);
+  }
+}
+
+void ExecutionContext::setRequestMemoryMaxBytes(int64 max) {
+  m_maxMemory = max;
+  MemoryManager::TheMemoryManager()->getStats().maxBytes = m_maxMemory;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -300,34 +305,6 @@ void ExecutionContext::resetCurrentBuffer() {
   }
 }
 
-String ExecutionContext::getMimeType() {
-  String mimetype;
-  if (m_transport) {
-    mimetype = m_transport->getMimeType();
-  }
-
-  if (strncasecmp(mimetype.data(), "text/", 5) == 0) {
-    int pos = mimetype.find(';');
-    if (pos != String::npos) {
-      mimetype = mimetype.substr(0, pos);
-    }
-  } else if (m_transport && m_transport->sendDefaultContentType()) {
-    mimetype = m_transport->getDefaultContentType();
-  }
-  return mimetype;
-}
-
-void ExecutionContext::setContentType(CStrRef mimetype, CStrRef charset) {
-  if (m_transport) {
-    String contentType = mimetype;
-    contentType += "; ";
-    contentType += "charset=";
-    contentType += charset;
-    m_transport->addHeader("Content-Type", contentType);
-    m_transport->setDefaultContentType(false);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // program executions
 
@@ -335,55 +312,50 @@ void ExecutionContext::registerShutdownFunction(CVarRef function,
                                                 Array arguments,
                                                 ShutdownType type) {
   Array callback = CREATE_MAP2("name", function, "args", arguments);
-  Variant &funcs = s_request_data->data->shutdowns.lvalAt(type);
+  Variant &funcs = m_shutdowns.lvalAt(type);
   funcs.append(callback);
 }
 
 void ExecutionContext::registerTickFunction(CVarRef function,
                                             Array arguments) {
   Array callback = CREATE_MAP2("name", function, "args", arguments);
-  s_request_data->data->ticks.append(callback);
+  m_ticks.append(callback);
   throw NotImplementedException(__func__);
 }
 
 void ExecutionContext::unregisterTickFunction(CVarRef function) {
-  //s_request_data->data->ticks.remove(function);
+  //m_ticks.remove(function);
   throw NotImplementedException(__func__);
 }
 
 Variant ExecutionContext::pushUserErrorHandler(CVarRef function,
                                                int error_types) {
   Variant ret;
-  RequestData::Data *data = s_request_data->data;
-  if (!data->userErrorHandlers.empty()) {
-    ret = data->userErrorHandlers.back().first;
+  if (!m_userErrorHandlers.empty()) {
+    ret = m_userErrorHandlers.back().first;
   }
-  data->userErrorHandlers.push_back(
-    std::pair<Variant,int>(function, error_types));
+  m_userErrorHandlers.push_back(std::pair<Variant,int>(function, error_types));
   return ret;
 }
 
 Variant ExecutionContext::pushUserExceptionHandler(CVarRef function) {
   Variant ret;
-  RequestData::Data *data = s_request_data->data;
-  if (!data->userExceptionHandlers.empty()) {
-    ret = data->userExceptionHandlers.back();
+  if (!m_userExceptionHandlers.empty()) {
+    ret = m_userExceptionHandlers.back();
   }
-  data->userExceptionHandlers.push_back(function);
+  m_userExceptionHandlers.push_back(function);
   return ret;
 }
 
 void ExecutionContext::popUserErrorHandler() {
-  RequestData::Data *data = s_request_data->data;
-  if (!data->userErrorHandlers.empty()) {
-    data->userErrorHandlers.pop_back();
+  if (!m_userErrorHandlers.empty()) {
+    m_userErrorHandlers.pop_back();
   }
 }
 
 void ExecutionContext::popUserExceptionHandler() {
-  RequestData::Data *data = s_request_data->data;
-  if (!data->userExceptionHandlers.empty()) {
-    data->userExceptionHandlers.pop_back();
+  if (!m_userExceptionHandlers.empty()) {
+    m_userExceptionHandlers.pop_back();
   }
 }
 
@@ -421,32 +393,55 @@ void ExecutionContext::onRequestShutdown() {
   m_requestEventHandlerSet.clear();
 }
 
+void ExecutionContext::executeFunctions(CArrRef funcs) {
+  for (ArrayIter iter(funcs); iter; ++iter) {
+    Array callback = iter.second();
+    f_call_user_func_array(callback["name"], callback["args"]);
+  }
+}
+
 void ExecutionContext::onShutdownPreSend() {
-  Array &funcs = s_request_data->data->shutdowns;
-  if (!funcs.isNull() && funcs.exists(ShutDown)) {
-    executeFunctions(funcs[ShutDown]);
-    funcs.remove(ShutDown);
+  if (!m_shutdowns.isNull() && m_shutdowns.exists(ShutDown)) {
+    executeFunctions(m_shutdowns[ShutDown]);
+    m_shutdowns.remove(ShutDown);
   }
   obFlushAll(); // in case obStart was called without obFlush
 }
 
 void ExecutionContext::onShutdownPostSend() {
-  Array &funcs = s_request_data->data->shutdowns;
-  if (!funcs.isNull()) {
-    if (funcs.exists(PostSend)) {
-      executeFunctions(funcs[PostSend]);
-      funcs.remove(PostSend);
+  ServerStats::SetThreadMode(ServerStats::PostProcessing);
+  try {
+    try {
+      ServerStatsHelper ssh("psp");
+      if (!m_shutdowns.isNull()) {
+        if (m_shutdowns.exists(PostSend)) {
+          executeFunctions(m_shutdowns[PostSend]);
+          m_shutdowns.remove(PostSend);
+        }
+        if (m_shutdowns.exists(CleanUp)) {
+          executeFunctions(m_shutdowns[CleanUp]);
+          m_shutdowns.remove(CleanUp);
+        }
+      }
+    } catch (const ExitException &e) {
+      // do nothing
+    } catch (const Exception &e) {
+      onFatalError(e);
+    } catch (const Object &e) {
+      onUnhandledException(e);
     }
-    if (funcs.exists(CleanUp)) {
-      executeFunctions(funcs[CleanUp]);
-      funcs.remove(CleanUp);
-    }
+  } catch (...) {
+    Logger::Error("unknown exception was thrown from psp");
   }
+  ServerStats::SetThreadMode(ServerStats::Idling);
 }
 
 void ExecutionContext::onTick() {
-  executeFunctions(s_request_data->data->ticks);
+  executeFunctions(m_ticks);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// error handling
 
 bool ExecutionContext::errorNeedsHandling(int errnum,
                                           bool callUserHandler,
@@ -456,14 +451,28 @@ bool ExecutionContext::errorNeedsHandling(int errnum,
     return true;
   }
   if (callUserHandler) {
-    RequestData::Data *data = s_request_data->data;
-    if (!data->userErrorHandlers.empty() &&
-        (data->userErrorHandlers.back().second & errnum) != 0) {
+    if (!m_userErrorHandlers.empty() &&
+        (m_userErrorHandlers.back().second & errnum) != 0) {
       return true;
     }
   }
   return false;
 }
+
+class ErrorStateHelper {
+public:
+  ErrorStateHelper(ExecutionContext *context, int state) {
+    m_context = context;
+    m_originalState = m_context->getErrorState();
+    m_context->setErrorState(state);
+  }
+  ~ErrorStateHelper() {
+    m_context->setErrorState(m_originalState);
+  }
+private:
+  ExecutionContext *m_context;
+  int m_originalState;
+};
 
 void ExecutionContext::handleError(const std::string &msg,
                                    int errnum,
@@ -507,9 +516,8 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
   default:
     break;
   }
-  RequestData::Data *data = s_request_data->data;
-  if (!data->userErrorHandlers.empty() &&
-      (data->userErrorHandlers.back().second & errnum) != 0) {
+  if (!m_userErrorHandlers.empty() &&
+      (m_userErrorHandlers.back().second & errnum) != 0) {
     int errline = 0;
     String errfile;
     Array backtrace;
@@ -531,7 +539,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
     try {
       ErrorStateHelper esh(this, ExecutingUserHandler);
       if (!same(f_call_user_func_array
-                (data->userErrorHandlers.back().first,
+                (m_userErrorHandlers.back().first,
                  CREATE_VECTOR6(errnum, String(e.getMessage()), errfile,
                                 errline, "", backtrace)),
                 false)) {
@@ -546,9 +554,8 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
 
 void ExecutionContext::recordLastError(const Exception &e,
                                        int errnum /* = 0 */) {
-  RequestData::Data *data = s_request_data->data;
-  data->lastError = String(e.getMessage());
-  data->lastErrorNum = errnum;
+  m_lastError = String(e.getMessage());
+  m_lastErrorNum = errnum;
 }
 
 bool ExecutionContext::onFatalError(const Exception &e) {
@@ -573,29 +580,63 @@ void ExecutionContext::onUnhandledException(Object e) {
     Logger::Error("HipHop Fatal error: Uncaught exception %s", err.data());
   }
 
-  RequestData::Data *data = s_request_data->data;
   if (e.instanceof("exception")) {
     // user thrown exception
-    if (!data->userExceptionHandlers.empty()) {
-      f_call_user_func_array(data->userExceptionHandlers.back(),
-                             CREATE_VECTOR1(e));
+    if (!m_userExceptionHandlers.empty()) {
+      f_call_user_func_array(m_userExceptionHandlers.back(),CREATE_VECTOR1(e));
       return;
     }
   } else {
     ASSERT(false);
   }
-  data->lastError = err;
+  m_lastError = err;
 
   if (!RuntimeOption::AlwaysLogUnhandledExceptions) {
     Logger::Error("HipHop Fatal error: Uncaught exception: %s", err.data());
   }
 }
 
-void ExecutionContext::executeFunctions(CArrRef funcs) {
-  for (ArrayIter iter(funcs); iter; ++iter) {
-    Array callback = iter.second();
-    f_call_user_func_array(callback["name"], callback["args"]);
+void ExecutionContext::setLogErrors(bool on) {
+  if (m_logErrors != on) {
+    m_logErrors = on;
+    if (m_logErrors) {
+      if (!m_errorLog.empty()) {
+        FILE *output = fopen(m_errorLog.data(), "a");
+        if (output) {
+          Logger::SetNewOutput(output);
+        }
+      }
+    } else {
+      Logger::SetNewOutput(NULL);
+    }
   }
+}
+
+void ExecutionContext::setErrorLog(CStrRef filename) {
+  m_errorLog = filename;
+  if (m_logErrors && !m_errorLog.empty()) {
+    FILE *output = fopen(m_errorLog.data(), "a");
+    if (output) {
+      Logger::SetNewOutput(output);
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ExecutionContext::setenv(CStrRef name, CStrRef value) {
+  m_envs.set(name, value);
+}
+
+String ExecutionContext::getenv(CStrRef name) const {
+  if (m_envs.exists(name)) {
+    return m_envs[name];
+  }
+  char *value = ::getenv(name.data());
+  if (value) {
+    return String(value, CopyString);
+  }
+  return String();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

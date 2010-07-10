@@ -104,6 +104,7 @@ public:
   /**
    * Write to output.
    */
+  void write(CStrRef s);
   void write(const char *s, int len);
   void write(const char *s) { write(s, strlen(s));}
 

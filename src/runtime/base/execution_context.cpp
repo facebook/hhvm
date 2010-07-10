@@ -147,7 +147,7 @@ void ExecutionContext::setRequestMemoryMaxBytes(int64 max) {
 ///////////////////////////////////////////////////////////////////////////////
 // write()
 
-void ExecutionContext::write(const char *s, int len) {
+void ExecutionContext::write(CStrRef s) {
 #ifdef TAINTED
   if (s.isTainted()) {
     // in the future, raise some kind of exception
@@ -160,6 +160,10 @@ void ExecutionContext::write(const char *s, int len) {
            FrameInjection::GetLine());
   }
 #endif
+  write(s.data(), s.size());
+}
+
+void ExecutionContext::write(const char *s, int len) {
   if (m_out) {
     m_out->append(s, len);
   } else {

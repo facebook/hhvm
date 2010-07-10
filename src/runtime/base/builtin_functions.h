@@ -462,12 +462,19 @@ inline bool instanceOf(ObjectData *v, const char *s) {
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 
-inline int print(CStrRef s) {
-  g_context->write(s.data(), s.size());
+inline int print(const char *s) {
+  g_context->write(s);
   return 1;
 }
+inline int print(CStrRef s) {
+  g_context->write(s);
+  return 1;
+}
+inline void echo(const char *s) {
+  g_context->write(s);
+}
 inline void echo(CStrRef s) {
-  g_context->write(s.data(), s.size());
+  g_context->write(s);
 }
 
 String get_source_filename(litstr path);

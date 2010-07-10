@@ -33,16 +33,21 @@ String f_json_encode(CVarRef value, bool loose /* = false */) {
   return ret;
 }
 
-Variant f_json_decode(CStrRef json, bool assoc /* = false */,
+Variant f_json_decode(CVarRef json, bool assoc /* = false */,
                       bool loose /* = false */) {
-  if (json.empty()) {
+  if (!json.isString()) {
+    raise_error("json_decode() expects parameter 1 to be string");
+    return null;
+  }
+  String sjson = json.toString();
+  if (sjson.empty()) {
     return null;
   }
 
-  unsigned short *utf16 = (unsigned short *)malloc((json.size() + 1) *
+  unsigned short *utf16 = (unsigned short *)malloc((sjson.size() + 1) *
                                                    sizeof(unsigned short) + 1);
 
-  int utf16_len = utf8_to_utf16(utf16, (char*)json.data(), json.size(),
+  int utf16_len = utf8_to_utf16(utf16, (char*)sjson.data(), sjson.size(),
                                 loose ? 1 : 0);
   if (utf16_len <= 0) {
     if (utf16) {
@@ -58,30 +63,30 @@ Variant f_json_decode(CStrRef json, bool assoc /* = false */,
   }
   free(utf16);
 
-  if (json.size() == 4) {
-    if (!strcasecmp(json.data(), "null")) return null;
-    if (!strcasecmp(json.data(), "true")) return true;
-  } else if (json.size() == 5 && !strcasecmp(json.data(), "false")) {
+  if (sjson.size() == 4) {
+    if (!strcasecmp(sjson.data(), "null")) return null;
+    if (!strcasecmp(sjson.data(), "true")) return true;
+  } else if (sjson.size() == 5 && !strcasecmp(sjson.data(), "false")) {
     return false;
   }
 
   int64 p;
   double d;
-  DataType type = is_numeric_string(json.data(), json.size(), &p, &d, 0);
+  DataType type = is_numeric_string(sjson.data(), sjson.size(), &p, &d, 0);
   if (type == KindOfInt64) {
     return p;
   } else if (type == KindOfDouble) {
     return d;
   }
 
-  char ch0 = json.charAt(0);
-  if (json.size() > 1 && ch0 == '"' && json.charAt(json.size() - 1) == '"') {
-    return json.substr(1, json.size() - 2);
+  char ch0 = sjson[0];
+  if (sjson.size() > 1 && ch0 == '"' && sjson[sjson.size() - 1] == '"') {
+    return sjson.substr(1, sjson.size() - 2);
   }
 
-  if (loose && json.size() > 1 &&
-      ch0 == '\'' && json.charAt(json.size() - 1) == '\'') {
-    return json.substr(1, json.size() - 2);
+  if (loose && sjson.size() > 1 &&
+      ch0 == '\'' && sjson[sjson.size() - 1] == '\'') {
+    return sjson.substr(1, sjson.size() - 2);
   }
 
   if (ch0 == '{' || ch0 == '[') { /* invalid JSON string */

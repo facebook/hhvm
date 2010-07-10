@@ -30,7 +30,7 @@ inline String x_json_encode(CVarRef value, bool loose = false) {
   return f_json_encode(value, loose);
 }
 
-inline Variant x_json_decode(CStrRef json, bool assoc = false, bool loose = false) {
+inline Variant x_json_decode(CVarRef json, bool assoc = false, bool loose = false) {
   FUNCTION_INJECTION_BUILTIN(json_decode);
   return f_json_decode(json, assoc, loose);
 }

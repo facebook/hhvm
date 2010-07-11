@@ -4631,7 +4631,7 @@ String c_exception::t_gettraceasstring() {
           v_i++;
         }
       }
-      concat_assign(v_s, tmp_sbuf_v_s);
+      concat_assign(v_s, tmp_sbuf_v_s.detach());
     }
   }
   concat_assign(v_s, concat3("#", toString(v_i), " {main}"));

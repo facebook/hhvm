@@ -265,7 +265,7 @@ bool TestExtVariable::test_var_dump() {
   Variant v = CREATE_MAP3("a","apple","b",2,"c",CREATE_VECTOR3(1,"y",3));
   g_context->obStart();
   f_var_dump(v);
-  String output = g_context->obGetContents();
+  String output = g_context->obCopyContents();
   g_context->obEnd();
   VS(output,
      "array(3) {\n"
@@ -290,7 +290,7 @@ bool TestExtVariable::test_debug_zval_dump() {
   Variant v = CREATE_MAP3("a","apple","b",2,"c",CREATE_VECTOR3(1,"y",3));
   g_context->obStart();
   f_debug_zval_dump(v);
-  String output = g_context->obGetContents();
+  String output = g_context->obCopyContents();
   g_context->obEnd();
   VS(output,
      "array(3) refcount(1){\n"

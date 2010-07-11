@@ -280,7 +280,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                       error, errorMsg);
 
     if (ret) {
-      std::string content = context->getContents();
+      String content = context->obDetachContents();
       if (cachableDynamicContent && !content.empty()) {
         ASSERT(transport->getUrl());
         string key = file + transport->getUrl();
@@ -305,7 +305,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                           RuntimeOption::RequestInitFunction,
                           error, errorMsg);
         if (ret) {
-          std::string content = context->getContents();
+          String content = context->obDetachContents();
           transport->sendRaw((void*)content.data(), content.size());
         } else {
           errorPage.clear(); // so we fall back to 500 return

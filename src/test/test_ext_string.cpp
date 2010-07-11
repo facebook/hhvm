@@ -568,7 +568,7 @@ bool TestExtString::test_nl_langinfo() {
 bool TestExtString::test_echo() {
   g_context->obStart();
   f_echo(0, "test");
-  String output = g_context->obGetContents();
+  String output = g_context->obCopyContents();
   g_context->obEnd();
   VS(output, "test");
   return Count(true);
@@ -577,7 +577,7 @@ bool TestExtString::test_echo() {
 bool TestExtString::test_print() {
   g_context->obStart();
   f_print("test");
-  String output = g_context->obGetContents();
+  String output = g_context->obCopyContents();
   g_context->obEnd();
   VS(output, "test");
   return Count(true);
@@ -586,7 +586,7 @@ bool TestExtString::test_print() {
 bool TestExtString::test_printf() {
   g_context->obStart();
   f_printf(2, "A%sB%dC", CREATE_VECTOR2("test", 10));
-  String output = g_context->obGetContents();
+  String output = g_context->obCopyContents();
   g_context->obEnd();
   VS(output, "AtestB10C");
   return Count(true);
@@ -595,7 +595,7 @@ bool TestExtString::test_printf() {
 bool TestExtString::test_vprintf() {
   g_context->obStart();
   f_vprintf("A%sB%dC", CREATE_VECTOR2("test", 10));
-  String output = g_context->obGetContents();
+  String output = g_context->obCopyContents();
   g_context->obEnd();
   VS(output, "AtestB10C");
   return Count(true);

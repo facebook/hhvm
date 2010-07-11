@@ -998,7 +998,7 @@ bool TestExtArray::test_array_walk_recursive() {
 
   g_context->obStart();
   f_array_walk_recursive(fruits, "test_print");
-  String output = g_context->obGetContents();
+  String output = g_context->obCopyContents();
   g_context->obEnd();
   VS(output, "a: apple\nb: banana\nsour: lemon\n");
 
@@ -1014,7 +1014,7 @@ bool TestExtArray::test_array_walk() {
   f_array_walk(ref(fruits), "test_print");
   f_array_walk(ref(fruits), "test_alter", "fruit");
   f_array_walk(ref(fruits), "test_print");
-  String output = g_context->obGetContents();
+  String output = g_context->obCopyContents();
   g_context->obEnd();
 
   VS(output,

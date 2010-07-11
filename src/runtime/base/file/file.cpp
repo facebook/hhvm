@@ -628,7 +628,7 @@ int64 File::writeCSV(CArrRef fields, char delimiter_char /* = ',' */,
   }
   csvline.append('\n');
 
-  return write(csvline);
+  return write(csvline.detach());
 }
 
 static const char *lookup_trailing_spaces(const char *ptr, int len) {

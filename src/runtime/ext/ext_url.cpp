@@ -91,7 +91,7 @@ static String normalize_variable_name(CStrRef name) {
       sb.append('_');
     }
   }
-  return sb;
+  return sb.detach();
 }
 
 Array f_get_meta_tags(CStrRef filename, bool use_include_path /* = false */) {
@@ -141,8 +141,9 @@ static void url_encode_array(StringBuffer &ret, CArrRef arr,
       new_prefix += encoded;
       new_prefix += key_suffix;
       new_prefix += "%5B";
-      url_encode_array(ret, data.toArray(), seen_arrs, String(), new_prefix,
-                       String("%5D", AttachLiteral), arg_sep);
+      url_encode_array(ret, data.toArray(), seen_arrs, String(),
+                       new_prefix.detach(), String("%5D", AttachLiteral),
+                       arg_sep);
     } else {
       if (!ret.empty()) {
         ret += arg_sep;
@@ -186,7 +187,7 @@ Variant f_http_build_query(CVarRef formdata,
   std::set<void*> seen_arrs;
   url_encode_array(ret, formdata.toArray(), seen_arrs,
                    numeric_prefix, String(), String(), arg_sep);
-  return String(ret);
+  return ret.detach();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

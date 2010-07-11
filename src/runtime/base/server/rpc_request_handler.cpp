@@ -166,13 +166,13 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     if (ret) {
       String response;
       switch (output) {
-      case 0: response = f_json_encode(funcRet);   break;
-      case 1: response = m_context->obGetContents(); break;
-      case 2:
-        response =
-          f_json_encode(CREATE_MAP2("output", m_context->obGetContents(),
-                                    "return", f_json_encode(funcRet)));
-        break;
+        case 0: response = f_json_encode(funcRet);   break;
+        case 1: response = m_context->obDetachContents(); break;
+        case 2:
+          response =
+            f_json_encode(CREATE_MAP2("output", m_context->obDetachContents(),
+                                      "return", f_json_encode(funcRet)));
+          break;
       }
       code = 200;
       transport->sendRaw((void*)response.data(), response.size());

@@ -50,7 +50,7 @@ inline void f_flush() {
   g_context->flush();
 }
 inline String f_ob_get_contents() {
-  return g_context->obGetContents();
+  return g_context->obCopyContents();
 }
 inline String f_ob_get_clean() {
   String output = f_ob_get_contents();
@@ -58,7 +58,7 @@ inline String f_ob_get_clean() {
   return output;
 }
 inline String f_ob_get_flush() {
-  String output = g_context->obGetContents();
+  String output = g_context->obCopyContents();
   g_context->obFlush();
   return output;
 }

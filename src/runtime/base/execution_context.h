@@ -21,6 +21,7 @@
 #include <runtime/base/server/transport.h>
 #include <runtime/base/resource_data.h>
 #include <runtime/base/fiber_safe.h>
+#include <runtime/base/util/string_buffer.h>
 #include <util/thread_local.h>
 
 namespace HPHP {
@@ -110,8 +111,8 @@ public:
    * Output buffering.
    */
   void obStart(CVarRef handler = null);
-  String obGetContents();
-  std::string getContents();
+  String obCopyContents();
+  String obDetachContents();
   int obGetContentLength();
   void obClean();
   bool obFlush();
@@ -187,8 +188,10 @@ public:
   void setArgSeparatorOutput(CStrRef s) { m_argSeparatorOutput = s;}
 
 private:
-  struct OutputBuffer {
-    std::ostringstream oss;
+  class OutputBuffer {
+  public:
+    OutputBuffer() : oss(8096) {}
+    StringBuffer oss;
     Variant handler;
   };
 
@@ -199,7 +202,7 @@ private:
   String m_cwd;
 
   // output buffering
-  std::ostream *m_out;                // current output buffer
+  StringBuffer *m_out;                // current output buffer
   std::list<OutputBuffer*> m_buffers; // a stack of output buffers
   bool m_implicitFlush;
   int m_protectedLevel;

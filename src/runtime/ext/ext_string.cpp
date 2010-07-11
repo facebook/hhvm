@@ -635,7 +635,7 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
   }
   free(key);
 
-  return String(result);
+  return result.detach();
 }
 
 void f_parse_str(CStrRef str, Variant arr /* = null */) {

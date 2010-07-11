@@ -23,7 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 StringBuffer::StringBuffer(int initialSize /* = 1024 */)
-  : m_size(initialSize), m_pos(0) {
+    : m_size(initialSize), m_pos(0) {
   ASSERT(initialSize > 0);
   m_buffer = (char *)malloc(initialSize + 1);
   #ifdef TAINTED
@@ -120,11 +120,41 @@ String StringBuffer::detach() {
   return String("");
 }
 
+String StringBuffer::copy() {
+  return String(data(), size(), CopyString);
+}
+
+void StringBuffer::absorb(StringBuffer &buf) {
+  if (empty()) {
+    char *buffer = m_buffer;
+    int size = m_size;
+
+    m_buffer = buf.m_buffer;
+    m_size = buf.m_size;
+    m_pos = buf.m_pos;
+#ifdef TAINTED
+    m_tainted = buf.m_tainted;
+    m_place_tainted = buf.m_place_tainted;
+#endif
+
+    buf.m_buffer = buffer;
+    buf.m_size = size;
+    buf.reset();
+  } else {
+    append(buf.detach());
+  }
+}
+
 void StringBuffer::reset() {
   if (m_buffer == NULL) {
     m_buffer = (char *)malloc(m_size + 1);
   }
   m_pos = 0;
+#ifdef TAINTED
+  m_tainted = false;
+  m_place_tainted.name = NULL;
+  m_place_tainted.line = -1;
+#endif
 }
 
 void StringBuffer::resize(int size) {

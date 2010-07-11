@@ -57,7 +57,7 @@ bool TestExtError::test_debug_print_backtrace() {
   StackTrace::Enabled = true;
   g_context->obStart();
   f_debug_print_backtrace();
-  String output = g_context->obGetContents();
+  String output = g_context->obCopyContents();
   g_context->obEnd();
 #ifndef MAC_OS_X
   VERIFY(strstr((const char *)output, "test_debug_print_backtrace"));

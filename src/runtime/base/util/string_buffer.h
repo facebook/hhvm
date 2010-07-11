@@ -53,7 +53,7 @@ public:
    */
   char *detach(int &size);
   String detach();
-  operator String() { return detach();}
+  String copy();
   void reset();
   void clear() { reset();}
   void resize(int size);
@@ -75,12 +75,20 @@ public:
   void append(CStrRef s);
   void append(const char *s, int len);
   void append(const std::string &s) { append(s.data(), s.size());}
+
   StringBuffer &operator+=(int n)     { append(n); return *this;}
   StringBuffer &operator+=(char c)    { append(c); return *this;}
   StringBuffer &operator+=(litstr  s) { append(s); return *this;}
   StringBuffer &operator+=(CStrRef s) { append(s); return *this;}
+
   StringBuffer &add(const char *s, int len) { append(s, len); return *this; }
   StringBuffer &add(CStrRef s)        { append(s); return *this; }
+
+  /**
+   * Append what buf has, and reset buf. Internally, if this StringBuffer
+   * is empty, it will swap with buf, so to avoid one string copying.
+   */
+  void absorb(StringBuffer &buf);
 
   /**
    * Write data.

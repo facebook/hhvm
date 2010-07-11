@@ -336,7 +336,7 @@ String SessionModule::create_sid() {
 
   StringBuffer readable;
   bin_to_readable(hashed, readable, PS(hash_bits_per_character));
-  return readable;
+  return readable.detach();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -790,7 +790,7 @@ public:
         raise_notice("Skipping numeric key %lld", key.toInt64());
       }
     }
-    return buf;
+    return buf.detach();
   }
 
   virtual bool decode(CStrRef value) {
@@ -838,7 +838,7 @@ public:
         raise_notice("Skipping numeric key %lld", key.toInt64());
       }
     }
-    return buf;
+    return buf.detach();
   }
 
   virtual bool decode(CStrRef value) {

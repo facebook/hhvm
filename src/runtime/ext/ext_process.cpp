@@ -337,7 +337,7 @@ String f_exec(CStrRef command, Variant output /* = null */,
   StringBuffer sbuf;
   sbuf.read(fp);
 
-  Array lines = StringUtil::Explode(sbuf, "\n");
+  Array lines = StringUtil::Explode(sbuf.detach(), "\n");
   return_var = ctx.exit();
   int count = lines.size();
   if (count > 0 && lines[count - 1].toString().empty()) {
@@ -379,7 +379,7 @@ String f_system(CStrRef command, Variant return_var /* = null */) {
     sbuf.read(fp);
   }
 
-  Array lines = StringUtil::Explode(sbuf, "\n");
+  Array lines = StringUtil::Explode(sbuf.detach(), "\n");
   return_var = ctx.exit();
   int count = lines.size();
   if (count > 0 && lines[count - 1].toString().empty()) {

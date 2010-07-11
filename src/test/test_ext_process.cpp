@@ -236,7 +236,7 @@ bool TestExtProcess::test_passthru() {
   g_context->obStart();
   Variant ret;
   f_passthru("echo hello; echo world;", ref(ret));
-  String output = g_context->obGetContents();
+  String output = g_context->obCopyContents();
   g_context->obEnd();
 
   VS(output, "hello\nworld\n");
@@ -248,7 +248,7 @@ bool TestExtProcess::test_system() {
   g_context->obStart();
   Variant ret;
   String last_line = f_system("echo hello; echo world;", ref(ret));
-  String output = g_context->obGetContents();
+  String output = g_context->obCopyContents();
   g_context->obEnd();
 
   VS(output, "hello\nworld\n");

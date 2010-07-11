@@ -42,11 +42,10 @@ ExecutionContext::ExecutionContext()
     m_maxMemory(RuntimeOption::RequestMemoryMaxBytes),
     m_maxTime(RuntimeOption::RequestTimeoutSeconds),
     m_cwd(Process::CurrentWorkingDirectory),
-    m_implicitFlush(false), m_protectedLevel(0),
+    m_out(NULL), m_implicitFlush(false), m_protectedLevel(0),
     m_errorState(ExecutionContext::NoError),
     m_errorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel),
     m_lastErrorNum(0), m_logErrors(false) {
-  m_out = &cout;
   MemoryManager::TheMemoryManager()->getStats().maxBytes = m_maxMemory;
 }
 
@@ -161,7 +160,11 @@ void ExecutionContext::write(const char *s, int len) {
            FrameInjection::GetLine());
   }
 #endif
-  m_out->write(s, len);
+  if (m_out) {
+    m_out->append(s, len);
+  } else {
+    fwrite(s, len, 1, stdout);
+  }
   if (m_implicitFlush) flush();
 }
 
@@ -179,32 +182,36 @@ void ExecutionContext::obStart(CVarRef handler /* = null */) {
   resetCurrentBuffer();
 }
 
-String ExecutionContext::obGetContents() {
-  if (m_buffers.empty()) {
-    return "";
+String ExecutionContext::obCopyContents() {
+  if (!m_buffers.empty()) {
+    StringBuffer &oss = m_buffers.back()->oss;
+    if (!oss.empty()) {
+      return oss.copy();
+    }
   }
-
-  // ideally we don't have to make a copy here...
-  return String(m_buffers.back()->oss.str());
+  return "";
 }
 
-std::string ExecutionContext::getContents() {
-  if (m_buffers.empty()) {
-    return "";
+String ExecutionContext::obDetachContents() {
+  if (!m_buffers.empty()) {
+    StringBuffer &oss = m_buffers.back()->oss;
+    if (!oss.empty()) {
+      return oss.detach();
+    }
   }
-  return m_buffers.back()->oss.str();
+  return "";
 }
 
 int ExecutionContext::obGetContentLength() {
   if (m_buffers.empty()) {
     return 0;
   }
-  return m_buffers.back()->oss.str().length();
+  return m_buffers.back()->oss.size();
 }
 
 void ExecutionContext::obClean() {
   if (!m_buffers.empty()) {
-    m_buffers.back()->oss.str("");
+    m_buffers.back()->oss.reset();
   }
 }
 
@@ -216,24 +223,23 @@ bool ExecutionContext::obFlush() {
     if (iter != m_buffers.begin()) {
       OutputBuffer *prev = *(--iter);
       if (last->handler.isNull()) {
-        prev->oss << last->oss.str();
+        prev->oss.absorb(last->oss);
       } else {
         try {
-          string output = last->oss.str();
-          String sout(output.data(), output.length(), AttachLiteral);
           Variant tout =
-            f_call_user_func_array(last->handler, CREATE_VECTOR1(sout));
-          sout = tout.toString();
-          prev->oss << string(sout.data(), sout.size());
+            f_call_user_func_array(last->handler,
+                                   CREATE_VECTOR1(last->oss.detach()));
+          prev->oss.append(tout.toString());
+          last->oss.reset();
         } catch (...) {
-          prev->oss << last->oss.str();
+          prev->oss.absorb(last->oss);
         }
       }
-      last->oss.str("");
       return true;
     }
-    cout << last->oss.str();
-    last->oss.str("");
+    fwrite(last->oss.data(), last->oss.size(), 1, stdout);
+    last->oss.reset();
+    return true;
   }
   return false;
 }
@@ -284,22 +290,22 @@ void ExecutionContext::flush() {
              (m_transport == NULL ||
               (m_transport->getHTTPVersion() == "1.1" &&
                m_transport->getMethod() != Transport::HEAD))) {
-    std::string content = m_buffers.front()->oss.str();
-    if (!content.empty()) {
-      m_buffers.front()->oss.str("");
+    StringBuffer &oss = m_buffers.front()->oss;
+    if (!oss.empty()) {
       if (m_transport) {
-        m_transport->sendString(content, 200, false, true);
+        m_transport->sendRaw((void*)oss.data(), oss.size(), 200, false, true);
       } else {
-        cout << content;
+        fwrite(oss.data(), oss.size(), 1, stdout);
         fflush(stdout);
       }
+      oss.reset();
     }
   }
 }
 
 void ExecutionContext::resetCurrentBuffer() {
   if (m_buffers.empty()) {
-    m_out = &cout;
+    m_out = NULL;
   } else {
     m_out = &m_buffers.back()->oss;
   }

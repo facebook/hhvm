@@ -318,12 +318,13 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 <ST_IN_SCRIPTING>"__FILE__"             { SETTOKEN; return T_FILE;    }
 
 <INITIAL>"#"[^\n]*"\n" {
+        yyleng = 0;
         SETTOKEN;
         BEGIN(ST_IN_HTML);
         return T_INLINE_HTML;
 }
 
-<INITIAL,ST_IN_HTML>(([^<]|"<"[^?%s<]){1,400})|"<s"|"<" {
+<INITIAL,ST_IN_HTML>(([^<#]|"<"[^?%s<]){1,400})|"<s"|"<" {
         SETTOKEN;
         return T_INLINE_HTML;
 }

@@ -1526,7 +1526,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model,
         model->min_occurs > 0 && !strict) {
       return 0;
     }
-    if (data) {
+    if (!data.isNull()) {
       enc = model->u_element->encode;
       if ((model->max_occurs == -1 || model->max_occurs > 1) &&
           data.isArray() && data.toArray()->isVectorData()) {
@@ -1697,7 +1697,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, CVarRef data_, int style,
   sdlType *sdlType = type->sdl_type;
   Variant data = data_;
 
-  if (!data || data.isNull()) {
+  if (data.isNull()) {
     xmlParam = xmlNewNode(NULL, BAD_CAST("BOGUS"));
     xmlAddChild(parent, xmlParam);
     if (style == SOAP_ENCODED) {
@@ -1766,7 +1766,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, CVarRef data_, int style,
       sdlTypePtr array_el;
 
       if (data.isArray() && data.toArray()->isVectorData() &&
-          !sdlType->attributes.empty() && sdlType->model != NULL &&
+          sdlType->attributes.empty() && sdlType->model != NULL &&
           (array_el = model_array_element(sdlType->model)) != NULL) {
         for (ArrayIter iter(prop); iter; ++iter) {
           Variant val = iter.second();

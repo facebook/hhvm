@@ -2526,7 +2526,7 @@ Variant c_soapclient::t___soapcall(String name, Array args,
     m_soap_fault = create_soap_fault("Client", "Unknown Error");
   }
   if (!m_soap_fault.isNull()) {
-    return m_soap_fault;
+    throw m_soap_fault.toObject();
   }
   return return_value;
 }

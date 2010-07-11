@@ -18,8 +18,6 @@
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/complex_types.h>
-#include <runtime/base/array/vector_variant.h>
-#include <runtime/base/array/map_variant.h>
 #include <system/gen/php/classes/stdclass.h>
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/array/zend_array.h>

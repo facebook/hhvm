@@ -382,8 +382,6 @@ ArrayData *SmallArray::escalate(bool mutableIteration /* = false */) const {
 }
 
 ArrayData *SmallArray::escalateToZendArray() const {
-  // Assume UseZendArray for now
-  ASSERT(RuntimeOption::UseZendArray);
   ZendArray *ret = NEW(ZendArray)(m_nNumOfElements);
   for (int p = m_nListHead; p >= 0; p = m_arBuckets[p].next) {
     const Bucket &b = m_arBuckets[p];

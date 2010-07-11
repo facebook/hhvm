@@ -365,8 +365,6 @@ class Variant {
 
   /**
    * Iterator functions. See array_iterator.h for end() and next().
-   * escalate() will escalate me to become VectorVariant or MapVariant, so that
-   * getValueRef() can be called to take a reference to an array element.
    */
   ArrayIterPtr begin(const char *context = NULL) const;
   // used by generated code

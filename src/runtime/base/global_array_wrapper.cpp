@@ -15,7 +15,6 @@
 */
 
 #include <runtime/base/global_array_wrapper.h>
-#include <runtime/base/array/map_variant.h>
 
 namespace HPHP {
 

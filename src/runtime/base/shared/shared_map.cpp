@@ -15,7 +15,6 @@
 */
 
 #include <runtime/base/shared/shared_map.h>
-#include <runtime/base/array/map_variant.h>
 #include <runtime/base/array/zend_array.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/runtime_error.h>
@@ -212,11 +211,6 @@ ArrayData *SharedMap::escalate(bool mutableIteration /* = false */) const {
   m_arr->loadElems(ret, *this, mutableIteration);
   ASSERT(!ret->isStatic());
   return ret;
-}
-
-MapVariant *SharedMap::escalateToMapVariant() const {
-  ASSERT(!RuntimeOption::UseZendArray);
-  return (MapVariant *)escalate();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

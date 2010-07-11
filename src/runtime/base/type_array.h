@@ -40,14 +40,14 @@ CVarRef ref(CVarRef v);
  * counting, copy-on-write and ArrayData escalation.
  *
  * "Escalation" happens when an underlying ArrayData cannot handle an operation
- * any more and instead it needs to "upgrade" itself to be a more general (but
- * slower) type of ArrayData to accomplish the task. This "upgrade" is called
+ * and instead it needs to "upgrade" itself to be a more general (but slower)
+ * type of ArrayData to accomplish the task. This "upgrade" is called
  * escalation. This describes all possible escalation paths:
  *
- *   VectorVariant --> MapVariant
+ *   SmallArray --> ZendArray
  *
- * VectorVariant escalates to MapVariant when a string key is added, or when
- * an integer key that is out of range is added.
+ * SmallArray escalates to ZendArray when the capacity of the SmallArray is
+ * exceeded.
  */
 class Array : public SmartPtr<ArrayData> {
  public:
@@ -132,8 +132,6 @@ class Array : public SmartPtr<ArrayData> {
 
   /**
    * Iterator functions. See array_iterator.h for end() and next().
-   * escalate() will escalate me to become VectorVariant or MapVariant, so that
-   * getValueRef() can be called to take a reference to an array element.
    */
   ArrayIter begin(const char *context = NULL) const { return m_px;}
 

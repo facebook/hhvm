@@ -28,8 +28,6 @@ class TestUtil : public TestBase {
 
   virtual bool RunTests(const std::string &which);
 
-  bool TestHphpMap();
-  bool TestHphpVector();
   bool TestLFUTable();
   bool TestSharedString();
   bool TestCanonicalize();

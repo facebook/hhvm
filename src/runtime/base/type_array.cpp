@@ -18,8 +18,6 @@
 #include <runtime/base/types.h>
 #include <runtime/base/comparisons.h>
 #include <util/exception.h>
-#include <runtime/base/array/vector_variant.h>
-#include <runtime/base/array/map_variant.h>
 #include <runtime/base/array/small_array.h>
 #include <runtime/base/shared/shared_map.h>
 #include <system/gen/php/classes/stdclass.h>

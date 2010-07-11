@@ -84,9 +84,7 @@ class ArrayData : public Countable {
 
   /**
    * For ArrayIter to work. Get key or value at position "pos". getValueRef()
-   * gets a reference to value at that position, and it's only available to
-   * VectorVariant and MapVariant types. Generated code made sure array data is
-   * in Variant type by calling escalate() beforehand.
+   * gets a reference to value at position "pos".
    */
   virtual Variant getKey(ssize_t pos) const = 0;
   virtual Variant getValue(ssize_t pos) const = 0;

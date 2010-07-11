@@ -21,9 +21,7 @@
 #include <runtime/base/shared/shared_variant.h>
 #include <runtime/base/array/array_data.h>
 #include <runtime/base/complex_types.h>
-#include <runtime/base/array/array_funcs.h>
 #include <runtime/base/builtin_functions.h>
-#include <runtime/base/util/hphp_map.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -134,7 +132,6 @@ public:
   void sweep() { m_arr->decRef();}
 
   virtual ArrayData *escalate(bool mutableIteration = false) const;
-  MapVariant *escalateToMapVariant() const;
 
 private:
   SharedVariant *m_arr;

@@ -29,7 +29,7 @@ namespace HPHP {
  * of them with different strategy:
  *
  *  1. Fixed size objects: de/allocated by SmartAllocators, these objects have
- *     exactly the same size. For example, EmptyArray.
+ *     exactly the same size.
  *  2. Interally malloc-ed and variable sized memory held by fixed size
  *     objects, for example, StringData's m_data. These memory can be backed up
  *     and restored by LinearAllocator.

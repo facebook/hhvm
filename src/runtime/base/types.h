@@ -82,18 +82,6 @@ class ArrayElement;
 
 struct FullPos;
 
-/**
- * Zend implementation uses HashTable for arrays ubiquitously. That just means
- * it will use a lot more memory than needed sometimes, esp. with vectors. Here
- * we use 7 specialized array types to store differently shaped arrays. Right
- * now we rely on an "escalation" process at run-time to adjust itself to use
- * a type without losing semantics. In the future, it's not that crazy to
- * provide type hints on what kind of array a code write intends to build.
- */
-class EmptyArray;
-class VectorVariant;
-class MapVariant;
-
 class VariableSerializer;
 class VariableUnserializer;
 class FiberReferenceMap;

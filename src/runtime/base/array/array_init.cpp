@@ -15,8 +15,6 @@
 */
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/array/zend_array.h>
-#include <runtime/base/array/vector_variant.h>
-#include <runtime/base/array/map_variant.h>
 #include <runtime/base/array/small_array.h>
 #include <runtime/base/runtime_option.h>
 
@@ -26,31 +24,17 @@ namespace HPHP {
 
 ArrayInit::ArrayInit(ssize_t n, bool isVector /* = false */,
                      bool keepRef /* = false */) : m_data(NULL) {
-  if (RuntimeOption::UseZendArray) {
-    if (n == 0) {
-      if (RuntimeOption::UseSmallArray && !keepRef) {
-        m_data = StaticEmptySmallArray::Get();
-      } else {
-        m_data = StaticEmptyZendArray::Get();
-      }
-    } else if (n <= SmallArray::SARR_SIZE && !keepRef &&
-               RuntimeOption::UseSmallArray) {
-      m_data = NEW(SmallArray)();
+  if (n == 0) {
+    if (RuntimeOption::UseSmallArray && !keepRef) {
+      m_data = StaticEmptySmallArray::Get();
     } else {
-      m_data = NEW(ZendArray)(n);
+      m_data = StaticEmptyZendArray::Get();
     }
+  } else if (n <= SmallArray::SARR_SIZE && !keepRef &&
+             RuntimeOption::UseSmallArray) {
+    m_data = NEW(SmallArray)();
   } else {
-    if (n == 0) {
-      m_data = StaticEmptyArray::Get();
-    } else if (isVector) {
-      VectorVariant *v = NEW(VectorVariant)();
-      v->m_elems.reserve(n);
-      m_data = v;
-    } else {
-      MapVariant *m = NEW(MapVariant)();
-      m->m_elems.reserve(n);
-      m_data = m;
-    }
+    m_data = NEW(ZendArray)(n);
   }
 }
 

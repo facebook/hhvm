@@ -14,6 +14,7 @@ $topics =
       ),
       'PHP Compatibility' => array(
         'Inconsistencies' => 'inconsistencies',
+        'Compiled vs. Interpreter' => 'inconsistencies.hphpi',
       ),
       'New Features' => array(
         'New functions' => 'extension.new_functions',

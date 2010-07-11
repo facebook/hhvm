@@ -37,7 +37,7 @@ Transport::Transport()
     m_chunkedEncoding(false), m_headerSent(false),
     m_responseCode(-1), m_responseSize(0), m_sendContentType(true),
     m_compression(true), m_compressor(NULL),
-    m_compressionDecision(ShouldNotCompress), m_threadType(RequestThread) {
+    m_compressionDecision(NotDecidedYet), m_threadType(RequestThread) {
 }
 
 Transport::~Transport() {
@@ -404,7 +404,7 @@ bool Transport::cookieExists(const char *name) {
 }
 
 bool Transport::decideCompression() {
-  ASSERT(m_compressionDecision == ShouldNotCompress);
+  ASSERT(m_compressionDecision == NotDecidedYet);
 
   if (!RuntimeOption::ForceCompressionURL.empty() &&
       getCommand() == RuntimeOption::ForceCompressionURL) {
@@ -565,6 +565,9 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
   // we don't use chunk encoding to send anything pre-compressed
   ASSERT(!compressed || !m_chunkedEncoding);
 
+  if (m_compressionDecision == NotDecidedYet) {
+    decideCompression();
+  }
   if (compressed || !isCompressionEnabled() ||
       m_compressionDecision == ShouldNotCompress) {
     return response;
@@ -577,7 +580,7 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
       m_compressionDecision == HasToCompress) {
     if (m_compressor == NULL) {
       m_compressor = new StreamCompressor(RuntimeOption::GzipCompressionLevel,
-                                         CODING_GZIP, true);
+                                          CODING_GZIP, true);
     }
     int len = size;
     char *compressedData =

@@ -317,6 +317,7 @@ protected:
   StreamCompressor *m_compressor;
 
   enum CompressionDecision {
+    NotDecidedYet,
     ShouldNotCompress,
     ShouldCompress,
     HasToCompress,

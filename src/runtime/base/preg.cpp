@@ -1094,7 +1094,7 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
   pcre_extra *extra = pce->extra;
 
   // Get next piece if no limit or limit not yet reached and something matched
-  Variant return_value;
+  Variant return_value = Array::Create();
   int g_notempty = 0;   /* If the match should not be empty */
   pcre *re_bump = NULL; /* Regex instance for empty matches */
   pcre_extra *extra_bump = NULL; /* Almost dummy */

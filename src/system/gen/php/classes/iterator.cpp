@@ -1023,7 +1023,7 @@ Variant c_arrayiterator::t_offsetset(CVarRef v_index, CVarRef v_newval) {
 Variant c_arrayiterator::t_offsetunset(CVarRef v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetUnset);
   DECLARE_SYSTEM_GLOBALS(g);
-  m_arr.weakRemove(v_index);
+  lval(m_arr).weakRemove(v_index);
   return null;
 } /* function */
 /* SRC: classes/iterator.php line 138 */
@@ -1616,12 +1616,12 @@ bool c_appenditerator::t_valid() {
 /* SRC: classes/iterator.php line 309 */
 Variant c_appenditerator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::current);
-  return toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("current", 0x5B3A4A72846B21DCLL, 0))) : ((Variant)(null));
+  return (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("current", 0x5B3A4A72846B21DCLL, 0))) : ((Variant)(null)));
 } /* function */
 /* SRC: classes/iterator.php line 318 */
 Variant c_appenditerator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::key);
-  return toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("key", 0x56EDB60C824E8C51LL, 0))) : ((Variant)(null));
+  return (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args("valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args("key", 0x56EDB60C824E8C51LL, 0))) : ((Variant)(null)));
 } /* function */
 /* SRC: classes/iterator.php line 322 */
 void c_appenditerator::t_next() {
@@ -1661,7 +1661,8 @@ Variant c_appenditerator::t___call(Variant v_func, Variant v_params) {
     ArrayInit tmp6(2, true);
     tmp6.set(0, o_root_invoke_few_args("getInnerIterator", 0x3106F858B09C7424LL, 0));
     tmp6.set(1, v_func);
-    return x_call_user_func_array(Array(tmp6), toArray(v_params));
+    const Array &tmp7((Array(tmp6)));
+    return x_call_user_func_array(tmp7, toArray(v_params));
   }
 } /* function */
 /* SRC: classes/iterator.php line 210 */
@@ -2936,8 +2937,8 @@ void c_recursivedirectoryiterator::t___construct(Variant v_path, Variant v_flags
   if (!(x_hphp_recursivedirectoryiterator___construct(GET_THIS(), toString(v_path), toInt64(v_flags)))) {
     {
       {
-        c_unexpectedvalueexception *tmp7 = NEWOBJ(c_unexpectedvalueexception)();
-        throw_exception(p_unexpectedvalueexception(tmp7->create(concat3("RecursiveDirectoryIterator::__construct(", toString(v_path), "): failed to open dir"))));
+        c_unexpectedvalueexception *tmp8 = NEWOBJ(c_unexpectedvalueexception)();
+        throw_exception(p_unexpectedvalueexception(tmp8->create(concat3("RecursiveDirectoryIterator::__construct(", toString(v_path), "): failed to open dir"))));
       }
     }
   }
@@ -4123,8 +4124,8 @@ void c_directoryiterator::t___construct(Variant v_path) {
   if (!(x_hphp_directoryiterator___construct(GET_THIS(), toString(v_path)))) {
     {
       {
-        c_unexpectedvalueexception *tmp8 = NEWOBJ(c_unexpectedvalueexception)();
-        throw_exception(p_unexpectedvalueexception(tmp8->create(concat3("DirectoryIterator::__construct(", toString(v_path), "): failed to open dir"))));
+        c_unexpectedvalueexception *tmp9 = NEWOBJ(c_unexpectedvalueexception)();
+        throw_exception(p_unexpectedvalueexception(tmp9->create(concat3("DirectoryIterator::__construct(", toString(v_path), "): failed to open dir"))));
       }
     }
   }

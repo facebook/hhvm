@@ -74,14 +74,17 @@ specified.
 
 $default_strategy can be,
 
-(1) GLOBAL_STATE_IGNORE
+(1) GLOBAL_STATE_IGNORE (default)
 
 In this case, new thread's modifications of global states will be thrown away.
 
-(2) GLOBAL_STATE_OVERWRITE (default)
+(2) GLOBAL_STATE_OVERWRITE
 
 In this case, new thread's modifications of global states will entirely
-replace main thread's.
+replace main thread's. Do so ONLY when you are sure main thread's global states
+can be lost during this overwrite. Otherwise, please use GLOBAL_STATE_IGNORE
+and use function output parameters to pass back global states that need to
+be copied back to main thread.
 
 (3) GLOBAL_STATE_SKIP
 

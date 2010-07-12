@@ -32,7 +32,7 @@ Object f_call_user_func_array_async(CVarRef function, CArrRef params);
 Object f_call_user_func_async(int _argc, CVarRef function, CArrRef _argv = null_array);
 Variant f_forward_static_call_array(CVarRef function, CArrRef params);
 Variant f_forward_static_call(int _argc, CVarRef function, CArrRef _argv = null_array);
-Variant f_end_user_func_async(CObjRef handle, int default_strategy = k_GLOBAL_STATE_OVERWRITE, CVarRef additional_strategies = null);
+Variant f_end_user_func_async(CObjRef handle, int default_strategy = k_GLOBAL_STATE_IGNORE, CVarRef additional_strategies = null);
 String f_create_function(CStrRef args, CStrRef code);
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -12,9 +12,9 @@ $topics =
         'Server Status' => 'server.status',
         'Server Statistics' => 'server.stats',
       ),
-      'PHP Compatibility' => array(
-        'Inconsistencies' => 'inconsistencies',
-        'Compiled vs. Interpreter' => 'inconsistencies.hphpi',
+      'Inconsistencies' => array(
+        'PHP vs. HipHop' => 'inconsistencies',
+        'HipHop Compiler vs. Interpreter' => 'inconsistencies.hphpi',
       ),
       'New Features' => array(
         'New functions' => 'extension.new_functions',

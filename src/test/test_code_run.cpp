@@ -11888,6 +11888,26 @@ bool TestCodeRun::TestFiber() {
 
         "int(456)\n"
        );
+  MVCRO("<?php "
+        "function fiber() { global $foo; $foo = 456;}"
+        "$foo = 123;"
+        "end_user_func_async(call_user_func_async('fiber'),"
+        " GLOBAL_STATE_IGNORE);"
+        "var_dump($foo);",
+
+        "int(123)\n"
+       );
+  MVCRO("<?php "
+        "function fiber() { global $foo; $foo = 456;}"
+        "$foo = 123;"
+        "end_user_func_async(call_user_func_async('fiber'),"
+        " GLOBAL_STATE_OVERWRITE,"
+        " array(GLOBAL_SYMBOL_GLOBAL_VARIABLE =>"
+        "       array('foo' => GLOBAL_STATE_IGNORE)));"
+        "var_dump($foo);",
+
+        "int(123)\n"
+       );
 
   // test dynamic globals
   MVCRO("<?php "
@@ -11907,6 +11927,16 @@ bool TestCodeRun::TestFiber() {
 
         "int(124)\n"
         "int(125)\n"
+       );
+
+  // test execution context
+  MVCRO("<?php "
+        "function fiber() { date_default_timezone_set('America/New_York');}"
+        "$task = call_user_func_async('fiber');"
+        "end_user_func_async($task);"
+        "var_dump(date_default_timezone_get());",
+
+        "string(16) \"America/New_York\"\n"
        );
 
   return true;

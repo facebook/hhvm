@@ -106,6 +106,17 @@ void ExecutionContext::fiberExit(FiberLocal *src, FiberReferenceMap &refMap) {
       }
     }
   }
+
+  // isNull() is really a sub-optimal way of telling "who's changed".
+  if (m_timezone.isNull()) {
+    m_timezone = ec->m_timezone.fiberCopy();
+  }
+  if (m_timezoneDefault.isNull()) {
+    m_timezoneDefault = ec->m_timezoneDefault.fiberCopy();
+  }
+  if (m_argSeparatorOutput.isNull()) {
+    m_argSeparatorOutput = ec->m_argSeparatorOutput.fiberCopy();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

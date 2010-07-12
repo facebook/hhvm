@@ -87,10 +87,6 @@ public:
     if (m_unmarshaled_function) {
       Lock lock(m_thread->m_mutex);
       if (m_thread->m_reqId == m_reqId) {
-        ExecutionContext *context = g_context.get();
-        if (m_context && context) {
-          m_context->fiberExit(context, m_refMap);
-        }
         DELETE(Variant)(m_unmarshaled_function);
         DELETE(Variant)(m_unmarshaled_params);
         m_unmarshaled_function = NULL;
@@ -120,6 +116,7 @@ public:
       ExecutionContext *context = g_context.get();
       if (context && m_context) {
         context->fiberInit(m_context, m_refMap);
+        m_context = context; // switching role
       }
       m_function = m_function.fiberMarshal(m_refMap);
       m_params = m_params.fiberMarshal(m_refMap);
@@ -171,6 +168,12 @@ public:
       while (!m_done) wait();
     }
 
+    ExecutionContext *context = g_context.get();
+    if (context && m_context) {
+      context->fiberExit(m_context, m_refMap);
+      m_context = NULL;
+    }
+
     fiber_unmarshal_global_state(get_global_variables(), m_global_variables,
                                  m_refMap, default_strategy, resolver);
 
@@ -219,7 +222,7 @@ private:
   FiberAsyncFuncData *m_thread;
 
   // holding references to them, so we can later restore their states safely
-  ExecutionContext *m_context; // main thread's
+  ExecutionContext *m_context; // peer thread's
   Variant *m_unmarshaled_function;
   Variant *m_unmarshaled_params;
   GlobalVariables *m_unmarshaled_global_variables;

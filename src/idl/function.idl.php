@@ -32,7 +32,7 @@ f('call_user_func_async', Object,
 
 f('end_user_func_async', Variant,
   array('handle' => Object,
-        'default_strategy' => array(Int32, 'k_GLOBAL_STATE_OVERWRITE'),
+        'default_strategy' => array(Int32, 'k_GLOBAL_STATE_IGNORE'),
         'additional_strategies' => array(Variant, 'null')));
 
 f('forward_static_call_array', Variant,

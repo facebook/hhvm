@@ -679,8 +679,10 @@ Variant require(CStrRef file, bool once = false,
 /**
  * For function interception or stubout support.
  */
-hphp_const_char_imap<const char*> &get_renamed_functions();
-hphp_const_char_iset &get_unmapped_functions();
+void check_renamed_functions(CArrRef names);
+bool check_renamed_function(const char *name);
+hphp_string_imap<std::string> &get_renamed_functions();
+hphp_string_iset &get_unmapped_functions();
 
 inline void assignCallTemp(Variant& temp, CVarRef val) {
   temp.unset();

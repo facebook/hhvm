@@ -10164,6 +10164,12 @@ Variant i_pixelgetalphaquantum(CArrRef params) {
   if (count != 1) return throw_wrong_arguments("pixelgetalphaquantum", count, 1, 1, 1);
   return (f_pixelgetalphaquantum(params[0]));
 }
+Variant i_fb_renamed_functions(CArrRef params) {
+  FUNCTION_INJECTION(fb_renamed_functions);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("fb_renamed_functions", count, 1, 1, 1);
+  return (f_fb_renamed_functions(params[0]), null);
+}
 Variant i_imagepsextendfont(CArrRef params) {
   FUNCTION_INJECTION(imagepsextendfont);
   int count __attribute__((__unused__)) = params.size();
@@ -13212,6 +13218,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 536:
       HASH_INVOKE(0x56C95225813A5218LL, memory_get_usage);
+      HASH_INVOKE(0x4D63F2C9AAB79218LL, fb_renamed_functions);
       break;
     case 538:
       HASH_INVOKE(0x72C0C89D897E721ALL, magicksetimagetype);
@@ -49892,6 +49899,22 @@ Variant ei_pixelgetalphaquantum(Eval::VariableEnvironment &env, const Eval::Func
   }
   return (x_pixelgetalphaquantum(a0));
 }
+Variant ei_fb_renamed_functions(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("fb_renamed_functions", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_fb_renamed_functions(a0), null);
+}
 Variant ei_imagepsextendfont(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -58285,6 +58308,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 536:
       HASH_INVOKE_FROM_EVAL(0x56C95225813A5218LL, memory_get_usage);
+      HASH_INVOKE_FROM_EVAL(0x4D63F2C9AAB79218LL, fb_renamed_functions);
       break;
     case 538:
       HASH_INVOKE_FROM_EVAL(0x72C0C89D897E721ALL, magicksetimagetype);

@@ -26,6 +26,9 @@ f('fb_unserialize', Variant,
         'success' => Boolean | Reference,
         'errcode' => array(Int32 | Reference, 'null_variant')));
 
+f('fb_renamed_functions', NULL,
+  array('names' => StringVec));
+
 f('fb_rename_function', Boolean,
   array('orig_func_name' => String,
         'new_func_name' => String));

@@ -3,6 +3,7 @@
 "fb_thrift_unserialize", T(Variant), S(0), "thing", T(Variant), NULL, S(0), "success", T(Variant), NULL, S(1), "errcode", T(Variant), "null_variant", S(1), NULL, S(0), 
 "fb_serialize", T(Variant), S(0), "thing", T(Variant), NULL, S(0), NULL, S(0), 
 "fb_unserialize", T(Variant), S(0), "thing", T(Variant), NULL, S(0), "success", T(Variant), NULL, S(1), "errcode", T(Variant), "null_variant", S(1), NULL, S(0), 
+"fb_renamed_functions", T(Void), S(0), "names", T(Array), NULL, S(0), NULL, S(0), 
 "fb_rename_function", T(Boolean), S(0), "orig_func_name", T(String), NULL, S(0), "new_func_name", T(String), NULL, S(0), NULL, S(0), 
 "fb_utf8ize", T(Boolean), S(0), "input", T(Variant), NULL, S(1), NULL, S(0), 
 "fb_call_user_func_safe", T(Array), S(0), "function", T(Variant), NULL, S(0), NULL, S(1), 

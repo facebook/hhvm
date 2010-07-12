@@ -32,31 +32,64 @@ using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// fb_rename_function()
 
-class RuntimeInfo : public RequestEventHandler {
+class RenameManager : public RequestEventHandler {
 public:
-  virtual void requestInit() {
+  RenameManager() : use_allowed_functions(false) {
+  }
+
+  void clear() {
+    use_allowed_functions = false;
+    allowed_functions.clear();
     renamed_functions.clear();
     unmapped_functions.clear();
+  }
+
+  virtual void requestInit() {
+    clear();
   }
 
   virtual void requestShutdown() {
-    renamed_functions.clear();
-    unmapped_functions.clear();
+    clear();
   }
 
-  hphp_const_char_imap<const char*> renamed_functions;
-  hphp_const_char_iset unmapped_functions;
+  bool use_allowed_functions;
+  hphp_string_iset allowed_functions;
+  hphp_string_imap<string> renamed_functions;
+  hphp_string_iset unmapped_functions;
 };
-IMPLEMENT_STATIC_REQUEST_LOCAL(RuntimeInfo, s_runtime_info);
+IMPLEMENT_STATIC_REQUEST_LOCAL(RenameManager, s_rename_manager);
 
-hphp_const_char_imap<const char*> &get_renamed_functions() {
-  return s_runtime_info->renamed_functions;
+void check_renamed_functions(CArrRef names) {
+  s_rename_manager->use_allowed_functions = true;
+  hphp_string_iset &allowed = s_rename_manager->allowed_functions;
+  for (ArrayIter iter(names); iter; ++iter) {
+    String name = iter.second().toString();
+    if (!name.empty()) {
+      allowed.insert(string(name.data(), name.size()));
+    }
+  }
 }
 
-hphp_const_char_iset &get_unmapped_functions() {
-  return s_runtime_info->unmapped_functions;
+bool check_renamed_function(const char *name) {
+  ASSERT(name);
+  if (s_rename_manager->use_allowed_functions) {
+    hphp_string_iset &allowed = s_rename_manager->allowed_functions;
+    return allowed.find(name) != allowed.end();
+  }
+  return true;
 }
+
+hphp_string_imap<string> &get_renamed_functions() {
+  return s_rename_manager->renamed_functions;
+}
+
+hphp_string_iset &get_unmapped_functions() {
+  return s_rename_manager->unmapped_functions;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 bool class_exists(CStrRef class_name, bool autoload /* = true */) {
   return f_call_user_func_array("class_exists",
@@ -622,22 +655,20 @@ Variant require(CStrRef file, bool once /* = false */,
 bool function_exists(CStrRef function_name) {
   const char *name = function_name.data();
 
-  hphp_const_char_iset &unmap = get_unmapped_functions();
+  hphp_string_iset &unmap = get_unmapped_functions();
   if (unmap.find(name) != unmap.end()) {
     return false;
   }
-  hphp_const_char_imap<const char*> &remap = get_renamed_functions();
-  hphp_const_char_imap<const char*>::iterator it = remap.find(name);
+  hphp_string_imap<string> &remap = get_renamed_functions();
+  hphp_string_imap<string>::iterator it = remap.find(name);
   if (it != remap.end()) {
-    name = it->second;
+    name = it->second.c_str();
   }
-  const ClassInfo::MethodInfo *info =
-    ClassInfo::FindFunction(name);
+  const ClassInfo::MethodInfo *info = ClassInfo::FindFunction(name);
   if (info) {
     if (info->attribute & ClassInfo::IsSystem) return true;
     if (info->attribute & ClassInfo::IsVolatile) {
-      return ((Globals*)get_global_variables())->
-             function_exists(name);
+      return ((Globals*)get_global_variables())->function_exists(name);
     } else {
       return true;
     }

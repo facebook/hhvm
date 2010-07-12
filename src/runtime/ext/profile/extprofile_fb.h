@@ -45,6 +45,11 @@ inline Variant x_fb_unserialize(CVarRef thing, Variant success, Variant errcode 
   return f_fb_unserialize(thing, ref(success), ref(errcode));
 }
 
+inline void x_fb_renamed_functions(CArrRef names) {
+  FUNCTION_INJECTION_BUILTIN(fb_renamed_functions);
+  f_fb_renamed_functions(names);
+}
+
 inline bool x_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
   FUNCTION_INJECTION_BUILTIN(fb_rename_function);
   return f_fb_rename_function(orig_func_name, new_func_name);

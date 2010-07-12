@@ -38,11 +38,10 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   bool renamed = false;
   {
     // so hacky, gotta do this properly by overriding rename_function.
-    hphp_const_char_imap<const char*> &funcs = get_renamed_functions();
-    hphp_const_char_imap<const char*>::const_iterator iter =
-      funcs.find(name.data());
+    hphp_string_imap<string> &funcs = get_renamed_functions();
+    hphp_string_imap<string>::const_iterator iter = funcs.find(name.data());
     if (iter != funcs.end()) {
-      name = iter->second;
+      name = String(iter->second);
       renamed = true;
     }
   }

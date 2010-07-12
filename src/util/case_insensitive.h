@@ -23,26 +23,46 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct eqstri {
-  bool operator()(const char* s1, const char* s2) const {
-    return strcasecmp(s1, s2) == 0;
-  }
-};
 struct hashi {
   size_t operator()(const char *s) const {
     return hash_string_i(s, strlen(s));
   }
 };
+struct eqstri {
+  bool operator()(const char* s1, const char* s2) const {
+    return strcasecmp(s1, s2) == 0;
+  }
+};
+
+struct string_hashi {
+  size_t operator()(const std::string &s) const {
+    return hash_string_i(s.data(), s.size());
+  }
+};
+struct string_eqstri {
+  bool operator()(const std::string &s1, const std::string &s2) const {
+    return s1.size() == s2.size() &&
+      strncasecmp(s1.data(), s2.data(), s1.size()) == 0;
+  }
+};
 
 template<typename T>
 class hphp_const_char_imap :
-    public hphp_hash_map<const char *, T, hashi, eqstri> {
+      public hphp_hash_map<const char *, T, hashi, eqstri> {
 };
 
 class hphp_const_char_iset :
-    public hphp_hash_set<const char *, hashi, eqstri> {
+      public hphp_hash_set<const char *, hashi, eqstri> {
 };
 
+template<typename T>
+class hphp_string_imap :
+      public hphp_hash_map<std::string, T, string_hashi, string_eqstri> {
+};
+
+class hphp_string_iset :
+      public hphp_hash_set<std::string, string_hashi, string_eqstri> {
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

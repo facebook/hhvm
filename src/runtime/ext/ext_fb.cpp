@@ -720,6 +720,10 @@ bool f_fb_utf8ize(Variant input) {
   return true;
 }
 
+void f_fb_renamed_functions(CArrRef names) {
+  check_renamed_functions(names);
+}
+
 bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
   if (orig_func_name.empty() || new_func_name.empty() ||
       strcasecmp(orig_func_name.data(), new_func_name.data()) == 0) {
@@ -734,6 +738,15 @@ bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
     return false;
   }
 
+  if (!check_renamed_function(orig_func_name.data())) {
+    raise_error("fb_rename_function(%s, %s) failed: %s is not allowed to "
+                "rename. Please add it to the list provided to "
+                "fb_renamed_functions().",
+                orig_func_name.data(), new_func_name.data(),
+                orig_func_name.data());
+    return false;
+  }
+
   if (function_exists(new_func_name)) {
     raise_warning("fb_rename_function(%s, %s) failed: %s already exists!",
                   orig_func_name.data(), new_func_name.data(),
@@ -741,51 +754,33 @@ bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
     return false;
   }
 
-  hphp_const_char_imap<const char*> &funcs = get_renamed_functions();
-  hphp_const_char_iset &ufuncs = get_unmapped_functions();
+  hphp_string_imap<string> &funcs = get_renamed_functions();
+  hphp_string_iset &ufuncs = get_unmapped_functions();
 
-  char *new_key = new char[new_func_name.size() + 1];
-  memcpy(new_key, new_func_name.data(), new_func_name.size() + 1);
-  char *new_val = new char[orig_func_name.size() + 1];
-  memcpy(new_val, orig_func_name.data(), orig_func_name.size() + 1);
-
+  string new_key(new_func_name.data());
+  string new_val(orig_func_name.data());
   {
-    hphp_const_char_imap<const char*>::iterator iter = funcs.find(new_key);
+    hphp_string_imap<string>::iterator iter = funcs.find(new_key);
     if (iter != funcs.end()) {
-      char *old_key = (char *)iter->first;
-      char *old_val = (char *)iter->second;
       funcs.erase(iter);
-      delete [] old_key;
-      delete [] old_val;
     }
 
     // resolve to real name
     iter = funcs.find(new_val);
     if (iter != funcs.end()) {
-      char *to_delete = new_val;
-
-      int len = strlen(iter->second);
-      new_val = new char[len + 1];
-      memcpy(new_val, iter->second, len + 1);
-
-      delete [] to_delete;
+      new_val = iter->second;
     }
-
     funcs[new_key] = new_val;
   }
   {
-    hphp_const_char_iset::iterator iter = ufuncs.find(new_key);
+    hphp_string_iset::iterator iter = ufuncs.find(new_key);
     if (iter != ufuncs.end()) {
-      char *old_key = (char *)*iter;
-      ufuncs.erase(old_key);
-      delete [] old_key;
+      ufuncs.erase(iter);
     }
 
     iter = ufuncs.find(new_val);
     if (iter == ufuncs.end()) {
-      new_val = new char[orig_func_name.size() + 1];
-      memcpy(new_val, orig_func_name.data(), orig_func_name.size() + 1);
-      ufuncs.insert(new_val);
+      ufuncs.insert(orig_func_name.data());
     }
   }
   return true;

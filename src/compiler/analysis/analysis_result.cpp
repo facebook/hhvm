@@ -1539,12 +1539,12 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
 
       if (!Option::DynamicInvokeFunctions.empty() ||
           Option::EnableEval == Option::FullEval) {
-        cg_printf("hphp_const_char_imap<const char*> &funcs = "
+        cg_printf("hphp_string_imap<string> &funcs = "
                   "get_renamed_functions();\n");
-        cg_printf("hphp_const_char_imap<const char*>::const_iterator iter ="
+        cg_printf("hphp_string_imap<string>::const_iterator iter ="
                   " funcs.find(s);\n");
         cg_indentBegin("if (iter != funcs.end()) {\n");
-        cg_printf("s = iter->second;\n");
+        cg_printf("s = iter->second.c_str();\n");
         cg_printf("hash = -1;\n");
         cg_indentEnd("}\n");
       }

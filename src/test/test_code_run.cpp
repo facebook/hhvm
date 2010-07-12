@@ -4681,6 +4681,12 @@ bool TestCodeRun::TestDynamicFunctions() {
        "baz(\"test1\", \"test2\");"
        "test1();"
        "test2();")
+  MVCRO("<?php\n"
+        "function one() { echo 'one';}\n"
+        "fb_renamed_functions(array('one', 'three'));\n"
+        "var_dump(fb_rename_function('one', 'two'));\n",
+
+        "bool(true)\n");
   Option::DynamicInvokeFunctions.clear();
 
   return true;

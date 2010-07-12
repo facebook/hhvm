@@ -29,6 +29,7 @@ Variant f_fb_thrift_serialize(CVarRef thing);
 Variant f_fb_thrift_unserialize(CVarRef thing, Variant success, Variant errcode = null_variant);
 Variant f_fb_serialize(CVarRef thing);
 Variant f_fb_unserialize(CVarRef thing, Variant success, Variant errcode = null_variant);
+void f_fb_renamed_functions(CArrRef names);
 bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name);
 bool f_fb_utf8ize(Variant input);
 Array f_fb_call_user_func_safe(int _argc, CVarRef function, CArrRef _argv = null_array);

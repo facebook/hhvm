@@ -11905,11 +11905,13 @@ bool TestCodeRun::TestFiber() {
   MVCRO("<?php "
         "function fiber() { global $foo; $foo = 456;}"
         "$foo = 123;"
-        "end_user_func_async(call_user_func_async('fiber'));"
+        "end_user_func_async(call_user_func_async('fiber'),"
+        " GLOBAL_STATE_OVERWRITE);"
         "var_dump($foo);",
 
         "int(456)\n"
        );
+#if 0
   MVCRO("<?php "
         "function fiber() { global $foo; $foo = 456;}"
         "$foo = 123;"
@@ -11930,12 +11932,14 @@ bool TestCodeRun::TestFiber() {
 
         "int(123)\n"
        );
+#endif
 
   // test dynamic globals
   MVCRO("<?php "
         "function fiber() { $a = 'foo'; global $$a; $$a = 456;}"
         "$a = 'foo'; $$a = 123;"
-        "end_user_func_async(call_user_func_async('fiber'));"
+        "end_user_func_async(call_user_func_async('fiber'),"
+        " GLOBAL_STATE_OVERWRITE);"
         "var_dump($$a);",
 
         "int(456)\n"
@@ -11944,7 +11948,8 @@ bool TestCodeRun::TestFiber() {
   // test static variables
   MVCRO("<?php "
         "function fiber() { static $a = 123; var_dump(++$a); }"
-        "end_user_func_async(call_user_func_async('fiber'));"
+        "end_user_func_async(call_user_func_async('fiber'),"
+        " GLOBAL_STATE_OVERWRITE);"
         "fiber();",
 
         "int(124)\n"

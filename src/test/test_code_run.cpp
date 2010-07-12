@@ -12156,6 +12156,48 @@ bool TestCodeRun::TestVariableClassName() {
     "int(5)\n"
   );
 
+  MVCRO("<?php\n"
+        "class B {\n"
+        "  function __call($name, $arguments) {\n"
+        "    echo \"Calling B object method '$name' \" . "
+        "implode(', ', $arguments). \"\n\";\n"
+        "  }\n"
+        "}\n"
+        "class G extends B {\n"
+        "  function __call($name, $arguments) {\n"
+        "    echo \"Calling G object method '$name' \" . "
+        "implode(', ', $arguments). \"\n\";\n"
+        "  }\n"
+        "  function f4missing($a) {\n"
+        "    $b=\"B\";\n"
+        "    echo \"Calling G object method 'f4missing' 5 == \", "
+        "$b::f4missing(5);\n"
+        "  }\n"
+        "}\n"
+        "\n"
+        "$g = new G();\n"
+        "$g->f4missing(3);\n"
+        "echo \"finish\n\";\n",
+
+        "Calling G object method 'f4missing' 5 == "
+        "Calling G object method 'f4missing' 5\nfinish\n"
+       );
+
+  MVCRO("<?php\n"
+        "function func() { return 'B';}\n"
+        "class B {\n"
+        "  function foo() { var_dump(__CLASS__);}\n"
+        "  function f4missing() { $this->foo();}\n"
+        "}\n"
+        "class G extends B {\n"
+        "  function foo() { var_dump(__CLASS__);}\n"
+        "  function f4missing() { $b = func(); $b::f4missing();}\n"
+        "}\n"
+        "$g = new G; $g->f4missing();\n",
+
+        "string(1) \"G\"\n"
+       );
+
   return true;
 }
 

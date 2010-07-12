@@ -92,12 +92,15 @@ Variant &ObjectData::os_lval(const char *s, int64 hash) {
 Variant ObjectData::os_invoke(const char *c, const char *s,
                               CArrRef params, int64 hash,
                               bool fatal /* = true */) {
-  Object obj = create_object(c, Array::Create(), false);
-  int *pmax = os_max_id.get();
-  int &id = obj.get()->o_id;
-  if (id == *pmax) --(*pmax);
-  id = 0; // for isset($this) to tell whether this is a fake obj
-  return obj->o_invoke(s, params, hash, fatal);
+  Object obj = FrameInjection::GetThis();
+  if (obj.isNull() || !obj->o_instanceof(c)) {
+    obj = create_object(c, Array::Create(), false);
+    int *pmax = os_max_id.get();
+    int &id = obj.get()->o_id;
+    if (id == *pmax) --(*pmax);
+    id = 0; // for isset($this) to tell whether this is a fake obj
+  }
+  return obj->o_invoke_ex(c, s, params, hash, fatal);
 }
 
 Variant ObjectData::os_constant(const char *s) {

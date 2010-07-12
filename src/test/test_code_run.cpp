@@ -492,12 +492,17 @@ bool TestCodeRun::RunTests(const std::string &which) {
 bool TestCodeRun::TestSanity() {
   MVCR("<?php print 'Hello, World!';");
   MVCR("Hello, World!");
+  MVCR("#!/usr/bin/php\n"
+       "<?php\n");
+  MVCR("#!/usr/bin/php\n"
+       "\n"
+       "<?php\n");
   MVCR("#!/usr/bin/env <?php\n"
-      "#!/usr/bin/env php\n"
-      "a /* show or not */ b\n"
-      "Hello, World! # comments\n"
-      "<?php\n"
-      "print 'hello'; # comments");
+       "#!/usr/bin/env php\n"
+       "a /* show or not */ b\n"
+       "Hello, World! # comments\n"
+       "<?php\n"
+       "print 'hello'; # comments");
   MVCR("<?php if (true) { ?>#<?php } ?>");
   return true;
 }

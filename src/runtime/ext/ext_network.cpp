@@ -73,24 +73,27 @@ static Mutex NetworkMutex;
 
 Variant f_gethostbyaddr(CStrRef ip_address) {
   IOStatusHelper io("gethostbyaddr", ip_address.data());
-  Lock lock(NetworkMutex);
+  struct addrinfo hints, *res, *res0;
+  char h_name[NI_MAXHOST];
+  int error;
 
-  struct in6_addr addr6;
-  struct in_addr addr;
-  struct hostent *hp;
-  if (inet_pton(AF_INET6, ip_address.data(), &addr6)) {
-    hp = gethostbyaddr((char *) &addr6, sizeof(addr6), AF_INET6);
-  } else if (inet_pton(AF_INET, ip_address.data(), &addr)) {
-    hp = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
-  } else {
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = PF_UNSPEC;
+  error = getaddrinfo(ip_address.data(), NULL, &hints, &res0);
+  if (error)  {
     return false;
   }
 
-  if (!hp || hp->h_name == NULL || hp->h_name[0] == '\0') {
-    return ip_address;
+  for (res = res0; res; res = res->ai_next) {
+    if (getnameinfo(res->ai_addr, res->ai_addrlen, h_name, NI_MAXHOST,
+          NULL, NULL, 0) < 0) {
+      continue;
+    }
+    freeaddrinfo(res0);
+    return String(h_name, CopyString);
   }
-
-  return String(hp->h_name, CopyString);
+  freeaddrinfo(res0);
+  return ip_address;
 }
 
 String f_gethostbyname(CStrRef hostname) {

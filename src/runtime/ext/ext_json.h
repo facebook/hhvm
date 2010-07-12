@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 String f_json_encode(CVarRef value, bool loose = false);
-Variant f_json_decode(CVarRef json, bool assoc = false, bool loose = false);
+Variant f_json_decode(CStrRef json, bool assoc = false, bool loose = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

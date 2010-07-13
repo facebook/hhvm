@@ -303,7 +303,7 @@ public:
 
   FILE *exec(const char *cmd) {
     ASSERT(m_proc == NULL);
-    m_proc = LightProcess::popen(cmd, "r");
+    m_proc = LightProcess::popen(cmd, "r", g_context->getCwd().data());
     if (m_proc == NULL) {
       raise_warning("Unable to execute '%s'", cmd);
     }

@@ -35,6 +35,7 @@ namespace HPHP {
 // helper functions
 
 static const unsigned int BUFFER_SIZE = 4096;
+Mutex LightProcess::s_mutex;
 
 static void read_buf(FILE *fin, char *buf) {
   if (!fgets(buf, BUFFER_SIZE, fin)) {
@@ -87,12 +88,25 @@ static void close_fds(const vector<int> &fds) {
 
 static void do_popen(FILE *fin, FILE *fout, int afdt_fd) {
   char buf[BUFFER_SIZE];
+  char cwd[BUFFER_SIZE];
 
   if (!fgets(buf, BUFFER_SIZE, fin)) buf[0] = '\0';
   bool read_only = (buf[0] == 'r');
 
   read_buf(fin, buf);
+
+  string old_cwd = Process::GetCurrentDirectory();
+  read_buf(fin, cwd);
+  if (old_cwd != cwd) {
+    chdir(cwd);
+  }
+
   FILE *f = buf[0] ? ::popen(buf, read_only ? "r" : "w") : NULL;
+
+  if (old_cwd != cwd) {
+    chdir(old_cwd.c_str());
+  }
+
   if (f == NULL) {
     // no need to send the errno back, as the main process will try ::popen
     fprintf(fout, "error\n");
@@ -403,39 +417,61 @@ int LightProcess::GetId() {
   return (int)pthread_self() % g_procs.size();
 }
 
-FILE *LightProcess::popen(const char *cmd, const char *type) {
+FILE *LightProcess::popen(const char *cmd, const char *type,
+                          const char *cwd /* = NULL */) {
   if (!Available()) {
     // fallback to normal popen
     Logger::Verbose("Light-weight fork not available; "
                     "use the heavy one instead.");
-    return ::popen(cmd, type);
+  } else {
+    FILE *f = LightPopenImpl(cmd, type, cwd);
+    if (f) {
+      return f;
+    }
+    Logger::Verbose("Light-weight fork failed; use the heavy one instead.");
   }
+  return HeavyPopenImpl(cmd, type, cwd);
+}
 
+FILE *LightProcess::HeavyPopenImpl(const char *cmd, const char *type,
+                                   const char *cwd) {
+  if (cwd && *cwd) {
+    string old_cwd = Process::GetCurrentDirectory();
+    if (old_cwd != cwd) {
+      Lock lock(s_mutex);
+      chdir(cwd);
+      FILE *f = ::popen(cmd, type);
+      chdir(old_cwd.c_str());
+      return f;
+    }
+  }
+  return ::popen(cmd, type);
+}
+
+FILE *LightProcess::LightPopenImpl(const char *cmd, const char *type,
+                                   const char *cwd) {
   int id = GetId();
   Lock lock(g_procs[id].m_procMutex);
 
-  fprintf(g_procs[id].m_fout, "popen\n%s\n%s\n", type, cmd);
+  fprintf(g_procs[id].m_fout, "popen\n%s\n%s\n%s\n", type, cmd, cwd);
   fflush(g_procs[id].m_fout);
 
   char buf[BUFFER_SIZE];
   read_buf(g_procs[id].m_fin, buf);
   if (strncmp(buf, "error", 5) == 0) {
-    Logger::Verbose("Light-weight fork failed; use the heavy one instead.");
-    return ::popen(cmd, type);
+    return NULL;
   }
 
   int64 fptr = 0;
   read_buf(g_procs[id].m_fin, buf);
   sscanf(buf, "%lld", &fptr);
   if (!fptr) {
-    Logger::Verbose("Light-weight fork failed; use the heavy one instead.");
-    return ::popen(cmd, type);
+    return NULL;
   }
 
   int fd = recv_fd(g_procs[id].m_afdt_fd);
   if (fd < 0) {
-    Logger::Verbose("Light-weight fork failed; use the heavy one instead.");
-    return ::popen(cmd, type);
+    return NULL;
   }
   FILE *f = fdopen(fd, type);
   g_procs[id].m_popenMap[(int64)f] = fptr;

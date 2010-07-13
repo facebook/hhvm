@@ -36,7 +36,8 @@ public:
   static void Initialize(const std::string &prefix, int count);
   static void ChangeUser(const std::string &username);
 
-  static FILE *popen(const char *cmd, const char *type);
+  static FILE *popen(const char *cmd, const char *type,
+                     const char *cwd = NULL);
   static int pclose(FILE *f);
 
   /**
@@ -67,6 +68,12 @@ private:
   void runShadow(int fdin, int fdout);
   void closeShadow();
 
+  static FILE *LightPopenImpl(const char *cmd, const char *type,
+                              const char *cwd);
+  static FILE *HeavyPopenImpl(const char *cmd, const char *type,
+                              const char *cwd);
+
+  static Mutex s_mutex;
   pid_t m_shadowProcess;
   FILE *m_fin;   // the pipe to read from the child
   FILE *m_fout;  // the pipe to write to the child

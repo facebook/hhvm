@@ -22,6 +22,8 @@
 #include <runtime/base/runtime_option.h>
 #include <util/light_process.h>
 
+using namespace std;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtProcess::RunTests(const std::string &which) {
@@ -215,6 +217,11 @@ bool TestExtProcess::test_pcntl_wtermsig() {
 bool TestExtProcess::test_shell_exec() {
   Variant output = f_shell_exec("echo hello");
   VS(output, "hello\n");
+
+  string cur_cwd = Process::GetCurrentDirectory();
+  f_chdir("/tmp/");
+  VS(f_shell_exec("/bin/pwd"), "/tmp\n");
+  f_chdir(String(cur_cwd));
   return Count(true);
 }
 
@@ -229,6 +236,11 @@ bool TestExtProcess::test_exec() {
   VS(output, CREATE_VECTOR2("hello", "world"));
   VS(last_line, "world");
   VS(ret, 0);
+
+  string cur_cwd = Process::GetCurrentDirectory();
+  f_chdir("/tmp/");
+  VS(f_exec("/bin/pwd"), "/tmp");
+  f_chdir(String(cur_cwd));
   return Count(true);
 }
 
@@ -241,6 +253,17 @@ bool TestExtProcess::test_passthru() {
 
   VS(output, "hello\nworld\n");
   VS(ret, 0);
+
+
+  string cur_cwd = Process::GetCurrentDirectory();
+  f_chdir("/tmp/");
+  g_context->obStart();
+  f_passthru("/bin/pwd");
+  output = g_context->obCopyContents();
+  g_context->obEnd();
+  VS(output, "/tmp\n");
+  f_chdir(String(cur_cwd));
+
   return Count(true);
 }
 
@@ -254,6 +277,11 @@ bool TestExtProcess::test_system() {
   VS(output, "hello\nworld\n");
   VS(last_line, "world");
   VS(ret, 0);
+
+  string cur_cwd = Process::GetCurrentDirectory();
+  f_chdir("/tmp/");
+  VS(f_system("/bin/pwd"), "/tmp");
+  f_chdir(String(cur_cwd));
   return Count(true);
 }
 

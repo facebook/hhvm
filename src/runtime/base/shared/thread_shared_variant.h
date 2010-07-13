@@ -69,9 +69,10 @@ public:
   void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
                  bool keepRef = false);
 
-  virtual SharedVariant* getKey(ssize_t pos) const {
+  virtual Variant getKey(ssize_t pos) const {
     ASSERT(is(KindOfArray));
-    return m_data.map->keys[pos];
+    if (m_data.map->isVector) return pos;
+    else return m_data.map->keys[pos]->toLocal();
   }
   virtual SharedVariant* getValue(ssize_t pos) const {
     ASSERT(is(KindOfArray));
@@ -85,37 +86,53 @@ protected:
   virtual ThreadSharedVariant *createAnother(CVarRef source, bool serialized,
                                              bool inner = false);
 
+  virtual SharedVariant* getKeySV(ssize_t pos) const {
+    ASSERT(is(KindOfArray));
+    if (m_data.map->isVector) return NULL;
+    else return m_data.map->keys[pos];
+  }
+
 private:
   class MapData {
   public:
     size_t size;
-    Int64ToIntMap intMap;
-    StringDataToIntMap strMap;
+    bool isVector;
+    Int64ToIntMap *intMap;
+    StringDataToIntMap *strMap;
     ThreadSharedVariant **keys;
     ThreadSharedVariant **vals;
 
-    MapData(size_t s) : size(s), intMap(s), strMap(s) {
-      keys = new ThreadSharedVariant *[s];
+    MapData(size_t s, bool vector = false) : size(s), isVector(vector),
+      intMap(NULL), strMap(NULL) {
+      if (!vector) keys = new ThreadSharedVariant *[s];
       vals = new ThreadSharedVariant *[s];
     }
 
     ~MapData() {
       for (size_t i = 0; i < size; i++) {
-        keys[i]->decRef();
+        if (!isVector) keys[i]->decRef();
         vals[i]->decRef();
       }
-      delete [] keys;
+      if (intMap) delete intMap;
+      if (strMap) delete strMap;
+      if (!isVector) delete [] keys;
       delete [] vals;
+    }
+
+    void setVec(int p, ThreadSharedVariant *val) {
+      vals[p] = val;
     }
 
     void set(int p, ThreadSharedVariant *key, ThreadSharedVariant *val) {
       keys[p] = key;
       vals[p] = val;
       if (key->is(KindOfInt64)) {
-        intMap[key->m_data.num] = p;
+        if (!intMap) intMap = new Int64ToIntMap(size);
+        (*intMap)[key->m_data.num] = p;
       } else {
         ASSERT(key->is(KindOfString));
-        strMap[key->m_data.str] = p;
+        if (!strMap) strMap = new StringDataToIntMap(size);
+        (*strMap)[key->m_data.str] = p;
       }
     }
   };

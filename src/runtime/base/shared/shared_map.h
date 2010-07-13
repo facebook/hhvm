@@ -42,7 +42,7 @@ public:
   }
 
   Variant getKey(ssize_t pos) const {
-    return m_arr->getKey(pos)->toLocal();
+    return m_arr->getKey(pos);
   }
 
   Variant getValue(ssize_t pos) const {

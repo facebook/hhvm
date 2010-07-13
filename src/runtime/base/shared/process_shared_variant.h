@@ -95,7 +95,7 @@ class ProcessSharedVariant : public SharedVariant {
   void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
                  bool keepRef = false);
 
-  virtual SharedVariant* getKey(ssize_t pos) const;
+  virtual Variant getKey(ssize_t pos) const;
   virtual SharedVariant* getValue(ssize_t pos) const;
 
   SharedMemoryString* getString() const {
@@ -122,6 +122,8 @@ class ProcessSharedVariant : public SharedVariant {
   T putPtr(T p) const {
     return (T)((size_t)p-(size_t)this);
   }
+
+  virtual SharedVariant* getKeySV(ssize_t pos) const;
 
   ProcessSharedVariantMapData* getMapData() const {
     return getPtr(m_data.map);

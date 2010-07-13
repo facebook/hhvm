@@ -81,14 +81,18 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
       }
 
       size_t size = arr->size();
-      m_data.map = new MapData(size);
+      m_data.map = new MapData(size, arr->isVectorData());
 
       uint i = 0;
       for (ArrayIter it(arr); !it.end(); it.next(), i++) {
-        ThreadSharedVariant* key = createAnother(it.first(), false);
         ThreadSharedVariant* val = createAnother(it.second(), false, true);
         if (val->shouldCache()) m_shouldCache = true;
-        m_data.map->set(i, key, val);
+        if (m_data.map->isVector) {
+          m_data.map->setVec(i, val);
+        } else {
+          ThreadSharedVariant* key = createAnother(it.first(), false);
+          m_data.map->set(i, key, val);
+        }
       }
       break;
     }
@@ -229,22 +233,30 @@ int ThreadSharedVariant::getIndex(CVarRef key) {
   case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64: {
+    if (m_data.map->isVector) {
+      int index = key.getNumData();
+      if (index < 0 || (size_t) index >= m_data.map->size) return -1;
+      return index;
+    }
+    if (!m_data.map->intMap) return -1;
     int64 num = key.getNumData();
-    Int64ToIntMap::const_iterator it = m_data.map->intMap.find(num);
-    if (it == m_data.map->intMap.end()) return -1;
+    Int64ToIntMap::const_iterator it = m_data.map->intMap->find(num);
+    if (it == m_data.map->intMap->end()) return -1;
     return it->second;
   }
   case KindOfStaticString:
   case KindOfString: {
+    if (!m_data.map->strMap) return -1;
     StringData *sd = key.getStringData();
-    StringDataToIntMap::const_iterator it = m_data.map->strMap.find(sd);
-    if (it == m_data.map->strMap.end()) return -1;
+    StringDataToIntMap::const_iterator it = m_data.map->strMap->find(sd);
+    if (it == m_data.map->strMap->end()) return -1;
     return it->second;
   }
   case LiteralString: {
+    if (!m_data.map->strMap) return -1;
     StringData sd(key.getLiteralString(), AttachLiteral);
-    StringDataToIntMap::const_iterator it = m_data.map->strMap.find(&sd);
-    if (it == m_data.map->strMap.end()) return -1;
+    StringDataToIntMap::const_iterator it = m_data.map->strMap->find(&sd);
+    if (it == m_data.map->strMap->end()) return -1;
     return it->second;
   }
   default:
@@ -273,9 +285,14 @@ void ThreadSharedVariant::loadElems(ArrayData *&elems,
                                     bool keepRef /* = false */) {
   ASSERT(is(KindOfArray));
   uint count = arrSize();
-  ArrayInit ai(count, false, keepRef);
+  ArrayInit ai(count, m_data.map->isVector, keepRef);
   for (uint i = 0; i < count; i++) {
-    ai.set(i, m_data.map->keys[i]->toLocal(), sharedMap.getValue(i), -1, true);
+    if (m_data.map->isVector) {
+      ai.set(i, (int64)i, sharedMap.getValue(i), -1, true);
+    } else {
+      ai.set(i, m_data.map->keys[i]->toLocal(), sharedMap.getValue(i), -1,
+             true);
+    }
   }
   elems = ai.create();
   if (elems->isStatic()) elems = elems->copy();

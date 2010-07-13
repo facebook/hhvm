@@ -33,8 +33,8 @@ int SharedVariant::countReachable() {
     for (int i = 0; i < size; i++) {
       SharedVariant* p = getValue(i);
       count += p->countReachable();
-      p = getKey(i);
-      p->countReachable();
+      p = getKeySV(i);
+      if (p) p->countReachable();
     }
   }
   return count;

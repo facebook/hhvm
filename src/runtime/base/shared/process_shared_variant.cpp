@@ -347,7 +347,11 @@ bool ProcessSharedVariant::exists(CVarRef key) {
   return it != map().end();
 }
 
-SharedVariant* ProcessSharedVariant::getKey(ssize_t pos) const {
+Variant ProcessSharedVariant::getKey(ssize_t pos) const {
+  return getPtr(keys()[pos])->toLocal();
+}
+
+SharedVariant* ProcessSharedVariant::getKeySV(ssize_t pos) const {
   return getPtr(keys()[pos]);
 }
 

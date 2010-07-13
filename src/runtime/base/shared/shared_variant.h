@@ -64,7 +64,7 @@ public:
                          bool keepRef = false) = 0;
 
   /** Returns a key in thread-local space. */
-  virtual SharedVariant* getKey(ssize_t pos) const = 0;
+  virtual Variant getKey(ssize_t pos) const = 0;
   virtual SharedVariant* getValue(ssize_t pos) const = 0;
 
   int countReachable();
@@ -78,6 +78,10 @@ public:
   bool m_shouldCache;
   bool m_serializedArray;
   DataType m_type;
+
+  // only for countReachable() return NULL if it is vector and key is not
+  // SharedVariant
+  virtual SharedVariant* getKeySV(ssize_t pos) const = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

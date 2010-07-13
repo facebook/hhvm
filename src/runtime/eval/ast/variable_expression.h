@@ -17,6 +17,7 @@
 #ifndef __EVAL_VARIABLE_EXPRESSION_H__
 #define __EVAL_VARIABLE_EXPRESSION_H__
 
+#include <runtime/eval/ast/name.h>
 #include <runtime/eval/ast/lval_expression.h>
 
 namespace HPHP {
@@ -24,7 +25,6 @@ namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_AST_PTR(VariableExpression);
-DECLARE_AST_PTR(Name);
 
 class VariableExpression : public LvalExpression {
 public:

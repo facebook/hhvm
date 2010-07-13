@@ -23,7 +23,6 @@
 #include <compiler/parser/hphp.tab.hpp>
 #include <compiler/expression/function_call.h>
 #include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/alias_manager.h>
 
 using namespace HPHP;
 using namespace std;

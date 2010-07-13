@@ -34,11 +34,13 @@ class BucketMapEntry {
   void beginScope();
   void endScope();
   void resetScope();
+  void pop_back() { m_exprs.pop_back(); }
   ExpressionPtrList::iterator begin() { return m_exprs.begin(); }
   ExpressionPtrList::iterator end() { return m_exprs.end(); }
   ExpressionPtrList::reverse_iterator rbegin() { return m_exprs.rbegin(); }
   ExpressionPtrList::reverse_iterator rend() { return m_exprs.rend(); }
   bool isLast(ExpressionPtr e) { return *rbegin() == e; }
+  bool isSubLast(ExpressionPtr e);
   size_t size() { return m_num; }
   void stash(size_t from, ExpressionPtrList &to);
   void import(ExpressionPtrList &from);
@@ -84,8 +86,8 @@ class AliasManager {
   void resetScope();
   ExpressionPtr getCanonical(ExpressionPtr e);
 
-  bool optimize(AnalysisResultPtr ar, MethodStatementPtr s);
-  void setChanged() { m_changed = true; }
+  int optimize(AnalysisResultPtr ar, MethodStatementPtr s);
+  void setChanged() { m_changes++; }
 
   static bool parseOptimizations(const std::string &optimizations,
                                  std::string &errs);
@@ -148,7 +150,8 @@ class AliasManager {
 
   unsigned              m_nextID;
 
-  bool                  m_changed;
+  int                   m_changes;
+  int                   m_replaced;
   bool                  m_wildRefs;
   AliasInfoMap          m_aliasInfo;
 
@@ -161,6 +164,7 @@ class AliasManager {
   int                   m_nrvoFix;
 
   bool                  m_inlineAsExpr;
+  bool                  m_noAdd;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -350,13 +350,15 @@ StatementPtr MethodStatement::preOptimize(AnalysisResultPtr ar) {
   ar->pushScope(funcScope);
   if (ar->getPhase() != AnalysisResult::AnalyzeInclude &&
       Option::LocalCopyProp) {
-    bool flag;
+    int flag;
     do {
       AliasManager am;
       MethodStatementPtr self =
         static_pointer_cast<MethodStatement>(shared_from_this());
       flag = am.optimize(ar, self);
-      ar->preOptimize(m_stmt);
+      if (flag >= 0) {
+        ar->preOptimize(m_stmt);
+      }
     } while (flag);
   } else {
     ar->preOptimize(m_stmt);
@@ -372,13 +374,15 @@ StatementPtr MethodStatement::postOptimize(AnalysisResultPtr ar) {
   ar->pushScope(funcScope);
   if (ar->getPhase() != AnalysisResult::AnalyzeInclude &&
       (Option::LocalCopyProp || Option::StringLoopOpts)) {
-    bool flag;
+    int flag;
     do {
       AliasManager am;
       MethodStatementPtr self =
         static_pointer_cast<MethodStatement>(shared_from_this());
       flag = am.optimize(ar, self);
-      ar->postOptimize(m_stmt);
+      if (flag >= 0) {
+        ar->postOptimize(m_stmt);
+      }
     } while (flag);
   } else {
     ar->postOptimize(m_stmt);

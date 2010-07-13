@@ -56,6 +56,8 @@ StaticMemberExpression::StaticMemberExpression
 ExpressionPtr StaticMemberExpression::clone() {
   StaticMemberExpressionPtr exp(new StaticMemberExpression(*this));
   Expression::deepCopy(exp);
+  if (m_class) exp->m_class = m_class->clone();
+  exp->m_exp = m_exp->clone();
   return exp;
 }
 

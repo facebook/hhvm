@@ -129,6 +129,7 @@ public:
   void clearContext();
   int getContext() const { return m_context;}
   bool hasContext(Context context) const { return m_context & context; }
+  bool hasSubExpr(ExpressionPtr sub) const;
 
   /**
    * Set this expression's error flags.
@@ -296,7 +297,8 @@ public:
 
   bool isUnused() const { return m_unused; }
   void setUnused(bool u) { m_unused = u; }
-
+  ExpressionPtr fetchReplacement();
+  void setReplacement(ExpressionPtr rep) { m_replacement = rep; }
 protected:
   static bool IsIdentifier(const std::string &value);
 
@@ -325,6 +327,7 @@ protected:
   ExpressionPtr m_canonPtr;
   mutable int m_error;
   bool m_unused;
+  ExpressionPtr m_replacement;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

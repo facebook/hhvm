@@ -94,7 +94,17 @@ void Expression::deepCopy(ExpressionPtr exp) {
   exp->m_canon_id = 0;
   exp->m_unused = false;
   exp->m_canonPtr.reset();
+  exp->m_replacement.reset();
 };
+
+bool Expression::hasSubExpr(ExpressionPtr sub) const {
+  if (this == sub.get()) return true;
+  for (int i = getKidCount(); i--; ) {
+    ExpressionPtr kid = getNthExpr(i);
+    if (kid && kid->hasSubExpr(sub)) return true;
+  }
+  return false;
+}
 
 void Expression::addElement(ExpressionPtr exp) {
   ASSERT(false);
@@ -447,6 +457,12 @@ bool Expression::canonCompare(ExpressionPtr e) const {
   }
 
   return true;
+}
+
+ExpressionPtr Expression::fetchReplacement() {
+  ExpressionPtr t = m_replacement;
+  m_replacement.reset();
+  return t;
 }
 
 bool Expression::isUnquotedScalar() const {

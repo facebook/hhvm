@@ -23,7 +23,6 @@
 #include <compiler/analysis/variable_table.h>
 #include <compiler/analysis/constant_table.h>
 #include <compiler/analysis/file_scope.h>
-#include <compiler/analysis/alias_manager.h>
 #include <compiler/expression/unary_op_expression.h>
 #include <compiler/parser/hphp.tab.hpp>
 #include <compiler/option.h>

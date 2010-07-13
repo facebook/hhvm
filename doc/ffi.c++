@@ -1,19 +1,19 @@
 
-<h2>How to Use HPHP Compiled Libraries in C++</h2>
+<h2>How to Use HipHop Compiled Libraries in C++</h2>
 
 There are several functions that have to be called correctly to make sure
-HPHP compiled binaries work in a C++ environment:
+HipHop compiled binaries work in a C++ environment:
 
 1. Without Memory Manager
 
 (1) hphp_process_init() and hphp_process_exit()
 
 The 1st function initializes all static variables a PHP library contains. This
-function is only needed to be called just ONCE before calling any other HPHP
+function is only needed to be called just ONCE before calling any other HipHop
 functions. Please call this function from process level (the "main thread")
 before starting any threads.
 
-Call hphp_process_exit() as the last HPHP function call when program exits.
+Call hphp_process_exit() as the last HipHop function call when program exits.
 
 (2) hphp_session_init() and hphp_session_exit()
 

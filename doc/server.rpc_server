@@ -3,8 +3,8 @@
 
 1. Parameters
 
-When RPC server is turned on, HPHP server will listen on a port that takes RPC
-requests in a format like this,
+When RPC server is turned on, HipHop server will listen on a port that takes
+RPC requests in a format like this,
 
   http://[server]:[port]/function_name?params=...
 

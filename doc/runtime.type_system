@@ -3,7 +3,7 @@
 
 1. Primitive Types
 
-In HPHP, booleans, integers (8-, 16-, 32- and 64-bit) and doubles are
+In HipHop, booleans, integers (8-, 16-, 32- and 64-bit) and doubles are
 represented as is with C++'s built-in primitive type support:
 
 - bool
@@ -27,7 +27,7 @@ larger than 1.
 
 3. Object classes
 
-In HPHP, all user classes derive from ObjectData. PHP object variables will
+In HipHop, all user classes derive from ObjectData. PHP object variables will
 become smart pointers of different types of ObjectData objects.
 
 In PHP, objects are passed by reference automatically. Therefore, SmartPtr is

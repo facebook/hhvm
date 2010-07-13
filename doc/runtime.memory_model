@@ -1,7 +1,7 @@
 
 <h2>Memory Model</h2>
 
-In HPHP, there are several different types of variables, depending on how
+In HipHop, there are several different types of variables, depending on how
 their lifetime is controled and how they allocate and deallocate memories.
 
 1. Process Memory Variables
@@ -9,18 +9,18 @@ their lifetime is controled and how they allocate and deallocate memories.
 (1) APC Variables
 
 APC stands for Alternative PHP Cache in PHP/Zend terminology, and they are
-shared by multiple processes in pre-forking Apache environment. In HPHP, APC's
-semantics is kept by two different implementations, depending on how program
-is configured:
+shared by multiple processes in pre-forking Apache environment. In HipHop,
+APC's semantics is kept by two different implementations, depending on how
+program is configured:
 
-- If HPHP is configured to run as one single process with multiple threads,
+- If HipHop is configured to run as one single process with multiple threads,
   APC variables are merely the ones that are shared by all threads. They are
   accessed through apc_store() and apc_fetch() functions by name-value lookups.
   In this model, APC variables are implemented with plain memory, allocated and
   deallocated through malloc/free calls. Then, granularity locking is
   implemented to ensure access from multiple threads are safe and efficient.
 
-- If HPHP is configured to run with shared memory for APC, those variables
+- If HipHop is configured to run with shared memory for APC, those variables
   are allocated and deallocated through boost::inter_process classes, which
   operate on real shared memory regions that multiple processes can attach to.
   In this model, we used the same type of granularity locking for safe reads
@@ -35,14 +35,14 @@ automatically. Proper locking is needed for thread-safety.
 
 (1) ThreadLocal<T>
 
-HPHP implemented ThreadLocal<T> template class that wraps any C++ data
+HipHop implemented ThreadLocal<T> template class that wraps any C++ data
 structures to make them thread local. A ThreadLocal<T> object is only intended
 to be accessed by a single thread, thus avoiding mutex locking.
 
 (2) Persistent Objects
 
 In PHP extensions, some objects are persistent across multiple requests, and
-HPHP has also implemented this type of variables for resource data. They are
+HipHop has also implemented this type of variables for resource data. They are
 thread local, therefore, each thread has its own persistent object storage.
 They are also accessed by names, just like how PHP/Zend has implemented it.
 
@@ -63,7 +63,7 @@ are allocated and deallocated through smart allocators and linear allocators.
 
 (2) RequestLocal<T>
 
-HPHP also implemented RequestLocal<T> template class to allow PHP extensions
+HipHop also implemented RequestLocal<T> template class to allow PHP extensions
 to properly initialize and uninitialize certain request local variables.
 
 The template class simply implemented requestInit() and requestShutdown()
@@ -73,13 +73,13 @@ shutdown time of an HTTP request.
 
 <h2>Memory Allocators</h2>
 
-Two speciailized memory allocators are implemented in HPHP, in addition to
+Two speciailized memory allocators are implemented in HipHop, in addition to
 the general purpose tcmalloc we used for replacing glic's malloc/free.
 
 1. SmartAllocator<T>
 
 A SmartAllocator simply allocates one slab of multiple objects with the same
-size a time. Then it will use replacement new (macro-ed as NEW in HPHP code
+size a time. Then it will use replacement new (macro-ed as NEW in HipHop code
 base) for any caller to allocate a new one from the slab.
 
 When an object is deallocated, it will be pushed to a free list maintained by
@@ -94,7 +94,7 @@ free list.
 
 2. LinearAllocator
 
-HPHP supports memory state check points, so that on subsequent requests,
+HipHop supports memory state check points, so that on subsequent requests,
 certain user PHP code doesn't have to be executed again, if its sole purpose
 is to initialize global states to certain values.
 

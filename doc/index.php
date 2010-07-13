@@ -45,13 +45,6 @@ $topics =
       'References' => array(
         'Configuration file format' => 'hdf',
       ),
-      'Facebook Build Processes' => array(
-        'Compiler push' => 'facebook/fb.process.merge',
-        'Server testing' => 'facebook/fb.process.server_test',
-        'External library' => 'facebook/fb.process.external_lib',
-        'Update engshare' => 'facebook/fb.process.engshare',
-        'Build worker machine' => 'facebook/fb.process.build_worker',
-      ),
     );
 
 ///////////////////////////////////////////////////////////////////////////////

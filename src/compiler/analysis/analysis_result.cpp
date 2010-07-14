@@ -2648,9 +2648,14 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairVecVec &symbols,
   for (StringToClassScopePtrVecMap::const_iterator iter =
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
     const char *name = iter->first.c_str();
-    if (iter->second.size() && iter->second[0]->needLazyStaticInitializer()) {
-      string varname = string(Option::ClassStaticInitializerFlagPrefix) + name;
-      names->push_back(pair<string, string>(varname, varname));
+    for (unsigned int i = 0; i < iter->second.size(); i++) {
+      if (iter->second[i]->needLazyStaticInitializer()) {
+        string varname = string(Option::ClassStaticInitializerFlagPrefix) +
+          name;
+        string memname = string(Option::ClassStaticInitializerFlagPrefix) +
+          iter->second[i]->getId(cg);
+        names->push_back(pair<string, string>(varname, memname));
+      }
     }
   }
 }

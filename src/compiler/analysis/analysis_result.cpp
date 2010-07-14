@@ -2821,7 +2821,6 @@ void AnalysisResult::outputCPPMain() {
 
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
-  cg_printInclude("<runtime/base/array/zend_array.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
   if (Option::PrecomputeLiteralStrings && m_stringLiterals.size() > 0) {
     cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");

@@ -730,6 +730,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   }
 
   cg.printSection("Class Static Variables");
+  int count = 0;
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
@@ -738,9 +739,18 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
                                                sgi->name);
     if (!sgi->func) {
       TypePtr varType = sgi->variables->getFinalType(sgi->name);
-      varType->outputCPPDecl(cg, ar);
-      cg_printf(" %s%s;\n", Option::StaticPropertyPrefix, id.c_str());
+      if (varType->is(Type::KindOfVariant)) {
+        cg_printf("#define %s%s csp[%d]\n",
+                  Option::StaticPropertyPrefix, id.c_str(), count);
+        count++;
+      } else {
+        varType->outputCPPDecl(cg, ar);
+        cg_printf(" %s%s;\n", Option::StaticPropertyPrefix, id.c_str());
+      }
     }
+  }
+  if (count) {
+    cg_printf("Variant csp[%d];\n", count);
   }
 
   cg.printSection("Class Static Initializer Flags");

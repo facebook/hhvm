@@ -337,6 +337,43 @@ bool TestExtArray::test_array_map() {
      "    [4] => 125\n"
      ")\n");
 
+  b = f_array_map(2, null, a);
+  VS(f_print_r(b, true),
+     "Array\n"
+     "(\n"
+     "    [0] => 1\n"
+     "    [1] => 2\n"
+     "    [2] => 3\n"
+     "    [3] => 4\n"
+     "    [4] => 5\n"
+     ")\n");
+
+  b = f_array_map(2, null, CREATE_MAP2("x", 6, 0, 7));
+  VS(f_print_r(b, true),
+     "Array\n"
+     "(\n"
+     "    [x] => 6\n"
+     "    [0] => 7\n"
+     ")\n");
+
+  VS(f_print_r(f_array_map(3, null, CREATE_MAP2("x", 6, 0, 7),
+                           CREATE_VECTOR1(CREATE_VECTOR2("a","b"))), true),
+     "Array\n"
+     "(\n"
+     "    [0] => Array\n"
+     "        (\n"
+     "            [0] => 6\n"
+     "            [1] => a\n"
+     "        )\n"
+     "\n"
+     "    [1] => Array\n"
+     "        (\n"
+     "            [0] => 7\n"
+     "            [1] => b\n"
+     "        )\n"
+     "\n"
+     ")\n");
+
   return Count(true);
 }
 

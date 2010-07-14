@@ -96,7 +96,13 @@ bool f_array_key_exists(CVarRef key, CVarRef search) {
 
 static Variant map_func(CArrRef params, const void *data) {
   Variant *callback = (Variant *)data;
-  return f_call_user_func_array(*callback, params);
+  if (!callback->isNull()) {
+    return f_call_user_func_array(*callback, params);
+  }
+  if (params.size() == 1) {
+    return params[0];
+  }
+  return params;
 }
 Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* = null_array */) {
   Array inputs;

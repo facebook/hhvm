@@ -284,6 +284,9 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   if (flags & 0x4) {
     f->setNoEffect();
   }
+  if (flags & 0x20) {
+    f->setIsFoldable();
+  }
 
   return f;
 }
@@ -340,7 +343,13 @@ bool BuiltinSymbols::LoadSepExtensionSymbols(AnalysisResultPtr ar,
   ParseExtDynamics (ar, symbols[3], true);
 
   if (handle) {
-    dlclose(handle);
+    /*
+      Not closing for now, because it may have set an object allocator,
+      which would then fail next time its used.
+      I think the object allocators should be fixed instead - one per size,
+      rather than one per class, then this issue wouldnt occur
+    */
+    // dlclose(handle);
   }
   return true;
 }

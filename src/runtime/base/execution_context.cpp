@@ -45,7 +45,7 @@ ExecutionContext::ExecutionContext()
     m_out(NULL), m_implicitFlush(false), m_protectedLevel(0),
     m_errorState(ExecutionContext::NoError),
     m_errorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel),
-    m_lastErrorNum(0), m_logErrors(false) {
+    m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false) {
   MemoryManager::TheMemoryManager()->getStats().maxBytes = m_maxMemory;
 }
 
@@ -479,6 +479,7 @@ void ExecutionContext::onTick() {
 bool ExecutionContext::errorNeedsHandling(int errnum,
                                           bool callUserHandler,
                                           ErrorThrowMode mode) {
+  if (m_throwAllErrors) throw errnum;
   if (mode != NeverThrow || (getErrorReportingLevel() & errnum) != 0 ||
       RuntimeOption::NoSilencer) {
     return true;

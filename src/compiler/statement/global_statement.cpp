@@ -97,7 +97,6 @@ StatementPtr GlobalStatement::postOptimize(AnalysisResultPtr ar) {
 
 void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
   BlockScopePtr scope = ar->getScope();
-  scope->getVariables()->setAttribute(VariableTable::InsideGlobalStatement);
   for (int i = 0; i < m_exp->getCount(); i++) {
     ExpressionPtr exp = (*m_exp)[i];
     VariableTablePtr variables = scope->getVariables();
@@ -109,6 +108,7 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
          it is not a global variable, record this variable as "redeclared"
          which will force Variant type.
        */
+      variables->setAttribute(VariableTable::InsideGlobalStatement);
       variables->checkRedeclared(name, KindOfGlobalStatement);
       variables->addLocalGlobal(name);
       var->setContext(Expression::Declaration);
@@ -123,6 +123,7 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
                                       var->getName(), var,
                                       var->getName(), decl);
       }
+      variables->clearAttribute(VariableTable::InsideGlobalStatement);
     } else {
       if (ar->isFirstPass()) {
         ar->getCodeError()->record(shared_from_this(),
@@ -138,7 +139,6 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
     }
   }
   FunctionScopePtr func = ar->getFunctionScope();
-  scope->getVariables()->clearAttribute(VariableTable::InsideGlobalStatement);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

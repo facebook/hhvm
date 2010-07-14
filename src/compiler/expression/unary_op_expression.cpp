@@ -42,7 +42,7 @@ using namespace boost;
 UnaryOpExpression::UnaryOpExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp, int op, bool front)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_exp(exp), m_op(op), m_front(front), m_arrayId(-1),
+    m_exp(exp), m_op(op), m_front(front),
     m_silencer(-1), m_localEffects(0) {
   switch (m_op) {
   case T_INC:
@@ -247,7 +247,6 @@ bool UnaryOpExpression::canonCompare(ExpressionPtr e) const {
 
   return m_op == u->m_op &&
     m_front == u->m_front &&
-    m_arrayId == u->m_arrayId &&
     m_silencer == u->m_silencer;
 }
 
@@ -273,40 +272,12 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
   if (!m_exp->getScalarValue(value)) return ExpressionPtr();
   hasResult = preCompute(ar, value, result);
   if (hasResult) {
-    if (result.isNull()) {
-      return CONSTANT("null");
-    } else if (result.isBoolean()) {
-      return CONSTANT(result ? "true" : "false");
-    } else if (result.isDouble() && !finite(result.getDouble())) {
-      return ExpressionPtr();
-    } else if (result.isArray()) {
-      return ExpressionPtr();
-    } else {
-      return ScalarExpressionPtr
-               (new ScalarExpression(m_exp->getLocation(),
-                                     Expression::KindOfScalarExpression,
-                                     result));
-    }
+    return MakeScalarExpression(ar, getLocation(), result);
   }
   return ExpressionPtr();
 }
 
 ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultPtr ar) {
-  bool insideScalarArray = ar->getInsideScalarArray();
-
-  if (m_op == T_ARRAY &&
-      (getContext() & (RefValue|LValue)) == 0) {
-    if (m_exp) {
-      ExpressionListPtr pairs = dynamic_pointer_cast<ExpressionList>(m_exp);
-      if (pairs && pairs->isScalarArrayPairs()) {
-        m_arrayId = ar->registerScalarArray(m_exp);
-        ar->setInsideScalarArray(true);
-      }
-    } else {
-      m_arrayId = ar->registerScalarArray(m_exp); // empty array
-    }
-  }
-
   ar->postOptimize(m_exp);
   if (m_op == T_PRINT && m_exp->is(KindOfEncapsListExpression) &&
       !m_exp->hasEffect()) {
@@ -314,8 +285,6 @@ ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultPtr ar) {
       (m_exp);
     e->stripConcat();
   }
-
-  ar->setInsideScalarArray(insideScalarArray);
 
   if (m_op == T_UNSET_CAST && !hasEffect()) {
     return CONSTANT("null");
@@ -632,15 +601,28 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
 void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
                                       AnalysisResultPtr ar) {
-  if (m_arrayId != -1) {
-    if (cg.getOutput() == CodeGenerator::SystemCPP) {
-      cg_printf("SystemScalarArrays::%s[%d]",
-                Option::SystemScalarArrayName, m_arrayId);
+  if (m_op == T_ARRAY &&
+      (getContext() & (RefValue|LValue)) == 0 &&
+      !ar->getInsideScalarArray()) {
+    int id = -1;
+    if (m_exp) {
+      ExpressionListPtr pairs = dynamic_pointer_cast<ExpressionList>(m_exp);
+      if (pairs && pairs->isScalarArrayPairs()) {
+        id = ar->registerScalarArray(m_exp);
+      }
     } else {
-      cg_printf("ScalarArrays::%s[%d]",
-                Option::ScalarArrayName, m_arrayId);
+      id = ar->registerScalarArray(m_exp); // empty array
     }
-    return;
+    if (id != -1) {
+      if (cg.getOutput() == CodeGenerator::SystemCPP) {
+        cg_printf("SystemScalarArrays::%s[%d]",
+                  Option::SystemScalarArrayName, id);
+      } else {
+        cg_printf("ScalarArrays::%s[%d]",
+                  Option::ScalarArrayName, id);
+      }
+      return;
+    }
   }
 
   if ((m_op == T_ISSET || m_op == T_EMPTY || m_op == T_UNSET) && m_exp) {
@@ -693,11 +675,7 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     case T_UNSET_CAST:    cg_printf("(");          break;
     case T_EXIT:          cg_printf("f_exit(");    break;
     case T_ARRAY:
-      if (ar->getInsideScalarArray()) {
-        cg_printf("StaticArray(");
-      } else {
-        cg_printf("Array(");
-      }
+      cg_printf("Array(");
       break;
     case T_PRINT:         cg_printf("print(");     break;
     case T_EVAL:

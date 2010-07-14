@@ -25,6 +25,8 @@
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/simple_variable.h>
+#include <compiler/expression/array_pair_expression.h>
+#include <compiler/expression/unary_op_expression.h>
 #include <compiler/analysis/constant_table.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/expression/function_call.h>
@@ -468,6 +470,41 @@ ExpressionPtr Expression::fetchReplacement() {
 bool Expression::isUnquotedScalar() const {
   if (!is(KindOfScalarExpression)) return false;
   return !((ScalarExpression*)this)->isQuoted();
+}
+
+ExpressionPtr Expression::MakeScalarExpression(AnalysisResultPtr ar,
+                                               LocationPtr loc,
+                                               CVarRef value) {
+  if (value.isArray()) {
+    ExpressionListPtr el(new ExpressionList(loc,
+                                            KindOfExpressionList,
+                                            ExpressionList::ListKindParam));
+
+    for (ArrayIter iter(value); iter; ++iter) {
+      ExpressionPtr k(MakeScalarExpression(ar, loc, iter.first()));
+      ExpressionPtr v(MakeScalarExpression(ar, loc, iter.second()));
+      if (!k || !v) return ExpressionPtr();
+      ArrayPairExpressionPtr ap(
+        new ArrayPairExpression(loc, KindOfArrayPairExpression,
+                                k, v, false));
+      el->addElement(ap);
+    }
+    if (!el->getCount()) el.reset();
+    return ExpressionPtr(
+      new UnaryOpExpression(loc, KindOfUnaryOpExpression,
+                            el, T_ARRAY, true));
+  } else if (value.isNull()) {
+    return MakeConstant(ar, loc, "null");
+  } else if (value.isBoolean()) {
+    return MakeConstant(ar, loc, value ? "true" : "false");
+  } else if (!value.isDouble() || finite(value.getDouble())) {
+    return ScalarExpressionPtr
+      (new ScalarExpression(loc,
+                            Expression::KindOfScalarExpression,
+                            value));
+  }
+
+  return ExpressionPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

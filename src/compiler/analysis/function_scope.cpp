@@ -225,6 +225,14 @@ void FunctionScope::setNoEffect() {
   }
 }
 
+bool FunctionScope::isFoldable() const {
+  return m_attribute & FileScope::IsFoldable;
+}
+
+void FunctionScope::setIsFoldable() {
+  m_attribute |= FileScope::IsFoldable;
+}
+
 bool FunctionScope::isHelperFunction() const {
   return m_attribute & FileScope::HelperFunction;
 }

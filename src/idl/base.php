@@ -77,6 +77,7 @@ define('ReferenceVariableArguments', 2);
 define('NoEffect', 4);
 define('NoInjection', 8);
 define('MixedVariableArguments', 16);
+define('FunctionIsFoldable', 32);
 
 // Mask for checking the flags related to variable arguments
 define('VarArgsMask', (VariableArguments | ReferenceVariableArguments |

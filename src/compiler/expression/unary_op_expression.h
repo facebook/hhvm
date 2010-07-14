@@ -54,7 +54,6 @@ protected:
   ExpressionPtr m_exp;
   int m_op;
   bool m_front;
-  int m_arrayId;
   int m_silencer;
   int m_localEffects;
 

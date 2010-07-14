@@ -34,48 +34,48 @@ k("UCOL_NUMERIC_COLLATION",        Int64);
 
 f('array_change_key_case', Variant,
   array('input' => Variant,
-        'upper' => array(Boolean, 'false')));
+        'upper' => array(Boolean, 'false')), FunctionIsFoldable);
 
 f('array_chunk', Variant,
   array('input' => Variant,
         'size' => Int32,
-        'preserve_keys' => array(Boolean, 'false')));
+        'preserve_keys' => array(Boolean, 'false')), FunctionIsFoldable);
 
 f('array_combine', Variant,
   array('keys' => Variant,
-        'values' => Variant));
+        'values' => Variant), FunctionIsFoldable);
 
 f('array_count_values', Variant,
-  array('input' => Variant));
+  array('input' => Variant), FunctionIsFoldable);
 
 f('array_fill_keys', Variant,
   array('keys' => Variant,
-        'value' => Variant));
+        'value' => Variant), FunctionIsFoldable);
 
 f('array_fill', Variant,
   array('start_index' => Int32,
         'num' => Int32,
-        'value' => Variant));
+        'value' => Variant), FunctionIsFoldable);
 
 f('array_filter', Variant,
   array('input' => Variant,
-        'callback' => array(Variant, 'null_variant')));
+        'callback' => array(Variant, 'null_variant')), FunctionIsFoldable);
 
 f('array_flip', Variant,
-  array('trans' => Variant));
+  array('trans' => Variant), FunctionIsFoldable);
 
 f('array_key_exists', Boolean,
   array('key' => Variant,
-        'search' => Variant));
+        'search' => Variant), FunctionIsFoldable);
 
 f('key_exists', Boolean,
   array('key' => Variant,
-        'search' => Variant));
+        'search' => Variant), FunctionIsFoldable);
 
 f('array_keys', Variant,
   array('input' => Variant,
         'search_value' => array(Variant, 'null_variant'),
-        'strict' => array(Boolean, 'false')));
+        'strict' => array(Boolean, 'false')), FunctionIsFoldable);
 
 f('array_map', Variant,
   array('callback' => Variant,
@@ -84,19 +84,19 @@ f('array_map', Variant,
 
 f('array_merge_recursive', Variant,
   array('array1' => Variant),
-  VariableArguments);
+  VariableArguments | FunctionIsFoldable);
 
 f('array_merge', Variant,
   array('array1' => Variant),
-  VariableArguments);
+  VariableArguments | FunctionIsFoldable);
 
 f('array_replace_recursive', Variant,
   array('array1' => Variant),
-  VariableArguments);
+  VariableArguments | FunctionIsFoldable);
 
 f('array_replace', Variant,
   array('array1' => Variant),
-  VariableArguments);
+  VariableArguments | FunctionIsFoldable);
 
 f('array_multisort', Boolean,
   array('ar1' => Variant | Reference),
@@ -105,13 +105,13 @@ f('array_multisort', Boolean,
 f('array_pad', Variant,
   array('input' => Variant,
         'pad_size' => Int32,
-        'pad_value' => Variant));
+        'pad_value' => Variant), FunctionIsFoldable);
 
 f('array_pop', Variant,
   array('array' => VariantMap | Reference));
 
 f('array_product', Variant,
-  array('array' => Variant));
+  array('array' => Variant), FunctionIsFoldable);
 
 f('array_push', Variant,
   array('array' => VariantMap | Reference,
@@ -129,12 +129,12 @@ f('array_reduce', Variant,
 
 f('array_reverse', Variant,
   array('array' => Variant,
-        'preserve_keys' => array(Boolean, 'false')));
+        'preserve_keys' => array(Boolean, 'false')), FunctionIsFoldable);
 
 f('array_search', Variant,
   array('needle' => Variant,
         'haystack' => Variant,
-        'strict' => array(Boolean, 'false')));
+        'strict' => array(Boolean, 'false')), FunctionIsFoldable);
 
 f('array_shift', Variant,
   array('array' => VariantMap | Reference));
@@ -143,7 +143,7 @@ f('array_slice', Variant,
   array('array' => Variant,
         'offset' => Int32,
         'length' => array(Variant, 'null_variant'),
-        'preserve_keys' => array(Boolean, 'false')));
+        'preserve_keys' => array(Boolean, 'false')), FunctionIsFoldable);
 
 f('array_splice', Variant,
   array('input' => VariantMap | Reference,
@@ -152,10 +152,10 @@ f('array_splice', Variant,
         'replacement' => array(Variant, 'null_variant')));
 
 f('array_sum', Variant,
-  array('array' => Variant));
+  array('array' => Variant), FunctionIsFoldable);
 
 f('array_unique', Variant,
-  array('array' => Variant));
+  array('array' => Variant), FunctionIsFoldable);
 
 f('array_unshift', Int32,
   array('array' => VariantMap | Reference,
@@ -163,7 +163,7 @@ f('array_unshift', Int32,
   VariableArguments);
 
 f('array_values', Variant,
-  array('input' => Variant));
+  array('input' => Variant), FunctionIsFoldable);
 
 f('array_walk_recursive', Boolean,
   array('input' => VariantMap | Reference,
@@ -184,11 +184,11 @@ f('shuffle', Boolean,
 
 f('count', Int32,
   array('var' => Variant,
-        'recursive' => array(Boolean, 'false')));
+        'recursive' => array(Boolean, 'false')), FunctionIsFoldable);
 
 f('sizeof', Int32,
   array('var' => Variant,
-        'recursive' => array(Boolean, 'false')));
+        'recursive' => array(Boolean, 'false')), FunctionIsFoldable);
 
 f('each', Variant,
   array('array' => VariantMap | Reference));
@@ -214,7 +214,7 @@ f('end', Variant,
 f('in_array', Boolean,
   array('needle' => Variant,
         'haystack' => Variant,
-        'strict' => array(Boolean, 'false')));
+        'strict' => array(Boolean, 'false')), FunctionIsFoldable);
 
 f('key', Variant,
   array('array' => VariantMap | Reference));
@@ -222,14 +222,14 @@ f('key', Variant,
 f('range', Variant,
   array('low' => Variant,
         'high' => Variant,
-        'step' => array(Variant, '1')));
+        'step' => array(Variant, '1')), FunctionIsFoldable);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 f('array_diff', Variant,
   array('array1' => Variant,
         'array2' => Variant),
-  VariableArguments);
+  VariableArguments | FunctionIsFoldable);
 
 f('array_udiff', Variant,
   array('array1' => Variant,
@@ -240,7 +240,7 @@ f('array_udiff', Variant,
 f('array_diff_assoc', Variant,
   array('array1' => Variant,
         'array2' => Variant),
-  VariableArguments);
+  VariableArguments | FunctionIsFoldable);
 
 f('array_diff_uassoc', Variant,
   array('array1' => Variant,
@@ -264,7 +264,7 @@ f('array_udiff_uassoc', Variant,
 f('array_diff_key', Variant,
   array('array1' => Variant,
         'array2' => Variant),
-  VariableArguments);
+  VariableArguments | FunctionIsFoldable);
 
 f('array_diff_ukey', Variant,
   array('array1' => Variant,
@@ -275,7 +275,7 @@ f('array_diff_ukey', Variant,
 f('array_intersect', Variant,
   array('array1' => Variant,
         'array2' => Variant),
-  VariableArguments);
+  VariableArguments | FunctionIsFoldable);
 
 f('array_uintersect', Variant,
   array('array1' => Variant,
@@ -286,7 +286,7 @@ f('array_uintersect', Variant,
 f('array_intersect_assoc', Variant,
   array('array1' => Variant,
         'array2' => Variant),
-  VariableArguments);
+  VariableArguments | FunctionIsFoldable);
 
 f('array_intersect_uassoc', Variant,
   array('array1' => Variant,
@@ -310,7 +310,7 @@ f('array_uintersect_uassoc', Variant,
 f('array_intersect_key', Variant,
   array('array1' => Variant,
         'array2' => Variant),
-  VariableArguments);
+  VariableArguments | FunctionIsFoldable);
 
 f('array_intersect_ukey', Variant,
   array('array1' => Variant,

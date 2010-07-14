@@ -289,6 +289,9 @@ public:
   static ExpressionPtr MakeConstant(AnalysisResultPtr ar,
                                     LocationPtr loc,
                                     const std::string &value);
+  static ExpressionPtr MakeScalarExpression(AnalysisResultPtr ar,
+                                            LocationPtr loc,
+                                            const Variant &value);
   static void CheckPassByReference(AnalysisResultPtr ar,
                                    ExpressionPtr param);
 

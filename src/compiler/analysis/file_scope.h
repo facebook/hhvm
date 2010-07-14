@@ -53,6 +53,7 @@ public:
     HelperFunction            = 0x200, // runtime helper function
     ContainsGetDefinedVars    = 0x400, // need VariableTable with getDefinedVars
     MixedVariableArgument     = 0x800, // variable args, may or may not be ref'd
+    IsFoldable                = 0x1000,// function can be constant folded
   };
 
   typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;

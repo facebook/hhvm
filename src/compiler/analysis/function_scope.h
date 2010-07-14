@@ -127,6 +127,11 @@ public:
   void setNoEffect();
 
   /**
+   * Whether this function can be constant folded
+   */
+  bool isFoldable() const;
+  void setIsFoldable();
+  /**
    * Whether this function is a runtime helper function
    */
   bool isHelperFunction() const;

@@ -141,10 +141,10 @@ f('convert_uuencode', Variant,
   array('data' => String));
 
 f('str_rot13', String,
-  array('str' => String));
+  array('str' => String), FunctionIsFoldable);
 
 f('crc32', Int64,
-  array('str' => String));
+  array('str' => String), FunctionIsFoldable);
 
 f('crypt', String,
   array('str' => String,
@@ -152,7 +152,7 @@ f('crypt', String,
 
 f('md5', String,
   array('str' => String,
-        'raw_output' => array(Boolean, 'false')));
+        'raw_output' => array(Boolean, 'false')), FunctionIsFoldable);
 
 f('sha1', String,
   array('str' => String,
@@ -207,19 +207,19 @@ f('vprintf', Variant,
         'args' => VariantVec));
 
 f('sprintf', Variant,
-  array('format' => String), VariableArguments);
+  array('format' => String), VariableArguments|FunctionIsFoldable);
 
 f('vsprintf', Variant,
   array('format' => String,
-        'args' => VariantVec));
+        'args' => VariantVec), FunctionIsFoldable);
 
 f('sscanf', Variant,
   array('str' => String,
         'format' => String),
   ReferenceVariableArguments);
 
-f('chr', String, array('ascii' => Int64));
-f('ord', Int64,   array('str' => String));
+f('chr', String, array('ascii' => Int64), FunctionIsFoldable);
+f('ord', Int64,   array('str' => String), FunctionIsFoldable);
 
 f('money_format', Variant,
   array('format' => String,
@@ -236,117 +236,117 @@ f('number_format', String,
 
 f('strcmp', Int32,
   array('str1' => String,
-        'str2' => String));
+        'str2' => String), FunctionIsFoldable);
 
 f('strncmp', Int32,
   array('str1' => String,
         'str2' => String,
-        'len' => Int32));
+        'len' => Int32), FunctionIsFoldable);
 
 f('strnatcmp', Int32,
   array('str1' => String,
-        'str2' => String));
+        'str2' => String), FunctionIsFoldable);
 
 f('strcasecmp', Int32,
   array('str1' => String,
-        'str2' => String));
+        'str2' => String), FunctionIsFoldable);
 
 f('strncasecmp', Int32,
   array('str1' => String,
         'str2' => String,
-        'len' => Int32));
+        'len' => Int32), FunctionIsFoldable);
 
 f('strnatcasecmp', Int32,
   array('str1' => String,
-        'str2' => String));
+        'str2' => String), FunctionIsFoldable);
 
 f('strcoll', Int32,
   array('str1' => String,
-        'str2' => String));
+        'str2' => String), FunctionIsFoldable);
 
 f('substr_compare', Variant,
   array('main_str' => String,
         'str' => String,
         'offset' => Int32,
         'length' => array(Int32, '0'),
-        'case_insensitivity' => array(Boolean, 'false')));
+        'case_insensitivity' => array(Boolean, 'false')), FunctionIsFoldable);
 
 f('strchr', Variant,
   array('haystack' => String,
-        'needle' => Variant));
+        'needle' => Variant), FunctionIsFoldable);
 
 f('strrchr', Variant,
   array('haystack' => String,
-        'needle' => Variant));
+        'needle' => Variant), FunctionIsFoldable);
 
 f('strstr', Variant,
   array('haystack' => String,
-        'needle' => Variant));
+        'needle' => Variant), FunctionIsFoldable);
 
 f('stristr', Variant,
   array('haystack' => String,
-        'needle' => Variant));
+        'needle' => Variant), FunctionIsFoldable);
 
 f('strpbrk', Variant,
   array('haystack' => String,
-        'char_list' => String));
+        'char_list' => String), FunctionIsFoldable);
 
 f('strpos', Variant,
   array('haystack' => String,
         'needle' => Variant,
-        'offset' => array(Int32, '0')));
+        'offset' => array(Int32, '0')), FunctionIsFoldable);
 
 f('stripos', Variant,
   array('haystack' => String,
         'needle' => Variant,
-        'offset' => array(Int32, '0')));
+        'offset' => array(Int32, '0')), FunctionIsFoldable);
 
 f('strrpos', Variant,
   array('haystack' => String,
         'needle' => Variant,
-        'offset' => array(Int32, '-1')));
+        'offset' => array(Int32, '-1')), FunctionIsFoldable);
 
 f('strripos', Variant,
   array('haystack' => String,
         'needle' => Variant,
-        'offset' => array(Int32, '-1')));
+        'offset' => array(Int32, '-1')), FunctionIsFoldable);
 
 f('substr_count', Variant,
   array('haystack' => String,
         'needle' => String,
         'offset' => array(Int32, '0'),
-        'length' => array(Int32, '0x7FFFFFFF')));
+        'length' => array(Int32, '0x7FFFFFFF')), FunctionIsFoldable);
 
 f('strspn', Variant,
   array('str1' => String,
         'str2' => String,
         'start' => array(Int32, '0'),
-        'length' => array(Int32, '0x7FFFFFFF')));
+        'length' => array(Int32, '0x7FFFFFFF')), FunctionIsFoldable);
 
 f('strcspn', Variant,
   array('str1' => String,
         'str2' => String,
         'start' => array(Int32, '0'),
-        'length' => array(Int32, '0x7FFFFFFF')));
+        'length' => array(Int32, '0x7FFFFFFF')), FunctionIsFoldable);
 
 f('strlen', Int32,
-  array('str' => String));
+  array('str' => String), FunctionIsFoldable);
 
 f('count_chars', Variant,
   array('str' => String,
-        'mode' => array(Int64, '0')));
+        'mode' => array(Int64, '0')), FunctionIsFoldable);
 
 f('str_word_count', Variant,
   array('str' => String,
         'format' => array(Int64, '0'),
-        'charlist' => array(String, '""')));
+        'charlist' => array(String, '""')), FunctionIsFoldable);
 
 f('levenshtein', Int32,
   array('str1' => String,
         'str2' => String,
         'cost_ins' => array(Int32, '1'),
         'cost_rep' => array(Int32, '1'),
-        'cost_del' => array(Int32, '1')));
+        'cost_del' => array(Int32, '1')), FunctionIsFoldable);
 
 f('similar_text', Int32,
   array('first' => String,
@@ -354,11 +354,11 @@ f('similar_text', Int32,
         'percent' => array(Double | Reference, 'null')));
 
 f('soundex', Variant,
-  array('str' => String));
+  array('str' => String), FunctionIsFoldable);
 
 f('metaphone', Variant,
   array('str' => String,
-        'phones' => array(Int32, '0')));
+        'phones' => array(Int32, '0')), FunctionIsFoldable);
 
 ///////////////////////////////////////////////////////////////////////////////
 // special

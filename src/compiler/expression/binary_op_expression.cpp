@@ -402,104 +402,95 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultPtr ar) {
 
   if (m_exp1->isScalar()) {
     if (!m_exp1->getScalarValue(v1)) return ExpressionPtr();
-    Variant result;
-    switch (m_op) {
-    case T_LOGICAL_XOR:
-      result = logical_xor(v1, v2); break;
-    case '|':
-      result = bitwise_or(v1, v2); break;
-    case '&':
-      result = bitwise_and(v1, v2); break;
-    case '^':
-      result = bitwise_xor(v1, v2); break;
-    case '.':
-      result = concat(v1, v2); break;
-    case T_IS_IDENTICAL:
-      result = same(v1, v2); break;
-    case T_IS_NOT_IDENTICAL:
-      result = !same(v1, v2); break;
-    case T_IS_EQUAL:
-      result = equal(v1, v2); break;
-    case T_IS_NOT_EQUAL:
-      result = !equal(v1, v2); break;
-    case '<':
-      result = less(v1, v2); break;
-    case T_IS_SMALLER_OR_EQUAL:
-      result = not_more(v1, v2); break;
-    case '>':
-      result = more(v1, v2); break;
-    case T_IS_GREATER_OR_EQUAL:
-      result = not_less(v1, v2); break;
-    case '+':
-      result = plus(v1, v2); break;
-    case '-':
-      result = minus(v1, v2); break;
-    case '*':
-      result = multiply(v1, v2); break;
-    case '/':
-      if ((v2.isIntVal() && v2.toInt64() == 0) || v2.toDouble() == 0.0) {
-        return ExpressionPtr();
+    try {
+      Variant result;
+      switch (m_op) {
+        case T_LOGICAL_XOR:
+          result = logical_xor(v1, v2); break;
+        case '|':
+          result = bitwise_or(v1, v2); break;
+        case '&':
+          result = bitwise_and(v1, v2); break;
+        case '^':
+          result = bitwise_xor(v1, v2); break;
+        case '.':
+          result = concat(v1, v2); break;
+        case T_IS_IDENTICAL:
+          result = same(v1, v2); break;
+        case T_IS_NOT_IDENTICAL:
+          result = !same(v1, v2); break;
+        case T_IS_EQUAL:
+          result = equal(v1, v2); break;
+        case T_IS_NOT_EQUAL:
+          result = !equal(v1, v2); break;
+        case '<':
+          result = less(v1, v2); break;
+        case T_IS_SMALLER_OR_EQUAL:
+          result = not_more(v1, v2); break;
+        case '>':
+          result = more(v1, v2); break;
+        case T_IS_GREATER_OR_EQUAL:
+          result = not_less(v1, v2); break;
+        case '+':
+          result = plus(v1, v2); break;
+        case '-':
+          result = minus(v1, v2); break;
+        case '*':
+          result = multiply(v1, v2); break;
+        case '/':
+          if ((v2.isIntVal() && v2.toInt64() == 0) || v2.toDouble() == 0.0) {
+            return ExpressionPtr();
+          }
+          result = divide(v1, v2); break;
+        case '%':
+          if ((v2.isIntVal() && v2.toInt64() == 0) || v2.toDouble() == 0.0) {
+            return ExpressionPtr();
+          }
+          result = modulo(v1, v2); break;
+        case T_SL:
+          result = shift_left(v1, v2); break;
+        case T_SR:
+          result = shift_right(v1, v2); break;
+        case T_BOOLEAN_OR:
+          result = v1 || v2; break;
+        case T_BOOLEAN_AND:
+          result = v1 && v2; break;
+        case T_LOGICAL_OR:
+          result = v1 || v2; break;
+        case T_LOGICAL_AND:
+          result = v1 && v2; break;
+        case T_INSTANCEOF:
+          result = false; break;
+        default:
+          return ExpressionPtr();
       }
-      result = divide(v1, v2); break;
-    case '%':
-      if ((v2.isIntVal() && v2.toInt64() == 0) || v2.toDouble() == 0.0) {
-        return ExpressionPtr();
-      }
-      result = modulo(v1, v2); break;
-    case T_SL:
-      result = shift_left(v1, v2); break;
-    case T_SR:
-      result = shift_right(v1, v2); break;
-    case T_BOOLEAN_OR:
-      result = v1 || v2; break;
-    case T_BOOLEAN_AND:
-      result = v1 && v2; break;
-    case T_LOGICAL_OR:
-      result = v1 || v2; break;
-    case T_LOGICAL_AND:
-      result = v1 && v2; break;
-    case T_INSTANCEOF:
-      result = false; break;
-    default:
-      return ExpressionPtr();
-    }
-    if (result.isNull()) {
-      return CONSTANT("null");
-    } else if (result.isBoolean()) {
-      return CONSTANT(result ? "true" : "false");
-    } else if (result.isDouble() && !finite(result.getDouble()) ||
-               result.isArray()) {
-      return ExpressionPtr();
-    } else {
-      return ScalarExpressionPtr
-             (new ScalarExpression(getLocation(),
-                                   Expression::KindOfScalarExpression,
-                                   result));
+      return MakeScalarExpression(ar, getLocation(), result);
+    } catch (...) {
     }
   } else {
     switch (m_op) {
-    case T_LOGICAL_XOR:
-    case '|':
-    case '&':
-    case '^':
-    case '.':
-    case '+':
-    case '*':
-    case T_BOOLEAN_OR:
-    case T_BOOLEAN_AND:
-    case T_LOGICAL_OR:
-    case T_LOGICAL_AND:
-      optExp = foldConstRightAssoc(ar);
-      if (optExp) return optExp;
-      break;
-    case T_IS_IDENTICAL:
-    case T_IS_NOT_IDENTICAL:
-      if (v2.isNull()) {
-        return makeIsNull(getLocation(), m_exp1, m_op == T_IS_NOT_IDENTICAL);
-      }
-      break;
-    default:
-      break;
+      case T_LOGICAL_XOR:
+      case '|':
+      case '&':
+      case '^':
+      case '.':
+      case '+':
+      case '*':
+      case T_BOOLEAN_OR:
+      case T_BOOLEAN_AND:
+      case T_LOGICAL_OR:
+      case T_LOGICAL_AND:
+        optExp = foldConstRightAssoc(ar);
+        if (optExp) return optExp;
+        break;
+      case T_IS_IDENTICAL:
+      case T_IS_NOT_IDENTICAL:
+        if (v2.isNull()) {
+          return makeIsNull(getLocation(), m_exp1, m_op == T_IS_NOT_IDENTICAL);
+        }
+        break;
+      default:
+        break;
     }
   }
   return ExpressionPtr();

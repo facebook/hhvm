@@ -1140,7 +1140,6 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
                                   const std::string *compileDir) {
   if (output == CodeGenerator::SystemCPP) {
     Option::GenerateCPPMain = false;
-    outputCPPSystem();
   }
 
   FileScopePtrVec trueDeps;
@@ -1209,7 +1208,11 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
   if (Option::GenerateCPPMacros) {
     outputCPPDynamicTables(output);
   }
-  if (Option::GenerateCPPMain) {
+  if (output == CodeGenerator::SystemCPP) {
+    // this calls outputCPPScalarArrays, so must happen
+    // after function bodies have been output
+    outputCPPSystem();
+  } else if (Option::GenerateCPPMain) {
     outputCPPGlobalDeclarations();
     outputCPPMain();
     outputCPPScalarArrays(false);

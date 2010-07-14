@@ -191,7 +191,7 @@ public:
     return m_argSeparatorOutput;
   }
   void setArgSeparatorOutput(CStrRef s) { m_argSeparatorOutput = s;}
-
+  void setThrowAllErrors(bool f) { m_throwAllErrors = f; }
 private:
   class OutputBuffer {
   public:
@@ -234,6 +234,7 @@ private:
   String m_timezone;
   String m_timezoneDefault;
   String m_argSeparatorOutput;
+  bool m_throwAllErrors;
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;

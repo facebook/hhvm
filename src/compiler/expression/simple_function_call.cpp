@@ -38,6 +38,8 @@
 #include <compiler/parser/parser.h>
 #include <compiler/parser/hphp.tab.hpp>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/externals.h>
+#include <runtime/base/execution_context.h>
 
 using namespace HPHP;
 using namespace std;
@@ -448,8 +450,33 @@ static int cloneStmtsForInline(ExpressionListPtr elist, StatementPtr s,
 }
 
 ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
-  if (m_class || !m_className.empty() || !m_funcScope ||
-      !m_funcScope->getInlineAsExpr() ||
+  if (m_class || !m_className.empty() || !m_funcScope) return ExpressionPtr();
+
+  if (!m_funcScope->isUserFunction()) {
+    if (m_type == UnknownType && m_funcScope->isFoldable()) {
+      Array arr;
+      if (m_params) {
+        if (!m_params->isScalar()) return ExpressionPtr();
+        for (int i = 0, n = m_params->getCount(); i < n; ++i) {
+          Variant v;
+          if (!(*m_params)[i]->getScalarValue(v)) return ExpressionPtr();
+          arr.set(i, v);
+        }
+      }
+      try {
+        g_context->setThrowAllErrors(true);
+        Variant v = invoke_builtin(m_funcScope->getName().c_str(),
+                                   arr, -1, true);
+        g_context->setThrowAllErrors(false);
+        return MakeScalarExpression(ar, getLocation(), v);
+      } catch (...) {
+        g_context->setThrowAllErrors(false);
+      }
+      return ExpressionPtr();
+    }
+  }
+
+  if (!m_funcScope->getInlineAsExpr() ||
       !m_funcScope->getStmt() ||
       m_funcScope->getStmt()->getRecursiveCount() > 10) {
     return ExpressionPtr();
@@ -677,10 +704,8 @@ ExpressionPtr SimpleFunctionCall::postOptimize(AnalysisResultPtr ar) {
 int SimpleFunctionCall::getLocalEffects() const {
   if (m_class) return UnknownEffect;
 
-  if (!m_params || m_params->isNoObjectInvolved()) {
-    // Check if this function is known to have no side effects
-    if (m_funcScope && !m_funcScope->hasEffect())
-      return 0;
+  if (m_funcScope && !m_funcScope->hasEffect()) {
+    return 0;
   }
 
   return UnknownEffect;

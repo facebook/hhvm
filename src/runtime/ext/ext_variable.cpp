@@ -65,8 +65,8 @@ bool f_settype(Variant var, CStrRef type) {
   return true;
 }
 
-bool f_is_object(CVarRef v) {
-  return v.is(KindOfObject) && !v.isResource();
+bool f_is_object(CVarRef var) {
+  return var.is(KindOfObject) && !var.isResource();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

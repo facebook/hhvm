@@ -61,6 +61,7 @@ ScalarExpression::ScalarExpression
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
     m_quoted(quoted), m_variant(value) {
   switch (value.getType()) {
+  case KindOfStaticString:
   case KindOfString:
   case LiteralString:
     m_type = T_STRING;
@@ -77,7 +78,11 @@ ScalarExpression::ScalarExpression
   default:
     ASSERT(false);
   }
-  m_value = string(value.toString()->data(), value.toString()->size());
+  CStrRef s = value.toString();
+  m_value = string(s->data(), s->size());
+  if (m_type == T_DNUMBER && m_value.find_first_of(".eE", 0) == string::npos) {
+    m_value += ".";
+  }
 }
 
 ExpressionPtr ScalarExpression::clone() {

@@ -61,8 +61,8 @@
 #include <test/test_ext_simplexml.h>
 #include <test/test_ext_soap.h>
 #include <test/test_ext_socket.h>
-#include <test/test_ext_splfile.h>
 #include <test/test_ext_spl.h>
+#include <test/test_ext_splfile.h>
 #include <test/test_ext_sqlite3.h>
 #include <test/test_ext_stream.h>
 #include <test/test_ext_string.h>

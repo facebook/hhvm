@@ -2338,39 +2338,13 @@ Variant Variant::o_invoke_ex(const char *clsname, const char *s,
 }
 
 Variant Variant::o_invoke_few_args(const char *s, int64 hash, int count,
-                                   CVarRef a0 /* = null_variant */,
-                                   CVarRef a1 /* = null_variant */,
-                                   CVarRef a2 /* = null_variant */
-#if INVOKE_FEW_ARGS_COUNT > 3
-                                   ,CVarRef a3 /* = null_variant */,
-                                   CVarRef a4 /* = null_variant */,
-                                   CVarRef a5 /* = null_variant */
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 6
-                                   ,CVarRef a6 /* = null_variant */,
-                                   CVarRef a7 /* = null_variant */,
-                                   CVarRef a8 /* = null_variant */,
-                                   CVarRef a9 /* = null_variant */
-#endif
-) {
+                                   INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_invoke_few_args(s, hash, count, a0, a1, a2
-#if INVOKE_FEW_ARGS_COUNT > 3
-                                          ,a3, a4, a5
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 6
-                                          ,a6, a7, a8, a9
-#endif
-                                         );
+    return m_data.pobj->o_invoke_few_args(s, hash, count,
+                                          INVOKE_FEW_ARGS_PASS_ARGS);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_invoke_few_args(s, hash, count, a0, a1, a2
-#if INVOKE_FEW_ARGS_COUNT > 3
-                                          ,a3, a4, a5
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 6
-                                          ,a6, a7, a8, a9
-#endif
-                                         );
+    return m_data.pvar->o_invoke_few_args(s, hash, count,
+                                          INVOKE_FEW_ARGS_PASS_ARGS);
   } else {
     throw InvalidOperandException(
         "Call to a member function on a non-object");
@@ -2378,39 +2352,13 @@ Variant Variant::o_invoke_few_args(const char *s, int64 hash, int count,
 }
 
 Variant Variant::o_root_invoke_few_args(const char *s, int64 hash, int count,
-                                        CVarRef a0 /* = null_variant */,
-                                        CVarRef a1 /* = null_variant */,
-                                        CVarRef a2 /* = null_variant */
-#if INVOKE_FEW_ARGS_COUNT > 3
-                                        ,CVarRef a3 /* = null_variant */,
-                                        CVarRef a4 /* = null_variant */,
-                                        CVarRef a5 /* = null_variant */
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 6
-                                        ,CVarRef a6 /* = null_variant */,
-                                        CVarRef a7 /* = null_variant */,
-                                        CVarRef a8 /* = null_variant */,
-                                        CVarRef a9 /* = null_variant */
-#endif
-) {
+                                        INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_root_invoke_few_args(s, hash, count, a0, a1, a2
-#if INVOKE_FEW_ARGS_COUNT > 3
-                                               ,a3, a4, a5
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 6
-                                               ,a6, a7, a8, a9
-#endif
-                                              );
+    return m_data.pobj->o_root_invoke_few_args(s, hash, count,
+                                               INVOKE_FEW_ARGS_PASS_ARGS);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_root_invoke_few_args(s, hash, count, a0, a1, a2
-#if INVOKE_FEW_ARGS_COUNT > 3
-                                               ,a3, a4, a5
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 6
-                                               ,a6, a7, a8, a9
-#endif
-                                              );
+    return m_data.pvar->o_root_invoke_few_args(s, hash, count,
+                                               INVOKE_FEW_ARGS_PASS_ARGS);
   } else {
     throw InvalidOperandException(
         "Call to a member function on a non-object");

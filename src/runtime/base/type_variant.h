@@ -629,37 +629,9 @@ class Variant {
                       CArrRef params, int64 hash);
 
   Variant o_invoke_few_args(const char *s, int64 hash, int count,
-                            CVarRef a0 = null_variant,
-                            CVarRef a1 = null_variant,
-                            CVarRef a2 = null_variant
-#if INVOKE_FEW_ARGS_COUNT > 3
-                            ,CVarRef a3 = null_variant,
-                            CVarRef a4 = null_variant,
-                            CVarRef a5 = null_variant
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 6
-                            ,CVarRef a6 = null_variant,
-                            CVarRef a7 = null_variant,
-                            CVarRef a8 = null_variant,
-                            CVarRef a9 = null_variant
-#endif
-);
+                            INVOKE_FEW_ARGS_DECL_ARGS);
   Variant o_root_invoke_few_args(const char *s, int64 hash, int count,
-                                 CVarRef a0 = null_variant,
-                                 CVarRef a1 = null_variant,
-                                 CVarRef a2 = null_variant
-#if INVOKE_FEW_ARGS_COUNT > 3
-                                 ,CVarRef a3 = null_variant,
-                                 CVarRef a4 = null_variant,
-                                 CVarRef a5 = null_variant
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 6
-                                 ,CVarRef a6 = null_variant,
-                                 CVarRef a7 = null_variant,
-                                 CVarRef a8 = null_variant,
-                                 CVarRef a9 = null_variant
-#endif
-);
+                            INVOKE_FEW_ARGS_DECL_ARGS);
 
   /**
    * The whole purpose of VariantOffset is to collect "v" parameter to call

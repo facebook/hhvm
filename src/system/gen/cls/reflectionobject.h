@@ -29,8 +29,8 @@ class c_reflectionobject : public c_reflectionclass {
     PARENT_CLASS(reflectionclass)
     PARENT_CLASS(reflector)
   END_CLASS_MAP(reflectionobject)
-  DECLARE_CLASS_COMMON(reflectionobject, ReflectionObject, reflectionclass)
-  DECLARE_INVOKE_EX(reflectionobject, reflectionclass)
+  DECLARE_CLASS_COMMON(reflectionobject, ReflectionObject)
+  DECLARE_INVOKE_EX(reflectionobject, ReflectionObject, reflectionclass)
 
   // DECLARE_STATIC_PROP_OPS
   public:

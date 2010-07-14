@@ -33,8 +33,8 @@ class c_directoryiterator : public c_splfileinfo {
     PARENT_CLASS(splfileinfo)
     PARENT_CLASS(traversable)
   END_CLASS_MAP(directoryiterator)
-  DECLARE_CLASS_COMMON(directoryiterator, DirectoryIterator, splfileinfo)
-  DECLARE_INVOKE_EX(directoryiterator, splfileinfo)
+  DECLARE_CLASS_COMMON(directoryiterator, DirectoryIterator)
+  DECLARE_INVOKE_EX(directoryiterator, DirectoryIterator, splfileinfo)
 
   // DECLARE_STATIC_PROP_OPS
   public:

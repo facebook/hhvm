@@ -34,8 +34,8 @@ class c_arrayiterator : public ExtObjectData {
     PARENT_CLASS(seekableiterator)
     PARENT_CLASS(traversable)
   END_CLASS_MAP(arrayiterator)
-  DECLARE_CLASS_COMMON(arrayiterator, ArrayIterator, ObjectData)
-  DECLARE_INVOKE_EX(arrayiterator, ObjectData)
+  DECLARE_CLASS_COMMON(arrayiterator, ArrayIterator)
+  DECLARE_INVOKE_EX(arrayiterator, ArrayIterator, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:

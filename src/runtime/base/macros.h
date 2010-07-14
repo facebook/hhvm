@@ -153,25 +153,16 @@ namespace HPHP {
   virtual Variant o_invoke_few_args(const char *s, int64 h, int count,  \
                                     INVOKE_FEW_ARGS_DECL_ARGS);         \
 
-#define DECLARE_INVOKE_EX(cls, parent)                                  \
+#define DECLARE_INVOKE_EX(cls, originalName, parent)                    \
   virtual Variant o_invoke_ex(const char *clsname, const char *s,       \
                               CArrRef ps, int64 h, bool f = true) {     \
-    if (clsname && strcasecmp(clsname, #cls) == 0) {                    \
+    if (clsname && strcasecmp(clsname, #originalName) == 0) {           \
       return c_##cls::o_invoke(s, ps, h, f);                            \
     }                                                                   \
     return c_##parent::o_invoke_ex(clsname, s, ps, h, f);               \
   }                                                                     \
 
-#define DECLARE_DYNAMIC_INVOKE_EX(cls, parent)                          \
-  virtual Variant o_invoke_ex(const char *clsname, const char *s,       \
-                              CArrRef ps, int64 h, bool f = true) {     \
-    if (clsname && strcasecmp(clsname, #cls) == 0) {                    \
-      return o_invoke(s, ps, h, f);                                     \
-    }                                                                   \
-    return parent->o_invoke_ex(clsname, s, ps, h, f);                   \
-  }                                                                     \
-
-#define DECLARE_CLASS_COMMON(cls, originalName, parent) \
+#define DECLARE_CLASS_COMMON(cls, originalName) \
   DECLARE_OBJECT_ALLOCATION(c_##cls);                                   \
   protected:                                                            \
   ObjectData *cloneImpl();                                              \
@@ -180,20 +171,20 @@ namespace HPHP {
   virtual const char *o_getClassName() const { return #originalName;}   \
 
 #define DECLARE_CLASS(cls, originalName, parent)                        \
-  DECLARE_CLASS_COMMON(cls, originalName, parent)                       \
+  DECLARE_CLASS_COMMON(cls, originalName)                               \
   DECLARE_STATIC_PROP_OPS                                               \
   DECLARE_INSTANCE_PROP_OPS                                             \
   DECLARE_INSTANCE_PUBLIC_PROP_OPS                                      \
   DECLARE_COMMON_INVOKES                                                \
-  DECLARE_INVOKE_EX(cls, parent)                                        \
+  DECLARE_INVOKE_EX(cls, originalName, parent)                          \
   public:                                                               \
 
-#define DECLARE_DYNAMIC_CLASS(cls, originalName)                        \
-  DECLARE_CLASS_COMMON(cls, originalName, parent)                       \
+#define DECLARE_DYNAMIC_CLASS(cls, originalName, parent)                \
+  DECLARE_CLASS_COMMON(cls, originalName)                               \
   DECLARE_STATIC_PROP_OPS                                               \
   DECLARE_INSTANCE_PROP_OPS                                             \
   DECLARE_COMMON_INVOKES                                                \
-  DECLARE_DYNAMIC_INVOKE_EX(cls, parent)                                \
+  DECLARE_INVOKE_EX(cls, originalName, parent)                          \
   public:                                                               \
 
 #define DECLARE_INVOKES_FROM_EVAL                                       \

@@ -4,7 +4,7 @@ PROJECT_NAME = hphp_runtime
 
 EVAL_DIR=runtime/eval
 
-EXCLUDED_CXX_SOURCES := runtime/ext/sep/%.cpp
+EXCLUDED_CXX_SOURCES := runtime/ext/sep/%.cpp $(if $(BOOTSTRAP),system/gen/%)
 RECURSIVE_SOURCE_SUBDIRS := runtime/base runtime/ext system/gen util $(EVAL_DIR)
 REC_SOURCES := $(filter-out $(EXCLUDED_CXX_SOURCES), \
 	$(shell find $(RECURSIVE_SOURCE_SUBDIRS) -name "*.cpp" -o -name "*.c"))

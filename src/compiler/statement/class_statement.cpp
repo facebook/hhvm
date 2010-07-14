@@ -274,9 +274,9 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   // Now we start to break down DECLARE_CLASS into lines of code that could
   // be generated differently...
 
-  cg_printf("DECLARE_CLASS_COMMON(%s, %s, %s)\n", clsName, originalName,
-            parent);
-  cg_printf("DECLARE_INVOKE_EX(%s, %s)\n", clsName, parent);
+  cg_printf("DECLARE_CLASS_COMMON(%s, %s)\n", clsName, originalName);
+  cg_printf("DECLARE_INVOKE_EX(%s, %s, %s)\n",
+            clsName, originalName, parent);
 
   cg.printSection("DECLARE_STATIC_PROP_OPS");
   cg_printf("public:\n");
@@ -493,11 +493,12 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         bool redec = classScope->isRedeclaring();
         if (!classScope->derivesFromRedeclaring()) {
           outputCPPClassDecl(cg, ar, clsName, m_originalName.c_str(),
-                             m_parent.empty() ?
-                             "ObjectData" : m_parent.c_str());
+                             parCls ? parCls->getId(cg).c_str() : "ObjectData");
         } else {
-          cg_printf("DECLARE_DYNAMIC_CLASS(%s, %s)\n", clsName,
-                    m_originalName.c_str());
+          cg_printf("DECLARE_DYNAMIC_CLASS(%s, %s, %s)\n", clsName,
+                    m_originalName.c_str(),
+                    dyn || !parCls ? "DynamicObjectData" :
+                    parCls->getId(cg).c_str());
         }
         if (system || Option::EnableEval >= Option::LimitedEval) {
           cg_printf("DECLARE_INVOKES_FROM_EVAL\n");

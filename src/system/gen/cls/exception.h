@@ -26,8 +26,8 @@ namespace HPHP {
 class c_exception : public ExtObjectData {
   BEGIN_CLASS_MAP(exception)
   END_CLASS_MAP(exception)
-  DECLARE_CLASS_COMMON(exception, Exception, ObjectData)
-  DECLARE_INVOKE_EX(exception, ObjectData)
+  DECLARE_CLASS_COMMON(exception, Exception)
+  DECLARE_INVOKE_EX(exception, Exception, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:

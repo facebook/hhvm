@@ -28,8 +28,8 @@ class c_errorexception : public c_exception {
   BEGIN_CLASS_MAP(errorexception)
     PARENT_CLASS(exception)
   END_CLASS_MAP(errorexception)
-  DECLARE_CLASS_COMMON(errorexception, ErrorException, exception)
-  DECLARE_INVOKE_EX(errorexception, exception)
+  DECLARE_CLASS_COMMON(errorexception, ErrorException)
+  DECLARE_INVOKE_EX(errorexception, ErrorException, exception)
 
   // DECLARE_STATIC_PROP_OPS
   public:

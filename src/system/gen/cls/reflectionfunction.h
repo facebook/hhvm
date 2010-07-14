@@ -30,8 +30,8 @@ class c_reflectionfunction : public c_reflectionfunctionabstract {
     PARENT_CLASS(reflectionfunctionabstract)
     PARENT_CLASS(reflector)
   END_CLASS_MAP(reflectionfunction)
-  DECLARE_CLASS_COMMON(reflectionfunction, ReflectionFunction, reflectionfunctionabstract)
-  DECLARE_INVOKE_EX(reflectionfunction, reflectionfunctionabstract)
+  DECLARE_CLASS_COMMON(reflectionfunction, ReflectionFunction)
+  DECLARE_INVOKE_EX(reflectionfunction, ReflectionFunction, reflectionfunctionabstract)
 
   // DECLARE_STATIC_PROP_OPS
   public:

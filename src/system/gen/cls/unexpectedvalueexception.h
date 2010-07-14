@@ -29,8 +29,8 @@ class c_unexpectedvalueexception : public c_runtimeexception {
     PARENT_CLASS(exception)
     PARENT_CLASS(runtimeexception)
   END_CLASS_MAP(unexpectedvalueexception)
-  DECLARE_CLASS_COMMON(unexpectedvalueexception, UnexpectedValueException, runtimeexception)
-  DECLARE_INVOKE_EX(unexpectedvalueexception, runtimeexception)
+  DECLARE_CLASS_COMMON(unexpectedvalueexception, UnexpectedValueException)
+  DECLARE_INVOKE_EX(unexpectedvalueexception, UnexpectedValueException, runtimeexception)
 
   // DECLARE_STATIC_PROP_OPS
   public:

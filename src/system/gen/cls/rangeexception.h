@@ -29,8 +29,8 @@ class c_rangeexception : public c_runtimeexception {
     PARENT_CLASS(exception)
     PARENT_CLASS(runtimeexception)
   END_CLASS_MAP(rangeexception)
-  DECLARE_CLASS_COMMON(rangeexception, RangeException, runtimeexception)
-  DECLARE_INVOKE_EX(rangeexception, runtimeexception)
+  DECLARE_CLASS_COMMON(rangeexception, RangeException)
+  DECLARE_INVOKE_EX(rangeexception, RangeException, runtimeexception)
 
   // DECLARE_STATIC_PROP_OPS
   public:

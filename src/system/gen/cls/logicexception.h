@@ -28,8 +28,8 @@ class c_logicexception : public c_exception {
   BEGIN_CLASS_MAP(logicexception)
     PARENT_CLASS(exception)
   END_CLASS_MAP(logicexception)
-  DECLARE_CLASS_COMMON(logicexception, LogicException, exception)
-  DECLARE_INVOKE_EX(logicexception, exception)
+  DECLARE_CLASS_COMMON(logicexception, LogicException)
+  DECLARE_INVOKE_EX(logicexception, LogicException, exception)
 
   // DECLARE_STATIC_PROP_OPS
   public:

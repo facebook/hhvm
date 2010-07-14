@@ -28,8 +28,8 @@ class c_reflectionexception : public c_exception {
   BEGIN_CLASS_MAP(reflectionexception)
     PARENT_CLASS(exception)
   END_CLASS_MAP(reflectionexception)
-  DECLARE_CLASS_COMMON(reflectionexception, ReflectionException, exception)
-  DECLARE_INVOKE_EX(reflectionexception, exception)
+  DECLARE_CLASS_COMMON(reflectionexception, ReflectionException)
+  DECLARE_INVOKE_EX(reflectionexception, ReflectionException, exception)
 
   // DECLARE_STATIC_PROP_OPS
   public:

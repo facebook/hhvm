@@ -35,8 +35,8 @@ class c_splfileobject : public c_splfileinfo {
     PARENT_CLASS(splfileinfo)
     PARENT_CLASS(traversable)
   END_CLASS_MAP(splfileobject)
-  DECLARE_CLASS_COMMON(splfileobject, SplFileObject, splfileinfo)
-  DECLARE_INVOKE_EX(splfileobject, splfileinfo)
+  DECLARE_CLASS_COMMON(splfileobject, SplFileObject)
+  DECLARE_INVOKE_EX(splfileobject, SplFileObject, splfileinfo)
 
   // DECLARE_STATIC_PROP_OPS
   public:

@@ -34,8 +34,8 @@ class c_recursivedirectoryiterator : public c_directoryiterator {
     PARENT_CLASS(splfileinfo)
     PARENT_CLASS(traversable)
   END_CLASS_MAP(recursivedirectoryiterator)
-  DECLARE_CLASS_COMMON(recursivedirectoryiterator, RecursiveDirectoryIterator, directoryiterator)
-  DECLARE_INVOKE_EX(recursivedirectoryiterator, directoryiterator)
+  DECLARE_CLASS_COMMON(recursivedirectoryiterator, RecursiveDirectoryIterator)
+  DECLARE_INVOKE_EX(recursivedirectoryiterator, RecursiveDirectoryIterator, directoryiterator)
 
   // DECLARE_STATIC_PROP_OPS
   public:

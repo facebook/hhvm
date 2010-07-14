@@ -26,8 +26,8 @@ namespace HPHP {
 class c_reflectionfunctionabstract : public ExtObjectData {
   BEGIN_CLASS_MAP(reflectionfunctionabstract)
   END_CLASS_MAP(reflectionfunctionabstract)
-  DECLARE_CLASS_COMMON(reflectionfunctionabstract, ReflectionFunctionAbstract, ObjectData)
-  DECLARE_INVOKE_EX(reflectionfunctionabstract, ObjectData)
+  DECLARE_CLASS_COMMON(reflectionfunctionabstract, ReflectionFunctionAbstract)
+  DECLARE_INVOKE_EX(reflectionfunctionabstract, ReflectionFunctionAbstract, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:

@@ -31,8 +31,8 @@ class c_splobjectstorage : public ExtObjectData {
     PARENT_CLASS(iterator)
     PARENT_CLASS(traversable)
   END_CLASS_MAP(splobjectstorage)
-  DECLARE_CLASS_COMMON(splobjectstorage, SplObjectStorage, ObjectData)
-  DECLARE_INVOKE_EX(splobjectstorage, ObjectData)
+  DECLARE_CLASS_COMMON(splobjectstorage, SplObjectStorage)
+  DECLARE_INVOKE_EX(splobjectstorage, SplObjectStorage, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:

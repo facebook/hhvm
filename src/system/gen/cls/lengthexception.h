@@ -29,8 +29,8 @@ class c_lengthexception : public c_logicexception {
     PARENT_CLASS(exception)
     PARENT_CLASS(logicexception)
   END_CLASS_MAP(lengthexception)
-  DECLARE_CLASS_COMMON(lengthexception, LengthException, logicexception)
-  DECLARE_INVOKE_EX(lengthexception, logicexception)
+  DECLARE_CLASS_COMMON(lengthexception, LengthException)
+  DECLARE_INVOKE_EX(lengthexception, LengthException, logicexception)
 
   // DECLARE_STATIC_PROP_OPS
   public:

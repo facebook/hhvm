@@ -26,8 +26,8 @@ namespace HPHP {
 class c_splfileinfo : public ExtObjectData {
   BEGIN_CLASS_MAP(splfileinfo)
   END_CLASS_MAP(splfileinfo)
-  DECLARE_CLASS_COMMON(splfileinfo, SplFileInfo, ObjectData)
-  DECLARE_INVOKE_EX(splfileinfo, ObjectData)
+  DECLARE_CLASS_COMMON(splfileinfo, SplFileInfo)
+  DECLARE_INVOKE_EX(splfileinfo, SplFileInfo, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:

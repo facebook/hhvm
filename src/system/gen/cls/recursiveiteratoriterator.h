@@ -31,8 +31,8 @@ class c_recursiveiteratoriterator : public ExtObjectData {
     PARENT_CLASS(outeriterator)
     PARENT_CLASS(traversable)
   END_CLASS_MAP(recursiveiteratoriterator)
-  DECLARE_CLASS_COMMON(recursiveiteratoriterator, RecursiveIteratorIterator, ObjectData)
-  DECLARE_INVOKE_EX(recursiveiteratoriterator, ObjectData)
+  DECLARE_CLASS_COMMON(recursiveiteratoriterator, RecursiveIteratorIterator)
+  DECLARE_INVOKE_EX(recursiveiteratoriterator, RecursiveIteratorIterator, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:

@@ -26,8 +26,8 @@ namespace HPHP {
 class c_stdclass : public ExtObjectData {
   BEGIN_CLASS_MAP(stdclass)
   END_CLASS_MAP(stdclass)
-  DECLARE_CLASS_COMMON(stdclass, stdClass, ObjectData)
-  DECLARE_INVOKE_EX(stdclass, ObjectData)
+  DECLARE_CLASS_COMMON(stdclass, stdClass)
+  DECLARE_INVOKE_EX(stdclass, stdClass, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:

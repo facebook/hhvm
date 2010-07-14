@@ -29,8 +29,8 @@ class c_outofboundsexception : public c_runtimeexception {
     PARENT_CLASS(exception)
     PARENT_CLASS(runtimeexception)
   END_CLASS_MAP(outofboundsexception)
-  DECLARE_CLASS_COMMON(outofboundsexception, OutOfBoundsException, runtimeexception)
-  DECLARE_INVOKE_EX(outofboundsexception, runtimeexception)
+  DECLARE_CLASS_COMMON(outofboundsexception, OutOfBoundsException)
+  DECLARE_INVOKE_EX(outofboundsexception, OutOfBoundsException, runtimeexception)
 
   // DECLARE_STATIC_PROP_OPS
   public:

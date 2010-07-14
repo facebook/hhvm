@@ -28,8 +28,8 @@ class c_reflectionextension : public ExtObjectData {
   BEGIN_CLASS_MAP(reflectionextension)
     PARENT_CLASS(reflector)
   END_CLASS_MAP(reflectionextension)
-  DECLARE_CLASS_COMMON(reflectionextension, ReflectionExtension, ObjectData)
-  DECLARE_INVOKE_EX(reflectionextension, ObjectData)
+  DECLARE_CLASS_COMMON(reflectionextension, ReflectionExtension)
+  DECLARE_INVOKE_EX(reflectionextension, ReflectionExtension, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:

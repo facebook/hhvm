@@ -29,8 +29,8 @@ class c_outofrangeexception : public c_logicexception {
     PARENT_CLASS(exception)
     PARENT_CLASS(logicexception)
   END_CLASS_MAP(outofrangeexception)
-  DECLARE_CLASS_COMMON(outofrangeexception, OutOfRangeException, logicexception)
-  DECLARE_INVOKE_EX(outofrangeexception, logicexception)
+  DECLARE_CLASS_COMMON(outofrangeexception, OutOfRangeException)
+  DECLARE_INVOKE_EX(outofrangeexception, OutOfRangeException, logicexception)
 
   // DECLARE_STATIC_PROP_OPS
   public:

@@ -30,8 +30,8 @@ class c_badmethodcallexception : public c_badfunctioncallexception {
     PARENT_CLASS(exception)
     PARENT_CLASS(logicexception)
   END_CLASS_MAP(badmethodcallexception)
-  DECLARE_CLASS_COMMON(badmethodcallexception, BadMethodCallException, badfunctioncallexception)
-  DECLARE_INVOKE_EX(badmethodcallexception, badfunctioncallexception)
+  DECLARE_CLASS_COMMON(badmethodcallexception, BadMethodCallException)
+  DECLARE_INVOKE_EX(badmethodcallexception, BadMethodCallException, badfunctioncallexception)
 
   // DECLARE_STATIC_PROP_OPS
   public:

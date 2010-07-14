@@ -30,8 +30,8 @@ class c_filteriterator : public ExtObjectData {
     PARENT_CLASS(outeriterator)
     PARENT_CLASS(traversable)
   END_CLASS_MAP(filteriterator)
-  DECLARE_CLASS_COMMON(filteriterator, FilterIterator, ObjectData)
-  DECLARE_INVOKE_EX(filteriterator, ObjectData)
+  DECLARE_CLASS_COMMON(filteriterator, FilterIterator)
+  DECLARE_INVOKE_EX(filteriterator, FilterIterator, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:

@@ -29,8 +29,8 @@ class c_underflowexception : public c_runtimeexception {
     PARENT_CLASS(exception)
     PARENT_CLASS(runtimeexception)
   END_CLASS_MAP(underflowexception)
-  DECLARE_CLASS_COMMON(underflowexception, UnderflowException, runtimeexception)
-  DECLARE_INVOKE_EX(underflowexception, runtimeexception)
+  DECLARE_CLASS_COMMON(underflowexception, UnderflowException)
+  DECLARE_INVOKE_EX(underflowexception, UnderflowException, runtimeexception)
 
   // DECLARE_STATIC_PROP_OPS
   public:

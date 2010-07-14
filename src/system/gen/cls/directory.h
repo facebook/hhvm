@@ -26,8 +26,8 @@ namespace HPHP {
 class c_directory : public ExtObjectData {
   BEGIN_CLASS_MAP(directory)
   END_CLASS_MAP(directory)
-  DECLARE_CLASS_COMMON(directory, Directory, ObjectData)
-  DECLARE_INVOKE_EX(directory, ObjectData)
+  DECLARE_CLASS_COMMON(directory, Directory)
+  DECLARE_INVOKE_EX(directory, Directory, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:

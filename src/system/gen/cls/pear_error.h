@@ -26,8 +26,8 @@ namespace HPHP {
 class c_pear_error : public ExtObjectData {
   BEGIN_CLASS_MAP(pear_error)
   END_CLASS_MAP(pear_error)
-  DECLARE_CLASS_COMMON(pear_error, pear_error, ObjectData)
-  DECLARE_INVOKE_EX(pear_error, ObjectData)
+  DECLARE_CLASS_COMMON(pear_error, pear_error)
+  DECLARE_INVOKE_EX(pear_error, pear_error, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:

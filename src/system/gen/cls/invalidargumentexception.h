@@ -29,8 +29,8 @@ class c_invalidargumentexception : public c_logicexception {
     PARENT_CLASS(exception)
     PARENT_CLASS(logicexception)
   END_CLASS_MAP(invalidargumentexception)
-  DECLARE_CLASS_COMMON(invalidargumentexception, InvalidArgumentException, logicexception)
-  DECLARE_INVOKE_EX(invalidargumentexception, logicexception)
+  DECLARE_CLASS_COMMON(invalidargumentexception, InvalidArgumentException)
+  DECLARE_INVOKE_EX(invalidargumentexception, InvalidArgumentException, logicexception)
 
   // DECLARE_STATIC_PROP_OPS
   public:

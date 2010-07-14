@@ -30,8 +30,8 @@ class c_appenditerator : public ExtObjectData {
     PARENT_CLASS(outeriterator)
     PARENT_CLASS(traversable)
   END_CLASS_MAP(appenditerator)
-  DECLARE_CLASS_COMMON(appenditerator, AppendIterator, ObjectData)
-  DECLARE_INVOKE_EX(appenditerator, ObjectData)
+  DECLARE_CLASS_COMMON(appenditerator, AppendIterator)
+  DECLARE_INVOKE_EX(appenditerator, AppendIterator, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:

@@ -28,8 +28,8 @@ class c_reflectionparameter : public ExtObjectData {
   BEGIN_CLASS_MAP(reflectionparameter)
     PARENT_CLASS(reflector)
   END_CLASS_MAP(reflectionparameter)
-  DECLARE_CLASS_COMMON(reflectionparameter, ReflectionParameter, ObjectData)
-  DECLARE_INVOKE_EX(reflectionparameter, ObjectData)
+  DECLARE_CLASS_COMMON(reflectionparameter, ReflectionParameter)
+  DECLARE_INVOKE_EX(reflectionparameter, ReflectionParameter, ObjectData)
 
   // DECLARE_STATIC_PROP_OPS
   public:

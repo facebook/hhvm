@@ -28,8 +28,8 @@ class c_runtimeexception : public c_exception {
   BEGIN_CLASS_MAP(runtimeexception)
     PARENT_CLASS(exception)
   END_CLASS_MAP(runtimeexception)
-  DECLARE_CLASS_COMMON(runtimeexception, RuntimeException, exception)
-  DECLARE_INVOKE_EX(runtimeexception, exception)
+  DECLARE_CLASS_COMMON(runtimeexception, RuntimeException)
+  DECLARE_INVOKE_EX(runtimeexception, RuntimeException, exception)
 
   // DECLARE_STATIC_PROP_OPS
   public:

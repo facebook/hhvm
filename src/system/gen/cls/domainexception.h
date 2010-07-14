@@ -29,8 +29,8 @@ class c_domainexception : public c_logicexception {
     PARENT_CLASS(exception)
     PARENT_CLASS(logicexception)
   END_CLASS_MAP(domainexception)
-  DECLARE_CLASS_COMMON(domainexception, DomainException, logicexception)
-  DECLARE_INVOKE_EX(domainexception, logicexception)
+  DECLARE_CLASS_COMMON(domainexception, DomainException)
+  DECLARE_INVOKE_EX(domainexception, DomainException, logicexception)
 
   // DECLARE_STATIC_PROP_OPS
   public:

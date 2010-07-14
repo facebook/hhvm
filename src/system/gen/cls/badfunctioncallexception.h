@@ -29,8 +29,8 @@ class c_badfunctioncallexception : public c_logicexception {
     PARENT_CLASS(exception)
     PARENT_CLASS(logicexception)
   END_CLASS_MAP(badfunctioncallexception)
-  DECLARE_CLASS_COMMON(badfunctioncallexception, BadFunctionCallException, logicexception)
-  DECLARE_INVOKE_EX(badfunctioncallexception, logicexception)
+  DECLARE_CLASS_COMMON(badfunctioncallexception, BadFunctionCallException)
+  DECLARE_INVOKE_EX(badfunctioncallexception, BadFunctionCallException, logicexception)
 
   // DECLARE_STATIC_PROP_OPS
   public:

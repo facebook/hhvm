@@ -17,8 +17,6 @@
 #ifndef __STACKTRACE_H__
 #define __STACKTRACE_H__
 
-#include <string>
-#include <vector>
 #include <dlfcn.h>
 #include "base.h"
 
@@ -160,6 +158,11 @@ public:
    * Returns the name of the generated file.
    */
   void log(const char *errorType, const char * fname, const char *pid) const;
+
+  /**
+   * Add extra information to log together with a crash stacktrace log.
+   */
+  static void AddExtraLogging(const char *name, const char *value);
 
 private:
   /**

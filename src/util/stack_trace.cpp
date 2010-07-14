@@ -26,6 +26,9 @@
 #endif
 
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 using namespace std;
 using namespace boost;
@@ -243,37 +246,45 @@ std::string StackTrace::hexEncode(int minLevel /* = 0 */,
   return bts;
 }
 
-template <class T>
-struct DumpGetThreadId {
-  void print(FILE *f, const pthread_t& p) {
-    fprintf (f, lexical_cast<string>(p).c_str());
-  }
+///////////////////////////////////////////////////////////////////////////////
+// crash log
+
+class StackTraceLog {
+public:
+  hphp_string_map<std::string> data;
+
+  static DECLARE_THREAD_LOCAL(StackTraceLog, s_logData);
 };
+IMPLEMENT_THREAD_LOCAL(StackTraceLog, StackTraceLog::s_logData);
 
-template <>
-struct DumpGetThreadId<unsigned long int> {
-  // no heap version, if possible
-  void print(FILE *f, const pthread_t& p) {
-    fprintf (f, "%lu", (unsigned long int)(p));
-  }
-};
+void StackTraceNoHeap::AddExtraLogging(const char *name, const char *value) {
+  ASSERT(name && *name);
+  ASSERT(value);
 
-void StackTraceNoHeap::log(const char *errorType, const char *tracefn,
-                           const char * pid) const {
-  FILE *f = fopen(tracefn,"w");
-  if (!f) return;
-
-  fprintf(f, "Host: %s\n",Process::GetHostName().c_str());
-  fprintf(f, "ProcessID: %s\n", pid);
-  fprintf(f, "ThreadID: ");
-  { DumpGetThreadId<pthread_t> p; p.print(f,Process::GetThreadId()); }
-  fprintf(f, "\nName: %s\n", Process::GetAppName().c_str());
-  fprintf(f, "Type: %s\n\n", errorType ? errorType : "(unknown error)");
-  print(f);
-  fprintf(f, "\n");
-  fclose(f);
+  StackTraceLog::s_logData->data[name] = value;
 }
 
+void StackTraceNoHeap::log(const char *errorType, const char *tracefn,
+                           const char *pid) const {
+  int fd = ::open(tracefn, O_CREAT|O_TRUNC|O_WRONLY);
+  if (fd < 0) return;
+
+  dprintf(fd, "Host: %s\n",Process::GetHostName().c_str());
+  dprintf(fd, "ProcessID: %s\n", pid);
+  dprintf(fd, "ThreadID: %llx\n", (int64)Process::GetThreadId());
+  dprintf(fd, "Name: %s\n", Process::GetAppName().c_str());
+  dprintf(fd, "Type: %s\n", errorType ? errorType : "(unknown error)");
+  dprintf(fd, "\n");
+
+  hphp_string_map<std::string> &extra = StackTraceLog::s_logData->data;
+  for (hphp_string_map<std::string>::const_iterator iter = extra.begin();
+       iter != extra.end(); ++iter) {
+    dprintf(fd, "%s: %s\n", iter->first.c_str(), iter->second.c_str());
+  }
+  dprintf(fd, "\n");
+
+  ::close(fd);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers

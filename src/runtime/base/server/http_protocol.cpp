@@ -174,6 +174,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   string hostHeader(transport->getHeader("Host"));
   if (hostHeader.empty()) {
     server.set("HTTP_HOST", hostName);
+    StackTraceNoHeap::AddExtraLogging("Server", hostName.data());
+  } else {
+    StackTraceNoHeap::AddExtraLogging("Server", hostHeader.c_str());
   }
   if (hostName.empty() || RuntimeOption::ForceServerNameToHeader) {
     hostName = hostHeader;

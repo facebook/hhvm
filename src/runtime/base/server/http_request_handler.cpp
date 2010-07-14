@@ -103,6 +103,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   transport->enableCompression();
 
   Logger::Verbose("receiving %s", transport->getCommand().c_str());
+  StackTraceNoHeap::AddExtraLogging("URL", transport->getUrl());
   ServerStatsHelper ssh("all", true);
 
   // resolve virtual host

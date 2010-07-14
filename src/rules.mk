@@ -171,6 +171,8 @@ PREFIX := $(TIMECMD)$(if $(USE_CCACHE), ccache,$(if $(NO_DISTCC),, distcc))
 
 ifndef CXX
 CXX = g++
+endif
+ifndef CC
 CC = gcc
 endif
 P_CXX = $(PREFIX) $(CXX)
@@ -345,6 +347,24 @@ ifdef COVERAGE
 CPPFLAGS += -fprofile-arcs -ftest-coverage
 endif
 
+ifdef CPP_PROFILE_GENERATE
+#CPPFLAGS += -fprofile-arcs
+CPPFLAGS += -fprofile-generate
+endif
+
+ifdef LD_PROFILE_GENERATE
+#LDFLAGS  += -fprofile-arcs
+#SO_LDFLAGS += -fprofile-arcs
+LDFLAGS += -fprofile-generate
+SO_LDFLAGS += -fprofile-generate
+endif
+
+ifdef PROFILE_USE
+CPPFLAGS += -fprofile-use -fprofile-correction -Wcoverage-mismatch
+LDFLAGS  += -fprofile-use -fprofile-correction
+SO_LDFLAGS += -fprofile-use -fprofile-correction
+endif
+
 ifdef HPHP_BUILD_LIBRARY
 CPPFLAGS += -DHPHP_BUILD_LIBRARY
 endif
@@ -368,11 +388,18 @@ CPPFLAGS += -DHAVE_PHPT
 ###############################################################################
 # Linking
 
-AR = $(TIMECMD) ar -crs
-LD = $(TIMECMD) $(CXX) -o
+ifndef AR
+AR = ar
+endif
+ifndef LINKER
+LINKER = $(CXX)
+endif
+
+AR_CMD = $(TIMECMD) $(AR) -crs
+LD_CMD = $(TIMECMD) $(LINKER)
 
 ifndef NO_GOLD
-LD = $(TIMECMD) $(CXX) -B$(EXT_DIR)/binutils/ -o
+LD_CMD += -B$(EXT_DIR)/binutils/
 LDFLAGS += -Xlinker --export-dynamic -Xlinker --no-warn-search-mismatch
 else
 LDFLAGS += -rdynamic
@@ -614,7 +641,7 @@ endef
 
 define LINK_OBJECTS
 $(ECHO_LINK)
-$(LV)$(LD) $@ $(LDFLAGS) $(filter %.o,$^) $(LIBS)
+$(LV)$(LD_CMD) -o $@ $(LDFLAGS) $(filter %.o,$^) $(LIBS)
 endef
 
 OBJECT_FILES = $(addprefix $(OUT_DIR),$(patsubst %.$(2),%.o,$(1)))
@@ -687,28 +714,28 @@ ifdef SHOW_LINK
 
 $(SHARED_LIB): $(OBJECTS)
 	$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,lib$(PROJECT_NAME).so \
-			-o $@ $(OBJECTS) $(EXTERNAL)
+			$(SO_LDFLAGS) -o $@ $(OBJECTS) $(EXTERNAL)
 
 $(STATIC_LIB): $(OBJECTS)
-	$(AR) $@ $(OBJECTS)
+	$(AR_CMD) $@ $(OBJECTS)
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
-	$(LD) $@ $(LDFLAGS) $< $(LIBS)
+	$(LD_CMD) -o $@ $(LDFLAGS) $< $(LIBS)
 
 else
 
 $(SHARED_LIB): $(OBJECTS)
 	@echo 'Linking $@ ...'
 	$(V)$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,lib$(PROJECT_NAME).so \
-		-o $@ $(OBJECTS) $(EXTERNAL)
+		$(SO_LDFLAGS) -o $@ $(OBJECTS) $(EXTERNAL)
 
 $(STATIC_LIB): $(OBJECTS)
 	@echo 'Linking $@ ...'
-	$(V)$(AR) $@ $(OBJECTS)
+	$(V)$(AR_CMD) $@ $(OBJECTS)
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 	@echo 'Linking $@ ...'
-	$(V)$(LD) $@ $(LDFLAGS) $< $(LIBS)
+	$(V)$(LD_CMD) -o $@ $(LDFLAGS) $< $(LIBS)
 
 endif
 

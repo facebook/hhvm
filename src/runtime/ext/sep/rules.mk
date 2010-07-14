@@ -35,7 +35,7 @@ all: $(TARGETS)
 schema.so: $(SCHEMA_OBJECTS)
 	@echo 'Linking $@ ...'
 	$(V)$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror \
-		-Wl,-soname,schema.so -o $@ $(SCHEMA_OBJECTS)
+		-Wl,-soname,schema.so $(SO_LDFLAGS) -o $@ $(SCHEMA_OBJECTS)
 
 extimpl_$(EXT).cpp: schema.so
 	$(HPHP) -t sep-ext-cpp --output-file $@ \
@@ -46,11 +46,11 @@ extimpl_$(EXT).cpp: schema.so
 lib$(EXT).so: $(OBJECTS) extimpl_$(EXT).o
 	@echo 'Linking $@ ...'
 	$(V)$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror \
-		-Wl,-soname,lib$(EXT).so -o $@ $^
+		-Wl,-soname,lib$(EXT).so $(SO_LDFLAGS) -o $@ $^
 
 lib$(EXT).a: $(OBJECTS) extimpl_$(EXT).o
 	@echo 'Linking $@ ...'
-	$(V)$(AR) $@ $(OBJECTS) $^
+	$(V)$(AR_CMD) $@ $(OBJECTS) $^
 
 test_$(EXT): $(TEST_OBJECTS) lib$(EXT).a
 	$(LINK_OBJECTS) lib$(EXT).a \

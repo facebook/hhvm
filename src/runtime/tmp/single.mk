@@ -31,4 +31,5 @@ all: $(TARGETS)
 $(TEST_LIB): $(OBJECTS)
 	$(V)echo $(OBJECTS) > $@.response
 	$(V)$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wl,-soname,lib$(PROJECT_NAME).so \
-			-o $@ $(OBJECTS) $(EXTERNAL)
+			$(SO_LDFLAGS) -o $@ $(OBJECTS) $(EXTERNAL)
+

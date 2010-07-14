@@ -735,6 +735,7 @@ public:
        CREATE_VECTOR1((int64)maxlifetime));
   }
 };
+static UserSessionModule s_user_session_module;
 
 ///////////////////////////////////////////////////////////////////////////////
 // session serializers

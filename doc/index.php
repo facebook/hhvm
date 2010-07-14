@@ -12,6 +12,9 @@ $topics =
         'Server Status' => 'server.status',
         'Server Statistics' => 'server.stats',
       ),
+      'HTTP Server' => array(
+        'Rewrite Rules' => 'server.rewrite_rules',
+      ),
       'Inconsistencies' => array(
         'PHP vs. HipHop' => 'inconsistencies',
         'HipHop Compiler vs. Interpreter' => 'inconsistencies.hphpi',

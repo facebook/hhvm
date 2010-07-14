@@ -5,6 +5,7 @@
   thread apply [threadno] [all] args
   set follow-fork-mode child
   set detach-on-fork off
+  set print pretty
   handle SIGPIPE nostop noprint pass
   dump binary memory [filename] [start_addr] [end_addr]
   symbol-file [un-stripped binary OR symbol file from strip]

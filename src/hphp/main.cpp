@@ -359,9 +359,9 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
   }
   size_t rootSize = po.inputDir.size();
   for (unsigned int i = 0; i < po.excludePatterns.size(); i++) {
+    string pattern = po.inputDir + po.excludePatterns[i];
     const char *argv[] = {"", "-L", (char*)po.inputDir.c_str(),
-                          "-type", "f",
-                          "-regex", po.excludePatterns[i].c_str(),
+                          "-type", "f", "-regex", pattern.c_str(),
                           NULL};
     int numErrors = 0;
     for (;;) {
@@ -391,9 +391,9 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     }
   }
   for (unsigned int i = 0; i < po.excludeStaticPatterns.size(); i++) {
+    string pattern = po.inputDir + po.excludeStaticPatterns[i];
     const char *argv[] = {"", "-L", (char*)po.inputDir.c_str(),
-                          "-type", "f",
-                          "-regex", po.excludeStaticPatterns[i].c_str(),
+                          "-type", "f", "-regex", pattern.c_str(),
                           NULL};
     int numErrors = 0;
     for (;;) {

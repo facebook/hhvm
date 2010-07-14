@@ -495,7 +495,21 @@ void translate_rtti(const char *rttiDirectory) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static int execute_program_impl(int argc, char **argv);
 int execute_program(int argc, char **argv) {
+  try {
+    return execute_program_impl(argc, argv);
+  } catch (const Exception &e) {
+    cerr << "Uncaught exception: " << e.what();
+  } catch (const std::exception &e) {
+    cerr << "Uncaught exception: " << e.what();
+  } catch (...) {
+    cerr << "Uncaught exception: (unknown)\n";
+  }
+  return -1;
+}
+
+static int execute_program_impl(int argc, char **argv) {
   string usage = "Usage:\n\n\t";
   usage += argv[0];
   usage += " [-m <mode>] [<options>] [<arg1>] [<arg2>] ...\n\nOptions";

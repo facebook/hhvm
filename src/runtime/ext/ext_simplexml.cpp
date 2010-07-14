@@ -841,13 +841,16 @@ bool c_simplexmlelement::t_offsetexists(CVarRef index) {
 Variant c_simplexmlelement::t_offsetget(CVarRef index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::offsetget);
   if (index.isInteger()) {
-    int64 n = 0; int64 nIndex = index.toInt64(); Variant var(this);
-    for (ArrayIterPtr iter = var.begin(); !iter->end(); iter->next()) {
-      if (n++ == nIndex) {
-        return iter->second();
+    if (m_is_property) {
+      int64 n = 0; int64 nIndex = index.toInt64(); Variant var(this);
+      for (ArrayIterPtr iter = var.begin(); !iter->end(); iter->next()) {
+        if (n++ == nIndex) {
+          return iter->second();
+        }
       }
+      return this;
     }
-    return this;
+    return m_children[index];
   }
   return m_attributes[index];
 }

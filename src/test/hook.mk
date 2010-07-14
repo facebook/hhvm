@@ -1,8 +1,9 @@
-EXTRA_FILES = $(ABS_PROJECT_ROOT)/facebook/src/compiler/fb_compiler_hooks.cpp \
+EXTRA_FILES = \
 	$(ABS_PROJECT_ROOT)/facebook/src/test/test_fbcode_error.cpp \
 	$(ABS_PROJECT_ROOT)/facebook/src/test/test_fbdepend_graph.cpp
 
 CPPFLAGS += -I$(PROJECT_ROOT)/facebook/src
+LDFLAGS += -Wl,-ucompiler_hook_initialize
 CXX_SOURCES += $(EXTRA_FILES)
 
 EXTRA_TEST_SUITE_INC := \

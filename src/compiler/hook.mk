@@ -1,3 +1,5 @@
+CXX_SOURCES += $(ABS_PROJECT_ROOT)/facebook/src/compiler/fb_compiler_hooks.cpp
+CPPFLAGS += -I$(PROJECT_ROOT)/facebook/src
 EXTRA_ERROR_INC := \
   $(wildcard ../../facebook/src/compiler/analysis/extra_code_error.inc)
 ifneq ($(strip $(EXTRA_ERROR_INC)),)

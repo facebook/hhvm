@@ -7,17 +7,16 @@ SOURCE_SUBDIRS = expression statement analysis util parser
 INTERMEDIATE_FILES += $(OUT_DIR)analysis/code_error.inc $(OUT_DIR)analysis/dependency.inc
 ALWAYS_ASSERT = 1
 
-include $(PROJECT_ROOT)/src/dirs.mk
-include $(PROJECT_ROOT)/src/rules.mk
-TARGETS = $(STATIC_LIB)
-all: $(TARGETS)
-
 ERROR_INC := analysis/core_code_error.inc
 DEPENDENCY_INC := analysis/core_dependency.inc
 HOOK_RULE_FILE = $(wildcard hook.mk)
 ifneq ($(strip $(HOOK_RULE_FILE)),)
  include hook.mk
 endif
+include $(PROJECT_ROOT)/src/rules.mk
+
+TARGETS = $(STATIC_LIB)
+all: $(TARGETS)
 
 $(OUT_DIR)analysis/code_error.inc: $(ERROR_INC)
 	$(V)cat $^ > $@

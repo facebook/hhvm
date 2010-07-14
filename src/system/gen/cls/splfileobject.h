@@ -21,7 +21,6 @@
 #include <cls/splfileinfo.h>
 #include <cls/recursiveiterator.h>
 #include <cls/traversable.h>
-#include <cls/iterator.h>
 #include <cls/seekableiterator.h>
 
 namespace HPHP {

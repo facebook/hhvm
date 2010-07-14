@@ -3352,6 +3352,11 @@ bool TestCodeRun::TestObjectMethod() {
 }
 
 bool TestCodeRun::TestClassMethod() {
+  // circular derivation
+  MVCR("<?php class A extends B { function foo() {}} "
+       "class B extends A { function foo() {}} "
+       "$obj = new A(); $obj->foo();");
+
   MVCR(
     "<?php\n"
     "class Foo {\n"

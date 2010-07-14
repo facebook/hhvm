@@ -443,6 +443,12 @@ private:
   CodeGenerator::MapIntToStringVec m_funcTable;
 
   /**
+   * Checks circular class derivations that can cause stack overflows for
+   * subsequent analysis. Also checks to make sure no two redundant parents.
+   */
+  void checkClassDerivations();
+
+  /**
    * Creates the global function table. Needs to be called before generating
    * cpp code for each toplevel function.
    */

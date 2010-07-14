@@ -176,6 +176,34 @@ int ClassScope::implementsAccessor(AnalysisResultPtr ar, const char *name) {
   return ret;
 }
 
+void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_string_set &seen) {
+  seen.insert(m_name);
+
+  hphp_string_set bases;
+  for (int i = m_bases.size() - 1; i >= 0; i--) {
+    const string &base = m_bases[i];
+
+    if (seen.find(base) != seen.end() || bases.find(base) != bases.end()) {
+      ar->getCodeError()->record(CodeError::InvalidDerivation, m_stmt,
+                                 ConstructPtr(), base.c_str());
+      if (i == 0 && !m_parent.empty()) {
+        ASSERT(base == m_parent);
+        m_parent.clear();
+      }
+      m_bases.erase(m_bases.begin() + i);
+      continue;
+    }
+    bases.insert(base);
+
+    const ClassScopePtrVec &parents = ar->findClasses(base);
+    for (unsigned int j = 0; j < parents.size(); j++) {
+      parents[j]->checkDerivation(ar, seen);
+    }
+  }
+
+  seen.erase(m_name);
+}
+
 void ClassScope::collectMethods(AnalysisResultPtr ar,
                                 StringToFunctionScopePtrMap &funcs,
                                 bool collectPrivate /* = true */,
@@ -203,19 +231,9 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
     }
   }
 
-  set<string> seen;
-  seen.insert(m_name);
-
   // walk up
   for (int i = m_bases.size() - 1; i >= 0; i--) {
     const string &base = m_bases[i];
-    if (seen.find(base) != seen.end()) {
-      ar->getCodeError()->record(CodeError::InvalidDerivation, m_stmt,
-                                 ConstructPtr(), base.c_str());
-      m_bases.erase(m_bases.begin() + i);
-      continue;
-    }
-    seen.insert(base);
     if (forInvoke && base != m_parent) {
       continue;
     }

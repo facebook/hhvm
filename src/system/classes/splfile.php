@@ -24,7 +24,7 @@ class SplFileInfo {
 
   public function getPathname() {
     return hphp_splfileinfo_getpathname($this);
-  }  
+  }
 
   public function getPathInfo($class_name = "") {
     return hphp_splfileinfo_getpathinfo($this, $class_name);
@@ -97,7 +97,7 @@ class SplFileInfo {
   public function getRealPath() {
     return hphp_splfileinfo_getrealpath($this);
   }
-  
+
   public function __toString() {
     return hphp_splfileinfo___tostring($this);
   }
@@ -118,7 +118,7 @@ class SplFileInfo {
 }
 
 class SplFileObject extends SplFileInfo implements RecursiveIterator,
-  Traversable, Iterator, SeekableIterator {
+  Traversable, SeekableIterator {
 
   const DROP_NEW_LINE = 1;
   const READ_AHEAD = 2;
@@ -233,7 +233,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator,
   public function setCsvControl($delimiter = ",", $enclosure = "\"",
                                 $escape = "\\") {
     return hphp_splfileobject_setcsvcontrol($this, $delimiter, $enclosure,
-                                            $escape); 
+                                            $escape);
   }
 
   public function setFlags($flags) {

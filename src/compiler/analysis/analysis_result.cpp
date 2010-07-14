@@ -550,6 +550,18 @@ void AnalysisResult::loadBuiltins() {
   BuiltinSymbols::LoadBaseSysRsrcClasses(ar, m_baseSysRsrcClasses);
 }
 
+void AnalysisResult::checkClassDerivations() {
+  AnalysisResultPtr ar = shared_from_this();
+  ClassScopePtr cls;
+  for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
+       iter != m_classDecs.end(); ++iter) {
+    BOOST_FOREACH(cls, iter->second) {
+      hphp_string_set seen;
+      cls->checkDerivation(ar, seen);
+    }
+  }
+}
+
 void AnalysisResult::analyzeProgram(bool system /* = false */) {
   AnalysisResultPtr ar = shared_from_this();
 
@@ -557,6 +569,8 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   getVariables()->setAttribute(VariableTable::ContainsLDynamicVariable);
   getVariables()->setAttribute(VariableTable::ContainsExtract);
   pushScope(ar);
+
+  checkClassDerivations();
 
   // Analyze Includes
   Logger::Verbose("Analyzing Includes");
@@ -580,6 +594,10 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
       cls->setVolatile();
     }
   }
+
+  // I think we need one more round of checking, as new includes may bring in
+  // more classes.
+  checkClassDerivations();
 
   // Analyze All
   Logger::Verbose("Analyzing All");

@@ -101,6 +101,7 @@ public:
 
   virtual std::string getId(CodeGenerator &cg) const;
 
+  void checkDerivation(AnalysisResultPtr ar, hphp_string_set &seen);
   const std::string &getParent() const { return m_parent;}
   std::string getHeaderFilename(CodeGenerator &cg);
 

@@ -610,9 +610,8 @@ bool Array::exists(CVarRef key, int64 prehash /* = -1 */) const {
   default:
     break;
   }
-  Variant k(key.toKey());
-  if (!k.isNull()) {
-    return existsImpl(k, prehash);
+  if (!key.isNull()) {
+    return existsImpl(key.toKey(), prehash);
   }
   return false;
 }

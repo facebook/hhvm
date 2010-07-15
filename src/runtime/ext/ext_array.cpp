@@ -79,13 +79,22 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
 }
 
 bool f_array_key_exists(CVarRef key, CVarRef search) {
-  if (!search.isArray() && !search.is(KindOfObject)) {
+  if (!search.isArray() && !search.isObject()) {
     throw_bad_type_exception("array_key_exists expects an array or an object; "
                              "false returned.");
     return false;
   }
-  if (key.isString() || key.isInteger()) {
-    return toArray(search).exists(key);
+
+  if (key.isString()) {
+    int64 n = 0;
+    String k = key.toString();
+    if (k->isStrictlyInteger(n)) {
+      return toArray(search).exists(n);
+    }
+    return toArray(search)->exists(k);
+  }
+  if (key.isInteger()) {
+    return toArray(search).exists(key.toInt64());
   }
   if (key.isNull()) {
     return toArray(search).exists("");

@@ -23,7 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 StringBuffer::StringBuffer(int initialSize /* = 1024 */)
-    : m_size(initialSize), m_pos(0) {
+    : m_initialSize(initialSize), m_size(initialSize), m_pos(0) {
   ASSERT(initialSize > 0);
   m_buffer = (char *)malloc(initialSize + 1);
   #ifdef TAINTED
@@ -34,7 +34,7 @@ StringBuffer::StringBuffer(int initialSize /* = 1024 */)
 }
 
 StringBuffer::StringBuffer(const char *filename)
-  : m_buffer(NULL), m_size(0), m_pos(0) {
+    : m_buffer(NULL), m_initialSize(1024), m_size(0), m_pos(0) {
   struct stat sb;
   if (stat(filename, &sb) == 0) {
     m_size = sb.st_size;
@@ -74,9 +74,7 @@ StringBuffer::~StringBuffer() {
 }
 
 const char *StringBuffer::data() {
-  ASSERT(m_buffer);
-
-  if (m_pos) {
+  if (m_buffer && m_pos) {
     m_buffer[m_pos] = '\0'; // fixup
     return m_buffer;
   }
@@ -85,36 +83,36 @@ const char *StringBuffer::data() {
 
 char StringBuffer::charAt(int pos) const {
   ASSERT(pos >= 0 && pos < m_pos);
-  return m_buffer[pos];
+  if (m_buffer && pos >= 0 && pos < m_pos) {
+    return m_buffer[pos];
+  }
+  return '\0';
 }
 
 char *StringBuffer::detach(int &size) {
-  ASSERT(m_buffer);
-
-  if (m_pos) {
-    m_buffer[m_pos] = '\0'; // fixup
-    size = m_pos;
-    char *ret = m_buffer;
-    m_buffer = NULL;
-    m_pos = 0;
-    return ret;
+  if (m_buffer) {
+    if (m_pos) {
+      m_buffer[m_pos] = '\0'; // fixup
+      size = m_pos;
+      char *ret = m_buffer;
+      m_buffer = NULL;
+      m_pos = 0;
+      return ret;
+    }
+    size = 0;
   }
-
-  size = 0;
   return NULL;
 }
 
 String StringBuffer::detach() {
-  ASSERT(m_buffer);
-
-  if (m_pos) {
+  if (m_buffer && m_pos) {
     m_buffer[m_pos] = '\0'; // fixup
     String ret(m_buffer, m_pos, AttachString);
     m_buffer = NULL;
     m_pos = 0;
-    #ifdef TAINTED
+#ifdef TAINTED
     propagate_tainting1_buf(*this, ret);
-    #endif
+#endif
     return ret;
   }
   return String("");
@@ -146,9 +144,6 @@ void StringBuffer::absorb(StringBuffer &buf) {
 }
 
 void StringBuffer::reset() {
-  if (m_buffer == NULL) {
-    m_buffer = (char *)malloc(m_size + 1);
-  }
   m_pos = 0;
 #ifdef TAINTED
   m_tainted = false;
@@ -159,17 +154,18 @@ void StringBuffer::reset() {
 
 void StringBuffer::resize(int size) {
   ASSERT(size >= 0 && size < m_size);
-  m_pos = size;
+  if (size >= 0 && size < m_size) {
+    m_pos = size;
+  }
 }
 
 char *StringBuffer::reserve(int size) {
   if (m_size < m_pos + size) {
     m_size = m_pos + size;
-    if (m_buffer == NULL) {
-      m_buffer = (char *)malloc(m_size + 1);
-    } else {
-      m_buffer = (char *)realloc(m_buffer, m_size + 1);
-    }
+    m_buffer = (char *)realloc(m_buffer, m_size + 1);
+  } else if (m_buffer == NULL) {
+    m_size = m_initialSize;
+    m_buffer = (char *)malloc(m_size + 1);
   }
   return m_buffer + m_pos;
 }
@@ -191,7 +187,10 @@ void StringBuffer::append(int64 n) {
 }
 
 void StringBuffer::append(char ch) {
-  ASSERT(m_buffer);
+  if (m_buffer == NULL) {
+    m_size = m_initialSize;
+    m_buffer = (char *)malloc(m_size + 1);
+  }
 
   if (m_pos + 1 > m_size) {
     grow(m_pos + 1);
@@ -208,7 +207,13 @@ void StringBuffer::append(CStrRef s) {
 }
 
 void StringBuffer::append(const char *s, int len) {
-  ASSERT(m_buffer);
+  if (m_buffer == NULL) {
+    m_size = m_initialSize;
+    if (len > m_size) {
+      m_size = len;
+    }
+    m_buffer = (char *)malloc(m_size + 1);
+  }
 
   ASSERT(s);
   ASSERT(len >= 0);
@@ -247,6 +252,11 @@ void StringBuffer::read(FILE* in, int page_size /* = 1024 */) {
   ASSERT(in);
   ASSERT(page_size > 0);
 
+  if (m_buffer == NULL) {
+    m_size = m_initialSize;
+    m_buffer = (char *)malloc(m_size + 1);
+  }
+
   while (true) {
     int buffer_size = m_size - m_pos;
     if (buffer_size < page_size) {
@@ -262,6 +272,11 @@ void StringBuffer::read(FILE* in, int page_size /* = 1024 */) {
 void StringBuffer::read(File* in, int page_size /* = 1024 */) {
   ASSERT(in);
   ASSERT(page_size > 0);
+
+  if (m_buffer == NULL) {
+    m_size = m_initialSize;
+    m_buffer = (char *)malloc(m_size + 1);
+  }
 
   while (true) {
     int buffer_size = m_size - m_pos;

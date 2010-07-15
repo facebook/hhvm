@@ -125,6 +125,7 @@ private:
   StringBuffer &operator=(const StringBuffer &sb) {ASSERT(false);return *this;}
 
   char *m_buffer;
+  int m_initialSize;
   int m_size;
   int m_pos;
   #ifdef TAINTED

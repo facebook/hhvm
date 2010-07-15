@@ -351,7 +351,8 @@ ExpressionPtr BinaryOpExpression::postOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
-static ExpressionPtr makeIsNull(LocationPtr loc, ExpressionPtr exp) {
+static ExpressionPtr makeIsNull(LocationPtr loc, ExpressionPtr exp,
+                                bool invert) {
   /* Replace "$x === null" with an is_null call; this requires slightly
    * less work at runtime. */
   ExpressionListPtr expList =
@@ -366,7 +367,14 @@ static ExpressionPtr makeIsNull(LocationPtr loc, ExpressionPtr exp) {
   call->setValid();
   call->setActualType(Type::Boolean);
 
-  return call;
+  ExpressionPtr result(call);
+  if (invert) {
+    result = ExpressionPtr(new UnaryOpExpression(
+                             loc, Expression::KindOfUnaryOpExpression,
+                             result, '!', true));
+  }
+
+  return result;
 }
 
 ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultPtr ar) {
@@ -378,7 +386,11 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultPtr ar) {
     if (m_exp1->isScalar() && m_exp1->getScalarValue(v1)) {
       switch (m_op) {
         case T_IS_IDENTICAL:
-          if (v1.isNull()) return makeIsNull(getLocation(), m_exp2);
+        case T_IS_NOT_IDENTICAL:
+          if (v1.isNull()) {
+            return makeIsNull(getLocation(), m_exp2,
+                              m_op == T_IS_NOT_IDENTICAL);
+          }
           break;
         default:
           break;
@@ -481,7 +493,10 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultPtr ar) {
       if (optExp) return optExp;
       break;
     case T_IS_IDENTICAL:
-      if (v2.isNull()) return makeIsNull(getLocation(), m_exp1);
+    case T_IS_NOT_IDENTICAL:
+      if (v2.isNull()) {
+        return makeIsNull(getLocation(), m_exp1, m_op == T_IS_NOT_IDENTICAL);
+      }
       break;
     default:
       break;

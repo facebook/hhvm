@@ -1073,7 +1073,7 @@ bool c_arrayiterator::t_uksort(Variant v_cmp_function) {
 /* SRC: classes/iterator.php line 163 */
 bool c_arrayiterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::valid);
-  return !same(x_key(ref(lval(m_arr))), null);
+  return !(x_is_null(x_key(ref(lval(m_arr)))));
 } /* function */
 /* SRC: classes/iterator.php line 283 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_appenditerator

@@ -5206,12 +5206,12 @@ void c_errorexception::t___construct(Variant v_message //  = ""
   bool oldInCtor = gasInCtor(true);
   c_exception::t___construct(v_message, v_code);
   (m_severity = v_severity);
-  if (!same(v_filename, null)) {
+  if (!(x_is_null(v_filename))) {
     {
       (m_file = v_filename);
     }
   }
-  if (!same(v_lineno, null)) {
+  if (!(x_is_null(v_lineno))) {
     {
       (m_line = v_lineno);
     }

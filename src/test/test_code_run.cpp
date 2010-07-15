@@ -5339,6 +5339,19 @@ bool TestCodeRun::TestVolatile() {
       "var_dump(foo(0));"
       "var_dump(foo(1));"
       "if (class_exists('C')) var_dump('yes'); else var_dump('no');");
+  MVCR("<?php "
+      "function __autoload($name) {"
+      "  if ($name == 'CaT') {"
+      "  class CaT {"
+      "    function __construct() {}"
+      "  }"
+      "  }"
+      "  var_dump($name);"
+      "}"
+      ""
+      "new CaT(1);"
+      "class_exists('cat', false);");
+
   return true;
 }
 

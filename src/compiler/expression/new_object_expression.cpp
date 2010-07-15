@@ -194,8 +194,8 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
                 m_name.c_str());
     } else {
       cg_printf("create_object(");
-      if (!m_name.empty()) {
-        cg_printf("\"%s\"", m_name.c_str());
+      if (!m_origName.empty()) {
+        cg_printf("\"%s\"", m_origName.c_str());
       } else if (m_nameExp->is(Expression::KindOfSimpleVariable)) {
         m_nameExp->outputCPP(cg, ar);
       } else {

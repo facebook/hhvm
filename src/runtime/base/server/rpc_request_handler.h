@@ -50,7 +50,6 @@ public:
 
 private:
   ExecutionContext *m_context;
-  Array m_shutdowns;
   SatelliteServerInfoPtr m_serverInfo;
   int m_count;
   bool m_reset;

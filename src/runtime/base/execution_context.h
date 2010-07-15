@@ -83,6 +83,10 @@ public:
   ExecutionContext();
   ~ExecutionContext();
 
+  // For RPCRequestHandler
+  void backupSession();
+  void restoreSession();
+
   // implementing FiberSafe
   virtual void fiberInit(FiberLocal *src, FiberReferenceMap &refMap);
   virtual void fiberExit(FiberLocal *src, FiberReferenceMap &refMap);
@@ -230,6 +234,11 @@ private:
   String m_timezone;
   String m_timezoneDefault;
   String m_argSeparatorOutput;
+
+  // session backup/restore for RPCRequestHandler
+  Array m_shutdownsBackup;
+  std::vector<std::pair<Variant,int> > m_userErrorHandlersBackup;
+  std::vector<Variant> m_userExceptionHandlersBackup;
 
   // helper functions
   void resetCurrentBuffer();

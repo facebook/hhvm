@@ -733,8 +733,9 @@ ExecutionContext *hphp_context_init() {
   return context;
 }
 
-bool hphp_warmup(ExecutionContext *context, const std::string &warmupDoc,
-                 const std::string reqInitFunc, bool &error) {
+static bool hphp_warmup(ExecutionContext *context,
+                        const std::string &warmupDoc,
+                        const std::string reqInitFunc, bool &error) {
   bool ret = true;
   error = false;
   std::string errorMsg;
@@ -767,6 +768,7 @@ bool hphp_warmup(ExecutionContext *context, const std::string &warmupDoc,
     ServerStatsHelper ssh("reqinit");
     try {
       invoke(reqInitFunc.c_str(), Array());
+      context->backupSession();
     } catch (...) {
       ret = handle_exception(context, errorMsg, ReqInitException, error);
     }

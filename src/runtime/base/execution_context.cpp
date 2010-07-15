@@ -57,6 +57,18 @@ ExecutionContext::~ExecutionContext() {
   }
 }
 
+void ExecutionContext::backupSession() {
+  m_shutdownsBackup = m_shutdowns;
+  m_userErrorHandlersBackup = m_userErrorHandlers;
+  m_userExceptionHandlersBackup = m_userExceptionHandlers;
+}
+
+void ExecutionContext::restoreSession() {
+  m_shutdowns = m_shutdownsBackup;
+  m_userErrorHandlers = m_userErrorHandlersBackup;
+  m_userExceptionHandlers = m_userExceptionHandlersBackup;
+}
+
 void ExecutionContext::fiberInit(FiberLocal *src, FiberReferenceMap &refMap) {
   ExecutionContext *ec = dynamic_cast<ExecutionContext*>(src);
   ASSERT(ec);

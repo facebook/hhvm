@@ -32,7 +32,6 @@ namespace HPHP {
 RPCRequestHandler::RPCRequestHandler() : m_count(0), m_reset(false) {
   hphp_session_init();
   m_context = hphp_context_init();
-  m_shutdowns = m_context->backupShutdowns();
   m_created = time(0);
 
   Logger::ResetRequestCount();
@@ -194,7 +193,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   ServerStats::LogPage(rpcFunc, code);
 
   m_context->onShutdownPostSend();
-  m_context->restoreShutdowns(m_shutdowns);
+  m_context->restoreSession();
   return !error;
 }
 

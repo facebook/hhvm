@@ -25,6 +25,7 @@
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/ini_setting.h>
 #include <runtime/base/time/datetime.h>
+#include <runtime/base/variable_unserializer.h>
 #include <util/lock.h>
 #include <util/compatibility.h>
 #include <sys/types.h>
@@ -807,7 +808,15 @@ public:
       String key(p + 1, namelen, CopyString);
       p += namelen + 1;
       if (has_value) {
-        g->gv__SESSION.set(key, f_unserialize(String(p, AttachLiteral)));
+        istringstream in(std::string(p, endptr - p));
+        VariableUnserializer vu(in);
+        try {
+          g->gv__SESSION.set(key, vu.unserialize());
+          if (in.tellg() > 0 && in.tellg() < endptr - p) {
+            p += in.tellg();
+          }
+        } catch (Exception &e) {
+        }
       }
     }
     return true;
@@ -862,7 +871,15 @@ public:
       String key(p, q - p, CopyString);
       q++;
       if (has_value) {
-        g->gv__SESSION.set(key, f_unserialize(String(q, AttachLiteral)));
+        istringstream in(std::string(q, endptr - q));
+        VariableUnserializer vu(in);
+        try {
+          g->gv__SESSION.set(key, vu.unserialize());
+          if (in.tellg() > 0 && in.tellg() < endptr - q) {
+            q += in.tellg();
+          }
+        } catch (Exception &e) {
+        }
       }
       p = q;
     }

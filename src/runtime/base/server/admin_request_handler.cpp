@@ -30,18 +30,13 @@
 #include <runtime/base/memory/leak_detectable.h>
 #include <runtime/ext/mysql_stats.h>
 #include <runtime/base/shared/shared_store_stats.h>
+#include <runtime/base/util/alloc.h>
 
 #ifdef GOOGLE_CPU_PROFILER
 #include <google/profiler.h>
 #endif
 #ifdef GOOGLE_HEAP_PROFILER
 #include <google/heap-profiler.h>
-#endif
-#ifdef GOOGLE_TCMALLOC
-#include <google/malloc_extension.h>
-#endif
-#ifdef USE_JEMALLOC
-#include <jemalloc/jemalloc.h>
 #endif
 
 using namespace std;
@@ -59,14 +54,12 @@ AccessLog AdminRequestHandler::s_accessLog(
 AdminRequestHandler::AdminRequestHandler() {
 }
 
-#ifdef USE_JEMALLOC
 #define MALLOC_WRITE_CB_BUFLEN 1024*1024
 static void
 malloc_write_cb(void *cbopaque, const char *s) {
   char *buf = (char *)cbopaque;
   strncat(buf, s, MALLOC_WRITE_CB_BUFLEN - 1);
 }
-#endif
 
 void AdminRequestHandler::handleRequest(Transport *transport) {
   GetAccessLog().onNewRequest();
@@ -147,23 +140,28 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/leak-off:        end leak detection and report leaking\n"
         "    cutoff        optional, default 20 seconds, ignore newer allocs\n"
 #endif
-#ifdef GOOGLE_TCMALLOC
-        "/free-mem:        ask tcmalloc to release memory to system\n"
-        "/tcmalloc-stats:  get internal tcmalloc stats\n"
-#endif
-#ifdef USE_JEMALLOC
-        "/jemalloc-stats:  get internal jemalloc stats\n"
-        "/jemalloc-stats-print:\n"
-        "                  get comprehensive jemalloc stats in human-readable form\n"
-        "/jemalloc-prof-activate:\n"
-        "                  activate heap profiling\n"
-        "/jemalloc-prof-deactivate:\n"
-        "                  deactivate heap profiling\n"
-        "/jemalloc-prof-dump:\n"
-        "                  dump heap profile\n"
-        "    file          optional, filesystem path\n"
-#endif
-        ;
+      ;
+        if (MallocExtensionInstance) {
+          usage.append(
+              "/free-mem:        ask tcmalloc to release memory to system\n"
+              "/tcmalloc-stats:  get internal tcmalloc stats\n"
+              );
+        }
+        if (mallctl) {
+          usage.append(
+              "/jemalloc-stats:  get internal jemalloc stats\n"
+              "/jemalloc-stats-print:\n"
+              "                  get comprehensive jemalloc stats in\n"
+              "                  human-readable form\n"
+              "/jemalloc-prof-activate:\n"
+              "                  activate heap profiling\n"
+              "/jemalloc-prof-deactivate:\n"
+              "                  deactivate heap profiling\n"
+              "/jemalloc-prof-dump:\n"
+              "                  dump heap profile\n"
+              "    file          optional, filesystem path\n"
+              );
+        }
       transport->sendString(usage);
       break;
     }
@@ -225,118 +223,123 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         handleAPCSizeRequest(cmd, transport)) {
       break;
     }
-#ifdef GOOGLE_TCMALLOC
-    if (cmd == "free-mem") {
-      MallocExtension::instance()->ReleaseFreeMemory();
-      transport->sendString("OK\n");
-      break;
-    }
-    if (cmd == "tcmalloc-stats") {
-      ostringstream stats;
-      size_t user_allocated, heap_size, slack_bytes;
-      MallocExtension::instance()->
-        GetNumericProperty("generic.current_allocated_bytes", &user_allocated);
-      MallocExtension::instance()->
-        GetNumericProperty("generic.heap_size", &heap_size);
-      MallocExtension::instance()->
-        GetNumericProperty("tcmalloc.slack_bytes", &slack_bytes);
-      stats << "<tcmalloc-stats>" << endl;
-      stats << "  <user_allocated>" << user_allocated << "</user_allocated>" <<
-        endl;
-      stats << "  <heap_size>" << heap_size << "</heap_size>" << endl;
-      stats << "  <slack_bytes>" << slack_bytes << "</slack_bytes>" << endl;
-      stats << "</tcmalloc-stats>" << endl;
-      transport->sendString(stats.str());
-      break;
-    }
-#endif
-#ifdef USE_JEMALLOC
-    if (cmd == "jemalloc-stats") {
-      // Force jemalloc to update stats cached for use by mallctl().
-      uint64_t epoch = 1;
-      mallctl("epoch", NULL, NULL, &epoch, sizeof(epoch));
-
-      size_t allocated = 0; // Initialize in case jemalloc stats aren't enabled.
-      size_t sz = sizeof(size_t);
-      mallctl("stats.allocated", &allocated, &sz, NULL, 0);
-
-      size_t active = 0;
-      mallctl("stats.active", &active, &sz, NULL, 0);
-
-      size_t mapped = 0;
-      mallctl("stats.mapped", &mapped, &sz, NULL, 0);
-
-      ostringstream stats;
-      stats << "<jemalloc-stats>" << endl;
-      stats << "  <allocated>" << allocated << "</allocated>" << endl;
-      stats << "  <active>" << active << "</active>" << endl;
-      stats << "  <mapped>" << mapped << "</mapped>" << endl;
-      stats << "</jemalloc-stats>" << endl;
-      transport->sendString(stats.str());
-      break;
-    }
-    if (cmd == "jemalloc-stats-print") {
-      char *buf = (char *)malloc(MALLOC_WRITE_CB_BUFLEN);
-      if (buf == NULL) {
-        transport->sendString("OOM\n");
+    if (MallocExtensionInstance) {
+      if (cmd == "free-mem") {
+        MallocExtensionInstance()->ReleaseFreeMemory();
+        transport->sendString("OK\n");
         break;
       }
+      if (cmd == "tcmalloc-stats") {
+        ostringstream stats;
+        size_t user_allocated, heap_size, slack_bytes;
+        MallocExtensionInstance()->
+          GetNumericProperty("generic.current_allocated_bytes",
+              &user_allocated);
+        MallocExtensionInstance()->
+          GetNumericProperty("generic.heap_size", &heap_size);
+        MallocExtensionInstance()->
+          GetNumericProperty("tcmalloc.slack_bytes", &slack_bytes);
+        stats << "<tcmalloc-stats>" << endl;
+        stats << "  <user_allocated>" << user_allocated << "</user_allocated>"
+          << endl;
+        stats << "  <heap_size>" << heap_size << "</heap_size>" << endl;
+        stats << "  <slack_bytes>" << slack_bytes << "</slack_bytes>" << endl;
+        stats << "</tcmalloc-stats>" << endl;
+        transport->sendString(stats.str());
+        break;
+      }
+    }
+    if (mallctl) {
+      if (cmd == "jemalloc-stats") {
+        // Force jemalloc to update stats cached for use by mallctl().
+        uint64_t epoch = 1;
+        mallctl("epoch", NULL, NULL, &epoch, sizeof(epoch));
 
-      buf[0] = '\0';
-      malloc_stats_print(malloc_write_cb, (void *)buf, "");
-      transport->sendString(buf);
-      free(buf);
-      break;
-    }
-    if (cmd == "jemalloc-prof-activate") {
-      bool active = true;
-      int err = mallctl("prof.active", NULL, NULL, &active, sizeof(bool));
-      if (err) {
-        ostringstream estr;
-        estr << "Error " << err << " in mallctl(\"prof.active\", ...)" << endl;
-        transport->sendString(estr.str());
-      } else {
-        transport->sendString("OK\n");
+        size_t allocated = 0; // Initialize in case stats aren't enabled.
+        size_t sz = sizeof(size_t);
+        mallctl("stats.allocated", &allocated, &sz, NULL, 0);
+
+        size_t active = 0;
+        mallctl("stats.active", &active, &sz, NULL, 0);
+
+        size_t mapped = 0;
+        mallctl("stats.mapped", &mapped, &sz, NULL, 0);
+
+        ostringstream stats;
+        stats << "<jemalloc-stats>" << endl;
+        stats << "  <allocated>" << allocated << "</allocated>" << endl;
+        stats << "  <active>" << active << "</active>" << endl;
+        stats << "  <mapped>" << mapped << "</mapped>" << endl;
+        stats << "</jemalloc-stats>" << endl;
+        transport->sendString(stats.str());
+        break;
       }
-      break;
-    }
-    if (cmd == "jemalloc-prof-deactivate") {
-      bool active = false;
-      int err = mallctl("prof.active", NULL, NULL, &active, sizeof(bool));
-      if (err) {
-        ostringstream estr;
-        estr << "Error " << err << " in mallctl(\"prof.active\", ...)" << endl;
-        transport->sendString(estr.str());
-      } else {
-        transport->sendString("OK\n");
-      }
-      break;
-    }
-    if (cmd == "jemalloc-prof-dump") {
-      string f = transport->getParam("file");
-      if (f != "") {
-        const char *s = f.c_str();
-        int err = mallctl("prof.dump", NULL, NULL, (void *)&s, sizeof(char *));
-        if (err) {
-          ostringstream estr;
-          estr << "Error " << err << " in mallctl(\"prof.dump\", ..., \"" << f
-               << "\", ...)" << endl;
-          transport->sendString(estr.str());
+      if (cmd == "jemalloc-stats-print") {
+        char *buf = (char *)malloc(MALLOC_WRITE_CB_BUFLEN);
+        if (buf == NULL) {
+          transport->sendString("OOM\n");
           break;
         }
-      } else {
-        int err = mallctl("prof.dump", NULL, NULL, NULL, 0);
+
+        buf[0] = '\0';
+        malloc_stats_print(malloc_write_cb, (void *)buf, "");
+        transport->sendString(buf);
+        free(buf);
+        break;
+      }
+      if (cmd == "jemalloc-prof-activate") {
+        bool active = true;
+        int err = mallctl("prof.active", NULL, NULL, &active, sizeof(bool));
         if (err) {
           ostringstream estr;
-          estr << "Error " << err << " in mallctl(\"prof.dump\", ...)" << endl;
+          estr << "Error " << err << " in mallctl(\"prof.active\", ...)"
+            << endl;
           transport->sendString(estr.str());
-          break;
+        } else {
+          transport->sendString("OK\n");
         }
+        break;
       }
-      transport->sendString("OK\n");
-      break;
+      if (cmd == "jemalloc-prof-deactivate") {
+        bool active = false;
+        int err = mallctl("prof.active", NULL, NULL, &active, sizeof(bool));
+        if (err) {
+          ostringstream estr;
+          estr << "Error " << err << " in mallctl(\"prof.active\", ...)"
+            << endl;
+          transport->sendString(estr.str());
+        } else {
+          transport->sendString("OK\n");
+        }
+        break;
+      }
+      if (cmd == "jemalloc-prof-dump") {
+        string f = transport->getParam("file");
+        if (f != "") {
+          const char *s = f.c_str();
+          int err = mallctl("prof.dump", NULL, NULL, (void *)&s,
+              sizeof(char *));
+          if (err) {
+            ostringstream estr;
+            estr << "Error " << err << " in mallctl(\"prof.dump\", ..., \"" << f
+              << "\", ...)" << endl;
+            transport->sendString(estr.str());
+            break;
+          }
+        } else {
+          int err = mallctl("prof.dump", NULL, NULL, NULL, 0);
+          if (err) {
+            ostringstream estr;
+            estr << "Error " << err << " in mallctl(\"prof.dump\", ...)"
+              << endl;
+            transport->sendString(estr.str());
+            break;
+          }
+        }
+        transport->sendString("OK\n");
+        break;
+      }
     }
-#endif
 
     transport->sendString("Unknown command: " + cmd + "\n", 404);
   } while (0);

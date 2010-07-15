@@ -19,6 +19,19 @@
 
 #include <stdlib.h>
 
+#include <google/malloc_extension.h>
+#include <jemalloc/jemalloc.h>
+
+extern "C" {
+#define MallocExtensionInstance _ZN15MallocExtension8instanceEv
+  MallocExtension* MallocExtensionInstance() __attribute__((weak));
+
+  int mallctl(const char *name, void *oldp, size_t *oldlenp, void *newp,
+          size_t newlen) __attribute__((weak));
+  void malloc_stats_print(void (*write_cb)(void *, const char *),
+          void *cbopaque, const char *opts) __attribute__((weak));
+}
+
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
 

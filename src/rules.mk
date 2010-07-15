@@ -231,12 +231,10 @@ CPPFLAGS += \
   -isystem $(EXT_DIR)/libfbi/include \
   -isystem $(EXT_DIR)/readline/include \
   -isystem $(EXT_DIR)/libmemcached/include \
+  -isystem $(EXT_DIR)/jemalloc/include \
+  -isystem $(EXT_DIR)/google-perftools/include \
   -I $(PROJECT_ROOT)/src \
   -I $(PROJECT_ROOT)/src/system/gen \
-
-ifdef USE_JEMALLOC
-CPPFLAGS += -isystem $(EXT_DIR)/jemalloc/include
-endif
 
 ifdef GOOGLE_CPU_PROFILER
 GOOGLE_TOOLS = 1
@@ -246,9 +244,6 @@ GOOGLE_TOOLS = 1
 endif
 ifdef GOOGLE_TCMALLOC
 GOOGLE_TOOLS = 1
-endif
-ifdef GOOGLE_TOOLS
-CPPFLAGS += -isystem $(EXT_DIR)/google-perftools/include
 endif
 
 CPPFLAGS += -D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1 -pthread

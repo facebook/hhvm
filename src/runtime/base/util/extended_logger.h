@@ -26,8 +26,9 @@ namespace HPHP {
 
 class ExtendedLogger : public Logger {
 public:
-  // These logging functions will also print stacktrace at end of each message.
+  static bool EnabledByDefault;
 
+  // These logging functions will also print stacktrace at end of each message.
   static void Error(const std::string &msg);
   static void Warning(const std::string &msg);
   static void Info(const std::string &msg);
@@ -45,16 +46,17 @@ public:
   static void RawVerbose(const std::string &msg);
 
   // Log additional injected stacktrace.
-  static void Log(CArrRef stackTrace);
+  static void Log(CArrRef stackTrace, bool escape = true);
 
 protected:
   virtual void log(const char *type, const Exception &e,
                    const char *file = NULL, int line = 0);
   virtual void log(const std::string &msg, const StackTrace *stackTrace,
-                   bool escape = true);
+                   bool escape = true, bool escapeMore = false);
 
 private:
-  static void PrintStackTrace(FILE *f, CArrRef stackTrace);
+  static void PrintStackTrace(FILE *f, CArrRef stackTrace,
+                              bool escape = false, bool escapeMore = false);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

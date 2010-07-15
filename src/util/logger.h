@@ -96,8 +96,9 @@ protected:
   static DECLARE_THREAD_LOCAL(ThreadData, s_threadData);
 
   static void Log(const char *fmt, va_list ap);
+  static void LogEscapeMore(const char *fmt, va_list ap);
   static void Log(const std::string &msg, const StackTrace *stackTrace,
-                  bool escape = true);
+                  bool escape = true, bool escapeMore = false);
 
   /**
    * For subclasses to override, e.g., to support injected stack trace.
@@ -105,7 +106,7 @@ protected:
   virtual void log(const char *type, const Exception &e,
                    const char *file = NULL, int line = 0);
   virtual void log(const std::string &msg, const StackTrace *stackTrace,
-                   bool escape = true);
+                   bool escape = true, bool escapeMore = false);
 
   /**
    * What needs to be print for each line of logging. Currently it's

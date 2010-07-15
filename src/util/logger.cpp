@@ -92,6 +92,14 @@ void Logger::Log(const char *fmt, va_list ap) {
   Log(msg, NULL);
 }
 
+void Logger::LogEscapeMore(const char *fmt, va_list ap) {
+  if (!UseLogAggregator && !UseLogFile) return;
+
+  string msg;
+  VSNPrintf(msg, fmt, ap);
+  Log(msg, NULL, true, true);
+}
+
 void Logger::Log(const char *type, const Exception &e,
                  const char *file /* = NULL */, int line /* = 0 */) {
   s_logger->log(type, e, file, line);
@@ -124,12 +132,13 @@ void Logger::ResetRequestCount() {
 }
 
 void Logger::Log(const std::string &msg, const StackTrace *stackTrace,
-                 bool escape /* = true */) {
-  s_logger->log(msg, stackTrace, escape);
+                 bool escape /* = true */, bool escapeMore /* = false */) {
+  s_logger->log(msg, stackTrace, escape, escapeMore);
 }
 
 void Logger::log(const std::string &msg, const StackTrace *stackTrace,
-                 bool escape /* = true */) {
+                 bool escape /* = true */, bool escapeMore /* = false */) {
+  ASSERT(!escapeMore || escape);
   ThreadData *threadData = s_threadData.get();
   if (++threadData->message > MaxMessagesPerRequest &&
       MaxMessagesPerRequest >= 0) {
@@ -158,10 +167,12 @@ void Logger::log(const std::string &msg, const StackTrace *stackTrace,
       }
     }
     const char *escaped = escape ? EscapeString(msg) : msg.c_str();
-    fprintf(f, "%s%s\n", sheader.c_str(), escaped);
+    fprintf(f, "%s%s%s", sheader.c_str(), escaped,
+                         escapeMore ? "\\n" : "\n");
     FILE *tf = threadData->log;
     if (tf) {
-      fprintf(tf, "%s%s\n", header.c_str(), escaped);
+      fprintf(tf, "%s%s%s", header.c_str(), escaped,
+                            escapeMore ? "\\n" : "\n");
       fflush(tf);
     }
     if (escape) {

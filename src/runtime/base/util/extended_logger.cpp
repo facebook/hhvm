@@ -24,28 +24,35 @@
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                   \
   void ExtendedLogger::LOGLEVEL(const char *fmt, ...) {                \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
-    va_list ap; va_start(ap, fmt); Logger::Log(fmt, ap);               \
-    if (RuntimeOption::InjectedStackTrace) {                           \
+    va_list ap; va_start(ap, fmt); Logger::LogEscapeMore(fmt, ap);     \
+    if (RuntimeOption::InjectedStackTrace &&                           \
+        !ExtendedLogger::EnabledByDefault) {                           \
       Log(FrameInjection::GetBacktrace());                             \
     }                                                                  \
     va_end(ap);                                                        \
   }                                                                    \
   void ExtendedLogger::LOGLEVEL(const std::string &msg) {              \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
-    Logger::Log(msg, NULL);                                            \
-    if (RuntimeOption::InjectedStackTrace) {                           \
+    Logger::Log(msg, NULL, true, true);                                \
+    if (RuntimeOption::InjectedStackTrace &&                           \
+        !ExtendedLogger::EnabledByDefault) {                           \
       Log(FrameInjection::GetBacktrace());                             \
     }                                                                  \
   }                                                                    \
   void ExtendedLogger::Raw ## LOGLEVEL(const std::string &msg) {       \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
     Logger::Log(msg, NULL, false);                                     \
-    if (RuntimeOption::InjectedStackTrace) {                           \
+    if (RuntimeOption::InjectedStackTrace &&                           \
+        !ExtendedLogger::EnabledByDefault) {                           \
       Log(FrameInjection::GetBacktrace());                             \
     }                                                                  \
   }                                                                    \
 
 namespace HPHP {
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool ExtendedLogger::EnabledByDefault = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -70,14 +77,15 @@ void ExtendedLogger::log(const char *type, const Exception &e,
 }
 
 void ExtendedLogger::log(const std::string &msg, const StackTrace *stackTrace,
-                         bool escape /* = true */) {
-  Logger::log(msg, stackTrace, escape);
+                         bool escape /* = true */,
+                         bool escapeMore /* = false */) {
+  Logger::log(msg, stackTrace, escape, escape);
   if (RuntimeOption::InjectedStackTrace) {
-    Log(FrameInjection::GetBacktrace());
+    Log(FrameInjection::GetBacktrace(), escape);
   }
 }
 
-void ExtendedLogger::Log(CArrRef stackTrace) {
+void ExtendedLogger::Log(CArrRef stackTrace, bool escape /* = true */) {
   ThreadData *threadData = s_threadData.get();
   if (++threadData->message > MaxMessagesPerRequest &&
       MaxMessagesPerRequest >= 0) {
@@ -89,18 +97,23 @@ void ExtendedLogger::Log(CArrRef stackTrace) {
   // TODO Should we also send the stacktrace to LogAggregator?
   if (UseLogFile) {
     FILE *f = Output ? Output : stdout;
-    PrintStackTrace(f, stackTrace);
+    PrintStackTrace(f, stackTrace, escape);
 
     FILE *tf = threadData->log;
     if (tf) {
-      PrintStackTrace(tf, stackTrace);
+      PrintStackTrace(tf, stackTrace, escape);
     }
   }
 }
 
-void ExtendedLogger::PrintStackTrace(FILE *f, CArrRef stackTrace) {
+void ExtendedLogger::PrintStackTrace(FILE *f, CArrRef stackTrace,
+                                     bool escape /* = false */,
+                                     bool escapeMore /* = false */) {
   int i = 0;
   for (ArrayIter it(stackTrace); it; ++it, ++i) {
+    if (i > 0) {
+      fprintf(f, "%s", escape ? "\\n" : "\n");
+    }
     Array frame = it.second().toArray();
     fprintf(f, "    #%d ", i);
     if (frame.exists("function")) {
@@ -112,9 +125,10 @@ void ExtendedLogger::PrintStackTrace(FILE *f, CArrRef stackTrace) {
         fprintf(f, "%s(), called ", frame["function"].toString().c_str());
       }
     }
-    fprintf(f, "at [%s:%lld]\n", frame["file"].toString().c_str(),
+    fprintf(f, "at [%s:%lld]", frame["file"].toString().c_str(),
             frame["line"].toInt64());
   }
+  fprintf(f, escapeMore ? "\\n" : "\n");
   fflush(f);
 }
 

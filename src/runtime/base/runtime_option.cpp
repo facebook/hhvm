@@ -367,6 +367,7 @@ void RuntimeOption::Load(Hdf &config) {
     bool logInjectedStackTrace = logger["InjectedStackTrace"].getBool(false);
     if (logInjectedStackTrace) {
       Logger::SetTheLogger(new ExtendedLogger());
+      ExtendedLogger::EnabledByDefault = true;
     }
     Logger::LogNativeStackTrace = logger["NativeStackTrace"].getBool(true);
     Logger::MaxMessagesPerRequest =

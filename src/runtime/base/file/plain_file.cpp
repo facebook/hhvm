@@ -63,7 +63,7 @@ bool PlainFile::closeImpl() {
     if (m_stream) {
       ret = (fclose(m_stream) == 0);
       m_stream = NULL;
-    } else {
+    } else if (m_fd >= 0) {
       ret = (::close(m_fd) == 0);
     }
     m_closed = true;

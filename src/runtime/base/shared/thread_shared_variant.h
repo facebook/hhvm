@@ -23,15 +23,12 @@
 #include <util/atomic.h>
 #include <runtime/base/shared/shared_variant.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/shared/immutable_map.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class ThreadSharedVariant;
-
-typedef hphp_hash_map<int64, int, int64_hash> Int64ToIntMap;
-typedef hphp_hash_map<StringData *, int, string_data_hash, string_data_equal>
-        StringDataToIntMap;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -71,16 +68,28 @@ public:
 
   virtual Variant getKey(ssize_t pos) const {
     ASSERT(is(KindOfArray));
-    if (m_data.map->isVector) return pos;
-    else return m_data.map->keys[pos]->toLocal();
+    if (m_isVector) {
+      ASSERT(pos < m_data.vec->size);
+      return pos;
+    }
+    return m_data.map->getKeyIndex(pos)->toLocal();
   }
   virtual SharedVariant* getValue(ssize_t pos) const {
     ASSERT(is(KindOfArray));
-    return m_data.map->vals[pos];
+    if (m_isVector) {
+      ASSERT(pos < m_data.vec->size);
+      return m_data.vec->vals[pos];
+    }
+    return m_data.map->getValIndex(pos);
   }
 
   // implementing LeakDetectable
   virtual void dump(std::string &out);
+
+  StringData *getStringData() const {
+    ASSERT(is(KindOfString));
+    return m_data.str;
+  }
 
 protected:
   virtual ThreadSharedVariant *createAnother(CVarRef source, bool serialized,
@@ -88,52 +97,25 @@ protected:
 
   virtual SharedVariant* getKeySV(ssize_t pos) const {
     ASSERT(is(KindOfArray));
-    if (m_data.map->isVector) return NULL;
-    else return m_data.map->keys[pos];
+    if (m_isVector) return NULL;
+    else return m_data.map->getKeyIndex(pos);
   }
 
 private:
-  class MapData {
+  class VectorData {
   public:
     size_t size;
-    bool isVector;
-    Int64ToIntMap *intMap;
-    StringDataToIntMap *strMap;
-    ThreadSharedVariant **keys;
     ThreadSharedVariant **vals;
 
-    MapData(size_t s, bool vector = false) : size(s), isVector(vector),
-      intMap(NULL), strMap(NULL) {
-      if (!vector) keys = new ThreadSharedVariant *[s];
+    VectorData(size_t s) : size(s) {
       vals = new ThreadSharedVariant *[s];
     }
 
-    ~MapData() {
+    ~VectorData() {
       for (size_t i = 0; i < size; i++) {
-        if (!isVector) keys[i]->decRef();
         vals[i]->decRef();
       }
-      if (intMap) delete intMap;
-      if (strMap) delete strMap;
-      if (!isVector) delete [] keys;
       delete [] vals;
-    }
-
-    void setVec(int p, ThreadSharedVariant *val) {
-      vals[p] = val;
-    }
-
-    void set(int p, ThreadSharedVariant *key, ThreadSharedVariant *val) {
-      keys[p] = key;
-      vals[p] = val;
-      if (key->is(KindOfInt64)) {
-        if (!intMap) intMap = new Int64ToIntMap(size);
-        (*intMap)[key->m_data.num] = p;
-      } else {
-        ASSERT(key->is(KindOfString));
-        if (!strMap) strMap = new StringDataToIntMap(size);
-        (*strMap)[key->m_data.str] = p;
-      }
     }
   };
 
@@ -141,8 +123,11 @@ private:
     int64 num;
     double dbl;
     StringData *str;
-    MapData* map;
+    ImmutableMap* map;
+    VectorData* vec;
   } m_data;
+
+  bool m_isVector;
   bool m_owner;
 };
 

@@ -81,17 +81,23 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
       }
 
       size_t size = arr->size();
-      m_data.map = new MapData(size, arr->isVectorData());
-
-      uint i = 0;
-      for (ArrayIter it(arr); !it.end(); it.next(), i++) {
-        ThreadSharedVariant* val = createAnother(it.second(), false, true);
-        if (val->shouldCache()) m_shouldCache = true;
-        if (m_data.map->isVector) {
-          m_data.map->setVec(i, val);
-        } else {
+      m_isVector = arr->isVectorData();
+      if (m_isVector) {
+        m_data.vec = new VectorData(size);
+        uint i = 0;
+        for (ArrayIter it(arr); !it.end(); it.next(), i++) {
+          ThreadSharedVariant* val = createAnother(it.second(), false, true);
+          if (val->shouldCache()) m_shouldCache = true;
+          m_data.vec->vals[i] = val;
+        }
+      } else {
+        m_data.map = new ImmutableMap(size);
+        uint i = 0;
+        for (ArrayIter it(arr); !it.end(); it.next(), i++) {
           ThreadSharedVariant* key = createAnother(it.first(), false);
-          m_data.map->set(i, key, val);
+          ThreadSharedVariant* val = createAnother(it.second(), false, true);
+          if (val->shouldCache()) m_shouldCache = true;
+          m_data.map->add(key, val);
         }
       }
       break;
@@ -201,7 +207,8 @@ ThreadSharedVariant::~ThreadSharedVariant() {
       }
 
       ASSERT(m_owner);
-      delete m_data.map;
+      if (m_isVector) delete m_data.vec;
+      else delete m_data.map;
     }
     break;
   default:
@@ -223,7 +230,8 @@ size_t ThreadSharedVariant::stringLength() const {
 
 size_t ThreadSharedVariant::arrSize() const {
   ASSERT(is(KindOfArray));
-  return m_data.map->size;
+  if (m_isVector) return m_data.vec->size;
+  return m_data.map->size();
 }
 
 int ThreadSharedVariant::getIndex(CVarRef key) {
@@ -233,31 +241,23 @@ int ThreadSharedVariant::getIndex(CVarRef key) {
   case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64: {
-    if (m_data.map->isVector) {
-      int index = key.getNumData();
-      if (index < 0 || (size_t) index >= m_data.map->size) return -1;
-      return index;
-    }
-    if (!m_data.map->intMap) return -1;
     int64 num = key.getNumData();
-    Int64ToIntMap::const_iterator it = m_data.map->intMap->find(num);
-    if (it == m_data.map->intMap->end()) return -1;
-    return it->second;
+    if (m_isVector) {
+      if (num < 0 || (size_t) num >= m_data.vec->size) return -1;
+      return num;
+    }
+    return m_data.map->indexOf(num);
   }
   case KindOfStaticString:
   case KindOfString: {
-    if (!m_data.map->strMap) return -1;
+    if (m_isVector) return -1;
     StringData *sd = key.getStringData();
-    StringDataToIntMap::const_iterator it = m_data.map->strMap->find(sd);
-    if (it == m_data.map->strMap->end()) return -1;
-    return it->second;
+    return m_data.map->indexOf(sd);
   }
   case LiteralString: {
-    if (!m_data.map->strMap) return -1;
+    if (m_isVector) return -1;
     StringData sd(key.getLiteralString(), AttachLiteral);
-    StringDataToIntMap::const_iterator it = m_data.map->strMap->find(&sd);
-    if (it == m_data.map->strMap->end()) return -1;
-    return it->second;
+    return m_data.map->indexOf(&sd);
   }
   default:
     // No other types are legitimate keys
@@ -269,7 +269,8 @@ int ThreadSharedVariant::getIndex(CVarRef key) {
 SharedVariant* ThreadSharedVariant::get(CVarRef key) {
   int idx = getIndex(key);
   if (idx != -1) {
-    return m_data.map->vals[idx];
+    if (m_isVector) return m_data.vec->vals[idx];
+    return m_data.map->getValIndex(idx);
   }
   return NULL;
 }
@@ -285,13 +286,13 @@ void ThreadSharedVariant::loadElems(ArrayData *&elems,
                                     bool keepRef /* = false */) {
   ASSERT(is(KindOfArray));
   uint count = arrSize();
-  ArrayInit ai(count, m_data.map->isVector, keepRef);
+  ArrayInit ai(count, m_isVector, keepRef);
   for (uint i = 0; i < count; i++) {
-    if (m_data.map->isVector) {
+    if (m_isVector) {
       ai.set(i, (int64)i, sharedMap.getValue(i), -1, true);
     } else {
-      ai.set(i, m_data.map->keys[i]->toLocal(), sharedMap.getValue(i), -1,
-             true);
+      ai.set(i, m_data.map->getKeyIndex(i)->toLocal(), sharedMap.getValue(i),
+             -1, true);
     }
   }
   elems = ai.create();

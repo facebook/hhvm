@@ -41,9 +41,9 @@ UrlFile::UrlFile(const char *method /* = "GET" */,
 
 bool UrlFile::open(CStrRef url, CStrRef mode) {
   if (strchr(mode, '+') || strchr(mode, 'a') || strchr(mode, 'w')) {
-    string msg("cannot open a url stream for write/append operation: ");
+    std::string msg = "cannot open a url stream for write/append operation: ";
     msg += url.c_str();
-    raise_warning(msg.c_str());
+    m_error = msg;
     return false;
   }
   HttpClient http(m_timeout, m_maxRedirect);
@@ -83,6 +83,7 @@ bool UrlFile::open(CStrRef url, CStrRef mode) {
     m_malloced = true;
     return true;
   } else {
+    m_error = http.getLastError().c_str();
     return false;
   }
 }
@@ -97,6 +98,10 @@ bool UrlFile::flush() {
   ASSERT(m_len != -1);
   throw FatalErrorException((string("cannot flush a url stream: ") +
                              m_name).c_str());
+}
+
+String UrlFile::getLastError() {
+  return m_error;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

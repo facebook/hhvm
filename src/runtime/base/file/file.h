@@ -122,6 +122,11 @@ public:
    */
   Array readCSV(int64 length = 0, char delimiter = ',', char enclosure = '"');
 
+  /**
+   * Return the last error we know about
+   */
+  String getLastError();
+
 protected:
   int m_fd;      // file descriptor
   bool m_closed; // whether close() was called

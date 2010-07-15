@@ -40,6 +40,7 @@ public:
   virtual bool open(CStrRef filename, CStrRef mode);
   virtual int64 writeImpl(const char *buffer, int64 length);
   virtual bool flush();
+  String getLastError();
 
 private:
   bool m_get;
@@ -47,6 +48,7 @@ private:
   String m_postData;
   int m_maxRedirect;
   int m_timeout;
+  std::string m_error;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

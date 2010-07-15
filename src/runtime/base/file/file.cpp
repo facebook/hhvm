@@ -180,7 +180,7 @@ Variant File::Open(CStrRef filename, CStrRef mode,
     Object obj(file);
     bool ret = file->open(filename, mode);
     if (!ret) {
-      raise_warning("%s", Util::safe_strerror(errno).c_str());
+      raise_warning("%s", file->getLastError().c_str());
       return false;
     }
     return obj;
@@ -213,7 +213,7 @@ Variant File::Open(CStrRef filename, CStrRef mode,
     Object obj(file);
     bool ret = file->open(File::TranslatePath(name), mode);
     if (!ret) {
-      raise_warning("%s", Util::safe_strerror(errno).c_str());
+      raise_warning("%s", file->getLastError().c_str());
       return false;
     }
     return obj;
@@ -223,7 +223,7 @@ Variant File::Open(CStrRef filename, CStrRef mode,
   Object obj(file);
   bool ret = file->open(File::TranslatePath(name), mode);
   if (!ret) {
-    raise_warning("%s", Util::safe_strerror(errno).c_str());
+    raise_warning("%s", file->getLastError().c_str());
     return false;
   }
   return obj;
@@ -835,6 +835,11 @@ Array File::readCSV(int64 length /* = 0 */, char delimiter_char /* = ',' */,
   free(temp);
   return ret;
 }
+
+String File::getLastError() {
+  return Util::safe_strerror(errno);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

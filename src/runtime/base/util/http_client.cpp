@@ -178,7 +178,6 @@ int HttpClient::impl(const char *url, const char *data, int size,
   long code = 0;
   if (error_no != CURLE_OK) {
     m_error = error_str;
-    Logger::Error("HttpClient::get(%s) returned error: %s", url, error_str);
   } else {
     curl_easy_getinfo(cp, CURLINFO_RESPONSE_CODE, &code);
   }

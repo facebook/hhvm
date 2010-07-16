@@ -69,7 +69,7 @@ public:
   virtual Variant getKey(ssize_t pos) const {
     ASSERT(is(KindOfArray));
     if (m_isVector) {
-      ASSERT(pos < m_data.vec->size);
+      ASSERT(pos < (ssize_t) m_data.vec->size);
       return pos;
     }
     return m_data.map->getKeyIndex(pos)->toLocal();
@@ -77,7 +77,7 @@ public:
   virtual SharedVariant* getValue(ssize_t pos) const {
     ASSERT(is(KindOfArray));
     if (m_isVector) {
-      ASSERT(pos < m_data.vec->size);
+      ASSERT(pos < (ssize_t) m_data.vec->size);
       return m_data.vec->vals[pos];
     }
     return m_data.map->getValIndex(pos);

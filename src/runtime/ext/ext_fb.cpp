@@ -738,19 +738,20 @@ bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
     return false;
   }
 
-  if (!check_renamed_function(orig_func_name.data())) {
+  if (function_exists(new_func_name)) {
+    raise_warning("fb_rename_function(%s, %s) failed: %s already exists!",
+                  orig_func_name.data(), new_func_name.data(),
+                  new_func_name.data());
+    return false;
+  }
+
+  if (!check_renamed_function(orig_func_name.data()) &&
+      !check_renamed_function(new_func_name.data())) {
     raise_error("fb_rename_function(%s, %s) failed: %s is not allowed to "
                 "rename. Please add it to the list provided to "
                 "fb_renamed_functions().",
                 orig_func_name.data(), new_func_name.data(),
                 orig_func_name.data());
-    return false;
-  }
-
-  if (function_exists(new_func_name)) {
-    raise_warning("fb_rename_function(%s, %s) failed: %s already exists!",
-                  orig_func_name.data(), new_func_name.data(),
-                  new_func_name.data());
     return false;
   }
 

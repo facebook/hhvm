@@ -861,7 +861,9 @@ private:
   Profiler *m_profiler;
 };
 
+#ifdef HOTPROFILER
 IMPLEMENT_STATIC_REQUEST_LOCAL(ProfilerFactory, s_factory);
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // main functions

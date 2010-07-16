@@ -15,6 +15,7 @@
 */
 
 #include <runtime/base/util/string_buffer.h>
+#include <runtime/base/util/alloc.h>
 #include <runtime/base/file/file.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/tainting.h>
@@ -25,7 +26,7 @@ namespace HPHP {
 StringBuffer::StringBuffer(int initialSize /* = 1024 */)
     : m_initialSize(initialSize), m_size(initialSize), m_pos(0) {
   ASSERT(initialSize > 0);
-  m_buffer = (char *)malloc(initialSize + 1);
+  m_buffer = (char *)Util::safe_malloc(initialSize + 1);
   #ifdef TAINTED
   m_tainted = false;
   m_place_tainted.name = NULL;
@@ -38,7 +39,7 @@ StringBuffer::StringBuffer(const char *filename)
   struct stat sb;
   if (stat(filename, &sb) == 0) {
     m_size = sb.st_size;
-    m_buffer = (char *)malloc(m_size + 1);
+    m_buffer = (char *)Util::safe_malloc(m_size + 1);
 
     FILE *f = fopen(filename, "r");
     if (f) {
@@ -162,10 +163,10 @@ void StringBuffer::resize(int size) {
 char *StringBuffer::reserve(int size) {
   if (m_size < m_pos + size) {
     m_size = m_pos + size;
-    m_buffer = (char *)realloc(m_buffer, m_size + 1);
+    m_buffer = (char *)Util::safe_realloc(m_buffer, m_size + 1);
   } else if (m_buffer == NULL) {
     m_size = m_initialSize;
-    m_buffer = (char *)malloc(m_size + 1);
+    m_buffer = (char *)Util::safe_malloc(m_size + 1);
   }
   return m_buffer + m_pos;
 }
@@ -189,7 +190,7 @@ void StringBuffer::append(int64 n) {
 void StringBuffer::append(char ch) {
   if (m_buffer == NULL) {
     m_size = m_initialSize;
-    m_buffer = (char *)malloc(m_size + 1);
+    m_buffer = (char *)Util::safe_malloc(m_size + 1);
   }
 
   if (m_pos + 1 > m_size) {
@@ -212,7 +213,7 @@ void StringBuffer::append(const char *s, int len) {
     if (len > m_size) {
       m_size = len;
     }
-    m_buffer = (char *)malloc(m_size + 1);
+    m_buffer = (char *)Util::safe_malloc(m_size + 1);
   }
 
   ASSERT(s);
@@ -235,7 +236,7 @@ void StringBuffer::printf(const char *format, ...) {
     va_list v;
     va_copy(v, ap);
 
-    char *buf = (char*)malloc(len);
+    char *buf = (char*)Util::safe_malloc(len);
     if (vsnprintf(buf, len, format, v) < len) {
       append(buf);
       printed = true;
@@ -254,7 +255,7 @@ void StringBuffer::read(FILE* in, int page_size /* = 1024 */) {
 
   if (m_buffer == NULL) {
     m_size = m_initialSize;
-    m_buffer = (char *)malloc(m_size + 1);
+    m_buffer = (char *)Util::safe_malloc(m_size + 1);
   }
 
   while (true) {
@@ -275,7 +276,7 @@ void StringBuffer::read(File* in, int page_size /* = 1024 */) {
 
   if (m_buffer == NULL) {
     m_size = m_initialSize;
-    m_buffer = (char *)malloc(m_size + 1);
+    m_buffer = (char *)Util::safe_malloc(m_size + 1);
   }
 
   while (true) {
@@ -291,9 +292,17 @@ void StringBuffer::read(File* in, int page_size /* = 1024 */) {
 }
 
 void StringBuffer::grow(int minSize) {
-  m_size <<= 1;
-  if (m_size < minSize) m_size = minSize;
-  m_buffer = (char *)realloc(m_buffer, m_size + 1);
+  int new_size = m_size;
+  new_size <<= 1;
+  if (new_size < minSize) {
+    new_size = minSize;
+  }
+
+  char *new_buffer;
+  new_buffer = (char *)Util::safe_realloc(m_buffer, new_size + 1);
+
+  m_size = new_size;
+  m_buffer = new_buffer;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

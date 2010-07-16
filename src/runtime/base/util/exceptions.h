@@ -224,6 +224,12 @@ public:
     : ExtendedException("File could not be loaded: %s", file) {}
 };
 
+class OutOfMemoryException : public FatalErrorException {
+public:
+  OutOfMemoryException(const char *msg, int memory)
+    : FatalErrorException(msg, memory) {}
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

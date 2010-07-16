@@ -172,7 +172,7 @@ bool VirtualHost::match(const string &host) const {
                                     AttachLiteral));
     return ret.toInt64() > 0;
   } else if (!m_prefix.empty()) {
-    return strncmp(host.c_str(), m_prefix.c_str(), m_prefix.size()) == 0;
+    return strncasecmp(host.c_str(), m_prefix.c_str(), m_prefix.size()) == 0;
   }
   return true;
 }

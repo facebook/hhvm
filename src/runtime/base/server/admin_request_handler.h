@@ -46,8 +46,12 @@ private:
   bool handleHeapProfilerRequest(const std::string &cmd, Transport *transport);
 #endif
 
-  static DECLARE_THREAD_LOCAL(AccessLog::ThreadData, s_accessLog_tl);
+  static DECLARE_THREAD_LOCAL(AccessLog::ThreadData, s_accessLogThreadData);
   static AccessLog s_accessLog;
+
+  static AccessLog::ThreadData* getAccessLogThreadData() {
+    return s_accessLogThreadData.get();
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

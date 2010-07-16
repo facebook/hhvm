@@ -31,8 +31,9 @@ public:
     FILE *log;
     int64 startTime;
   };
-  AccessLog(ThreadLocal<ThreadData> & tl) :
-      m_initialized(false), m_threadData(tl) {}
+  typedef ThreadData* (*GetThreadDataFunc)();
+  AccessLog(GetThreadDataFunc f) :
+      m_initialized(false), m_fGetThreadData(f) {}
   ~AccessLog();
   bool init(const std::string &defaultFormat,
             std::vector<std::pair<std::string, std::string> > &files);
@@ -56,7 +57,7 @@ private:
 
   std::vector<FILE*> m_output;
   bool m_initialized;
-  ThreadLocal<ThreadData> & m_threadData;
+  GetThreadDataFunc m_fGetThreadData;
   std::string m_defaultFormat;
   std::vector<std::pair<std::string, std::string> > m_files;
 

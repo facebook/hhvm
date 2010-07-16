@@ -37,8 +37,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_THREAD_LOCAL(AccessLog::ThreadData,
-                       HttpRequestHandler::s_accessLog_tl);
-AccessLog HttpRequestHandler::s_accessLog(HttpRequestHandler::s_accessLog_tl);
+                       HttpRequestHandler::s_accessLogThreadData);
+
+AccessLog HttpRequestHandler::s_accessLog(
+  &(HttpRequestHandler::getAccessLogThreadData));
 
 HttpRequestHandler::HttpRequestHandler()
   : m_pathTranslation(true) {

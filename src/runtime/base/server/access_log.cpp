@@ -86,7 +86,7 @@ void AccessLog::log(Transport *transport) {
   ASSERT(transport);
   if (!m_initialized) return;
 
-  FILE *threadLog = m_threadData->log;
+  FILE *threadLog = m_fGetThreadData()->log;
   if (threadLog) {
     writeLog(transport, threadLog,
              m_defaultFormat.c_str());
@@ -233,7 +233,7 @@ bool AccessLog::genField(ostringstream &out, const char* &format,
     }
     break;
   case 'T':
-    out << TimeStamp::Current() - m_threadData->startTime;
+    out << TimeStamp::Current() - m_fGetThreadData()->startTime;
     break;
   case 'r':
     {
@@ -275,15 +275,15 @@ bool AccessLog::genField(ostringstream &out, const char* &format,
 
 void AccessLog::onNewRequest() {
   if (!m_initialized) return;
-  ThreadData *threadData = m_threadData.get();
+  ThreadData *threadData = m_fGetThreadData();
   threadData->startTime = TimeStamp::Current();
 }
 
 bool AccessLog::setThreadLog(const char *file) {
-  return (m_threadData->log = fopen(file, "a")) != NULL;
+  return (m_fGetThreadData()->log = fopen(file, "a")) != NULL;
 }
 void AccessLog::clearThreadLog() {
-  FILE* &threadLog = m_threadData->log;
+  FILE* &threadLog = m_fGetThreadData()->log;
   if (threadLog) {
     fclose(threadLog);
   }

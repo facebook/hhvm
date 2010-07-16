@@ -50,8 +50,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_THREAD_LOCAL(AccessLog::ThreadData,
-                       AdminRequestHandler::s_accessLog_tl);
-AccessLog AdminRequestHandler::s_accessLog(AdminRequestHandler::s_accessLog_tl);
+                       AdminRequestHandler::s_accessLogThreadData);
+
+AccessLog AdminRequestHandler::s_accessLog(
+  &(AdminRequestHandler::getAccessLogThreadData));
 
 AdminRequestHandler::AdminRequestHandler() {
 }

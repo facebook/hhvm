@@ -14107,6 +14107,12 @@ Variant c_simplexmlelement::o_invoke(const char *s, CArrRef params, int64 hash, 
         return (t_children(params[0], params[1]));
       }
       break;
+    case 46:
+      HASH_GUARD(0x4FE08FDDAE2178EELL, __isset) {
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        return (t___isset(params[0]));
+      }
+      break;
     case 49:
       HASH_GUARD(0x0D08AA5F0B2F34F1LL, getdocnamespaces) {
         if (count > 1) return throw_toomany_arguments("getdocnamespaces", 1, 1);
@@ -14258,6 +14264,12 @@ Variant c_simplexmlelement::o_invoke_few_args(const char *s, int64 hash, int cou
         if (count <= 0) return (t_children());
         if (count == 1) return (t_children(a0));
         return (t_children(a0, a1));
+      }
+      break;
+    case 46:
+      HASH_GUARD(0x4FE08FDDAE2178EELL, __isset) {
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        return (t___isset(a0));
       }
       break;
     case 49:
@@ -14648,6 +14660,24 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         if (count <= 0) return (t_children());
         else if (count == 1) return (t_children(a0));
         else return (t_children(a0, a1));
+      }
+      break;
+    case 46:
+      HASH_GUARD(0x4FE08FDDAE2178EELL, __isset) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___isset(a0));
       }
       break;
     case 49:

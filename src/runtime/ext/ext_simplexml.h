@@ -74,6 +74,7 @@ class c_simplexmlelement : public ExtObjectData {
   public: Variant t___get(Variant name);
   public: Variant doGet(Variant v_name, bool error);
   public: Variant t___set(Variant name, Variant value);
+  public: bool t___isset(Variant name);
   public: Variant t___unset(Variant name);
   public: Variant t___destruct();
 

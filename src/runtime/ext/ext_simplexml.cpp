@@ -700,8 +700,24 @@ Variant c_simplexmlelement::t___unset(Variant name) {
     }
   }
 
-  m_children.remove(name);
+  if (m_is_attribute) {
+    m_attributes.remove(name);
+  } else {
+    m_children.remove(name);
+  }
   return null;
+}
+
+bool c_simplexmlelement::t___isset(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::__isset);
+  if (m_node) {
+    if (m_is_attribute) {
+      return m_attributes.toArray().exists(name);
+    } else {
+      return m_children.toArray().exists(name);
+    }
+  }
+  return false;
 }
 
 static void change_node_zval(xmlNodePtr node, CStrRef value) {

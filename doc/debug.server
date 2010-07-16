@@ -1,0 +1,19 @@
+
+<h2>How to Debug Server Problems</h2>
+
+1. Crashing and other memory problems
+
+Normally a crash generates /tmp/stacktrace.<pid>.log file that has stacktrace
+where crash happens. Sometimes, a crash can happen badly without giving crash
+log a chance to generate a readable stack. Then use ResourceLimit.CoreFileSize
+to turn on coredumps to capture a crash.
+
+Another way is to use RecordInput option to capture bad HTTP requests. Then
+replay with "-m replay" option from the compiled program at command line. This
+way, one can run it under valgrind to detect memory problems.
+
+2. Server hanging and other status problems
+
+Admin server commands provide status information that may be useful for
+debugging, esp. /status.json command that will tell network I/O status of each
+thread.

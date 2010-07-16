@@ -33,10 +33,12 @@ $topics =
         'Python' => 'ffi.python',
       ),
       'Debugging' => array(
+        'Server' => 'debug.server',
         'CPU Profiling' => 'debug.profile',
         'Memory leak detection' => 'debug.leak',
         'Mutex contention' => 'debug.mutex',
         'Useful gdb commands' => 'debug.gdb',
+        'Useful Linux commands' => 'debug.linux',
       ),
       'Development' => array(
         'Coding guidelines' => 'coding_guideline',

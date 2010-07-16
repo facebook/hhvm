@@ -8,13 +8,21 @@ running old instance of server on a different port for longer time before
 shutting down. This way, on new server, if a page detects that the page needs
 to be served from old version, it can simply call:
 
-  if (dangling_server_proxy_request()) {
+  if (dangling_server_proxy_old_request()) {
     exit;
   }
   // otherwise continue executing the page with new version
 
-What dangling_server_proxy_request() will do is to send an HTTP request to
+What dangling_server_proxy_old_request() will do is to send an HTTP request to
 the local dangling server with URL, headers and POST data of current request,
 and update current response's headers and output buffer with what it gets. It
 will return false, if it failed to contact the dangling server that may have
 shut down eventually.
+
+Similarly, an old server can call dangling_server_proxy_new_request(), if it
+knows which servers will surely get new version of the software first:
+
+  if (dangling_server_proxy_new_request($host)) {
+    exit;
+  }
+  // otherwise, do something about it

@@ -1,0 +1,28 @@
+
+<h2>Useful Linux Commands</h2>
+
+1. Who's listening on port 80?
+
+  sudo lsof -t -i :80
+
+2. Who's talking to a remote port 11300?
+
+  netstat -pal | grep 11300
+
+3. Incoming web requests
+
+  ngrep -q "POST|GET"
+  ngrep -q "POST|GET" | egrep "(POST|GET) /"
+
+4. Incoming and outgoing web traffic
+
+  tcpdump "port 80" -X -s 1024
+
+5. Who's blocking port access?
+
+  /sbin/iptables -L
+  /sbin/iptables -F    # flush iptables
+
+6. Who'e the main www process?
+
+  ps -e | grep www

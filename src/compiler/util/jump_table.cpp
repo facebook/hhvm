@@ -36,13 +36,11 @@ JumpTable::JumpTable(CodeGenerator &cg,
   } else {
     m_cg_printf("int64 ");
   }
-  m_cg_printf("hash = hash_string%s(", caseInsensitive ? "_i" : "");
   if (useString) {
-    m_cg_printf("s.data(), s.length()");
+    m_cg_printf("hash = StringData::Hash(s.get());\n");
   } else {
-    m_cg_printf("s");
+    m_cg_printf("hash = hash_string(s);\n");
   }
-  m_cg_printf(");\n");
   m_cg.printStartOfJumpTable(tableSize);
   m_iter = m_table.begin();
   if (ready()) {

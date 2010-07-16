@@ -158,8 +158,9 @@ class soapHeader : public ResourceData {
 public:
   DECLARE_OBJECT_ALLOCATION(soapHeader);
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  virtual const char *o_getClassName() const { return "soapHeader";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 
   sdlFunction                      *function;
   String                            function_name;

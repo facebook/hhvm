@@ -57,6 +57,10 @@ public:
 
   const char* stringData() const;
   size_t stringLength() const;
+  virtual int64 stringHash() const {
+    ASSERT(is(KindOfString));
+    return StringData::Hash(m_data.str);
+  }
 
   size_t arrSize() const;
   int getIndex(CVarRef key);

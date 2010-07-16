@@ -140,6 +140,12 @@ ArrayData *MutableArrayIter::getData() {
 ///////////////////////////////////////////////////////////////////////////////
 // ObjectArrayIter
 
+static StaticString s_rewind("rewind");
+static StaticString s_valid("valid");
+static StaticString s_next("next");
+static StaticString s_key("key");
+static StaticString s_current("current");
+
 ObjectArrayIter::ObjectArrayIter(ObjectData *obj,
                                  Variant *iterator /* = NULL */)
   : m_obj(obj), m_iterator(NULL) {
@@ -150,7 +156,7 @@ ObjectArrayIter::ObjectArrayIter(ObjectData *obj,
     *m_iterator = *iterator;
     // m_iterator from IteratorAggregate only, no need to rewind
   } else {
-    m_obj->o_invoke("rewind", Array(), -1);
+    m_obj->o_invoke(s_rewind, Array(), -1);
   }
 }
 
@@ -159,23 +165,23 @@ ObjectArrayIter::~ObjectArrayIter() {
 }
 
 bool ObjectArrayIter::end() {
-  return !m_obj->o_invoke("valid", Array(), -1);
+  return !m_obj->o_invoke(s_valid, Array(), -1);
 }
 
 void ObjectArrayIter::next() {
-  m_obj->o_invoke("next", Array(), -1);
+  m_obj->o_invoke(s_next, Array(), -1);
 }
 
 Variant ObjectArrayIter::first() {
-  return m_obj->o_invoke("key", Array(), -1);
+  return m_obj->o_invoke(s_key, Array(), -1);
 }
 
 Variant ObjectArrayIter::second() {
-  return m_obj->o_invoke("current", Array(), -1);
+  return m_obj->o_invoke(s_current, Array(), -1);
 }
 
 void ObjectArrayIter::second(Variant & v) {
-  v = m_obj->o_invoke("current", Array(), -1);
+  v = m_obj->o_invoke(s_current, Array(), -1);
 }
 
 CVarRef ObjectArrayIter::secondRef() {

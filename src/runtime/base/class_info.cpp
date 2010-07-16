@@ -314,7 +314,7 @@ bool ClassInfo::derivesFromImpl(const char *name, bool considerInterface) const 
   }
 
   // We don't support redeclared parents anyway.
-  const ClassInfo *parent = FindClass(getParentClass());
+  const ClassInfo *parent = getParentClassInfo();
   if (parent && parent->derivesFromImpl(name, considerInterface)) {
     return true;
   }
@@ -368,7 +368,7 @@ ClassInfo::MethodInfo *ClassInfo::hasMethod(const char *name,
     }
     return m;
   }
-  const ClassInfo *parent = FindClass(getParentClass());
+  const ClassInfo *parent = getParentClassInfo();
   if (parent) return parent->hasMethod(name, classInfo);
   return NULL;
 }

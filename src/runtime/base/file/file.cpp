@@ -43,6 +43,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
+StaticString File::s_class_name("File");
+
 String File::TranslatePath(CStrRef filename, bool useFileCache /* = false */) {
   String canonicalized(Util::canonicalize(string(filename.data(),
                                                  filename.size())));

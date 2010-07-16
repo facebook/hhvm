@@ -63,10 +63,13 @@ public:
   int64 key;
   int id;
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "MessageQueue";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 };
 IMPLEMENT_OBJECT_ALLOCATION(MessageQueue)
+
+StaticString MessageQueue::s_class_name("MessageQueue");
 
 Variant f_msg_get_queue(int64 key, int64 perms /* = 0666 */) {
   int id = msgget(key, 0);
@@ -272,8 +275,9 @@ public:
   int count;        // Acquire count for auto-release.
   int auto_release; // flag that says to auto-release.
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "Semaphore";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 
   bool op(bool acquire) {
     struct sembuf sop;
@@ -329,6 +333,8 @@ public:
     semop(semid, sop, opcount);
   }
 };
+
+StaticString Semaphore::s_class_name("Semaphore");
 
 bool f_sem_acquire(CObjRef sem_identifier) {
   return sem_identifier.getTyped<Semaphore>()->op(true);

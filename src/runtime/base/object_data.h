@@ -93,7 +93,7 @@ class ObjectData : public Countable {
   virtual ObjectData *getRedeclaredParent() const { return 0; }
 
   // class info
-  virtual const char *o_getClassName() const = 0;
+  virtual CStrRef o_getClassName() const = 0;
   virtual bool isResource() const { return false;}
   virtual int64 o_toInt64() const { return 1;}
   bool o_isClass(const char *s) const;
@@ -141,20 +141,28 @@ class ObjectData : public Countable {
 
   // properties
   virtual Array o_toArray() const;
-  virtual Array o_toIterArray(const char *context, bool getRef = false);
+  virtual Array o_toIterArray(CStrRef context, bool getRef = false);
   virtual Array o_getDynamicProperties() const;
-  virtual bool o_exists(CStrRef s, int64 hash,
-                        const char *context = NULL) const;
+  bool o_exists(CStrRef s, int64 hash, CStrRef context = null_string) const;
+  virtual bool o_exists(CStrRef prop, int64 phash,
+                        const char *context, int64 hash) const;
   virtual bool o_existsPublic(CStrRef s, int64 hash) const;
-  virtual Variant o_get(CStrRef s, int64 hash, bool error = true,
-                        const char *context = NULL);
+  Variant o_get(CStrRef s, int64 hash, bool error = true,
+                CStrRef context = null_string);
+  virtual Variant o_get(CStrRef prop, int64 phash, bool error,
+                        const char *context, int64 hash);
   virtual Variant o_getPublic(CStrRef s, int64 hash, bool error = true);
-  virtual Variant o_getUnchecked(CStrRef s, int64 hash,
-                                 const char *context = NULL);
-  virtual Variant o_set(CStrRef s, int64 hash, CVarRef v, bool forInit = false,
-                        const char *context = NULL);
+  Variant o_getUnchecked(CStrRef s, int64 hash, CStrRef context = null_string);
+  virtual Variant o_getUnchecked(CStrRef prop, int64 phash,
+                                 const char *context, int64 hash);
+  Variant o_set(CStrRef s, int64 hash, CVarRef v, bool forInit = false,
+                CStrRef context = null_string);
+  virtual Variant o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit,
+                        const char *context, int64 hash);
   virtual Variant o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit);
-  virtual Variant &o_lval(CStrRef s, int64 hash, const char *context = NULL);
+  Variant &o_lval(CStrRef s, int64 hash, CStrRef context = null_string);
+  virtual Variant &o_lval(CStrRef prop, int64 phash,
+                          const char *context, int64 hash);
   virtual Variant &o_lvalPublic(CStrRef s, int64 hash);
 
   virtual void o_setArray(CArrRef properties);
@@ -166,7 +174,7 @@ class ObjectData : public Countable {
    * This is used for deciding what property_exists() returns and whether or
    * not this property should be part of an iteration in foreach ($obj as ...)
    */
-  bool o_propExists(CStrRef s, int64 hash = -1, const char *context = NULL);
+  bool o_propExists(CStrRef s, int64 hash = -1, CStrRef context = null_string);
 
   static Object FromArray(ArrayData *properties);
 
@@ -190,6 +198,17 @@ class ObjectData : public Countable {
                                      const Eval::FunctionCallExpression *call,
                                      int64 hash,
                                      bool fatal /* = true */);
+
+  // method invocation with CStrRef
+  Variant o_invoke(CStrRef s, CArrRef params, int64 hash = -1,
+                   bool fatal = true);
+  Variant o_root_invoke(CStrRef s, CArrRef params, int64 hash = -1,
+                        bool fatal = false);
+  Variant o_invoke_few_args(CStrRef s, int64 hash, int count,
+                            INVOKE_FEW_ARGS_DECL_ARGS);
+  Variant o_root_invoke_few_args(CStrRef s, int64 hash, int count,
+                                 INVOKE_FEW_ARGS_DECL_ARGS);
+
   // misc
   Variant o_throw_fatal(const char *msg);
   virtual void serialize(VariableSerializer *serializer) const;

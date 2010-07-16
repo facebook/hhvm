@@ -577,6 +577,9 @@ String get_static_class_name(CVarRef objOrClassName);
 
 Variant f_call_user_func_array(CVarRef function, CArrRef params);
 
+Variant invoke(CStrRef function, CArrRef params, int64 hash = -1,
+               bool tryInterp = true, bool fatal = true);
+
 /**
  * Fallback when a dynamic function call fails to find a user function
  * matching the name.  If no handlers are able to
@@ -680,9 +683,9 @@ Variant require(CStrRef file, bool once = false,
  * For function interception or stubout support.
  */
 void check_renamed_functions(CArrRef names);
-bool check_renamed_function(const char *name);
-hphp_string_imap<std::string> &get_renamed_functions();
-hphp_string_iset &get_unmapped_functions();
+bool check_renamed_function(CStrRef name);
+StringIMap<String> &get_renamed_functions();
+StringISet &get_unmapped_functions();
 
 inline void assignCallTemp(Variant& temp, CVarRef val) {
   temp.unset();

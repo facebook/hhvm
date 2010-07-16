@@ -67,7 +67,7 @@ Variant MethodStatement::invokeInstance(CObjRef obj, CArrRef params,
 #endif
   MethScopeVariableEnvironment env(this, params.size());
   env.setCurrentObject(obj);
-  EvalFrameInjection fi(m_class->name().c_str(), m_fullName.c_str(), env,
+  EvalFrameInjection fi(m_class->nameString(), m_fullName.c_str(), env,
                         loc()->file, obj.get());
   if (m_ref) {
     return ref(invokeImpl(env, params));
@@ -91,7 +91,7 @@ invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
   MethScopeVariableEnvironment fenv(this, 0);
   directBind(env, caller, fenv);
   fenv.setCurrentObject(obj);
-  EvalFrameInjection fi(m_class->name().c_str(), m_fullName.c_str(), fenv,
+  EvalFrameInjection fi(m_class->nameString(), m_fullName.c_str(), fenv,
                         loc()->file, obj.get());
   if (m_ref) {
     return ref(evalBody(fenv));
@@ -110,7 +110,7 @@ Variant MethodStatement::invokeStatic(const char* cls, CArrRef params,
 #endif
   MethScopeVariableEnvironment env(this, params.size());
   env.setCurrentClass(cls);
-  EvalFrameInjection fi(m_class->name().c_str(), m_fullName.c_str(), env,
+  EvalFrameInjection fi(m_class->nameString(), m_fullName.c_str(), env,
                         loc()->file);
   if (m_ref) {
     return ref(invokeImpl(env, params));
@@ -132,7 +132,7 @@ invokeStaticDirect(const char* cls, VariableEnvironment &env,
 #ifdef HOTPROFILER
   ProfilerInjection pi(info, m_fullName.c_str());
 #endif
-  EvalFrameInjection fi(m_class->name().c_str(), m_fullName.c_str(), fenv,
+  EvalFrameInjection fi(m_class->nameString(), m_fullName.c_str(), fenv,
                         loc()->file);
   if (m_ref) {
     return ref(evalBody(fenv));

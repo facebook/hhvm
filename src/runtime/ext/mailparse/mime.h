@@ -46,10 +46,9 @@ public:
 
   MimePart();
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  virtual const char *o_getClassName() const {
-    return "mailparse_mail_structure";
-  }
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 
   bool parse(const char *buf, int bufsize);
   Variant extract(CVarRef filename, CVarRef callbackfunc, int decode,

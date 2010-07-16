@@ -331,13 +331,16 @@ public:
 
   XboxTransport *getJob() { return m_job;}
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  virtual const char *o_getClassName() const { return "XboxTask";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 
 private:
   XboxTransport *m_job;
 };
 IMPLEMENT_OBJECT_ALLOCATION(XboxTask)
+
+StaticString XboxTask::s_class_name("XboxTask");
 
 ///////////////////////////////////////////////////////////////////////////////
 

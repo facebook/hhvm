@@ -46,12 +46,15 @@ public:
     }
   }
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "MCrypt";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 
   MCRYPT m_td;
   bool m_init;
 };
+
+StaticString MCrypt::s_class_name("MCrypt");
 
 typedef enum {
   RANDOM = 0,

@@ -22,6 +22,7 @@
 #include <runtime/base/memory/unsafe_pointer.h>
 #include <runtime/base/memory/leak_detectable.h>
 #include <util/mutex.h>
+#include <util/hash.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,6 +55,9 @@ public:
 
   virtual const char* stringData() const = 0;
   virtual size_t stringLength() const = 0;
+  virtual int64 stringHash() const {
+    return hash_string(stringData(), stringLength());
+  }
 
   virtual size_t arrSize() const = 0;
 

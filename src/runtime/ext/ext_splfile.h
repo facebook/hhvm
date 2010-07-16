@@ -32,8 +32,9 @@ public:
   SplFileInfo() {}
   SplFileInfo(CStrRef fileName) : m_fileName(fileName) {}
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  virtual const char *o_getClassName() const { return "splfileinfo";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
   virtual bool isResource() const { return !m_fileName.empty();}
 
   const std::string &getFileName() { return m_fileName;}
@@ -49,8 +50,9 @@ public:
     m_file = f.isNull() ? Object() : f.toObject();
   }
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  virtual const char *o_getClassName() const { return "splfileobject";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
   virtual bool isResource() const { return !m_file.isNull();}
   Object getFile() { return m_file;}
 private:

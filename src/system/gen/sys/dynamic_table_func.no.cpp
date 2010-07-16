@@ -12888,7 +12888,7 @@ Variant i_fb_call_user_func_array_safe(CArrRef params) {
   return (f_fb_call_user_func_array_safe(params[0], params[1]));
 }
 Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 4095) {
     case 1:
       HASH_INVOKE(0x4F7230DC25F0E001LL, magicknormalizeimage);
@@ -59104,7 +59104,7 @@ Variant ei_fb_call_user_func_array_safe(Eval::VariableEnvironment &env, const Ev
   return (x_fb_call_user_func_array_safe(a0, a1));
 }
 Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 4095) {
     case 1:
       HASH_INVOKE_FROM_EVAL(0x4F7230DC25F0E001LL, magicknormalizeimage);

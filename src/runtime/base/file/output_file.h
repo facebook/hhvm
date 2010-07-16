@@ -34,8 +34,9 @@ public:
 
   bool valid() const { return !m_closed;}
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "OutputFile";}
+  CStrRef o_getClassName() const { return s_class_name; }
 
   // implementing File
   virtual bool open(CStrRef filename, CStrRef mode);

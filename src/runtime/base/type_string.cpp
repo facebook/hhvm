@@ -28,6 +28,7 @@ namespace HPHP {
 #define SERIALIZE_MAX_SIZE (64*1024*1024)
 
 const String null_string = String();
+const StaticString empty_string("");
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics

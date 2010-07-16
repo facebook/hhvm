@@ -1187,8 +1187,15 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
     if (fewArgs &&
         func->getMinParamCount() > Option::InvokeFewArgsCount)
       continue;
-    cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
-                   hash_string_i(name), name);
+    string origName = func->getOriginalName();
+    if (cg.checkLiteralString(origName, ar) >= 0) {
+      cg_indentBegin("HASH_GUARD_LITSTR(0x%016llXLL, ", hash_string_i(name));
+      cg_printString(origName, ar);
+      cg_printf(") {\n");
+    } else {
+      cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
+                     hash_string_i(name), name);
+    }
     const char *extra = NULL;
     const char *prefix = Option::MethodPrefix;
     if (func->isStatic()) {

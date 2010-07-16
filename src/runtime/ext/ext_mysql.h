@@ -94,8 +94,9 @@ public:
   void setLastError(const char *func);
   void close();
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  virtual const char *o_getClassName() const { return "MySQL";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
   virtual bool isResource() const { return m_conn != NULL;}
 
   bool connect(CStrRef host, int port, CStrRef socket, CStrRef username,
@@ -144,8 +145,9 @@ public:
   MySQLResult(MYSQL_RES *res, bool localized = false);
   virtual ~MySQLResult();
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "MySQLResult";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 
   void close() {
     if (m_res) {

@@ -83,11 +83,6 @@ class StringData {
    */
   void destruct() const { if (!isStatic()) delete this; }
 
-  int64 getStaticHash() const {
-    ASSERT(!isShared() && isStatic());
-    return m_hash & 0x7fffffffffffffffull;
-  }
-
   StringData() : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
     #ifdef TAINTED
     m_tainted = false;
@@ -170,6 +165,29 @@ class StringData {
   double toDouble () const;
   DataType toNumeric(int64 &ival, double &dval) const;
 
+  static size_t Hash(const StringData *s) {
+    if (s->isStatic()) return s->getPrecomputedHash();
+    if (s->isShared()) return s->getSharedStringHash();
+    if (s->m_hash == 0) {
+      s->m_hash = hash_string(s->data(), s->size());
+    }
+    return s->m_hash;
+  }
+
+  static bool Equal(const StringData *s1, const StringData *s2) {
+    int len = s1->size();
+    if (s2->size() != len) return false;
+    if (s1->data() == s2->data()) return true;
+    return !memcmp(s1->data(), s2->data(), len);
+  }
+
+  static bool IEqual(const StringData *s1, const StringData *s2) {
+    int len = s1->size();
+    if (s2->size() != len) return false;
+    if (s1->data() == s2->data()) return true;
+    return !strncasecmp(s1->data(), s2->data(), len);
+  }
+
   /**
    * Comparisons.
    */
@@ -214,6 +232,13 @@ class StringData {
   void escalate(); // change to malloc-ed string
   void setChar(int offset, char ch);
   void removeChar(int offset);
+
+  int64 getPrecomputedHash() const {
+    ASSERT(!isShared());
+    return m_hash & 0x7fffffffffffffffull;
+  }
+
+  int64 getSharedStringHash() const;
 
 #ifdef FAST_REFCOUNT_FOR_VARIANT
  private:

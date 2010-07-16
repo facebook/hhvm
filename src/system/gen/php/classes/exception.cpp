@@ -51,22 +51,22 @@ void c_unexpectedvalueexception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_unexpectedvalueexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_unexpectedvalueexception
-Variant c_unexpectedvalueexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_unexpectedvalueexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_unexpectedvalueexception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_unexpectedvalueexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_unexpectedvalueexception
-Variant c_unexpectedvalueexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_unexpectedvalueexception::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_runtimeexception::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_unexpectedvalueexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_unexpectedvalueexception
-Variant c_unexpectedvalueexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_unexpectedvalueexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_unexpectedvalueexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_unexpectedvalueexception
-bool c_unexpectedvalueexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_unexpectedvalueexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_unexpectedvalueexception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_unexpectedvalueexception
@@ -81,22 +81,22 @@ bool c_unexpectedvalueexception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_unexpectedvalueexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_unexpectedvalueexception
-Variant c_unexpectedvalueexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_unexpectedvalueexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_unexpectedvalueexception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_unexpectedvalueexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_unexpectedvalueexception
-Variant c_unexpectedvalueexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_unexpectedvalueexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_runtimeexception::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_unexpectedvalueexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_unexpectedvalueexception
-Variant c_unexpectedvalueexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_unexpectedvalueexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_unexpectedvalueexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_unexpectedvalueexception
-Variant& c_unexpectedvalueexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_unexpectedvalueexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_unexpectedvalueexception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_unexpectedvalueexception
@@ -127,7 +127,7 @@ void c_unexpectedvalueexception::cloneSet(c_unexpectedvalueexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_unexpectedvalueexception
 Variant c_unexpectedvalueexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -193,7 +193,7 @@ Variant c_unexpectedvalueexception::o_invoke(const char *s, CArrRef params, int6
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_unexpectedvalueexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_unexpectedvalueexception
 Variant c_unexpectedvalueexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -264,7 +264,7 @@ Variant c_unexpectedvalueexception::os_invoke(const char *c, const char *s, CArr
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_unexpectedvalueexception
 Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -447,22 +447,22 @@ void c_overflowexception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_overflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_overflowexception
-Variant c_overflowexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_overflowexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_overflowexception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_overflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_overflowexception
-Variant c_overflowexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_overflowexception::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_runtimeexception::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_overflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_overflowexception
-Variant c_overflowexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_overflowexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_overflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_overflowexception
-bool c_overflowexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_overflowexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_overflowexception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_overflowexception
@@ -477,22 +477,22 @@ bool c_overflowexception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_overflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_overflowexception
-Variant c_overflowexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_overflowexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_overflowexception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_overflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_overflowexception
-Variant c_overflowexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_overflowexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_runtimeexception::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_overflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_overflowexception
-Variant c_overflowexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_overflowexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_overflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_overflowexception
-Variant& c_overflowexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_overflowexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_overflowexception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_overflowexception
@@ -523,7 +523,7 @@ void c_overflowexception::cloneSet(c_overflowexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_overflowexception
 Variant c_overflowexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -589,7 +589,7 @@ Variant c_overflowexception::o_invoke(const char *s, CArrRef params, int64 hash,
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_overflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_overflowexception
 Variant c_overflowexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -660,7 +660,7 @@ Variant c_overflowexception::os_invoke(const char *c, const char *s, CArrRef par
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_overflowexception
 Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -843,22 +843,22 @@ void c_outofboundsexception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_outofboundsexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_outofboundsexception
-Variant c_outofboundsexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_outofboundsexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_outofboundsexception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_outofboundsexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_outofboundsexception
-Variant c_outofboundsexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_outofboundsexception::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_runtimeexception::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_outofboundsexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_outofboundsexception
-Variant c_outofboundsexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_outofboundsexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_outofboundsexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_outofboundsexception
-bool c_outofboundsexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_outofboundsexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_outofboundsexception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_outofboundsexception
@@ -873,22 +873,22 @@ bool c_outofboundsexception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_outofboundsexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_outofboundsexception
-Variant c_outofboundsexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_outofboundsexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_outofboundsexception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_outofboundsexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_outofboundsexception
-Variant c_outofboundsexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_outofboundsexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_runtimeexception::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_outofboundsexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_outofboundsexception
-Variant c_outofboundsexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_outofboundsexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_outofboundsexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_outofboundsexception
-Variant& c_outofboundsexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_outofboundsexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_outofboundsexception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_outofboundsexception
@@ -919,7 +919,7 @@ void c_outofboundsexception::cloneSet(c_outofboundsexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofboundsexception
 Variant c_outofboundsexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -985,7 +985,7 @@ Variant c_outofboundsexception::o_invoke(const char *s, CArrRef params, int64 ha
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_outofboundsexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofboundsexception
 Variant c_outofboundsexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -1056,7 +1056,7 @@ Variant c_outofboundsexception::os_invoke(const char *c, const char *s, CArrRef 
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofboundsexception
 Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -1239,22 +1239,22 @@ void c_logicexception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_logicexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_logicexception
-Variant c_logicexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_logicexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_logicexception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_logicexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_logicexception
-Variant c_logicexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_logicexception::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_exception::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_logicexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_logicexception
-Variant c_logicexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_logicexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_logicexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_logicexception
-bool c_logicexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_logicexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_logicexception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_logicexception
@@ -1269,22 +1269,22 @@ bool c_logicexception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_logicexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_logicexception
-Variant c_logicexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_logicexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_logicexception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_logicexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_logicexception
-Variant c_logicexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_logicexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_exception::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_logicexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_logicexception
-Variant c_logicexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_logicexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_logicexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_logicexception
-Variant& c_logicexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_logicexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_logicexception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_logicexception
@@ -1315,7 +1315,7 @@ void c_logicexception::cloneSet(c_logicexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_logicexception
 Variant c_logicexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -1381,7 +1381,7 @@ Variant c_logicexception::o_invoke(const char *s, CArrRef params, int64 hash, bo
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_logicexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_logicexception
 Variant c_logicexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -1452,7 +1452,7 @@ Variant c_logicexception::os_invoke(const char *c, const char *s, CArrRef params
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_logicexception
 Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -1635,22 +1635,22 @@ void c_rangeexception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_rangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_rangeexception
-Variant c_rangeexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_rangeexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_rangeexception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_rangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_rangeexception
-Variant c_rangeexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_rangeexception::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_runtimeexception::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_rangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_rangeexception
-Variant c_rangeexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_rangeexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_rangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_rangeexception
-bool c_rangeexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_rangeexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_rangeexception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_rangeexception
@@ -1665,22 +1665,22 @@ bool c_rangeexception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_rangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_rangeexception
-Variant c_rangeexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_rangeexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_rangeexception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_rangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_rangeexception
-Variant c_rangeexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_rangeexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_runtimeexception::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_rangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_rangeexception
-Variant c_rangeexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_rangeexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_rangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_rangeexception
-Variant& c_rangeexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_rangeexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_rangeexception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_rangeexception
@@ -1711,7 +1711,7 @@ void c_rangeexception::cloneSet(c_rangeexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_rangeexception
 Variant c_rangeexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -1777,7 +1777,7 @@ Variant c_rangeexception::o_invoke(const char *s, CArrRef params, int64 hash, bo
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_rangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_rangeexception
 Variant c_rangeexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -1848,7 +1848,7 @@ Variant c_rangeexception::os_invoke(const char *c, const char *s, CArrRef params
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_rangeexception
 Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -2031,22 +2031,22 @@ void c_invalidargumentexception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_invalidargumentexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_invalidargumentexception
-Variant c_invalidargumentexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_invalidargumentexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_invalidargumentexception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_invalidargumentexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_invalidargumentexception
-Variant c_invalidargumentexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_invalidargumentexception::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_logicexception::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_invalidargumentexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_invalidargumentexception
-Variant c_invalidargumentexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_invalidargumentexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_invalidargumentexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_invalidargumentexception
-bool c_invalidargumentexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_invalidargumentexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_invalidargumentexception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_invalidargumentexception
@@ -2061,22 +2061,22 @@ bool c_invalidargumentexception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_invalidargumentexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_invalidargumentexception
-Variant c_invalidargumentexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_invalidargumentexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_invalidargumentexception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_invalidargumentexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_invalidargumentexception
-Variant c_invalidargumentexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_invalidargumentexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_logicexception::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_invalidargumentexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_invalidargumentexception
-Variant c_invalidargumentexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_invalidargumentexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_invalidargumentexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_invalidargumentexception
-Variant& c_invalidargumentexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_invalidargumentexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_invalidargumentexception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_invalidargumentexception
@@ -2107,7 +2107,7 @@ void c_invalidargumentexception::cloneSet(c_invalidargumentexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_invalidargumentexception
 Variant c_invalidargumentexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -2173,7 +2173,7 @@ Variant c_invalidargumentexception::o_invoke(const char *s, CArrRef params, int6
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_invalidargumentexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_invalidargumentexception
 Variant c_invalidargumentexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -2244,7 +2244,7 @@ Variant c_invalidargumentexception::os_invoke(const char *c, const char *s, CArr
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_invalidargumentexception
 Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -2427,22 +2427,22 @@ void c_underflowexception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_underflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_underflowexception
-Variant c_underflowexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_underflowexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_underflowexception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_underflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_underflowexception
-Variant c_underflowexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_underflowexception::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_runtimeexception::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_underflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_underflowexception
-Variant c_underflowexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_underflowexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_underflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_underflowexception
-bool c_underflowexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_underflowexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_underflowexception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_underflowexception
@@ -2457,22 +2457,22 @@ bool c_underflowexception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_underflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_underflowexception
-Variant c_underflowexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_underflowexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_underflowexception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_underflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_underflowexception
-Variant c_underflowexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_underflowexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_runtimeexception::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_underflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_underflowexception
-Variant c_underflowexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_underflowexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_underflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_underflowexception
-Variant& c_underflowexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_underflowexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_underflowexception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_underflowexception
@@ -2503,7 +2503,7 @@ void c_underflowexception::cloneSet(c_underflowexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_underflowexception
 Variant c_underflowexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -2569,7 +2569,7 @@ Variant c_underflowexception::o_invoke(const char *s, CArrRef params, int64 hash
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_underflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_underflowexception
 Variant c_underflowexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -2640,7 +2640,7 @@ Variant c_underflowexception::os_invoke(const char *c, const char *s, CArrRef pa
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_underflowexception
 Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -2823,22 +2823,22 @@ void c_outofrangeexception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_outofrangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_outofrangeexception
-Variant c_outofrangeexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_outofrangeexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_outofrangeexception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_outofrangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_outofrangeexception
-Variant c_outofrangeexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_outofrangeexception::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_logicexception::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_outofrangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_outofrangeexception
-Variant c_outofrangeexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_outofrangeexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_outofrangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_outofrangeexception
-bool c_outofrangeexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_outofrangeexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_outofrangeexception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_outofrangeexception
@@ -2853,22 +2853,22 @@ bool c_outofrangeexception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_outofrangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_outofrangeexception
-Variant c_outofrangeexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_outofrangeexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_outofrangeexception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_outofrangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_outofrangeexception
-Variant c_outofrangeexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_outofrangeexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_logicexception::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_outofrangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_outofrangeexception
-Variant c_outofrangeexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_outofrangeexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_outofrangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_outofrangeexception
-Variant& c_outofrangeexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_outofrangeexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_outofrangeexception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_outofrangeexception
@@ -2899,7 +2899,7 @@ void c_outofrangeexception::cloneSet(c_outofrangeexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofrangeexception
 Variant c_outofrangeexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -2965,7 +2965,7 @@ Variant c_outofrangeexception::o_invoke(const char *s, CArrRef params, int64 has
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_outofrangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofrangeexception
 Variant c_outofrangeexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -3036,7 +3036,7 @@ Variant c_outofrangeexception::os_invoke(const char *c, const char *s, CArrRef p
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofrangeexception
 Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -3219,22 +3219,22 @@ void c_badmethodcallexception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_badmethodcallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_badmethodcallexception
-Variant c_badmethodcallexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_badmethodcallexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_badmethodcallexception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_badmethodcallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_badmethodcallexception
-Variant c_badmethodcallexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_badmethodcallexception::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_badfunctioncallexception::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_badmethodcallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_badmethodcallexception
-Variant c_badmethodcallexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_badmethodcallexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_badmethodcallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_badmethodcallexception
-bool c_badmethodcallexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_badmethodcallexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_badmethodcallexception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_badmethodcallexception
@@ -3249,22 +3249,22 @@ bool c_badmethodcallexception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_badmethodcallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_badmethodcallexception
-Variant c_badmethodcallexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_badmethodcallexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_badmethodcallexception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_badmethodcallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_badmethodcallexception
-Variant c_badmethodcallexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_badmethodcallexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_badfunctioncallexception::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_badmethodcallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_badmethodcallexception
-Variant c_badmethodcallexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_badmethodcallexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_badmethodcallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_badmethodcallexception
-Variant& c_badmethodcallexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_badmethodcallexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_badmethodcallexception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_badmethodcallexception
@@ -3295,7 +3295,7 @@ void c_badmethodcallexception::cloneSet(c_badmethodcallexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badmethodcallexception
 Variant c_badmethodcallexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -3361,7 +3361,7 @@ Variant c_badmethodcallexception::o_invoke(const char *s, CArrRef params, int64 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_badmethodcallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badmethodcallexception
 Variant c_badmethodcallexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -3432,7 +3432,7 @@ Variant c_badmethodcallexception::os_invoke(const char *c, const char *s, CArrRe
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badmethodcallexception
 Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -3615,22 +3615,22 @@ void c_runtimeexception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_runtimeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_runtimeexception
-Variant c_runtimeexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_runtimeexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_runtimeexception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_runtimeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_runtimeexception
-Variant c_runtimeexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_runtimeexception::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_exception::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_runtimeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_runtimeexception
-Variant c_runtimeexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_runtimeexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_runtimeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_runtimeexception
-bool c_runtimeexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_runtimeexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_runtimeexception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_runtimeexception
@@ -3645,22 +3645,22 @@ bool c_runtimeexception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_runtimeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_runtimeexception
-Variant c_runtimeexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_runtimeexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_runtimeexception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_runtimeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_runtimeexception
-Variant c_runtimeexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_runtimeexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_exception::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_runtimeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_runtimeexception
-Variant c_runtimeexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_runtimeexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_runtimeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_runtimeexception
-Variant& c_runtimeexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_runtimeexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_runtimeexception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_runtimeexception
@@ -3691,7 +3691,7 @@ void c_runtimeexception::cloneSet(c_runtimeexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_runtimeexception
 Variant c_runtimeexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -3757,7 +3757,7 @@ Variant c_runtimeexception::o_invoke(const char *s, CArrRef params, int64 hash, 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_runtimeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_runtimeexception
 Variant c_runtimeexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -3828,7 +3828,7 @@ Variant c_runtimeexception::os_invoke(const char *c, const char *s, CArrRef para
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_runtimeexception
 Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -3990,23 +3990,25 @@ Variant c_exception::os_getInit(const char *s, int64 hash) {
   DECLARE_SYSTEM_GLOBALS(g);
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
-    case 4:
-      HASH_RETURN(0x08C19339767C0884LL, 
-                  null, "file");
-      break;
     case 7:
-      HASH_RETURN(0x33997C0BC1E6CC87LL, 
-                  0LL, "code");
-      HASH_RETURN(0x0253015494C8CE77LL, 
+      HASH_RETURN(0x3CCB986B2CF0A747LL, 
                   null, "trace");
       break;
-    case 12:
-      HASH_RETURN(0x21093C71DDF9728CLL, 
+    case 9:
+      HASH_RETURN(0x58C72230857ACDB9LL, 
+                  0LL, "code");
+      break;
+    case 10:
+      HASH_RETURN(0x04AB35CACF8C8C9ALL, 
                   null, "line");
       break;
-    case 15:
-      HASH_RETURN(0x3EAA4B97155266DFLL, 
+    case 11:
+      HASH_RETURN(0x0247CDBB94C9D47BLL, 
                   "", "message");
+      break;
+    case 15:
+      HASH_RETURN(0x7863294A8F33D14FLL, 
+                  null, "file");
       break;
     default:
       break;
@@ -4026,11 +4028,11 @@ Variant &c_exception::os_lval(const char *s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_exception
 void c_exception::o_getArray(Array &props) const {
-  if (isInitialized(m_message)) props.set("message", m_message.isReferenced() ? ref(m_message) : m_message, 0x3EAA4B97155266DFLL, true);
-  if (isInitialized(m_code)) props.set("code", m_code.isReferenced() ? ref(m_code) : m_code, 0x33997C0BC1E6CC87LL, true);
-  if (isInitialized(m_file)) props.set("file", m_file.isReferenced() ? ref(m_file) : m_file, 0x08C19339767C0884LL, true);
-  if (isInitialized(m_line)) props.set("line", m_line.isReferenced() ? ref(m_line) : m_line, 0x21093C71DDF9728CLL, true);
-  if (isInitialized(m_trace)) props.set("trace", m_trace.isReferenced() ? ref(m_trace) : m_trace, 0x0253015494C8CE77LL, true);
+  if (isInitialized(m_message)) props.set("message", m_message.isReferenced() ? ref(m_message) : m_message, 0x0247CDBB94C9D47BLL, true);
+  if (isInitialized(m_code)) props.set("code", m_code.isReferenced() ? ref(m_code) : m_code, 0x58C72230857ACDB9LL, true);
+  if (isInitialized(m_file)) props.set("file", m_file.isReferenced() ? ref(m_file) : m_file, 0x7863294A8F33D14FLL, true);
+  if (isInitialized(m_line)) props.set("line", m_line.isReferenced() ? ref(m_line) : m_line, 0x04AB35CACF8C8C9ALL, true);
+  if (isInitialized(m_trace)) props.set("trace", m_trace.isReferenced() ? ref(m_trace) : m_trace, 0x3CCB986B2CF0A747LL, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_exception
@@ -4040,31 +4042,33 @@ void c_exception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_exception
-Variant c_exception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_exception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_exception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_exception
-Variant c_exception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_exception::o_getPublic(CStrRef s, int64 hash, bool error) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 15) {
-    case 4:
-      HASH_RETURN_STRING(0x08C19339767C0884LL, m_file,
-                         "file", 4);
-      break;
     case 7:
-      HASH_RETURN_STRING(0x33997C0BC1E6CC87LL, m_code,
-                         "code", 4);
-      HASH_RETURN_STRING(0x0253015494C8CE77LL, m_trace,
+      HASH_RETURN_STRING(0x3CCB986B2CF0A747LL, m_trace,
                          "trace", 5);
       break;
-    case 12:
-      HASH_RETURN_STRING(0x21093C71DDF9728CLL, m_line,
+    case 9:
+      HASH_RETURN_STRING(0x58C72230857ACDB9LL, m_code,
+                         "code", 4);
+      break;
+    case 10:
+      HASH_RETURN_STRING(0x04AB35CACF8C8C9ALL, m_line,
                          "line", 4);
       break;
-    case 15:
-      HASH_RETURN_STRING(0x3EAA4B97155266DFLL, m_message,
+    case 11:
+      HASH_RETURN_STRING(0x0247CDBB94C9D47BLL, m_message,
                          "message", 7);
+      break;
+    case 15:
+      HASH_RETURN_STRING(0x7863294A8F33D14FLL, m_file,
+                         "file", 4);
       break;
     default:
       break;
@@ -4073,31 +4077,33 @@ Variant c_exception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */)
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_exception
-Variant c_exception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_exception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_exception
-bool c_exception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_exception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_exception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_exception
 bool c_exception::o_existsPublic(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 15) {
-    case 4:
-      HASH_EXISTS_STRING(0x08C19339767C0884LL, "file", 4);
-      break;
     case 7:
-      HASH_EXISTS_STRING(0x33997C0BC1E6CC87LL, "code", 4);
-      HASH_EXISTS_STRING(0x0253015494C8CE77LL, "trace", 5);
+      HASH_EXISTS_STRING(0x3CCB986B2CF0A747LL, "trace", 5);
       break;
-    case 12:
-      HASH_EXISTS_STRING(0x21093C71DDF9728CLL, "line", 4);
+    case 9:
+      HASH_EXISTS_STRING(0x58C72230857ACDB9LL, "code", 4);
+      break;
+    case 10:
+      HASH_EXISTS_STRING(0x04AB35CACF8C8C9ALL, "line", 4);
+      break;
+    case 11:
+      HASH_EXISTS_STRING(0x0247CDBB94C9D47BLL, "message", 7);
       break;
     case 15:
-      HASH_EXISTS_STRING(0x3EAA4B97155266DFLL, "message", 7);
+      HASH_EXISTS_STRING(0x7863294A8F33D14FLL, "file", 4);
       break;
     default:
       break;
@@ -4111,31 +4117,33 @@ bool c_exception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_exception
-Variant c_exception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_exception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_exception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_exception
-Variant c_exception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_exception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 15) {
-    case 4:
-      HASH_SET_STRING(0x08C19339767C0884LL, m_file,
-                      "file", 4);
-      break;
     case 7:
-      HASH_SET_STRING(0x33997C0BC1E6CC87LL, m_code,
-                      "code", 4);
-      HASH_SET_STRING(0x0253015494C8CE77LL, m_trace,
+      HASH_SET_STRING(0x3CCB986B2CF0A747LL, m_trace,
                       "trace", 5);
       break;
-    case 12:
-      HASH_SET_STRING(0x21093C71DDF9728CLL, m_line,
+    case 9:
+      HASH_SET_STRING(0x58C72230857ACDB9LL, m_code,
+                      "code", 4);
+      break;
+    case 10:
+      HASH_SET_STRING(0x04AB35CACF8C8C9ALL, m_line,
                       "line", 4);
       break;
-    case 15:
-      HASH_SET_STRING(0x3EAA4B97155266DFLL, m_message,
+    case 11:
+      HASH_SET_STRING(0x0247CDBB94C9D47BLL, m_message,
                       "message", 7);
+      break;
+    case 15:
+      HASH_SET_STRING(0x7863294A8F33D14FLL, m_file,
+                      "file", 4);
       break;
     default:
       break;
@@ -4144,36 +4152,38 @@ Variant c_exception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit 
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_exception
-Variant c_exception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_exception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_exception
-Variant& c_exception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_exception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_exception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_exception
 Variant& c_exception::o_lvalPublic(CStrRef s, int64 hash) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 15) {
-    case 4:
-      HASH_RETURN_STRING(0x08C19339767C0884LL, m_file,
-                         "file", 4);
-      break;
     case 7:
-      HASH_RETURN_STRING(0x33997C0BC1E6CC87LL, m_code,
-                         "code", 4);
-      HASH_RETURN_STRING(0x0253015494C8CE77LL, m_trace,
+      HASH_RETURN_STRING(0x3CCB986B2CF0A747LL, m_trace,
                          "trace", 5);
       break;
-    case 12:
-      HASH_RETURN_STRING(0x21093C71DDF9728CLL, m_line,
+    case 9:
+      HASH_RETURN_STRING(0x58C72230857ACDB9LL, m_code,
+                         "code", 4);
+      break;
+    case 10:
+      HASH_RETURN_STRING(0x04AB35CACF8C8C9ALL, m_line,
                          "line", 4);
       break;
-    case 15:
-      HASH_RETURN_STRING(0x3EAA4B97155266DFLL, m_message,
+    case 11:
+      HASH_RETURN_STRING(0x0247CDBB94C9D47BLL, m_message,
                          "message", 7);
+      break;
+    case 15:
+      HASH_RETURN_STRING(0x7863294A8F33D14FLL, m_file,
+                         "file", 4);
       break;
     default:
       break;
@@ -4257,7 +4267,7 @@ void c_exception::cloneSet(c_exception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_exception
 Variant c_exception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -4323,7 +4333,7 @@ Variant c_exception::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_exception
 Variant c_exception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -4394,7 +4404,7 @@ Variant c_exception::os_invoke(const char *c, const char *s, CArrRef params, int
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_exception
 Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -4577,17 +4587,17 @@ void c_exception::t___init__() {
         {
           bool tmp4;
           {
-            bool tmp5 = (empty(v_top, "class", 0x45397FE5C82CBD12LL, true));
+            bool tmp5 = (empty(v_top, "class", 0x2E3A246D1F74C210LL, true));
             if (!tmp5) {
-              bool tmp6 = ((toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true)), "__init__")) && toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true)), "__construct"))));
+              bool tmp6 = ((toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x7356F680A745A524LL, true, true)), "__init__")) && toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x7356F680A745A524LL, true, true)), "__construct"))));
               if (tmp6) {
-                String tmp7((toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true))));
-                String tmp8((toString(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
+                String tmp7((toString(v_top.rvalAt("function", 0x7356F680A745A524LL, true, true))));
+                String tmp8((toString(v_top.rvalAt("class", 0x2E3A246D1F74C210LL, true, true))));
                 tmp6 = (toBoolean(x_strcasecmp(tmp7, tmp8)));
               }
               tmp5 = (tmp6);
             }
-            tmp4 = ((tmp5 || (toBoolean(x_strcasecmp(toString(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)), "exception")) && !(x_is_subclass_of(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true), "exception")))));
+            tmp4 = ((tmp5 || (toBoolean(x_strcasecmp(toString(v_top.rvalAt("class", 0x2E3A246D1F74C210LL, true, true)), "exception")) && !(x_is_subclass_of(v_top.rvalAt("class", 0x2E3A246D1F74C210LL, true, true), "exception")))));
           }
           if (tmp4) {
             {
@@ -4602,15 +4612,15 @@ void c_exception::t___init__() {
       }
     }
   }
-  if (isset(v_frame, "file", 0x08C19339767C0884LL, true)) {
+  if (isset(v_frame, "file", 0x7863294A8F33D14FLL, true)) {
     {
-      Variant tmp10((v_frame.rvalAt("file", 0x08C19339767C0884LL, true, true)));
+      Variant tmp10((v_frame.rvalAt("file", 0x7863294A8F33D14FLL, true, true)));
       m_file = tmp10;
     }
   }
-  if (isset(v_frame, "line", 0x21093C71DDF9728CLL, true)) {
+  if (isset(v_frame, "line", 0x04AB35CACF8C8C9ALL, true)) {
     {
-      Variant tmp11((v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true)));
+      Variant tmp11((v_frame.rvalAt("line", 0x04AB35CACF8C8C9ALL, true, true)));
       m_line = tmp11;
     }
   }
@@ -4664,7 +4674,7 @@ String c_exception::t_gettraceasstring() {
     Variant map2 = t_gettrace();
     {
       StringBuffer tmp_sbuf_v_s(512);
-      for (ArrayIterPtr iter3 = map2.begin("exception"); !iter3->end(); iter3->next()) {
+      for (ArrayIterPtr iter3 = map2.begin(s_class_name); !iter3->end(); iter3->next()) {
         LOOP_COUNTER_CHECK(1);
         iter3->second(v_frame);
         {
@@ -4676,20 +4686,20 @@ String c_exception::t_gettraceasstring() {
             tmp4_buf.append("#", 1);
             tmp4_buf.append(toString(v_i));
             tmp4_buf.append(" ", 1);
-            tmp4_buf.append(toString(v_frame.rvalAt("file", 0x08C19339767C0884LL, true, true)));
+            tmp4_buf.append(toString(v_frame.rvalAt("file", 0x7863294A8F33D14FLL, true, true)));
             tmp4_buf.append("(", 1);
-            tmp4_buf.append(toString(v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true)));
+            tmp4_buf.append(toString(v_frame.rvalAt("line", 0x04AB35CACF8C8C9ALL, true, true)));
             tmp4_buf.append("): ", 3);
             Variant tmp5;
-            if (isset(v_frame, "class", 0x45397FE5C82CBD12LL, true)) {
-              String tmp6((toString(v_frame.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
-              String tmp7((toString(v_frame.rvalAt("type", 0x508FC7C8724B760ALL, true, true))));
+            if (isset(v_frame, "class", 0x2E3A246D1F74C210LL, true)) {
+              String tmp6((toString(v_frame.rvalAt("class", 0x2E3A246D1F74C210LL, true, true))));
+              String tmp7((toString(v_frame.rvalAt("type", 0x7B5ABDA0E01EF853LL, true, true))));
               tmp5 = (concat(tmp6, tmp7));
             } else {
               tmp5 = ("");
             }
             tmp4_buf.append(toString(tmp5));
-            tmp4_buf.append(toString(v_frame.rvalAt("function", 0x736D912A52413931LL, true, true)));
+            tmp4_buf.append(toString(v_frame.rvalAt("function", 0x7356F680A745A524LL, true, true)));
             tmp4_buf.append("()\n", 3);
             CStrRef tmp4(tmp4_buf.detach());
             tmp_sbuf_v_s.add(tmp4);
@@ -4714,8 +4724,8 @@ Variant c_errorexception::os_getInit(const char *s, int64 hash) {
   DECLARE_SYSTEM_GLOBALS(g);
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
-    case 0:
-      HASH_RETURN(0x78B6E7FAB84C8CFALL, 
+    case 1:
+      HASH_RETURN(0x4FDAA620FA5F15F9LL, 
                   null, "severity");
       break;
     default:
@@ -4736,7 +4746,7 @@ Variant &c_errorexception::os_lval(const char *s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_errorexception
 void c_errorexception::o_getArray(Array &props) const {
-  if (isInitialized(m_severity)) props.set("severity", m_severity.isReferenced() ? ref(m_severity) : m_severity, 0x78B6E7FAB84C8CFALL, true);
+  if (isInitialized(m_severity)) props.set("severity", m_severity.isReferenced() ? ref(m_severity) : m_severity, 0x4FDAA620FA5F15F9LL, true);
   c_exception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_errorexception
@@ -4746,16 +4756,16 @@ void c_errorexception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_errorexception
-Variant c_errorexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_errorexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_errorexception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_errorexception
-Variant c_errorexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_errorexception::o_getPublic(CStrRef s, int64 hash, bool error) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
-    case 0:
-      HASH_RETURN_STRING(0x78B6E7FAB84C8CFALL, m_severity,
+    case 1:
+      HASH_RETURN_STRING(0x4FDAA620FA5F15F9LL, m_severity,
                          "severity", 8);
       break;
     default:
@@ -4765,21 +4775,21 @@ Variant c_errorexception::o_getPublic(CStrRef s, int64 hash, bool error /* = tru
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_errorexception
-Variant c_errorexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_errorexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_errorexception
-bool c_errorexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_errorexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_errorexception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_errorexception
 bool c_errorexception::o_existsPublic(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
-    case 0:
-      HASH_EXISTS_STRING(0x78B6E7FAB84C8CFALL, "severity", 8);
+    case 1:
+      HASH_EXISTS_STRING(0x4FDAA620FA5F15F9LL, "severity", 8);
       break;
     default:
       break;
@@ -4793,16 +4803,16 @@ bool c_errorexception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_errorexception
-Variant c_errorexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_errorexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_errorexception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_errorexception
-Variant c_errorexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_errorexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
-    case 0:
-      HASH_SET_STRING(0x78B6E7FAB84C8CFALL, m_severity,
+    case 1:
+      HASH_SET_STRING(0x4FDAA620FA5F15F9LL, m_severity,
                       "severity", 8);
       break;
     default:
@@ -4812,21 +4822,21 @@ Variant c_errorexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool for
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_errorexception
-Variant c_errorexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_errorexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_errorexception
-Variant& c_errorexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_errorexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_errorexception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_errorexception
 Variant& c_errorexception::o_lvalPublic(CStrRef s, int64 hash) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
-    case 0:
-      HASH_RETURN_STRING(0x78B6E7FAB84C8CFALL, m_severity,
+    case 1:
+      HASH_RETURN_STRING(0x4FDAA620FA5F15F9LL, m_severity,
                          "severity", 8);
       break;
     default:
@@ -4931,7 +4941,7 @@ void c_errorexception::cloneSet(c_errorexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_errorexception
 Variant c_errorexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -5004,7 +5014,7 @@ Variant c_errorexception::o_invoke(const char *s, CArrRef params, int64 hash, bo
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_errorexception
 Variant c_errorexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -5082,7 +5092,7 @@ Variant c_errorexception::os_invoke(const char *c, const char *s, CArrRef params
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_errorexception
 Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -5321,22 +5331,22 @@ void c_badfunctioncallexception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_badfunctioncallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_badfunctioncallexception
-Variant c_badfunctioncallexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_badfunctioncallexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_badfunctioncallexception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_badfunctioncallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_badfunctioncallexception
-Variant c_badfunctioncallexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_badfunctioncallexception::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_logicexception::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_badfunctioncallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_badfunctioncallexception
-Variant c_badfunctioncallexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_badfunctioncallexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_badfunctioncallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_badfunctioncallexception
-bool c_badfunctioncallexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_badfunctioncallexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_badfunctioncallexception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_badfunctioncallexception
@@ -5351,22 +5361,22 @@ bool c_badfunctioncallexception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_badfunctioncallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_badfunctioncallexception
-Variant c_badfunctioncallexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_badfunctioncallexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_badfunctioncallexception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_badfunctioncallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_badfunctioncallexception
-Variant c_badfunctioncallexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_badfunctioncallexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_logicexception::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_badfunctioncallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_badfunctioncallexception
-Variant c_badfunctioncallexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_badfunctioncallexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_badfunctioncallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_badfunctioncallexception
-Variant& c_badfunctioncallexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_badfunctioncallexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_badfunctioncallexception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_badfunctioncallexception
@@ -5397,7 +5407,7 @@ void c_badfunctioncallexception::cloneSet(c_badfunctioncallexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badfunctioncallexception
 Variant c_badfunctioncallexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -5463,7 +5473,7 @@ Variant c_badfunctioncallexception::o_invoke(const char *s, CArrRef params, int6
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_badfunctioncallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badfunctioncallexception
 Variant c_badfunctioncallexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -5534,7 +5544,7 @@ Variant c_badfunctioncallexception::os_invoke(const char *c, const char *s, CArr
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badfunctioncallexception
 Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -5717,22 +5727,22 @@ void c_lengthexception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_lengthexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_lengthexception
-Variant c_lengthexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_lengthexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_lengthexception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_lengthexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_lengthexception
-Variant c_lengthexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_lengthexception::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_logicexception::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_lengthexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_lengthexception
-Variant c_lengthexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_lengthexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_lengthexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_lengthexception
-bool c_lengthexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_lengthexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_lengthexception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_lengthexception
@@ -5747,22 +5757,22 @@ bool c_lengthexception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_lengthexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_lengthexception
-Variant c_lengthexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_lengthexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_lengthexception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_lengthexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_lengthexception
-Variant c_lengthexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_lengthexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_logicexception::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_lengthexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_lengthexception
-Variant c_lengthexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_lengthexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_lengthexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_lengthexception
-Variant& c_lengthexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_lengthexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_lengthexception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_lengthexception
@@ -5793,7 +5803,7 @@ void c_lengthexception::cloneSet(c_lengthexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_lengthexception
 Variant c_lengthexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -5859,7 +5869,7 @@ Variant c_lengthexception::o_invoke(const char *s, CArrRef params, int64 hash, b
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_lengthexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_lengthexception
 Variant c_lengthexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -5930,7 +5940,7 @@ Variant c_lengthexception::os_invoke(const char *c, const char *s, CArrRef param
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_lengthexception
 Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -6113,22 +6123,22 @@ void c_domainexception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domainexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domainexception
-Variant c_domainexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_domainexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_domainexception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_domainexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domainexception
-Variant c_domainexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_domainexception::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_logicexception::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domainexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domainexception
-Variant c_domainexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_domainexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domainexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_domainexception
-bool c_domainexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_domainexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_domainexception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_domainexception
@@ -6143,22 +6153,22 @@ bool c_domainexception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domainexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_domainexception
-Variant c_domainexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_domainexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_domainexception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_domainexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domainexception
-Variant c_domainexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_domainexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_logicexception::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domainexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domainexception
-Variant c_domainexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_domainexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domainexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_domainexception
-Variant& c_domainexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_domainexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_domainexception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_domainexception
@@ -6189,7 +6199,7 @@ void c_domainexception::cloneSet(c_domainexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domainexception
 Variant c_domainexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -6255,7 +6265,7 @@ Variant c_domainexception::o_invoke(const char *s, CArrRef params, int64 hash, b
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domainexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domainexception
 Variant c_domainexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -6326,7 +6336,7 @@ Variant c_domainexception::os_invoke(const char *c, const char *s, CArrRef param
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domainexception
 Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {

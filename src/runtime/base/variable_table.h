@@ -38,23 +38,27 @@ namespace HPHP {
 class RVariableTable : public Array {
  public:
   virtual ~RVariableTable() {}
-  Variant get(CVarRef s) { return getImpl(s.toString());}
-  Variant get(CStrRef s) { return getImpl(s);}
-  Variant get(litstr  s) { return getImpl(s);}
+  Variant get(CVarRef s) { return get(s.toString());}
+  Variant get(CStrRef s) { return getImpl(s, StringData::Hash(s.get()));}
+  Variant get(litstr  s) { return getImpl(s, -1);}
 
+  bool exists(CStrRef s) const {
+    return exists(s, StringData::Hash(s.get()));
+  }
   /**
    * Code-generated sub-class may override this function by generating one
    * entry per variable.
    */
-  virtual bool exists(const char *s) const {
-    return Array::exists(s);
+  virtual bool exists(const char *s, int64 hash) const {
+    // Integers are never valid variable names.
+    return Array::exists(s, hash, true);
   }
 
   /**
    * Code-generated sub-class will implement this function by generating one
    * entry per variable.
    */
-  virtual Variant getImpl(const char *s) = 0;
+  virtual Variant getImpl(const char *s, int64 hash) = 0;
 
   virtual Array getDefinedVars() const;
 };
@@ -73,9 +77,11 @@ class LVariableTable : public Array {
  public:
   virtual ~LVariableTable() {}
   Variant &get(CVarRef s, int64 hash = -1) {
-    return getImpl(s.toString(), hash);
+    return get(s.toString(), hash);
   }
-  Variant &get(CStrRef s, int64 hash = -1) { return getImpl(s, hash);}
+  Variant &get(CStrRef s, int64 hash = -1) {
+    return getImpl(s, hash < 0 ? StringData::Hash(s.get()) : hash);
+  }
   Variant &get(litstr  s, int64 hash = -1) { return getImpl(s, hash);}
 
   /**
@@ -83,7 +89,7 @@ class LVariableTable : public Array {
    * entry per variable.
    */
   virtual bool exists(const char *s, int64 hash = -1) const {
-    return Array::exists(s, hash);
+    return Array::exists(s, hash, true);
   }
 
   /**

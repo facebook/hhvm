@@ -1674,9 +1674,9 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
 
       if (!Option::DynamicInvokeFunctions.empty() ||
           Option::EnableEval == Option::FullEval) {
-        cg_printf("hphp_string_imap<string> &funcs = "
+        cg_printf("StringIMap<String> &funcs = "
                   "get_renamed_functions();\n");
-        cg_printf("hphp_string_imap<string>::const_iterator iter ="
+        cg_printf("StringIMap<String>::const_iterator iter ="
                   " funcs.find(s);\n");
         cg_indentBegin("if (iter != funcs.end()) {\n");
         cg_printf("s = iter->second.c_str();\n");
@@ -2128,8 +2128,8 @@ void AnalysisResult::getLiteralStringCompressed(std::string &zsdata,
   int nstrings = m_stringLiterals.size();
   ASSERT(nstrings > 0);
   string *sortedById = new string[nstrings];
-  for (map<string, int>::const_iterator it =
-       m_stringLiterals.begin(); it != m_stringLiterals.end(); ++it) {
+  for (map<string, int>::const_iterator it = m_stringLiterals.begin();
+       it != m_stringLiterals.end(); ++it) {
     int index = it->second;
     ASSERT(0 <= index && index < nstrings);
     sortedById[index] = it->first;
@@ -3359,8 +3359,7 @@ void AnalysisResult::outputCPPLiteralStringPrecomputation() {
     cg_printf("#endif // __GENERATED_sys_literal_strings_h__\n");
     f.close();
   }
-  map<string, int>::const_iterator it =
-    m_stringLiterals.begin();
+  map<string, int>::const_iterator it = m_stringLiterals.begin();
   const char *lsname = "literalStrings";
   for (uint i = 0; i < bucketCount; i++) {
     stringstream filenames;

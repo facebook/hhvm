@@ -107,8 +107,9 @@ public:
   Key(EVP_PKEY *key) : m_key(key) { ASSERT(m_key);}
   ~Key() { if (m_key) EVP_PKEY_free(m_key);}
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "OpenSSL key";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 
   bool isPrivate() {
     ASSERT(m_key);
@@ -236,6 +237,8 @@ public:
   }
 };
 
+StaticString Key::s_class_name("OpenSSL key");
+
 /**
  * Certificate Signing Request
  */
@@ -245,8 +248,9 @@ public:
   CSRequest(X509_REQ *csr) : m_csr(csr) { ASSERT(m_csr);}
   ~CSRequest() { if (m_csr) X509_REQ_free(m_csr);}
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "OpenSSL X.509 CSR";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 
   static X509_REQ *Get(CVarRef var, Object &ocsr) {
     ocsr = Get(var);
@@ -275,6 +279,8 @@ public:
     return Object();
   }
 };
+
+StaticString CSRequest::s_class_name("OpenSSL X.509 CSR");
 
 class php_x509_request {
 public:

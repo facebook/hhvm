@@ -26,6 +26,8 @@ IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(DateTime);
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
+StaticString DateTime::s_class_name("DateTime");
+
 const char *DateTime::DateFormatRFC822     = "D, d M y H:i:s O";
 const char *DateTime::DateFormatRFC850     = "l, d-M-y H:i:s T";
 const char *DateTime::DateFormatRFC1036    = "D, d M y H:i:s O";

@@ -30,7 +30,8 @@ public:
   XmlParser();
   virtual ~XmlParser();
   void cleanupImpl();
-  virtual const char* o_getClassName() const;
+  static StaticString s_class_name;
+  virtual CStrRef o_getClassName() const;
 
   int case_folding;
   XML_Parser parser;
@@ -91,8 +92,10 @@ void XmlParser::sweep() {
   cleanupImpl();
 }
 
-const char* XmlParser::o_getClassName() const {
-  return "xml";
+StaticString XmlParser::s_class_name("xml");
+
+CStrRef XmlParser::o_getClassName() const {
+  return s_class_name;
 }
 
 typedef struct {

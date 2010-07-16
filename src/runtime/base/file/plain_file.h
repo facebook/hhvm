@@ -34,8 +34,9 @@ public:
   PlainFile(int fd, bool pipe = false);
   virtual ~PlainFile();
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "PlainFile";}
+  CStrRef o_getClassName() const { return s_class_name; }
 
   // implementing File
   virtual bool open(CStrRef filename, CStrRef mode);

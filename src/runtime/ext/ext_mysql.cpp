@@ -34,6 +34,11 @@ namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(mysql);
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString MySQL::s_class_name("MySQL");
+StaticString MySQLResult::s_class_name("MySQLResult");
+
+///////////////////////////////////////////////////////////////////////////////
+
 IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(MySQLResult);
 
 MySQLResult::MySQLResult(MYSQL_RES *res, bool localized /* = false */)

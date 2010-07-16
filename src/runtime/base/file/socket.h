@@ -41,8 +41,9 @@ public:
   Socket(int sockfd, int type, const char *address = NULL, int port = 0);
   virtual ~Socket();
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "Socket";}
+  CStrRef o_getClassName() const { return s_class_name; }
 
   // implementing File
   virtual bool open(CStrRef filename, CStrRef mode);

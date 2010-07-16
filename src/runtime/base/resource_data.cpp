@@ -58,6 +58,10 @@ void ResourceData::serialize(VariableSerializer *serializer) const {
   serializer->decNestedLevel((void*)this);
 }
 
+const char *ResourceData::o_getResourceName() const {
+  return o_getClassName().data();
+}
+
 Object ResourceData::fiberMarshal(FiberReferenceMap &refMap) const {
   return Object();
 }

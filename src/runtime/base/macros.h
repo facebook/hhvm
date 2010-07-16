@@ -119,23 +119,39 @@ namespace HPHP {
   static Variant &os_lval(const char *s, int64 hash);                   \
   static Variant os_constant(const char *s);                            \
 
+#define DECLARE_INSTANCE_PROP_WRAPPER_OPS                               \
+  public:                                                               \
+  bool o_exists(CStrRef s, int64 hash, CStrRef context = null_string)   \
+      const { return ObjectData::o_exists(s, hash, context); }          \
+  Variant o_get(CStrRef s, int64 hash, bool error = true,               \
+                CStrRef context = null_string) {                        \
+    return ObjectData::o_get(s, hash, error, context);                  \
+  }                                                                     \
+  Variant o_set(CStrRef s, int64 hash, CVarRef v, bool forInit = false, \
+                CStrRef context = null_string) {                        \
+    return ObjectData::o_set(s, hash, v, forInit, context);             \
+  }                                                                     \
+  Variant &o_lval(CStrRef s, int64 hash, CStrRef context = null_string) \
+      { return ObjectData::o_lval(s, hash, context); }                  \
+
 #define DECLARE_INSTANCE_PROP_OPS                                       \
   public:                                                               \
-  virtual bool o_exists(CStrRef s, int64 hash,                          \
-                        const char *context = NULL) const;              \
+  virtual bool o_exists(CStrRef prop, int64 phash,                      \
+                        const char *context, int64 hash) const;         \
   bool o_existsPrivate(CStrRef s, int64 hash) const;                    \
   virtual void o_getArray(Array &props) const;                          \
   virtual void o_setArray(CArrRef props);                               \
-  virtual Variant o_get(CStrRef s, int64 hash, bool error = true,       \
-                        const char *context = NULL);                    \
+  virtual Variant o_get(CStrRef prop, int64 phash, bool error,          \
+                        const char *context, int64 hash);               \
   Variant o_getPrivate(CStrRef s, int64 hash, bool error = true);       \
-  virtual Variant o_set(CStrRef s, int64 hash, CVarRef v,               \
-                        bool forInit = false,                           \
-                        const char *context = NULL);                    \
+  virtual Variant o_set(CStrRef prop, int64 phash, CVarRef v,           \
+                        bool forInit,                                   \
+                        const char *context, int64 hash);               \
   Variant o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit); \
-  virtual Variant &o_lval(CStrRef s, int64 hash,                        \
-                          const char *context = NULL);                  \
+  virtual Variant &o_lval(CStrRef prop, int64 phash,                    \
+                          const char *context, int64 hash);             \
   Variant &o_lvalPrivate(CStrRef s, int64 hash);                        \
+  DECLARE_INSTANCE_PROP_WRAPPER_OPS
 
 #define DECLARE_INSTANCE_PUBLIC_PROP_OPS                                \
   public:                                                               \
@@ -169,7 +185,9 @@ namespace HPHP {
   ObjectData *cloneImpl();                                              \
   void cloneSet(c_##cls *cl);                                           \
   public:                                                               \
-  virtual const char *o_getClassName() const { return #originalName;}   \
+  static const char *GetClassName() { return #originalName; }           \
+  static StaticString s_class_name;                                     \
+  virtual CStrRef o_getClassName() const { return s_class_name; }       \
 
 #define DECLARE_CLASS(cls, originalName, parent)                        \
   DECLARE_CLASS_COMMON(cls, originalName)                               \
@@ -214,6 +232,7 @@ namespace HPHP {
 #define CLASS_CHECK(exp) (checkClassExists(s, g), (exp))
 
 #define IMPLEMENT_CLASS(cls)                                            \
+  StaticString c_##cls::s_class_name(c_##cls::GetClassName());          \
   IMPLEMENT_OBJECT_ALLOCATION(c_##cls)
 
 //////////////////////////////////////////////////////////////////////////////
@@ -221,6 +240,8 @@ namespace HPHP {
 
 #define HASH_GUARD(code, f)                                             \
   if (hash == code && !strcasecmp(s, #f))
+#define HASH_GUARD_LITSTR(code, str)                                    \
+  if (hash == code && (str.data() == s || !strcasecmp(s, str.data())))
 #define HASH_EXISTS_STRING(code, str, len)                              \
   if (hash == code && s.length() == len &&                              \
       memcmp(s.data(), str, len) == 0) return true
@@ -372,10 +393,9 @@ do { \
 #endif
 
 // Stack frame injection is also for correctness, and cannot be disabled.
-#define FRAME_INJECTION(c, n) FrameInjection fi(info, #c, #n);
-#define FRAME_INJECTION_FLAGS(c, n, f) \
-  FrameInjection fi(info, #c, #n, NULL, f);
-#define FRAME_INJECTION_WITH_THIS(c, n) FrameInjection fi(info, #c, #n, this);
+#define FRAME_INJECTION(c, n) FrameInjection fi(info, c, #n);
+#define FRAME_INJECTION_FLAGS(c, n, f) FrameInjection fi(info, c, #n, NULL, f);
+#define FRAME_INJECTION_WITH_THIS(c, n) FrameInjection fi(info, c, #n, this);
 #define LINE(n, e) (fi.setLine(n), e)
 
 // code injected into beginning of every function/method
@@ -384,28 +404,28 @@ do { \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION(n)                      \
-  FRAME_INJECTION(, n)                          \
+  FRAME_INJECTION(empty_string, n)              \
 
 #define STATIC_METHOD_INJECTION(c, n)           \
   DECLARE_THREAD_INFO                           \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION(n)                      \
-  FRAME_INJECTION(c, n)                         \
+  FRAME_INJECTION(s_class_name, n)              \
 
 #define INSTANCE_METHOD_INJECTION(c, n)         \
   DECLARE_THREAD_INFO                           \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION(n)                      \
-  FRAME_INJECTION_WITH_THIS(c, n)               \
+  FRAME_INJECTION_WITH_THIS(s_class_name, n)    \
 
 #define PSEUDOMAIN_INJECTION(n)                 \
   DECLARE_THREAD_INFO                           \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION(n)                      \
-  FRAME_INJECTION_FLAGS(, n, FrameInjection::PseudoMain) \
+  FRAME_INJECTION_FLAGS(empty_string, n, FrameInjection::PseudoMain) \
 
 // code injected into every builtin function/method
 #define FUNCTION_INJECTION_BUILTIN(n)           \
@@ -413,14 +433,14 @@ do { \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION_BUILTIN(n)              \
-  FRAME_INJECTION_FLAGS(, n, FrameInjection::BuiltinFunction) \
+  FRAME_INJECTION_FLAGS(empty_string, n, FrameInjection::BuiltinFunction) \
 
 #define STATIC_METHOD_INJECTION_BUILTIN(c, n)   \
   DECLARE_THREAD_INFO                           \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION_BUILTIN(n)              \
-  FRAME_INJECTION(c, n)                         \
+  FRAME_INJECTION(s_class_name, n)              \
 
 #define INSTANCE_METHOD_INJECTION_BUILTIN(c, n) \
   if (!o_id) throw_instance_method_fatal(#n);   \
@@ -428,12 +448,12 @@ do { \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION_BUILTIN(n)              \
-  FRAME_INJECTION_WITH_THIS(c, n)               \
+  FRAME_INJECTION_WITH_THIS(s_class_name, n)    \
 
 #ifdef ENABLE_LATE_STATIC_BINDING
 
 #define STATIC_CLASS_NAME_CALL(s, exp)                             \
-  (FrameInjection::StaticClassNameHelper(info, #s), exp)           \
+  (FrameInjection::StaticClassNameHelper(info, s), exp)            \
 
 #define BIND_CLASS_DOT  bindClass(info).
 #define BIND_CLASS_ARROW(T) bindClass<c_##T>(info)->

@@ -32,8 +32,9 @@ public:
 
   DirectoryIterator(CStrRef path);
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  virtual const char *o_getClassName() const { return "directoryiterator";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
   virtual bool isResource() const { return !m_dir.isNull();}
   String getPathName();
 
@@ -55,10 +56,9 @@ public:
 
   RecursiveDirectoryIterator(CStrRef path, int flags);
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  virtual const char *o_getClassName() const {
-    return "recursivedirectoryiterator";
-  }
+  virtual CStrRef o_getClassName() const { return s_class_name; }
   virtual bool isResource() const { return !m_dir.isNull();}
   void rewind();
   void next();
@@ -73,10 +73,9 @@ public:
 
   RecursiveIteratorIterator(CObjRef iterator, int mode, int flags);
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  virtual const char *o_getClassName() const {
-    return "recursiveiteratoriterator";
-  }
+  virtual CStrRef o_getClassName() const { return s_class_name; }
   virtual bool isResource() const { return !m_iterator.isNull();}
 
 public:

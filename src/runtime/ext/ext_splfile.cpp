@@ -22,6 +22,11 @@ namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(SPL);
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString SplFileInfo::s_class_name("splfileinfo");
+StaticString SplFileObject::s_class_name("splfileobject");
+
+///////////////////////////////////////////////////////////////////////////////
+
 IMPLEMENT_OBJECT_ALLOCATION(SplFileInfo)
 IMPLEMENT_OBJECT_ALLOCATION(SplFileObject)
 

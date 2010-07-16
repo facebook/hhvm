@@ -33,8 +33,9 @@ public:
   ZipFile();
   virtual ~ZipFile();
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "ZipFile";}
+  CStrRef o_getClassName() const { return s_class_name; }
 
   virtual bool open(CStrRef filename, CStrRef mode);
   virtual bool close();

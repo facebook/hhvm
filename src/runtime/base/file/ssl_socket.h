@@ -55,8 +55,9 @@ public:
   bool onConnect();
   bool onAccept();
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "SSLSocket";}
+  CStrRef o_getClassName() const { return s_class_name; }
 
   // overriding Socket
   virtual bool close();
@@ -101,8 +102,9 @@ public:
   Certificate(X509 *cert) : m_cert(cert) { ASSERT(m_cert);}
   ~Certificate() { if (m_cert) X509_free(m_cert);}
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "OpenSSL X.509";}
+  CStrRef o_getClassName() const { return s_class_name; }
 
   /**
    * Given a variant, coerce it into an X509 object. It can be:

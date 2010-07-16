@@ -21,8 +21,19 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// static strings
 
-const char *FrameInjection::GetClassName(bool skip /* = false */) {
+static StaticString s_file("file");
+static StaticString s_line("line");
+static StaticString s_function("function");
+static StaticString s_args("args");
+static StaticString s_class("class");
+static StaticString s_object("object");
+static StaticString s_type("type");
+
+///////////////////////////////////////////////////////////////////////////////
+
+CStrRef FrameInjection::GetClassName(bool skip /* = false */) {
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {
     t = t->m_prev;
@@ -38,11 +49,11 @@ const char *FrameInjection::GetClassName(bool skip /* = false */) {
   if (t && *t->m_class) {
     return t->m_class;
   }
-  return "";
+  return empty_string;
 }
 
 const char *FrameInjection::GetParentClassName(bool skip /* = false */) {
-  String cls = GetClassName(skip);
+  CStrRef cls = GetClassName(skip);
   if (cls.empty()) return cls;
   const ClassInfo *classInfo = ClassInfo::FindClass(cls);
   if (classInfo) {
@@ -91,8 +102,8 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
     // add it to the trace
     if (filename != "") {
       Array frame = Array::Create();
-      frame.set("file", filename, -1, true);
-      frame.set("line", t->m_line, -1, true);
+      frame.set(s_file, filename, -1, true);
+      frame.set(s_line, t->m_line, -1, true);
       bt.append(frame);
     }
   }
@@ -102,8 +113,8 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
     if (t->m_prev) {
       String file = t->m_prev->getFileName();
       if (!file.empty() && t->m_prev->m_line) {
-        frame.set("file", file, -1, true);
-        frame.set("line", t->m_prev->m_line, -1, true);
+        frame.set(s_file, file, -1, true);
+        frame.set(s_line, t->m_prev->m_line, -1, true);
       }
     } else if (t->m_flags & PseudoMain) {
       // Stop at top, don't include top file
@@ -111,30 +122,30 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
     }
 
     if (t->m_flags & PseudoMain) {
-      frame.set("function", "include", -1, true);
-      frame.set("args", Array::Create(t->getFileName()), -1, true);
+      frame.set(s_function, "include", -1, true);
+      frame.set(s_args, Array::Create(t->getFileName()), -1, true);
     } else {
       const char *c = strstr(t->m_name, "::");
       if (c) {
-        frame.set("function", String(c + 2), -1, true);
-        frame.set("class", String(t->m_class), -1, true);
+        frame.set(s_function, String(c + 2), -1, true);
+        frame.set(s_class, String(t->m_class), -1, true);
         if (!t->m_object.isNull()) {
           if (withThis) {
-            frame.set("object", t->m_object, -1, true);
+            frame.set(s_object, t->m_object, -1, true);
           }
-          frame.set("type", "->", -1, true);
+          frame.set(s_type, "->", -1, true);
         } else {
-          frame.set("type", "::", -1, true);
+          frame.set(s_type, "::", -1, true);
         }
       } else {
-        frame.set("function", t->m_name, -1, true);
+        frame.set(s_function, t->m_name, -1, true);
       }
 
       Array args = t->getArgs();
       if (!args.isNull()) {
-        frame.set("args", args, -1, true);
+        frame.set(s_args, args, -1, true);
       } else {
-        frame.set("args", Array::Create(), -1, true);
+        frame.set(s_args, Array::Create(), -1, true);
       }
     }
 

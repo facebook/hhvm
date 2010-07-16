@@ -366,7 +366,7 @@ class Variant {
   /**
    * Iterator functions. See array_iterator.h for end() and next().
    */
-  ArrayIterPtr begin(const char *context = NULL) const;
+  ArrayIterPtr begin(CStrRef context = null_string) const;
   // used by generated code
   MutableArrayIterPtr begin(Variant *key, Variant &val);
 
@@ -628,14 +628,20 @@ class Variant {
                 bool error = true) const;
   ObjectOffset o_lval(CStrRef propName, int64 prehash = -1);
 
-  Variant o_invoke(const char *s, CArrRef params, int64 hash);
-  Variant o_root_invoke(const char *s, CArrRef params, int64 hash);
+  Variant o_invoke(const char *s, CArrRef params, int64 hash = -1);
+  Variant o_invoke(CStrRef s, CArrRef params, int64 hash = -1);
+  Variant o_root_invoke(const char *s, CArrRef params, int64 hash = -1);
+  Variant o_root_invoke(CStrRef s, CArrRef params, int64 hash = -1);
   Variant o_invoke_ex(const char *clsname, const char *s,
                       CArrRef params, int64 hash);
 
   Variant o_invoke_few_args(const char *s, int64 hash, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
+  Variant o_invoke_few_args(CStrRef s, int64 hash, int count,
+                            INVOKE_FEW_ARGS_DECL_ARGS);
   Variant o_root_invoke_few_args(const char *s, int64 hash, int count,
+                            INVOKE_FEW_ARGS_DECL_ARGS);
+  Variant o_root_invoke_few_args(CStrRef s, int64 hash, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
 
   /**

@@ -51,8 +51,8 @@ Variant PhpFile::eval(LVariableTable *vars) {
 #ifdef HOTPROFILER
   ProfilerInjection pi(info, m_profName.c_str());
 #endif
-  EvalFrameInjection fi("", m_profName.c_str(), env, m_tree->loc()->file,
-      NULL, FrameInjection::PseudoMain);
+  EvalFrameInjection fi(empty_string, m_profName.c_str(), env,
+      m_tree->loc()->file, NULL, FrameInjection::PseudoMain);
   m_tree->eval(env);
   if (env.isReturning()) {
     return env.getRet();

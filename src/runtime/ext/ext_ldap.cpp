@@ -57,13 +57,16 @@ public:
     rebindproc.reset();
   }
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  virtual const char *o_getClassName() const { return "ldap link";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 
   LDAP *link;
   Variant rebindproc;
 };
 IMPLEMENT_OBJECT_ALLOCATION(LdapLink)
+
+StaticString LdapLink::s_class_name("ldap link");
 
 class LdapResult : public SweepableResourceData {
 public:
@@ -79,12 +82,15 @@ public:
     }
   }
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  virtual const char *o_getClassName() const { return "ldap result";}
+  virtual CStrRef o_getClassName() const { return s_class_name;}
 
   LDAPMessage *data;
 };
 IMPLEMENT_OBJECT_ALLOCATION(LdapResult)
+
+StaticString LdapResult::s_class_name("ldap result");
 
 class LdapResultEntry : public SweepableResourceData {
 public:
@@ -101,13 +107,16 @@ public:
     data = NULL;
   }
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  virtual const char *o_getClassName() const { return "ldap result entry";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 
   LDAPMessage *data;
   BerElement *ber;
 };
 IMPLEMENT_OBJECT_ALLOCATION(LdapResultEntry)
+
+StaticString LdapResultEntry::s_class_name("ldap result entry");
 
 ///////////////////////////////////////////////////////////////////////////////
 

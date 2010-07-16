@@ -746,8 +746,8 @@ bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
     return false;
   }
 
-  if (!check_renamed_function(orig_func_name.data()) &&
-      !check_renamed_function(new_func_name.data())) {
+  if (!check_renamed_function(orig_func_name) &&
+      !check_renamed_function(new_func_name)) {
     raise_error("fb_rename_function(%s, %s) failed: %s is not allowed to "
                 "rename. Please add it to the list provided to "
                 "fb_renamed_functions().",
@@ -756,13 +756,12 @@ bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
     return false;
   }
 
-  hphp_string_imap<string> &funcs = get_renamed_functions();
-  hphp_string_iset &ufuncs = get_unmapped_functions();
+  StringIMap<String> &funcs = get_renamed_functions();
+  StringISet &ufuncs = get_unmapped_functions();
 
-  string new_key(new_func_name.data());
-  string new_val(orig_func_name.data());
+  String new_val(orig_func_name);
   {
-    hphp_string_imap<string>::iterator iter = funcs.find(new_key);
+    StringIMap<String>::iterator iter = funcs.find(new_func_name);
     if (iter != funcs.end()) {
       funcs.erase(iter);
     }
@@ -772,17 +771,17 @@ bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
     if (iter != funcs.end()) {
       new_val = iter->second;
     }
-    funcs[new_key] = new_val;
+    funcs[new_func_name] = new_val;
   }
   {
-    hphp_string_iset::iterator iter = ufuncs.find(new_key);
+    StringISet::iterator iter = ufuncs.find(new_func_name);
     if (iter != ufuncs.end()) {
       ufuncs.erase(iter);
     }
 
     iter = ufuncs.find(new_val);
     if (iter == ufuncs.end()) {
-      ufuncs.insert(orig_func_name.data());
+      ufuncs.insert(orig_func_name);
     }
   }
   return true;

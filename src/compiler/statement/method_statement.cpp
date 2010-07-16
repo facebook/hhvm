@@ -414,6 +414,7 @@ void MethodStatement::inferTypes(AnalysisResultPtr ar) {
       }
     }
   }
+
   ar->pushScope(funcScope);
   if (m_params) {
     m_params->inferAndCheck(ar, NEW_TYPE(Any), false);

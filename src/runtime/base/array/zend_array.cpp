@@ -196,6 +196,9 @@ Variant ZendArray::current() const {
   return false;
 }
 
+static StaticString s_value("value");
+static StaticString s_key("key");
+
 Variant ZendArray::each() {
   if (m_pos) {
     ArrayInit init(4, false);
@@ -203,9 +206,9 @@ Variant ZendArray::each() {
     Variant key = getKey(m_pos);
     Variant value = getValue(m_pos);
     init.set(0, 1, value);
-    init.set(1, "value", value, -1, true);
+    init.set(1, s_value, value, -1, true);
     init.set(2, 0, key);
-    init.set(3, "key", key, -1, true);
+    init.set(3, s_key, key, -1, true);
     m_pos = (ssize_t)p->pListNext;
     return Array(init.create());
   }
@@ -219,11 +222,8 @@ static bool hit_string_key(const ZendArray::Bucket *p, const char *k, int len,
                            int64 hash) {
   if (!p->key) return false;
   const char *data = p->key->data();
-  return data == k || p->h == hash && p->key->size() == len && (
-#ifdef USE_MURMUR
-         len < 8 ||
-#endif
-         memcmp(data, k, len) == 0);
+  return data == k || p->h == hash && p->key->size() == len &&
+         memcmp(data, k, len) == 0;
 }
 
 ZendArray::Bucket *ZendArray::find(int64 h) const {
@@ -345,7 +345,7 @@ Variant ZendArray::get(litstr k, int64 prehash /* = -1 */,
 Variant ZendArray::get(CStrRef k, int64 prehash /* = -1 */,
                        bool error /* = false */) const {
   StringData *key = k.get();
-  if (key->isStatic()) prehash = key->getStaticHash();
+  if (prehash < 0) prehash = StringData::Hash(key);
   Bucket *p = find(key->data(), key->size(), prehash);
   if (p) {
     return p->data;
@@ -364,7 +364,7 @@ Variant ZendArray::get(CVarRef k, int64 prehash /* = -1 */,
   } else {
     String key = k.toString();
     StringData *strkey = key.get();
-    if (strkey->isStatic()) prehash = key->getStaticHash();
+    if (prehash < 0) prehash = StringData::Hash(strkey);
     p = find(strkey->data(), strkey->size(), prehash);
   }
   if (p) {
@@ -378,8 +378,7 @@ Variant ZendArray::get(CVarRef k, int64 prehash /* = -1 */,
 
 Variant ZendArray::fetch(CStrRef k) const {
   StringData *key = k.get();
-  int64 prehash = -1;
-  if (key->isStatic()) prehash = key->getStaticHash();
+  int64 prehash = StringData::Hash(key);
   Bucket *p = find(key->data(), key->size(), prehash);
   if (p) {
     return p->data;
@@ -394,8 +393,7 @@ void ZendArray::load(CVarRef k, Variant &v) const {
   } else {
     String key = k.toString();
     StringData *strkey = key.get();
-    int64 prehash = -1;
-    if (strkey->isStatic()) prehash = key->getStaticHash();
+    int64 prehash = StringData::Hash(strkey);
     p = find(strkey->data(), strkey->size(), prehash);
   }
   if (p) {
@@ -711,8 +709,8 @@ bool ZendArray::update(litstr key, int64 h, CVarRef data) {
 }
 
 bool ZendArray::update(StringData *key, int64 h, CVarRef data) {
-  if (key->isStatic()) h = key->getStaticHash();
-  Bucket *p = find(key->data(), key->size(), h, &h);
+  if (h < 0) h = StringData::Hash(key);
+  Bucket *p = find(key->data(), key->size(), h);
   if (p) {
     p->data = data;
     return true;
@@ -776,7 +774,7 @@ ArrayData *ZendArray::lval(CStrRef k, Variant *&ret, bool copy,
                            int64 prehash /* = -1 */,
                            bool checkExist /* = false */) {
   StringData *key = k.get();
-  if (key->isStatic()) prehash = key->getStaticHash();
+  if (prehash < 0) prehash = StringData::Hash(key);
   if (!copy) {
     addLval(key, prehash, &ret);
     return NULL;

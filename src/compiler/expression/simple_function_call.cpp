@@ -1211,7 +1211,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                 }
               }
               cg_printf("f_function_exists(");
-              cg_printString(lname, ar);
+              cg_printString(symbol, ar);
               cg_printf(")");
             }
             break;
@@ -1254,7 +1254,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                 } else {
                   cg_printf("f_interface_exists(");
                 }
-                cg_printString(lname, ar);
+                cg_printString(symbol, ar);
                 cg_printf(")");
               }
             }

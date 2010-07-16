@@ -55,7 +55,7 @@ public:
   bool defined(const char *name);
   Variant getConstant(const char *name);
   Array getDynamicConstants() const;
-  bool function_exists(const char *name);
+  bool function_exists(CStrRef name);
 
   virtual bool class_exists(const char *name);
 

@@ -24,6 +24,11 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString SSLSocket::s_class_name("SSLSocket");
+StaticString Certificate::s_class_name("OpenSSL X.509");
+
+///////////////////////////////////////////////////////////////////////////////
+
 Mutex SSLSocket::s_mutex;
 int SSLSocket::s_ex_data_index = -1;
 int SSLSocket::GetSSLExDataIndex() {

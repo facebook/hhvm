@@ -518,7 +518,7 @@ bool BreakPointInfo::Match(const char *haystack, int haystack_len,
 bool BreakPointInfo::checkException(CObjRef e) {
   ASSERT(!e.isNull());
   if (m_regex) {
-    return Match(m_class.c_str(), m_class.size(), e->o_getClassName(),
+    return Match(m_class.c_str(), m_class.size(), e->o_getClassName().data(),
                  true, false);
   }
   return e.instanceof(m_class.c_str());

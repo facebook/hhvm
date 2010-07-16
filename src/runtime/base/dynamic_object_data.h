@@ -42,17 +42,19 @@ class DynamicObjectData : public ObjectData {
   // properties
   virtual Array o_toArray() const;
   virtual Array o_getDynamicProperties() const;
-  virtual bool o_exists(CStrRef s, int64 hash,
-      const char *context = NULL) const;
-  virtual Variant o_get(CStrRef s, int64 hash, bool error = true,
-      const char *context = NULL);
-  virtual Variant o_set(CStrRef s, int64 hash, CVarRef v, bool forInit = false,
-      const char *context = NULL);
-  virtual Variant &o_lval(CStrRef s, int64 hash,
-      const char *context = NULL);
-
+  virtual bool o_exists(CStrRef prop, int64 phash,
+      const char *context, int64 hash) const;
+  virtual Variant o_get(CStrRef prop, int64 phash, bool error,
+      const char *context, int64 hash);
+  virtual Variant o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit,
+      const char *context, int64 hash);
+  virtual Variant &o_lval(CStrRef prop, int64 phash,
+      const char *context, int64 hash);
+  void o_set(const Array properties);
   virtual void o_getArray(Array &props) const;
   virtual void o_setArray(CArrRef props);
+
+  DECLARE_INSTANCE_PROP_WRAPPER_OPS
 
   // methods
   virtual Variant o_invoke(const char *s, CArrRef params, int64 hash,

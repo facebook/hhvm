@@ -83,25 +83,26 @@ ObjectData* DynamicObjectData::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // instance methods and properties
 
-bool DynamicObjectData::o_exists(CStrRef propName, int64 hash,
-    const char *context /* = NULL */) const {
+bool DynamicObjectData::o_exists(CStrRef propName, int64 phash,
+    const char *context, int64 hash) const {
   if (!parent.isNull()) {
-    return parent->o_exists(propName, hash, context);
+    return parent->o_exists(propName, phash, context, hash);
   } else {
-    return ObjectData::o_exists(propName, hash, context);
+    return ObjectData::o_exists(propName, phash, context, hash);
   }
 }
 
-Variant DynamicObjectData::o_get(CStrRef propName, int64 hash,
-    bool error /* = true */, const char *context /* = NULL */) {
+Variant DynamicObjectData::o_get(CStrRef propName, int64 phash, bool error,
+    const char *context, int64 hash) {
   if (!parent.isNull()) {
-    return parent->o_get(propName, hash, error, context);
+    return parent->o_get(propName, phash, error, context, hash);
   } else {
     if (propName.size() == 0) {
       return null;
     }
-    if (o_properties && o_properties->exists(propName, hash)) {
-      return o_properties->rvalAt(propName, hash);
+    // property names are definitely strings
+    if (o_properties && o_properties->exists(propName, phash, true)) {
+      return o_properties->rvalAt(propName, phash, false, true);
     }
     if (root->getAttribute(InGet)) {
       return ObjectData::doGet(propName, error);
@@ -128,16 +129,16 @@ void DynamicObjectData::o_setArray(CArrRef props) {
   }
 }
 
-Variant DynamicObjectData::o_set(CStrRef propName, int64 hash, CVarRef v,
-    bool forInit /* = false */, const char *context /* = NULL */) {
+Variant DynamicObjectData::o_set(CStrRef propName, int64 phash, CVarRef v,
+    bool forInit, const char *context, int64 hash) {
   if (!parent.isNull()) {
-    return parent->o_set(propName, hash, v, forInit, context);
+    return parent->o_set(propName, phash, v, forInit, context, hash);
   } else {
     if (propName.size() == 0) {
       throw EmptyObjectPropertyException();
     }
-    if (o_properties && o_properties->exists(propName, hash)) {
-      o_properties->set(propName, v, hash);
+    if (o_properties && o_properties->exists(propName, phash, true)) {
+      o_properties->set(propName, v, phash, true);
       return v;
     }
     if (forInit || root->getAttribute(InSet)) {
@@ -149,13 +150,13 @@ Variant DynamicObjectData::o_set(CStrRef propName, int64 hash, CVarRef v,
   }
 }
 
-Variant &DynamicObjectData::o_lval(CStrRef propName, int64 hash,
-    const char *context /* = NULL */) {
+Variant &DynamicObjectData::o_lval(CStrRef propName, int64 phash,
+    const char *context, int64 hash) {
   if (!parent.isNull()) {
-    return parent->o_lval(propName, hash, context);
+    return parent->o_lval(propName, phash, context, hash);
   } else {
-    if (o_properties && o_properties->exists(propName)) {
-      return o_properties->lvalAt(propName, hash);
+    if (o_properties && o_properties->exists(propName, phash, true)) {
+      return o_properties->lvalAt(propName, phash, false, true);
     }
     return root->___lval(propName);
   }

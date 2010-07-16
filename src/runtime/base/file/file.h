@@ -43,8 +43,9 @@ public:
   File(bool pipe = false);
   virtual ~File();
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "File";}
+  CStrRef o_getClassName() const { return s_class_name; }
   const char *o_getResourceName() const { return "stream";}
   int o_getResourceId() const {
     // This is different from Zend where each resource is assigned a unique id.

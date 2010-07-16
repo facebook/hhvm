@@ -245,7 +245,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                 Option::MapPrefix, mapId);
       ClassScopePtr cls = ar->getClassScope();
       if (cls) {
-        cg_printf("\"%s\"", cls->getName().c_str());
+        cg_printf("%sclass_name", Option::StaticPropertyPrefix);
       }
       cg_printf("); ");
       cg_printf("!%s%d->end(); %s%d->next()",
@@ -267,7 +267,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf(".begin(");
       ClassScopePtr cls = ar->getClassScope();
       if (cls) {
-        cg_printf("\"%s\"", cls->getName().c_str());
+        cg_printf("%sclass_name", Option::StaticPropertyPrefix);
       }
       cg_printf("); ");
       if (isArray) {

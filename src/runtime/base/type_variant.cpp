@@ -35,6 +35,15 @@ const Variant null_variant = Variant();
 IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(Variant);
 
 ///////////////////////////////////////////////////////////////////////////////
+// static strings
+
+static StaticString s_offsetGet("offsetGet");
+static StaticString s_offsetSet("offsetSet");
+static StaticString s_offsetUnset("offsetUnset");
+static StaticString s_s("s");
+static StaticString s_scalar("scalar");
+
+///////////////////////////////////////////////////////////////////////////////
 // private implementations
 
 Variant::Variant(CStrRef v) : _count(0), m_type(KindOfString) {
@@ -1470,7 +1479,7 @@ Variant Variant::operator--(int) {
 ///////////////////////////////////////////////////////////////////////////////
 // iterator functions
 
-ArrayIterPtr Variant::begin(const char *context /* = NULL */) const {
+ArrayIterPtr Variant::begin(CStrRef context /* = null_string */) const {
   if (is(KindOfArray)) {
     return new ArrayIter(getArrayData());
   }
@@ -1500,7 +1509,7 @@ MutableArrayIterPtr Variant::begin(Variant *key, Variant &val) {
       throw FatalErrorException("An iterator cannot be used with "
                                 "foreach by reference");
     }
-    Array properties = obj->o_toIterArray(NULL, true);
+    Array properties = obj->o_toIterArray(null_string, true);
     properties.escalate(true);
     ArrayData *arr = properties.getArrayData();
     return new MutableArrayIter(arr, key, val);
@@ -1628,7 +1637,7 @@ Object Variant::toObject() const {
   case KindOfString:
     {
       c_stdclass *obj = NEW(c_stdclass)();
-      obj->o_lval("scalar", -1) = *this;
+      obj->o_lval(s_scalar, -1) = *this;
       return obj;
     }
   case KindOfArray:   return m_data.parr->toObject();
@@ -1966,7 +1975,7 @@ ObjectData *Variant::getArrayAccess() const {
 }
 
 void Variant::callOffsetUnset(CVarRef key) {
-  getArrayAccess()->o_invoke("offsetunset", Array::Create(key), -1);
+  getArrayAccess()->o_invoke(s_offsetUnset, Array::Create(key));
 }
 
 #define IMPLEMENT_RVAL_INTEGRAL                                         \
@@ -1980,8 +1989,8 @@ void Variant::callOffsetUnset(CVarRef key) {
     case KindOfString:                                                  \
       return m_data.pstr->getChar((int)offset);                         \
     case KindOfObject:                                                  \
-      return getArrayAccess()->o_invoke("offsetget",                    \
-                                        Array::Create(offset), -1);     \
+      return getArrayAccess()->o_invoke(s_offsetGet,                    \
+                                        Array::Create(offset));         \
     case KindOfVariant:                                                 \
       return m_data.pvar->rvalAt(offset, prehash, error);               \
     case KindOfNull:                                                    \
@@ -2012,7 +2021,7 @@ Variant Variant::rvalAtHelper(int64 offset, int64 prehash /* = -1 */,
   case KindOfString:
     return m_data.pstr->getChar((int)offset);
   case KindOfObject:
-    return getArrayAccess()->o_invoke("offsetget", Array::Create(offset), -1);
+    return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
     return m_data.pvar->rvalAt(offset, prehash, error);
   case KindOfNull:
@@ -2046,7 +2055,7 @@ Variant Variant::rvalAt(litstr offset, int64 prehash /* = -1 */,
   case KindOfString:
     return m_data.pstr->getChar(String(offset).toInt32());
   case KindOfObject:
-    return getArrayAccess()->o_invoke("offsetget", Array::Create(offset), -1);
+    return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
     return m_data.pvar->rvalAt(offset, prehash, error);
   case KindOfNull:
@@ -2079,7 +2088,7 @@ Variant Variant::rvalAt(CStrRef offset, int64 prehash /* = -1 */,
   case KindOfString:
     return m_data.pstr->getChar(offset.toInt32());
   case KindOfObject:
-    return getArrayAccess()->o_invoke("offsetget", Array::Create(offset), -1);
+    return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
     return m_data.pvar->rvalAt(offset, prehash, error, isString);
   case KindOfNull:
@@ -2150,7 +2159,7 @@ Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
   case KindOfString:
     return m_data.pstr->getChar(offset.toInt32());
   case KindOfObject:
-    return getArrayAccess()->o_invoke("offsetget", Array::Create(offset), -1);
+    return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
     return m_data.pvar->rvalAt(offset, prehash, error);
   case KindOfNull:
@@ -2328,7 +2337,8 @@ Variant Variant::o_get(CStrRef propName, int64 prehash /* = -1 */,
   return null_variant;
 }
 
-Variant Variant::o_invoke(const char *s, CArrRef params, int64 hash) {
+Variant Variant::o_invoke(const char *s, CArrRef params,
+                          int64 hash /* = -1 */) {
   if (m_type == KindOfObject) {
     return m_data.pobj->o_invoke(s, params, hash);
   } else if (m_type == KindOfVariant) {
@@ -2339,7 +2349,31 @@ Variant Variant::o_invoke(const char *s, CArrRef params, int64 hash) {
   }
 }
 
-Variant Variant::o_root_invoke(const char *s, CArrRef params, int64 hash) {
+Variant Variant::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */) {
+  if (m_type == KindOfObject) {
+    return m_data.pobj->o_invoke(s, params, hash);
+  } else if (m_type == KindOfVariant) {
+    return m_data.pvar->o_invoke(s, params, hash);
+  } else {
+    throw InvalidOperandException(
+        "Call to a member function on a non-object");
+  }
+}
+
+Variant Variant::o_root_invoke(const char *s, CArrRef params,
+                               int64 hash /* = -1 */) {
+  if (m_type == KindOfObject) {
+    return m_data.pobj->o_root_invoke(s, params, hash);
+  } else if (m_type == KindOfVariant) {
+    return m_data.pvar->o_root_invoke(s, params, hash);
+  } else {
+    throw InvalidOperandException(
+        "Call to a member function on a non-object");
+  }
+}
+
+Variant Variant::o_root_invoke(CStrRef s, CArrRef params,
+                               int64 hash /* = -1 */) {
   if (m_type == KindOfObject) {
     return m_data.pobj->o_root_invoke(s, params, hash);
   } else if (m_type == KindOfVariant) {
@@ -2376,7 +2410,35 @@ Variant Variant::o_invoke_few_args(const char *s, int64 hash, int count,
   }
 }
 
+Variant Variant::o_invoke_few_args(CStrRef s, int64 hash, int count,
+                                   INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (m_type == KindOfObject) {
+    return m_data.pobj->o_invoke_few_args(s, hash, count,
+                                          INVOKE_FEW_ARGS_PASS_ARGS);
+  } else if (m_type == KindOfVariant) {
+    return m_data.pvar->o_invoke_few_args(s, hash, count,
+                                          INVOKE_FEW_ARGS_PASS_ARGS);
+  } else {
+    throw InvalidOperandException(
+        "Call to a member function on a non-object");
+  }
+}
+
 Variant Variant::o_root_invoke_few_args(const char *s, int64 hash, int count,
+                                        INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (m_type == KindOfObject) {
+    return m_data.pobj->o_root_invoke_few_args(s, hash, count,
+                                               INVOKE_FEW_ARGS_PASS_ARGS);
+  } else if (m_type == KindOfVariant) {
+    return m_data.pvar->o_root_invoke_few_args(s, hash, count,
+                                               INVOKE_FEW_ARGS_PASS_ARGS);
+  } else {
+    throw InvalidOperandException(
+        "Call to a member function on a non-object");
+  }
+}
+
+Variant Variant::o_root_invoke_few_args(CStrRef s, int64 hash, int count,
                                         INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (m_type == KindOfObject) {
     return m_data.pobj->o_root_invoke_few_args(s, hash, count,
@@ -2448,8 +2510,8 @@ ObjectOffset Variant::o_lval(CStrRef propName, int64 prehash /*= -1 */) {
       break;                                                            \
     }                                                                   \
   case KindOfObject:                                                    \
-    getArrayAccess()->o_invoke("offsetset",                             \
-                               CREATE_VECTOR2(key, v), -1);             \
+    getArrayAccess()->o_invoke(s_offsetSet,                             \
+                               CREATE_VECTOR2(key, v));                 \
     break;                                                              \
   default:                                                              \
     throw_bad_type_exception("not array objects");                      \
@@ -2521,7 +2583,7 @@ check_array:                                                            \
     default:                                                            \
       throw FatalErrorException("invalid operator %d", op);             \
     }                                                                   \
-    aa->o_invoke("offsetset", CREATE_VECTOR2(key, cv), -1);             \
+    aa->o_invoke(s_offsetSet, CREATE_VECTOR2(key, cv), -1);             \
     return cv;                                                          \
   }                                                                     \
   default:                                                              \
@@ -2625,7 +2687,7 @@ CVarRef Variant::append(CVarRef v) {
   case KindOfObject:
     {
       Array params = CREATE_VECTOR2(null, v);
-      m_data.pobj->o_invoke("offsetset", params, -1);
+      m_data.pobj->o_invoke(s_offsetSet, params);
       break;
     }
   case LiteralString:
@@ -2709,7 +2771,7 @@ check_array:
     default:
       throw FatalErrorException("invalid operator %d", op);
     }
-    aa->o_invoke("offsetset", CREATE_VECTOR2(null_variant, cv), -1);
+    aa->o_invoke(s_offsetSet, CREATE_VECTOR2(null_variant, cv));
     return cv;
   }
   case LiteralString:
@@ -3004,7 +3066,8 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
           Variant &value = subLen != 0 ?
             (key.charAt(1) == '*' ?
              obj->o_lval(key.substr(subLen), -1, clsName) :
-             obj->o_lval(key.substr(subLen), -1, key.substr(1, subLen - 2)))
+             obj->o_lval(key.substr(subLen), -1,
+                         String(key.data() + 1, subLen - 2, AttachLiteral)))
             : obj->o_lval(key, -1);
           value.unserialize(unserializer);
         }
@@ -3080,10 +3143,10 @@ Variant Variant::share(bool save) const {
     if (save) {
       // we have to return an object so to remember its type
       c_stdclass *obj = NEW(c_stdclass)();
-      obj->o_set("s", -1, f_serialize(*this));
+      obj->o_set(s_s, -1, f_serialize(*this));
       return obj;
     } else {
-      return f_unserialize(m_data.pobj->o_get("s", -1));
+      return f_unserialize(m_data.pobj->o_get(s_s, -1));
     }
     break;
   default:

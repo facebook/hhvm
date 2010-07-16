@@ -32,6 +32,13 @@ using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// static strings
+
+static StaticString s_offsetExists("offsetExists");
+static StaticString s_class_exists("class_exists");
+static StaticString s___autoload("__autoload");
+
+///////////////////////////////////////////////////////////////////////////////
 // fb_rename_function()
 
 class RenameManager : public RequestEventHandler {
@@ -40,6 +47,9 @@ public:
   }
 
   void clear() {
+    // Note: ExecutionContext::onRequestShutdown() is called before
+    // MemoryManager::rollback(), so it is safe to store smart-allocated
+    // StringData objects here.
     use_allowed_functions = false;
     allowed_functions.clear();
     renamed_functions.clear();
@@ -55,44 +65,43 @@ public:
   }
 
   bool use_allowed_functions;
-  hphp_string_iset allowed_functions;
-  hphp_string_imap<string> renamed_functions;
-  hphp_string_iset unmapped_functions;
+  StringISet allowed_functions;
+  StringIMap<String> renamed_functions;
+  StringISet unmapped_functions;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(RenameManager, s_rename_manager);
 
 void check_renamed_functions(CArrRef names) {
   s_rename_manager->use_allowed_functions = true;
-  hphp_string_iset &allowed = s_rename_manager->allowed_functions;
+  StringISet &allowed = s_rename_manager->allowed_functions;
   for (ArrayIter iter(names); iter; ++iter) {
     String name = iter.second().toString();
     if (!name.empty()) {
-      allowed.insert(string(name.data(), name.size()));
+      allowed.insert(name);
     }
   }
 }
 
-bool check_renamed_function(const char *name) {
-  ASSERT(name);
+bool check_renamed_function(CStrRef name) {
   if (s_rename_manager->use_allowed_functions) {
-    hphp_string_iset &allowed = s_rename_manager->allowed_functions;
+    StringISet &allowed = s_rename_manager->allowed_functions;
     return allowed.find(name) != allowed.end();
   }
   return true;
 }
 
-hphp_string_imap<string> &get_renamed_functions() {
+StringIMap<String> &get_renamed_functions() {
   return s_rename_manager->renamed_functions;
 }
 
-hphp_string_iset &get_unmapped_functions() {
+StringISet &get_unmapped_functions() {
   return s_rename_manager->unmapped_functions;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 bool class_exists(CStrRef class_name, bool autoload /* = true */) {
-  return f_call_user_func_array("class_exists",
+  return f_call_user_func_array(s_class_exists,
       CREATE_VECTOR2(class_name, autoload));
 }
 
@@ -142,7 +151,7 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
                                   sfunction.substr(c+2).c_str(), param_arr,
                                   false);
     }
-    return invoke(sfunction.c_str(), param_arr, -1, true, false);
+    return invoke(sfunction, param_arr, -1, true, false);
   } else if (function.is(KindOfArray)) {
     Array arr = function.toArray();
     if (!(arr.size() == 2 && arr.exists(0LL) && arr.exists(1LL))) {
@@ -168,8 +177,7 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
         return classname.toObject()->o_invoke_ex
           (cls.c_str(), method.substr(c+2).c_str(), param_arr, -1, false);
       }
-      return classname.toObject()->o_invoke
-        (method.c_str(), param_arr, -1, false);
+      return classname.toObject()->o_invoke(method, param_arr, -1, false);
     } else {
       if (!classname.isString()) {
         throw_invalid_argument("function: classname not string");
@@ -192,6 +200,14 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
   }
   throw_invalid_argument("function: not string or array");
   return null;
+}
+
+Variant invoke(CStrRef function, CArrRef params, int64 hash /* = -1 */,
+               bool tryInterp /* = true */, bool fatal /* = true */) {
+  StringData *sd = function.get();
+  ASSERT(sd && sd->data());
+  return invoke(sd->data(), params, hash < 0 ? StringData::Hash(sd) : hash,
+                tryInterp, fatal);
 }
 
 Variant invoke_failed(const char *func, CArrRef params, int64 hash,
@@ -539,8 +555,7 @@ bool empty(CVarRef v, CStrRef offset, int64 prehash /* = -1 */,
 
 bool empty(CVarRef v, CVarRef offset, int64 prehash /* = -1 */) {
   if (v.is(KindOfObject)) {
-    if (!v.getArrayAccess()->o_invoke("offsetexists",
-                                      Array::Create(offset), -1)) {
+    if (!v.getArrayAccess()->o_invoke(s_offsetExists, Array::Create(offset))) {
       return true;
     }
     // fall through to check for 'empty'ness of the value.
@@ -580,7 +595,7 @@ bool isset(CVarRef v, CObjRef offset, int64 prehash /* = -1 */) {
 
 bool isset(CVarRef v, CVarRef offset, int64 prehash /* = -1 */) {
   if (v.is(KindOfObject)) {
-    return v.getArrayAccess()->o_invoke("offsetexists",
+    return v.getArrayAccess()->o_invoke(s_offsetExists,
                                         Array::Create(offset), -1);
   }
   if (v.isString()) {
@@ -677,22 +692,22 @@ Variant require(CStrRef file, bool once /* = false */,
 // class Limits
 
 bool function_exists(CStrRef function_name) {
-  const char *name = function_name.data();
+  String name = function_name;
 
-  hphp_string_iset &unmap = get_unmapped_functions();
-  if (unmap.find(name) != unmap.end()) {
+  StringISet &unmap = get_unmapped_functions();
+  if (unmap.find(function_name) != unmap.end()) {
     return false;
   }
-  hphp_string_imap<string> &remap = get_renamed_functions();
-  hphp_string_imap<string>::iterator it = remap.find(name);
+  StringIMap<String> &remap = get_renamed_functions();
+  StringIMap<String>::iterator it = remap.find(function_name);
   if (it != remap.end()) {
-    name = it->second.c_str();
+    name = it->second;
   }
   const ClassInfo::MethodInfo *info = ClassInfo::FindFunction(name);
   if (info) {
     if (info->attribute & ClassInfo::IsSystem) return true;
     if (info->attribute & ClassInfo::IsVolatile) {
-      return ((Globals*)get_global_variables())->function_exists(name);
+      return ((Globals *)get_global_variables())->function_exists(name);
     } else {
       return true;
     }
@@ -703,8 +718,8 @@ bool function_exists(CStrRef function_name) {
 
 void checkClassExists(CStrRef name, Globals *g, bool nothrow /* = false */) {
   if (g->class_exists(name)) return;
-  if (function_exists("__autoload")) {
-    invoke("__autoload", CREATE_VECTOR1(name), -1, true, false);
+  if (function_exists(s___autoload)) {
+    invoke(s___autoload, CREATE_VECTOR1(name), -1, true, false);
   }
   if (nothrow) return;
   if (!g->class_exists(name)) {
@@ -718,7 +733,7 @@ bool checkClassExists(CStrRef name, const bool *declared, bool autoloadExists,
                       bool nothrow /* = false */) {
   if (*declared) return true;
   if (autoloadExists) {
-    invoke("__autoload", CREATE_VECTOR1(name), -1, true, false);
+    invoke(s___autoload, CREATE_VECTOR1(name), -1, true, false);
   }
   if (!*declared) {
     if (nothrow) return false;

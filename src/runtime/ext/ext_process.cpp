@@ -413,8 +413,9 @@ public:
   String command;
   Variant env;
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "Process";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 
   int close() {
     pid_t wait_pid;
@@ -437,6 +438,8 @@ IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(ChildProcess);
 void ChildProcess::sweep() {
   // do nothing here, as everything will be collected by SmartAllocator
 }
+
+StaticString ChildProcess::s_class_name("Process");
 
 #define DESC_PIPE       1
 #define DESC_FILE       2

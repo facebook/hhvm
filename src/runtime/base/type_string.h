@@ -321,47 +321,52 @@ public:
 
 extern const String null_string;
 
-struct zend_hash {
-  size_t operator()(CStrRef s) const {
-    return hash_string(s.data(), s.size());
-  }
-};
-
-struct zend_eqstr {
-  bool operator()(CStrRef s1, CStrRef s2) const {
-    int len = s1.size();
-    if (s2.size() != len) return false;
-    if (s1.data() == s2.data()) return true;
-    return !memcmp(s1.data(), s2.data(), len);
-  }
-};
-
-/**
- * Two useful typedefs
- */
-typedef hphp_hash_set<String, zend_hash, zend_eqstr> StringSet;
-typedef hphp_hash_map<String, int, zend_hash, zend_eqstr> MapStringToInt;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 struct string_data_hash {
   size_t operator()(const StringData *s) const {
-    if (s->isStatic()) return s->getStaticHash();
-    return hash_string(s->data(), s->size());
+    return StringData::Hash(s);
   }
 };
 
 struct string_data_equal {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    int len = s1->size();
-    if (s2->size() != len) return false;
-    if (s1->data() == s2->data()) return true;
-    return !memcmp(s1->data(), s2->data(), len);
+    return StringData::Equal(s1, s2);
+  }
+};
+
+struct string_data_iequal {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    return StringData::IEqual(s1, s2);
   }
 };
 
 typedef hphp_hash_set<StringData *, string_data_hash, string_data_equal>
   StringDataSet;
+
+struct hphp_string_hash {
+  size_t operator()(CStrRef s) const {
+    return StringData::Hash(s.get());
+  }
+};
+
+struct hphp_string_equal {
+  bool operator()(CStrRef s1, CStrRef s2) const {
+    return StringData::Equal(s1.get(), s2.get());
+  }
+};
+
+struct hphp_string_iequal {
+  bool operator()(CStrRef s1, const CStrRef s2) const {
+    return StringData::IEqual(s1.get(), s2.get());
+  }
+};
+
+typedef hphp_hash_set<String, hphp_string_hash, hphp_string_iequal> StringISet;
+
+template<typename T>
+class StringIMap :
+  public hphp_hash_map<String, T, hphp_string_hash, hphp_string_iequal> { };
 
 /**
  * A StaticString can be co-accessed by multiple threads, therefore they are
@@ -397,6 +402,8 @@ private:
   StringData m_data;
   static StringDataSet s_stringSet;
 };
+
+extern const StaticString empty_string;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

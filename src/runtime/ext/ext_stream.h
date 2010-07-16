@@ -28,8 +28,9 @@ class StreamContext : public ResourceData {
 public:
   DECLARE_OBJECT_ALLOCATION(StreamContext);
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  virtual const char *o_getClassName() const { return "StreamContext";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 
   StreamContext(CArrRef options, CArrRef params)
     : m_options(options), m_params(params) {

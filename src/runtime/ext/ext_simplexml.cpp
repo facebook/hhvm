@@ -30,8 +30,9 @@ class XmlDocWrapper : public SweepableResourceData {
 public:
   DECLARE_OBJECT_ALLOCATION(XmlDocWrapper)
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "xmlDoc";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 
   XmlDocWrapper(xmlDocPtr doc) : m_doc(doc) {
   }
@@ -46,6 +47,8 @@ private:
   xmlDocPtr m_doc;
 };
 IMPLEMENT_OBJECT_ALLOCATION(XmlDocWrapper)
+
+StaticString XmlDocWrapper::s_class_name("xmlDoc");
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers

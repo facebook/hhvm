@@ -153,10 +153,12 @@ bool TestExtVariable::test_is_object() {
   return Count(true);
 }
 
+static StaticString s_TestResource("TestResource");
+
 class TestResource : public ResourceData {
 public:
   // overriding ResourceData
-  const char *o_getClassName() const { return "TestResource";}
+  CStrRef o_getClassName() const { return s_TestResource; }
 };
 
 bool TestExtVariable::test_is_resource() {

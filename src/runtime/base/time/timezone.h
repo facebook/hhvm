@@ -63,8 +63,9 @@ public:
   TimeZone(CStrRef name);
   TimeZone(timelib_tzinfo *tzi);
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "TimeZone";}
+  CStrRef o_getClassName() const { return s_class_name; }
 
   /**
    * Whether this represents a valid timezone.

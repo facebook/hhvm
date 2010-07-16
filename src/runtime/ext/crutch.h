@@ -50,8 +50,9 @@ class OpaqueObject : public ResourceData {
   static Object GetObject(int index);
   static int GetIndex(Object obj);
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "OpaqueObject";}
+  CStrRef o_getClassName() const { return s_class_name; }
 
  private:
   OpaqueObject(int index);

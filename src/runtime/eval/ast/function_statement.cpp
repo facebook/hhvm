@@ -202,7 +202,7 @@ Variant FunctionStatement::invoke(CArrRef params) const {
   ProfilerInjection pi(info, m_name.c_str());
 #endif
   FuncScopeVariableEnvironment env(this, params.size());
-  EvalFrameInjection fi("", m_name.c_str(), env, loc()->file);
+  EvalFrameInjection fi(empty_string, m_name.c_str(), env, loc()->file);
   if (m_ref) {
     return ref(invokeImpl(env, params));
   }
@@ -276,7 +276,7 @@ Variant FunctionStatement::directInvoke(VariableEnvironment &env,
 #endif
   FuncScopeVariableEnvironment fenv(this, 0);
   directBind(env, caller, fenv);
-  EvalFrameInjection fi("", m_name.c_str(), fenv, loc()->file);
+  EvalFrameInjection fi(empty_string, m_name.c_str(), fenv, loc()->file);
   if (m_ref) {
     return ref(evalBody(fenv));
   } else {

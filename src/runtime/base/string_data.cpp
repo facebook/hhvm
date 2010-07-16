@@ -445,6 +445,11 @@ int StringData::compare(const StringData *v2) const {
   return ret;
 }
 
+int64 StringData::getSharedStringHash() const {
+  ASSERT(isShared());
+  return m_shared->stringHash();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool StringData::calculate(int &totalSize) {

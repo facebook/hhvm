@@ -377,8 +377,9 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
     } else {
       if (fewParams) {
         uint64 hash = hash_string_i(m_name.data(), m_name.size());
-        cg_printf("%s%sinvoke_few_args(\"%s\"", Option::ObjectPrefix,
-                  isThis ? "root_" : "", m_origName.c_str());
+        cg_printf("%s%sinvoke_few_args(", Option::ObjectPrefix,
+                  isThis ? "root_" : "");
+        cg_printString(m_origName, ar);
         cg_printf(", 0x%016llXLL, ", hash);
 
         if (m_params && m_params->getCount()) {
@@ -389,8 +390,9 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
         }
         cg_printf(")");
       } else {
-        cg_printf("%s%sinvoke(\"%s\"", Option::ObjectPrefix,
-                  isThis ? "root_" : "", m_origName.c_str());
+        cg_printf("%s%sinvoke(", Option::ObjectPrefix,
+                  isThis ? "root_" : "");
+        cg_printString(m_origName, ar);
         cg_printf(", ");
         if (m_params && m_params->getCount()) {
           FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);

@@ -40,6 +40,10 @@ namespace HPHP {
 IMPLEMENT_OBJECT_ALLOCATION(StreamContext);
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString StreamContext::s_class_name("StreamContext");
+
+///////////////////////////////////////////////////////////////////////////////
+
 Variant f_stream_copy_to_stream(CObjRef source, CObjRef dest,
                                 int maxlength /* = 0 */,
                                 int offset /* = 0 */) {

@@ -1222,8 +1222,9 @@ public:
     close();
   }
 
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "Directory";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 
   void close() {
     if (dir) {
@@ -1234,6 +1235,8 @@ public:
 
   DIR *dir;
 };
+
+StaticString Directory::s_class_name("Directory");
 
 class DirectoryRequestData : public RequestEventHandler {
 public:

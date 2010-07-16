@@ -24,6 +24,14 @@ using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// static strings
+
+StaticString PDOConnection::s_class_name("PDOConnection");
+StaticString PDOColumn::s_class_name("PDOColumn");
+StaticString PDOBoundParam::s_class_name("PDOBoundParam");
+StaticString PDOStatement::s_class_name("PDOStatement");
+
+///////////////////////////////////////////////////////////////////////////////
 
 // This needs to get created first.
 PDODriverMap PDODriver::s_drivers;

@@ -32,7 +32,7 @@ public:
     BreakPointHit   = 4,
   };
 
-  static const char *GetClassName(bool skip = false);
+  static CStrRef GetClassName(bool skip = false);
   static const char *GetParentClassName(bool skip = false);
   static Object GetThis(bool skip = false);
   static String GetContainingFileName(bool skip = false);
@@ -41,12 +41,12 @@ public:
   static int GetLine(bool skip = false);
 
 public:
-  FrameInjection(ThreadInfo *info, const char *cls, const char *name,
+  FrameInjection(ThreadInfo *info, CStrRef cls, const char *name,
                  ObjectData *obj = NULL, int fs = 0)
       : m_info(info), m_class(cls), m_name(name),
         m_object(obj ? obj->getRoot() : NULL),
         m_line(0), m_flags(fs) {
-    ASSERT(m_class);
+    ASSERT(m_class.get());
     ASSERT(m_name);
     m_prev = m_info->m_top;
     m_info->m_top = this;
@@ -109,7 +109,7 @@ public:
 private:
   ThreadInfo     *m_info;
   FrameInjection *m_prev;
-  const char     *m_class;
+  CStrRef         m_class;
   const char     *m_name;
   Object          m_object;
 

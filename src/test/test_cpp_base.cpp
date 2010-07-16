@@ -84,10 +84,12 @@ public:
   int m_data;
 };
 
+static StaticString s_TestResource("TestResource");
+
 class TestResource : public ResourceData {
 public:
   // overriding ResourceData
-  const char *o_getClassName() const { return "TestResource";}
+  CStrRef o_getClassName() const { return s_TestResource; }
 };
 
 typedef SmartAllocator<SomeClass, -1, SmartAllocatorImpl::NoCallbacks>

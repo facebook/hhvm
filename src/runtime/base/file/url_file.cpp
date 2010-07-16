@@ -27,6 +27,10 @@ namespace HPHP {
 IMPLEMENT_OBJECT_ALLOCATION(UrlFile)
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString UrlFile::s_class_name("UrlFile");
+
+///////////////////////////////////////////////////////////////////////////////
+
 UrlFile::UrlFile(const char *method /* = "GET" */,
                  CArrRef headers /* = null_array */,
                  CStrRef postData /* = null_string */,

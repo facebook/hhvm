@@ -223,7 +223,9 @@ void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (!m_className.empty() && m_cppTemp.empty() &&
       m_origClassName != "self" &&
       m_origClassName != "parent") {
-    cg_printf("STATIC_CLASS_NAME_CALL(%s, ", m_className.c_str());
+    cg_printf("STATIC_CLASS_NAME_CALL(");
+    cg_printString(m_origClassName, ar);
+    cg_printf(", ");
     if (m_voidReturn) m_voidWrapper = true;
     staticClassName = true;
   }

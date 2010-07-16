@@ -26,6 +26,16 @@ IMPLEMENT_OBJECT_ALLOCATION(DirectoryIterator)
 IMPLEMENT_OBJECT_ALLOCATION(RecursiveDirectoryIterator)
 IMPLEMENT_OBJECT_ALLOCATION(RecursiveIteratorIterator)
 
+///////////////////////////////////////////////////////////////////////////////
+// static strings
+
+StaticString DirectoryIterator::s_class_name("directoryiterator");
+StaticString
+  RecursiveDirectoryIterator::s_class_name("recursivedirectoryiterator");
+StaticString
+  RecursiveIteratorIterator::s_class_name("recursiveiteratoriterator");
+
+///////////////////////////////////////////////////////////////////////////////
 // helper
 static RecursiveIteratorIterator *
 get_recursiveiteratoriterator(CObjRef obj) {

@@ -38,7 +38,7 @@ public:
   virtual String t___tostring();
   virtual int64 o_toInt64() const { return o_getId();}
   void serialize(VariableSerializer *serializer) const;
-  virtual const char *o_getResourceName() const { return o_getClassName();}
+  virtual const char *o_getResourceName() const;
   virtual int o_getResourceId() const { return o_getId(); }
 
   // implementing UnsafePointer

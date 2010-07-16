@@ -539,7 +539,7 @@ void VariableSerializer::writePropertyPrivacy(const char *prop,
   const ClassInfo *origCls = cls;
   ClassInfo::PropertyInfo *p = cls->getPropertyInfo(prop);
   while (!p && cls && cls->getParentClass()) {
-    cls = ClassInfo::FindClass(cls->getParentClass());
+    cls = cls->getParentClassInfo();
     if (cls) p = cls->getPropertyInfo(prop);
   }
   if (!p) return;
@@ -553,36 +553,42 @@ void VariableSerializer::writePropertyPrivacy(const char *prop,
 
 void VariableSerializer::writeSerializedProperty(CStrRef prop,
                                                  const ClassInfo *cls) {
-  String res = prop;
+  ASSERT(m_type == Serialize);
   const ClassInfo *origCls = cls;
   if (cls) {
     ClassInfo::PropertyInfo *p = cls->getPropertyInfo(prop.c_str());
     // Try to find defining class
     while (!p && cls && cls->getParentClass()) {
-      cls = ClassInfo::FindClass(cls->getParentClass());
+      cls = cls->getParentClassInfo();
       if (cls) p = cls->getPropertyInfo(prop);
     }
     if (p) {
       const ClassInfo *dcls = p->owner;
       ClassInfo::Attribute a = p->attribute;
       if (a & ClassInfo::IsProtected) {
-        res = String("\0*\0", 3, AttachLiteral) + prop;
+        m_buf->append("s:");
+        m_buf->append(prop.size() + 3);
+        m_buf->append(":\"");
+        m_buf->append("\0*\0", 3);
+        m_buf->append(prop);
+        m_buf->append("\";");
+        return;
       } else if (a & ClassInfo::IsPrivate && cls == origCls) {
         const char *clsname = dcls->getName();
         int clsLen = strlen(clsname);
-        int headerLen = clsLen + 2;
-        int totalLen = headerLen + prop.size() + 1;
-        char *buf = (char*)malloc(totalLen);
-        buf[0] = '\0';
-        memcpy(buf + 1, clsname, clsLen);
-        buf[clsLen + 1] = '\0';
-        memcpy(buf + headerLen, prop.c_str(), prop.size());
-        buf[totalLen - 1] = '\0';
-        res = String(buf, totalLen - 1, AttachString);
+
+        m_buf->append("s:");
+        m_buf->append(prop.size() + clsLen + 2);
+        m_buf->append(":\"\0", 3);
+        m_buf->append(clsname, clsLen);
+        m_buf->append('\0');
+        m_buf->append(prop);
+        m_buf->append("\";");
+        return;
       }
     }
   }
-  write(res);
+  write(prop);
 }
 
 void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
@@ -595,6 +601,11 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
   if (info.is_object) {
     String ks(key.toString());
     if (ks.charAt(0) == '\0') {
+      // fast path for serializing private properties
+      if (m_type == Serialize) {
+        write(ks);
+        return;
+      }
       int span = ks.find('\0', 1);
       ASSERT(span != String::npos);
       String cl(ks.substr(1, span - 1));

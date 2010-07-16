@@ -86,8 +86,9 @@ static HashEngineMapInitializer s_engine_initializer;
 
 class HashContext : public SweepableResourceData {
 public:
+  static StaticString s_class_name;
   // overriding ResourceData
-  const char *o_getClassName() const { return "Hash Context";}
+  virtual CStrRef o_getClassName() const { return s_class_name; }
 
   HashContext(HashEnginePtr ops_, void *context_, int options_)
     : ops(ops_), context(context_), options(options_), key(NULL) {
@@ -113,6 +114,8 @@ public:
   int options;
   char *key;
 };
+
+StaticString HashContext::s_class_name("Hash Context");
 
 ///////////////////////////////////////////////////////////////////////////////
 // hash functions

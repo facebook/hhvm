@@ -51,22 +51,22 @@ void c_pear_error::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_get_pear_error
-Variant c_pear_error::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_pear_error::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_pear_error::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_pear_error
-Variant c_pear_error::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_pear_error::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_pear_error
-Variant c_pear_error::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_pear_error::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_pear_error
-bool c_pear_error::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_pear_error::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_pear_error::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_pear_error
@@ -81,22 +81,22 @@ bool c_pear_error::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_set_pear_error
-Variant c_pear_error::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_pear_error::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_pear_error::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_pear_error
-Variant c_pear_error::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_pear_error::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_pear_error
-Variant c_pear_error::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_pear_error::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_pear_error
-Variant& c_pear_error::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_pear_error::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_pear_error::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_pear_error
@@ -200,7 +200,7 @@ void c_pear_error::cloneSet(c_pear_error *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pear_error
 Variant c_pear_error::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 1:
       HASH_GUARD(0x488B59A7AC1AD281LL, getbacktrace) {
@@ -280,7 +280,7 @@ Variant c_pear_error::o_invoke(const char *s, CArrRef params, int64 hash, bool f
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pear_error
 Variant c_pear_error::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 1:
       HASH_GUARD(0x488B59A7AC1AD281LL, getbacktrace) {
@@ -365,7 +365,7 @@ Variant c_pear_error::os_invoke(const char *c, const char *s, CArrRef params, in
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pear_error
 Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 1:
       HASH_GUARD(0x488B59A7AC1AD281LL, getbacktrace) {

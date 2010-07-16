@@ -35,7 +35,7 @@ public:
     bool m_set;
   };
 
-  EvalFrameInjection(const char *cls, const char *name,
+  EvalFrameInjection(CStrRef cls, const char *name,
                      VariableEnvironment &env, const char *file,
                      ObjectData *obj = NULL, int fs = 0)
     : FrameInjection(ThreadInfo::s_threadInfo.get(), cls, name, obj, fs),

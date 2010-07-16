@@ -33,7 +33,7 @@ Variant c_reflectionfunctionabstract::os_getInit(const char *s, int64 hash) {
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 1:
-      HASH_RETURN(0x3255DC7C4A035C47LL, 
+      HASH_RETURN(0x0F2EF58F157D479FLL, 
                   null, "info");
       break;
     default:
@@ -54,7 +54,7 @@ Variant &c_reflectionfunctionabstract::os_lval(const char *s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionfunctionabstract
 void c_reflectionfunctionabstract::o_getArray(Array &props) const {
-  if (isInitialized(m_info)) props.set("info", m_info.isReferenced() ? ref(m_info) : m_info, 0x3255DC7C4A035C47LL, true);
+  if (isInitialized(m_info)) props.set("info", m_info.isReferenced() ? ref(m_info) : m_info, 0x0F2EF58F157D479FLL, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionfunctionabstract
@@ -64,16 +64,16 @@ void c_reflectionfunctionabstract::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionfunctionabstract
-Variant c_reflectionfunctionabstract::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_reflectionfunctionabstract::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_reflectionfunctionabstract::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionfunctionabstract
-Variant c_reflectionfunctionabstract::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_reflectionfunctionabstract::o_getPublic(CStrRef s, int64 hash, bool error) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 1:
-      HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
+      HASH_RETURN_STRING(0x0F2EF58F157D479FLL, m_info,
                          "info", 4);
       break;
     default:
@@ -83,21 +83,21 @@ Variant c_reflectionfunctionabstract::o_getPublic(CStrRef s, int64 hash, bool er
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionfunctionabstract
-Variant c_reflectionfunctionabstract::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_reflectionfunctionabstract::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionfunctionabstract
-bool c_reflectionfunctionabstract::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_reflectionfunctionabstract::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_reflectionfunctionabstract::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionfunctionabstract
 bool c_reflectionfunctionabstract::o_existsPublic(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 1:
-      HASH_EXISTS_STRING(0x3255DC7C4A035C47LL, "info", 4);
+      HASH_EXISTS_STRING(0x0F2EF58F157D479FLL, "info", 4);
       break;
     default:
       break;
@@ -111,16 +111,16 @@ bool c_reflectionfunctionabstract::o_existsPrivate(CStrRef s, int64 hash) const 
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionfunctionabstract
-Variant c_reflectionfunctionabstract::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_reflectionfunctionabstract::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_reflectionfunctionabstract::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionfunctionabstract
-Variant c_reflectionfunctionabstract::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_reflectionfunctionabstract::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 1:
-      HASH_SET_STRING(0x3255DC7C4A035C47LL, m_info,
+      HASH_SET_STRING(0x0F2EF58F157D479FLL, m_info,
                       "info", 4);
       break;
     default:
@@ -130,21 +130,21 @@ Variant c_reflectionfunctionabstract::o_setPublic(CStrRef s, int64 hash, CVarRef
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionfunctionabstract
-Variant c_reflectionfunctionabstract::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_reflectionfunctionabstract::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_reflectionfunctionabstract
-Variant& c_reflectionfunctionabstract::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_reflectionfunctionabstract::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_reflectionfunctionabstract::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionfunctionabstract
 Variant& c_reflectionfunctionabstract::o_lvalPublic(CStrRef s, int64 hash) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 1:
-      HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
+      HASH_RETURN_STRING(0x0F2EF58F157D479FLL, m_info,
                          "info", 4);
       break;
     default:
@@ -176,7 +176,7 @@ void c_reflectionfunctionabstract::cloneSet(c_reflectionfunctionabstract *clone)
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunctionabstract
 Variant c_reflectionfunctionabstract::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
@@ -258,7 +258,7 @@ Variant c_reflectionfunctionabstract::o_invoke(const char *s, CArrRef params, in
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunctionabstract
 Variant c_reflectionfunctionabstract::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
@@ -345,7 +345,7 @@ Variant c_reflectionfunctionabstract::os_invoke(const char *c, const char *s, CA
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionfunctionabstract
 Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
@@ -544,52 +544,52 @@ void c_reflectionfunctionabstract::init() {
 /* SRC: classes/reflection.php line 99 */
 Variant c_reflectionfunctionabstract::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getName);
-  return m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true);
+  return m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 103 */
 Variant c_reflectionfunctionabstract::t_isinternal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::isInternal);
-  return m_info.rvalAt("internal", 0x575D95D69333A8ACLL, true, true);
+  return m_info.rvalAt("internal", 0x03DB58CB8EECAAACLL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 107 */
 Variant c_reflectionfunctionabstract::t_getclosure() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getClosure);
-  return m_info.rvalAt("closure", 0x3828EA96366C415ALL, true, true);
+  return m_info.rvalAt("closure", 0x3280F0C292E92A6CLL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 111 */
 bool c_reflectionfunctionabstract::t_isuserdefined() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::isUserDefined);
-  return !(toBoolean(m_info.rvalAt("internal", 0x575D95D69333A8ACLL, true, true)));
+  return !(toBoolean(m_info.rvalAt("internal", 0x03DB58CB8EECAAACLL, true, true)));
 } /* function */
 /* SRC: classes/reflection.php line 115 */
 Variant c_reflectionfunctionabstract::t_getfilename() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getFileName);
-  return m_info.rvalAt("file", 0x08C19339767C0884LL, true, true);
+  return m_info.rvalAt("file", 0x7863294A8F33D14FLL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 119 */
 Variant c_reflectionfunctionabstract::t_getstartline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getStartLine);
-  return m_info.rvalAt("line1", 0x7E7BD613D4C67725LL, true, true);
+  return m_info.rvalAt("line1", 0x3433B57D028B2C66LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 123 */
 Variant c_reflectionfunctionabstract::t_getendline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getEndLine);
-  return m_info.rvalAt("line2", 0x641B12C5BEFE32A8LL, true, true);
+  return m_info.rvalAt("line2", 0x7837CC133195C8E2LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 127 */
 Variant c_reflectionfunctionabstract::t_getdoccomment() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getDocComment);
-  return m_info.rvalAt("doc", 0x3E08E8478690475CLL, true, true);
+  return m_info.rvalAt("doc", 0x5C1091C88F8EB6EDLL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 131 */
 Variant c_reflectionfunctionabstract::t_getstaticvariables() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getStaticVariables);
-  return m_info.rvalAt("static_variables", 0x4BC9448B5BE6A94ALL, true, true);
+  return m_info.rvalAt("static_variables", 0x203C504C70133DB3LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 135 */
 Variant c_reflectionfunctionabstract::t_returnsreference() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::returnsReference);
-  return m_info.rvalAt("ref", 0x0B1A6D25134ED5FALL, true, true);
+  return m_info.rvalAt("ref", 0x05FF98D1208F545ELL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 139 */
 Array c_reflectionfunctionabstract::t_getparameters() {
@@ -602,8 +602,8 @@ Array c_reflectionfunctionabstract::t_getparameters() {
   v_ret = SystemScalarArrays::ssa_[0];
   {
     LOOP_COUNTER(1);
-    Variant map2 = m_info.rvalAt("params", 0x6E4C9E151F21AC62LL, true, true);
-    for (ArrayIterPtr iter3 = map2.begin("reflectionfunctionabstract"); !iter3->end(); iter3->next()) {
+    Variant map2 = m_info.rvalAt("params", 0x6A67A10AA9B9D7C1LL, true, true);
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_info);
       v_name = iter3->first();
@@ -625,7 +625,7 @@ Array c_reflectionfunctionabstract::t_getparameters() {
 /* SRC: classes/reflection.php line 149 */
 int c_reflectionfunctionabstract::t_getnumberofparameters() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getNumberOfParameters);
-  return x_count(m_info.rvalAt("params", 0x6E4C9E151F21AC62LL, true, true));
+  return x_count(m_info.rvalAt("params", 0x6A67A10AA9B9D7C1LL, true, true));
 } /* function */
 /* SRC: classes/reflection.php line 153 */
 int64 c_reflectionfunctionabstract::t_getnumberofrequiredparameters() {
@@ -642,7 +642,7 @@ int64 c_reflectionfunctionabstract::t_getnumberofrequiredparameters() {
   }
   {
     LOOP_COUNTER(2);
-    for (ArrayIter iter4 = v_params.begin("reflectionfunctionabstract"); !iter4.end(); ++iter4) {
+    for (ArrayIter iter4 = v_params.begin(s_class_name); !iter4.end(); ++iter4) {
       LOOP_COUNTER_CHECK(2);
       iter4.second(v_param);
       v_name = iter4.first();
@@ -685,13 +685,12 @@ void c_reflectionobject::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionobject
-Variant c_reflectionobject::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_reflectionobject::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   const char *s = context;
-  if (!s) { context = s = FrameInjection::GetClassName(false); }
-  int64 hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x35A44A5E6AE2E71DLL, reflectionclass) { return c_reflectionclass::o_getPrivate(prop, phash, error); }
+      HASH_GUARD(0x35A44A5E6AE2E71DLL, ReflectionClass) { return c_reflectionclass::o_getPrivate(prop, phash, error); }
       break;
     default:
       break;
@@ -700,23 +699,22 @@ Variant c_reflectionobject::o_get(CStrRef prop, int64 phash, bool error /* = tru
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionobject
-Variant c_reflectionobject::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_reflectionobject::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_reflectionclass::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionobject
-Variant c_reflectionobject::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_reflectionobject::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionobject
-bool c_reflectionobject::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_reflectionobject::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   const char *s = context;
-  if (!s) { context = s = FrameInjection::GetClassName(false); }
-  int64 hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x35A44A5E6AE2E71DLL, reflectionclass) { return c_reflectionclass::o_existsPrivate(prop, phash); }
+      HASH_GUARD(0x35A44A5E6AE2E71DLL, ReflectionClass) { return c_reflectionclass::o_existsPrivate(prop, phash); }
       break;
     default:
       break;
@@ -735,13 +733,12 @@ bool c_reflectionobject::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionobject
-Variant c_reflectionobject::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_reflectionobject::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   const char *s = context;
-  if (!s) { context = s = FrameInjection::GetClassName(false); }
-  int64 hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x35A44A5E6AE2E71DLL, reflectionclass) { return c_reflectionclass::o_setPrivate(prop, phash, v, forInit); }
+      HASH_GUARD(0x35A44A5E6AE2E71DLL, ReflectionClass) { return c_reflectionclass::o_setPrivate(prop, phash, v, forInit); }
       break;
     default:
       break;
@@ -750,23 +747,22 @@ Variant c_reflectionobject::o_set(CStrRef prop, int64 phash, CVarRef v, bool for
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionobject
-Variant c_reflectionobject::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_reflectionobject::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_reflectionclass::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionobject
-Variant c_reflectionobject::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_reflectionobject::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_reflectionobject
-Variant& c_reflectionobject::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_reflectionobject::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   const char *s = context;
-  if (!s) { context = s = FrameInjection::GetClassName(false); }
-  int64 hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x35A44A5E6AE2E71DLL, reflectionclass) { return c_reflectionclass::o_lvalPrivate(prop, phash); }
+      HASH_GUARD(0x35A44A5E6AE2E71DLL, ReflectionClass) { return c_reflectionclass::o_lvalPrivate(prop, phash); }
       break;
     default:
       break;
@@ -801,7 +797,7 @@ void c_reflectionobject::cloneSet(c_reflectionobject *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionobject
 Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
@@ -1045,7 +1041,7 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionobject
 Variant c_reflectionobject::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
@@ -1297,7 +1293,7 @@ Variant c_reflectionobject::o_invoke_few_args(const char *s, int64 hash, int cou
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionobject
 Variant c_reflectionobject::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
@@ -1312,7 +1308,7 @@ Variant c_reflectionobject::os_invoke(const char *c, const char *s, CArrRef para
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionobject
 Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
@@ -1947,7 +1943,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   return c_reflectionclass::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionobject::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
@@ -2032,22 +2028,22 @@ void c_reflectionexception::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionexception
-Variant c_reflectionexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_reflectionexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_reflectionexception::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionexception
-Variant c_reflectionexception::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_reflectionexception::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_exception::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionexception
-Variant c_reflectionexception::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_reflectionexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionexception
-bool c_reflectionexception::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_reflectionexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_reflectionexception::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionexception
@@ -2062,22 +2058,22 @@ bool c_reflectionexception::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionexception
-Variant c_reflectionexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_reflectionexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_reflectionexception::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionexception
-Variant c_reflectionexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_reflectionexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_exception::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionexception
-Variant c_reflectionexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_reflectionexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_reflectionexception
-Variant& c_reflectionexception::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_reflectionexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_reflectionexception::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionexception
@@ -2108,7 +2104,7 @@ void c_reflectionexception::cloneSet(c_reflectionexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionexception
 Variant c_reflectionexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -2174,7 +2170,7 @@ Variant c_reflectionexception::o_invoke(const char *s, CArrRef params, int64 has
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionexception
 Variant c_reflectionexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -2245,7 +2241,7 @@ Variant c_reflectionexception::os_invoke(const char *c, const char *s, CArrRef p
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionexception
 Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
@@ -2410,12 +2406,12 @@ Variant c_reflectionclass::os_getInit(const char *s, int64 hash) {
   DECLARE_SYSTEM_GLOBALS(g);
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
-    case 0:
-      HASH_RETURN(0x0BCDB293DC3DBDDCLL, 
+    case 2:
+      HASH_RETURN(0x5655B4FF77E35232LL, 
                   null, "name");
       break;
     case 3:
-      HASH_RETURN(0x3255DC7C4A035C47LL, 
+      HASH_RETURN(0x0F2EF58F157D479FLL, 
                   null, "info");
       break;
     default:
@@ -2436,8 +2432,8 @@ Variant &c_reflectionclass::os_lval(const char *s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionclass
 void c_reflectionclass::o_getArray(Array &props) const {
-  if (isInitialized(m_name)) props.set("name", m_name.isReferenced() ? ref(m_name) : m_name, 0x0BCDB293DC3DBDDCLL, true);
-  if (isInitialized(m_info)) props.set(String("\000ReflectionClass\000info", 21, AttachLiteral), m_info.isReferenced() ? ref(m_info) : m_info, 0x6C1B113D84E0D89DLL, true);
+  if (isInitialized(m_name)) props.set("name", m_name.isReferenced() ? ref(m_name) : m_name, 0x5655B4FF77E35232LL, true);
+  if (isInitialized(m_info)) props.set(String("\000ReflectionClass\000info", 21, AttachLiteral), m_info.isReferenced() ? ref(m_info) : m_info, 0x0349DE35883AE221LL, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionclass
@@ -2448,13 +2444,12 @@ void c_reflectionclass::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionclass
-Variant c_reflectionclass::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_reflectionclass::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   const char *s = context;
-  if (!s) { context = s = FrameInjection::GetClassName(false); }
-  int64 hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x35A44A5E6AE2E71DLL, reflectionclass) { return o_getPrivate(prop, phash, error); }
+      HASH_GUARD(0x35A44A5E6AE2E71DLL, ReflectionClass) { return o_getPrivate(prop, phash, error); }
       break;
     default:
       break;
@@ -2463,11 +2458,11 @@ Variant c_reflectionclass::o_get(CStrRef prop, int64 phash, bool error /* = true
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionclass
-Variant c_reflectionclass::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_reflectionclass::o_getPublic(CStrRef s, int64 hash, bool error) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 0:
-      HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
+      HASH_RETURN_STRING(0x5655B4FF77E35232LL, m_name,
                          "name", 4);
       break;
     default:
@@ -2477,11 +2472,11 @@ Variant c_reflectionclass::o_getPublic(CStrRef s, int64 hash, bool error /* = tr
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionclass
-Variant c_reflectionclass::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_reflectionclass::o_getPrivate(CStrRef s, int64 hash, bool error) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 1:
-      HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
+      HASH_RETURN_STRING(0x0F2EF58F157D479FLL, m_info,
                          "info", 4);
       break;
     default:
@@ -2491,13 +2486,12 @@ Variant c_reflectionclass::o_getPrivate(CStrRef s, int64 hash, bool error /* = t
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionclass
-bool c_reflectionclass::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_reflectionclass::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   const char *s = context;
-  if (!s) { context = s = FrameInjection::GetClassName(false); }
-  int64 hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x35A44A5E6AE2E71DLL, reflectionclass) { return o_existsPrivate(prop, phash); }
+      HASH_GUARD(0x35A44A5E6AE2E71DLL, ReflectionClass) { return o_existsPrivate(prop, phash); }
       break;
     default:
       break;
@@ -2507,10 +2501,10 @@ bool c_reflectionclass::o_exists(CStrRef prop, int64 phash, const char *context 
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionclass
 bool c_reflectionclass::o_existsPublic(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 0:
-      HASH_EXISTS_STRING(0x0BCDB293DC3DBDDCLL, "name", 4);
+      HASH_EXISTS_STRING(0x5655B4FF77E35232LL, "name", 4);
       break;
     default:
       break;
@@ -2520,10 +2514,10 @@ bool c_reflectionclass::o_existsPublic(CStrRef s, int64 hash) const {
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionclass
 bool c_reflectionclass::o_existsPrivate(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 1:
-      HASH_EXISTS_STRING(0x3255DC7C4A035C47LL, "info", 4);
+      HASH_EXISTS_STRING(0x0F2EF58F157D479FLL, "info", 4);
       break;
     default:
       break;
@@ -2532,13 +2526,12 @@ bool c_reflectionclass::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionclass
-Variant c_reflectionclass::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_reflectionclass::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   const char *s = context;
-  if (!s) { context = s = FrameInjection::GetClassName(false); }
-  int64 hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x35A44A5E6AE2E71DLL, reflectionclass) { return o_setPrivate(prop, phash, v, forInit); }
+      HASH_GUARD(0x35A44A5E6AE2E71DLL, ReflectionClass) { return o_setPrivate(prop, phash, v, forInit); }
       break;
     default:
       break;
@@ -2547,11 +2540,11 @@ Variant c_reflectionclass::o_set(CStrRef prop, int64 phash, CVarRef v, bool forI
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionclass
-Variant c_reflectionclass::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_reflectionclass::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 0:
-      HASH_SET_STRING(0x0BCDB293DC3DBDDCLL, m_name,
+      HASH_SET_STRING(0x5655B4FF77E35232LL, m_name,
                       "name", 4);
       break;
     default:
@@ -2561,11 +2554,11 @@ Variant c_reflectionclass::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool fo
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionclass
-Variant c_reflectionclass::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_reflectionclass::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 1:
-      HASH_SET_STRING(0x3255DC7C4A035C47LL, m_info,
+      HASH_SET_STRING(0x0F2EF58F157D479FLL, m_info,
                       "info", 4);
       break;
     default:
@@ -2575,13 +2568,12 @@ Variant c_reflectionclass::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool f
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_reflectionclass
-Variant& c_reflectionclass::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_reflectionclass::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   const char *s = context;
-  if (!s) { context = s = FrameInjection::GetClassName(false); }
-  int64 hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x35A44A5E6AE2E71DLL, reflectionclass) { return o_lvalPrivate(prop, phash); }
+      HASH_GUARD(0x35A44A5E6AE2E71DLL, ReflectionClass) { return o_lvalPrivate(prop, phash); }
       break;
     default:
       break;
@@ -2591,10 +2583,10 @@ Variant& c_reflectionclass::o_lval(CStrRef prop, int64 phash, const char *contex
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionclass
 Variant& c_reflectionclass::o_lvalPublic(CStrRef s, int64 hash) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 0:
-      HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
+      HASH_RETURN_STRING(0x5655B4FF77E35232LL, m_name,
                          "name", 4);
       break;
     default:
@@ -2605,10 +2597,10 @@ Variant& c_reflectionclass::o_lvalPublic(CStrRef s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_reflectionclass
 Variant& c_reflectionclass::o_lvalPrivate(CStrRef s, int64 hash) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 1:
-      HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
+      HASH_RETURN_STRING(0x0F2EF58F157D479FLL, m_info,
                          "info", 4);
       break;
     default:
@@ -2625,8 +2617,8 @@ Variant c_reflectionclass::os_constant(const char *s) {
       HASH_RETURN(0x042E299D3BE2773ALL, q_reflectionclass_IS_IMPLICIT_ABSTRACT, "IS_IMPLICIT_ABSTRACT");
       break;
     case 6:
-      HASH_RETURN(0x468EF528A19A529ELL, q_reflectionclass_IS_EXPLICIT_ABSTRACT, "IS_EXPLICIT_ABSTRACT");
-      HASH_RETURN(0x47AAFAC74A59AD66LL, q_reflectionclass_IS_FINAL, "IS_FINAL");
+      HASH_RETURN(0x468EF528A19B529ELL, q_reflectionclass_IS_EXPLICIT_ABSTRACT, "IS_EXPLICIT_ABSTRACT");
+      HASH_RETURN(0x47AAFAC74A58AD66LL, q_reflectionclass_IS_FINAL, "IS_FINAL");
       break;
     default:
       break;
@@ -2685,7 +2677,7 @@ void c_reflectionclass::cloneSet(c_reflectionclass *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionclass
 Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
@@ -2939,7 +2931,7 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionclass
 Variant c_reflectionclass::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
@@ -3201,7 +3193,7 @@ Variant c_reflectionclass::o_invoke_few_args(const char *s, int64 hash, int coun
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionclass
 Variant c_reflectionclass::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
@@ -3216,7 +3208,7 @@ Variant c_reflectionclass::os_invoke(const char *c, const char *s, CArrRef param
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionclass
 Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
@@ -3889,7 +3881,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionclass::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
@@ -3980,28 +3972,28 @@ Variant c_reflectionclass::t_fetch(CVarRef v_what) {
       }
       if (toBoolean(t_isinterface())) {
         {
-          if (!(empty(m_info, "parent", 0x3E764E41E4A6ACA5LL, true))) {
+          if (!(empty(m_info, "parent", 0x53DCFFF92D13045ELL, true))) {
             {
               {
                 p_reflectionclass tmp3 = NEWOBJ(c_reflectionclass)();
-                (tmp3->create(m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)));
+                (tmp3->create(m_info.rvalAt("parent", 0x53DCFFF92D13045ELL, true, true)));
                 v_p = tmp3;
               }
               {
-                Variant tmp4((m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)));
-                lval(m_info.lvalAt("interfaces", 0x0C5BD661CFB9E254LL, false, true)).append((tmp4));
+                Variant tmp4((m_info.rvalAt("parent", 0x53DCFFF92D13045ELL, true, true)));
+                lval(m_info.lvalAt("interfaces", 0x2C0A39FD56221A08LL, false, true)).append((tmp4));
               }
               {
                 const Variant &tmp5((v_p->t_fetch("interfaces")));
-                m_info.setOpEqual(277, "interfaces", (tmp5), 0x0C5BD661CFB9E254LL, true);
+                m_info.setOpEqual(277, "interfaces", (tmp5), 0x2C0A39FD56221A08LL, true);
               }
               {
-                Variant tmp6((v_p->m_info.rvalAt("methods", 0x2A7E90235B229AD5LL, true, true)));
-                m_info.setOpEqual(277, "methods", (tmp6), 0x2A7E90235B229AD5LL, true);
+                Variant tmp6((v_p->m_info.rvalAt("methods", 0x4E047FA19797C9CELL, true, true)));
+                m_info.setOpEqual(277, "methods", (tmp6), 0x4E047FA19797C9CELL, true);
               }
               {
-                Variant tmp7((v_p->m_info.rvalAt("constants", 0x61A5DA894BD05406LL, true, true)));
-                m_info.setOpEqual(277, "constants", (tmp7), 0x61A5DA894BD05406LL, true);
+                Variant tmp7((v_p->m_info.rvalAt("constants", 0x76FE868B1D07A592LL, true, true)));
+                m_info.setOpEqual(277, "constants", (tmp7), 0x76FE868B1D07A592LL, true);
               }
             }
           }
@@ -4011,8 +4003,8 @@ Variant c_reflectionclass::t_fetch(CVarRef v_what) {
         {
           {
             LOOP_COUNTER(8);
-            Variant map9 = m_info.rvalAt("interfaces", 0x0C5BD661CFB9E254LL, true, true);
-            for (ArrayIterPtr iter10 = map9.begin("reflectionclass"); !iter10->end(); iter10->next()) {
+            Variant map9 = m_info.rvalAt("interfaces", 0x2C0A39FD56221A08LL, true, true);
+            for (ArrayIterPtr iter10 = map9.begin(s_class_name); !iter10->end(); iter10->next()) {
               LOOP_COUNTER_CHECK(8);
               iter10->second(v__);
               v_interface = iter10->first();
@@ -4024,41 +4016,41 @@ Variant c_reflectionclass::t_fetch(CVarRef v_what) {
                 }
                 {
                   const Variant &tmp12((v_p->t_fetch("methods")));
-                  m_info.setOpEqual(277, "methods", (tmp12), 0x2A7E90235B229AD5LL, true);
+                  m_info.setOpEqual(277, "methods", (tmp12), 0x4E047FA19797C9CELL, true);
                 }
                 {
-                  Variant tmp13((v_p->m_info.rvalAt("constants", 0x61A5DA894BD05406LL, true, true)));
-                  m_info.setOpEqual(277, "constants", (tmp13), 0x61A5DA894BD05406LL, true);
+                  Variant tmp13((v_p->m_info.rvalAt("constants", 0x76FE868B1D07A592LL, true, true)));
+                  m_info.setOpEqual(277, "constants", (tmp13), 0x76FE868B1D07A592LL, true);
                 }
                 {
-                  Variant tmp14((v_p->m_info.rvalAt("interfaces", 0x0C5BD661CFB9E254LL, true, true)));
-                  m_info.setOpEqual(277, "interfaces", (tmp14), 0x0C5BD661CFB9E254LL, true);
+                  Variant tmp14((v_p->m_info.rvalAt("interfaces", 0x2C0A39FD56221A08LL, true, true)));
+                  m_info.setOpEqual(277, "interfaces", (tmp14), 0x2C0A39FD56221A08LL, true);
                 }
               }
             }
           }
-          if (!(empty(m_info, "parent", 0x3E764E41E4A6ACA5LL, true))) {
+          if (!(empty(m_info, "parent", 0x53DCFFF92D13045ELL, true))) {
             {
               {
                 p_reflectionclass tmp15 = NEWOBJ(c_reflectionclass)();
-                (tmp15->create(m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)));
+                (tmp15->create(m_info.rvalAt("parent", 0x53DCFFF92D13045ELL, true, true)));
                 v_p = tmp15;
               }
               {
                 const Variant &tmp16((v_p->t_fetch("interfaces")));
-                m_info.setOpEqual(277, "interfaces", (tmp16), 0x0C5BD661CFB9E254LL, true);
+                m_info.setOpEqual(277, "interfaces", (tmp16), 0x2C0A39FD56221A08LL, true);
               }
               {
-                Variant tmp17((v_p->m_info.rvalAt("properties", 0x5D7B5CC390269404LL, true, true)));
-                m_info.setOpEqual(277, "properties", (tmp17), 0x5D7B5CC390269404LL, true);
+                Variant tmp17((v_p->m_info.rvalAt("properties", 0x6C09887B749653DALL, true, true)));
+                m_info.setOpEqual(277, "properties", (tmp17), 0x6C09887B749653DALL, true);
               }
               {
-                Variant tmp18((v_p->m_info.rvalAt("methods", 0x2A7E90235B229AD5LL, true, true)));
-                m_info.setOpEqual(277, "methods", (tmp18), 0x2A7E90235B229AD5LL, true);
+                Variant tmp18((v_p->m_info.rvalAt("methods", 0x4E047FA19797C9CELL, true, true)));
+                m_info.setOpEqual(277, "methods", (tmp18), 0x4E047FA19797C9CELL, true);
               }
               {
-                Variant tmp19((v_p->m_info.rvalAt("constants", 0x61A5DA894BD05406LL, true, true)));
-                m_info.setOpEqual(277, "constants", (tmp19), 0x61A5DA894BD05406LL, true);
+                Variant tmp19((v_p->m_info.rvalAt("constants", 0x76FE868B1D07A592LL, true, true)));
+                m_info.setOpEqual(277, "constants", (tmp19), 0x76FE868B1D07A592LL, true);
               }
             }
           }
@@ -4202,7 +4194,7 @@ p_reflectionmethod c_reflectionclass::t_getmethod(CVarRef v_name) {
   if (!(isset(v_methods, v_lname))) {
     {
       {
-        Variant tmp3((m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true)));
+        Variant tmp3((m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true)));
         v_class = tmp3;
       }
       {
@@ -4221,12 +4213,12 @@ p_reflectionmethod c_reflectionclass::t_getmethod(CVarRef v_name) {
   }
   v_ret->m_name = v_lname;
   {
-    Variant tmp7((m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true)));
+    Variant tmp7((m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true)));
     v_ret->m_class = tmp7;
   }
   if ((equal(v_lname, "__construct") || (!(toBoolean(x_strcasecmp(v_lname, toString(v_ret->m_class)))) && !(t_hasmethod("__construct"))))) {
     {
-      v_ret->m_info.set("constructor", (true), 0x2315FB4206576AA4LL, true);
+      v_ret->m_info.set("constructor", (true), 0x50B7EDE53A464145LL, true);
     }
   }
   return v_ret;
@@ -4248,7 +4240,7 @@ Array c_reflectionclass::t_getmethods(CVarRef v_filter //  = 65535LL
   }
   {
     LOOP_COUNTER(2);
-    for (ArrayIterPtr iter4 = v_methods.begin("reflectionclass"); !iter4->end(); iter4->next()) {
+    for (ArrayIterPtr iter4 = v_methods.begin(s_class_name); !iter4->end(); iter4->next()) {
       LOOP_COUNTER_CHECK(2);
       iter4->second(v__);
       v_name = iter4->first();
@@ -4284,7 +4276,7 @@ p_reflectionproperty c_reflectionclass::t_getproperty(CVarRef v_name) {
   if (!(isset(v_properties, v_name))) {
     {
       {
-        Variant tmp2((m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true)));
+        Variant tmp2((m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true)));
         v_class = tmp2;
       }
       {
@@ -4303,7 +4295,7 @@ p_reflectionproperty c_reflectionclass::t_getproperty(CVarRef v_name) {
   }
   v_ret->m_name = v_name;
   {
-    Variant tmp6((m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true)));
+    Variant tmp6((m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true)));
     v_ret->m_class = tmp6;
   }
   return v_ret;
@@ -4319,7 +4311,7 @@ Array c_reflectionclass::t_getproperties() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch("properties");
-    for (ArrayIterPtr iter3 = map2.begin("reflectionclass"); !iter3->end(); iter3->next()) {
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v__);
       v_name = iter3->first();
@@ -4351,7 +4343,7 @@ Variant c_reflectionclass::t_getconstant(CVarRef v_name) {
   if (!(isset(v_constants, v_name))) {
     {
       {
-        Variant tmp2((m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true)));
+        Variant tmp2((m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true)));
         v_class = tmp2;
       }
       {
@@ -4374,7 +4366,7 @@ Variant c_reflectionclass::t_getinterfaces() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch("interfaces");
-    for (ArrayIterPtr iter3 = map2.begin("reflectionclass"); !iter3->end(); iter3->next()) {
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v__);
       v_name = iter3->first();
@@ -4410,7 +4402,7 @@ Array c_reflectionclass::t_getinterfacenames() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch("interfaces");
-    for (ArrayIterPtr iter3 = map2.begin("reflectionclass"); !iter3->end(); iter3->next()) {
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v__);
       v_name = iter3->first();
@@ -4508,7 +4500,7 @@ Variant c_reflectionclass::t_issubclassof(Variant v_cls) {
   {
     LOOP_COUNTER(2);
     Variant map3 = t_fetch("interfaces");
-    for (ArrayIterPtr iter4 = map3.begin("reflectionclass"); !iter4->end(); iter4->next()) {
+    for (ArrayIterPtr iter4 = map3.begin(s_class_name); !iter4->end(); iter4->next()) {
       LOOP_COUNTER_CHECK(2);
       iter4->second(v__);
       v_name = iter4->first();
@@ -4554,14 +4546,14 @@ Variant c_reflectionclass::t_getstaticproperties() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_getproperties();
-    for (ArrayIterPtr iter3 = map2.begin("reflectionclass"); !iter3->end(); iter3->next()) {
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_prop);
       {
         if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args("isStatic", 0x7A15DC56E8CC0B19LL, 0))) {
           {
             {
-              Variant tmp4((v_prop.o_get("name", 0x0BCDB293DC3DBDDCLL)));
+              Variant tmp4((v_prop.o_get("name", 0x5655B4FF77E35232LL)));
               Variant tmp5((v_prop));
               v_ret.set(tmp4, (tmp5));
             }
@@ -4598,14 +4590,14 @@ Variant c_reflectionclass::t_getdefaultproperties() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_getproperties();
-    for (ArrayIterPtr iter3 = map2.begin("reflectionclass"); !iter3->end(); iter3->next()) {
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_prop);
       {
         if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args("isDefault", 0x384A52597AB11F15LL, 0))) {
           {
             {
-              Variant tmp4((v_prop.o_get("name", 0x0BCDB293DC3DBDDCLL)));
+              Variant tmp4((v_prop.o_get("name", 0x5655B4FF77E35232LL)));
               Variant tmp5((v_prop));
               v_ret.set(tmp4, (tmp5));
             }
@@ -4638,7 +4630,7 @@ bool c_reflectionclass::t_implementsinterface(Variant v_cls) {
   {
     LOOP_COUNTER(2);
     Variant map3 = t_fetch("interfaces");
-    for (ArrayIterPtr iter4 = map3.begin("reflectionclass"); !iter4->end(); iter4->next()) {
+    for (ArrayIterPtr iter4 = map3.begin(s_class_name); !iter4->end(); iter4->next()) {
       LOOP_COUNTER_CHECK(2);
       iter4->second(v__);
       v_name = iter4->first();
@@ -4669,12 +4661,12 @@ Variant c_reflectionextension::os_getInit(const char *s, int64 hash) {
   DECLARE_SYSTEM_GLOBALS(g);
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
-    case 0:
-      HASH_RETURN(0x0BCDB293DC3DBDDCLL, 
+    case 2:
+      HASH_RETURN(0x5655B4FF77E35232LL, 
                   null, "name");
       break;
     case 3:
-      HASH_RETURN(0x3255DC7C4A035C47LL, 
+      HASH_RETURN(0x0F2EF58F157D479FLL, 
                   null, "info");
       break;
     default:
@@ -4695,8 +4687,8 @@ Variant &c_reflectionextension::os_lval(const char *s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionextension
 void c_reflectionextension::o_getArray(Array &props) const {
-  if (isInitialized(m_name)) props.set(String("\000ReflectionExtension\000name", 25, AttachLiteral), m_name.isReferenced() ? ref(m_name) : m_name, 0x4D1C5D03A227FDB9LL, true);
-  if (isInitialized(m_info)) props.set(String("\000ReflectionExtension\000info", 25, AttachLiteral), m_info.isReferenced() ? ref(m_info) : m_info, 0x479598263F2B39E7LL, true);
+  if (isInitialized(m_name)) props.set(String("\000ReflectionExtension\000name", 25, AttachLiteral), m_name.isReferenced() ? ref(m_name) : m_name, 0x75D4843488CF4F87LL, true);
+  if (isInitialized(m_info)) props.set(String("\000ReflectionExtension\000info", 25, AttachLiteral), m_info.isReferenced() ? ref(m_info) : m_info, 0x26E8E772446ED36ELL, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionextension
@@ -4708,13 +4700,12 @@ void c_reflectionextension::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionextension
-Variant c_reflectionextension::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_reflectionextension::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   const char *s = context;
-  if (!s) { context = s = FrameInjection::GetClassName(false); }
-  int64 hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x0B61E0BFCFA06573LL, reflectionextension) { return o_getPrivate(prop, phash, error); }
+      HASH_GUARD(0x0B61E0BFCFA06573LL, ReflectionExtension) { return o_getPrivate(prop, phash, error); }
       break;
     default:
       break;
@@ -4723,20 +4714,20 @@ Variant c_reflectionextension::o_get(CStrRef prop, int64 phash, bool error /* = 
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionextension
-Variant c_reflectionextension::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_reflectionextension::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionextension
-Variant c_reflectionextension::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_reflectionextension::o_getPrivate(CStrRef s, int64 hash, bool error) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 3) {
-    case 0:
-      HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
+    case 2:
+      HASH_RETURN_STRING(0x5655B4FF77E35232LL, m_name,
                          "name", 4);
       break;
     case 3:
-      HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
+      HASH_RETURN_STRING(0x0F2EF58F157D479FLL, m_info,
                          "info", 4);
       break;
     default:
@@ -4746,13 +4737,12 @@ Variant c_reflectionextension::o_getPrivate(CStrRef s, int64 hash, bool error /*
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionextension
-bool c_reflectionextension::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_reflectionextension::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   const char *s = context;
-  if (!s) { context = s = FrameInjection::GetClassName(false); }
-  int64 hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x0B61E0BFCFA06573LL, reflectionextension) { return o_existsPrivate(prop, phash); }
+      HASH_GUARD(0x0B61E0BFCFA06573LL, ReflectionExtension) { return o_existsPrivate(prop, phash); }
       break;
     default:
       break;
@@ -4767,13 +4757,13 @@ bool c_reflectionextension::o_existsPublic(CStrRef s, int64 hash) const {
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionextension
 bool c_reflectionextension::o_existsPrivate(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 3) {
-    case 0:
-      HASH_EXISTS_STRING(0x0BCDB293DC3DBDDCLL, "name", 4);
+    case 2:
+      HASH_EXISTS_STRING(0x5655B4FF77E35232LL, "name", 4);
       break;
     case 3:
-      HASH_EXISTS_STRING(0x3255DC7C4A035C47LL, "info", 4);
+      HASH_EXISTS_STRING(0x0F2EF58F157D479FLL, "info", 4);
       break;
     default:
       break;
@@ -4782,13 +4772,12 @@ bool c_reflectionextension::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionextension
-Variant c_reflectionextension::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_reflectionextension::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   const char *s = context;
-  if (!s) { context = s = FrameInjection::GetClassName(false); }
-  int64 hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x0B61E0BFCFA06573LL, reflectionextension) { return o_setPrivate(prop, phash, v, forInit); }
+      HASH_GUARD(0x0B61E0BFCFA06573LL, ReflectionExtension) { return o_setPrivate(prop, phash, v, forInit); }
       break;
     default:
       break;
@@ -4797,20 +4786,20 @@ Variant c_reflectionextension::o_set(CStrRef prop, int64 phash, CVarRef v, bool 
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionextension
-Variant c_reflectionextension::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_reflectionextension::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionextension
-Variant c_reflectionextension::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_reflectionextension::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 3) {
-    case 0:
-      HASH_SET_STRING(0x0BCDB293DC3DBDDCLL, m_name,
+    case 2:
+      HASH_SET_STRING(0x5655B4FF77E35232LL, m_name,
                       "name", 4);
       break;
     case 3:
-      HASH_SET_STRING(0x3255DC7C4A035C47LL, m_info,
+      HASH_SET_STRING(0x0F2EF58F157D479FLL, m_info,
                       "info", 4);
       break;
     default:
@@ -4820,13 +4809,12 @@ Variant c_reflectionextension::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bo
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_reflectionextension
-Variant& c_reflectionextension::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_reflectionextension::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   const char *s = context;
-  if (!s) { context = s = FrameInjection::GetClassName(false); }
-  int64 hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x0B61E0BFCFA06573LL, reflectionextension) { return o_lvalPrivate(prop, phash); }
+      HASH_GUARD(0x0B61E0BFCFA06573LL, ReflectionExtension) { return o_lvalPrivate(prop, phash); }
       break;
     default:
       break;
@@ -4841,14 +4829,14 @@ Variant& c_reflectionextension::o_lvalPublic(CStrRef s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_reflectionextension
 Variant& c_reflectionextension::o_lvalPrivate(CStrRef s, int64 hash) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 3) {
-    case 0:
-      HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
+    case 2:
+      HASH_RETURN_STRING(0x5655B4FF77E35232LL, m_name,
                          "name", 4);
       break;
     case 3:
-      HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
+      HASH_RETURN_STRING(0x0F2EF58F157D479FLL, m_info,
                          "info", 4);
       break;
     default:
@@ -4913,7 +4901,7 @@ void c_reflectionextension::cloneSet(c_reflectionextension *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionextension
 Variant c_reflectionextension::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x0113D73FC859EDC2LL, getclasses) {
@@ -4985,7 +4973,7 @@ Variant c_reflectionextension::o_invoke(const char *s, CArrRef params, int64 has
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionextension
 Variant c_reflectionextension::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x0113D73FC859EDC2LL, getclasses) {
@@ -5058,7 +5046,7 @@ Variant c_reflectionextension::o_invoke_few_args(const char *s, int64 hash, int 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionextension
 Variant c_reflectionextension::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
@@ -5073,7 +5061,7 @@ Variant c_reflectionextension::os_invoke(const char *c, const char *s, CArrRef p
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionextension
 Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x0113D73FC859EDC2LL, getclasses) {
@@ -5243,7 +5231,7 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionextension::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
@@ -5321,32 +5309,32 @@ Variant c_reflectionextension::ti_export(const char* cls, CVarRef v_name, CVarRe
 /* SRC: classes/reflection.php line 776 */
 Variant c_reflectionextension::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getName);
-  return m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true);
+  return m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 780 */
 Variant c_reflectionextension::t_getversion() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getVersion);
-  return m_info.rvalAt("version", 0x2AF5F0847CD81DB4LL, true, true);
+  return m_info.rvalAt("version", 0x5AE41239FF63D86ALL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 784 */
 Variant c_reflectionextension::t_getfunctions() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getFunctions);
-  return m_info.rvalAt("functions", 0x5BE59D9CB1CEB46DLL, true, true);
+  return m_info.rvalAt("functions", 0x7740FE6BE7015A1FLL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 788 */
 Variant c_reflectionextension::t_getconstants() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getConstants);
-  return m_info.rvalAt("constants", 0x61A5DA894BD05406LL, true, true);
+  return m_info.rvalAt("constants", 0x76FE868B1D07A592LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 792 */
 Variant c_reflectionextension::t_getinientries() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getINIEntries);
-  return m_info.rvalAt("ini", 0x0A7D7869B87324F2LL, true, true);
+  return m_info.rvalAt("ini", 0x1B3ED6203A6B8527LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 796 */
 Variant c_reflectionextension::t_getclasses() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getClasses);
-  return m_info.rvalAt("classes", 0x6EF08968EDA9B7FBLL, true, true);
+  return m_info.rvalAt("classes", 0x3EF49BB8DAE480D5LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 800 */
 Array c_reflectionextension::t_getclassnames() {
@@ -5357,8 +5345,8 @@ Array c_reflectionextension::t_getclassnames() {
   v_ret = SystemScalarArrays::ssa_[0];
   {
     LOOP_COUNTER(1);
-    Variant map2 = m_info.rvalAt("classes", 0x6EF08968EDA9B7FBLL, true, true);
-    for (ArrayIterPtr iter3 = map2.begin("reflectionextension"); !iter3->end(); iter3->next()) {
+    Variant map2 = m_info.rvalAt("classes", 0x3EF49BB8DAE480D5LL, true, true);
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_cls);
       {
@@ -5374,7 +5362,7 @@ Array c_reflectionextension::t_getclassnames() {
 /* SRC: classes/reflection.php line 808 */
 Variant c_reflectionextension::t_info() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::info);
-  return m_info.rvalAt("info", 0x3255DC7C4A035C47LL, true, true);
+  return m_info.rvalAt("info", 0x0F2EF58F157D479FLL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 655 */
 const int64 q_reflectionmethod_IS_STATIC = 1LL;
@@ -5389,12 +5377,12 @@ Variant c_reflectionmethod::os_getInit(const char *s, int64 hash) {
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 0:
-      HASH_RETURN(0x0BCDB293DC3DBDDCLL, 
-                  null, "name");
+      HASH_RETURN(0x2E3A246D1F74C210LL, 
+                  null, "class");
       break;
     case 2:
-      HASH_RETURN(0x45397FE5C82CBD12LL, 
-                  null, "class");
+      HASH_RETURN(0x5655B4FF77E35232LL, 
+                  null, "name");
       break;
     default:
       break;
@@ -5414,8 +5402,8 @@ Variant &c_reflectionmethod::os_lval(const char *s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionmethod
 void c_reflectionmethod::o_getArray(Array &props) const {
-  if (isInitialized(m_name)) props.set("name", m_name.isReferenced() ? ref(m_name) : m_name, 0x0BCDB293DC3DBDDCLL, true);
-  if (isInitialized(m_class)) props.set("class", m_class.isReferenced() ? ref(m_class) : m_class, 0x45397FE5C82CBD12LL, true);
+  if (isInitialized(m_name)) props.set("name", m_name.isReferenced() ? ref(m_name) : m_name, 0x5655B4FF77E35232LL, true);
+  if (isInitialized(m_class)) props.set("class", m_class.isReferenced() ? ref(m_class) : m_class, 0x2E3A246D1F74C210LL, true);
   c_reflectionfunctionabstract::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionmethod
@@ -5425,21 +5413,21 @@ void c_reflectionmethod::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionmethod
-Variant c_reflectionmethod::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_reflectionmethod::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_reflectionmethod::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionmethod
-Variant c_reflectionmethod::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_reflectionmethod::o_getPublic(CStrRef s, int64 hash, bool error) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 3) {
     case 0:
-      HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
-                         "name", 4);
+      HASH_RETURN_STRING(0x2E3A246D1F74C210LL, m_class,
+                         "class", 5);
       break;
     case 2:
-      HASH_RETURN_STRING(0x45397FE5C82CBD12LL, m_class,
-                         "class", 5);
+      HASH_RETURN_STRING(0x5655B4FF77E35232LL, m_name,
+                         "name", 4);
       break;
     default:
       break;
@@ -5448,24 +5436,24 @@ Variant c_reflectionmethod::o_getPublic(CStrRef s, int64 hash, bool error /* = t
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionmethod
-Variant c_reflectionmethod::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_reflectionmethod::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionmethod
-bool c_reflectionmethod::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_reflectionmethod::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_reflectionmethod::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionmethod
 bool c_reflectionmethod::o_existsPublic(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 3) {
     case 0:
-      HASH_EXISTS_STRING(0x0BCDB293DC3DBDDCLL, "name", 4);
+      HASH_EXISTS_STRING(0x2E3A246D1F74C210LL, "class", 5);
       break;
     case 2:
-      HASH_EXISTS_STRING(0x45397FE5C82CBD12LL, "class", 5);
+      HASH_EXISTS_STRING(0x5655B4FF77E35232LL, "name", 4);
       break;
     default:
       break;
@@ -5479,21 +5467,21 @@ bool c_reflectionmethod::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionmethod
-Variant c_reflectionmethod::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_reflectionmethod::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_reflectionmethod::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionmethod
-Variant c_reflectionmethod::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_reflectionmethod::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 3) {
     case 0:
-      HASH_SET_STRING(0x0BCDB293DC3DBDDCLL, m_name,
-                      "name", 4);
+      HASH_SET_STRING(0x2E3A246D1F74C210LL, m_class,
+                      "class", 5);
       break;
     case 2:
-      HASH_SET_STRING(0x45397FE5C82CBD12LL, m_class,
-                      "class", 5);
+      HASH_SET_STRING(0x5655B4FF77E35232LL, m_name,
+                      "name", 4);
       break;
     default:
       break;
@@ -5502,26 +5490,26 @@ Variant c_reflectionmethod::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool f
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionmethod
-Variant c_reflectionmethod::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_reflectionmethod::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_reflectionmethod
-Variant& c_reflectionmethod::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_reflectionmethod::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_reflectionmethod::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionmethod
 Variant& c_reflectionmethod::o_lvalPublic(CStrRef s, int64 hash) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 3) {
     case 0:
-      HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
-                         "name", 4);
+      HASH_RETURN_STRING(0x2E3A246D1F74C210LL, m_class,
+                         "class", 5);
       break;
     case 2:
-      HASH_RETURN_STRING(0x45397FE5C82CBD12LL, m_class,
-                         "class", 5);
+      HASH_RETURN_STRING(0x5655B4FF77E35232LL, m_name,
+                         "name", 4);
       break;
     default:
       break;
@@ -5538,21 +5526,21 @@ Variant& c_reflectionmethod::o_lvalPrivate(CStrRef s, int64 hash) {
 Variant c_reflectionmethod::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 15) {
+    case 0:
+      HASH_RETURN(0x7DA78A433EE05120LL, q_reflectionmethod_IS_STATIC, "IS_STATIC");
+      break;
     case 1:
       HASH_RETURN(0x163BE642CB04C741LL, q_reflectionmethod_IS_PRIVATE, "IS_PRIVATE");
       break;
     case 3:
+      HASH_RETURN(0x3784532769C1EF03LL, q_reflectionmethod_IS_PUBLIC, "IS_PUBLIC");
       HASH_RETURN(0x6572B785E302A373LL, q_reflectionmethod_IS_ABSTRACT, "IS_ABSTRACT");
       break;
-    case 4:
-      HASH_RETURN(0x5F17AEF953553E24LL, q_reflectionmethod_IS_PUBLIC, "IS_PUBLIC");
-      break;
     case 6:
-      HASH_RETURN(0x47AAFAC74A59AD66LL, q_reflectionmethod_IS_FINAL, "IS_FINAL");
+      HASH_RETURN(0x47AAFAC74A58AD66LL, q_reflectionmethod_IS_FINAL, "IS_FINAL");
       break;
-    case 7:
-      HASH_RETURN(0x56142E71554B0647LL, q_reflectionmethod_IS_STATIC, "IS_STATIC");
-      HASH_RETURN(0x6912B8D6D8DE2FF7LL, q_reflectionmethod_IS_PROTECTED, "IS_PROTECTED");
+    case 14:
+      HASH_RETURN(0x10A614A8C272DC9ELL, q_reflectionmethod_IS_PROTECTED, "IS_PROTECTED");
       break;
     default:
       break;
@@ -5615,7 +5603,7 @@ void c_reflectionmethod::cloneSet(c_reflectionmethod *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionmethod
 Variant c_reflectionmethod::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 2:
       HASH_GUARD(0x3FCE192CF6199942LL, invoke) {
@@ -5788,7 +5776,7 @@ Variant c_reflectionmethod::o_invoke(const char *s, CArrRef params, int64 hash, 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionmethod
 Variant c_reflectionmethod::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 2:
       HASH_GUARD(0x3FCE192CF6199942LL, invoke) {
@@ -5968,7 +5956,7 @@ Variant c_reflectionmethod::o_invoke_few_args(const char *s, int64 hash, int cou
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionmethod
 Variant c_reflectionmethod::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
@@ -5983,7 +5971,7 @@ Variant c_reflectionmethod::os_invoke(const char *c, const char *s, CArrRef para
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionmethod
 Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 2:
       HASH_GUARD(0x3FCE192CF6199942LL, invoke) {
@@ -6411,7 +6399,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   return c_reflectionfunctionabstract::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionmethod::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
@@ -6478,15 +6466,15 @@ void c_reflectionmethod::t___construct(Variant v_cls, Variant v_name) {
       if (toBoolean(v_method)) {
         {
           {
-            Variant tmp3((v_method.o_get("info", 0x3255DC7C4A035C47LL)));
+            Variant tmp3((v_method.o_get("info", 0x0F2EF58F157D479FLL)));
             m_info = tmp3;
           }
           {
-            Variant tmp4((v_method.o_get("name", 0x0BCDB293DC3DBDDCLL)));
+            Variant tmp4((v_method.o_get("name", 0x5655B4FF77E35232LL)));
             m_name = tmp4;
           }
           {
-            Variant tmp5((v_method.o_get("class", 0x45397FE5C82CBD12LL)));
+            Variant tmp5((v_method.o_get("class", 0x2E3A246D1F74C210LL)));
             m_class = tmp5;
           }
         }
@@ -6538,8 +6526,8 @@ Variant c_reflectionmethod::t_invoke(int num_args, CVarRef v_obj, Array args /* 
   x_array_shift(ref(v_args));
   {
     Variant tmp2((v_obj));
-    String tmp3((toString(m_info.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
-    String tmp4((toString(m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true))));
+    String tmp3((toString(m_info.rvalAt("class", 0x2E3A246D1F74C210LL, true, true))));
+    String tmp4((toString(m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true))));
     return x_hphp_invoke_method(tmp2, tmp3, tmp4, toArray(v_args));
   }
 } /* function */
@@ -6548,8 +6536,8 @@ Variant c_reflectionmethod::t_invokeargs(CVarRef v_obj, CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::invokeArgs);
   {
     Variant tmp1((v_obj));
-    String tmp2((toString(m_info.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
-    String tmp3((toString(m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true))));
+    String tmp2((toString(m_info.rvalAt("class", 0x2E3A246D1F74C210LL, true, true))));
+    String tmp3((toString(m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true))));
     const Array &tmp4((toArray(x_array_values(v_args))));
     return x_hphp_invoke_method(tmp1, tmp2, tmp3, tmp4);
   }
@@ -6557,37 +6545,37 @@ Variant c_reflectionmethod::t_invokeargs(CVarRef v_obj, CVarRef v_args) {
 /* SRC: classes/reflection.php line 705 */
 Variant c_reflectionmethod::t_isfinal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isFinal);
-  return m_info.rvalAt("final", 0x5192930B2145036ELL, true, true);
+  return m_info.rvalAt("final", 0x5001EEC0D0BCC379LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 709 */
 Variant c_reflectionmethod::t_isabstract() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isAbstract);
-  return m_info.rvalAt("abstract", 0x475C06CE12C8A8A6LL, true, true);
+  return m_info.rvalAt("abstract", 0x1B108112FE2864C8LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 713 */
 bool c_reflectionmethod::t_ispublic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isPublic);
-  return equal(m_info.rvalAt("access", 0x432ABF90750DDA3BLL, true, true), "public");
+  return equal(m_info.rvalAt("access", 0x0192C89B84AEC2A9LL, true, true), "public");
 } /* function */
 /* SRC: classes/reflection.php line 717 */
 bool c_reflectionmethod::t_isprivate() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isPrivate);
-  return equal(m_info.rvalAt("access", 0x432ABF90750DDA3BLL, true, true), "private");
+  return equal(m_info.rvalAt("access", 0x0192C89B84AEC2A9LL, true, true), "private");
 } /* function */
 /* SRC: classes/reflection.php line 721 */
 bool c_reflectionmethod::t_isprotected() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isProtected);
-  return equal(m_info.rvalAt("access", 0x432ABF90750DDA3BLL, true, true), "protected");
+  return equal(m_info.rvalAt("access", 0x0192C89B84AEC2A9LL, true, true), "protected");
 } /* function */
 /* SRC: classes/reflection.php line 725 */
 Variant c_reflectionmethod::t_isstatic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isStatic);
-  return m_info.rvalAt("static", 0x77C3F61406F7F174LL, true, true);
+  return m_info.rvalAt("static", 0x5DBDF95E796D376ELL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 729 */
 bool c_reflectionmethod::t_isconstructor() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isConstructor);
-  return isset(m_info, "constructor", 0x2315FB4206576AA4LL, true);
+  return isset(m_info, "constructor", 0x50B7EDE53A464145LL, true);
 } /* function */
 /* SRC: classes/reflection.php line 733 */
 bool c_reflectionmethod::t_isdestructor() {
@@ -6597,24 +6585,24 @@ bool c_reflectionmethod::t_isdestructor() {
 /* SRC: classes/reflection.php line 737 */
 Variant c_reflectionmethod::t_getmodifiers() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getModifiers);
-  return m_info.rvalAt("modifiers", 0x2CAF244C9F244C80LL, true, true);
+  return m_info.rvalAt("modifiers", 0x3FC2B34E9291EB83LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 741 */
 Variant c_reflectionmethod::t_getclosure() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getClosure);
-  return m_info.rvalAt("closure", 0x3828EA96366C415ALL, true, true);
+  return m_info.rvalAt("closure", 0x3280F0C292E92A6CLL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 745 */
 Variant c_reflectionmethod::t_getdeclaringclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getDeclaringClass);
-  if (empty(m_info, "class", 0x45397FE5C82CBD12LL, true)) {
+  if (empty(m_info, "class", 0x2E3A246D1F74C210LL, true)) {
     {
       return null;
     }
   }
   {
     p_reflectionclass tmp1 = NEWOBJ(c_reflectionclass)();
-    return (tmp1->create(m_info.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)), tmp1);
+    return (tmp1->create(m_info.rvalAt("class", 0x2E3A246D1F74C210LL, true, true)), tmp1);
   }
 } /* function */
 /* SRC: classes/reflection.php line 554 */
@@ -6627,16 +6615,16 @@ Variant c_reflectionproperty::os_getInit(const char *s, int64 hash) {
   DECLARE_SYSTEM_GLOBALS(g);
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
-    case 2:
-      HASH_RETURN(0x45397FE5C82CBD12LL, 
+    case 0:
+      HASH_RETURN(0x2E3A246D1F74C210LL, 
                   null, "class");
       break;
-    case 4:
-      HASH_RETURN(0x0BCDB293DC3DBDDCLL, 
+    case 2:
+      HASH_RETURN(0x5655B4FF77E35232LL, 
                   null, "name");
       break;
     case 7:
-      HASH_RETURN(0x3255DC7C4A035C47LL, 
+      HASH_RETURN(0x0F2EF58F157D479FLL, 
                   null, "info");
       break;
     default:
@@ -6657,9 +6645,9 @@ Variant &c_reflectionproperty::os_lval(const char *s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionproperty
 void c_reflectionproperty::o_getArray(Array &props) const {
-  if (isInitialized(m_info)) props.set("info", m_info.isReferenced() ? ref(m_info) : m_info, 0x3255DC7C4A035C47LL, true);
-  if (isInitialized(m_name)) props.set("name", m_name.isReferenced() ? ref(m_name) : m_name, 0x0BCDB293DC3DBDDCLL, true);
-  if (isInitialized(m_class)) props.set("class", m_class.isReferenced() ? ref(m_class) : m_class, 0x45397FE5C82CBD12LL, true);
+  if (isInitialized(m_info)) props.set("info", m_info.isReferenced() ? ref(m_info) : m_info, 0x0F2EF58F157D479FLL, true);
+  if (isInitialized(m_name)) props.set("name", m_name.isReferenced() ? ref(m_name) : m_name, 0x5655B4FF77E35232LL, true);
+  if (isInitialized(m_class)) props.set("class", m_class.isReferenced() ? ref(m_class) : m_class, 0x2E3A246D1F74C210LL, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionproperty
@@ -6669,24 +6657,24 @@ void c_reflectionproperty::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionproperty
-Variant c_reflectionproperty::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_reflectionproperty::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_reflectionproperty::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionproperty
-Variant c_reflectionproperty::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_reflectionproperty::o_getPublic(CStrRef s, int64 hash, bool error) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 7) {
-    case 2:
-      HASH_RETURN_STRING(0x45397FE5C82CBD12LL, m_class,
+    case 0:
+      HASH_RETURN_STRING(0x2E3A246D1F74C210LL, m_class,
                          "class", 5);
       break;
-    case 4:
-      HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
+    case 2:
+      HASH_RETURN_STRING(0x5655B4FF77E35232LL, m_name,
                          "name", 4);
       break;
     case 7:
-      HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
+      HASH_RETURN_STRING(0x0F2EF58F157D479FLL, m_info,
                          "info", 4);
       break;
     default:
@@ -6696,27 +6684,27 @@ Variant c_reflectionproperty::o_getPublic(CStrRef s, int64 hash, bool error /* =
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionproperty
-Variant c_reflectionproperty::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_reflectionproperty::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionproperty
-bool c_reflectionproperty::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_reflectionproperty::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_reflectionproperty::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionproperty
 bool c_reflectionproperty::o_existsPublic(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 7) {
-    case 2:
-      HASH_EXISTS_STRING(0x45397FE5C82CBD12LL, "class", 5);
+    case 0:
+      HASH_EXISTS_STRING(0x2E3A246D1F74C210LL, "class", 5);
       break;
-    case 4:
-      HASH_EXISTS_STRING(0x0BCDB293DC3DBDDCLL, "name", 4);
+    case 2:
+      HASH_EXISTS_STRING(0x5655B4FF77E35232LL, "name", 4);
       break;
     case 7:
-      HASH_EXISTS_STRING(0x3255DC7C4A035C47LL, "info", 4);
+      HASH_EXISTS_STRING(0x0F2EF58F157D479FLL, "info", 4);
       break;
     default:
       break;
@@ -6730,24 +6718,24 @@ bool c_reflectionproperty::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionproperty
-Variant c_reflectionproperty::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_reflectionproperty::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_reflectionproperty::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionproperty
-Variant c_reflectionproperty::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_reflectionproperty::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 7) {
-    case 2:
-      HASH_SET_STRING(0x45397FE5C82CBD12LL, m_class,
+    case 0:
+      HASH_SET_STRING(0x2E3A246D1F74C210LL, m_class,
                       "class", 5);
       break;
-    case 4:
-      HASH_SET_STRING(0x0BCDB293DC3DBDDCLL, m_name,
+    case 2:
+      HASH_SET_STRING(0x5655B4FF77E35232LL, m_name,
                       "name", 4);
       break;
     case 7:
-      HASH_SET_STRING(0x3255DC7C4A035C47LL, m_info,
+      HASH_SET_STRING(0x0F2EF58F157D479FLL, m_info,
                       "info", 4);
       break;
     default:
@@ -6757,29 +6745,29 @@ Variant c_reflectionproperty::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionproperty
-Variant c_reflectionproperty::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_reflectionproperty::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_reflectionproperty
-Variant& c_reflectionproperty::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_reflectionproperty::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_reflectionproperty::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionproperty
 Variant& c_reflectionproperty::o_lvalPublic(CStrRef s, int64 hash) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 7) {
-    case 2:
-      HASH_RETURN_STRING(0x45397FE5C82CBD12LL, m_class,
+    case 0:
+      HASH_RETURN_STRING(0x2E3A246D1F74C210LL, m_class,
                          "class", 5);
       break;
-    case 4:
-      HASH_RETURN_STRING(0x0BCDB293DC3DBDDCLL, m_name,
+    case 2:
+      HASH_RETURN_STRING(0x5655B4FF77E35232LL, m_name,
                          "name", 4);
       break;
     case 7:
-      HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
+      HASH_RETURN_STRING(0x0F2EF58F157D479FLL, m_info,
                          "info", 4);
       break;
     default:
@@ -6797,15 +6785,17 @@ Variant& c_reflectionproperty::o_lvalPrivate(CStrRef s, int64 hash) {
 Variant c_reflectionproperty::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 7) {
+    case 0:
+      HASH_RETURN(0x7DA78A433EE05120LL, q_reflectionproperty_IS_STATIC, "IS_STATIC");
+      break;
     case 1:
       HASH_RETURN(0x163BE642CB04C741LL, q_reflectionproperty_IS_PRIVATE, "IS_PRIVATE");
       break;
-    case 4:
-      HASH_RETURN(0x5F17AEF953553E24LL, q_reflectionproperty_IS_PUBLIC, "IS_PUBLIC");
+    case 3:
+      HASH_RETURN(0x3784532769C1EF03LL, q_reflectionproperty_IS_PUBLIC, "IS_PUBLIC");
       break;
-    case 7:
-      HASH_RETURN(0x56142E71554B0647LL, q_reflectionproperty_IS_STATIC, "IS_STATIC");
-      HASH_RETURN(0x6912B8D6D8DE2FF7LL, q_reflectionproperty_IS_PROTECTED, "IS_PROTECTED");
+    case 6:
+      HASH_RETURN(0x10A614A8C272DC9ELL, q_reflectionproperty_IS_PROTECTED, "IS_PROTECTED");
       break;
     default:
       break;
@@ -6869,7 +6859,7 @@ void c_reflectionproperty::cloneSet(c_reflectionproperty *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionproperty
 Variant c_reflectionproperty::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x791E9751F5B8C5A2LL, setaccessible) {
@@ -6966,7 +6956,7 @@ Variant c_reflectionproperty::o_invoke(const char *s, CArrRef params, int64 hash
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionproperty
 Variant c_reflectionproperty::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x791E9751F5B8C5A2LL, setaccessible) {
@@ -7064,7 +7054,7 @@ Variant c_reflectionproperty::o_invoke_few_args(const char *s, int64 hash, int c
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionproperty
 Variant c_reflectionproperty::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
@@ -7079,7 +7069,7 @@ Variant c_reflectionproperty::os_invoke(const char *c, const char *s, CArrRef pa
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionproperty
 Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x791E9751F5B8C5A2LL, setaccessible) {
@@ -7326,7 +7316,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionproperty::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
@@ -7393,15 +7383,15 @@ void c_reflectionproperty::t___construct(Variant v_cls, Variant v_name) {
       if (toBoolean(v_prop)) {
         {
           {
-            Variant tmp3((v_prop.o_get("info", 0x3255DC7C4A035C47LL)));
+            Variant tmp3((v_prop.o_get("info", 0x0F2EF58F157D479FLL)));
             m_info = tmp3;
           }
           {
-            Variant tmp4((v_prop.o_get("name", 0x0BCDB293DC3DBDDCLL)));
+            Variant tmp4((v_prop.o_get("name", 0x5655B4FF77E35232LL)));
             m_name = tmp4;
           }
           {
-            Variant tmp5((v_prop.o_get("class", 0x45397FE5C82CBD12LL)));
+            Variant tmp5((v_prop.o_get("class", 0x2E3A246D1F74C210LL)));
             m_class = tmp5;
           }
         }
@@ -7444,32 +7434,32 @@ Variant c_reflectionproperty::ti_export(const char* cls, Variant v_cls, CVarRef 
 /* SRC: classes/reflection.php line 589 */
 Variant c_reflectionproperty::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getName);
-  return m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true);
+  return m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 593 */
 bool c_reflectionproperty::t_ispublic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isPublic);
-  return equal(m_info.rvalAt("access", 0x432ABF90750DDA3BLL, true, true), "public");
+  return equal(m_info.rvalAt("access", 0x0192C89B84AEC2A9LL, true, true), "public");
 } /* function */
 /* SRC: classes/reflection.php line 597 */
 bool c_reflectionproperty::t_isprivate() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isPrivate);
-  return equal(m_info.rvalAt("access", 0x432ABF90750DDA3BLL, true, true), "private");
+  return equal(m_info.rvalAt("access", 0x0192C89B84AEC2A9LL, true, true), "private");
 } /* function */
 /* SRC: classes/reflection.php line 601 */
 bool c_reflectionproperty::t_isprotected() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isProtected);
-  return equal(m_info.rvalAt("access", 0x432ABF90750DDA3BLL, true, true), "protected");
+  return equal(m_info.rvalAt("access", 0x0192C89B84AEC2A9LL, true, true), "protected");
 } /* function */
 /* SRC: classes/reflection.php line 605 */
 Variant c_reflectionproperty::t_isstatic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isStatic);
-  return m_info.rvalAt("static", 0x77C3F61406F7F174LL, true, true);
+  return m_info.rvalAt("static", 0x5DBDF95E796D376ELL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 609 */
 Variant c_reflectionproperty::t_isdefault() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isDefault);
-  return m_info.rvalAt("default", 0x1575CB56409781E3LL, true, true);
+  return m_info.rvalAt("default", 0x3B47CFE99B9C0021LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 613 */
 void c_reflectionproperty::t_setaccessible() {
@@ -7477,7 +7467,7 @@ void c_reflectionproperty::t_setaccessible() {
 /* SRC: classes/reflection.php line 616 */
 Variant c_reflectionproperty::t_getmodifiers() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getModifiers);
-  return m_info.rvalAt("modifiers", 0x2CAF244C9F244C80LL, true, true);
+  return m_info.rvalAt("modifiers", 0x3FC2B34E9291EB83LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 620 */
 Variant c_reflectionproperty::t_getvalue(CVarRef v_obj //  = null_variant
@@ -7486,8 +7476,8 @@ Variant c_reflectionproperty::t_getvalue(CVarRef v_obj //  = null_variant
   if (toBoolean(t_isstatic())) {
     {
       {
-        String tmp1((toString(m_info.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
-        String tmp2((toString(m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true))));
+        String tmp1((toString(m_info.rvalAt("class", 0x2E3A246D1F74C210LL, true, true))));
+        String tmp2((toString(m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true))));
         return x_hphp_get_static_property(tmp1, tmp2);
       }
     }
@@ -7496,8 +7486,8 @@ Variant c_reflectionproperty::t_getvalue(CVarRef v_obj //  = null_variant
     {
       {
         Object tmp3((toObject(v_obj)));
-        String tmp4((toString(m_info.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
-        String tmp5((toString(m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true))));
+        String tmp4((toString(m_info.rvalAt("class", 0x2E3A246D1F74C210LL, true, true))));
+        String tmp5((toString(m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true))));
         return x_hphp_get_property(tmp3, tmp4, tmp5);
       }
     }
@@ -7510,16 +7500,16 @@ Variant c_reflectionproperty::t_setvalue(CVarRef v_obj, CVarRef v_value) {
   if (toBoolean(t_isstatic())) {
     {
       {
-        String tmp1((toString(m_info.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
-        String tmp2((toString(m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true))));
+        String tmp1((toString(m_info.rvalAt("class", 0x2E3A246D1F74C210LL, true, true))));
+        String tmp2((toString(m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true))));
         return (x_hphp_set_static_property(tmp1, tmp2, v_value), null);
       }
     }
   }
   {
     Object tmp3((toObject(v_obj)));
-    String tmp4((toString(m_info.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
-    String tmp5((toString(m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true))));
+    String tmp4((toString(m_info.rvalAt("class", 0x2E3A246D1F74C210LL, true, true))));
+    String tmp5((toString(m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true))));
     x_hphp_set_property(tmp3, tmp4, tmp5, v_value);
   }
   return null;
@@ -7527,20 +7517,20 @@ Variant c_reflectionproperty::t_setvalue(CVarRef v_obj, CVarRef v_value) {
 /* SRC: classes/reflection.php line 640 */
 Variant c_reflectionproperty::t_getdeclaringclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getDeclaringClass);
-  if (empty(m_info, "class", 0x45397FE5C82CBD12LL, true)) {
+  if (empty(m_info, "class", 0x2E3A246D1F74C210LL, true)) {
     {
       return null;
     }
   }
   {
     p_reflectionclass tmp1 = NEWOBJ(c_reflectionclass)();
-    return (tmp1->create(m_info.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)), tmp1);
+    return (tmp1->create(m_info.rvalAt("class", 0x2E3A246D1F74C210LL, true, true)), tmp1);
   }
 } /* function */
 /* SRC: classes/reflection.php line 647 */
 Variant c_reflectionproperty::t_getdoccomment() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getDocComment);
-  return m_info.rvalAt("doc", 0x3E08E8478690475CLL, true, true);
+  return m_info.rvalAt("doc", 0x5C1091C88F8EB6EDLL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 169 */
 const int64 q_reflectionfunction_IS_DEPRECATED = 262144LL;
@@ -7570,22 +7560,22 @@ void c_reflectionfunction::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionfunction
-Variant c_reflectionfunction::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_reflectionfunction::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_reflectionfunction::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionfunction
-Variant c_reflectionfunction::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_reflectionfunction::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_reflectionfunctionabstract::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionfunction
-Variant c_reflectionfunction::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_reflectionfunction::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionfunction
-bool c_reflectionfunction::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_reflectionfunction::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_reflectionfunction::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionfunction
@@ -7600,22 +7590,22 @@ bool c_reflectionfunction::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionfunction
-Variant c_reflectionfunction::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_reflectionfunction::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_reflectionfunction::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionfunction
-Variant c_reflectionfunction::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_reflectionfunction::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_reflectionfunctionabstract::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionfunction
-Variant c_reflectionfunction::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_reflectionfunction::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_reflectionfunction
-Variant& c_reflectionfunction::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_reflectionfunction::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_reflectionfunction::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionfunction
@@ -7633,8 +7623,8 @@ Variant& c_reflectionfunction::o_lvalPrivate(CStrRef s, int64 hash) {
 Variant c_reflectionfunction::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 1) {
-    case 1:
-      HASH_RETURN(0x7E324BF544E5B919LL, q_reflectionfunction_IS_DEPRECATED, "IS_DEPRECATED");
+    case 0:
+      HASH_RETURN(0x25C5A7C72E7B0EF6LL, q_reflectionfunction_IS_DEPRECATED, "IS_DEPRECATED");
       break;
     default:
       break;
@@ -7691,7 +7681,7 @@ void c_reflectionfunction::cloneSet(c_reflectionfunction *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunction
 Variant c_reflectionfunction::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 2:
       HASH_GUARD(0x3FCE192CF6199942LL, invoke) {
@@ -7803,7 +7793,7 @@ Variant c_reflectionfunction::o_invoke(const char *s, CArrRef params, int64 hash
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunction
 Variant c_reflectionfunction::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 2:
       HASH_GUARD(0x3FCE192CF6199942LL, invoke) {
@@ -7923,7 +7913,7 @@ Variant c_reflectionfunction::o_invoke_few_args(const char *s, int64 hash, int c
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionfunction
 Variant c_reflectionfunction::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
@@ -7938,7 +7928,7 @@ Variant c_reflectionfunction::os_invoke(const char *c, const char *s, CArrRef pa
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionfunction
 Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 2:
       HASH_GUARD(0x3FCE192CF6199942LL, invoke) {
@@ -8209,7 +8199,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
   return c_reflectionfunctionabstract::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionfunction::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
@@ -8301,7 +8291,7 @@ Variant c_reflectionfunction::t_invoke(int num_args, Array args /* = Array() */)
     v_args = tmp1;
   }
   {
-    String tmp2((toString(m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true))));
+    String tmp2((toString(m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true))));
     return x_hphp_invoke(tmp2, v_args);
   }
 } /* function */
@@ -8309,7 +8299,7 @@ Variant c_reflectionfunction::t_invoke(int num_args, Array args /* = Array() */)
 Variant c_reflectionfunction::t_invokeargs(CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::invokeArgs);
   {
-    String tmp1((toString(m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true))));
+    String tmp1((toString(m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true))));
     const Array &tmp2((toArray(x_array_values(v_args))));
     return x_hphp_invoke(tmp1, tmp2);
   }
@@ -8321,7 +8311,7 @@ Variant c_reflectionparameter::os_getInit(const char *s, int64 hash) {
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 1:
-      HASH_RETURN(0x3255DC7C4A035C47LL, 
+      HASH_RETURN(0x0F2EF58F157D479FLL, 
                   null, "info");
       break;
     default:
@@ -8342,7 +8332,7 @@ Variant &c_reflectionparameter::os_lval(const char *s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionparameter
 void c_reflectionparameter::o_getArray(Array &props) const {
-  if (isInitialized(m_info)) props.set("info", m_info.isReferenced() ? ref(m_info) : m_info, 0x3255DC7C4A035C47LL, true);
+  if (isInitialized(m_info)) props.set("info", m_info.isReferenced() ? ref(m_info) : m_info, 0x0F2EF58F157D479FLL, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionparameter
@@ -8352,16 +8342,16 @@ void c_reflectionparameter::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionparameter
-Variant c_reflectionparameter::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_reflectionparameter::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_reflectionparameter::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionparameter
-Variant c_reflectionparameter::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_reflectionparameter::o_getPublic(CStrRef s, int64 hash, bool error) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 1:
-      HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
+      HASH_RETURN_STRING(0x0F2EF58F157D479FLL, m_info,
                          "info", 4);
       break;
     default:
@@ -8371,21 +8361,21 @@ Variant c_reflectionparameter::o_getPublic(CStrRef s, int64 hash, bool error /* 
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionparameter
-Variant c_reflectionparameter::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_reflectionparameter::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionparameter
-bool c_reflectionparameter::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_reflectionparameter::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_reflectionparameter::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionparameter
 bool c_reflectionparameter::o_existsPublic(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 1:
-      HASH_EXISTS_STRING(0x3255DC7C4A035C47LL, "info", 4);
+      HASH_EXISTS_STRING(0x0F2EF58F157D479FLL, "info", 4);
       break;
     default:
       break;
@@ -8399,16 +8389,16 @@ bool c_reflectionparameter::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionparameter
-Variant c_reflectionparameter::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_reflectionparameter::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_reflectionparameter::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionparameter
-Variant c_reflectionparameter::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+Variant c_reflectionparameter::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 1:
-      HASH_SET_STRING(0x3255DC7C4A035C47LL, m_info,
+      HASH_SET_STRING(0x0F2EF58F157D479FLL, m_info,
                       "info", 4);
       break;
     default:
@@ -8418,21 +8408,21 @@ Variant c_reflectionparameter::o_setPublic(CStrRef s, int64 hash, CVarRef v, boo
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionparameter
-Variant c_reflectionparameter::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_reflectionparameter::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_reflectionparameter
-Variant& c_reflectionparameter::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_reflectionparameter::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_reflectionparameter::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionparameter
 Variant& c_reflectionparameter::o_lvalPublic(CStrRef s, int64 hash) {
-  if (hash < 0) hash = hash_string(s.data(), s.length());
+  if (hash < 0) hash = StringData::Hash(s.get());
   switch (hash & 1) {
     case 1:
-      HASH_RETURN_STRING(0x3255DC7C4A035C47LL, m_info,
+      HASH_RETURN_STRING(0x0F2EF58F157D479FLL, m_info,
                          "info", 4);
       break;
     default:
@@ -8505,7 +8495,7 @@ void c_reflectionparameter::cloneSet(c_reflectionparameter *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionparameter
 Variant c_reflectionparameter::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
@@ -8589,7 +8579,7 @@ Variant c_reflectionparameter::o_invoke(const char *s, CArrRef params, int64 has
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionparameter
 Variant c_reflectionparameter::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
@@ -8674,7 +8664,7 @@ Variant c_reflectionparameter::o_invoke_few_args(const char *s, int64 hash, int 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionparameter
 Variant c_reflectionparameter::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
@@ -8689,7 +8679,7 @@ Variant c_reflectionparameter::os_invoke(const char *c, const char *s, CArrRef p
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionparameter
 Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
@@ -8895,7 +8885,7 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionparameter::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
@@ -8951,7 +8941,7 @@ void c_reflectionparameter::t___construct(Variant v_func, Variant v_param) {
         v_params = tmp1;
       }
       {
-        Variant tmp2((v_params.rvalAt(v_param, -1, true).o_get("info", 0x3255DC7C4A035C47LL)));
+        Variant tmp2((v_params.rvalAt(v_param, -1, true).o_get("info", 0x0F2EF58F157D479FLL)));
         m_info = tmp2;
       }
     }
@@ -8986,48 +8976,48 @@ Variant c_reflectionparameter::ti_export(const char* cls, CVarRef v_func, CVarRe
 /* SRC: classes/reflection.php line 40 */
 Variant c_reflectionparameter::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getName);
-  return m_info.rvalAt("name", 0x0BCDB293DC3DBDDCLL, true, true);
+  return m_info.rvalAt("name", 0x5655B4FF77E35232LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 44 */
 Variant c_reflectionparameter::t_ispassedbyreference() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::isPassedByReference);
-  return m_info.rvalAt("ref", 0x0B1A6D25134ED5FALL, true, true);
+  return m_info.rvalAt("ref", 0x05FF98D1208F545ELL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 48 */
 Variant c_reflectionparameter::t_getdeclaringclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getDeclaringClass);
-  if (empty(m_info, "class", 0x45397FE5C82CBD12LL, true)) {
+  if (empty(m_info, "class", 0x2E3A246D1F74C210LL, true)) {
     {
       return null;
     }
   }
   {
     p_reflectionclass tmp1 = NEWOBJ(c_reflectionclass)();
-    return (tmp1->create(m_info.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)), tmp1);
+    return (tmp1->create(m_info.rvalAt("class", 0x2E3A246D1F74C210LL, true, true)), tmp1);
   }
 } /* function */
 /* SRC: classes/reflection.php line 55 */
 Variant c_reflectionparameter::t_getclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getClass);
-  if (empty(m_info, "type", 0x508FC7C8724B760ALL, true)) {
+  if (empty(m_info, "type", 0x7B5ABDA0E01EF853LL, true)) {
     {
       return null;
     }
   }
   {
     p_reflectionclass tmp1 = NEWOBJ(c_reflectionclass)();
-    return (tmp1->create(m_info.rvalAt("type", 0x508FC7C8724B760ALL, true, true)), tmp1);
+    return (tmp1->create(m_info.rvalAt("type", 0x7B5ABDA0E01EF853LL, true, true)), tmp1);
   }
 } /* function */
 /* SRC: classes/reflection.php line 62 */
 bool c_reflectionparameter::t_isarray() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::isArray);
-  return equal(m_info.rvalAt("type", 0x508FC7C8724B760ALL, true, true), "array");
+  return equal(m_info.rvalAt("type", 0x7B5ABDA0E01EF853LL, true, true), "array");
 } /* function */
 /* SRC: classes/reflection.php line 66 */
 Variant c_reflectionparameter::t_allowsnull() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::allowsNull);
-  return m_info.rvalAt("nullable", 0x5E22F816EDD57A43LL, true, true);
+  return m_info.rvalAt("nullable", 0x33C2350C87EA6C49LL, true, true);
 } /* function */
 /* SRC: classes/reflection.php line 70 */
 bool c_reflectionparameter::t_isoptional() {
@@ -9050,12 +9040,12 @@ Variant c_reflectionparameter::t_getdefaultvalue() {
     }
   }
   {
-    Variant tmp1((m_info.rvalAt("default", 0x1575CB56409781E3LL, true, true)));
+    Variant tmp1((m_info.rvalAt("default", 0x3B47CFE99B9C0021LL, true, true)));
     v_defaultValue = tmp1;
   }
   if (instanceOf(v_defaultValue, "stdclass")) {
     {
-      x_hphp_throw_fatal_error(toString(v_defaultValue.o_get("msg", 0x2D2468251A30BE95LL)));
+      x_hphp_throw_fatal_error(toString(v_defaultValue.o_get("msg", 0x071C713DEF270D72LL)));
     }
   }
   return v_defaultValue;
@@ -9063,7 +9053,7 @@ Variant c_reflectionparameter::t_getdefaultvalue() {
 /* SRC: classes/reflection.php line 89 */
 Variant c_reflectionparameter::t_getposition() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getPosition);
-  return m_info.rvalAt("index", 0x1C79FCB6D76A8068LL, true, true);
+  return m_info.rvalAt("index", 0x4B27521443880CAELL, true, true);
 } /* function */
 Object co_reflectionfunctionabstract(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_reflectionfunctionabstract)())->dynCreate(params, init));

@@ -184,7 +184,8 @@ bool f_property_exists(CVarRef class_or_object, CStrRef property) {
     if (classInfo->hasProperty(property)) {
       return true;
     } else {
-      classInfo = ClassInfo::FindClass(classInfo->getParentClass());
+      classInfo = classInfo->getParentClassInfo();
+//      classInfo = ClassInfo::FindClass(classInfo->getParentClass());
     }
   }
   return false;

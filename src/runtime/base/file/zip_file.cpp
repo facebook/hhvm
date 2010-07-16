@@ -23,6 +23,10 @@ namespace HPHP {
 IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(ZipFile);
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString ZipFile::s_class_name("ZipFile");
+
+///////////////////////////////////////////////////////////////////////////////
+
 ZipFile::ZipFile() : m_gzFile(NULL) {
   m_innerFile = NEW(PlainFile)();
   m_innerFile->unregister(); // so Sweepable won't touch my child

@@ -121,8 +121,20 @@ ObjectData::os_invoke_from_eval(const char *c, const char *s,
 // instance methods and properties
 
 bool ObjectData::o_exists(CStrRef propName, int64 hash,
-    const char *context /* = NULL */) const {
-  return o_existsPublic(propName, hash);
+    CStrRef context /* = null_string */) const {
+  StringData *sd;
+  if (context.isNull()) {
+    sd = FrameInjection::GetClassName(false).get();
+  } else {
+    sd = context.get();
+  }
+  ASSERT(sd && sd->data());
+  return o_exists(propName, hash, sd->data(), StringData::Hash(sd));
+}
+
+bool ObjectData::o_exists(CStrRef propName, int64 phash,
+    const char *context, int64 hash) const {
+  return o_existsPublic(propName, phash);
 }
 
 bool ObjectData::o_existsPublic(CStrRef propName, int64 hash) const {
@@ -132,9 +144,22 @@ bool ObjectData::o_existsPublic(CStrRef propName, int64 hash) const {
 }
 
 Variant ObjectData::o_get(CStrRef propName, int64 hash,
-    bool error /* = true */, const char *context /* = NULL */) {
-  return o_getPublic(propName, hash, error);
+    bool error /* = true */, CStrRef context /* = null_string */) {
+  StringData *sd;
+  if (context.isNull()) {
+    sd = FrameInjection::GetClassName(false).get();
+  } else {
+    sd = context.get();
+  }
+  ASSERT(sd && sd->data());
+  return o_get(propName, hash, error, sd->data(), StringData::Hash(sd));
 }
+
+Variant ObjectData::o_get(CStrRef propName, int64 phash, bool error,
+    const char *context, int64 hash) {
+  return o_getPublic(propName, phash, error);
+}
+
 Variant ObjectData::o_getPublic(CStrRef propName, int64 hash,
     bool error /* = true */) {
   if (propName.size() == 0) {
@@ -152,14 +177,39 @@ Variant ObjectData::o_getPublic(CStrRef propName, int64 hash,
 }
 
 Variant ObjectData::o_getUnchecked(CStrRef propName, int64 hash,
-    const char *context /* = NULL */) {
-  return o_get(propName, hash, true, context);
+    CStrRef context /* = null_string */) {
+  StringData *sd;
+  if (context.isNull()) {
+    sd = FrameInjection::GetClassName(false).get();
+  } else {
+    sd = context.get();
+  }
+  ASSERT(sd && sd->data());
+  return o_getUnchecked(propName, hash, sd->data(), StringData::Hash(sd));
+}
+
+Variant ObjectData::o_getUnchecked(CStrRef propName, int64 phash,
+    const char *context, int64 hash) {
+  return o_get(propName, phash, true, context, hash);
 }
 
 Variant ObjectData::o_set(CStrRef propName, int64 hash, CVarRef v,
-    bool forInit /* = false */, const char *context /* = NULL */) {
-  return o_setPublic(propName, hash, v, forInit);
+    bool forInit /* = false */, CStrRef context /* = null_string */) {
+  StringData *sd;
+  if (context.isNull()) {
+    sd = FrameInjection::GetClassName(false).get();
+  } else {
+    sd = context.get();
+  }
+  ASSERT(sd && sd->data());
+  return o_set(propName, hash, v, forInit, sd->data(), StringData::Hash(sd));
 }
+
+Variant ObjectData::o_set(CStrRef propName, int64 phash, CVarRef v,
+    bool forInit, const char *context, int64 hash) {
+  return o_setPublic(propName, phash, v, forInit);
+}
+
 Variant ObjectData::o_setPublic(CStrRef propName, int64 hash, CVarRef v,
     bool forInit /* = false */) {
   if (propName.size() == 0) {
@@ -205,9 +255,22 @@ CVarRef ObjectData::set(CStrRef s, CVarRef v) {
 }
 
 Variant &ObjectData::o_lval(CStrRef propName, int64 hash,
-    const char *context /* = NULL */) {
-  return o_lvalPublic(propName, hash);
+    CStrRef context /* = null_string */) {
+  StringData *sd;
+  if (context.isNull()) {
+    sd = FrameInjection::GetClassName(false).get();
+  } else {
+    sd = context.get();
+  }
+  ASSERT(sd && sd->data());
+  return o_lval(propName, hash, sd->data(), StringData::Hash(sd));
 }
+
+Variant &ObjectData::o_lval(CStrRef propName, int64 phash,
+    const char *context, int64 hash) {
+  return o_lvalPublic(propName, phash);
+}
+
 Variant &ObjectData::o_lvalPublic(CStrRef propName, int64 hash) {
   if (propName.size() == 0) {
     throw EmptyObjectPropertyException();
@@ -228,7 +291,7 @@ Array ObjectData::o_toArray() const {
   return ret;
 }
 
-Array ObjectData::o_toIterArray(const char *context,
+Array ObjectData::o_toIterArray(CStrRef context,
                                 bool getRef /* = false */) {
   const char *object_class = o_getClassName();
   const ClassInfo *classInfo = ClassInfo::FindClass(object_class);
@@ -254,12 +317,12 @@ Array ObjectData::o_toIterArray(const char *context,
   // accessible;
   // any property of the context class is also accessible unless it is
   // overriden by the object class. (3) is really just an optimization.
-  if (context == NULL || !*context) {
+  if (context.empty()) { // null_string is also empty
     category = 1;
   } else {
     contextClassInfo = ClassInfo::FindClass(context);
     ASSERT(contextClassInfo);
-    if (strcasecmp(object_class, context) == 0) {
+    if (strcasecmp(object_class, context.data()) == 0) {
       category = 3;
     } else if (classInfo->derivesFrom(context, false) ||
                contextClassInfo->derivesFrom(object_class, false)) {
@@ -315,7 +378,7 @@ Array ObjectData::o_toIterArray(const char *context,
         av = ref(ov);
       } else {
         ret.set(prop->name, o_getUnchecked(prop->name, -1,
-                                           prop->owner->getName()));
+                                           prop->owner->getName(), -1));
       }
     }
     dynamics.remove(prop->name);
@@ -341,6 +404,40 @@ Array ObjectData::o_toIterArray(const char *context,
 Array ObjectData::o_getDynamicProperties() const {
   if (o_properties) return *o_properties;
   return Array();
+}
+
+Variant ObjectData::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */,
+                             bool fatal /* = true */) {
+  StringData *sd = s.get();
+  ASSERT(sd && sd->data());
+  return o_invoke(sd->data(), params, hash < 0 ? StringData::Hash(sd) : hash,
+                  fatal);
+}
+
+Variant ObjectData::o_root_invoke(CStrRef s, CArrRef params,
+                                  int64 hash /* = -1 */,
+                                  bool fatal /* = true */) {
+  StringData *sd = s.get();
+  ASSERT(sd && sd->data());
+  return o_root_invoke(sd->data(), params,
+                       hash < 0 ? StringData::Hash(sd) : hash, fatal);
+}
+
+Variant ObjectData::o_invoke_few_args(CStrRef s, int64 hash, int count,
+                                      INVOKE_FEW_ARGS_IMPL_ARGS) {
+  StringData *sd = s.get();
+  ASSERT(sd && sd->data());
+  return o_invoke_few_args(sd->data(), hash < 0 ? StringData::Hash(sd) : hash,
+                           count, INVOKE_FEW_ARGS_PASS_ARGS);
+}
+
+Variant ObjectData::o_root_invoke_few_args(CStrRef s, int64 hash, int count,
+                                           INVOKE_FEW_ARGS_IMPL_ARGS) {
+  StringData *sd = s.get();
+  ASSERT(sd && sd->data());
+  return o_root_invoke_few_args(sd->data(),
+                                hash < 0 ? StringData::Hash(sd) : hash,
+                                count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
 Variant ObjectData::o_invoke(const char *s, CArrRef params, int64 hash,
@@ -471,7 +568,7 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
       serializer->writeNull();
     } else {
       raise_error("%s::serialize() must return a string or NULL",
-                  o_getClassName());
+                  o_getClassName().data());
     }
   } else {
     Variant ret;
@@ -541,7 +638,7 @@ Variant ObjectData::doRootCall(Variant v_name, Variant v_arguments, bool fatal) 
 
 Variant ObjectData::doGet(Variant v_name, bool error) {
   if (error) {
-    raise_notice("Undefined property: %s::$%s", o_getClassName(),
+    raise_notice("Undefined property: %s::$%s", o_getClassName().data(),
                  v_name.toString().data());
   }
   return null_variant;
@@ -606,7 +703,7 @@ Variant ObjectData::t___unset(Variant v_name) {
 }
 
 bool ObjectData::o_propExists(CStrRef s, int64 hash /* = -1 */,
-                              const char *context /* = NULL */) {
+                              CStrRef context /* = null_string */) {
   // Exists and the value is not null or it is null but also initialized.
   // Can't just do isInitialized because type inferred properties may not
   // be in the o_lval table.
@@ -630,7 +727,7 @@ Variant ObjectData::t___set_state(Variant v_properties) {
 }
 
 String ObjectData::t___tostring() {
-  string msg = o_getClassName();
+  string msg = o_getClassName().data();
   msg += "::__toString() was not defined";
   throw BadTypeConversionException(msg.c_str());
 }

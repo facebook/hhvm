@@ -1282,20 +1282,22 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
       cg_indentEnd("}\n");
     }
   } else {
-    cg_indentBegin("virtual Variant getImpl(const char *s) {\n");
-    if (!outputCPPJumpTable(cg, ar, NULL, true, false, EitherStatic)) {
+    cg_indentBegin("virtual Variant getImpl(const char *s, int64 hash) {\n");
+    if (!outputCPPJumpTable(cg, ar, NULL, false, false, EitherStatic)) {
       m_emptyJumpTables.insert(JumpTableLocalGetImpl);
     }
-    cg_printf("return rvalAt(s);\n");
+    // Valid variable names cannot be numerical.
+    cg_printf("return rvalAt(s, hash, false, true);\n");
     cg_indentEnd("}\n");
 
     if (getAttribute(ContainsCompact)) {
-      cg_indentBegin("virtual bool exists(const char *s) const {\n");
-      if (!outputCPPJumpTable(cg, ar, NULL, true, false,
+      cg_indentBegin("virtual bool exists(const char *s, int64 hash) "
+                     "const {\n");
+      if (!outputCPPJumpTable(cg, ar, NULL, false, false,
                               EitherStatic, JumpInitialized)) {
         m_emptyJumpTables.insert(JumpTableLocalExists);
       }
-      cg_printf("return RVariableTable::exists(s);\n");
+      cg_printf("return RVariableTable::exists(s, hash);\n");
       cg_indentEnd("}\n");
     }
   }
@@ -1540,13 +1542,13 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
   cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_SETARRAY_%s", cls);
   if (empty) m_emptyJumpTables.insert(JumpTableClassSetArray);
 
-  outputCPPPropertyOp(cg, ar, cls, parent, "get", ", bool error /* = true */",
+  outputCPPPropertyOp(cg, ar, cls, parent, "get", ", bool error",
                       ", error", "Variant", false, JumpReturnString, false,
                       dynamicObject, JumpTableClassGet);
   outputCPPPropertyOp(cg, ar, cls, parent, "exists", "", "", "bool", true,
                       JumpExists, false, dynamicObject, JumpTableClassExists);
   outputCPPPropertyOp(cg, ar, cls, parent, "set",
-                      ", CVarRef v, bool forInit /* = false */",
+                      ", CVarRef v, bool forInit",
                       ", v, forInit", "Variant",
                       false, JumpSet, false, dynamicObject, JumpTableClassSet);
   outputCPPPropertyOp(cg, ar, cls, parent, "lval", "", "", "Variant&", false,
@@ -1560,26 +1562,24 @@ bool VariableTable::outputCPPPrivateSelector(CodeGenerator &cg,
   vector<const char *> classes;
   do {
     if (cls->getVariables()->hasPrivate()) {
-      classes.push_back(cls->getName().c_str());
+      classes.push_back(cls->getOriginalName().c_str());
     }
     cls = cls->getParentScope(ar);
   } while (cls && !cls->isRedeclaring()); // allow current class to be redec
   if (classes.empty()) return false;
 
   cg_printf("const char *s = context;\n");
-  cg_printf("if (!s) { context = s = FrameInjection::GetClassName(false);"
-      " }\n");
-  for (JumpTable jt(cg, classes, true, false, false); jt.ready(); jt.next()) {
+  for (JumpTable jt(cg, classes, true, true, false); jt.ready(); jt.next()) {
     const char *name = jt.key();
-    if (strcmp(name, ar->getClassScope()->getName().c_str()) == 0) {
+    if (!strcasecmp(name, ar->getClassScope()->getOriginalName().c_str())) {
       cg_printf("HASH_GUARD(0x%016llXLL, %s) { return %s%sPrivate(prop, "
           "phash%s); }\n",
           hash_string_i(name), name, Option::ObjectPrefix, op, args);
     } else {
       cg_printf("HASH_GUARD(0x%016llXLL, %s) { return %s%s::%s%sPrivate(prop, "
           "phash%s); }\n",
-          hash_string_i(name), name, Option::ClassPrefix, name,
-          Option::ObjectPrefix, op, args);
+          hash_string_i(name), name, Option::ClassPrefix,
+          Util::toLower(name).c_str(), Option::ObjectPrefix, op, args);
     }
   }
   return true;
@@ -1593,7 +1593,7 @@ void VariableTable::outputCPPPropertyOp
 
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_%s_%s", op, cls);
   cg_indentBegin("%s %s%s::%s%s(CStrRef prop, int64 phash%s, "
-      "const char *context /* = NULL */)%s {\n", ret, Option::ClassPrefix,
+      "const char *context, int64 hash)%s {\n", ret, Option::ClassPrefix,
       cls, Option::ObjectPrefix, op, argsDec, cnst ? " const" : "");
   if (!outputCPPPrivateSelector(cg, ar, op, args)) {
     m_emptyJumpTables.insert(jtname);
@@ -1602,7 +1602,8 @@ void VariableTable::outputCPPPropertyOp
     cg_printf("return %s%s::%s%sPublic(prop, phash%s);\n",
               Option::ClassPrefix, cls, Option::ObjectPrefix, op, args);
   } else {
-    cg_printf("return DynamicObjectData::%s%s(prop, phash%s, context);\n",
+    cg_printf("return DynamicObjectData::%s%s"
+              "(prop, phash%s, context, hash);\n",
               Option::ObjectPrefix, op, args);
   }
   cg_indentEnd("}\n");
@@ -1638,7 +1639,7 @@ void VariableTable::outputCPPPropertyOp
     cg_printf("return %s%sPublic(s, hash%s);\n",
               Option::ObjectPrefix, op, args);
   } else {
-    cg_printf("return DynamicObjectData::%s%s(s, hash%s, \"\");\n",
+    cg_printf("return DynamicObjectData::%s%s(s, hash%s, \"\", -1);\n",
               Option::ObjectPrefix, op, args);
   }
   cg_indentEnd("}\n");

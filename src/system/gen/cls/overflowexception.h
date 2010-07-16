@@ -40,22 +40,7 @@ class c_overflowexception : public c_runtimeexception {
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_overflowexception 1
 
   // DECLARE_INSTANCE_PROP_OPS
-  public:
-  virtual bool o_exists(CStrRef s, int64 hash,
-                        const char *context = NULL) const;
-  bool o_existsPrivate(CStrRef s, int64 hash) const;
-  virtual void o_getArray(Array &props) const;
-  virtual void o_setArray(CArrRef props);
-  virtual Variant o_get(CStrRef s, int64 hash, bool error = true,
-                        const char *context = NULL);
-  Variant o_getPrivate(CStrRef s, int64 hash, bool error = true);
-  virtual Variant o_set(CStrRef s, int64 hash, CVarRef v,
-                        bool forInit = false,
-                        const char *context = NULL);
-  Variant o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit);
-  virtual Variant &o_lval(CStrRef s, int64 hash,
-                          const char *context = NULL);
-  Variant &o_lvalPrivate(CStrRef s, int64 hash);
+  DECLARE_INSTANCE_PROP_OPS
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

@@ -766,7 +766,8 @@ void Array::unserialize(VariableUnserializer *unserializer) {
     for (int64 i = 0; i < size; i++) {
       Variant key(unserializer->unserializeKey());
       Variant &value =
-        key.isString() ? lvalAt(key.toString(), -1, false, true) : lvalAt(key);
+        key.isString() ? lvalAt(key.toString(), -1, false, true)
+                       : lvalAt(key);
       value.unserialize(unserializer);
     }
   }

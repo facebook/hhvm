@@ -305,25 +305,7 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   }
 
   cg.printSection("DECLARE_INSTANCE_PROP_OPS");
-  cg_printf("public:\n");
-  cg_printf("virtual bool o_exists(CStrRef s, int64 hash,\n");
-  cg_printf("                      const char *context = NULL) const;\n");
-  cg_printf("bool o_existsPrivate(CStrRef s, int64 hash) const;\n");
-  cg_printf("virtual void o_getArray(Array &props) const;\n");
-  cg_printf("virtual void o_setArray(CArrRef props);\n");
-  cg_printf("virtual Variant o_get(CStrRef s, int64 hash, "
-            "bool error = true,\n");
-  cg_printf("                      const char *context = NULL);\n");
-  cg_printf("Variant o_getPrivate(CStrRef s, int64 hash, "
-            "bool error = true);\n");
-  cg_printf("virtual Variant o_set(CStrRef s, int64 hash, CVarRef v,\n");
-  cg_printf("                      bool forInit = false,\n");
-  cg_printf("                      const char *context = NULL);\n");
-  cg_printf("Variant o_setPrivate(CStrRef s, int64 hash, CVarRef v, "
-            "bool forInit);\n");
-  cg_printf("virtual Variant &o_lval(CStrRef s, int64 hash,\n");
-  cg_printf("                        const char *context = NULL);\n");
-  cg_printf("Variant &o_lvalPrivate(CStrRef s, int64 hash);\n");
+  cg_printf("DECLARE_INSTANCE_PROP_OPS\n");
 
   cg.printSection("DECLARE_INSTANCE_PUBLIC_PROP_OPS");
   cg_printf("public:\n");
@@ -396,8 +378,12 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
          it != bases.end(); ++it) {
       ClassScopePtr base = ar->findClass(*it);
       if (base && base->isVolatile()) {
-        cg_printf("checkClassExists(\"%s\", g);\n",
-                  base->getOriginalName().c_str());
+        cg_printf("checkClassExists(");
+        cg_printString(base->getOriginalName(), ar);
+        string lname = Util::toLower(base->getOriginalName());
+        cg_printf(", &%s->CDEC(%s), %s->FVF(__autoload));\n",
+                  cg.getGlobals(ar), cg.formatLabel(lname).c_str(),
+                  cg.getGlobals(ar));
       }
     }
     return;

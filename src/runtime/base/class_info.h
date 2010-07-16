@@ -186,7 +186,7 @@ public:
   static void SetHook(ClassInfoHook *hook) { s_hook = hook; }
 
 public:
-  ClassInfo() : m_docComment(NULL) {}
+  ClassInfo() : m_docComment(NULL), m_parentCache(NULL) {}
   virtual ~ClassInfo() {}
 
   Attribute getAttribute() const { return getCurrent()->m_attribute;}
@@ -203,6 +203,12 @@ public:
    * Parents of this class.
    */
   virtual const char *getParentClass() const = 0;
+  const ClassInfo *getParentClassInfo() const {
+    if (m_parentCache) return m_parentCache;
+    const char *parentName = getParentClass();
+    ASSERT(parentName);
+    return m_parentCache = FindClass(parentName);
+  }
   virtual const InterfaceMap &getInterfaces() const = 0;
   virtual const InterfaceVec &getInterfacesVec() const = 0;
   bool derivesFrom(const char *name, bool considerInterface) const;
@@ -254,6 +260,7 @@ protected:
   Attribute m_attribute;
   const char *m_name;
   const char *m_docComment;
+  mutable const ClassInfo *m_parentCache; // cache the found parent class
 
   // name is already lowered
   bool derivesFromImpl(const char *name, bool considerInterface) const;

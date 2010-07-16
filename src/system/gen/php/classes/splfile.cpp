@@ -56,22 +56,22 @@ void c_splfileobject::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_get_splfileobject
-Variant c_splfileobject::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_splfileobject::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_splfileobject::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileobject
-Variant c_splfileobject::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_splfileobject::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_splfileinfo::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileobject
-Variant c_splfileobject::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_splfileobject::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_splfileobject
-bool c_splfileobject::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_splfileobject::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_splfileobject::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_splfileobject
@@ -86,22 +86,22 @@ bool c_splfileobject::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_set_splfileobject
-Variant c_splfileobject::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_splfileobject::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_splfileobject::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileobject
-Variant c_splfileobject::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_splfileobject::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_splfileinfo::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileobject
-Variant c_splfileobject::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_splfileobject::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_splfileobject
-Variant& c_splfileobject::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_splfileobject::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_splfileobject::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_splfileobject
@@ -120,14 +120,16 @@ Variant c_splfileobject::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 7) {
     case 2:
-      HASH_RETURN(0x54B2A676B562E232LL, q_splfileobject_SKIP_EMPTY, "SKIP_EMPTY");
+      HASH_RETURN(0x54B2A676B563E232LL, q_splfileobject_SKIP_EMPTY, "SKIP_EMPTY");
       break;
     case 3:
       HASH_RETURN(0x23519E830A6DEC13LL, q_splfileobject_READ_CSV, "READ_CSV");
       break;
     case 4:
-      HASH_RETURN(0x05ABC27224BCAC64LL, q_splfileobject_DROP_NEW_LINE, "DROP_NEW_LINE");
-      HASH_RETURN(0x1250F99C672AB2C4LL, q_splfileobject_READ_AHEAD, "READ_AHEAD");
+      HASH_RETURN(0x05ABC27224BDAC64LL, q_splfileobject_DROP_NEW_LINE, "DROP_NEW_LINE");
+      break;
+    case 6:
+      HASH_RETURN(0x6ABD9DCA7D94431ELL, q_splfileobject_READ_AHEAD, "READ_AHEAD");
       break;
     default:
       break;
@@ -208,7 +210,7 @@ void c_splfileobject::cloneSet(c_splfileobject *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileobject
 Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 0:
       HASH_GUARD(0x09637D7CA2E33F00LL, fgetc) {
@@ -555,7 +557,7 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileobject
 Variant c_splfileobject::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 0:
       HASH_GUARD(0x09637D7CA2E33F00LL, fgetc) {
@@ -907,7 +909,7 @@ Variant c_splfileobject::os_invoke(const char *c, const char *s, CArrRef params,
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileobject
 Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 0:
       HASH_GUARD(0x09637D7CA2E33F00LL, fgetc) {
@@ -2017,22 +2019,22 @@ void c_splfileinfo::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_get_splfileinfo
-Variant c_splfileinfo::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+Variant c_splfileinfo::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
   return c_splfileinfo::o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileinfo
-Variant c_splfileinfo::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_splfileinfo::o_getPublic(CStrRef s, int64 hash, bool error) {
   return c_ObjectData::o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileinfo
-Variant c_splfileinfo::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+Variant c_splfileinfo::o_getPrivate(CStrRef s, int64 hash, bool error) {
   return o_getPublic(s, hash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_splfileinfo
-bool c_splfileinfo::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+bool c_splfileinfo::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
   return c_splfileinfo::o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_splfileinfo
@@ -2047,22 +2049,22 @@ bool c_splfileinfo::o_existsPrivate(CStrRef s, int64 hash) const {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_set_splfileinfo
-Variant c_splfileinfo::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+Variant c_splfileinfo::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
   return c_splfileinfo::o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileinfo
-Variant c_splfileinfo::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_splfileinfo::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return c_ObjectData::o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileinfo
-Variant c_splfileinfo::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+Variant c_splfileinfo::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
   return o_setPublic(s, hash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_splfileinfo
-Variant& c_splfileinfo::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+Variant& c_splfileinfo::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
   return c_splfileinfo::o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_splfileinfo
@@ -2130,7 +2132,7 @@ void c_splfileinfo::cloneSet(c_splfileinfo *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileinfo
 Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 5:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
@@ -2308,7 +2310,7 @@ Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileinfo
 Variant c_splfileinfo::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 5:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
@@ -2491,7 +2493,7 @@ Variant c_splfileinfo::os_invoke(const char *c, const char *s, CArrRef params, i
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileinfo
 Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string_i(s);
+  if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 5:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {

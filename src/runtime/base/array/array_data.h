@@ -25,6 +25,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class SharedVariant;
+
 /**
  * Base class/interface for all types of specialized array data.
  */
@@ -92,6 +94,8 @@ class ArrayData : public Countable {
   virtual CVarRef getValueRef(ssize_t pos) const;
   virtual bool isVectorData() const;
   virtual bool supportValueRef() const { return false;}
+
+  virtual SharedVariant *getSharedVariant() const { return NULL; }
 
   /**
    * Whether or not this array has a referenced Variant or Object appearing

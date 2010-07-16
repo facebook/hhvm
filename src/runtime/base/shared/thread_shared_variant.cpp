@@ -301,6 +301,12 @@ void ThreadSharedVariant::loadElems(ArrayData *&elems,
 
 ThreadSharedVariant *ThreadSharedVariant::createAnother
 (CVarRef source, bool serialized, bool inner /* = false */) {
+  SharedVariant *wrapped = source.getSharedVariant();
+  if (wrapped) {
+    wrapped->incRef();
+    // static cast should be enough
+    return (ThreadSharedVariant *)wrapped;
+  }
   return new ThreadSharedVariant(source, serialized, inner);
 }
 

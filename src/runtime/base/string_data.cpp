@@ -50,7 +50,12 @@ StringData::StringData(SharedVariant *shared)
   m_place_tainted.name = NULL;
   m_place_tainted.line = -1;
   #endif
-  assign(shared);
+  ASSERT(shared);
+  shared->incRef();
+  m_shared = shared;
+  m_data = m_shared->stringData();
+  m_len = m_shared->stringLength() | IsShared;
+  ASSERT(m_data);
 }
 
 StringData::StringData(const char *data, int len, StringDataMode mode)
@@ -137,16 +142,6 @@ void StringData::assign(const char *data, int len, StringDataMode mode) {
     m_len |= IsLiteral;
     m_data = "";
   }
-  ASSERT(m_data);
-}
-
-void StringData::assign(SharedVariant *shared) {
-  ASSERT(!m_shared);
-  ASSERT(shared);
-  shared->incRef();
-  m_shared = shared;
-  m_data = m_shared->stringData();
-  m_len = m_shared->stringLength() | IsShared;
   ASSERT(m_data);
 }
 

@@ -225,10 +225,21 @@ public:
     }
   }
 
+  /**
+   * If the value v already wraps a ThreadSharedVariant, we do not have to
+   * regenerate it, but just bumping up the ref count.
+   * However, ThreadSharedVariantLockedRefs cannot be safely reused, because
+   * it may contain a lock associated with a different key.
+   */
   inline SharedVariant* create(CStrRef key, CVarRef v) {
     if (RuntimeOption::ApcUseLockedRefs) {
       return new ThreadSharedVariantLockedRefs(v, false, *getLock(key));
     } else {
+      SharedVariant *wrapped = v.getSharedVariant();
+      if (wrapped) {
+        wrapped->incRef();
+        return wrapped;
+      }
       return new ThreadSharedVariant(v, false);
     }
   }
@@ -238,6 +249,11 @@ public:
       return new ThreadSharedVariantLockedRefs(v, serialized,
                                                *getLock(str, len));
     } else {
+      SharedVariant *wrapped = v->getSharedVariant();
+      if (wrapped) {
+        wrapped->incRef();
+        return wrapped;
+      }
       return new ThreadSharedVariant(v, serialized);
     }
   }
@@ -246,6 +262,11 @@ public:
       return new ThreadSharedVariantLockedRefs(v, false,
                                                *getLock(str, len));
     } else {
+      SharedVariant *wrapped = v.getSharedVariant();
+      if (wrapped) {
+        wrapped->incRef();
+        return wrapped;
+      }
       return new ThreadSharedVariant(v, false);
     }
   }
@@ -647,6 +668,14 @@ protected:
     }
     m_vars.clear();
   }
+
+  /**
+   * The Map::accessor here establishes a write lock, which means that other
+   * threads, protected by read locks through Map::const_accessor, will not
+   * read erased values from APC.
+   * The ReadLock here is to sync with clear(), which only has a WriteLock,
+   * not a specific accessor.
+   */
   virtual bool eraseImpl(CStrRef key, bool expired) {
     if (key.isNull()) return false;
     ReadLock l(m_lock);

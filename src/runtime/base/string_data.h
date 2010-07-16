@@ -70,6 +70,14 @@ class StringData {
   bool isStatic() const { return _count == (1 << 30); }
 
   /**
+   * Get the wrapped SharedVariant.
+   */
+  SharedVariant *getSharedVariant() const {
+    ASSERT(isShared());
+    return m_shared;
+  }
+
+  /**
    * When we have static StringData in SharedStore, we should avoid directly
    * deleting the StringData pointer, but rather call destruct().
    */

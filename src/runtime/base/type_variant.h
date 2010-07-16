@@ -492,6 +492,11 @@ class Variant {
   Variant share(bool save) const;
 
   /**
+   * Get the wrapped SharedVariant, if any.
+   */
+  SharedVariant *getSharedVariant() const;
+
+  /**
    * Marshaling/Unmarshaling between request thread and fiber thread.
    */
   Variant fiberMarshal(FiberReferenceMap &refMap) const;

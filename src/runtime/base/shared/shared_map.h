@@ -37,6 +37,8 @@ public:
     m_arr->decRef();
   }
 
+  virtual SharedVariant *getSharedVariant() const { return m_arr; }
+
   ssize_t size() const {
     return m_arr->arrSize();
   }

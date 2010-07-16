@@ -1046,7 +1046,7 @@ static Variant sockopen_impl(CStrRef hostname, int port, Variant &errnum,
           msg += name;
           msg += ":";
           msg += boost::lexical_cast<std::string>(port);
-          SOCKET_ERROR(sock, msg.c_str(), EAGAIN);
+          SOCKET_ERROR(sock, msg.c_str(), ETIMEDOUT);
           errnum = sock->getError();
           errstr = String(Util::safe_strerror(sock->getError()));
           return false;

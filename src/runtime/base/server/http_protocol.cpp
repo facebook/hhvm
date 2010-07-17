@@ -290,20 +290,15 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   }
   sri.setServerVariables(server);
 
+  const char *threadType = "(unknown)";
   switch (transport->getThreadType()) {
-  case Transport::RequestThread:
-    server.set("THREAD_TYPE", "REQUEST");
-    break;
-  case Transport::PageletThread:
-    server.set("THREAD_TYPE", "PAGELET");
-    break;
-  case Transport::XboxThread:
-    server.set("THREAD_TYPE", "XBOX");
-    break;
-  case Transport::RpcThread:
-    server.set("THREAD_TYPE", "RPC");
-    break;
+    case Transport::RequestThread: threadType = "REQUEST"; break;
+    case Transport::PageletThread: threadType = "PAGELET"; break;
+    case Transport::XboxThread:    threadType = "XBOX";    break;
+    case Transport::RpcThread:     threadType = "RPC";     break;
   }
+  server.set("THREAD_TYPE", threadType);
+  StackTraceNoHeap::AddExtraLogging("ThreadType", threadType);
 }
 
 std::string HttpProtocol::RecordRequest(Transport *transport) {

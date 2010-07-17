@@ -52,8 +52,12 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   Logger::OnNewRequest();
   transport->enableCompression();
 
-  Logger::Verbose("receiving %s", transport->getCommand().c_str());
   ServerStatsHelper ssh("all", true);
+  Logger::Verbose("receiving %s", transport->getCommand().c_str());
+
+  // will clear all extra logging when this function goes out of scope
+  StackTraceNoHeap::ExtraLoggingClearer clearer;
+  StackTraceNoHeap::AddExtraLogging("RPC-URL", transport->getUrl());
 
   // authentication
   const string &password = m_serverInfo->getPassword();

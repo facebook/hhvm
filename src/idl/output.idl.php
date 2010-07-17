@@ -46,6 +46,10 @@ f('hphp_log', Boolean,
   array('filename' => String,
         'message' =>String));
 
+f('hphp_crash_log', null,
+  array('name' => String,
+        'value' => String));
+
 f('hphp_stats', NULL,
   array('name' => String,
         'value' => Int64));

@@ -115,6 +115,11 @@ inline bool x_hphp_log(CStrRef filename, CStrRef message) {
   return f_hphp_log(filename, message);
 }
 
+inline void x_hphp_crash_log(CStrRef name, CStrRef value) {
+  FUNCTION_INJECTION_BUILTIN(hphp_crash_log);
+  f_hphp_crash_log(name, value);
+}
+
 inline void x_hphp_stats(CStrRef name, int64 value) {
   FUNCTION_INJECTION_BUILTIN(hphp_stats);
   f_hphp_stats(name, value);

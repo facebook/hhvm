@@ -17,6 +17,7 @@
 "output_add_rewrite_var", T(Boolean), S(0), "name", T(String), NULL, S(0), "value", T(String), NULL, S(0), NULL, S(0), 
 "output_reset_rewrite_vars", T(Boolean), S(0), NULL, S(0), 
 "hphp_log", T(Boolean), S(0), "filename", T(String), NULL, S(0), "message", T(String), NULL, S(0), NULL, S(0), 
+"hphp_crash_log", T(Void), S(0), "name", T(String), NULL, S(0), "value", T(String), NULL, S(0), NULL, S(0), 
 "hphp_stats", T(Void), S(0), "name", T(String), NULL, S(0), "value", T(Int64), NULL, S(0), NULL, S(0), 
 "hphp_get_stats", T(Int64), S(0), "name", T(String), NULL, S(0), NULL, S(0), 
 "hphp_output_global_state", T(Void), S(0), "filename", T(String), "null_string", S(0), NULL, S(0), 

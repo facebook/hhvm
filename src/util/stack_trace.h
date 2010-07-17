@@ -163,6 +163,13 @@ public:
    * Add extra information to log together with a crash stacktrace log.
    */
   static void AddExtraLogging(const char *name, const char *value);
+  static void ClearAllExtraLogging();
+
+  class ExtraLoggingClearer {
+  public:
+    ExtraLoggingClearer() {}
+    ~ExtraLoggingClearer() { StackTraceNoHeap::ClearAllExtraLogging();}
+  };
 
 private:
   /**

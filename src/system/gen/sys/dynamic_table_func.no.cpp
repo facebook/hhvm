@@ -2696,6 +2696,12 @@ Variant i_file(CArrRef params) {
   if (count == 2) return (f_file(params[0], params[1]));
   return (f_file(params[0], params[1], params[2]));
 }
+Variant i_hphp_crash_log(CArrRef params) {
+  FUNCTION_INJECTION(hphp_crash_log);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("hphp_crash_log", count, 2, 2, 1);
+  return (f_hphp_crash_log(params[0], params[1]), null);
+}
 Variant i_imagecolorresolvealpha(CArrRef params) {
   FUNCTION_INJECTION(imagecolorresolvealpha);
   int count __attribute__((__unused__)) = params.size();
@@ -9607,6 +9613,12 @@ Variant i_hphp_splfileinfo_gettype(CArrRef params) {
   if (count != 1) return throw_wrong_arguments("hphp_splfileinfo_gettype", count, 1, 1, 1);
   return (f_hphp_splfileinfo_gettype(params[0]));
 }
+Variant i_libxml_clear_errors(CArrRef params) {
+  FUNCTION_INJECTION(libxml_clear_errors);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("libxml_clear_errors", 0, 1);
+  return (f_libxml_clear_errors(), null);
+}
 Variant i_xmlwriter_start_document(CArrRef params) {
   FUNCTION_INJECTION(xmlwriter_start_document);
   int count __attribute__((__unused__)) = params.size();
@@ -9615,12 +9627,6 @@ Variant i_xmlwriter_start_document(CArrRef params) {
   if (count == 2) return (f_xmlwriter_start_document(params[0], params[1]));
   if (count == 3) return (f_xmlwriter_start_document(params[0], params[1], params[2]));
   return (f_xmlwriter_start_document(params[0], params[1], params[2], params[3]));
-}
-Variant i_libxml_clear_errors(CArrRef params) {
-  FUNCTION_INJECTION(libxml_clear_errors);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("libxml_clear_errors", 0, 1);
-  return (f_libxml_clear_errors(), null);
 }
 Variant i_magicknormalizeimage(CArrRef params) {
   FUNCTION_INJECTION(magicknormalizeimage);
@@ -15028,6 +15034,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 2027:
       HASH_INVOKE(0x54AE7140B95027EBLL, pixelgetgreenquantum);
       HASH_INVOKE(0x1A397501431EC7EBLL, is_numeric);
+      break;
+    case 2029:
+      HASH_INVOKE(0x0DC2C2D372EC97EDLL, hphp_crash_log);
       break;
     case 2031:
       HASH_INVOKE(0x5367B0F3A4D2D7EFLL, ldap_list);
@@ -26126,6 +26135,26 @@ Variant ei_file(Eval::VariableEnvironment &env, const Eval::FunctionCallExpressi
   if (count <= 1) return (x_file(a0));
   else if (count == 2) return (x_file(a0, a1));
   else return (x_file(a0, a1, a2));
+}
+Variant ei_hphp_crash_log(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("hphp_crash_log", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_hphp_crash_log(a0, a1), null);
 }
 Variant ei_imagecolorresolvealpha(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -48192,6 +48221,18 @@ Variant ei_hphp_splfileinfo_gettype(Eval::VariableEnvironment &env, const Eval::
   }
   return (x_hphp_splfileinfo_gettype(a0));
 }
+Variant ei_libxml_clear_errors(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("libxml_clear_errors", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_libxml_clear_errors(), null);
+}
 Variant ei_xmlwriter_start_document(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -48222,18 +48263,6 @@ Variant ei_xmlwriter_start_document(Eval::VariableEnvironment &env, const Eval::
   else if (count == 2) return (x_xmlwriter_start_document(a0, a1));
   else if (count == 3) return (x_xmlwriter_start_document(a0, a1, a2));
   else return (x_xmlwriter_start_document(a0, a1, a2, a3));
-}
-Variant ei_libxml_clear_errors(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("libxml_clear_errors", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_libxml_clear_errors(), null);
 }
 Variant ei_magicknormalizeimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -60118,6 +60147,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2027:
       HASH_INVOKE_FROM_EVAL(0x54AE7140B95027EBLL, pixelgetgreenquantum);
       HASH_INVOKE_FROM_EVAL(0x1A397501431EC7EBLL, is_numeric);
+      break;
+    case 2029:
+      HASH_INVOKE_FROM_EVAL(0x0DC2C2D372EC97EDLL, hphp_crash_log);
       break;
     case 2031:
       HASH_INVOKE_FROM_EVAL(0x5367B0F3A4D2D7EFLL, ldap_list);

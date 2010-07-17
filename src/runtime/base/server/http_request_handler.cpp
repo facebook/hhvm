@@ -104,9 +104,12 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   GetAccessLog().onNewRequest();
   transport->enableCompression();
 
-  Logger::Verbose("receiving %s", transport->getCommand().c_str());
-  StackTraceNoHeap::AddExtraLogging("URL", transport->getUrl());
   ServerStatsHelper ssh("all", true);
+  Logger::Verbose("receiving %s", transport->getCommand().c_str());
+
+  // will clear all extra logging when this function goes out of scope
+  StackTraceNoHeap::ExtraLoggingClearer clearer;
+  StackTraceNoHeap::AddExtraLogging("URL", transport->getUrl());
 
   // resolve virtual host
   const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);

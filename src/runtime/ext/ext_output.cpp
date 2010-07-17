@@ -63,5 +63,9 @@ bool f_hphp_log(CStrRef filename, CStrRef message) {
   return ret;
 }
 
+void f_hphp_crash_log(CStrRef name, CStrRef value) {
+  StackTraceNoHeap::AddExtraLogging(name.data(), value.data());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

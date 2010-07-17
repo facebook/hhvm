@@ -264,6 +264,10 @@ void StackTraceNoHeap::AddExtraLogging(const char *name, const char *value) {
   StackTraceLog::s_logData->data[name] = value;
 }
 
+void StackTraceNoHeap::ClearAllExtraLogging() {
+  StackTraceLog::s_logData->data.clear();
+}
+
 void StackTraceNoHeap::log(const char *errorType, const char *tracefn,
                            const char *pid) const {
   int fd = ::open(tracefn, O_CREAT|O_TRUNC|O_WRONLY);

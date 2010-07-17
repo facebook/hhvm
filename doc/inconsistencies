@@ -128,3 +128,6 @@ In PHP, XMLWriter class and its functions returned different types of objects,
 
 In HipHop, they are the same.
 
+7. Extra errors, warnings and notices in HipHop
+
+(1) HipHop notices about number[offset] or bool[offset].

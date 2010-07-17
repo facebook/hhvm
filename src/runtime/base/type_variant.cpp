@@ -1969,24 +1969,27 @@ void Variant::callOffsetUnset(CVarRef key) {
   getArrayAccess()->o_invoke("offsetunset", Array::Create(key), -1);
 }
 
-#define IMPLEMENT_RVAL_INTEGRAL \
-  if (m_type == KindOfArray) { \
-      return m_data.parr->get((int64)offset, prehash, error); \
-  } \
-  switch (m_type) { \
-  case LiteralString: \
-    return toString().get()->getChar((int)offset); \
-  case KindOfStaticString: \
-  case KindOfString: \
-    return m_data.pstr->getChar((int)offset); \
-  case KindOfObject: \
-    return getArrayAccess()->o_invoke("offsetget", \
-        Array::Create(offset), -1); \
-  case KindOfVariant: \
-    return m_data.pvar->rvalAt(offset, prehash, error); \
-  default: \
-    break; \
-  } \
+#define IMPLEMENT_RVAL_INTEGRAL                                         \
+  if (m_type == KindOfArray) {                                          \
+    return m_data.parr->get((int64)offset, prehash, error);             \
+  }                                                                     \
+  switch (m_type) {                                                     \
+    case LiteralString:                                                 \
+      return toString().get()->getChar((int)offset);                    \
+    case KindOfStaticString:                                            \
+    case KindOfString:                                                  \
+      return m_data.pstr->getChar((int)offset);                         \
+    case KindOfObject:                                                  \
+      return getArrayAccess()->o_invoke("offsetget",                    \
+                                        Array::Create(offset), -1);     \
+    case KindOfVariant:                                                 \
+      return m_data.pvar->rvalAt(offset, prehash, error);               \
+    case KindOfNull:                                                    \
+      break;                                                            \
+    default:                                                            \
+      raise_notice("taking offset [] on bool or number");               \
+      break;                                                            \
+  }                                                                     \
   return null_variant;
 
 Variant Variant::rvalAt(bool offset, int64 prehash /* = -1 */,
@@ -2010,7 +2013,10 @@ Variant Variant::rvalAtHelper(int64 offset, int64 prehash /* = -1 */,
     return getArrayAccess()->o_invoke("offsetget", Array::Create(offset), -1);
   case KindOfVariant:
     return m_data.pvar->rvalAt(offset, prehash, error);
+  case KindOfNull:
+    break;
   default:
+    raise_notice("taking offset [] on bool or number");
     break;
   }
   return null_variant;
@@ -2039,7 +2045,10 @@ Variant Variant::rvalAt(litstr offset, int64 prehash /* = -1 */,
     return getArrayAccess()->o_invoke("offsetget", Array::Create(offset), -1);
   case KindOfVariant:
     return m_data.pvar->rvalAt(offset, prehash, error);
+  case KindOfNull:
+    break;
   default:
+    raise_notice("taking offset [] on bool or number");
     break;
   }
   return null_variant;
@@ -2067,7 +2076,10 @@ Variant Variant::rvalAt(CStrRef offset, int64 prehash /* = -1 */,
     return getArrayAccess()->o_invoke("offsetget", Array::Create(offset), -1);
   case KindOfVariant:
     return m_data.pvar->rvalAt(offset, prehash, error, isString);
+  case KindOfNull:
+    break;
   default:
+    raise_notice("taking offset [] on bool or number");
     break;
   }
   return null_variant;
@@ -2133,7 +2145,10 @@ Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
     return getArrayAccess()->o_invoke("offsetget", Array::Create(offset), -1);
   case KindOfVariant:
     return m_data.pvar->rvalAt(offset, prehash, error);
+  case KindOfNull:
+    break;
   default:
+    raise_notice("taking offset [] on bool or number");
     break;
   }
   return null_variant;

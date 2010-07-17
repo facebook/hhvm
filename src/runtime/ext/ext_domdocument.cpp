@@ -43,6 +43,10 @@ IMPLEMENT_DEFAULT_EXTENSION(dom);
 #define PHP_LIBXML_CTX_ERROR 1
 #define PHP_LIBXML_CTX_WARNING 2
 
+// defined in ext_simplexml.cpp
+extern bool libxml_use_internal_error();
+extern void libxml_add_error(const std::string &msg);
+
 static void php_libxml_internal_error_handler(int error_type, void *ctx,
                                               const char *fmt, va_list ap) {
   string msg;
@@ -51,6 +55,10 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
   /* remove any trailing \n */
   while (!msg.empty() && msg[msg.size() - 1] == '\n') {
     msg = msg.substr(0, msg.size() - 1);
+  }
+  if (libxml_use_internal_error()) {
+    libxml_add_error(msg);
+    return;
   }
 
   xmlParserCtxtPtr parser = (xmlParserCtxtPtr) ctx;

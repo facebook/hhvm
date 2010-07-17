@@ -18,6 +18,7 @@
 #include <runtime/ext/ext_simplexml.h>
 #include <runtime/ext/ext_file.h>
 #include <runtime/base/class_info.h>
+#include <runtime/base/util/request_local.h>
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(SimpleXML);
@@ -1038,10 +1039,63 @@ Variant c_libxmlerror::t___destruct() {
 ///////////////////////////////////////////////////////////////////////////////
 // libxml
 
-static IMPLEMENT_THREAD_LOCAL(std::vector<xmlError>, s_libxml_errors);
+class xmlErrorVec : public std::vector<xmlError> {
+public:
+  ~xmlErrorVec() {
+    reset();
+  }
+
+  void reset() {
+    for (unsigned int i = 0; i < size(); i++) {
+      xmlResetError(&at(i));
+    }
+    clear();
+  }
+};
+
+class LibXmlErrors : public RequestEventHandler {
+public:
+  virtual void requestInit() {
+    m_use_error = false;
+    m_errors.reset();
+  }
+  virtual void requestShutdown() {
+    m_use_error = false;
+    m_errors.reset();
+  }
+
+  bool m_use_error;
+  xmlErrorVec m_errors;
+};
+
+IMPLEMENT_STATIC_REQUEST_LOCAL(LibXmlErrors, s_libxml_errors);
+bool libxml_use_internal_error() {
+  return s_libxml_errors->m_use_error;
+}
+extern void libxml_add_error(const std::string &msg) {
+  xmlErrorVec *error_list = &s_libxml_errors->m_errors;
+
+  error_list->resize(error_list->size() + 1);
+  xmlError &error_copy = error_list->back();
+  memset(&error_copy, 0, sizeof(xmlError));
+
+  error_copy.domain = 0;
+  error_copy.code = XML_ERR_INTERNAL_ERROR;
+  error_copy.level = XML_ERR_ERROR;
+  error_copy.line = 0;
+  error_copy.node = NULL;
+  error_copy.int1 = 0;
+  error_copy.int2 = 0;
+  error_copy.ctxt = NULL;
+  error_copy.message = (char*)xmlStrdup((const xmlChar*)msg.c_str());
+  error_copy.file = NULL;
+  error_copy.str1 = NULL;
+  error_copy.str2 = NULL;
+  error_copy.str3 = NULL;
+}
 
 static void libxml_error_handler(void *userData, xmlErrorPtr error) {
-  std::vector<xmlError> *error_list = s_libxml_errors.get();
+  xmlErrorVec *error_list = &s_libxml_errors->m_errors;
 
   error_list->resize(error_list->size() + 1);
   xmlError &error_copy = error_list->back();
@@ -1067,7 +1121,7 @@ static Object create_libxmlerror(xmlError &error) {
 }
 
 Variant f_libxml_get_errors() {
-  std::vector<xmlError> *error_list = s_libxml_errors.get();
+  xmlErrorVec *error_list = &s_libxml_errors->m_errors;
   Array ret = Array::Create();
   for (unsigned int i = 0; i < error_list->size(); i++) {
     ret.append(create_libxmlerror(error_list->at(i)));
@@ -1085,7 +1139,7 @@ Variant f_libxml_get_last_error() {
 
 void f_libxml_clear_errors() {
   xmlResetLastError();
-  s_libxml_errors->clear();
+  s_libxml_errors->m_errors.reset();
 }
 
 bool f_libxml_use_internal_errors(CVarRef use_errors /* = null_variant */) {
@@ -1093,9 +1147,11 @@ bool f_libxml_use_internal_errors(CVarRef use_errors /* = null_variant */) {
   if (!use_errors.isNull()) {
     if (!use_errors.toBoolean()) {
       xmlSetStructuredErrorFunc(NULL, NULL);
-      s_libxml_errors->clear();
+      s_libxml_errors->m_use_error = false;
+      s_libxml_errors->m_errors.reset();
     } else {
       xmlSetStructuredErrorFunc(NULL, libxml_error_handler);
+      s_libxml_errors->m_use_error = true;
     }
   }
   return ret;

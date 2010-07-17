@@ -46,7 +46,8 @@ public:
   static void RawVerbose(const std::string &msg);
 
   // Log additional injected stacktrace.
-  static void Log(CArrRef stackTrace, bool escape = true);
+  static void Log(CArrRef stackTrace, bool escape = true,
+                  bool escapeMore = false);
 
 protected:
   virtual void log(const char *type, const Exception &e,

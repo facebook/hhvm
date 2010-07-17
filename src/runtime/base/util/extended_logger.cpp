@@ -24,20 +24,33 @@
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                   \
   void ExtendedLogger::LOGLEVEL(const char *fmt, ...) {                \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
-    va_list ap; va_start(ap, fmt); Logger::LogEscapeMore(fmt, ap);     \
     if (RuntimeOption::InjectedStackTrace &&                           \
         !ExtendedLogger::EnabledByDefault) {                           \
-      Log(FrameInjection::GetBacktrace());                             \
+      Array bt = FrameInjection::GetBacktrace();                       \
+      if (!bt.empty()) {                                               \
+        va_list ap; va_start(ap, fmt);                                 \
+        Logger::LogEscapeMore(fmt, ap);                                \
+        va_end(ap);                                                    \
+        Log(bt);                                                       \
+        return;                                                        \
+      }                                                                \
     }                                                                  \
+    va_list ap; va_start(ap, fmt);                                     \
+    Logger::Log(fmt, ap);                                              \
     va_end(ap);                                                        \
   }                                                                    \
   void ExtendedLogger::LOGLEVEL(const std::string &msg) {              \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
-    Logger::Log(msg, NULL, true, true);                                \
     if (RuntimeOption::InjectedStackTrace &&                           \
         !ExtendedLogger::EnabledByDefault) {                           \
-      Log(FrameInjection::GetBacktrace());                             \
+      Array bt = FrameInjection::GetBacktrace();                       \
+      if (!bt.empty()) {                                               \
+        Logger::Log(msg, NULL, true, true);                            \
+        Log(bt);                                                       \
+        return;                                                        \
+      }                                                                \
     }                                                                  \
+    Logger::Log(msg, NULL, true);                                      \
   }                                                                    \
   void ExtendedLogger::Raw ## LOGLEVEL(const std::string &msg) {       \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
@@ -79,13 +92,20 @@ void ExtendedLogger::log(const char *type, const Exception &e,
 void ExtendedLogger::log(const std::string &msg, const StackTrace *stackTrace,
                          bool escape /* = true */,
                          bool escapeMore /* = false */) {
-  Logger::log(msg, stackTrace, escape, escape);
   if (RuntimeOption::InjectedStackTrace) {
-    Log(FrameInjection::GetBacktrace(), escape);
+    Array bt = FrameInjection::GetBacktrace();
+    if (!bt.empty()) {
+      Logger::log(msg, stackTrace, escape, escape);
+      Log(bt, escape, escapeMore);
+      return;
+    }
   }
+  Logger::log(msg, stackTrace, escape, escapeMore);
 }
 
-void ExtendedLogger::Log(CArrRef stackTrace, bool escape /* = true */) {
+void ExtendedLogger::Log(CArrRef stackTrace, bool escape /* = true */,
+                         bool escapeMore /* = false */) {
+  ASSERT(!escapeMore || escape);
   ThreadData *threadData = s_threadData.get();
   if (++threadData->message > MaxMessagesPerRequest &&
       MaxMessagesPerRequest >= 0) {
@@ -97,11 +117,11 @@ void ExtendedLogger::Log(CArrRef stackTrace, bool escape /* = true */) {
   // TODO Should we also send the stacktrace to LogAggregator?
   if (UseLogFile) {
     FILE *f = Output ? Output : stdout;
-    PrintStackTrace(f, stackTrace, escape);
+    PrintStackTrace(f, stackTrace, escape, escapeMore);
 
     FILE *tf = threadData->log;
     if (tf) {
-      PrintStackTrace(tf, stackTrace, escape);
+      PrintStackTrace(tf, stackTrace, escape, escapeMore);
     }
   }
 }

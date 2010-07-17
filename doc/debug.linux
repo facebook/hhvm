@@ -23,6 +23,10 @@
   /sbin/iptables -L
   /sbin/iptables -F    # flush iptables
 
-6. Who'e the main www process?
+6. Who's the main www process?
 
   ps -e | grep www
+
+7. Start gdb by process name
+
+  gdb --pid=`ps -eo pid,comm | grep www | cut -d' ' -f1`

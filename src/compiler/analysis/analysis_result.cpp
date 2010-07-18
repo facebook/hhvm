@@ -1322,9 +1322,13 @@ void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
       throw Exception("During code gen, class %s is undefined",
                       iter->first.c_str());
     }
-    ClassScopePtr cls = iter->second[0];
-    if (!cls->isInterface()) {
-      classes.push_back(cls->getName().c_str());
+    for (ClassScopePtrVec::const_iterator iter2 = iter->second.begin();
+         iter2 != iter->second.end(); ++iter2) {
+      ClassScopePtr cls = *iter2;
+      if (!cls->isInterface()) {
+        classes.push_back(cls->getName().c_str());
+        break;
+      }
     }
   }
 
@@ -1703,14 +1707,18 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
     for (StringToClassScopePtrVecMap::const_iterator iter =
            m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
       if (iter->second.size()) {
-        cls = iter->second[0];
-        if (cls->isUserClass() && !cls->isInterface()) {
-          classes.push_back(cls->getName().c_str());
-          classScopes[cls->getName()].push_back(cls);
-          if (!system) {
-            cls->outputCPPDynamicClassDecl(cg);
+        for (ClassScopePtrVec::const_iterator iter2 = iter->second.begin();
+             iter2 != iter->second.end(); ++iter2) {
+          cls = *iter2;
+          if (cls->isUserClass() && !cls->isInterface()) {
+            classes.push_back(cls->getName().c_str());
+            classScopes[cls->getName()].push_back(cls);
+            if (!system) {
+              cls->outputCPPDynamicClassDecl(cg);
+            }
+            cls->outputCPPGlobalTableWrappersDecl(cg, ar);
+            break;
           }
-          cls->outputCPPGlobalTableWrappersDecl(cg, ar);
         }
       }
     }
@@ -2894,9 +2902,18 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
        iter != m_classDecs.end(); ++iter) {
     bool redec = !iter->second.size() || iter->second[0]->isRedeclaring();
     if (redec) {
+      bool isInterface = true;
+      for (size_t i = 0; i < iter->second.size(); i++) {
+        if (!iter->second[i]->isInterface()) {
+          isInterface = false;
+          break;
+        }
+      }
       cg_printf("(const char *)(ClassInfo::IsRedeclared | "
-                "ClassInfo::IsVolatile), \"%s\", "
-                "(const char *)%s%s,\n", iter->first.c_str(),
+                "ClassInfo::IsVolatile%s), \"%s\", "
+                "(const char *)%s%s,\n",
+                isInterface ? " | ClassInfo::IsInterface" : "",
+                iter->first.c_str(),
                 Option::ClassStaticsIdGetterPrefix, iter->first.c_str());
     }
     BOOST_FOREACH(ClassScopePtr cls, iter->second) {

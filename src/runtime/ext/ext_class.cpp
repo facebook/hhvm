@@ -47,7 +47,9 @@ bool f_class_exists(CStrRef class_name, bool autoload /* = true */) {
     if (autoload && (info->getAttribute() & ClassInfo::IsVolatile) != 0) {
       checkClassExists(class_name, get_globals(), true);
     }
-    return info->isDeclared();
+    if (!info->isDeclared()) return false;
+    // XXX see the comment in f_interface_exists().
+    return !(info->getCurrent()->isClassInfoRedeclared());
   }
   return false;
 }
@@ -61,6 +63,20 @@ bool f_interface_exists(CStrRef interface_name, bool autoload /* = true */) {
     }
     return info->isDeclared();
   }
+
+  // look for interfaces redeclared by classes
+  info = ClassInfo::FindClass(interface_name.data());
+  if (info && info->isClassInfoRedeclared()) {
+    if (autoload && (info->getAttribute() & ClassInfo::IsVolatile) != 0) {
+      checkClassExists(interface_name, get_globals(), true);
+    }
+    // XXX we currently do not update cso for interfaces, which means that
+    // if the name is declared, and getCurrent() is still info itself, it must
+    // be an interface.
+    if (!info->isDeclared()) return false;
+    return info->getCurrent()->isClassInfoRedeclared();
+  }
+
   return false;
 }
 

@@ -154,6 +154,8 @@ bool ClassInfo::HasInterface(const char *name) {
   return s_interfaces.find(name) != s_interfaces.end();
 }
 
+// NOTE: FindInterface() currently cannot find interfaces redeclared by
+// classes.
 const ClassInfo *ClassInfo::FindInterface(const char *name) {
   ASSERT(name);
   if (!s_loaded) Load();

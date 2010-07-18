@@ -8177,6 +8177,26 @@ bool TestCodeRun::TestRedeclaredClasses() {
        "  function bar() { return $this->foo + $this->bar; }"
        "}"
        "PEAR::f();");
+  MVCR("<?php\n"
+       "function f() { return false; }\n"
+       "if (f()) {\n"
+       "  interface A { }\n"
+       "  class B { }\n"
+       "  interface C { }\n"
+       "} else {\n"
+       "  class A { }\n"
+       "  interface B { }\n"
+       "  interface C { }\n"
+       "}\n"
+       "function test($c) {\n"
+       "  var_dump(class_exists('A'));\n"
+       "  var_dump(interface_exists('A'));\n"
+       "  var_dump(class_exists('B'));\n"
+       "  var_dump(interface_exists('B'));\n"
+       "  var_dump(class_exists($c));\n"
+       "  var_dump(interface_exists('C'));\n"
+       "}\n"
+       "test('C');\n");
 
   return true;
 }

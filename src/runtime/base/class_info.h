@@ -193,6 +193,7 @@ public:
   virtual const char *getName() const { return m_name;}
   const char *getDocComment() const { return m_docComment; }
   virtual const ClassInfo *getCurrent() const { return this; }
+  virtual bool isClassInfoRedeclared() const { return false; }
   /**
    * Whether or not declaration is executed.
    */
@@ -304,6 +305,7 @@ public:
 
   // implementing ClassInfo
   virtual const ClassInfo *getCurrent() const { return current(); }
+  virtual bool isClassInfoRedeclared() const { return true; }
   const char *getName() const { return current()->getName();}
   const char *getParentClass() const { return current()->getParentClass();}
   const InterfaceMap &getInterfaces() const {

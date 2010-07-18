@@ -616,19 +616,35 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
           break;
         }
         case InterfaceExistsFunction: {
-          ClassScopePtr cls = ar->findClass(Util::toLower(symbol));
-          if (!cls || !cls->isInterface()) {
-            return CONSTANT("false");
-          } else if (!cls->isVolatile()) {
+          ClassScopePtrVec classes = ar->findClasses(Util::toLower(symbol));
+          bool interfaceFound = false;
+          for (ClassScopePtrVec::const_iterator it = classes.begin();
+               it != classes.end(); ++it) {
+            ClassScopePtr cls = *it;
+            if (cls->isInterface()) {
+              interfaceFound = true;
+              break;
+            }
+          }
+          if (!interfaceFound) return CONSTANT("false");
+          if (classes.size() == 1 && !classes.back()->isVolatile()) {
             return CONSTANT("true");
           }
           break;
         }
         case ClassExistsFunction: {
-          ClassScopePtr cls = ar->findClass(Util::toLower(symbol));
-          if (!cls || cls->isInterface()) {
-            return CONSTANT("false");
-          } else if (!cls->isVolatile()) {
+          ClassScopePtrVec classes = ar->findClasses(Util::toLower(symbol));
+          bool classFound = false;
+          for (ClassScopePtrVec::const_iterator it = classes.begin();
+               it != classes.end(); ++it) {
+            ClassScopePtr cls = *it;
+            if (!cls->isInterface()) {
+              classFound = true;
+              break;
+            }
+          }
+          if (!classFound) return CONSTANT("false");
+          if (classes.size() == 1 && !classes.back()->isVolatile()) {
             return CONSTANT("true");
           }
           break;
@@ -1178,24 +1194,18 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
             break;
           case ClassExistsFunction:
             {
-              ClassScopePtr cls = ar->findClass(Util::toLower(symbol));
-              if (cls && !cls->isInterface()) {
-                const char *name = cls->getName().c_str();
-                cg_printf("f_class_exists(\"%s\")", name);
-              } else {
-                cg_printf("false");
-              }
+              // All the definite cases should have been resolved in
+              // postOptimize().
+              cg_printf("f_class_exists(\"%s\")",
+                        Util::toLower(symbol).c_str());
             }
             break;
           case InterfaceExistsFunction:
             {
-              ClassScopePtr cls = ar->findClass(Util::toLower(symbol));
-              if (cls && cls->isInterface()) {
-                const char *name = cls->getName().c_str();
-                cg_printf("f_interface_exists(\"%s\")", name);
-              } else {
-                cg_printf("false");
-              }
+              // All the definite cases should have been resolved in
+              // postOptimize().
+              cg_printf("f_interface_exists(\"%s\")",
+                        Util::toLower(symbol).c_str());
             }
             break;
           default:

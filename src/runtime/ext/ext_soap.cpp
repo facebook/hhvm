@@ -148,6 +148,11 @@ static Object create_soap_fault(CStrRef code, CStrRef fault) {
   return Object((NEW(c_soapfault)())->create(code, fault));
 }
 
+static Object create_soap_fault(Exception &e) {
+  USE_SOAP_GLOBAL;
+  return create_soap_fault(SOAP_GLOBAL(error_code), String(e.getMessage()));
+}
+
 static sdlParamPtr get_param(sdlFunction *function, const char *param_name,
                              int index, bool response) {
   sdlParamVec *ht;
@@ -1773,11 +1778,9 @@ static void send_soap_server_fault(sdlFunctionPtr function, Exception &e,
                                    soapHeader *hdr) {
   USE_SOAP_GLOBAL;
   if (SOAP_GLOBAL(use_soap_error_handler)) {
-    send_soap_server_fault
-      (sdlFunctionPtr(), create_soap_fault(SOAP_GLOBAL(error_code),
-                                           String(e.getMessage())), NULL);
+    send_soap_server_fault(sdlFunctionPtr(), create_soap_fault(e), NULL);
   } else {
-    throw; // assuming we are in "catch"
+    throw create_soap_fault(e); // assuming we are in "catch"
   }
 }
 
@@ -1819,6 +1822,8 @@ void c_soapserver::t___construct(CVarRef wsdl,
   INSTANCE_METHOD_INJECTION_BUILTIN(soapserver, soapserver::__construct);
   USE_SOAP_GLOBAL;
   SoapServerScope ss(this);
+
+  try {
 
   if (!wsdl.isString() && !wsdl.isNull()) {
     throw SoapException("Invalid parameters");
@@ -1900,6 +1905,10 @@ void c_soapserver::t___construct(CVarRef wsdl,
 
   if (!typemap_ht.empty()) {
     m_typemap = soap_create_typemap(m_sdl, typemap_ht);
+  }
+
+  } catch (Exception &e) {
+    throw create_soap_fault(e);
   }
 }
 
@@ -2100,8 +2109,8 @@ void c_soapserver::t_handle(CStrRef request /* = null_string */) {
       (m_sdl, doc_request, m_actor, function_name, params, soap_version,
        m_soap_headers);
   } catch (Exception &e) {
-    send_soap_server_fault(function, e, NULL);
     xmlFreeDoc(doc_request);
+    send_soap_server_fault(function, e, NULL);
     return;
   }
   xmlFreeDoc(doc_request);
@@ -2290,6 +2299,8 @@ void c_soapclient::t___construct(CVarRef wsdl,
   USE_SOAP_GLOBAL;
   SoapClientScope ss(this);
 
+  try {
+
   if (!wsdl.isString() && !wsdl.isNull()) {
     throw SoapException("wsdl must be string or null");
   }
@@ -2369,6 +2380,10 @@ void c_soapclient::t___construct(CVarRef wsdl,
     if (!arr.empty()) {
       m_typemap = soap_create_typemap(m_sdl, arr);
     }
+  }
+
+  } catch (Exception &e) {
+    throw create_soap_fault(e);
   }
 }
 
@@ -2464,7 +2479,7 @@ Variant c_soapclient::t___soapcall(String name, Array args,
         }
       } catch (Exception &e) {
         xmlFreeDoc(request);
-        throw;
+        throw create_soap_fault(e);
       }
       xmlFreeDoc(request);
 
@@ -2508,7 +2523,7 @@ Variant c_soapclient::t___soapcall(String name, Array args,
                          m_soap_version, 0, response);
       } catch (Exception &e) {
         xmlFreeDoc(request);
-        throw;
+        throw create_soap_fault(e);
       }
       xmlFreeDoc(request);
       if (ret && response.isString()) {

@@ -20,6 +20,7 @@
 #include "process.h"
 #include "exception.h"
 #include "log_aggregator.h"
+#include "text_color.h"
 
 using namespace std;
 
@@ -167,8 +168,11 @@ void Logger::log(const std::string &msg, const StackTrace *stackTrace,
       }
     }
     const char *escaped = escape ? EscapeString(msg) : msg.c_str();
-    fprintf(f, "%s%s%s", sheader.c_str(), escaped,
-                         escapeMore ? "\\n" : "\n");
+    bool color = (f == stdout && Util::s_stderr_color);
+    fprintf(f, "%s%s%s%s%s",
+            color ? Util::s_stderr_color : "",
+            sheader.c_str(), escaped, escapeMore ? "\\n" : "\n",
+            color ? ANSI_COLOR_END : "");
     FILE *tf = threadData->log;
     if (tf) {
       fprintf(tf, "%s%s%s", header.c_str(), escaped,

@@ -894,9 +894,3 @@ void createOutputDirectory(ProgramOptions &po) {
     mkdir(po.syncDir.c_str(), 0777);
   }
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// forcing ThriftBuffer class to be linked into hphp
-
-#include <runtime/ext/thrift_buffer.h>
-ThriftBuffer s_class_loader(0);

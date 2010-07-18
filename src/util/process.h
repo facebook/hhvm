@@ -149,7 +149,8 @@ public:
    *                 program
    */
   static bool Exec(const char *path, const char *argv[], const char *in,
-                   std::string &out, std::string *err = NULL);
+                   std::string &out, std::string *err = NULL,
+                   bool color = false);
 
   /**
    * Execute an external program.

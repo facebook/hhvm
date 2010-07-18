@@ -42,6 +42,8 @@
 #include <runtime/ext/ext_variable.h>
 #include <runtime/ext/ext_apc.h>
 #include <runtime/eval/runtime/code_coverage.h>
+#include <runtime/eval/debugger/debugger.h>
+#include <runtime/eval/debugger/debugger_client.h>
 #include <runtime/base/fiber_async_func.h>
 
 #include <boost/program_options/options_description.hpp>
@@ -68,6 +70,8 @@ struct ProgramOptions {
   vector<string> confStrings;
   int    port;
   int    admin_port;
+  string debug_host;
+  int    debug_port;
   string user;
   string file;
   int    count;
@@ -232,6 +236,8 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
   bool ret = false;
   try {
     throw;
+  } catch (const DebuggerRestartException &e) {
+    throw;
   } catch (const ExitException &e) {
     ret = true;
     // ExitException is fine
@@ -346,8 +352,7 @@ void handle_destructor_exception() {
   }
 }
 
-static int execute_command_line(ProgramOptions &po,
-                                const char * file, int argc, char **argv) {
+void execute_command_line_begin(int argc, char **argv, int xhprof) {
   hphp_session_init();
   ExecutionContext *context = g_context.get();
   context->obSetImplicitFlush(true);
@@ -380,28 +385,21 @@ static int execute_command_line(ProgramOptions &po,
 
   if (RuntimeOption::EnableCliRTTI) RTTIInfo::TheRTTIInfo.init(true);
 
-  if (po.xhprofFlags) {
-    f_xhprof_enable(po.xhprofFlags, null);
+  if (xhprof) {
+    f_xhprof_enable(xhprof, null);
   }
-  int exitCode = -1;
-  bool ret = false;
-  string errorMsg = "";
-  bool error;
-  ret = hphp_invoke(context, file, false, Array(), null, "", "", "", error,
-                    errorMsg);
-  if (po.xhprofFlags) {
+}
+
+void execute_command_line_end(int xhprof, bool coverage) {
+  if (xhprof) {
     f_var_dump(f_json_encode(f_xhprof_disable()));
   }
-  hphp_context_exit(context, true);
+  hphp_context_exit(g_context.get(), true);
   hphp_session_exit();
-  if (ret) {
-    exitCode = ExitException::ExitCode;
-  }
-  if (RuntimeOption::RecordCodeCoverage &&
+  if (coverage && RuntimeOption::RecordCodeCoverage &&
       !RuntimeOption::CodeCoverageOutputFile.empty()) {
     Eval::CodeCoverage::Report(RuntimeOption::CodeCoverageOutputFile);
   }
-  return exitCode;
 }
 
 static void pagein_self(void) {
@@ -510,6 +508,28 @@ int execute_program(int argc, char **argv) {
   return -1;
 }
 
+static int run_program(ProgramOptions &po, int argc, char **argv,
+                       bool began) {
+  int ret = 0;
+  for (int i = 0; i < po.count; i++) {
+    if (!began) {
+      execute_command_line_begin(argc, argv, po.xhprofFlags);
+    } else {
+      began = false;
+    }
+    if (!po.file.empty()) {
+      ret = -1;
+      bool error; string errorMsg;
+      if (hphp_invoke(g_context.get(), po.file.c_str(),
+                      false, Array(), null, "", "", "", error, errorMsg)) {
+        ret = ExitException::ExitCode;
+      }
+    }
+    execute_command_line_end(po.xhprofFlags, true);
+  }
+  return ret;
+}
+
 static int execute_program_impl(int argc, char **argv) {
   string usage = "Usage:\n\n\t";
   usage += argv[0];
@@ -523,7 +543,7 @@ static int execute_program_impl(int argc, char **argv) {
     ("compiler-id", "display the git hash for the compiler id")
 #endif
     ("mode,m", value<string>(&po.mode)->default_value("run"),
-     "run | server | daemon | replay | translate")
+     "run | debug | server | daemon | replay | translate")
     ("config,c", value<string>(&po.config),
      "load specified config file")
     ("config-value,v", value<vector<string> >(&po.confStrings)->composing(),
@@ -533,6 +553,10 @@ static int execute_program_impl(int argc, char **argv) {
      "start an HTTP server at specified port")
     ("admin-port", value<int>(&po.admin_port)->default_value(-1),
      "start admin listerner at specified port")
+    ("debug-host", value<string>(&po.debug_host),
+     "connect to debugger server at specified address")
+    ("debug-port", value<int>(&po.debug_port)->default_value(-1),
+     "connect to debugger server at specified port")
     ("user,u", value<string>(&po.user),
      "run server under this user account")
     ("file,f", value<string>(&po.file),
@@ -610,7 +634,7 @@ static int execute_program_impl(int argc, char **argv) {
     }
   }
 
-  if (argc <= 1 || po.mode == "run") {
+  if (argc <= 1 || po.mode == "run" || po.mode == "debug") {
     RuntimeOption::ExecutionMode = "cli";
 
     int new_argc = po.args.size() + 1;
@@ -621,13 +645,36 @@ static int execute_program_impl(int argc, char **argv) {
     }
     new_argv[new_argc] = NULL;
 
-    int ret = -1;
+    int ret = 0;
     hphp_process_init();
-    for (int i = 0; i < po.count; i++) {
-      ret = execute_command_line(po, po.file.c_str(), new_argc, new_argv);
+
+    if (po.mode == "debug") {
+      RuntimeOption::EnableDebugger = true;
+      Eval::Debugger::StartClient(po.debug_host, po.debug_port);
+
+      try {
+        while (true) {
+          try {
+            execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
+            Eval::Debugger::InterruptSessionStarted();
+            ret = run_program(po, new_argc, new_argv, true);
+            Eval::Debugger::InterruptSessionEnded();
+            execute_command_line_end(po.xhprofFlags, true);
+          } catch (const DebuggerRestartException &e) {
+            execute_command_line_end(0, false);
+          }
+        }
+      } catch (const DebuggerExitException &e) {
+        // end user quitting debugger
+        execute_command_line_end(0, false);
+      }
+
+    } else {
+      ret = run_program(po, new_argc, new_argv, false);
     }
 
     free(new_argv);
+    hphp_process_exit();
     return ret;
   }
 
@@ -703,6 +750,7 @@ void hphp_process_init() {
   Extension::InitModules();
   apc_load(RuntimeOption::ApcLoadThread);
   StaticString::FinishInit();
+  Eval::Debugger::StartServer();
 }
 
 void hphp_session_init() {
@@ -835,6 +883,9 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
                        bool shutdown /* = true */) {
   if (psp) {
     context->onShutdownPostSend();
+    if (RuntimeOption::EnableDebugger) {
+      Eval::Debugger::InterruptPSPEnded();
+    }
   }
   Eval::RequestEvalState::DestructObjects();
   if (shutdown) {
@@ -872,6 +923,7 @@ void hphp_session_exit() {
 }
 
 void hphp_process_exit() {
+  Eval::Debugger::Stop();
   Extension::ShutdownModules();
 }
 

@@ -652,6 +652,14 @@ users can use the same machine serving their own source files.
     StrictLevel = 1     # StrictBasic
     StrictFatal = false
 
+    # debugger
+    Debugger {
+      EnableDebugger = false
+      EnableDebuggerServer = false
+      Port = 8089
+      StartupDocument =
+    }
+
     # experimental, please ignore
     BytecodeInterpreter = false
     DumpBytecode = false

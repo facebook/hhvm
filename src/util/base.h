@@ -36,6 +36,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <poll.h>
 
 #include <vector>
 #include <string>
@@ -140,6 +141,7 @@ typedef hphp_hash_map<void*, void*, pointer_hash<void> > PointerMap;
 typedef hphp_hash_map<void*, int, pointer_hash<void> > PointerCounterMap;
 typedef hphp_hash_set<void*, pointer_hash<void> > PointerSet;
 
+typedef std::vector<std::string> StringVec;
 typedef std::vector<std::pair<std::string, std::string> > StringPairVec;
 typedef std::vector<StringPairVec> StringPairVecVec;
 
@@ -160,7 +162,9 @@ typedef std::vector<StringPairVec> StringPairVecVec;
   typedef __gnu_cxx::hash_map<std::string, classname ## Ptr,            \
     string_hash> StringTo ## classname ## PtrMap;                       \
   typedef __gnu_cxx::hash_map<std::string, classname ## PtrVec,         \
-    string_hash> StringTo ## classname ## PtrVecMap                     \
+    string_hash> StringTo ## classname ## PtrVecMap;                    \
+  typedef __gnu_cxx::hash_map<std::string, classname ## PtrSet,         \
+    string_hash> StringTo ## classname ## PtrSetMap;                    \
 
 #endif
 

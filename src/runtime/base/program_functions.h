@@ -27,6 +27,8 @@ namespace HPHP {
  * Main entry point of the entire program.
  */
 int execute_program(int argc, char **argv);
+void execute_command_line_begin(int argc, char **argv, int xhprof);
+void execute_command_line_end(int xhprof, bool coverage);
 
 /**
  * Setting up environment variables.

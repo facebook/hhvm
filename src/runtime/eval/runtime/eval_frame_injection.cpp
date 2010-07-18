@@ -18,6 +18,7 @@
 #include <runtime/eval/ast/construct.h>
 #include <runtime/eval/parser/parser.h>
 #include <runtime/eval/runtime/code_coverage.h>
+#include <runtime/eval/debugger/debugger.h>
 #include <runtime/base/runtime_option.h>
 
 namespace HPHP {
@@ -33,10 +34,13 @@ Array EvalFrameInjection::getArgs() {
 }
 
 void EvalFrameInjection::SetLine(const Construct *c) {
+  int line0 = c->loc()->line1; // TODO: fix parser to record line0
   int line1 = c->loc()->line1;
   ThreadInfo::s_threadInfo->m_top->line = line1;
+  if (RuntimeOption::EnableDebugger) {
+    Debugger::InterruptFileLine(c->loc()->file, line1);
+  }
   if (RuntimeOption::RecordCodeCoverage) {
-    int line0 = c->loc()->line1; // TODO: fix parser to record line0
     CodeCoverage::Record(c->loc()->file, line0, line1);
   }
 }
@@ -60,8 +64,6 @@ EvalFrameInjection::EvalStaticClassNameHelper::~EvalStaticClassNameHelper() {
   }
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
-

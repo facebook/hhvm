@@ -9,6 +9,7 @@ Displays the list of command line options with short descriptions.
 Specifies one of these execution modes,
 
 run: (default) directly executes the program from command line.
+debug: starts debugger.
 server: starts an HTTP server from command line.
 daemon: starts an HTTP server and runs it as a daemon.
 replay: replays a previously recorded HTTP request file.
@@ -33,6 +34,14 @@ Which port to start HTTP server on.
 
 Which port to start admin server that can take URL commands to perform
 adminstration, status queries, stats queries or debugging commands.
+
+= --debug-host
+
+When running "debug" mode, specifies which HPHPi server to attach to.
+
+= --debug-port
+
+When running "debug" mode, specifies which HPHPi server port to connect.
 
 = -f, --file
 

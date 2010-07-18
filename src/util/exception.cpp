@@ -53,7 +53,14 @@ Exception::~Exception() throw() {
 
 const char *Exception::what() const throw() {
   if (m_what.empty()) {
-    m_what = m_msg + "\n\n" + m_st.toString();
+    m_what = m_msg;
+    string st = m_st.toString();
+    if (!st.empty()) {
+      m_what += "\n\n";
+      m_what += st;
+    } else {
+      m_what += "\n";
+    }
   }
   return m_what.c_str();
 }

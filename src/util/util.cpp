@@ -38,13 +38,13 @@ void Util::split(char delimiter, const char *s, vector<string> &out,
   const char *p = s;
   for (; *p; p++) {
     if (*p == delimiter) {
-      if (!ignoreEmpty || p > start + 1) {
+      if (!ignoreEmpty || p > start) {
         out.push_back(string(start, p - start));
       }
       start = p + 1;
     }
   }
-  if (!ignoreEmpty || p > start + 1) {
+  if (!ignoreEmpty || p > start) {
     out.push_back(string(start, p - start));
   }
 }
@@ -130,7 +130,7 @@ static bool same(const char *file1, const char *file2) {
   }
 
   bool ret = false;
-  char buf1[8096];
+  char buf1[8192];
   char buf2[sizeof(buf1)];
   int n1;
   while ((n1 = fread(buf1, 1, sizeof(buf1), f1))) {

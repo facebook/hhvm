@@ -195,7 +195,7 @@ public:
 private:
   class OutputBuffer {
   public:
-    OutputBuffer() : oss(8096) {}
+    OutputBuffer() : oss(8192) {}
     StringBuffer oss;
     Variant handler;
   };

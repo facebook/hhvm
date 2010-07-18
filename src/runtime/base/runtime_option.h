@@ -280,6 +280,12 @@ public:
   static std::string SandboxConfFile;
   static std::map<std::string, std::string> SandboxServerVariables;
 
+  // Debugger options
+  static bool EnableDebugger;
+  static bool EnableDebuggerServer;
+  static int DebuggerServerPort;
+  static std::string DebuggerStartupDocument;
+
   // Mail options
   static std::string SendmailPath;
   static std::string MailForceExtraParameters;

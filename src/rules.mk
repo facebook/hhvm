@@ -222,6 +222,7 @@ CPPFLAGS += \
   -isystem $(EXT_DIR)/tbb/include \
   -isystem $(EXT_DIR)/libmcrypt/include \
   -isystem $(EXT_DIR)/libfbi/include \
+  -isystem $(EXT_DIR)/readline/include \
   -I $(PROJECT_ROOT)/src \
   -I $(PROJECT_ROOT)/src/system/gen \
 
@@ -250,7 +251,7 @@ endif
 ifndef NO_WALL
 CXXFLAGS += -Wall -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof
 ifeq ($(findstring g++, $(CXX)), g++)
-CXXFLAGS += -Wno-parentheses 
+CXXFLAGS += -Wno-parentheses
 endif
 endif
 
@@ -519,12 +520,15 @@ FBI_LIBS = $(EXT_DIR)/libfbi/lib/libfbi.a
 
 LDAP_LIBS = -lldap -llber
 
+READLINE_LIBS = $(EXT_DIR)/readline/lib/libreadline.a \
+	$(EXT_DIR)/readline/lib/libhistory.a -lcurses
+
 ALL_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \
 	$(MYSQL_LIBS) $(SQLITE_LIBS) $(MCC_LIBS) \
 	$(GD_LIBS) $(LIBXML_LIBS) $(FBML_LIBS) $(MBFL_LIBS) \
 	$(MCRYPT_LIBS) $(JEMALLOC_LIBS) $(GOOGLE_LIBS) $(ICU_LIBS) \
 	$(HTTP_LIBS) $(XHP_LIBS) $(TIME_LIBS) $(TBB_LIBS) $(FBI_LIBS) \
-	$(LDAP_LIBS) $(ORACLE_LIBS)
+	$(LDAP_LIBS) $(READLINE_LIBS) $(ORACLE_LIBS)
 
 LIB_PATHS = $(HPHP_LIB) \
   $(EXT_DIR)/libcurl/lib \
@@ -549,7 +553,8 @@ LIB_PATHS = $(HPHP_LIB) \
   $(EXT_DIR)/sqlite/lib \
   $(EXT_DIR)/tbb/lib \
   $(EXT_DIR)/libfbi/lib \
-  $(EXT_DIR)/jemalloc/lib
+  $(EXT_DIR)/jemalloc/lib \
+  $(EXT_DIR)/readline/lib \
 
 ###############################################################################
 # Dependencies

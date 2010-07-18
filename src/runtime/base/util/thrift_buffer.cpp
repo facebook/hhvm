@@ -3,7 +3,6 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
-   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,25 +14,23 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/ext/thrift_buffer.h>
+#include <runtime/base/util/thrift_buffer.h>
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/externals.h>
 
-#define BUFFER_SIZE 102400
 #define INVALID_DATA 1
+
+using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-ThriftBuffer::ThriftBuffer() : m_safe(false) {
-  m_buf = (char *)malloc(BUFFER_SIZE + 1);
+ThriftBuffer::ThriftBuffer(int size) : m_size(size), m_safe(false) {
+  m_buf = (char *)malloc(m_size + 1);
   if (!m_buf) throwOutOfMemory();
-  m_pEnd = m_buf + BUFFER_SIZE;
+  m_pEnd = m_buf + m_size;
   m_pSafe = m_pEnd - sizeof(int64) - 1;
   m_p = m_buf;
-}
-
-ThriftBuffer::ThriftBuffer(int) {
 }
 
 ThriftBuffer::~ThriftBuffer() {
@@ -45,7 +42,7 @@ void ThriftBuffer::reset(bool read) {
     m_pEnd = m_buf;
     m_safe = false;
   } else {
-    m_pEnd = m_buf + BUFFER_SIZE;
+    m_pEnd = m_buf + m_size;
   }
   m_pSafe = m_pEnd - sizeof(int64) - 1;
   m_p = m_buf;
@@ -60,8 +57,8 @@ void ThriftBuffer::write(CStrRef data) {
   if (m_p + len > m_pEnd) {
     flush();
   }
-  if (len > BUFFER_SIZE) {
-    flush(data);
+  if (len > m_size) {
+    flushImpl(data);
   } else {
     memcpy(m_p, data.data(), len);
     if ((m_p += len) > m_pSafe) flush();
@@ -72,11 +69,7 @@ void ThriftBuffer::flush() {
   *m_p = '\0';
   String data(m_buf, m_p - m_buf, AttachLiteral);
   m_p = m_buf;
-  flush(data);
-}
-
-void ThriftBuffer::flush(CStrRef data) {
-  m_xout->o_invoke("write", CREATE_VECTOR1(data), -1);
+  flushImpl(data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -95,9 +88,8 @@ void ThriftBuffer::read(char *data, int len) {
   len -= avail;
   data += avail;
 
-  Array args(CREATE_VECTOR1(BUFFER_SIZE));
   while (true) {
-    String ret = m_xin->o_invoke("read", args, -1).toString();
+    String ret = readImpl();
     if (ret.empty()) {
       Object e = create_object("TProtocolException",
                                CREATE_VECTOR2("unable to read enough bytes",
@@ -204,6 +196,35 @@ void ThriftBuffer::throwInvalidStringSize(int size) {
                            CREATE_VECTOR2(String(errbuf, CopyString),
                                           INVALID_DATA));
   throw e;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ThriftBuffer::read(std::string &data) {
+  String sdata;
+  read(sdata);
+  data = std::string(sdata.data(), sdata.size());
+}
+
+void ThriftBuffer::write(const std::string &data) {
+  write(String(data.data(), data.size(), AttachLiteral));
+}
+
+void ThriftBuffer::read(std::vector<std::string> &data) {
+  int32 size;
+  read(size);
+  data.resize(size);
+  for (int i = 0; i < size; i++) {
+    read(data[i]);
+  }
+}
+
+void ThriftBuffer::write(const std::vector<std::string> &data) {
+  int32 size = data.size();
+  write(size);
+  for (int i = 0; i < size; i++) {
+    write(data[i]);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

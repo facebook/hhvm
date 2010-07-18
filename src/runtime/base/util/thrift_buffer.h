@@ -3,7 +3,6 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
-   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -75,15 +74,8 @@ public:
    * Constructing with some initial size, subsequent allocation will double
    * existing size every round.
    */
-  ThriftBuffer();
-  ThriftBuffer(int); // only for hphp/main.cpp to load this class
+  ThriftBuffer(int size);
   ~ThriftBuffer();
-
-  // passing in input and output transport objects
-  void create(CObjRef xin, CObjRef xout) {
-    m_xin = xin;
-    m_xout = xout;
-  }
 
   void flush(); // write bytes to transport
   void reset(bool read); // get ready for reads or writes
@@ -177,18 +169,29 @@ public:
   void read(String &data) {
     int32 size;
     read(size);
-    if (size > 0 && ++size > 0) {
-      char *buf = (char*)malloc(size);
+    if (size > 0 && size + 1 > 0) {
+      char *buf = (char*)malloc(size + 1);
       if (!buf) throwOutOfMemory();
       read(buf, size);
       buf[size] = '\0';
       data = String(buf, size, AttachString);
-    } else {
+    } else if (size) {
       throwInvalidStringSize(size);
     }
   }
 
+  void read(std::string &data);
+  void write(const std::string &data);
+  void read(std::vector<std::string> &data);
+  void write(const std::vector<std::string> &data);
+
   void skip(int8 type);
+
+protected:
+  virtual String readImpl() = 0;
+  virtual void flushImpl(CStrRef data) = 0;
+
+  int   m_size;
 
 private:
   // disabling copy constructor and assignment
@@ -200,9 +203,7 @@ private:
   char *m_pEnd;
   bool  m_safe;
 
-  char  *m_buf;
-  Object m_xin;
-  Object m_xout;
+  char *m_buf;
 
   void flush(CStrRef data);
   void read(char *data, int len);

@@ -268,6 +268,11 @@ std::string RuntimeOption::SandboxHome;
 std::string RuntimeOption::SandboxConfFile;
 std::map<std::string, std::string> RuntimeOption::SandboxServerVariables;
 
+bool RuntimeOption::EnableDebugger = false;
+bool RuntimeOption::EnableDebuggerServer = false;
+int RuntimeOption::DebuggerServerPort = 8089;
+std::string RuntimeOption::DebuggerStartupDocument;
+
 std::string RuntimeOption::SendmailPath;
 std::string RuntimeOption::MailForceExtraParameters;
 
@@ -366,7 +371,7 @@ void RuntimeOption::Load(Hdf &config) {
       Logger::LogLevel = Logger::LogVerbose;
     }
     Logger::LogHeader = logger["Header"].getBool();
-    bool logInjectedStackTrace = logger["InjectedStackTrace"].getBool(false);
+    bool logInjectedStackTrace = logger["InjectedStackTrace"].getBool();
     if (logInjectedStackTrace) {
       Logger::SetTheLogger(new ExtendedLogger());
       ExtendedLogger::EnabledByDefault = true;
@@ -488,7 +493,7 @@ void RuntimeOption::Load(Hdf &config) {
 
     RequestBodyReadLimit = server["RequestBodyReadLimit"].getInt32(-1);
 
-    EnableSSL = server["EnableSSL"].getBool(false);
+    EnableSSL = server["EnableSSL"].getBool();
     SSLPort = server["SSLPort"].getInt16(443);
     SSLCertificateFile = server["SSLCertificateFile"].getString();
     SSLCertificateKeyFile = server["SSLCertificateKeyFile"].getString();
@@ -614,7 +619,7 @@ void RuntimeOption::Load(Hdf &config) {
     UploadTmpDir = upload["UploadTmpDir"].getString("/tmp");
     RuntimeOption::AllowedDirectories.push_back(UploadTmpDir);
     EnableFileUploads = upload["EnableFileUploads"].getBool(true);
-    EnableUploadProgress = upload["EnableUploadProgress"].getBool(false);
+    EnableUploadProgress = upload["EnableUploadProgress"].getBool();
     Rfc1867Freq = upload["Rfc1867Freq"].getInt32(256 * 1024);
     if (Rfc1867Freq < 0) Rfc1867Freq = 256 * 1024;
     Rfc1867Prefix = upload["Rfc1867Prefix"].getString("vupload_");
@@ -790,11 +795,18 @@ void RuntimeOption::Load(Hdf &config) {
   {
     Hdf eval = config["Eval"];
     EnableXHP = eval["EnableXHP"].getBool(true);
-    EnableStrict = eval["EnableStrict"].getBool(0);
+    EnableStrict = eval["EnableStrict"].getBool();
     StrictLevel = eval["StrictLevel"].getInt32(1); // StrictBasic
     StrictFatal = eval["StrictFatal"].getBool();
-    RecordCodeCoverage = eval["RecordCodeCoverage"].getBool(false);
+    RecordCodeCoverage = eval["RecordCodeCoverage"].getBool();
     CodeCoverageOutputFile = eval["CodeCoverageOutputFile"].getString();
+    {
+      Hdf debugger = eval["Debugger"];
+      EnableDebugger = debugger["EnableDebugger"].getBool();
+      EnableDebuggerServer = debugger["EnableDebuggerServer"].getBool();
+      DebuggerServerPort = debugger["Port"].getInt16(8089);
+      DebuggerStartupDocument = debugger["StartupDocument"].getString();
+    }
   }
   {
     Hdf sandbox = config["Sandbox"];

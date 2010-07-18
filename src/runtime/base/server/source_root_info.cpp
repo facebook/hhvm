@@ -19,6 +19,7 @@
 #include <runtime/base/preg.h>
 #include <runtime/base/server/http_request_handler.h>
 #include <runtime/base/server/transport.h>
+#include <runtime/eval/debugger/debugger.h>
 
 using namespace std;
 
@@ -123,6 +124,16 @@ void SourceRootInfo::setServerVariables(Variant &server) const {
     server.set(String(it->first),
                String(parseSandboxServerVariable(it->second)));
   }
+
+  // EvalDebugger needs these to associate debugger clients
+  server.set("HPHP_SANDBOX_USER", m_user);
+  server.set("HPHP_SANDBOX_NAME", m_sandbox);
+  server.set("HPHP_SANDBOX_PATH", m_path);
+  Eval::SandboxInfo sandbox;
+  sandbox.user = m_user.data();
+  sandbox.name = m_sandbox.data();
+  sandbox.path = m_path.data();
+  Eval::Debugger::RegisterSandbox(sandbox);
 }
 
 string SourceRootInfo::parseSandboxServerVariable(const string &format) const {

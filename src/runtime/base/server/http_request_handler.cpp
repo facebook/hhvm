@@ -30,6 +30,7 @@
 #include <runtime/base/server/request_uri.h>
 #include <runtime/base/server/http_protocol.h>
 #include <runtime/base/time/datetime.h>
+#include <runtime/eval/debugger/debugger.h>
 
 using namespace std;
 
@@ -278,6 +279,10 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   }
 
   if (ret) {
+    if (RuntimeOption::EnableDebugger) {
+      Eval::Debugger::InterruptRequestStarted();
+    }
+
     bool error = false;
     std::string errorMsg = "Internal Server Error";
     ret = hphp_invoke(context, file, false, Array(), null,
@@ -330,6 +335,10 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     } else {
       code = 404;
       transport->sendString("Not Found", 404);
+    }
+
+    if (RuntimeOption::EnableDebugger) {
+      Eval::Debugger::InterruptRequestEnded();
     }
   }
 

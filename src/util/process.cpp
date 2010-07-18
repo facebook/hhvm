@@ -30,6 +30,7 @@
 #include "base.h"
 #include "util.h"
 #include "async_func.h"
+#include "text_color.h"
 
 using namespace std;
 
@@ -78,7 +79,8 @@ void Process::InitProcessStatics() {
 }
 
 bool Process::Exec(const char *path, const char *argv[], const char *in,
-                   string &out, string *err /* = NULL */) {
+                   string &out, string *err /* = NULL */,
+                   bool color /* = false */) {
 
   int fdin = 0; int fdout = 0; int fderr = 0;
   int pid = Exec(path, argv, &fdin, &fdout, &fderr);
@@ -128,7 +130,13 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
           close(fdout);
           fdout = 0;
         } else {
-          out.append(buffer, e);
+          if (color && Util::s_stdout_color) {
+            out.append(Util::s_stdout_color);
+            out.append(buffer, e);
+            out.append(ANSI_COLOR_END);
+          } else {
+            out.append(buffer, e);
+          }
         }
       }
     }
@@ -140,7 +148,13 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
           close(fderr);
           fderr = 0;
         } else if (err) {
-          err->append(buffer, e);
+          if (color && Util::s_stdout_color) {
+            err->append(Util::s_stderr_color);
+            err->append(buffer, e);
+            err->append(ANSI_COLOR_END);
+          } else {
+            err->append(buffer, e);
+          }
         }
       }
     }

@@ -141,8 +141,8 @@ void StringData::assign(const char *data, int len, StringDataMode mode) {
 }
 
 void StringData::assign(SharedVariant *shared) {
+  ASSERT(!m_shared);
   ASSERT(shared);
-  releaseData();
   shared->incRef();
   m_shared = shared;
   m_data = m_shared->stringData();

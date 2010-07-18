@@ -101,7 +101,6 @@ class StringData {
   #endif
   void assign(const char *data, StringDataMode mode);
   void assign(const char *data, int len, StringDataMode mode);
-  void assign(SharedVariant *shared);
   void append(const char *s, int len);
   StringData *copy(bool sharedMemory = false) const;
 
@@ -202,6 +201,7 @@ class StringData {
   /**
    * Helpers.
    */
+  void assign(SharedVariant *shared);
   int numericCompare(const StringData *v2) const;
   void escalate(); // change to malloc-ed string
   void setChar(int offset, char ch);

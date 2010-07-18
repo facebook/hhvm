@@ -359,6 +359,7 @@ static int execute_command_line(ProgramOptions &po,
   process_cmd_arguments(argc, argv);
 
   Variant &server = g->gv__SERVER;
+  process_env_variables(server);
   server.set("DOCUMENT_ROOT", "");
   server.set("SCRIPT_FILENAME", argv[0]);
   server.set("SCRIPT_NAME", argv[0]);

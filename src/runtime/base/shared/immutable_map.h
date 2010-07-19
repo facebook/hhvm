@@ -35,12 +35,13 @@ class ThreadSharedVariant;
 class ImmutableMap {
 public:
   ImmutableMap(int num) : m_curPos(0) {
-    // TODO: consider a prime number sized hash table.
     if (num <= 0) {
       num = 1;
     }
-    m_hash.resize(num * 3 / 2, -1); // A larger number to avoid confliction
-    m_buckets.resize(num);
+    m_capacity = num;
+    m_hash = (int*)malloc(sizeof(int) * m_capacity);
+    for (int i = 0; i < m_capacity; i++) m_hash[i] = -1;
+    m_buckets = (Bucket*)malloc(sizeof(Bucket) * m_capacity);
   }
 
   virtual ~ImmutableMap();
@@ -69,8 +70,8 @@ public:
   }
 
   size_t getStructSize() {
-    size_t size = sizeof(ImmutableMap) + sizeof(Bucket) * m_buckets.size() +
-                  sizeof(int) * m_hash.size();
+    size_t size = sizeof(ImmutableMap) + sizeof(Bucket) * m_capacity +
+                  sizeof(int) * m_capacity;
     return size;
   }
 
@@ -83,10 +84,11 @@ private:
     ThreadSharedVariant *val;
   };
   /** index of the beginning of each hash chain */
-  std::vector<int> m_hash;
+  int *m_hash;
   /** buckets, stored in index order */
-  std::vector<Bucket> m_buckets;
+  Bucket* m_buckets;
   int m_curPos;
+  int m_capacity;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

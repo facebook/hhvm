@@ -218,6 +218,10 @@ std::string RuntimeOption::StatsXSLProxy;
 int RuntimeOption::StatsSlotDuration = 10 * 60; // 10 minutes
 int RuntimeOption::StatsMaxSlot = 12 * 6; // 12 hours
 
+bool RuntimeOption::EnableAPCSizeStats = false;
+bool RuntimeOption::EnableAPCSizeDetail = false;
+bool RuntimeOption::APCSizeCountPrime = false;
+
 int64 RuntimeOption::MaxRSS = 0;
 int64 RuntimeOption::MaxRSSPollingCycle = 0;
 int64 RuntimeOption::DropCacheCycle = 0;
@@ -796,6 +800,10 @@ void RuntimeOption::Load(Hdf &config) {
 
     StatsSlotDuration = stats["SlotDuration"].getInt32(10 * 60); // 10 minutes
     StatsMaxSlot = stats["MaxSlot"].getInt32(12 * 6); // 12 hours
+
+    EnableAPCSizeStats = stats["EnableAPCSizeStats"].getBool();
+    EnableAPCSizeDetail = stats["EnableAPCSizeDetail"].getBool();
+    APCSizeCountPrime = stats["APCSizeCountPrime"].getBool();
   }
   {
     config["ServerVariables"].get(ServerVariables);

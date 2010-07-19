@@ -29,6 +29,7 @@
 #include <runtime/base/shared/shared_store.h>
 #include <runtime/base/memory/leak_detectable.h>
 #include <runtime/ext/mysql_stats.h>
+#include <runtime/base/shared/shared_store_stats.h>
 
 #ifdef GOOGLE_CPU_PROFILER
 #include <google/profiler.h>
@@ -124,6 +125,11 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/stats.html:      show server stats in HTML\n"
         "    (same as /stats.xml)\n"
 
+        "/apc-ss:          get apc size stats\n"
+        "/apc-ss-keys:     get apc size break-down on keys\n"
+        "/apc-ss-dump:     dump the size info on each key to /tmp/APC_details\n"
+        "                  only valid when EnableAPCSizeDetail is true\n"
+
 #ifdef GOOGLE_CPU_PROFILER
         "/prof-cpu-on:     turn on CPU profiler\n"
         "/prof-cpu-off:    turn off CPU profiler\n"
@@ -210,6 +216,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "leak", 4) == 0 &&
         handleLeakRequest(cmd, transport)) {
+      break;
+    }
+    if (strncmp(cmd.c_str(), "apc-ss", 6) == 0 &&
+        handleAPCSizeRequest(cmd, transport)) {
       break;
     }
 #ifdef GOOGLE_TCMALLOC
@@ -664,6 +674,40 @@ bool AdminRequestHandler::handleLeakRequest(const std::string &cmd,
     return true;
   }
 
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// APC size profiling
+
+bool AdminRequestHandler::handleAPCSizeRequest (const std::string &cmd,
+                                                Transport *transport) {
+  if (!RuntimeOption::EnableAPCSizeStats &&
+      (cmd == "apc-ss" || cmd == "apc-ss-keys" || cmd == "apc-ss-dump")) {
+    transport->sendString("Not Enabled\n");
+    return true;
+  }
+  if (cmd == "apc-ss") {
+    std::string result = SharedStoreStats::report_basic();
+    transport->sendString(result);
+    return true;
+  }
+  if (cmd == "apc-ss-keys") {
+    std::string result = SharedStoreStats::report_keys();
+    transport->sendString(result);
+    return true;
+  }
+  if (cmd == "apc-ss-dump") {
+    if (!RuntimeOption::EnableAPCSizeDetail) {
+      transport->sendString("Not Enabled\n");
+    }
+    else if (SharedStoreStats::snapshot("/tmp/APC_details")) {
+      transport->sendString("Done\n");
+    } else {
+      transport->sendString("Failed\n");
+    }
+    return true;
+  }
   return false;
 }
 

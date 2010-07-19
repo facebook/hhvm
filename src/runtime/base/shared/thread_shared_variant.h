@@ -90,6 +90,8 @@ public:
   // implementing LeakDetectable
   virtual void dump(std::string &out);
 
+  virtual void getStats(SharedVariantStats *stats);
+
   StringData *getStringData() const {
     ASSERT(is(KindOfString));
     return m_data.str;

@@ -104,6 +104,9 @@ class ProcessSharedVariant : public SharedVariant {
 
   // implementing LeakDetectable
   virtual void dump(std::string &out);
+  virtual void getStats(SharedVariantStats* stats) {
+    // Not implement this because this class is not being used currently
+  }
 
  protected:
   union {

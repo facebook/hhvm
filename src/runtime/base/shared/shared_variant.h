@@ -29,6 +29,8 @@ namespace HPHP {
 
 class SharedMap;
 
+class SharedVariantStats;
+
 class SharedVariant
 #ifdef DEBUG_APC_LEAK
   : public LeakDetectable
@@ -73,6 +75,9 @@ public:
 
   int countReachable();
 
+  // recursively get stats from the SharedVariant
+  virtual void getStats(SharedVariantStats *stat) = 0;
+
   // whether it is an object, or an array that recursively contains an object
   // or an array with circular reference
   bool shouldCache() { return m_shouldCache; }
@@ -86,6 +91,35 @@ public:
   // only for countReachable() return NULL if it is vector and key is not
   // SharedVariant
   virtual SharedVariant* getKeySV(ssize_t pos) const = 0;
+};
+
+class SharedVariantStats {
+ public:
+  int64 dataSize;
+  int64 dataTotalSize;
+  int32 variantCount;
+
+  void initStats() {
+    variantCount = 0;
+    dataSize = 0;
+    dataTotalSize = 0;
+  }
+
+  SharedVariantStats() {
+    initStats();
+  }
+
+  void addChildStats(const SharedVariantStats *childStats) {
+    dataSize += childStats->dataSize;
+    dataTotalSize += childStats->dataTotalSize;
+    variantCount += childStats->variantCount;
+  }
+
+  void removeChildStats(const SharedVariantStats *childStats) {
+    dataSize -= childStats->dataSize;
+    dataTotalSize -= childStats->dataTotalSize;
+    variantCount -= childStats->variantCount;
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

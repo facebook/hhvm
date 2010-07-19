@@ -321,5 +321,61 @@ ThreadSharedVariant *ThreadSharedVariantLockedRefs::createAnother
   return new ThreadSharedVariantLockedRefs(source, serialized, m_lock, inner);
 }
 
+void ThreadSharedVariant::getStats(SharedVariantStats *stats) {
+  stats->initStats();
+  stats->variantCount = 1;
+  switch (m_type) {
+  case KindOfBoolean:
+  case KindOfInt64:
+    stats->dataSize = sizeof(m_data.num);
+    stats->dataTotalSize = sizeof(ThreadSharedVariant);
+    break;
+  case KindOfDouble:
+    stats->dataSize = sizeof(m_data.dbl);
+    stats->dataTotalSize = sizeof(ThreadSharedVariant);
+    break;
+  case KindOfString:
+  case KindOfObject:
+    if (m_data.str->isStatic()) {
+      stats->dataSize = 0;
+      stats->dataTotalSize = sizeof(ThreadSharedVariant);
+      break;
+    }
+    stats->dataSize = m_data.str->size();
+    stats->dataTotalSize = sizeof(ThreadSharedVariant) + sizeof(StringData) +
+                           stats->dataSize;
+    break;
+  default:
+    ASSERT(is(KindOfArray));
+    if (m_serializedArray) {
+      stats->dataSize = m_data.str->size();
+      stats->dataTotalSize = sizeof(ThreadSharedVariant) + sizeof(StringData) +
+                             stats->dataSize;
+      break;
+    }
+    if (m_isVector) {
+      stats->dataTotalSize = sizeof(ThreadSharedVariant) + sizeof(VectorData);
+      stats->dataTotalSize += sizeof(ThreadSharedVariant*) * m_data.vec->size;
+      for (size_t i = 0; i < m_data.vec->size; i++) {
+        ThreadSharedVariant *v = m_data.vec->vals[i];
+        SharedVariantStats childStats;
+        v->getStats(&childStats);
+        stats->addChildStats(&childStats);
+      }
+    } else {
+      ImmutableMap *map = m_data.map;
+      stats->dataTotalSize = sizeof(ThreadSharedVariant) + map->getStructSize();
+      for (int i = 0; i < map->size(); i++) {
+        SharedVariantStats childStats;
+        map->getKeyIndex(i)->getStats(&childStats);
+        stats->addChildStats(&childStats);
+        map->getValIndex(i)->getStats(&childStats);
+        stats->addChildStats(&childStats);
+      }
+    }
+    break;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

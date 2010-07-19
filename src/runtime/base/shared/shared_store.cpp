@@ -25,6 +25,7 @@
 #include <util/lfu_table.h>
 #include <tbb/concurrent_hash_map.h>
 #include <queue>
+#include <runtime/base/shared/shared_store_stats.h>
 
 using namespace std;
 using namespace boost;
@@ -33,7 +34,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 size_t SharedStore::s_lockCount = 10000;
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // LockedSharedStore
@@ -607,6 +607,7 @@ class ConcurrentTableSharedStore : public SharedStore,
                                    private ThreadSharedVariantFactory {
 public:
   ConcurrentTableSharedStore(int id) : SharedStore(id), m_purgeCounter(0) {}
+
   virtual int size() {
     return m_vars.size();
   }
@@ -660,6 +661,9 @@ protected:
 
   virtual void clear() {
     WriteLock l(m_lock);
+    if (RuntimeOption::EnableAPCSizeStats) {
+      SharedStoreStats::onClear();
+    }
     for (Map::iterator iter = m_vars.begin(); iter != m_vars.end();
          ++iter) {
       iter->second.var->decRef();
@@ -682,6 +686,9 @@ protected:
     if (m_vars.find(acc, key.data())) {
       if (expired && !acc->second.expired()) {
         return false;
+      }
+      if (RuntimeOption::EnableAPCSizeStats) {
+        SharedStoreStats::onDelete(key.get(), acc->second.var, false);
       }
       eraseAcc(acc);
       return true;
@@ -942,6 +949,9 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
     if (present) {
       free((void *)kcp);
       if (overwrite || sval->expired()) {
+        if (RuntimeOption::EnableAPCSizeStats) {
+          SharedStoreStats::onDelete(key.get(), sval->var, true);
+        }
         sval->var->decRef();
       } else {
         var->decRef();
@@ -950,6 +960,9 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
     }
     sval->set(var, ttl);
     expiry = sval->expiry;
+    if (RuntimeOption::EnableAPCSizeStats) {
+      SharedStoreStats::onStore(key.get(), var, ttl);
+    }
   }
   if (RuntimeOption::ApcExpireOnSets) {
     if (ttl) {
@@ -1044,6 +1057,11 @@ void ConcurrentTableSharedStore::prime
     const char *copy = strdup(item.key);
     m_vars.insert(acc, copy);
     acc->second.set(item.value, 0);
+    if (RuntimeOption::EnableAPCSizeStats &&
+        RuntimeOption::APCSizeCountPrime) {
+      StringData sd(copy);
+      SharedStoreStats::onStore(&sd, item.value, 0);
+    }
   }
 }
 

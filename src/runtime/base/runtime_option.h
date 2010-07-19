@@ -217,6 +217,10 @@ public:
   static int StatsSlotDuration;
   static int StatsMaxSlot;
 
+  static bool EnableAPCSizeStats;
+  static bool EnableAPCSizeDetail;
+  static bool APCSizeCountPrime;
+
   static int64 MaxRSS;
   static int64 MaxRSSPollingCycle;
   static int64 DropCacheCycle;

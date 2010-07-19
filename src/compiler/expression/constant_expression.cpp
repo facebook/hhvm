@@ -151,6 +151,7 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultPtr ar) {
           exp->setComment(getText());
           Option::FlAnnotate = annotate;
           exp->setLocation(getLocation());
+          m_valid = true;
           return exp;
         } else if (value->is(Expression::KindOfConstantExpression)) {
           // inline the value
@@ -161,6 +162,7 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultPtr ar) {
           exp->setComment(getText());
           Option::FlAnnotate = annotate;
           exp->setLocation(getLocation());
+          m_valid = true;
           return exp;
         }
       }

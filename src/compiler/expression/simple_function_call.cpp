@@ -771,6 +771,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       }
       if (m_params) {
         m_params->inferAndCheck(ar, NEW_TYPE(Some), false);
+        m_params->markParams(false);
       }
       return checkTypesImpl(ar, type, Type::Variant, coerce);
     }
@@ -827,13 +828,6 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     return checkTypesImpl(ar, type, Type::Variant, coerce);
   }
   m_builtinFunction = (!func->isUserFunction() || func->isSepExtension());
-
-  if (m_redeclared) {
-    if (m_params) {
-      m_params->inferAndCheck(ar, NEW_TYPE(Some), false);
-    }
-    return checkTypesImpl(ar, type, type, coerce);
-  }
 
   CHECK_HOOK(beforeSimpleFunctionCallCheck);
 

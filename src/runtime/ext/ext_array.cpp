@@ -449,10 +449,6 @@ int f_count(CVarRef var, bool recursive /* = false */) {
       Object obj = var.toObject();
       if (obj.instanceof("countable")) {
         return obj->o_invoke_few_args("count", -1, 0);
-      } else if (recursive) {
-        return php_count_recursive(var.toArray());
-      } else {
-        return var.toArray().getArrayData()->size();
       }
     }
     break;

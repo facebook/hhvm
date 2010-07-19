@@ -176,7 +176,8 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
     TypePtr tp;
     if (m_redeclared) {
       p = 0;
-      BOOST_FOREACH(ClassScopePtr clsr, ar->findClasses(m_className)) {
+      BOOST_FOREACH(ClassScopePtr clsr,
+                    ar->findRedeclaredClasses(m_className)) {
         int p1;
         clsr->checkStatic(name, type, coerce, ar, self, p1);
         p |= p1;

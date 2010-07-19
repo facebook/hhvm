@@ -256,7 +256,8 @@ ClassScopePtr AnalysisResult::findClass(const std::string &name,
   return ClassScopePtr();
 }
 
-const ClassScopePtrVec &AnalysisResult::findClasses(const std::string &name) {
+const ClassScopePtrVec &AnalysisResult::findRedeclaredClasses
+(const std::string &name) {
   ASSERT(name == Util::toLower(name));
 
   StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.find(name);
@@ -266,6 +267,18 @@ const ClassScopePtrVec &AnalysisResult::findClasses(const std::string &name) {
     return empty;
   }
   return iter->second;
+}
+
+ClassScopePtrVec AnalysisResult::findClasses(const std::string &name) {
+  ASSERT(name == Util::toLower(name));
+
+  StringToClassScopePtrMap::const_iterator sysIter =
+    m_systemClasses.find(name);
+  if (sysIter != m_systemClasses.end()) {
+    return ClassScopePtrVec(1, sysIter->second);
+  }
+
+  return findRedeclaredClasses(name);
 }
 
 bool AnalysisResult::classMemberExists(const std::string &name,

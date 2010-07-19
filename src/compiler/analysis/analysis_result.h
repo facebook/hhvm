@@ -287,7 +287,15 @@ public:
   ClassScopePtr resolveClass(std::string &className);
   ClassScopePtr findClass(const std::string &className,
                           FindClassBy by = ClassName);
-  const ClassScopePtrVec &findClasses(const std::string &className);
+  /**
+   * Find all the redeclared classes by the name, excluding system classes.
+   * Note that system classes cannot be redeclared.
+   */
+  const ClassScopePtrVec &findRedeclaredClasses(const std::string &className);
+  /**
+   * Find all the classes by the name, including system classes.
+   */
+  ClassScopePtrVec findClasses(const std::string &className);
   bool classMemberExists(const std::string &name, FindClassBy by);
   ClassScopePtr findExactClass(const std::string &name);
   bool checkClassPresent(const std::string &name);

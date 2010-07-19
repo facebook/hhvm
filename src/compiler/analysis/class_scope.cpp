@@ -115,7 +115,7 @@ int ClassScope::implementsArrayAccess(AnalysisResultPtr ar) {
 
   if (s && !ret) {
     int yes = 0, no = 0;
-    const ClassScopePtrVec &classes = ar->findClasses(m_parent);
+    ClassScopePtrVec classes = ar->findClasses(m_parent);
     BOOST_FOREACH(ClassScopePtr cls, classes) {
       int a = cls->implementsArrayAccess(ar);
       if (a < 0) {
@@ -154,7 +154,7 @@ int ClassScope::implementsAccessor(AnalysisResultPtr ar, const char *name) {
 
   if (!m_parent.empty() && !ret) {
     int yes = 0, no = 0;
-    const ClassScopePtrVec &classes = ar->findClasses(m_parent);
+    ClassScopePtrVec classes = ar->findClasses(m_parent);
     BOOST_FOREACH(ClassScopePtr cls, classes) {
       int a = cls->implementsAccessor(ar, name);
       if (a < 0) {
@@ -195,7 +195,7 @@ void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_string_set &seen) {
     }
     bases.insert(base);
 
-    const ClassScopePtrVec &parents = ar->findClasses(base);
+    ClassScopePtrVec parents = ar->findClasses(base);
     for (unsigned int j = 0; j < parents.size(); j++) {
       parents[j]->checkDerivation(ar, seen);
     }
@@ -242,7 +242,7 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
       if (super->isRedeclaring()) {
         if (base == m_parent) {
           if (forInvoke) continue;
-          const ClassScopePtrVec &classes = ar->findClasses(m_parent);
+          const ClassScopePtrVec &classes = ar->findRedeclaredClasses(m_parent);
           StringToFunctionScopePtrMap pristine(funcs);
           BOOST_FOREACH(ClassScopePtr cls, classes) {
             StringToFunctionScopePtrMap cur(pristine);
@@ -412,7 +412,7 @@ void ClassScope::setStaticDynamic(AnalysisResultPtr ar) {
   }
   if (!m_parent.empty()) {
     if (derivesFromRedeclaring() == DirectFromRedeclared) {
-      const ClassScopePtrVec &parents = ar->findClasses(m_parent);
+      const ClassScopePtrVec &parents = ar->findRedeclaredClasses(m_parent);
       BOOST_FOREACH(ClassScopePtr cl, parents) {
         cl->setStaticDynamic(ar);
       }
@@ -434,7 +434,7 @@ void ClassScope::setDynamic(AnalysisResultPtr ar, const std::string &name) {
     }
   } else if (!m_parent.empty()) {
     if (derivesFromRedeclaring() == DirectFromRedeclared) {
-      const ClassScopePtrVec &parents = ar->findClasses(m_parent);
+      const ClassScopePtrVec &parents = ar->findRedeclaredClasses(m_parent);
       BOOST_FOREACH(ClassScopePtr cl, parents) {
         cl->setDynamic(ar, name);
       }
@@ -892,7 +892,7 @@ void ClassScope::getRootParents(AnalysisResultPtr ar,
   if (m_parent.empty()) {
     roots.push_back(curClass);
   } else {
-    const ClassScopePtrVec &parents = ar->findClasses(m_parent);
+    ClassScopePtrVec parents = ar->findRedeclaredClasses(m_parent);
     for (unsigned int i = 0; i < parents.size(); i++) {
       ClassScopePtr cls = parents[i];
       if (methodName.empty() ||

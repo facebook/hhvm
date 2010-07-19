@@ -378,12 +378,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
           uint64 hash = hash_string(propName);
           if (useGetThis) cg_printf("GET_THIS_DOT()");
           cg_printf("%s(", func.c_str());
-          int stringId = cg.checkLiteralString(propName, ar);
-          if (stringId >= 0) {
-            cg_printf("LITSTR(%d, \"%s\")", stringId, propName);
-          } else {
-            cg_printf("\"%s\"", propName);
-          }
+          cg_printString(propName, ar);
           cg_printf(", 0x%016llXLL)", hash);
         }
       } else {
@@ -412,12 +407,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       }
       uint64 hash = hash_string(propName);
       cg_printf("%s(", func.c_str());
-      int stringId = cg.checkLiteralString(propName, ar);
-      if (stringId >= 0) {
-        cg_printf("LITSTR(%d, \"%s\")", stringId, propName);
-      } else {
-        cg_printf("\"%s\"", propName);
-      }
+      cg_printString(propName, ar);
       cg_printf(", 0x%016llXLL%s)", hash, error);
     }
   } else {

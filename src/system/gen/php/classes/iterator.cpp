@@ -60,8 +60,8 @@ Variant &c_arrayiterator::os_lval(const char *s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_arrayiterator
 void c_arrayiterator::o_get(Array &props) const {
-  if (isInitialized(m_arr)) props.set(String("\0arrayiterator\0arr", 18, CopyString), m_arr.isReferenced() ? ref(m_arr) : m_arr, 0x6CDE66253326681DLL, true);
-  if (isInitialized(m_flags)) props.set(String("\0arrayiterator\0flags", 20, CopyString), m_flags.isReferenced() ? ref(m_flags) : m_flags, 0x644DF75C0CB1D76BLL, true);
+  if (isInitialized(m_arr)) props.set(String("\000arrayiterator\000arr", 18, AttachLiteral), m_arr.isReferenced() ? ref(m_arr) : m_arr, 0x6CDE66253326681DLL, true);
+  if (isInitialized(m_flags)) props.set(String("\000arrayiterator\000flags", 20, AttachLiteral), m_flags.isReferenced() ? ref(m_flags) : m_flags, 0x644DF75C0CB1D76BLL, true);
   c_ObjectData::o_get(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_arrayiterator
@@ -1103,7 +1103,7 @@ Variant &c_appenditerator::os_lval(const char *s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_appenditerator
 void c_appenditerator::o_get(Array &props) const {
-  if (isInitialized(m_iterators)) props.set(String("\0appenditerator\0iterators", 25, CopyString), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, 0x370B757E55B5993DLL, true);
+  if (isInitialized(m_iterators)) props.set(String("\000appenditerator\000iterators", 25, AttachLiteral), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, 0x370B757E55B5993DLL, true);
   c_ObjectData::o_get(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_appenditerator

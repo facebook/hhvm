@@ -1474,7 +1474,6 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_GETARRAY_%s", cls);
   cg_indentBegin("void %s%s::%sget(Array &props) const {\n",
                  Option::ClassPrefix, cls, Option::ObjectPrefix);
-  string zero("\\0");
   bool empty = true;
   for (unsigned int i = 0; i < m_symbols.size(); i++) {
     bool priv = isPrivate(m_symbols[i]);
@@ -1485,35 +1484,23 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
     if (!isStatic(s)) {
       empty = false;
       if (priv) {
-        string pname = '\0' + m_blockScope.getName() + '\0' + prop;
-        prehash = hash_string(pname.c_str(), pname.length());
-        prop = zero + m_blockScope.getName() + zero + prop;
-        size_t ps = prop.size() - 2;
-        prop = string("String(\"") + prop;
-        prop += "\", ";
-        prop += lexical_cast<string>(ps);
-        prop += ", CopyString)"; // Copy is necessary because it's binary
-      } else {
-        int stringId = cg.checkLiteralString(prop, ar);
-        if (stringId >= 0) {
-          prop = "LITSTR(" + lexical_cast<string>(stringId) + ", \"" +
-                 prop + "\")";
-        } else {
-          prop = string("\"") + prop + "\"";
-        }
+        prop = '\0' + m_blockScope.getName() + '\0' + prop;
+        prehash = hash_string(prop.c_str(), prop.length());
       }
       if (getFinalType(s)->is(Type::KindOfVariant)) {
-        cg_printf("if (isInitialized(%s%s)) props.set(%s, "
-                  "%s%s.isReferenced() ? ref(%s%s) : %s%s, "
+        cg_printf("if (isInitialized(%s%s)) props.set(",
+                  Option::PropertyPrefix, s);
+        cg_printString(prop, ar);
+        cg_printf(", %s%s.isReferenced() ? ref(%s%s) : %s%s, "
                   "0x%016llXLL, true);\n",
-                  Option::PropertyPrefix, s,
-                  prop.c_str(),
                   Option::PropertyPrefix, s, Option::PropertyPrefix, s,
                   Option::PropertyPrefix, s,
                   prehash);
       } else {
-        cg_printf("props.set(%s, %s%s, 0x%016llXLL, true);\n",
-                  prop.c_str(), Option::PropertyPrefix, s, prehash);
+        cg_printf("props.set(");
+        cg_printString(prop, ar);
+        cg_printf(", %s%s, 0x%016llXLL, true);\n",
+                  Option::PropertyPrefix, s, prehash);
       }
     }
   }

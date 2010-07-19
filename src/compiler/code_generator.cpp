@@ -409,3 +409,18 @@ int CodeGenerator::checkLiteralString(const std::string &str,
   }
   return -1;
 }
+
+void CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
+                                bool staticWrapper /* = false */) {
+  int stringId = checkLiteralString(str, ar);
+  bool isBinary = false;
+  string escaped = escapeLabel(str, &isBinary);
+  if (stringId >= 0) {
+    printf("LITSTR(%d, \"%s\")", stringId, escaped.c_str());
+  } else if (isBinary) {
+    if (staticWrapper) printf("Static");
+    printf("String(\"%s\", %d, AttachLiteral)", escaped.c_str(), str.length());
+  } else {
+    printf("\"%s\"", escaped.c_str());
+  }
+}

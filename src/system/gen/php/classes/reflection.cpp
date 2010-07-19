@@ -2419,7 +2419,7 @@ Variant &c_reflectionclass::os_lval(const char *s, int64 hash) {
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionclass
 void c_reflectionclass::o_get(Array &props) const {
   if (isInitialized(m_name)) props.set("name", m_name.isReferenced() ? ref(m_name) : m_name, 0x0BCDB293DC3DBDDCLL, true);
-  if (isInitialized(m_info)) props.set(String("\0reflectionclass\0info", 21, CopyString), m_info.isReferenced() ? ref(m_info) : m_info, 0x76CD1386A6B652C3LL, true);
+  if (isInitialized(m_info)) props.set(String("\000reflectionclass\000info", 21, AttachLiteral), m_info.isReferenced() ? ref(m_info) : m_info, 0x76CD1386A6B652C3LL, true);
   c_ObjectData::o_get(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionclass
@@ -4605,8 +4605,8 @@ Variant &c_reflectionextension::os_lval(const char *s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionextension
 void c_reflectionextension::o_get(Array &props) const {
-  if (isInitialized(m_name)) props.set(String("\0reflectionextension\0name", 25, CopyString), m_name.isReferenced() ? ref(m_name) : m_name, 0x19A2EB7C8F3C0D32LL, true);
-  if (isInitialized(m_info)) props.set(String("\0reflectionextension\0info", 25, CopyString), m_info.isReferenced() ? ref(m_info) : m_info, 0x63734519071A4FA3LL, true);
+  if (isInitialized(m_name)) props.set(String("\000reflectionextension\000name", 25, AttachLiteral), m_name.isReferenced() ? ref(m_name) : m_name, 0x19A2EB7C8F3C0D32LL, true);
+  if (isInitialized(m_info)) props.set(String("\000reflectionextension\000info", 25, AttachLiteral), m_info.isReferenced() ? ref(m_info) : m_info, 0x63734519071A4FA3LL, true);
   c_ObjectData::o_get(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionextension

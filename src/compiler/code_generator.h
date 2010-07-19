@@ -195,6 +195,8 @@ public:
   void translatePredefined(bool flag) { m_translatePredefined = flag; }
 
   int checkLiteralString(const std::string &str, AnalysisResultPtr ar);
+  void printString(const std::string &str, AnalysisResultPtr ar,
+                   bool staticWrapper = false);
 
 private:
   std::string m_filename;
@@ -237,6 +239,7 @@ private:
 #define cg_indentEnd FLANN(cg,indentEnd,"")
 #define m_cg_indentEnd FLANN(m_cg,indentEnd,"")
 #define cg_printInclude FLANN(cg,printInclude,"\n")
+#define cg_printString FLANN(cg,printString,"")
 
 ///////////////////////////////////////////////////////////////////////////////
 }

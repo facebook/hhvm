@@ -429,21 +429,11 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
     ASSERT(m_quoted); // fall through
   case T_STRING: {
     if (m_quoted) {
-      bool hasEmbeddedNull = false;
-      string output = getCPPLiteralString(cg, &hasEmbeddedNull);
-      if (hasEmbeddedNull) {
-        char length[20];
-        snprintf(length, sizeof(length), "%ld", m_value.length());
-        bool constant =
-          (cg.getContext() == CodeGenerator::CppConstantsDecl) ||
-          (cg.getContext() == CodeGenerator::CppClassConstantsImpl);
-        output = // e.g., "a\0b" => String("a\0b", 3, AttachLiteral)
-          string(constant ? "Static" : "") +
-          string("String(") + output + string(", ") +
-          string(length) +
-          string(constant ? ")" : ", AttachLiteral)");
-      }
-      cg_printf("%s", output.c_str());
+      string output = getLiteralString();
+      bool constant =
+        (cg.getContext() == CodeGenerator::CppConstantsDecl) ||
+        (cg.getContext() == CodeGenerator::CppClassConstantsImpl);
+      cg_printString(output, ar, constant);
     } else {
       cg_printf("%s", m_value.c_str());
     }
@@ -452,7 +442,7 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
   case T_CLASS_C:
   case T_METHOD_C:
   case T_FUNC_C:
-    cg_printf("\"%s\"", m_translated.c_str());
+    cg_printString(m_translated, ar);
     break;
   default:
     ASSERT(false);
@@ -467,15 +457,7 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_CLASS_C:
   case T_METHOD_C:
   case T_FUNC_C: {
-    int stringId;
-    if (m_quoted &&
-        (stringId = cg.checkLiteralString(getLiteralString(), ar)) >= 0) {
-      cg_printf("LITSTR(%d, ", stringId);
-      outputCPPString(cg, ar);
-      cg_printf(")");
-    } else {
-      outputCPPString(cg, ar);
-    }
+    outputCPPString(cg, ar);
     break;
   }
   case T_LINE:

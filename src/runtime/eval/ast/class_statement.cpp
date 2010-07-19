@@ -661,55 +661,22 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
                                 "(%s)",
                                 name().c_str(), parent->name().c_str());
     }
-    if (getModifiers() & (Interface|Abstract)) return;
 
     // checking against parent methods
     if (parent) {
-      for (vector<MethodStatementPtr>::const_iterator it =
-             m_methodsVec.begin(); it != m_methodsVec.end(); ++it) {
-        const MethodStatement *m =
-          parent->findMethod((*it)->name().c_str(), true);
-        if (m == NULL) continue;
-
-        int tmod = (*it)->getModifiers();
-        int pmod = m->getModifiers();
-
-        if ((tmod & Static) && !(pmod & Static)) {
-          raise_error("Cannot make non static method %s::%s() static in "
-                      "class %s in %s on line %d",
-                      parent->name().c_str(), m->name().c_str(),
-                      m_name.c_str(), (*it)->loc()->file, (*it)->loc()->line1);
-        }
-
-        if (!(tmod & Static) && (pmod & Static)) {
-          raise_error("Cannot make static method %s::%s() non static in "
-                      "class %s in %s on line %d",
-                      parent->name().c_str(), m->name().c_str(),
-                      m_name.c_str(), (*it)->loc()->file, (*it)->loc()->line1);
-        }
-
-        if (tmod & Abstract) {
-          if (!(pmod & Abstract)) {
-            raise_error("Cannot make non abstract method %s::%s() abstract in "
-                        "class %s in %s on line %d",
-                        parent->name().c_str(), m->name().c_str(),
-                        m_name.c_str(), (*it)->loc()->file,
-                        (*it)->loc()->line1);
-          }
-
-          if (pmod & Abstract) {
-            raise_error("Cannot re-declare abstract method %s::%s() abstract "
-                        "in class %s in %s on line %d",
-                        parent->name().c_str(), m->name().c_str(),
-                        m_name.c_str(), (*it)->loc()->file,
-                        (*it)->loc()->line1);
-          }
-        }
+      parentMethodCheck(parent);
+    }
+    for (vector<string>::const_iterator it = m_basesVec.begin();
+        it != m_basesVec.end(); ++it) {
+      const ClassStatement *iface = RequestEvalState::findClass(it->c_str());
+      if (iface) {
+        parentMethodCheck(iface);
       }
     }
 
     cls = this;
   }
+  if (getModifiers() & (Interface|Abstract)) return;
 
   if (parent) {
     parent->semanticCheck(cls);
@@ -721,6 +688,52 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
     const ClassStatement *iface = RequestEvalState::findClass(it->c_str());
     if (iface) {
       iface->semanticCheck(cls);
+    }
+  }
+}
+
+void ClassStatement::parentMethodCheck(const ClassStatement *parent) const {
+  bool iface = getModifiers() & Interface;
+  bool ifaceParent = parent->getModifiers() & Interface;
+  for (vector<MethodStatementPtr>::const_iterator it =
+      m_methodsVec.begin(); it != m_methodsVec.end(); ++it) {
+    const MethodStatement *m =
+      parent->findMethod((*it)->name().c_str(), true);
+    if (m == NULL) continue;
+
+    int tmod = (*it)->getModifiers();
+    int pmod = m->getModifiers();
+
+    if ((tmod & Static) && !(pmod & Static)) {
+      raise_error("Cannot make non static method %s::%s() static in "
+          "class %s in %s on line %d",
+          parent->name().c_str(), m->name().c_str(),
+          m_name.c_str(), (*it)->loc()->file, (*it)->loc()->line1);
+    }
+
+    if (!(tmod & Static) && (pmod & Static)) {
+      raise_error("Cannot make static method %s::%s() non static in "
+          "class %s in %s on line %d",
+          parent->name().c_str(), m->name().c_str(),
+          m_name.c_str(), (*it)->loc()->file, (*it)->loc()->line1);
+    }
+
+    if (tmod & Abstract || iface) {
+      if (!(pmod & Abstract) && (tmod & Abstract)) {
+        raise_error("Cannot make non abstract method %s::%s() abstract in "
+            "class %s in %s on line %d",
+            parent->name().c_str(), m->name().c_str(),
+            m_name.c_str(), (*it)->loc()->file,
+            (*it)->loc()->line1);
+      }
+
+      if (pmod & Abstract || ifaceParent) {
+        raise_error("Cannot re-declare abstract method %s::%s() abstract "
+            "in class %s in %s on line %d",
+            parent->name().c_str(), m->name().c_str(),
+            m_name.c_str(), (*it)->loc()->file,
+            (*it)->loc()->line1);
+      }
     }
   }
 }

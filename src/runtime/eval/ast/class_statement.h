@@ -145,6 +145,7 @@ protected:
   bool m_delayDeclaration;
 
   void loadProperties(ClassInfoEvaled &info) const;
+  void parentMethodCheck(const ClassStatement *parent) const;
 
 };
 

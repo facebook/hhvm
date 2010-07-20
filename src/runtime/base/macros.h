@@ -454,10 +454,11 @@ do { \
   } while (0)
 
 // causes a division by zero error at compile time if the assertion fails
+// NOTE: use __LINE__, instead of __COUNTER__, for better compatibility
 #define CT_CONCAT_HELPER(a, b) a##b
 #define CT_CONCAT(a, b) CT_CONCAT_HELPER(a, b)
 #define CT_ASSERT(cond) \
-  enum { CT_CONCAT(compile_time_assert_, __COUNTER__) = 1/(!!(cond)) }
+  enum { CT_CONCAT(compile_time_assert_, __LINE__) = 1/(!!(cond)) }
 
 #define CT_ASSERT_DESCENDENT_OF_OBJECTDATA(T)   \
   do {                                          \

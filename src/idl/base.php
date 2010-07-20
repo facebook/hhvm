@@ -418,7 +418,7 @@ function generateFuncArgsCall($func, $f, $forceRef = false) {
 }
 
 function generateFuncCPPHeader($func, $f, $method = false, $forceref = false,
-                               $static = false) {
+                               $static = false, $class = false) {
   fprintf($f, '%s%s %s_%s', $static ? 'static ' : '',
           typename($func['return']), $method ? ($static ? "ti" : "t") : "f",
           $func['name']);
@@ -427,8 +427,10 @@ function generateFuncCPPHeader($func, $f, $method = false, $forceref = false,
 
   if ($static && $method) {
     fprintf($f, '  public: static %s t_%s', typename($func['return']), $func['name']);
-    generateFuncArgsCPPHeader($func, $f, $forceref, $static);
-    fprintf($f, " {\n    return ti_%s(\"%s\"", $func['name'], $func['name']);
+    // for the actual static call there is no class name needed
+    generateFuncArgsCPPHeader($func, $f, $forceref, false);
+    fprintf($f, " {\n    return ti_%s(\"%s\"", $func['name'],
+            $class ? strtolower($class['name']) : $func['name']);
     generateFuncArgsCall($func, $f, $forceref);
     fprintf($f, ");\n  }\n");
   }
@@ -569,7 +571,7 @@ function generateMethodCPPHeader($method, $class, $f) {
   generateFuncCPPHeader($method, $f, true,
                         $method['name'] != "__construct" &&
                         strpos($method['name'], "__") === 0,
-                        $method['static']);
+                        $method['static'], $class);
   if ($method['name'] == "__call") {
     fprintf($f, "  public: Variant doCall(Variant v_name, ");
     fprintf($f, "Variant v_arguments, bool fatal);\n");

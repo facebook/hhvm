@@ -52,12 +52,12 @@ class c_normalizer : public ExtObjectData, public Sweepable {
   public: ~c_normalizer();
   public: void t___construct();
   public: static Variant ti_isnormalized(const char* cls , CStrRef input, int64 form = q_normalizer_FORM_C);
-  public: static Variant t_isnormalized(const char* cls , CStrRef input, int64 form = q_normalizer_FORM_C) {
-    return ti_isnormalized("isnormalized", input, form);
+  public: static Variant t_isnormalized(CStrRef input, int64 form = q_normalizer_FORM_C) {
+    return ti_isnormalized("normalizer", input, form);
   }
   public: static Variant ti_normalize(const char* cls , CStrRef input, int64 form = q_normalizer_FORM_C);
-  public: static Variant t_normalize(const char* cls , CStrRef input, int64 form = q_normalizer_FORM_C) {
-    return ti_normalize("normalize", input, form);
+  public: static Variant t_normalize(CStrRef input, int64 form = q_normalizer_FORM_C) {
+    return ti_normalize("normalizer", input, form);
   }
   public: Variant t___destruct();
 

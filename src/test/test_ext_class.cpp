@@ -69,8 +69,6 @@ bool TestExtClass::test_interface_exists() {
 bool TestExtClass::test_get_class_methods() {
   Array methods = f_get_class_methods("TEst");
   VS(methods[0], "foo");
-  VS(methods[1], "func");
-  VS(methods[2], "bar");
   return Count(true);
 }
 

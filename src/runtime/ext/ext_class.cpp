@@ -82,11 +82,16 @@ bool f_interface_exists(CStrRef interface_name, bool autoload /* = true */) {
 
 Array f_get_class_methods(CVarRef class_or_object) {
   ClassInfo::MethodVec methods;
-  ClassInfo::GetClassMethods(methods, get_classname(class_or_object));
+  const String &class_name = get_classname(class_or_object);
+  ClassInfo::GetClassMethods(methods, class_name);
+  const char *klass = FrameInjection::GetClassName(true);
 
+  bool allowPrivate = klass && *klass && !strcasecmp(class_name->data(), klass);
   Array ret = Array::Create();
   for (unsigned int i = 0; i < methods.size(); i++) {
-    ret.set(methods[i]->name, true);
+    if ((methods[i]->attribute & ClassInfo::IsPublic) || allowPrivate) {
+      ret.set(methods[i]->name, true);
+    }
   }
   return ret.keys();
 }

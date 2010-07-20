@@ -3,7 +3,7 @@
 #  ICU_FOUND          - True if ICU found.
 #  ICU_I18N_FOUND     - True if ICU's internationalization library found.
 #  ICU_INCLUDE_DIRS   - Directory to include to get ICU headers
-#                       Note: always include ICU headers as, e.g., 
+#                       Note: always include ICU headers as, e.g.,
 #                       unicode/utypes.h
 #  ICU_LIBRARIES      - Libraries to link against for the common ICU
 #  ICU_I18N_LIBRARIES - Libraries to link against for ICU internationaliation
@@ -11,7 +11,7 @@
 
 # Look for the header file.
 find_path(
-  ICU_INCLUDE_DIR 
+  ICU_INCLUDE_DIR
   NAMES unicode/utypes.h
   DOC "Include directory for the ICU library")
 mark_as_advanced(ICU_INCLUDE_DIR)
@@ -32,7 +32,12 @@ if(ICU_INCLUDE_DIR AND ICU_LIBRARY)
   set(ICU_VERSION 0)
   set(ICU_MAJOR_VERSION 0)
   set(ICU_MINOR_VERSION 0)
-  FILE(READ "${ICU_INCLUDE_DIR}/unicode/uversion.h" _ICU_VERSION_CONENTS)
+  if (EXISTS "${ICU_INCLUDE_DIR}/unicode/uversion.h")
+    FILE(READ "${ICU_INCLUDE_DIR}/unicode/uversion.h" _ICU_VERSION_CONENTS)
+  else()
+    FILE(READ "${ICU_INCLUDE_DIR}/unicode/uvernum.h" _ICU_VERSION_CONENTS)
+  endif()
+
   STRING(REGEX REPLACE ".*#define U_ICU_VERSION_MAJOR_NUM ([0-9]+).*" "\\1" ICU_MAJOR_VERSION "${_ICU_VERSION_CONENTS}")
   STRING(REGEX REPLACE ".*#define U_ICU_VERSION_MINOR_NUM ([0-9]+).*" "\\1" ICU_MINOR_VERSION "${_ICU_VERSION_CONENTS}")
 

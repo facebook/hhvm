@@ -38,6 +38,7 @@ XHPResult xhp_preprocess(string &in, string &out, bool isEval, string &errDescri
   flags.short_tags = true;
   flags.idx_expr = true;
   flags.include_debug = true;
+  flags.emit_namespaces = false;
   return xhp_preprocess(in, out, errDescription, errLineno, flags);
 }
 
@@ -63,6 +64,7 @@ XHPResult xhp_preprocess(std::string &in, std::string &out, std::string &errDesc
   extra.insert_token = flags.eval ? T_OPEN_TAG_FAKE : 0;
   extra.short_tags = flags.short_tags;
   extra.asp_tags = flags.asp_tags;
+  extra.emit_namespaces = flags.emit_namespaces;
 
   xhplex_init(&scanner);
   xhpset_extra(&extra, scanner);

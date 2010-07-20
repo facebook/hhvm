@@ -71,6 +71,7 @@ abstract class :x:composable-element extends :x:base {
   const TYPE_OBJECT = 5;
   const TYPE_VAR    = 6;
   const TYPE_ENUM   = 7;
+  const TYPE_FLOAT  = 8;
 
   protected function init() {}
 
@@ -297,6 +298,12 @@ abstract class :x:composable-element extends :x:base {
       case self::TYPE_NUMBER:
         if (!is_int($val)) {
           $val = (int)$val;
+        }
+        return;
+
+      case self::TYPE_FLOAT:
+        if (!is_numeric($val)) {
+          $val = (float)$val;
         }
         return;
 

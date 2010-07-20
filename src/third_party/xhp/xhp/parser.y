@@ -190,6 +190,7 @@ static void replacestr(string &source, const string &find, const string &rep) {
 %token T_XHP_ARRAY
 %token T_XHP_STRING
 %token T_XHP_ENUM
+%token T_XHP_FLOAT
 %token T_XHP_REQUIRED
 
 %%
@@ -888,13 +889,13 @@ expr_without_variable:
     $$ = $1 + $2 + $3;
   }
 | expr T_LOGICAL_OR expr {
-    $$ = $1 + $2 + $3;
+    $$ = $1 + " " +  $2 + " " + $3;
   }
 | expr T_LOGICAL_AND expr {
-    $$ = $1 + $2 + $3;
+    $$ = $1 + " " + $2 + " " + $3;
   }
 | expr T_LOGICAL_XOR expr {
-    $$ = $1 + $2 + $3;
+    $$ = $1 + " " + $2 + " " + $3;
   }
 | expr '|' expr {
     $$ = $1 + $2 + $3;
@@ -1481,9 +1482,9 @@ xhp_singleton:
     if (yyextra->include_debug) {
       char line[16];
       sprintf(line, "%lu", (unsigned long)$1.lineno());
-      $$ = "new xhp_" + $1 + "(array(" + $2 + "), array(), __FILE__, " + line + ")";
+      $$ = (yyextra->emit_namespaces ? "new \\xhp_" : "new xhp_") + $1 + "(array(" + $2 + "), array(), __FILE__, " + line + ")";
     } else {
-      $$ = "new xhp_" + $1 + "(array(" + $2 + "), array())";
+      $$ = (yyextra->emit_namespaces ? "new \\xhp_" : "new xhp_") + $1 + "(array(" + $2 + "), array())";
     }
   }
 ;
@@ -1493,7 +1494,7 @@ xhp_tag_open:
     pop_state(); // XHP_ATTRS
     push_state(XHP_CHILD_START);
     yyextra->pushTag($1.c_str());
-    $$ = "new xhp_" + $1 + "(array(" + $2 + "), array(";
+    $$ = (yyextra->emit_namespaces ? "new \\xhp_" : "new xhp_") + $1 + "(array(" + $2 + "), array(";
   }
 ;
 
@@ -1535,8 +1536,12 @@ xhp_tag_start:
 
 // Children
 xhp_literal_text:
-  T_XHP_TEXT
+  T_XHP_TEXT {
+    $1.strip_lines();
+    $$ = $1;
+  }
 | xhp_literal_text T_XHP_TEXT {
+    $2.strip_lines();
     $$ = $1 + $2;
   }
 ;
@@ -1631,6 +1636,14 @@ xhp_label_pass:
   }
 ;
 
+xhp_label_pass_immediate:
+  { push_state(XHP_LABEL); } xhp_label_pass_ xhp_whitespace_hack {
+    pop_state();
+    $$ = $2;
+  }
+;
+
+
 xhp_label:
   { push_state(XHP_LABEL_WHITESPACE); } xhp_label_ xhp_whitespace_hack {
     pop_state();
@@ -1716,14 +1729,15 @@ xhp_attribute_decls:
 
 xhp_attribute_decl:
   xhp_attribute_decl_type xhp_label_pass xhp_attribute_default xhp_attribute_is_required {
+    $1.strip_lines();
     $2.strip_lines();
     yyextra->attribute_decls = yyextra->attribute_decls +
-      "'" + $2 + "'=>array(" + $1 + "," + $3 + ", " + $4 + "),"
+      "'" + $2 + "'=>array(" + $1 + "," + $3 + ", " + $4 + "),";
   }
 | T_XHP_COLON xhp_label_immediate {
     $2.strip_lines();
     yyextra->attribute_inherit = yyextra->attribute_inherit +
-      "xhp_" + $2 + "::__xhpAttributeDeclaration(),";
+      (yyextra->emit_namespaces ? "\\xhp_" : "xhp_") + $2 + "::__xhpAttributeDeclaration(),";
   }
 ;
 
@@ -1748,6 +1762,9 @@ xhp_attribute_decl_type:
   }
 | T_XHP_ENUM '{' { push_state(PHP); } xhp_attribute_enum { pop_state(); } '}' {
     $$ = "7, array(" + $4 + ")";
+  }
+| T_XHP_FLOAT {
+    $$ = "8, null";
   }
 ;
 
@@ -1791,18 +1808,18 @@ class_statement:
     pop_state();
     yyextra->used = true;
     $$ =
-      "protected function &__xhpCategoryDeclaration() {\
-         static $_ = array(" + $3 + ");" +
+      "protected function &__xhpCategoryDeclaration() {" +
+         code_rope("static $_ = array(") + $3 + ");" +
         "return $_;" +
       "}";
   }
 ;
 
 xhp_category_list:
-  '%' xhp_label_immediate {
+  '%' xhp_label_pass_immediate {
     $$ = "'" + $2 + "' => 1";
   }
-| xhp_category_list ',' '%' xhp_label_immediate {
+| xhp_category_list ',' '%' xhp_label_pass_immediate {
     $$ = $1 + ",'" + $4 + "' => 1";
   }
 ;
@@ -1858,10 +1875,10 @@ xhp_children_decl_expr:
     $$ = "array(3, " + $1 + ")";
   }
 | xhp_children_decl_expr ',' xhp_children_decl_expr {
-    $$ = "array(4, " + $1 + "," + $3 + ")"
+    $$ = "array(4, " + $1 + "," + $3 + ")";
   }
 | xhp_children_decl_expr '|' xhp_children_decl_expr {
-    $$ = "array(5, " + $1 + "," + $3 + ")"
+    $$ = "array(5, " + $1 + "," + $3 + ")";
   }
 ;
 
@@ -1873,7 +1890,7 @@ xhp_children_decl_tag:
     $$ = "2, null";
   }
 | T_XHP_COLON xhp_label {
-    $$ = "3, \'xhp_" + $2 + "\'";
+    $$ = (yyextra->emit_namespaces ? "3, \'\\\\xhp_" + $2 + "\'" : "3, \'xhp_" + $2 + "\'");
   }
 | '%' xhp_label {
     $$ = "4, \'" + $2 + "\'";
@@ -1886,7 +1903,7 @@ class_name:
     pop_state();
     push_state(PHP);
     yyextra->used = true;
-    $$ = "xhp_" + $2;
+    $$ = (yyextra->emit_namespaces ? "\\xhp_" : "xhp_") + $2;
   }
 ;
 
@@ -1895,7 +1912,7 @@ fully_qualified_class_name:
     pop_state();
     push_state(PHP);
     yyextra->used = true;
-    $$ = "xhp_" + $2;
+    $$ = (yyextra->emit_namespaces ? "\\xhp_" : "xhp_") + $2;
   }
 ;
 
@@ -1908,7 +1925,7 @@ expr_without_variable:
   expr '[' dim_offset ']' {
     if (yyextra->idx_expr) {
       yyextra->used = true;
-      $$ = "__xhp_idx(" + $1 + ", " + $3 + ")";
+      $$ = (yyextra->emit_namespaces ? "\\__xhp_idx(" : "__xhp_idx(") + $1 + ", " + $3 + ")";
     } else {
       $$ = $1 + $2 + $3 + $4;
     }

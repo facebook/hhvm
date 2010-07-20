@@ -16,12 +16,19 @@
 
 #include "fastpath.hpp"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 bool xhp_fastpath(const char* yy, const size_t len, const xhp_flags_t &flags) {
   const char* YYMARKER = NULL;
+  char* heredoc_marker = NULL;
+  size_t heredoc_marker_len = NULL;
+  bool result = false;
   enum {
     HTML,
     PHP,
+    HEREDOC,
+    HEREDOC_START,
     COMMENT_EOL,
     COMMENT_BLOCK
   } state = flags.eval ? PHP : HTML;
@@ -33,6 +40,7 @@ bool xhp_fastpath(const char* yy, const size_t len, const xhp_flags_t &flags) {
   #define YYDEBUG(s, c) printf("%03d: %c [%d]\n", s, c, c)
 
   for (;;) {
+    const char* yystart = yy;
 /*!re2c
     re2c:condenumprefix = "";
     re2c:yyfill:check = 0;
@@ -40,7 +48,10 @@ bool xhp_fastpath(const char* yy, const size_t len, const xhp_flags_t &flags) {
     NEWLINE = ('\r'|'\n'|'\r\n');
     WHITESPACE = [ \n\r\t]+;
 
-    <*> "\x00" { return false; }
+    <*> "\x00" {
+      result = false;
+      break;
+    }
     <*> [^\x00] { continue; }
 
     <HTML> '<?php'([ \t]|NEWLINE) {
@@ -80,13 +91,42 @@ bool xhp_fastpath(const char* yy, const size_t len, const xhp_flags_t &flags) {
       state = COMMENT_BLOCK;
       continue;
     }
+    <PHP> '<<<'["' \t]* {
+      state = HEREDOC_START;
+      continue;
+    }
     <PHP> '::' { continue; }
     <PHP> '</'|
           '/>'|
           ':'[a-zA-Z0-9]|
           ')'WHITESPACE*'['|
           '&#' {
-      return true;
+      result = true;
+      break;
+    }
+
+    <HEREDOC_START> [a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]* {
+      heredoc_marker_len = yy - yystart;
+      heredoc_marker = (char*)malloc(heredoc_marker_len + 1);
+      memcpy(heredoc_marker, yystart, heredoc_marker_len);
+      heredoc_marker[heredoc_marker_len] = 0;
+      state = HEREDOC;
+      continue;
+    }
+
+    <HEREDOC> [^\r\n\x00]+ {
+      continue;
+    }
+    <HEREDOC> [\r\n]+ {
+      if (strncmp(yy, heredoc_marker, heredoc_marker_len) == 0 && (
+            yy[heredoc_marker_len] == ';' || yy[heredoc_marker_len] == '\r' ||
+            yy[heredoc_marker_len] == '\n')
+      ) {
+        free(heredoc_marker);
+        heredoc_marker = NULL;
+        state = PHP;
+      }
+      continue;
     }
 
     <COMMENT_EOL> NEWLINE {
@@ -105,5 +145,8 @@ bool xhp_fastpath(const char* yy, const size_t len, const xhp_flags_t &flags) {
     }
 */
   }
-  return false;
+  if (heredoc_marker) {
+    free(heredoc_marker);
+  }
+  return result;
 }

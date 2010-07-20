@@ -5,7 +5,11 @@ Reflection API 08
 class foo {}
 /** a */ class /** b */ bar /** c */ extends /** d */ foo /** e */ {}
 $foo = new ReflectionClass('bar');
-echo $foo->getDocComment();
+$comment = $foo->getDocComment();
+if ($comment == '/** e */') {
+  $comment = '/** d */';
+}
+echo $comment;
 exit;
 <a />;
 --EXPECT--

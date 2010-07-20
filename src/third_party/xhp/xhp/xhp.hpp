@@ -33,6 +33,7 @@ class yy_extra_type {
       idx_expr = false;
       include_debug = false;
       has_doc_block = false;
+      emit_namespaces = false;
       expecting_xhp_class_statements = false;
       pushStack();
     }
@@ -41,6 +42,7 @@ class yy_extra_type {
     bool asp_tags; // `asp_tags` in php.ini
     bool idx_expr; // allow code like `foo()['bar']`
     bool include_debug; // include line numbers and file names in XHP object creation
+    bool emit_namespaces; // put everything in the global namespace (php 5.3+)
     size_t first_lineno; // line number before scanning the current token
     size_t lineno; // current line number being scanned.
     std::string error; // description of error (if terminated true)

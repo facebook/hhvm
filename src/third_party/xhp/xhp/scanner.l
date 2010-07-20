@@ -25,6 +25,8 @@
 #define last_token() yyextra->last_token
 
 #define YY_USER_ACTION \
+  if (yyextra->terminated) \
+    return 0; \
   if (!yyg->yy_more_len) \
     yyextra->first_lineno = yyextra->lineno;
 #define tok(t) \
@@ -133,6 +135,7 @@ NEWLINE ("\r\n"|"\n"|"\r")
 <XHP_ATTR_TYPE_DECL>{
   bool tok(T_XHP_BOOLEAN);
   int tok(T_XHP_NUMBER);
+  float tok(T_XHP_FLOAT);
   var tok(T_VAR);
   array tok(T_XHP_ARRAY);
   string tok(T_XHP_STRING);
@@ -377,7 +380,7 @@ NEWLINE ("\r\n"|"\n"|"\r")
       case T_BOOLEAN_AND: case T_IS_EQUAL: case T_IS_NOT_EQUAL:
       case T_IS_IDENTICAL: case T_IS_NOT_IDENTICAL: case T_IS_SMALLER_OR_EQUAL:
       case T_IS_GREATER_OR_EQUAL: case T_ECHO: case T_RETURN:
-      case T_EXTENDS: case T_INSTANCEOF:
+      case T_EXTENDS: case T_INSTANCEOF: case T_DOUBLE_ARROW:
       case T_XHP_ATTRIBUTE:
         tok(T_XHP_COLON);
         break;
@@ -425,7 +428,11 @@ NEWLINE ("\r\n"|"\n"|"\r")
 }
 <PHP_HEREDOC_START>{
   "'"{LABEL}"'"|\"{LABEL}\" {
-    yyextra->heredoc_label = string(yytext + yyextra->heredoc_yyleng, yyleng - 1);
+    // Create a new string for the heredoc label. Since we're using yymore above
+    // yytext will actually start at the "<<<" and not the label. Use of
+    // heredoc_yyleng jumps past that. Then we add 1 to get past the " or '. The
+    // match is similar to calculate length.
+    yyextra->heredoc_label = string(yytext + yyextra->heredoc_yyleng + 1, yyleng - yyextra->heredoc_yyleng - 2);
     set_state(PHP_HEREDOC_NSTART);
     yyextra->heredoc_yyleng = yyleng;
     yymore();
@@ -486,7 +493,20 @@ NEWLINE ("\r\n"|"\n"|"\r")
   "-" tok(T_XHP_HYPHEN);
   "::" {
     pop_state();
-    tok(T_PAAMAYIM_NEKUDOTAYIM);
+
+    // Hack: Please don't expect this to work: $foo = <a href={Thing::if} />;
+    // PHP will let you use reserved words for member variables and methods, but
+    // they are verboten in XHP classes now.
+    //
+    // We don't use tok() because that pushes PHP_NO_RESERVED_WORDS, which the
+    // scanner expects to pop at some point, but XHP_LABEL (in parser.y) will pop
+    // sooner and then you're left with an imbalanced tag stack and that's when
+    // the fun stops.
+  *yylval = code_rope(yytext, yyextra->first_lineno, yyextra->lineno - yyextra->first_lineno);
+#ifdef DEBUG
+  yy_log_token(T_PAAMAYIM_NEKUDOTAYIM);
+#endif
+    return T_PAAMAYIM_NEKUDOTAYIM;
   }
   "--" {
     pop_state();
@@ -839,7 +859,12 @@ NEWLINE ("\r\n"|"\n"|"\r")
 <XHP_AFTER_ENT>{
   [ \t\x0b\x0c\xa0\r\n]|\r\n {
     if (*yytext == '\r' || *yytext == '\n') {
+      // Since we rewrite newlines into space we need to increment both line
+      // counters. The first_lineno increment is quite a hack, and makes it so
+      // that this ent is on the wrong line but it doesn't mess up the rest of
+      // the file.
       ++yyextra->lineno;
+      ++yyextra->first_lineno;
     }
     pop_state();
     yytext[0] = ' ';
@@ -853,12 +878,23 @@ NEWLINE ("\r\n"|"\n"|"\r")
 }
 
 <XHP_CHILD>{
-  [^&'<>\\{ \t\x0b\x0c\xa0\r\n]+{WHITESPACE}{0,1} {
+  [^&'<>\\{ \t\x0b\x0c\xa0\r\n]+{WHITESPACE}? {
     yy_scan_newlines(yytext, yyg);
+    // Crunch white space at the end
+    char* ii = yytext + yyleng - 1;
+    while (*ii == ' ' || *ii == '\t' || *ii == '\n' || *ii == '\r') {
+      --ii;
+    }
+   if (ii != yytext + yyleng - 1) {
+      ii[1] = ' ';
+      ii[2] = 0;
+    }
     tok(T_XHP_TEXT);
   }
   {WHITESPACE}* {
     yy_scan_newlines(yytext, yyg);
+    yytext[0] = ' ';
+    yytext[1] = 0;
     tok(T_XHP_TEXT);
   }
   {WHITESPACE}*"{" {

@@ -936,7 +936,7 @@ void c_arrayiterator::t___construct(Variant v_array, Variant v_flags //  = 0LL /
 /* SRC: classes/iterator.php line 78 */
 void c_arrayiterator::t_append(CVarRef v_value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::append);
-  m_arr.append((v_value));
+  m_arr.append((wrap_variant(v_value)));
 } /* function */
 /* SRC: classes/iterator.php line 82 */
 bool c_arrayiterator::t_asort() {
@@ -1016,7 +1016,7 @@ Variant &c_arrayiterator::___offsetget_lval(Variant v_index) {
 /* SRC: classes/iterator.php line 130 */
 Variant c_arrayiterator::t_offsetset(CVarRef v_index, CVarRef v_newval) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetSet);
-  m_arr.set(v_index, (v_newval));
+  m_arr.set(v_index, (wrap_variant(v_newval)));
   return null;
 } /* function */
 /* SRC: classes/iterator.php line 134 */

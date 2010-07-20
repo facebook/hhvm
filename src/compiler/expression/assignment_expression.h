@@ -44,6 +44,7 @@ public:
   ExpressionPtr getVariable() { return m_variable;}
   ExpressionPtr getValue() { return m_value;}
   int getLocalEffects() const;
+  bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
 
 private:
   ExpressionPtr makeIdCall(AnalysisResultPtr ar);

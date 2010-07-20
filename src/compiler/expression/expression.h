@@ -107,7 +107,8 @@ public:
     FixOrder  = 1,
     StashVars = 2,
     StashKidVars = 4,
-    StashByRef = 8
+    StashByRef = 8,
+    StashAll = 16
   };
 
   enum Error {

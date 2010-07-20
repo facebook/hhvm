@@ -219,24 +219,48 @@ void AssignmentExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_value->outputPHP(cg, ar);
 }
 
+static void wrapValue(CodeGenerator &cg, AnalysisResultPtr ar,
+                      ExpressionPtr exp, bool ref, bool array) {
+  bool close = false;
+  if (ref) {
+    cg_printf("ref(");
+    close = true;
+  } else if (array && !exp->hasCPPTemp() &&
+             !exp->isTemporary() && !exp->isScalar() &&
+             exp->getActualType() && !exp->getActualType()->isPrimitive() &&
+             exp->getActualType()->getKindOf() != Type::KindOfString) {
+    cg_printf("wrap_variant(");
+    close = true;
+  }
+  exp->outputCPP(cg, ar);
+  if (close) cg_printf(")");
+}
+
+bool AssignmentExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
+                                        int state) {
+  if (m_variable->is(Expression::KindOfArrayElementExpression)) {
+    ExpressionPtr exp = m_value;
+    if (!(m_ref && exp->isRefable()) &&
+        !exp->isTemporary() && !exp->isScalar() &&
+        exp->getActualType() && !exp->getActualType()->isPrimitive() &&
+        exp->getActualType()->getKindOf() != Type::KindOfString) {
+      state |= Expression::StashAll;
+    }
+  }
+  return Expression::preOutputCPP(cg, ar, state);
+}
+
 void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
                                          AnalysisResultPtr ar) {
   BlockScopePtr scope = ar->getScope();
-  bool ref = (m_ref && !m_value->is(Expression::KindOfNewObjectExpression));
+  bool ref = (m_ref && m_value->isRefable());
 
-  bool setElement = false; // turning $a['elem'] = $b into $a.set('elem', $b);
-  bool type_cast = false;
   bool setNull = false;
-  TypePtr m_actualType;
+  bool arrayLike = false;
 
   if (m_variable->is(Expression::KindOfArrayElementExpression)) {
     ArrayElementExpressionPtr exp =
       dynamic_pointer_cast<ArrayElementExpression>(m_variable);
-    m_actualType = m_variable->getActualType();
-    if (m_actualType && m_actualType->getKindOf() == Type::KindOfVariant
-        && !ref) {
-      //type_cast = true;
-    }
     if (!exp->isSuperGlobal() && !exp->isDynamicGlobal()) {
       exp->getVariable()->outputCPP(cg, ar);
       if (exp->getOffset()) {
@@ -246,14 +270,7 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
       } else {
         cg_printf(".append((");
       }
-      if (type_cast) {
-        m_actualType->outputCPPCast(cg, ar);
-        cg_printf("(");
-      }
-      if (ref && m_value->isRefable()) cg_printf("ref(");
-      m_value->outputCPP(cg, ar);
-      if (ref && m_value->isRefable()) cg_printf(")");
-      if (type_cast) cg_printf(")");
+      wrapValue(cg, ar, m_value, ref, true);
       cg_printf(")");
       ExpressionPtr off = exp->getOffset();
       if (off) {
@@ -276,34 +293,24 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
         }
       }
       cg_printf(")");
-      setElement = true;
+      return;
     }
-  }
-  if (m_variable->is(Expression::KindOfSimpleVariable) &&
+  } else if (m_variable->is(Expression::KindOfSimpleVariable) &&
       m_value->is(Expression::KindOfConstantExpression)) {
     ConstantExpressionPtr exp =
       dynamic_pointer_cast<ConstantExpression>(m_value);
     if (exp->isNull()) setNull = true;
   }
 
-  if (!setElement) {
-    if (setNull) {
-      cg_printf("setNull(");
-      m_variable->outputCPP(cg, ar);
-    } else {
-      cg_printf("(");
-      m_variable->outputCPP(cg, ar);
-      cg_printf(" = ");
+  if (setNull) {
+    cg_printf("setNull(");
+    m_variable->outputCPP(cg, ar);
+  } else {
+    cg_printf("(");
+    m_variable->outputCPP(cg, ar);
+    cg_printf(" = ");
 
-      if (type_cast) {
-        m_actualType->outputCPPCast(cg, ar);
-        cg_printf("(");
-      }
-      if (ref && m_value->isRefable()) cg_printf("ref(");
-      m_value->outputCPP(cg, ar);
-      if (ref && m_value->isRefable()) cg_printf(")");
-      if (type_cast) cg_printf(")");
-    }
-    cg_printf(")");
+    wrapValue(cg, ar, m_value, ref, arrayLike);
   }
+  cg_printf(")");
 }

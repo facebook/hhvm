@@ -608,7 +608,7 @@ Array c_reflectionfunctionabstract::t_getparameters() {
           (v_param = tmp4);
         }
         (v_param->m_info = v_info);
-        v_ret.append((v_param));
+        v_ret.append((wrap_variant(v_param)));
       }
     }
   }
@@ -3960,7 +3960,7 @@ Variant c_reflectionclass::t_fetch(CVarRef v_what) {
                 p_reflectionclass tmp15(((tmp14->create(m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)), tmp14)));
                 (v_p = tmp15);
               }
-              lval(m_info.lvalAt("interfaces", 0x0C5BD661CFB9E254LL, false, true)).append((m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)));
+              lval(m_info.lvalAt("interfaces", 0x0C5BD661CFB9E254LL, false, true)).append((wrap_variant(m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true))));
               m_info.setOpEqual(277, "interfaces", (v_p->t_fetch("interfaces")), 0x0C5BD661CFB9E254LL, true);
               m_info.setOpEqual(277, "methods", (v_p->m_info.rvalAt("methods", 0x2A7E90235B229AD5LL, true, true)), 0x2A7E90235B229AD5LL, true);
               m_info.setOpEqual(277, "constants", (v_p->m_info.rvalAt("constants", 0x61A5DA894BD05406LL, true, true)), 0x61A5DA894BD05406LL, true);
@@ -4188,7 +4188,7 @@ Array c_reflectionclass::t_getmethods(CVarRef v_filter //  = 65535LL
         }
         if (((((((toBoolean(((bitwise_and(v_filter, 256LL /* reflectionmethod::IS_PUBLIC */)))) && v_m->t_ispublic()) || (toBoolean(((bitwise_and(v_filter, 512LL /* reflectionmethod::IS_PROTECTED */)))) && v_m->t_isprotected())) || (toBoolean(((bitwise_and(v_filter, 1024LL /* reflectionmethod::IS_PRIVATE */)))) && v_m->t_isprivate())) || (toBoolean(((bitwise_and(v_filter, 1LL /* reflectionmethod::IS_STATIC */)))) && toBoolean(v_m->t_isstatic()))) || (toBoolean(((bitwise_and(v_filter, 4LL /* reflectionmethod::IS_FINAL */)))) && toBoolean(v_m->t_isfinal()))) || (((toBoolean(bitwise_and(v_filter, 2LL /* reflectionmethod::IS_ABSTRACT */)) && toBoolean(v_m->t_isabstract())))))) {
           {
-            v_ret.append((v_m));
+            v_ret.append((wrap_variant(v_m)));
           }
         }
       }
@@ -4305,7 +4305,7 @@ Variant c_reflectionclass::t_getinterfaces() {
           {
             {
               const Variant &tmp53((v_cls->t_getname()));
-              v_ret.set(tmp53, (v_cls));
+              v_ret.set(tmp53, (wrap_variant(v_cls)));
             }
           }
         }
@@ -4474,7 +4474,7 @@ Variant c_reflectionclass::t_getstaticproperties() {
           {
             {
               Variant tmp73((v_prop.o_get("name", 0x0BCDB293DC3DBDDCLL)));
-              v_ret.set(tmp73, (v_prop));
+              v_ret.set(tmp73, (wrap_variant(v_prop)));
             }
           }
         }
@@ -4517,7 +4517,7 @@ Variant c_reflectionclass::t_getdefaultproperties() {
           {
             {
               Variant tmp77((v_prop.o_get("name", 0x0BCDB293DC3DBDDCLL)));
-              v_ret.set(tmp77, (v_prop));
+              v_ret.set(tmp77, (wrap_variant(v_prop)));
             }
           }
         }
@@ -5262,7 +5262,7 @@ Array c_reflectionextension::t_getclassnames() {
       LOOP_COUNTER_CHECK(84);
       iter86->second(v_cls);
       {
-        v_ret.append((v_cls. BIND_CLASS_DOT o_invoke_few_args("getName", 0x23F51CDECC198965LL, 0)));
+        v_ret.append((wrap_variant(v_cls. BIND_CLASS_DOT o_invoke_few_args("getName", 0x23F51CDECC198965LL, 0))));
       }
     }
   }

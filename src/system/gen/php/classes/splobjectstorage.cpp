@@ -575,7 +575,7 @@ void c_splobjectstorage::t_attach(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::attach);
   if ((x_is_object(v_obj) && !(t_contains(v_obj)))) {
     {
-      m_storage.append((v_obj));
+      m_storage.append((wrap_variant(v_obj)));
     }
   }
 } /* function */

@@ -32,6 +32,7 @@ public:
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
+  virtual bool isRefable(bool checkError = false) const { return checkError; }
 
 private:
   bool m_redeclared;

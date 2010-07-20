@@ -694,6 +694,8 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     return false;
   }
 
+  bool stashAll = state & StashAll;
+  state &= ~StashAll;
   bool ret = (state & FixOrder) != 0;
   int kidState = (state & ~(StashKidVars|StashVars|FixOrder));
   if (state & StashKidVars) kidState |= StashVars;
@@ -712,12 +714,17 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     }
     if (lastEffect >= 0 && j > 1) {
       kidState |= FixOrder;
+      if (stashAll) {
+        lastEffect = n - 1;
+      }
       ret = true;
     }
   }
 
   if (!ret || ar->inExpression()) {
-    bool skipLast = true;
+    bool skipLast = !stashAll;
+    int lastState = kidState | StashByRef;
+    if (stashAll) lastState |= StashVars;
     for (i = 0; i <= lastEffect; i++) {
       ExpressionPtr k = getNthExpr(i);
       if (k && !k->isScalar()) {
@@ -735,7 +742,7 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         if (k->is(KindOfSimpleVariable)) {
           skipLast = false;
         }
-        if (k->preOutputCPP(cg, ar, i == lastEffect ? s | StashByRef : s)) {
+        if (k->preOutputCPP(cg, ar, i == lastEffect ? lastState : s)) {
           ret = true;
           if (!ar->inExpression()) break;
         }

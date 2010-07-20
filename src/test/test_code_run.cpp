@@ -4527,6 +4527,35 @@ bool TestCodeRun::TestReference() {
        "}"
        "var_dump(foo());");
 
+  MVCRO("<?php "
+        "$a = array();"
+        "$a[0][0] = $a;"
+        "var_dump($a);"
+        "$b[0][0] = $b;"
+        "var_dump($b);"
+        "$c[0] = $c;"
+        "var_dump($c);"
+        ,
+        "array(1) {"
+        "  [0]=>"
+        "  array(1) {"
+        "    [0]=>"
+        "    array(0) {"
+        "    }"
+        "  }"
+        "}"
+        "array(1) {"
+        "  [0]=>"
+        "  array(1) {"
+        "    [0]=>"
+        "    NULL"
+        "  }"
+        "}"
+        "array(1) {"
+        "  [0]=>"
+        "  NULL"
+        "}");
+
  return true;
 }
 
@@ -4547,6 +4576,7 @@ bool TestCodeRun::TestDynamicConstants() {
   MVCR("<?php define('FOO', BAR); define('BAR', FOO); echo FOO; echo BAR;");
   MVCR("<?php define('A', 10); class T { static $a = array(A); } "
       "define('A', 20); var_dump(T::$a);");
+
   return true;
 }
 

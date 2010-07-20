@@ -63,7 +63,7 @@ Variant f_fsockopen(CStrRef hostname, int port = -1, Variant errnum = null,
 Variant f_pfsockopen(CStrRef hostname, int port = -1, Variant errnum = null,
                      Variant errstr = null, double timeout = 0.0);
 
-inline Array f_socket_get_status(CObjRef stream) {
+inline Variant f_socket_get_status(CObjRef stream) {
   return f_stream_get_meta_data(stream);
 }
 

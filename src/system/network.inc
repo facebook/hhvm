@@ -17,7 +17,7 @@
 "getmxrr", T(Boolean), S(0), "hostname", T(String), NULL, S(0), "mxhosts", T(Variant), NULL, S(1), "weight", T(Variant), "null", S(1), NULL, S(0), 
 "fsockopen", T(Variant), S(0), "hostname", T(String), NULL, S(0), "port", T(Int32), "-1", S(0), "errnum", T(Variant), "null", S(1), "errstr", T(Variant), "null", S(1), "timeout", T(Double), "0.0", S(0), NULL, S(0), 
 "pfsockopen", T(Variant), S(0), "hostname", T(String), NULL, S(0), "port", T(Int32), "-1", S(0), "errnum", T(Variant), "null", S(1), "errstr", T(Variant), "null", S(1), "timeout", T(Double), "0.0", S(0), NULL, S(0), 
-"socket_get_status", T(Array), S(0), "stream", T(Object), NULL, S(0), NULL, S(0), 
+"socket_get_status", T(Variant), S(0), "stream", T(Object), NULL, S(0), NULL, S(0), 
 "socket_set_blocking", T(Boolean), S(0), "stream", T(Object), NULL, S(0), "mode", T(Int32), NULL, S(0), NULL, S(0), 
 "socket_set_timeout", T(Boolean), S(0), "stream", T(Object), NULL, S(0), "seconds", T(Int32), NULL, S(0), "microseconds", T(Int32), "0", S(0), NULL, S(0), 
 "header", T(Void), S(0), "str", T(String), NULL, S(0), "replace", T(Boolean), "true", S(0), "http_response_code", T(Int32), "0", S(0), NULL, S(0), 

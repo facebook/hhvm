@@ -115,7 +115,7 @@ inline Variant x_pfsockopen(CStrRef hostname, int port = -1, Variant errnum = nu
   return f_pfsockopen(hostname, port, ref(errnum), ref(errstr), timeout);
 }
 
-inline Array x_socket_get_status(CObjRef stream) {
+inline Variant x_socket_get_status(CObjRef stream) {
   FUNCTION_INJECTION_BUILTIN(socket_get_status);
   return f_socket_get_status(stream);
 }

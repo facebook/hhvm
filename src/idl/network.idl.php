@@ -81,7 +81,7 @@ f('pfsockopen', Variant,
         'errstr' => array(String | Reference, 'null'),
         'timeout' => array(Double, '0.0')));
 
-f('socket_get_status', VariantMap,
+f('socket_get_status', Variant,
   array('stream' => Resource));
 
 f('socket_set_blocking', Boolean,

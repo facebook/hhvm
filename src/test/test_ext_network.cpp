@@ -188,7 +188,7 @@ bool TestExtNetwork::test_pfsockopen() {
 }
 
 bool TestExtNetwork::test_socket_get_status() {
-  VS(f_socket_get_status(Object()), null);
+  VS(f_socket_get_status(Object()), false);
   return Count(true);
 }
 

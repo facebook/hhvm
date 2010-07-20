@@ -1987,7 +1987,9 @@ void Variant::callOffsetUnset(CVarRef key) {
     case KindOfNull:                                                    \
       break;                                                            \
     default:                                                            \
-      raise_notice("taking offset [] on bool or number");               \
+      if (error) {                                                      \
+        raise_notice("taking offset [] on bool or number");             \
+      }                                                                 \
       break;                                                            \
   }                                                                     \
   return null_variant;
@@ -2016,7 +2018,9 @@ Variant Variant::rvalAtHelper(int64 offset, int64 prehash /* = -1 */,
   case KindOfNull:
     break;
   default:
-    raise_notice("taking offset [] on bool or number");
+    if (error) {
+      raise_notice("taking offset [] on bool or number");
+    }
     break;
   }
   return null_variant;
@@ -2048,7 +2052,9 @@ Variant Variant::rvalAt(litstr offset, int64 prehash /* = -1 */,
   case KindOfNull:
     break;
   default:
-    raise_notice("taking offset [] on bool or number");
+    if (error) {
+      raise_notice("taking offset [] on bool or number");
+    }
     break;
   }
   return null_variant;
@@ -2079,7 +2085,9 @@ Variant Variant::rvalAt(CStrRef offset, int64 prehash /* = -1 */,
   case KindOfNull:
     break;
   default:
-    raise_notice("taking offset [] on bool or number");
+    if (error) {
+      raise_notice("taking offset [] on bool or number");
+    }
     break;
   }
   return null_variant;
@@ -2148,7 +2156,9 @@ Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
   case KindOfNull:
     break;
   default:
-    raise_notice("taking offset [] on bool or number");
+    if (error) {
+      raise_notice("taking offset [] on bool or number");
+    }
     break;
   }
   return null_variant;

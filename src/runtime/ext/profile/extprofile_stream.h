@@ -35,7 +35,7 @@ inline Object x_stream_context_get_default(CArrRef options = null_array) {
   return f_stream_context_get_default(options);
 }
 
-inline Array x_stream_context_get_options(CObjRef stream_or_context) {
+inline Variant x_stream_context_get_options(CObjRef stream_or_context) {
   FUNCTION_INJECTION_BUILTIN(stream_context_get_options);
   return f_stream_context_get_options(stream_or_context);
 }
@@ -115,7 +115,7 @@ inline Variant x_stream_get_line(CObjRef handle, int length = 0, CStrRef ending 
   return f_stream_get_line(handle, length, ending);
 }
 
-inline Array x_stream_get_meta_data(CObjRef stream) {
+inline Variant x_stream_get_meta_data(CObjRef stream) {
   FUNCTION_INJECTION_BUILTIN(stream_get_meta_data);
   return f_stream_get_meta_data(stream);
 }

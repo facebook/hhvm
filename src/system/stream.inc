@@ -1,7 +1,7 @@
 #if EXT_TYPE == 0
 "stream_context_create", T(Object), S(0), "options", T(Array), "null_array", S(0), "params", T(Array), "null_array", S(0), NULL, S(0), 
 "stream_context_get_default", T(Object), S(0), "options", T(Array), "null_array", S(0), NULL, S(0), 
-"stream_context_get_options", T(Array), S(0), "stream_or_context", T(Object), NULL, S(0), NULL, S(0), 
+"stream_context_get_options", T(Variant), S(0), "stream_or_context", T(Object), NULL, S(0), NULL, S(0), 
 "stream_context_set_option", T(Boolean), S(0), "stream_or_context", T(Object), NULL, S(0), "wrapper", T(Variant), NULL, S(0), "option", T(String), "null_string", S(0), "value", T(Variant), "null_variant", S(0), NULL, S(0), 
 "stream_context_set_param", T(Boolean), S(0), "stream_or_context", T(Object), NULL, S(0), "params", T(Array), NULL, S(0), NULL, S(0), 
 "stream_copy_to_stream", T(Variant), S(0), "source", T(Object), NULL, S(0), "dest", T(Object), NULL, S(0), "maxlength", T(Int32), "0", S(0), "offset", T(Int32), "0", S(0), NULL, S(0), 
@@ -17,7 +17,7 @@
 "stream_get_contents", T(Variant), S(0), "handle", T(Object), NULL, S(0), "maxlen", T(Int32), "0", S(0), "offset", T(Int32), "0", S(0), NULL, S(0), 
 "stream_get_filters", T(Array), S(0), NULL, S(0), 
 "stream_get_line", T(Variant), S(0), "handle", T(Object), NULL, S(0), "length", T(Int32), "0", S(0), "ending", T(String), "null_string", S(0), NULL, S(0), 
-"stream_get_meta_data", T(Array), S(0), "stream", T(Object), NULL, S(0), NULL, S(0), 
+"stream_get_meta_data", T(Variant), S(0), "stream", T(Object), NULL, S(0), NULL, S(0), 
 "stream_get_transports", T(Array), S(0), NULL, S(0), 
 "stream_get_wrappers", T(Array), S(0), NULL, S(0), 
 "stream_register_wrapper", T(Boolean), S(0), "protocol", T(String), NULL, S(0), "classname", T(String), NULL, S(0), NULL, S(0), 

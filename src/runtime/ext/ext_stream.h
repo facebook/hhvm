@@ -47,7 +47,7 @@ inline Object f_stream_context_get_default(CArrRef options = null_array) {
   throw NotImplementedException(__func__);
 }
 
-inline Array f_stream_context_get_options(CObjRef stream_or_context) {
+inline Variant f_stream_context_get_options(CObjRef stream_or_context) {
   throw NotImplementedException(__func__);
 }
 
@@ -118,10 +118,10 @@ inline Array f_stream_get_filters() {
 Variant f_stream_get_line(CObjRef handle, int length = 0,
                           CStrRef ending = null_string);
 
-inline Array f_stream_get_meta_data(CObjRef stream) {
-  File *f = stream.getTyped<File>(true);
+inline Variant f_stream_get_meta_data(CObjRef stream) {
+  File *f = stream.getTyped<File>(true, true);
   if (f) return f->getMetaData();
-  return Array();
+  return false;
 }
 
 inline Array f_stream_get_transports() {

@@ -12,7 +12,7 @@ f('stream_context_create', Resource,
 f('stream_context_get_default', Resource,
   array('options' => array(VariantMap, 'null_array')));
 
-f('stream_context_get_options', VariantMap,
+f('stream_context_get_options', Variant,
   array('stream_or_context' => Resource));
 
 f('stream_context_set_option', Boolean,
@@ -81,7 +81,7 @@ f('stream_get_line', Variant,
         'length' => array(Int32, '0'),
         'ending' => array(String, 'null_string')));
 
-f('stream_get_meta_data', VariantMap,
+f('stream_get_meta_data', Variant,
   array('stream' => Resource));
 
 f('stream_get_transports', StringVec);

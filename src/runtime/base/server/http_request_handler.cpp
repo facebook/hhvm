@@ -283,6 +283,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     ret = hphp_invoke(context, file, false, Array(), null,
                       RuntimeOption::WarmupDocument,
                       RuntimeOption::RequestInitFunction,
+                      RuntimeOption::RequestInitDocument,
                       error, errorMsg);
 
     if (ret) {
@@ -309,6 +310,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
         ret = hphp_invoke(context, errorPage, false, Array(), null,
                           RuntimeOption::WarmupDocument,
                           RuntimeOption::RequestInitFunction,
+                          RuntimeOption::RequestInitDocument,
                           error, errorMsg);
         if (ret) {
           String content = context->obDetachContents();

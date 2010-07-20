@@ -131,6 +131,7 @@ int RuntimeOption::XboxServerInfoMaxRequest = 500;
 int RuntimeOption::XboxServerInfoDuration = 120;
 std::string RuntimeOption::XboxServerInfoWarmupDoc;
 std::string RuntimeOption::XboxServerInfoReqInitFunc;
+std::string RuntimeOption::XboxServerInfoReqInitDoc;
 std::string RuntimeOption::XboxProcessMessageFunc = "xbox_process_message";
 std::string RuntimeOption::XboxPassword;
 
@@ -151,6 +152,7 @@ bool RuntimeOption::EnableCliRTTI = false;
 std::string RuntimeOption::StartupDocument;
 std::string RuntimeOption::WarmupDocument;
 std::string RuntimeOption::RequestInitFunction;
+std::string RuntimeOption::RequestInitDocument;
 std::vector<std::string> RuntimeOption::ThreadDocuments;
 
 bool RuntimeOption::SafeFileAccess = false;
@@ -536,6 +538,7 @@ void RuntimeOption::Load(Hdf &config) {
     normalizePath(StartupDocument);
     WarmupDocument = server["WarmupDocument"].getString();
     RequestInitFunction = server["RequestInitFunction"].getString();
+    RequestInitDocument = server["RequestInitDocument"].getString();
     server["ThreadDocuments"].get(ThreadDocuments);
     for (unsigned int i = 0; i < ThreadDocuments.size(); i++) {
       normalizePath(ThreadDocuments[i]);
@@ -678,6 +681,7 @@ void RuntimeOption::Load(Hdf &config) {
     XboxServerInfoDuration = xbox["ServerInfo.MaxDuration"].getInt32(120);
     XboxServerInfoWarmupDoc = xbox["ServerInfo.WarmupDocument"].get("");
     XboxServerInfoReqInitFunc = xbox["ServerInfo.RequestInitFunction"].get("");
+    XboxServerInfoReqInitDoc = xbox["ServerInfo.RequestInitDocument"].get("");
     XboxProcessMessageFunc =
       xbox["ProcessMessageFunc"].get("xbox_process_message");
   }

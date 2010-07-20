@@ -153,19 +153,17 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   if (!error) {
     Variant funcRet;
     std::string errorMsg = "Internal Server Error";
-    string warmupDoc, reqInitFunc;
+    string warmupDoc, reqInitFunc, reqInitDoc;
     if (m_serverInfo) {
       warmupDoc = m_serverInfo->getWarmupDoc();
       reqInitFunc = m_serverInfo->getReqInitFunc();
-    }
-    if (warmupDoc.empty()) {
-      warmupDoc = RuntimeOption::WarmupDocument;
-      reqInitFunc = RuntimeOption::RequestInitFunction;
+      reqInitDoc = m_serverInfo->getReqInitDoc();
     }
     if (!warmupDoc.empty()) warmupDoc = canonicalize_path(warmupDoc, "", 0);
     if (!warmupDoc.empty()) warmupDoc = get_source_filename(warmupDoc.c_str());
     bool ret = hphp_invoke(m_context, rpcFunc, true, params, ref(funcRet),
-                           warmupDoc, reqInitFunc, error, errorMsg);
+                           warmupDoc, reqInitFunc, reqInitDoc,
+                           error, errorMsg);
     if (ret) {
       String response;
       switch (output) {

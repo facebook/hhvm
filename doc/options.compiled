@@ -171,6 +171,7 @@ flood error logs.
     StartupDocument = filename
     WarmupDocument = filename
     RequestInitFunction = function_name
+    RequestInitDocument = filename
     ThreadDocuments {
       * = somedoc.php
       * = another.php
@@ -427,8 +428,9 @@ These are experimental LFU settings.
       MaxRequest = 500
       MaxDuration = 120    # in seconds
       TimeoutSeconds = 30  # default to RequestTimeoutSeconds
-      WarmupDocument = lib/warmup.php
+      WarmupDocument = filename
       RequestInitFunction = on_init
+      RequestInitDocument = filename
       Password = authentication
 
       # only for InternalPageServer
@@ -457,6 +459,7 @@ patterns for pages to server over this port.
       MaxDuration = 120
       WarmupDocument =
       RequestInitFunction =
+      RequestInitDocument =
     }
     ProcessMessageFunc = xbox_process_message
     DefaultLocalTimeoutMilliSeconds = 500

@@ -387,7 +387,7 @@ static int execute_command_line(ProgramOptions &po,
   bool ret = false;
   string errorMsg = "";
   bool error;
-  ret = hphp_invoke(context, file, false, Array(), null, "", "", error,
+  ret = hphp_invoke(context, file, false, Array(), null, "", "", "", error,
                     errorMsg);
   if (po.xhprofFlags) {
     f_var_dump(f_json_encode(f_xhprof_disable()));
@@ -736,7 +736,8 @@ ExecutionContext *hphp_context_init() {
 
 static bool hphp_warmup(ExecutionContext *context,
                         const std::string &warmupDoc,
-                        const std::string reqInitFunc, bool &error) {
+                        const std::string &reqInitFunc,
+                        const std::string &reqInitDoc, bool &error) {
   bool ret = true;
   error = false;
   std::string errorMsg;
@@ -761,25 +762,32 @@ static bool hphp_warmup(ExecutionContext *context,
       s_warmup_state->done = true;
       mm->checkpoint();
       s_warmup_state->atCheckpoint = true;
+      context->backupSession();
     }
   }
 
-  if (!reqInitFunc.empty() && s_warmup_state->enabled &&
-      s_warmup_state->atCheckpoint) {
+  if (s_warmup_state->enabled && s_warmup_state->atCheckpoint) {
     ServerStatsHelper ssh("reqinit");
     try {
-      invoke(reqInitFunc.c_str(), Array());
+      if (!reqInitDoc.empty()) {
+        invoke_file(reqInitDoc, true, get_variable_table());
+      }
+      if (!reqInitFunc.empty()) {
+        invoke(reqInitFunc.c_str(), Array());
+      }
       context->backupSession();
     } catch (...) {
       ret = handle_exception(context, errorMsg, ReqInitException, error);
     }
   }
+
   s_warmup_state->atCheckpoint = false;
   return ret;
 }
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool func, CArrRef funcParams, Variant funcRet,
-                 const std::string &warmupDoc, const std::string reqInitFunc,
+                 const std::string &warmupDoc, const std::string &reqInitFunc,
+                 const std::string &reqInitDoc,
                  bool &error, std::string &errorMsg) {
   bool ret = false;
   bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
@@ -793,7 +801,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
           hphp_chdir_file(warmupDoc);
         }
       }
-      if (!hphp_warmup(context, warmupDoc, reqInitFunc, error)) {
+      if (!hphp_warmup(context, warmupDoc, reqInitFunc, reqInitDoc, error)) {
         if (isServer) context->setCwd(oldCwd);
         return false;
       }

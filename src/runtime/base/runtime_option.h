@@ -130,6 +130,7 @@ public:
   static int XboxServerInfoDuration;
   static std::string XboxServerInfoWarmupDoc;
   static std::string XboxServerInfoReqInitFunc;
+  static std::string XboxServerInfoReqInitDoc;
   static std::string XboxProcessMessageFunc;
   static std::string XboxPassword;
 
@@ -150,6 +151,7 @@ public:
   static std::string StartupDocument;
   static std::string WarmupDocument;
   static std::string RequestInitFunction;
+  static std::string RequestInitDocument;
   static std::vector<std::string> ThreadDocuments;
 
   static bool SafeFileAccess;

@@ -81,6 +81,7 @@ public:
   int getMaxDuration() const { return m_maxDuration;}
   const std::string &getWarmupDoc() const { return m_warmupDoc;}
   const std::string &getReqInitFunc() const { return m_reqInitFunc;}
+  const std::string &getReqInitDoc() const { return m_reqInitDoc;}
   const std::string &getPassword() const { return m_password;}
 
 protected:
@@ -94,6 +95,7 @@ protected:
   std::set<std::string> m_urls; // url regex patterns
   std::string m_warmupDoc;
   std::string m_reqInitFunc;
+  std::string m_reqInitDoc;
   std::string m_password;
 };
 

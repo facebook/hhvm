@@ -78,19 +78,20 @@ A warmup document can prepare global variables and other persistent data that
 are request neutral. This way we can avoid running the same initialization
 sequence for every single request.
 
-4. RequestInit Function
+4. RequestInit Function/Document
 
-This function is executed after every checkpoint, so to initialize certain
-states or request specific coding.
+This function or document is executed after every checkpoint, so to initialize
+certain states or request specific coding. Both can be specified, and
+RequestInitDocument is executed ahead of RequestInitFunction.
 
 5. RPCRequestHandler
 
 RPCRequestHandler will call ExecutionContext::backupSession() right after
-RequestInit function, and it will call ExecutionContext::restoreSession() right
-after it finishes one request processing and it goes back to a state right
-after RequestInit is executed.
+RequestInit function/document, and it will call ExecutionContext::
+restoreSession() right after it finishes one request processing and it goes
+back to a state right after RequestInit is executed.
 
 RPCRequestHandler will also reset itself from time to time, either after
 processing certain number of requests or after certain amount of time. When
 this happens, it will go back to checkpoint and re-execute RequestInit
-function.
+function/document.

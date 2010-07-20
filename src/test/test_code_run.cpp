@@ -3713,6 +3713,15 @@ bool TestCodeRun::TestNewObjectExpression() {
       "echo $x->id.\"\\n\";"
       "$x->zz(1);"
       "echo $x->id.\"\\n\";");
+  MVCR("<?php\n"
+      "class A {\n"
+      "  function __construct($a) { echo \"A\\n\"; }\n"
+      "  function __destruct() { var_dump($this); }\n"
+      "}\n"
+      "function f() { echo \"f\\n\"; throw new Exception(); }\n"
+      "function test() { $a = new A(f()); }\n"
+      "try { test(); } catch (Exception $e) { }\n");
+
   return true;
 }
 

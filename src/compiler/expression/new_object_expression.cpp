@@ -172,18 +172,18 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
                 Option::SmartPtrPrefix, m_name.c_str(),
                 Option::ClassPrefix, m_name.c_str());
     } else {
-      cg_printf("%s%s(%s->create(",
-                Option::SmartPtrPrefix, m_name.c_str(),
-                m_receiverTemp.c_str());
+      cg_printf("(%s->create(", m_receiverTemp.c_str());
     }
 
     FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
                                       m_variableArgument, m_argArrayId);
-    cg_printf("))");
     if (m_receiverTemp.empty()) {
+      cg_printf("))");
       if (outsideClass) {
         cls->outputVolatileCheckEnd(cg);
       }
+    } else {
+      cg_printf("), %s)", m_receiverTemp.c_str());
     }
   } else {
     if (m_redeclared) {
@@ -244,7 +244,7 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     ar->wrapExpressionBegin(cg);
     m_receiverTemp = genCPPTemp(cg, ar);
     bool outsideClass = !ar->checkClassPresent(m_origName);
-    cg_printf("%s%s *%s = ", Option::ClassPrefix, m_name.c_str(),
+    cg_printf("%s%s %s = ", Option::SmartPtrPrefix, m_name.c_str(),
               m_receiverTemp.c_str());
     ClassScopePtr cls = ar->resolveClass(m_name);
     ASSERT(cls);

@@ -153,10 +153,10 @@ TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     ret = variables->addParam(m_name, ret, ar, shared_from_this());
   } else {
     // Functions that can be called dynamically have to have
-    // variant parameters.
-    if (m_type.empty() && (ar->getFunctionScope()->isDynamic() ||
-                           ar->getFunctionScope()->isRedeclaring() ||
-                           ar->getFunctionScope()->isVirtual())) {
+    // variant parameters, even if they have a type hint
+    if (ar->getFunctionScope()->isDynamic() ||
+        ar->getFunctionScope()->isRedeclaring() ||
+        ar->getFunctionScope()->isVirtual()) {
       variables->forceVariant(ar, m_name);
     }
     int p;

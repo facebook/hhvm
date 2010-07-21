@@ -383,7 +383,8 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
       param->clearContext(Expression::NoRefWrapper);
     }
     if (i < m_maxParam) {
-      if (m_paramTypeSpecs[i] && ar->isFirstPass()) {
+      if (m_paramTypeSpecs[i] &&
+          ar->getPhase() == AnalysisResult::LastInference) {
         if (!Type::Inferred(ar, expType, m_paramTypeSpecs[i])) {
           const char *file = m_stmt->getLocation()->file;
           Logger::Error("%s: parameter %d of %s requires %s, called with %s",

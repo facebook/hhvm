@@ -2,8 +2,6 @@
 *.[ls]o
 *.la
 *.swp
-xhp/parser.yacc.*
-xhp/scanner.lex.*
 xhp/libxhp.so
 xhp/xhpize
 /.deps

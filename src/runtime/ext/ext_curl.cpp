@@ -41,7 +41,7 @@ IMPLEMENT_DEFAULT_EXTENSION(curl);
 
 class CurlResource : public SweepableResourceData {
 private:
-  DECLARE_OBJECT_ALLOCATION(CurlResource);
+  DECLARE_OBJECT_ALLOCATION(CurlResource)
 
   class WriteHandler {
   public:
@@ -867,7 +867,7 @@ Variant f_curl_close(CObjRef ch) {
 
 class CurlMultiResource : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(CurlMultiResource);
+  DECLARE_OBJECT_ALLOCATION(CurlMultiResource)
 
   // overriding ResourceData
   const char *o_getClassName() const { return "cURL Multi Handle";}
@@ -1010,7 +1010,7 @@ Variant f_curl_multi_close(CObjRef mh) {
 
 class LibEventHttpHandle : public ResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(LibEventHttpHandle);
+  DECLARE_OBJECT_ALLOCATION(LibEventHttpHandle)
 
   // overriding ResourceData
   virtual const char *o_getClassName() const { return "LibEventHttp";}

@@ -2937,8 +2937,8 @@ void c_recursivedirectoryiterator::t___construct(Variant v_path, Variant v_flags
   if (!(x_hphp_recursivedirectoryiterator___construct(GET_THIS(), toString(v_path), toInt64(v_flags)))) {
     {
       {
-        c_unexpectedvalueexception *tmp8 = NEWOBJ(c_unexpectedvalueexception)();
-        throw_exception(p_unexpectedvalueexception(tmp8->create(concat3("RecursiveDirectoryIterator::__construct(", toString(v_path), "): failed to open dir"))));
+        p_unexpectedvalueexception tmp8 = NEWOBJ(c_unexpectedvalueexception)();
+        throw_exception((tmp8->create(concat3("RecursiveDirectoryIterator::__construct(", toString(v_path), "): failed to open dir")), tmp8));
       }
     }
   }
@@ -4124,8 +4124,8 @@ void c_directoryiterator::t___construct(Variant v_path) {
   if (!(x_hphp_directoryiterator___construct(GET_THIS(), toString(v_path)))) {
     {
       {
-        c_unexpectedvalueexception *tmp9 = NEWOBJ(c_unexpectedvalueexception)();
-        throw_exception(p_unexpectedvalueexception(tmp9->create(concat3("DirectoryIterator::__construct(", toString(v_path), "): failed to open dir"))));
+        p_unexpectedvalueexception tmp9 = NEWOBJ(c_unexpectedvalueexception)();
+        throw_exception((tmp9->create(concat3("DirectoryIterator::__construct(", toString(v_path), "): failed to open dir")), tmp9));
       }
     }
   }

@@ -413,9 +413,9 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   switch (cg.getContext()) {
   case CodeGenerator::CppForwardDeclaration:
     if (Option::GenerateCPPMacros) {
-      cg_printf("FORWARD_DECLARE_CLASS(%s)\n", clsName);
+      cg_printf("FORWARD_DECLARE_CLASS(%s);\n", clsName);
       if (redeclared) {
-        cg_printf("FORWARD_DECLARE_REDECLARED_CLASS(%s)\n", clsName);
+        cg_printf("FORWARD_DECLARE_REDECLARED_CLASS(%s);\n", clsName);
       }
     }
     if (m_stmt) {

@@ -28,7 +28,7 @@ namespace HPHP {
 // 1. Constants
 
 // 2. Classes
-FORWARD_DECLARE_CLASS(directory)
+FORWARD_DECLARE_CLASS(directory);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -192,7 +192,7 @@ public:
 
 class PageletTask : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(PageletTask);
+  DECLARE_OBJECT_ALLOCATION(PageletTask)
 
   PageletTask(CStrRef url, CArrRef headers, CStrRef post_data,
               CStrRef remote_host) {

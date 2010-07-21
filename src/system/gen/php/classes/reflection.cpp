@@ -1979,8 +1979,8 @@ Variant c_reflectionobject::ti_export(const char* cls, Variant v_obj, CVarRef v_
   String v_str;
 
   {
-    c_reflectionobject *tmp9 = NEWOBJ(c_reflectionobject)();
-    p_reflectionobject tmp10((p_reflectionobject(tmp9->create(v_obj))));
+    p_reflectionobject tmp9 = NEWOBJ(c_reflectionobject)();
+    p_reflectionobject tmp10(((tmp9->create(v_obj), tmp9)));
     (v_obj = tmp10);
   }
   (v_str = (toString(v_obj)));
@@ -3922,8 +3922,8 @@ void c_reflectionclass::t___construct(Variant v_name) {
       if ((!(toBoolean(x_call_user_func(2, "class_exists", Array(ArrayInit(1, true).setRef(0, v_name).create())))) && !(toBoolean(x_call_user_func(2, "interface_exists", Array(ArrayInit(1, true).setRef(0, v_name).create())))))) {
         {
           {
-            c_reflectionexception *tmp12 = NEWOBJ(c_reflectionexception)();
-            throw_exception(p_reflectionexception(tmp12->create(concat3("Class ", toString(v_name), " does not exist"))));
+            p_reflectionexception tmp12 = NEWOBJ(c_reflectionexception)();
+            throw_exception((tmp12->create(concat3("Class ", toString(v_name), " does not exist")), tmp12));
           }
         }
       }
@@ -3946,8 +3946,8 @@ Variant c_reflectionclass::t_fetch(CVarRef v_what) {
       if (empty(m_info)) {
         {
           {
-            c_reflectionexception *tmp13 = NEWOBJ(c_reflectionexception)();
-            throw_exception(p_reflectionexception(tmp13->create(concat3("Class ", toString(v_name), " does not exist"))));
+            p_reflectionexception tmp13 = NEWOBJ(c_reflectionexception)();
+            throw_exception((tmp13->create(concat3("Class ", toString(v_name), " does not exist")), tmp13));
           }
         }
       }
@@ -3956,8 +3956,8 @@ Variant c_reflectionclass::t_fetch(CVarRef v_what) {
           if (!(empty(m_info, "parent", 0x3E764E41E4A6ACA5LL, true))) {
             {
               {
-                c_reflectionclass *tmp14 = NEWOBJ(c_reflectionclass)();
-                p_reflectionclass tmp15((p_reflectionclass(tmp14->create(m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)))));
+                p_reflectionclass tmp14 = NEWOBJ(c_reflectionclass)();
+                p_reflectionclass tmp15(((tmp14->create(m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)), tmp14)));
                 (v_p = tmp15);
               }
               lval(m_info.lvalAt("interfaces", 0x0C5BD661CFB9E254LL, false, true)).append((m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)));
@@ -3979,8 +3979,8 @@ Variant c_reflectionclass::t_fetch(CVarRef v_what) {
               v_interface = iter18->first();
               {
                 {
-                  c_reflectionclass *tmp19 = NEWOBJ(c_reflectionclass)();
-                  p_reflectionclass tmp20((p_reflectionclass(tmp19->create(v_interface))));
+                  p_reflectionclass tmp19 = NEWOBJ(c_reflectionclass)();
+                  p_reflectionclass tmp20(((tmp19->create(v_interface), tmp19)));
                   (v_p = tmp20);
                 }
                 m_info.setOpEqual(277, "methods", (v_p->t_fetch("methods")), 0x2A7E90235B229AD5LL, true);
@@ -3992,8 +3992,8 @@ Variant c_reflectionclass::t_fetch(CVarRef v_what) {
           if (!(empty(m_info, "parent", 0x3E764E41E4A6ACA5LL, true))) {
             {
               {
-                c_reflectionclass *tmp21 = NEWOBJ(c_reflectionclass)();
-                p_reflectionclass tmp22((p_reflectionclass(tmp21->create(m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)))));
+                p_reflectionclass tmp21 = NEWOBJ(c_reflectionclass)();
+                p_reflectionclass tmp22(((tmp21->create(m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)), tmp21)));
                 (v_p = tmp22);
               }
               m_info.setOpEqual(277, "interfaces", (v_p->t_fetch("interfaces")), 0x0C5BD661CFB9E254LL, true);
@@ -4031,8 +4031,8 @@ Variant c_reflectionclass::ti_export(const char* cls, CVarRef v_name, CVarRef v_
   String v_str;
 
   {
-    c_reflectionclass *tmp24 = NEWOBJ(c_reflectionclass)();
-    p_reflectionclass tmp25((p_reflectionclass(tmp24->create(v_name))));
+    p_reflectionclass tmp24 = NEWOBJ(c_reflectionclass)();
+    p_reflectionclass tmp25(((tmp24->create(v_name), tmp24)));
     (v_obj = tmp25);
   }
   (v_str = (toString(v_obj)));
@@ -4146,8 +4146,8 @@ p_reflectionmethod c_reflectionclass::t_getmethod(CVarRef v_name) {
         (v_class = tmp30);
       }
       {
-        c_reflectionexception *tmp31 = NEWOBJ(c_reflectionexception)();
-        throw_exception(p_reflectionexception(tmp31->create(concat5("Method ", toString(v_class), "::", toString(v_name), " does not exist"))));
+        p_reflectionexception tmp31 = NEWOBJ(c_reflectionexception)();
+        throw_exception((tmp31->create(concat5("Method ", toString(v_class), "::", toString(v_name), " does not exist")), tmp31));
       }
     }
   }
@@ -4214,8 +4214,8 @@ p_reflectionproperty c_reflectionclass::t_getproperty(CVarRef v_name) {
         (v_class = tmp39);
       }
       {
-        c_reflectionexception *tmp40 = NEWOBJ(c_reflectionexception)();
-        throw_exception(p_reflectionexception(tmp40->create(concat5("Property ", toString(v_class), "::", toString(v_name), " does not exist"))));
+        p_reflectionexception tmp40 = NEWOBJ(c_reflectionexception)();
+        throw_exception((tmp40->create(concat5("Property ", toString(v_class), "::", toString(v_name), " does not exist")), tmp40));
       }
     }
   }
@@ -4272,8 +4272,8 @@ Variant c_reflectionclass::t_getconstant(CVarRef v_name) {
         (v_class = tmp46);
       }
       {
-        c_reflectionexception *tmp47 = NEWOBJ(c_reflectionexception)();
-        throw_exception(p_reflectionexception(tmp47->create(concat5("Class constant ", toString(v_class), "::", toString(v_name), " does not exist"))));
+        p_reflectionexception tmp47 = NEWOBJ(c_reflectionexception)();
+        throw_exception((tmp47->create(concat5("Class constant ", toString(v_class), "::", toString(v_name), " does not exist")), tmp47));
       }
     }
   }
@@ -4297,8 +4297,8 @@ Variant c_reflectionclass::t_getinterfaces() {
       v_name = iter50->first();
       {
         {
-          c_reflectionclass *tmp51 = NEWOBJ(c_reflectionclass)();
-          p_reflectionclass tmp52((p_reflectionclass(tmp51->create(v_name))));
+          p_reflectionclass tmp51 = NEWOBJ(c_reflectionclass)();
+          p_reflectionclass tmp52(((tmp51->create(v_name), tmp51)));
           (v_cls = tmp52);
         }
         if (toBoolean(v_cls->t_isinterface())) {
@@ -4332,8 +4332,8 @@ Array c_reflectionclass::t_getinterfacenames() {
       v_name = iter56->first();
       {
         {
-          c_reflectionclass *tmp57 = NEWOBJ(c_reflectionclass)();
-          p_reflectionclass tmp58((p_reflectionclass(tmp57->create(v_name))));
+          p_reflectionclass tmp57 = NEWOBJ(c_reflectionclass)();
+          p_reflectionclass tmp58(((tmp57->create(v_name), tmp57)));
           (v_cls = tmp58);
         }
         if (toBoolean(v_cls->t_isinterface())) {
@@ -4399,8 +4399,8 @@ Variant c_reflectionclass::t_getparentclass() {
     }
   }
   {
-    c_reflectionclass *tmp61 = NEWOBJ(c_reflectionclass)();
-    return p_reflectionclass(tmp61->create(t_fetch("parent")));
+    p_reflectionclass tmp61 = NEWOBJ(c_reflectionclass)();
+    return (tmp61->create(t_fetch("parent")), tmp61);
   }
 } /* function */
 /* SRC: classes/reflection.php line 457 */
@@ -5205,8 +5205,8 @@ Variant c_reflectionextension::ti_export(const char* cls, CVarRef v_name, CVarRe
   String v_str;
 
   {
-    c_reflectionextension *tmp82 = NEWOBJ(c_reflectionextension)();
-    p_reflectionextension tmp83((p_reflectionextension(tmp82->create(v_name))));
+    p_reflectionextension tmp82 = NEWOBJ(c_reflectionextension)();
+    p_reflectionextension tmp83(((tmp82->create(v_name), tmp82)));
     (v_obj = tmp83);
   }
   (v_str = (toString(v_obj)));
@@ -6358,8 +6358,8 @@ void c_reflectionmethod::t___construct(Variant v_cls, Variant v_name) {
     {
       if (!(x_is_object(v_cls))) {
         {
-          c_reflectionclass *tmp87 = NEWOBJ(c_reflectionclass)();
-          p_reflectionclass tmp88((p_reflectionclass(tmp87->create(v_cls))));
+          p_reflectionclass tmp87 = NEWOBJ(c_reflectionclass)();
+          p_reflectionclass tmp88(((tmp87->create(v_cls), tmp87)));
           (v_cls = tmp88);
         }
       }
@@ -6391,8 +6391,8 @@ Variant c_reflectionmethod::ti_export(const char* cls, Variant v_cls, CVarRef v_
 
   if (!(x_is_object(v_cls))) {
     {
-      c_reflectionclass *tmp90 = NEWOBJ(c_reflectionclass)();
-      p_reflectionclass tmp91((p_reflectionclass(tmp90->create(v_cls))));
+      p_reflectionclass tmp90 = NEWOBJ(c_reflectionclass)();
+      p_reflectionclass tmp91(((tmp90->create(v_cls), tmp90)));
       (v_cls = tmp91);
     }
   }
@@ -6496,8 +6496,8 @@ Variant c_reflectionmethod::t_getdeclaringclass() {
     }
   }
   {
-    c_reflectionclass *tmp101 = NEWOBJ(c_reflectionclass)();
-    return p_reflectionclass(tmp101->create(m_info.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)));
+    p_reflectionclass tmp101 = NEWOBJ(c_reflectionclass)();
+    return (tmp101->create(m_info.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)), tmp101);
   }
 } /* function */
 /* SRC: classes/reflection.php line 549 */
@@ -7259,8 +7259,8 @@ void c_reflectionproperty::t___construct(Variant v_cls, Variant v_name) {
     {
       if (!(x_is_object(v_cls))) {
         {
-          c_reflectionclass *tmp102 = NEWOBJ(c_reflectionclass)();
-          p_reflectionclass tmp103((p_reflectionclass(tmp102->create(v_cls))));
+          p_reflectionclass tmp102 = NEWOBJ(c_reflectionclass)();
+          p_reflectionclass tmp103(((tmp102->create(v_cls), tmp102)));
           (v_cls = tmp103);
         }
       }
@@ -7292,8 +7292,8 @@ Variant c_reflectionproperty::ti_export(const char* cls, Variant v_cls, CVarRef 
 
   if (!(x_is_object(v_cls))) {
     {
-      c_reflectionclass *tmp105 = NEWOBJ(c_reflectionclass)();
-      p_reflectionclass tmp106((p_reflectionclass(tmp105->create(v_cls))));
+      p_reflectionclass tmp105 = NEWOBJ(c_reflectionclass)();
+      p_reflectionclass tmp106(((tmp105->create(v_cls), tmp105)));
       (v_cls = tmp106);
     }
   }
@@ -7401,8 +7401,8 @@ Variant c_reflectionproperty::t_getdeclaringclass() {
     }
   }
   {
-    c_reflectionclass *tmp117 = NEWOBJ(c_reflectionclass)();
-    return p_reflectionclass(tmp117->create(m_info.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)));
+    p_reflectionclass tmp117 = NEWOBJ(c_reflectionclass)();
+    return (tmp117->create(m_info.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)), tmp117);
   }
 } /* function */
 /* SRC: classes/reflection.php line 642 */
@@ -8119,8 +8119,8 @@ void c_reflectionfunction::t___construct(Variant v_name) {
   if (empty(m_info)) {
     {
       {
-        c_reflectionexception *tmp118 = NEWOBJ(c_reflectionexception)();
-        throw_exception(p_reflectionexception(tmp118->create(concat3("Function ", toString(v_name), " does not exist"))));
+        p_reflectionexception tmp118 = NEWOBJ(c_reflectionexception)();
+        throw_exception((tmp118->create(concat3("Function ", toString(v_name), " does not exist")), tmp118));
       }
     }
   }
@@ -8138,8 +8138,8 @@ Variant c_reflectionfunction::ti_export(const char* cls, CVarRef v_name, CVarRef
   String v_str;
 
   {
-    c_reflectionfunction *tmp119 = NEWOBJ(c_reflectionfunction)();
-    p_reflectionfunction tmp120((p_reflectionfunction(tmp119->create(v_name))));
+    p_reflectionfunction tmp119 = NEWOBJ(c_reflectionfunction)();
+    p_reflectionfunction tmp120(((tmp119->create(v_name), tmp119)));
     (v_obj = tmp120);
   }
   (v_str = (toString(v_obj)));
@@ -8821,8 +8821,8 @@ Variant c_reflectionparameter::ti_export(const char* cls, CVarRef v_func, CVarRe
   String v_str;
 
   {
-    c_reflectionparameter *tmp125 = NEWOBJ(c_reflectionparameter)();
-    p_reflectionparameter tmp126((p_reflectionparameter(tmp125->create(v_func, v_param))));
+    p_reflectionparameter tmp125 = NEWOBJ(c_reflectionparameter)();
+    p_reflectionparameter tmp126(((tmp125->create(v_func, v_param), tmp125)));
     (v_obj = tmp126);
   }
   (v_str = (toString(v_obj)));
@@ -8853,8 +8853,8 @@ Variant c_reflectionparameter::t_getdeclaringclass() {
     }
   }
   {
-    c_reflectionclass *tmp127 = NEWOBJ(c_reflectionclass)();
-    return p_reflectionclass(tmp127->create(m_info.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)));
+    p_reflectionclass tmp127 = NEWOBJ(c_reflectionclass)();
+    return (tmp127->create(m_info.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)), tmp127);
   }
 } /* function */
 /* SRC: classes/reflection.php line 55 */
@@ -8866,8 +8866,8 @@ Variant c_reflectionparameter::t_getclass() {
     }
   }
   {
-    c_reflectionclass *tmp128 = NEWOBJ(c_reflectionclass)();
-    return p_reflectionclass(tmp128->create(m_info.rvalAt("type", 0x508FC7C8724B760ALL, true, true)));
+    p_reflectionclass tmp128 = NEWOBJ(c_reflectionclass)();
+    return (tmp128->create(m_info.rvalAt("type", 0x508FC7C8724B760ALL, true, true)), tmp128);
   }
 } /* function */
 /* SRC: classes/reflection.php line 62 */

@@ -32,18 +32,18 @@ namespace HPHP {
 #define FORWARD_DECLARE_CLASS(cls)                      \
   class c_##cls;                                        \
   typedef SmartObject<c_##cls> p_##cls;                 \
-  typedef SmartObject<c_##cls> sp_##cls;                \
+  typedef SmartObject<c_##cls> sp_##cls                 \
 
 #define FORWARD_DECLARE_INTERFACE(cls)                  \
   class c_##cls;                                        \
-  typedef SmartInterface<c_##cls> p_##cls;              \
+  typedef SmartInterface<c_##cls> p_##cls               \
 
 #define FORWARD_DECLARE_GENERIC_INTERFACE(cls)          \
   class c_##cls;                                        \
-  typedef Object               p_##cls;                 \
+  typedef Object               p_##cls                  \
 
 #define FORWARD_DECLARE_REDECLARED_CLASS(cls)           \
-  class cs_##cls;                                       \
+  class cs_##cls                                        \
 
 #define BEGIN_CLASS_MAP(cls)                            \
   public:                                               \
@@ -163,7 +163,7 @@ namespace HPHP {
   }                                                                     \
 
 #define DECLARE_CLASS_COMMON(cls, originalName) \
-  DECLARE_OBJECT_ALLOCATION(c_##cls);                                   \
+  DECLARE_OBJECT_ALLOCATION(c_##cls)                                    \
   protected:                                                            \
   ObjectData *cloneImpl();                                              \
   void cloneSet(c_##cls *cl);                                           \

@@ -58,7 +58,7 @@ int64 f_ftok(CStrRef pathname, CStrRef proj) {
 
 class MessageQueue : public ResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(MessageQueue);
+  DECLARE_OBJECT_ALLOCATION(MessageQueue)
 
   int64 key;
   int id;

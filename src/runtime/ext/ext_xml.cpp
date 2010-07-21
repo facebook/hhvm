@@ -26,7 +26,7 @@ IMPLEMENT_DEFAULT_EXTENSION(xml);
 
 class XmlParser : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(XmlParser);
+  DECLARE_OBJECT_ALLOCATION(XmlParser)
   XmlParser();
   virtual ~XmlParser();
   void cleanupImpl();

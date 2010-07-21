@@ -28,12 +28,12 @@ namespace HPHP {
 // 1. Constants
 
 // 2. Classes
-FORWARD_DECLARE_CLASS(splfileobject)
+FORWARD_DECLARE_CLASS(splfileobject);
 extern const int64 q_splfileobject_DROP_NEW_LINE;
 extern const int64 q_splfileobject_READ_AHEAD;
 extern const int64 q_splfileobject_SKIP_EMPTY;
 extern const int64 q_splfileobject_READ_CSV;
-FORWARD_DECLARE_CLASS(splfileinfo)
+FORWARD_DECLARE_CLASS(splfileinfo);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

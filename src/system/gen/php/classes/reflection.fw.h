@@ -28,30 +28,30 @@ namespace HPHP {
 // 1. Constants
 
 // 2. Classes
-FORWARD_DECLARE_CLASS(reflectionfunctionabstract)
-FORWARD_DECLARE_CLASS(reflectionobject)
+FORWARD_DECLARE_CLASS(reflectionfunctionabstract);
+FORWARD_DECLARE_CLASS(reflectionobject);
 FORWARD_DECLARE_GENERIC_INTERFACE(reflector);
-FORWARD_DECLARE_CLASS(reflectionexception)
-FORWARD_DECLARE_CLASS(reflectionclass)
+FORWARD_DECLARE_CLASS(reflectionexception);
+FORWARD_DECLARE_CLASS(reflectionclass);
 extern const int64 q_reflectionclass_IS_IMPLICIT_ABSTRACT;
 extern const int64 q_reflectionclass_IS_EXPLICIT_ABSTRACT;
 extern const int64 q_reflectionclass_IS_FINAL;
-FORWARD_DECLARE_CLASS(reflectionextension)
-FORWARD_DECLARE_CLASS(reflectionmethod)
+FORWARD_DECLARE_CLASS(reflectionextension);
+FORWARD_DECLARE_CLASS(reflectionmethod);
 extern const int64 q_reflectionmethod_IS_STATIC;
 extern const int64 q_reflectionmethod_IS_PUBLIC;
 extern const int64 q_reflectionmethod_IS_PROTECTED;
 extern const int64 q_reflectionmethod_IS_PRIVATE;
 extern const int64 q_reflectionmethod_IS_ABSTRACT;
 extern const int64 q_reflectionmethod_IS_FINAL;
-FORWARD_DECLARE_CLASS(reflectionproperty)
+FORWARD_DECLARE_CLASS(reflectionproperty);
 extern const int64 q_reflectionproperty_IS_STATIC;
 extern const int64 q_reflectionproperty_IS_PUBLIC;
 extern const int64 q_reflectionproperty_IS_PROTECTED;
 extern const int64 q_reflectionproperty_IS_PRIVATE;
-FORWARD_DECLARE_CLASS(reflectionfunction)
+FORWARD_DECLARE_CLASS(reflectionfunction);
 extern const int64 q_reflectionfunction_IS_DEPRECATED;
-FORWARD_DECLARE_CLASS(reflectionparameter)
+FORWARD_DECLARE_CLASS(reflectionparameter);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

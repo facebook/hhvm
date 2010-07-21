@@ -859,7 +859,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
   bool system = (cg.getOutput() == CodeGenerator::SystemCPP);
 
   if (!system) {
-    cg_printf("IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(GlobalVariables);\n");
+    cg_printf("IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(GlobalVariables)\n");
   }
 
   const char *clsname = system ? "SystemGlobals" : "GlobalVariables";

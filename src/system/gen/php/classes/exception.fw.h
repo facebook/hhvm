@@ -28,21 +28,21 @@ namespace HPHP {
 // 1. Constants
 
 // 2. Classes
-FORWARD_DECLARE_CLASS(unexpectedvalueexception)
-FORWARD_DECLARE_CLASS(overflowexception)
-FORWARD_DECLARE_CLASS(outofboundsexception)
-FORWARD_DECLARE_CLASS(logicexception)
-FORWARD_DECLARE_CLASS(rangeexception)
-FORWARD_DECLARE_CLASS(invalidargumentexception)
-FORWARD_DECLARE_CLASS(underflowexception)
-FORWARD_DECLARE_CLASS(outofrangeexception)
-FORWARD_DECLARE_CLASS(badmethodcallexception)
-FORWARD_DECLARE_CLASS(runtimeexception)
-FORWARD_DECLARE_CLASS(exception)
-FORWARD_DECLARE_CLASS(errorexception)
-FORWARD_DECLARE_CLASS(badfunctioncallexception)
-FORWARD_DECLARE_CLASS(lengthexception)
-FORWARD_DECLARE_CLASS(domainexception)
+FORWARD_DECLARE_CLASS(unexpectedvalueexception);
+FORWARD_DECLARE_CLASS(overflowexception);
+FORWARD_DECLARE_CLASS(outofboundsexception);
+FORWARD_DECLARE_CLASS(logicexception);
+FORWARD_DECLARE_CLASS(rangeexception);
+FORWARD_DECLARE_CLASS(invalidargumentexception);
+FORWARD_DECLARE_CLASS(underflowexception);
+FORWARD_DECLARE_CLASS(outofrangeexception);
+FORWARD_DECLARE_CLASS(badmethodcallexception);
+FORWARD_DECLARE_CLASS(runtimeexception);
+FORWARD_DECLARE_CLASS(exception);
+FORWARD_DECLARE_CLASS(errorexception);
+FORWARD_DECLARE_CLASS(badfunctioncallexception);
+FORWARD_DECLARE_CLASS(lengthexception);
+FORWARD_DECLARE_CLASS(domainexception);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -28,7 +28,7 @@ IMPLEMENT_DEFAULT_EXTENSION(SimpleXML);
 // it go out of scope.
 class XmlDocWrapper : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(XmlDocWrapper);
+  DECLARE_OBJECT_ALLOCATION(XmlDocWrapper)
 
   // overriding ResourceData
   const char *o_getClassName() const { return "xmlDoc";}

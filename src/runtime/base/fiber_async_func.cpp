@@ -300,7 +300,7 @@ private:
 
 class FiberAsyncFuncHandle : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(FiberAsyncFuncHandle);
+  DECLARE_OBJECT_ALLOCATION(FiberAsyncFuncHandle)
 
   FiberAsyncFuncHandle(CVarRef function, CArrRef params, bool async) {
     m_job = new FiberJob(s_fiber_data.get(), function, params, async);

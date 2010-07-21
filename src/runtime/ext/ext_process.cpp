@@ -401,7 +401,7 @@ String f_system(CStrRef command, Variant return_var /* = null */) {
 
 class ChildProcess : public SweepableResourceData {
 public:
-  DECLARE_OBJECT_ALLOCATION(ChildProcess);
+  DECLARE_OBJECT_ALLOCATION(ChildProcess)
 
   pid_t child;
   Array pipes;

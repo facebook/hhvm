@@ -430,7 +430,7 @@ function generateFuncCPPHeader($func, $f, $method = false, $forceref = false,
     // for the actual static call there is no class name needed
     generateFuncArgsCPPHeader($func, $f, $forceref, false);
     fprintf($f, " {\n    return ti_%s(\"%s\"", $func['name'],
-            $class ? strtolower($class['name']) : $func['name']);
+            strtolower($class['name']));
     generateFuncArgsCall($func, $f, $forceref);
     fprintf($f, ");\n  }\n");
   }

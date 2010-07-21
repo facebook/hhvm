@@ -66,7 +66,7 @@ ExpressionPtr &TokenPayload::exp() {
   if (m_mode == None) {
     m_mode = SingleExpression;
   }
-  ASSERT(m_mode = SingleExpression);
+  ASSERT(m_mode == SingleExpression);
   return m_exp;
 }
 
@@ -74,7 +74,7 @@ StatementPtr &TokenPayload::stmt() {
   if (m_mode == None) {
     m_mode = SingleStatement;
   }
-  ASSERT(m_mode = SingleStatement);
+  ASSERT(m_mode == SingleStatement);
   return m_stmt;
 }
 
@@ -82,7 +82,7 @@ NamePtr &TokenPayload::name() {
   if (m_mode == None) {
     m_mode = SingleName;
   }
-  ASSERT(m_mode = SingleName);
+  ASSERT(m_mode == SingleName);
   return m_name;
 }
 

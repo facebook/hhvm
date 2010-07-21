@@ -688,6 +688,8 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
     const ClassStatement *iface = RequestEvalState::findClass(it->c_str());
     if (iface) {
       iface->semanticCheck(cls);
+    } else if (!f_interface_exists(it->c_str(), false)) {
+      raise_error("Interface '%s' does not exist.", it->c_str());
     }
   }
 }

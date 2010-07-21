@@ -12180,7 +12180,8 @@ bool TestCodeRun::TestAPC() {
 }
 
 bool TestCodeRun::TestInlining() {
-  bool save = Option::AutoInline++;
+  bool save = Option::AutoInline;
+  Option::AutoInline = true;
 
   MVCR("<?php "
        "function id($x) {"

@@ -175,6 +175,8 @@ CC = gcc
 endif
 P_CXX = $(PREFIX) $(CXX)
 P_CC = $(PREFIX) $(CC)
+# override make default for icpcp case
+LD = $(CXX)
 
 # Both $(CC) and $(CXX) will now generate .d dependency files.
 CPPFLAGS += -MMD -fPIC
@@ -365,10 +367,10 @@ CPPFLAGS += -DHAVE_PHPT
 # Linking
 
 AR = $(TIMECMD) ar -crs
-LD = $(TIMECMD) g++ -o
+LD = $(TIMECMD) $(CXX) -o
 
 ifndef NO_GOLD
-LD = $(TIMECMD) g++ -B$(EXT_DIR)/binutils/ -o
+LD = $(TIMECMD) $(CXX) -B$(EXT_DIR)/binutils/ -o
 LDFLAGS += -Xlinker --export-dynamic -Xlinker --no-warn-search-mismatch
 else
 LDFLAGS += -rdynamic

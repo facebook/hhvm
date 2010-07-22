@@ -363,8 +363,9 @@ void f_passthru(CStrRef command, Variant return_var /* = null */) {
 
   char buffer[1024];
   while (true) {
-    int len = fread(buffer, 1, sizeof(buffer) - 1, fp);
-    if (len == 0) break;
+    int len = read(fileno(fp), buffer, sizeof(buffer) - 1);
+    if (len == -1 && errno == EINTR) continue;
+    if (len <= 0) break; // break on error or EOF
     buffer[len] = '\0';
     echo(String(buffer, len, AttachLiteral));
   }

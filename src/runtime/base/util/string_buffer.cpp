@@ -14,6 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/util/alloc.h>
 #include <runtime/base/file/file.h>
@@ -41,15 +45,16 @@ StringBuffer::StringBuffer(const char *filename)
     m_size = sb.st_size;
     m_buffer = (char *)Util::safe_malloc(m_size + 1);
 
-    FILE *f = fopen(filename, "r");
-    if (f) {
+    int fd = ::open(filename, O_RDONLY);
+    if (fd != -1) {
       while (m_pos < m_size) {
         int buffer_size = m_size - m_pos;
-        int len = fread(m_buffer + m_pos, 1, buffer_size, f);
-        if (len == 0) break;
+        int len = ::read(fd, m_buffer + m_pos, buffer_size);
+        if (len == -1 && errno == EINTR) continue;
+        if (len <= 0) break;
         m_pos += len;
       }
-      fclose(f);
+      ::close(fd);
     }
   }
   #ifdef TAINTED

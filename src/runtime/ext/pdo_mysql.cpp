@@ -413,7 +413,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
     pdo_err = &error_code;
   }
 
-  if (stmt) {
+  if (stmt && stmt->stmt()) {
     einfo->errcode = mysql_stmt_errno(stmt->stmt());
   } else {
     einfo->errcode = mysql_errno(m_server);
@@ -447,11 +447,13 @@ int PDOMySqlConnection::handleError(const char *file, int line,
     return false;
   }
 
-  if (stmt) {
+  if (stmt && stmt->stmt()) {
     strcpy(*pdo_err, mysql_stmt_sqlstate(stmt->stmt()));
   } else {
     strcpy(*pdo_err, mysql_sqlstate(m_server));
   }
+
+  pdo_raise_impl_error(stmt->dbh, NULL, pdo_err[0], einfo->errmsg);
 
   return einfo->errcode;
 }

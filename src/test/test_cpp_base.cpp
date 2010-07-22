@@ -44,7 +44,6 @@ bool TestCppBase::RunTests(const std::string &which) {
   RUN_TEST(TestArray);
   RUN_TEST(TestObject);
   RUN_TEST(TestVariant);
-  RUN_TEST(TestListAssignment);
 #ifndef DEBUGGING_SMART_ALLOCATOR
   RUN_TEST(TestMemoryManager);
 #endif
@@ -824,18 +823,6 @@ bool TestCppBase::TestVariant() {
     lval(arr.lvalAt("name")).lvalAt(0) = 1.2;
     VS(arr, CREATE_MAP2(0, "test", "name", CREATE_VECTOR1(1.2)));
   }
-
-  return Count(true);
-}
-
-bool TestCppBase::TestListAssignment() {
-  Array arr = CREATE_VECTOR3("coffee", "brown", "caffeine");
-  Variant v;
-  list_assign(arr,
-              new ListAssignmentElement(lval(v.lvalAt(1)), 1, -1),
-              new ListAssignmentElement(lval(v.lvalAt(2)), 2, -1),
-              (ListAssignmentElement*)NULL);
-  VS(v, CREATE_MAP2(2, "caffeine", 1, "brown"));
 
   return Count(true);
 }

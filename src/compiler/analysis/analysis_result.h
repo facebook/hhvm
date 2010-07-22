@@ -94,6 +94,10 @@ public:
   void setPackage(Package *package) { m_package = package;}
   void setParseOnDemand(bool v) { m_parseOnDemand = v;}
   bool isParseOnDemand() { return m_package && m_parseOnDemand;}
+  void setParseOnDemandDirs(const std::vector<std::string> &dirs) {
+    ASSERT(m_package && !m_parseOnDemand);
+    m_parseOnDemandDirs = dirs;
+  }
 
   /**
    * create_function() generates extra PHP code that defines the lambda.
@@ -372,6 +376,7 @@ public:
 private:
   Package *m_package;
   bool m_parseOnDemand;
+  std::vector<std::string> m_parseOnDemandDirs;
   Phase m_phase;
   int m_newlyInferred;
   DependencyGraphPtr m_dependencyGraph;
@@ -452,6 +457,11 @@ private:
   int m_funcTableSize;
   CodeGenerator::MapIntToStringVec m_funcTable;
   bool m_system;
+
+  /**
+   * Checks whether the file is in one of the on-demand parsing directories.
+   */
+  bool inParseOnDemandDirs(const std::string &filename);
 
   /**
    * Checks circular class derivations that can cause stack overflows for

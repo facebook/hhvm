@@ -89,6 +89,13 @@ void AnalysisResult::setFileScope(FileScopePtr fileScope) {
   m_fileScopes.push_back(fileScope);
 }
 
+bool AnalysisResult::inParseOnDemandDirs(const string &filename) {
+  for (size_t i = 0; i < m_parseOnDemandDirs.size(); i++) {
+    if (filename.find(m_parseOnDemandDirs[i]) == 0) return true;
+  }
+  return false;
+}
+
 FileScopePtr AnalysisResult::findFileScope(const std::string &name,
                                            bool parseOnDemand) {
   StringToFileScopePtrMap::const_iterator iter = m_files.find(name);
@@ -101,7 +108,7 @@ FileScopePtr AnalysisResult::findFileScope(const std::string &name,
   }
 
   FileScopePtr curr = m_file;
-  if (parseOnDemand && m_parseOnDemand &&
+  if (parseOnDemand && (m_parseOnDemand || inParseOnDemandDirs(name)) &&
       m_package && m_package->parse(name.c_str())) {
     m_file = curr;
     iter = m_files.find(name);

@@ -44,7 +44,7 @@ public:
   void addAllFiles(bool force); // add from Option::PackageDirectories/Files
 
   void addSourceFile(const char *fileName);
-  void addListFiles(const char *listFileName);
+  void addInputList(const char *listFileName);
   void addStaticFile(const char *fileName);
   void addDirectory(const std::string &path, bool force);
   void addDirectory(const char *path, bool force);

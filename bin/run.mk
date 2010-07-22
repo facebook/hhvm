@@ -25,6 +25,13 @@ LIBS = $(SEP_EXTENSION_LIBS) $(HPHP_LIB)/libhphp_runtime.a $(ALL_LIBS)
 include $(HPHP_HOME)/src/rules.mk
 
 ifdef HPHP_BUILD_LIBRARY
+RUNTIME_DIRS = \
+	$(HPHP_HOME)/src/runtime/base \
+	$(HPHP_HOME)/src/runtime/ext \
+	$(HPHP_HOME)/src/runtime/eval \
+	$(HPHP_HOME)/src/system/gen \
+	$(HPHP_HOME)/src/util
+ADDITIONAL_OBJS += $(shell find $(RUNTIME_DIRS) -name "*.o")
 TARGETS = $(STATIC_LIB) $(SHARED_LIB)
 else
 TARGETS = $(APP_TARGET)

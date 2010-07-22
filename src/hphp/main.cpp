@@ -67,6 +67,8 @@ struct ProgramOptions {
   vector<string> cfiles;
   vector<string> cmodules;
   bool parseOnDemand;
+  vector<string> parseOnDemandDirs; // parse these directories on-demand
+                                    // when parseOnDemand=false
   string program;
   string programArgs;
   string branch;
@@ -362,9 +364,13 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
   for (unsigned int i = 0; i < po.excludeFiles.size(); i++) {
     Option::PackageExcludeFiles.insert(po.excludeFiles[i]);
   }
-  size_t rootSize = po.inputDir.size();
   for (unsigned int i = 0; i < po.excludePatterns.size(); i++) {
-    string pattern = po.inputDir + po.excludePatterns[i];
+    Option::PackageExcludePatterns.insert(po.excludePatterns[i]);
+  }
+  size_t rootSize = po.inputDir.size();
+  for (set<string>::const_iterator it = Option::PackageExcludePatterns.begin();
+       it != Option::PackageExcludePatterns.end(); ++it) {
+    string pattern = po.inputDir + *it;
     const char *argv[] = {"", "-L", (char*)po.inputDir.c_str(),
                           "-type", "f", "-regex", pattern.c_str(),
                           NULL};
@@ -517,6 +523,9 @@ int process(const ProgramOptions &po) {
     } else {
       ar->setPackage(&package);
       ar->setParseOnDemand(po.parseOnDemand);
+      if (!po.parseOnDemand) {
+        ar->setParseOnDemandDirs(Option::ParseOnDemandDirs);
+      }
       if (po.modules.empty() && po.fmodules.empty() &&
           po.ffiles.empty() && po.inputs.empty() && po.inputList.empty()) {
         package.addAllFiles(false);
@@ -540,7 +549,7 @@ int process(const ProgramOptions &po) {
           package.addSourceFile(po.inputs[i].c_str());
         }
         if (!po.inputList.empty()) {
-          package.addListFiles(po.inputList.c_str());
+          package.addInputList(po.inputList.c_str());
         }
       }
     }

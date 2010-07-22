@@ -37,7 +37,10 @@ set<string> Option::PackageFiles;
 set<string> Option::PackageExcludeDirs;
 set<string> Option::PackageExcludeFiles;
 set<string> Option::PackageExcludeStaticFiles;
+set<string> Option::PackageExcludePatterns;
 bool Option::CachePHPFile = false;
+
+vector<string> Option::ParseOnDemandDirs;
 
 set<string> Option::AllowedBadPHPIncludes;
 map<string, string> Option::IncludeRoots;
@@ -177,7 +180,6 @@ bool Option::ControlEvalOrder = true;
 bool Option::AllDynamic = true;
 bool Option::AllVolatile = false;
 
-std::string Option::FlibDirectory;
 StringBag Option::OptionStrings;
 
 bool Option::GenerateSourceInfo = false;
@@ -190,6 +192,8 @@ bool Option::AutoInline = false;
 
 bool Option::FlAnnotate = false;
 bool Option::SystemGen = false;
+
+void (*Option::m_hookHandler)(Hdf &config);
 
 ///////////////////////////////////////////////////////////////////////////////
 // load from a PHP file
@@ -229,13 +233,16 @@ void Option::Load(Hdf &config) {
   LoadRootHdf(config["IncludeRoots"], IncludeRoots);
   LoadRootHdf(config["AutoloadRoots"], AutoloadRoots);
 
+  config["PackageFiles"].get(PackageFiles);
   config["IncludeSearchPaths"].get(IncludeSearchPaths);
   config["PackageDirectories"].get(PackageDirectories);
   config["PackageExcludeDirs"].get(PackageExcludeDirs);
   config["PackageExcludeFiles"].get(PackageExcludeFiles);
-
   config["PackageExcludeStaticFiles"].get(PackageExcludeStaticFiles);
+  config["PackageExcludePatterns"].get(PackageExcludePatterns);
   CachePHPFile = config["CachePHPFile"].getBool();
+
+  config["ParseOnDemandDirs"].get(ParseOnDemandDirs);
 
   {
     Hdf cg = config["CodeGeneration"];
@@ -332,7 +339,6 @@ void Option::Load(Hdf &config) {
   if (LiteralStringFileCount <= 0) LiteralStringFileCount = 1;
   ScalarArrayOverflowLimit = config["ScalarArrayOverflowLimit"].getInt32(2000);
   if (ScalarArrayOverflowLimit <= 0) ScalarArrayOverflowLimit = 2000;
-  FlibDirectory = config["FlibDirectory"].getString();
   EnableXHP = config["EnableXHP"].getBool();
   RTTIOutputFile = config["RTTIOutputFile"].getString();
   EnableEval = (EvalLevel)config["EnableEval"].getByte(0);
@@ -346,6 +352,8 @@ void Option::Load(Hdf &config) {
   LocalCopyProp      = config["LocalCopyProp"].getBool(true);
   StringLoopOpts     = config["StringLoopOpts"].getBool(true);
   AutoInline         = config["AutoInline"].getBool(false);
+
+  if (m_hookHandler) m_hookHandler(config);
 
   OnLoad();
 }

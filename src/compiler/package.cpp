@@ -74,7 +74,7 @@ void Package::addSourceFile(const char *fileName) {
   m_files.add(Util::canonicalize(fileName).c_str());
 }
 
-void Package::addListFiles(const char *listFileName) {
+void Package::addInputList(const char *listFileName) {
   ASSERT(listFileName && *listFileName);
   FILE *f = fopen(listFileName, "r");
   if (f == NULL) {
@@ -84,8 +84,15 @@ void Package::addListFiles(const char *listFileName) {
   char fileName[PATH_MAX];
   while (fgets(fileName, sizeof(fileName), f)) {
     int len = strlen(fileName);
-    if (fileName[len - 1] == '\n') fileName[len-1] = '\0';
-    addSourceFile(fileName);
+    if (fileName[len - 1] == '\n') fileName[len - 1] = '\0';
+    len = strlen(fileName);
+    if (len) {
+      if (fileName[len - 1] == '/') {
+        addDirectory(fileName, false);
+      } else {
+        addSourceFile(fileName);
+      }
+    }
   }
   fclose(f);
 }

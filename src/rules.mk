@@ -145,6 +145,9 @@ MONO_TARGETS = $(filter-out $(PROJECT_NAME), $(patsubst %.cpp, %, $(wildcard *.c
 # external shared libraries
 EXTERNAL =
 
+# additional objects that are linked into the static library
+ADDITIONAL_OBJS =
+
 ###############################################################################
 # Compilation
 
@@ -725,7 +728,7 @@ $(SHARED_LIB): $(OBJECTS)
 			$(SO_LDFLAGS) -o $@ $(OBJECTS) $(EXTERNAL)
 
 $(STATIC_LIB): $(OBJECTS)
-	$(AR_CMD) $@ $(OBJECTS)
+	$(AR_CMD) $@ $(OBJECTS) $(ADDITIONAL_OBJS)
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 	$(LD_CMD) -o $@ $(LDFLAGS) $< $(LIBS)
@@ -739,7 +742,7 @@ $(SHARED_LIB): $(OBJECTS)
 
 $(STATIC_LIB): $(OBJECTS)
 	@echo 'Linking $@ ...'
-	$(V)$(AR_CMD) $@ $(OBJECTS)
+	$(V)$(AR_CMD) $@ $(OBJECTS) $(ADDITIONAL_OBJS)
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 	@echo 'Linking $@ ...'

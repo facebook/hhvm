@@ -24,7 +24,7 @@ using namespace std;
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
                                    const string &value)
-  : Expression(EXPRESSION_PASS), m_value(value) {
+  : Expression(EXPRESSION_PASS), m_value(value), m_binary(false) {
   switch (type) {
   case T_NUM_STRING: {
     const char *s = value.c_str();
@@ -48,6 +48,7 @@ ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
   }
   case T_STRING :
     m_kind = SString;
+    m_binary = m_value.find('\0') != string::npos;
     break;
   default:
     ASSERT(false);
@@ -74,7 +75,11 @@ Variant ScalarExpression::getValue() const {
   case SBool:
     return (bool)m_num.num;
   case SString:
-    return String(m_value);
+    if (!m_binary) {
+      return m_value.c_str();
+    } else {
+      return String(m_value.c_str(), m_value.size(), AttachLiteral);
+    }
   case SInt:
     return m_num.num;
   case SDouble:

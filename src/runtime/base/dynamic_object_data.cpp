@@ -103,7 +103,12 @@ Variant DynamicObjectData::o_get(CStrRef propName, int64 hash,
     if (o_properties && o_properties->exists(propName, hash)) {
       return o_properties->rvalAt(propName, hash);
     }
-    return root->doGet(propName, error);
+    if (root->getAttribute(InGet)) {
+      return ObjectData::doGet(propName, error);
+    } else {
+      AttributeSetter a(InGet, root);
+      return root->doGet(propName, error);
+    }
   }
 }
 

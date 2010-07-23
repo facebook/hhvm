@@ -143,7 +143,12 @@ Variant ObjectData::o_getPublic(CStrRef propName, int64 hash,
   if (o_properties && o_properties->exists(propName, hash, true)) {
     return o_properties->rvalAt(propName, hash, false, true);
   }
-  return doGet(propName, error);
+  if (getAttribute(InGet)) {
+    return ObjectData::doGet(propName, error);
+  } else {
+    AttributeSetter a(InGet, this);
+    return doGet(propName, error);
+  }
 }
 
 Variant ObjectData::o_getUnchecked(CStrRef propName, int64 hash,

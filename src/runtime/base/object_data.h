@@ -59,6 +59,7 @@ class ObjectData : public Countable {
     InDestructor  = 2, // __destruct()
     HasSleep      = 4, // __sleep()
     InSet         = 8, // __set()
+    InGet         = 16, // __get()
   };
 
   ObjectData(bool isResource = false);

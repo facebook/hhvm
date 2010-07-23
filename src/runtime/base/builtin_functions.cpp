@@ -289,6 +289,9 @@ void throw_infinite_loop_exception() {
 }
 void throw_infinite_recursion_exception() {
   if (!RuntimeOption::NoInfiniteRecursionDetection) {
+    // Reset profiler otherwise it might recurse further causing segfault
+    DECLARE_THREAD_INFO
+    info->m_profiler = NULL;
     throw UncatchableException("infinite recursion detected");
   }
 }

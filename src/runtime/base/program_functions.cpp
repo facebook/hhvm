@@ -813,12 +813,19 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
         invoke_file(cmd.c_str(), true, get_variable_table());
       }
       ret = true;
-      context->onShutdownPreSend();
     } catch (...) {
       ret = handle_exception(context, errorMsg, InvokeException, error);
     }
+    if (ret) {
+      try {
+        context->onShutdownPreSend();
+      } catch (...) {
+        ret = handle_exception(context, errorMsg, InvokeException, error);
+      }
+    }
   } catch (...) {
     ret = handle_exception(context, errorMsg, HandlerException, error);
+    context->obEndAll();
   }
   if (isServer) context->setCwd(oldCwd);
   return ret;
@@ -834,7 +841,7 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
     context->onRequestShutdown();
   }
   context->obProtect(false);
-  context->obEnd();
+  context->obEndAll();
 }
 
 void hphp_session_exit() {

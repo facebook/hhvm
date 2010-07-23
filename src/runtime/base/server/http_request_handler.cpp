@@ -304,6 +304,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
         errorPage = RuntimeOption::ErrorDocument500;
       }
       if (!errorPage.empty()) {
+        context->obProtect(false);
         context->obEndAll();
         context->obStart();
         context->obProtect(true);

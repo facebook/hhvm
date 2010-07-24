@@ -4579,6 +4579,13 @@ bool TestCodeRun::TestDynamicVariables() {
   MVCR("<?php $a = null; extract(array('a' => 'ok', 'b' => 'no'), EXTR_PREFIX_IF_EXISTS, 'p'); var_dump($p_a); var_dump($b); var_dump($p_b);");
   MVCR("<?php $a = 'ok'; extract(array('b' => &$a), EXTR_REFS); $b = 'no'; var_dump($a);");
   MVCR("<?php $a = 'ok'; $arr = array('b' => &$a); extract($arr, EXTR_REFS); $b = 'no'; var_dump($a);");
+  MVCR("<?php\n"
+      "function f() {\n"
+      "  $arr = array(1 => 2, '1d' => 3);\n"
+      "  extract($arr);\n"
+      "  var_dump(get_defined_vars());\n"
+      "}\n"
+      "f();\n");
 
   // compact
   MVCR("<?php function test() { $a = 10; $b = 'test'; "

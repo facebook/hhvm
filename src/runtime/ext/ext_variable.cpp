@@ -165,6 +165,9 @@ int extract(LVariableTable *variables, CArrRef var_array,
       break;
     }
 
+    // skip invalid variable names, as in PHP
+    if (!name.isValidVariableName()) continue;
+
     if (reference) {
       variables->get(name) = ref(iter.secondRef());
     } else {

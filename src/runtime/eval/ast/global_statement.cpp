@@ -32,7 +32,7 @@ void GlobalStatement::eval(VariableEnvironment &env) const {
   for (std::vector<NamePtr>::const_iterator it = m_vars.begin();
        it != m_vars.end(); ++it) {
     String n = (*it)->get(env);
-    env.flagGlobal(n.data(), (*it)->hash());
+    env.flagGlobal(n, (*it)->hash());
   }
 }
 

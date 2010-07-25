@@ -19,6 +19,7 @@
 #include <runtime/base/server/transport.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/static_content_cache.h>
+#include <runtime/base/string_util.h>
 
 using namespace std;
 
@@ -49,6 +50,7 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
                          const string &sourceRoot,
                          const string &pathTranslation, const char *url) {
   splitURL(url, m_originalURL, m_queryString);
+  m_originalURL = StringUtil::UrlDecode(m_originalURL, false);
 
   // Fast path for files that exist
   String canon = Util::canonicalize(string(m_originalURL.c_str(),

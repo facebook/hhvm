@@ -4506,48 +4506,58 @@ void c_exception::t___init__() {
   Variant v_top;
   Variant v_frame;
 
-  (m_trace = x_debug_backtrace());
-  LOOP_COUNTER(1);
+  {
+    const Array &tmp1((x_debug_backtrace()));
+    (m_trace = tmp1);
+  }
+  LOOP_COUNTER(2);
   {
     while (!(empty(m_trace))) {
-      LOOP_COUNTER_CHECK(1);
+      LOOP_COUNTER_CHECK(2);
       {
         {
-          Variant tmp2((m_trace.rvalAt(0LL, 0x77CFA1EEF01BCA90LL, true)));
-          (v_top = tmp2);
+          Variant tmp3((m_trace.rvalAt(0LL, 0x77CFA1EEF01BCA90LL, true)));
+          (v_top = tmp3);
         }
         {
-          bool tmp3;
+          bool tmp4;
           {
-            bool tmp4 = (empty(v_top, "class", 0x45397FE5C82CBD12LL, true));
-            if (!tmp4) {
-              bool tmp5 = ((toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true)), "__init__")) && toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true)), "__construct"))));
-              if (tmp5) {
-                String tmp6((toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true))));
-                tmp5 = (toBoolean(x_strcasecmp(tmp6, toString(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)))));
+            bool tmp5 = (empty(v_top, "class", 0x45397FE5C82CBD12LL, true));
+            if (!tmp5) {
+              bool tmp6 = ((toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true)), "__init__")) && toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true)), "__construct"))));
+              if (tmp6) {
+                String tmp7((toString(v_top.rvalAt("function", 0x736D912A52413931LL, true, true))));
+                String tmp8((toString(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
+                tmp6 = (toBoolean(x_strcasecmp(tmp7, tmp8)));
               }
-              tmp4 = ((tmp5));
+              tmp5 = ((tmp6));
             }
-            tmp3 = ((tmp4 || ((toBoolean(x_strcasecmp(toString(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)), "exception")) && !(x_is_subclass_of(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true), "exception"))))));
+            tmp4 = ((tmp5 || ((toBoolean(x_strcasecmp(toString(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)), "exception")) && !(x_is_subclass_of(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true), "exception"))))));
           }
-          if (tmp3) {
+          if (tmp4) {
             {
               break;
             }
           }
         }
         {
-          const Variant &tmp7((x_array_shift(ref(lval(m_trace)))));
-          (v_frame = tmp7);
+          const Variant &tmp9((x_array_shift(ref(lval(m_trace)))));
+          (v_frame = tmp9);
         }
       }
     }
   }
   if (isset(v_frame, "file", 0x08C19339767C0884LL, true)) {
-    (m_file = v_frame.rvalAt("file", 0x08C19339767C0884LL, true, true));
+    {
+      Variant tmp10((v_frame.rvalAt("file", 0x08C19339767C0884LL, true, true)));
+      (m_file = tmp10);
+    }
   }
   if (isset(v_frame, "line", 0x21093C71DDF9728CLL, true)) {
-    (m_line = v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true));
+    {
+      Variant tmp11((v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true)));
+      (m_line = tmp11);
+    }
   }
 } /* function */
 /* SRC: classes/exception.php line 37 */
@@ -4595,38 +4605,39 @@ String c_exception::t_gettraceasstring() {
   (v_i = 0LL);
   (v_s = "");
   {
-    LOOP_COUNTER(8);
-    Variant map9 = t_gettrace();
+    LOOP_COUNTER(12);
+    Variant map13 = t_gettrace();
     {
       StringBuffer tmp_sbuf_v_s(512);
-      for (ArrayIterPtr iter10 = map9.begin("exception"); !iter10->end(); iter10->next()) {
-        LOOP_COUNTER_CHECK(8);
-        iter10->second(v_frame);
+      for (ArrayIterPtr iter14 = map13.begin("exception"); !iter14->end(); iter14->next()) {
+        LOOP_COUNTER_CHECK(12);
+        iter14->second(v_frame);
         {
           if (!(x_is_array(v_frame))) {
             continue;
           }
           {
-            StringBuffer tmp11_buf;
-            tmp11_buf.append("#", 1);
-            tmp11_buf.append(toString(v_i));
-            tmp11_buf.append(" ", 1);
-            tmp11_buf.append(toString(v_frame.rvalAt("file", 0x08C19339767C0884LL, true, true)));
-            tmp11_buf.append("(", 1);
-            tmp11_buf.append(toString(v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true)));
-            tmp11_buf.append("): ", 3);
-            Variant tmp12;
+            StringBuffer tmp15_buf;
+            tmp15_buf.append("#", 1);
+            tmp15_buf.append(toString(v_i));
+            tmp15_buf.append(" ", 1);
+            tmp15_buf.append(toString(v_frame.rvalAt("file", 0x08C19339767C0884LL, true, true)));
+            tmp15_buf.append("(", 1);
+            tmp15_buf.append(toString(v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true)));
+            tmp15_buf.append("): ", 3);
+            Variant tmp16;
             if (isset(v_frame, "class", 0x45397FE5C82CBD12LL, true)) {
-              String tmp13((toString(v_frame.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
-              tmp12 = (concat(tmp13, toString(v_frame.rvalAt("type", 0x508FC7C8724B760ALL, true, true))));
+              String tmp17((toString(v_frame.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
+              String tmp18((toString(v_frame.rvalAt("type", 0x508FC7C8724B760ALL, true, true))));
+              tmp16 = (concat(tmp17, tmp18));
             } else {
-              tmp12 = ("");
+              tmp16 = ("");
             }
-            tmp11_buf.append(toString(tmp12));
-            tmp11_buf.append(toString(v_frame.rvalAt("function", 0x736D912A52413931LL, true, true)));
-            tmp11_buf.append("()\n", 3);
-            CStrRef tmp11(tmp11_buf.detach());
-            tmp_sbuf_v_s.add(tmp11);
+            tmp15_buf.append(toString(tmp16));
+            tmp15_buf.append(toString(v_frame.rvalAt("function", 0x736D912A52413931LL, true, true)));
+            tmp15_buf.append("()\n", 3);
+            CStrRef tmp15(tmp15_buf.detach());
+            tmp_sbuf_v_s.add(tmp15);
           }
           v_i++;
         }

@@ -370,7 +370,10 @@ void c_directory::t___construct(Variant v_path) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::__construct);
   bool oldInCtor = gasInCtor(true);
   (m_path = v_path);
-  (m_handle = x_opendir(toString(v_path)));
+  {
+    const Variant &tmp1((x_opendir(toString(v_path))));
+    (m_handle = tmp1);
+  }
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/directory.php line 12 */

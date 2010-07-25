@@ -341,6 +341,11 @@ class ReflectionClass implements Reflector {
     $ret->info  = $methods[$lname];
     $ret->name  = $lname;
     $ret->class = $this->info['name'];
+    if ($lname == '__construct' ||
+        (!strcasecmp($lname, $ret->class) &&
+         !$this->hasMethod("__construct"))) {
+      $ret->info['constructor'] = true;
+    }
     return $ret;
   }
 
@@ -722,7 +727,7 @@ implements Reflector {
   }
 
   public function isConstructor() {
-    return $this->getName() == '__construct';
+    return isset($this->info['constructor']);
   }
 
   public function isDestructor() {

@@ -726,32 +726,38 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
                     m_bucketMap[0].isSubLast(a)) {
                   rep->setReplacement(value);
                   m_replaced++;
-                } else if (!value->hasEffect()) {
-                  m_noAdd = true;
-                  ExpressionPtr v = canonicalizeRecurNonNull(value->clone());
-                  m_noAdd = false;
-                  if (v->getCanonID() == value->getCanonID()) {
-                    if (a->isUnused()) {
-                      value = value->replaceValue(
-                        canonicalizeRecurNonNull(
-                          Expression::MakeConstant(m_arp, value->getLocation(),
-                                                   "null")));
-                      a->setNthKid(1, value);
-                      m_changes++;
-                    } else {
-                      ExpressionListPtr el(
-                        new ExpressionList(a->getLocation(),
-                                           Expression::KindOfExpressionList,
-                                           ExpressionList::ListKindWrapped));
-                      a = spc(AssignmentExpression, a->clone());
-                      el->addElement(a);
-                      el->addElement(a->getValue());
-                      a->setNthKid(
-                        1, Expression::MakeConstant(m_arp,
-                                                    value->getLocation(),
-                                                    "null"));
-                      rep->setReplacement(el);
-                      m_replaced++;
+                } else {
+                  ExpressionPtr rhs = value;
+                  while (rhs->is(Expression::KindOfAssignmentExpression)) {
+                    rhs = spc(AssignmentExpression, rhs)->getValue();
+                  }
+                  if (!rhs->hasEffect()) {
+                    m_noAdd = true;
+                    ExpressionPtr v = canonicalizeRecurNonNull(rhs->clone());
+                    m_noAdd = false;
+                    if (v->getCanonID() == rhs->getCanonID()) {
+                      if (a->isUnused() && rhs == value) {
+                        value = value->replaceValue(
+                          canonicalizeRecurNonNull(
+                            Expression::MakeConstant(
+                              m_arp, value->getLocation(), "null")));
+                        a->setNthKid(1, value);
+                        m_changes++;
+                      } else {
+                        ExpressionListPtr el(
+                          new ExpressionList(a->getLocation(),
+                                             Expression::KindOfExpressionList,
+                                             ExpressionList::ListKindWrapped));
+                        a = spc(AssignmentExpression, a->clone());
+                        el->addElement(a);
+                        el->addElement(a->getValue());
+                        a->setNthKid(
+                          1, Expression::MakeConstant(m_arp,
+                                                      value->getLocation(),
+                                                      "null"));
+                        rep->setReplacement(el);
+                        m_replaced++;
+                      }
                     }
                   }
                 }
@@ -795,6 +801,9 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
               rep->getKindOf() == Expression::KindOfAssignmentExpression) {
             AssignmentExpressionPtr ae = spc(AssignmentExpression,rep);
             ExpressionPtr rhs = ae->getValue();
+            while (rhs->is(Expression::KindOfAssignmentExpression)) {
+              rhs = spc(AssignmentExpression, rhs)->getValue();
+            }
             if (rhs->isScalar()) {
               rhs = rhs->clone();
               getCanonical(rhs);

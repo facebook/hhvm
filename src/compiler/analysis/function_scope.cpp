@@ -1205,9 +1205,11 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (i >= m_minParam) attr |= ClassInfo::IsOptional;
     if (isRefParam(i)) attr |= ClassInfo::IsReference;
 
+    const std::string &tname = m_paramTypeSpecs[i] ?
+      m_paramTypeSpecs[i]->getPHPName() : "";
     cg_printf("(const char *)0x%04X, \"%s\", \"%s\", ",
               attr, m_paramNames[i].c_str(),
-              Util::toLower(m_paramTypes[i]->getPHPName()).c_str());
+              Util::toLower(tname).c_str());
 
     if (i >= m_minParam) {
       MethodStatementPtr m =

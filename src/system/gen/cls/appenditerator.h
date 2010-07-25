@@ -82,7 +82,7 @@ class c_appenditerator : public ExtObjectData {
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
-  public: void t_append(p_iterator v_it);
+  public: void t_append(CVarRef v_it);
   public: Variant t_getinneriterator();
   public: void t_rewind();
   public: bool t_valid();

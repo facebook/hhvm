@@ -1589,8 +1589,10 @@ void c_appenditerator::t___construct() {
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/iterator.php line 290 */
-void c_appenditerator::t_append(p_iterator v_it) {
+void c_appenditerator::t_append(CVarRef v_it) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::append);
+  if(!v_it.instanceof("iterator"))
+    throw_unexpected_argument_type(0,"append","iterator",v_it);
   m_iterators. BIND_CLASS_DOT o_invoke_few_args("append", 0x4DEE4A472DC69EC2LL, 1, v_it);
 } /* function */
 /* SRC: classes/iterator.php line 294 */

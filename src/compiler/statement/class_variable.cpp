@@ -256,7 +256,7 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           var = dynamic_pointer_cast<SimpleVariable>
             (assignment->getVariable());
           ExpressionPtr value = assignment->getValue();
-          if (!value->isScalar()) continue;
+          if (value->containsDynamicConstant(ar)) continue;
           cg_printf("g->%s%s%s%s = ",
                     Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
                     Option::IdPrefix.c_str(), var->getName().c_str());
@@ -285,7 +285,7 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           dynamic_pointer_cast<AssignmentExpression>(exp);
         var = dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
         ExpressionPtr value = assignment->getValue();
-        if (value->isScalar()) continue;
+        if (!value->containsDynamicConstant(ar)) continue;
         value->outputCPPBegin(cg, ar);
         cg_printf("g->%s%s%s%s = ",
                   Option::StaticPropertyPrefix, scope->getId(cg).c_str(),

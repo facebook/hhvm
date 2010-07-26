@@ -78,6 +78,16 @@ void ConstantTable::setValue(AnalysisResultPtr ar, const std::string &name,
   m_values[name] = value;
 }
 
+bool ConstantTable::isRecursivelyDeclared(AnalysisResultPtr ar,
+    const std::string &name) {
+  if (isExplicitlyDeclared(name)) return true;
+  ClassScopePtr parent = findParent(ar, name);
+  if (parent) {
+    return parent->getConstants()->isRecursivelyDeclared(ar, name);
+  }
+  return false;
+}
+
 TypePtr ConstantTable::checkBases(const std::string &name, TypePtr type,
                                   bool coerce, AnalysisResultPtr ar,
                                   ConstructPtr construct,

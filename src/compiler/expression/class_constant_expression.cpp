@@ -59,7 +59,8 @@ bool ClassConstantExpression::containsDynamicConstant(AnalysisResultPtr ar)
   const {
   if (m_class) return true;
   ClassScopePtr cls = ar->findClass(m_className);
-  return !cls || cls->isVolatile();
+  return !cls || cls->isVolatile() ||
+    !cls->getConstants()->isRecursivelyDeclared(ar, m_varName);
 }
 
 void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
@@ -117,7 +118,7 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
     if (cls->isVolatile() || cls->isRedeclaring()) return ExpressionPtr();
   }
   ConstantTablePtr constants = cls->getConstants();
-  if (constants->isExplicitlyDeclared(m_varName)) {
+  if (constants->isRecursivelyDeclared(ar, m_varName)) {
     ConstructPtr decl = constants->getValue(m_varName);
     if (decl) {
       ExpressionPtr value = dynamic_pointer_cast<Expression>(decl);
@@ -188,7 +189,7 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
     ar->getScope()->getVariables()->
       setAttribute(VariableTable::NeedGlobalPointer);
   }
-  if (cls->getConstants()->isExplicitlyDeclared(m_varName)) {
+  if (cls->getConstants()->isRecursivelyDeclared(ar, m_varName)) {
     string name = m_className + "::" + m_varName;
     ConstructPtr decl = cls->getConstants()->getDeclaration(m_varName);
     if (decl) { // No decl means an extension class.

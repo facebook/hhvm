@@ -71,6 +71,13 @@ Variant i_curl_multi_remove_handle(CArrRef params) {
   if (count != 2) return throw_wrong_arguments("curl_multi_remove_handle", count, 2, 2, 1);
   return (f_curl_multi_remove_handle(params[0], params[1]));
 }
+Variant i_memcache_get_server_status(CArrRef params) {
+  FUNCTION_INJECTION(memcache_get_server_status);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("memcache_get_server_status", count, 2, 3, 1);
+  if (count <= 2) return (f_memcache_get_server_status(params[0], params[1]));
+  return (f_memcache_get_server_status(params[0], params[1], params[2]));
+}
 Variant i_mysql_result(CArrRef params) {
   FUNCTION_INJECTION(mysql_result);
   int count __attribute__((__unused__)) = params.size();
@@ -740,6 +747,12 @@ Variant i_realpath(CArrRef params) {
   if (count != 1) return throw_wrong_arguments("realpath", count, 1, 1, 1);
   return (f_realpath(params[0]));
 }
+Variant i_memcache_setoptimeout(CArrRef params) {
+  FUNCTION_INJECTION(memcache_setoptimeout);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("memcache_setoptimeout", count, 2, 2, 1);
+  return (f_memcache_setoptimeout(params[0], params[1]));
+}
 Variant i_stream_filter_append(CArrRef params) {
   FUNCTION_INJECTION(stream_filter_append);
   int count __attribute__((__unused__)) = params.size();
@@ -1278,6 +1291,13 @@ Variant i_log(CArrRef params) {
   if (count <= 1) return (f_log(params[0]));
   return (f_log(params[0], params[1]));
 }
+Variant i_memcache_decrement(CArrRef params) {
+  FUNCTION_INJECTION(memcache_decrement);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("memcache_decrement", count, 2, 3, 1);
+  if (count <= 2) return (f_memcache_decrement(params[0], params[1]));
+  return (f_memcache_decrement(params[0], params[1], params[2]));
+}
 Variant i_drawskewx(CArrRef params) {
   FUNCTION_INJECTION(drawskewx);
   int count __attribute__((__unused__)) = params.size();
@@ -1487,6 +1507,12 @@ Variant i_drawsettextundercolor(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) return throw_wrong_arguments("drawsettextundercolor", count, 2, 2, 1);
   return (f_drawsettextundercolor(params[0], params[1]), null);
+}
+Variant i_memcache_get_version(CArrRef params) {
+  FUNCTION_INJECTION(memcache_get_version);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("memcache_get_version", count, 1, 1, 1);
+  return (f_memcache_get_version(params[0]));
 }
 Variant i_hphp_splfileobject_getflags(CArrRef params) {
   FUNCTION_INJECTION(hphp_splfileobject_getflags);
@@ -1717,6 +1743,13 @@ Variant i_socket_sendto(CArrRef params) {
   if (count <= 5) return (f_socket_sendto(params[0], params[1], params[2], params[3], params[4]));
   return (f_socket_sendto(params[0], params[1], params[2], params[3], params[4], params[5]));
 }
+Variant i_memcache_flush(CArrRef params) {
+  FUNCTION_INJECTION(memcache_flush);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("memcache_flush", count, 1, 2, 1);
+  if (count <= 1) return (f_memcache_flush(params[0]));
+  return (f_memcache_flush(params[0], params[1]));
+}
 Variant i_mb_output_handler(CArrRef params) {
   FUNCTION_INJECTION(mb_output_handler);
   int count __attribute__((__unused__)) = params.size();
@@ -1889,6 +1922,14 @@ Variant i_imagegrabwindow(CArrRef params) {
   if (count < 1 || count > 2) return throw_wrong_arguments("imagegrabwindow", count, 1, 2, 1);
   if (count <= 1) return (f_imagegrabwindow(params[0]));
   return (f_imagegrabwindow(params[0], params[1]));
+}
+Variant i_memcache_add(CArrRef params) {
+  FUNCTION_INJECTION(memcache_add);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 5) return throw_wrong_arguments("memcache_add", count, 3, 5, 1);
+  if (count <= 3) return (f_memcache_add(params[0], params[1], params[2]));
+  if (count == 4) return (f_memcache_add(params[0], params[1], params[2], params[3]));
+  return (f_memcache_add(params[0], params[1], params[2], params[3], params[4]));
 }
 Variant i_magickstereoimage(CArrRef params) {
   FUNCTION_INJECTION(magickstereoimage);
@@ -2592,6 +2633,13 @@ Variant i_natcasesort(CArrRef params) {
   if (count != 1) return throw_wrong_arguments("natcasesort", count, 1, 1, 1);
   return (f_natcasesort(ref(const_cast<Array&>(params).lvalAt(0))));
 }
+Variant i_memcache_get(CArrRef params) {
+  FUNCTION_INJECTION(memcache_get);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("memcache_get", count, 2, 3, 1);
+  if (count <= 2) return (f_memcache_get(params[0], params[1]));
+  return (f_memcache_get(params[0], params[1], ref(const_cast<Array&>(params).lvalAt(2))));
+}
 Variant i_fb_is_tainted(CArrRef params) {
   FUNCTION_INJECTION(fb_is_tainted);
   int count __attribute__((__unused__)) = params.size();
@@ -2695,6 +2743,15 @@ Variant i_file(CArrRef params) {
   if (count <= 1) return (f_file(params[0]));
   if (count == 2) return (f_file(params[0], params[1]));
   return (f_file(params[0], params[1], params[2]));
+}
+Variant i_memcache_get_extended_stats(CArrRef params) {
+  FUNCTION_INJECTION(memcache_get_extended_stats);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 4) return throw_wrong_arguments("memcache_get_extended_stats", count, 1, 4, 1);
+  if (count <= 1) return (f_memcache_get_extended_stats(params[0]));
+  if (count == 2) return (f_memcache_get_extended_stats(params[0], params[1]));
+  if (count == 3) return (f_memcache_get_extended_stats(params[0], params[1], params[2]));
+  return (f_memcache_get_extended_stats(params[0], params[1], params[2], params[3]));
 }
 Variant i_hphp_crash_log(CArrRef params) {
   FUNCTION_INJECTION(hphp_crash_log);
@@ -3659,6 +3716,12 @@ Variant i_exit(CArrRef params) {
   if (count <= 0) return (f_exit());
   return (f_exit(params[0]));
 }
+Variant i_memcache_debug(CArrRef params) {
+  FUNCTION_INJECTION(memcache_debug);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("memcache_debug", count, 1, 1, 1);
+  return (f_memcache_debug(params[0]));
+}
 Variant i_apc_sma_info(CArrRef params) {
   FUNCTION_INJECTION(apc_sma_info);
   int count __attribute__((__unused__)) = params.size();
@@ -3735,6 +3798,14 @@ Variant i_readgzfile(CArrRef params) {
   if (count < 1 || count > 2) return throw_wrong_arguments("readgzfile", count, 1, 2, 1);
   if (count <= 1) return (f_readgzfile(params[0]));
   return (f_readgzfile(params[0], params[1]));
+}
+Variant i_memcache_set(CArrRef params) {
+  FUNCTION_INJECTION(memcache_set);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 5) return throw_wrong_arguments("memcache_set", count, 3, 5, 1);
+  if (count <= 3) return (f_memcache_set(params[0], params[1], params[2]));
+  if (count == 4) return (f_memcache_set(params[0], params[1], params[2], params[3]));
+  return (f_memcache_set(params[0], params[1], params[2], params[3], params[4]));
 }
 Variant i_magicksampleimage(CArrRef params) {
   FUNCTION_INJECTION(magicksampleimage);
@@ -4201,6 +4272,13 @@ Variant i_restore_include_path(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) return throw_toomany_arguments("restore_include_path", 0, 1);
   return (f_restore_include_path(), null);
+}
+Variant i_memcache_set_compress_threshold(CArrRef params) {
+  FUNCTION_INJECTION(memcache_set_compress_threshold);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("memcache_set_compress_threshold", count, 2, 3, 1);
+  if (count <= 2) return (f_memcache_set_compress_threshold(params[0], params[1]));
+  return (f_memcache_set_compress_threshold(params[0], params[1], params[2]));
 }
 Variant i_dom_element_set_id_attribute_ns(CArrRef params) {
   FUNCTION_INJECTION(dom_element_set_id_attribute_ns);
@@ -5039,6 +5117,17 @@ Variant i_apc_compile_file(CArrRef params) {
   if (count <= 1) return (f_apc_compile_file(params[0]));
   if (count == 2) return (f_apc_compile_file(params[0], params[1]));
   return (f_apc_compile_file(params[0], params[1], params[2]));
+}
+Variant i_memcache_set_server_params(CArrRef params) {
+  FUNCTION_INJECTION(memcache_set_server_params);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 7) return throw_wrong_arguments("memcache_set_server_params", count, 2, 7, 1);
+  if (count <= 2) return (f_memcache_set_server_params(params[0], params[1]));
+  if (count == 3) return (f_memcache_set_server_params(params[0], params[1], params[2]));
+  if (count == 4) return (f_memcache_set_server_params(params[0], params[1], params[2], params[3]));
+  if (count == 5) return (f_memcache_set_server_params(params[0], params[1], params[2], params[3], params[4]));
+  if (count == 6) return (f_memcache_set_server_params(params[0], params[1], params[2], params[3], params[4], params[5]));
+  return (f_memcache_set_server_params(params[0], params[1], params[2], params[3], params[4], params[5], params[6]));
 }
 Variant i_magicksetpassphrase(CArrRef params) {
   FUNCTION_INJECTION(magicksetpassphrase);
@@ -6034,6 +6123,12 @@ Variant i_socket_getpeername(CArrRef params) {
   if (count <= 2) return (f_socket_getpeername(params[0], ref(const_cast<Array&>(params).lvalAt(1))));
   return (f_socket_getpeername(params[0], ref(const_cast<Array&>(params).lvalAt(1)), ref(const_cast<Array&>(params).lvalAt(2))));
 }
+Variant i_memcache_close(CArrRef params) {
+  FUNCTION_INJECTION(memcache_close);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("memcache_close", count, 1, 1, 1);
+  return (f_memcache_close(params[0]));
+}
 Variant i_mysql_error(CArrRef params) {
   FUNCTION_INJECTION(mysql_error);
   int count __attribute__((__unused__)) = params.size();
@@ -6388,6 +6483,15 @@ Variant i_array_count_values(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) return throw_wrong_arguments("array_count_values", count, 1, 1, 1);
   return (f_array_count_values(params[0]));
+}
+Variant i_memcache_connect(CArrRef params) {
+  FUNCTION_INJECTION(memcache_connect);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 4) return throw_wrong_arguments("memcache_connect", count, 1, 4, 1);
+  if (count <= 1) return (f_memcache_connect(params[0]));
+  if (count == 2) return (f_memcache_connect(params[0], params[1]));
+  if (count == 3) return (f_memcache_connect(params[0], params[1], params[2]));
+  return (f_memcache_connect(params[0], params[1], params[2], params[3]));
 }
 Variant i_pixelgetexception(CArrRef params) {
   FUNCTION_INJECTION(pixelgetexception);
@@ -8971,6 +9075,20 @@ Variant i_hphp_directoryiterator___tostring(CArrRef params) {
   if (count != 1) return throw_wrong_arguments("hphp_directoryiterator___tostring", count, 1, 1, 1);
   return (f_hphp_directoryiterator___tostring(params[0]));
 }
+Variant i_memcache_add_server(CArrRef params) {
+  FUNCTION_INJECTION(memcache_add_server);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 10) return throw_wrong_arguments("memcache_add_server", count, 2, 10, 1);
+  if (count <= 2) return (f_memcache_add_server(params[0], params[1]));
+  if (count == 3) return (f_memcache_add_server(params[0], params[1], params[2]));
+  if (count == 4) return (f_memcache_add_server(params[0], params[1], params[2], params[3]));
+  if (count == 5) return (f_memcache_add_server(params[0], params[1], params[2], params[3], params[4]));
+  if (count == 6) return (f_memcache_add_server(params[0], params[1], params[2], params[3], params[4], params[5]));
+  if (count == 7) return (f_memcache_add_server(params[0], params[1], params[2], params[3], params[4], params[5], params[6]));
+  if (count == 8) return (f_memcache_add_server(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]));
+  if (count == 9) return (f_memcache_add_server(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7], params[8]));
+  return (f_memcache_add_server(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7], params[8], params[9]));
+}
 Variant i_dom_node_remove_child(CArrRef params) {
   FUNCTION_INJECTION(dom_node_remove_child);
   int count __attribute__((__unused__)) = params.size();
@@ -9313,6 +9431,13 @@ Variant i_apd_breakpoint(CArrRef params) {
   if (count > 0) return throw_toomany_arguments("apd_breakpoint", 0, 1);
   return (f_apd_breakpoint());
 }
+Variant i_memcache_delete(CArrRef params) {
+  FUNCTION_INJECTION(memcache_delete);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("memcache_delete", count, 2, 3, 1);
+  if (count <= 2) return (f_memcache_delete(params[0], params[1]));
+  return (f_memcache_delete(params[0], params[1], params[2]));
+}
 Variant i_magickgetimageblueprimary(CArrRef params) {
   FUNCTION_INJECTION(magickgetimageblueprimary);
   int count __attribute__((__unused__)) = params.size();
@@ -9336,6 +9461,14 @@ Variant i_dom_element_set_attribute_node(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) return throw_wrong_arguments("dom_element_set_attribute_node", count, 2, 2, 1);
   return (f_dom_element_set_attribute_node(params[0], params[1]));
+}
+Variant i_memcache_replace(CArrRef params) {
+  FUNCTION_INJECTION(memcache_replace);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 5) return throw_wrong_arguments("memcache_replace", count, 3, 5, 1);
+  if (count <= 3) return (f_memcache_replace(params[0], params[1], params[2]));
+  if (count == 4) return (f_memcache_replace(params[0], params[1], params[2], params[3]));
+  return (f_memcache_replace(params[0], params[1], params[2], params[3], params[4]));
 }
 Variant i_stream_set_write_buffer(CArrRef params) {
   FUNCTION_INJECTION(stream_set_write_buffer);
@@ -9619,12 +9752,6 @@ Variant i_hphp_splfileinfo_gettype(CArrRef params) {
   if (count != 1) return throw_wrong_arguments("hphp_splfileinfo_gettype", count, 1, 1, 1);
   return (f_hphp_splfileinfo_gettype(params[0]));
 }
-Variant i_libxml_clear_errors(CArrRef params) {
-  FUNCTION_INJECTION(libxml_clear_errors);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("libxml_clear_errors", 0, 1);
-  return (f_libxml_clear_errors(), null);
-}
 Variant i_xmlwriter_start_document(CArrRef params) {
   FUNCTION_INJECTION(xmlwriter_start_document);
   int count __attribute__((__unused__)) = params.size();
@@ -9633,6 +9760,12 @@ Variant i_xmlwriter_start_document(CArrRef params) {
   if (count == 2) return (f_xmlwriter_start_document(params[0], params[1]));
   if (count == 3) return (f_xmlwriter_start_document(params[0], params[1], params[2]));
   return (f_xmlwriter_start_document(params[0], params[1], params[2], params[3]));
+}
+Variant i_libxml_clear_errors(CArrRef params) {
+  FUNCTION_INJECTION(libxml_clear_errors);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("libxml_clear_errors", 0, 1);
+  return (f_libxml_clear_errors(), null);
 }
 Variant i_magicknormalizeimage(CArrRef params) {
   FUNCTION_INJECTION(magicknormalizeimage);
@@ -9736,6 +9869,15 @@ Variant i_ldap_err2str(CArrRef params) {
   if (count != 1) return throw_wrong_arguments("ldap_err2str", count, 1, 1, 1);
   return (f_ldap_err2str(params[0]));
 }
+Variant i_memcache_get_stats(CArrRef params) {
+  FUNCTION_INJECTION(memcache_get_stats);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 4) return throw_wrong_arguments("memcache_get_stats", count, 1, 4, 1);
+  if (count <= 1) return (f_memcache_get_stats(params[0]));
+  if (count == 2) return (f_memcache_get_stats(params[0], params[1]));
+  if (count == 3) return (f_memcache_get_stats(params[0], params[1], params[2]));
+  return (f_memcache_get_stats(params[0], params[1], params[2], params[3]));
+}
 Variant i_xmlwriter_end_attribute(CArrRef params) {
   FUNCTION_INJECTION(xmlwriter_end_attribute);
   int count __attribute__((__unused__)) = params.size();
@@ -9836,6 +9978,13 @@ Variant i_pixelsetblack(CArrRef params) {
   if (count != 2) return throw_wrong_arguments("pixelsetblack", count, 2, 2, 1);
   return (f_pixelsetblack(params[0], params[1]), null);
 }
+Variant i_memcache_increment(CArrRef params) {
+  FUNCTION_INJECTION(memcache_increment);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("memcache_increment", count, 2, 3, 1);
+  if (count <= 2) return (f_memcache_increment(params[0], params[1]));
+  return (f_memcache_increment(params[0], params[1], params[2]));
+}
 Variant i_magickenhanceimage(CArrRef params) {
   FUNCTION_INJECTION(magickenhanceimage);
   int count __attribute__((__unused__)) = params.size();
@@ -9881,6 +10030,12 @@ Variant i_apd_set_pprof_trace(CArrRef params) {
   if (count == 1) return (f_apd_set_pprof_trace(params[0]));
   return (f_apd_set_pprof_trace(params[0], params[1]));
 }
+Variant i_ini_set(CArrRef params) {
+  FUNCTION_INJECTION(ini_set);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("ini_set", count, 2, 2, 1);
+  return (f_ini_set(params[0], params[1]));
+}
 Variant i_sort(CArrRef params) {
   FUNCTION_INJECTION(sort);
   int count __attribute__((__unused__)) = params.size();
@@ -9888,12 +10043,6 @@ Variant i_sort(CArrRef params) {
   if (count <= 1) return (f_sort(ref(const_cast<Array&>(params).lvalAt(0))));
   if (count == 2) return (f_sort(ref(const_cast<Array&>(params).lvalAt(0)), params[1]));
   return (f_sort(ref(const_cast<Array&>(params).lvalAt(0)), params[1], params[2]));
-}
-Variant i_ini_set(CArrRef params) {
-  FUNCTION_INJECTION(ini_set);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("ini_set", count, 2, 2, 1);
-  return (f_ini_set(params[0], params[1]));
 }
 Variant i_drawgetfont(CArrRef params) {
   FUNCTION_INJECTION(drawgetfont);
@@ -9914,12 +10063,11 @@ Variant i_mysql_close(CArrRef params) {
   if (count <= 0) return (f_mysql_close());
   return (f_mysql_close(params[0]));
 }
-Variant i_magickblurimage(CArrRef params) {
-  FUNCTION_INJECTION(magickblurimage);
+Variant i_magicksetimagerenderingintent(CArrRef params) {
+  FUNCTION_INJECTION(magicksetimagerenderingintent);
   int count __attribute__((__unused__)) = params.size();
-  if (count < 3 || count > 4) return throw_wrong_arguments("magickblurimage", count, 3, 4, 1);
-  if (count <= 3) return (f_magickblurimage(params[0], params[1], params[2]));
-  return (f_magickblurimage(params[0], params[1], params[2], params[3]));
+  if (count != 2) return throw_wrong_arguments("magicksetimagerenderingintent", count, 2, 2, 1);
+  return (f_magicksetimagerenderingintent(params[0], params[1]));
 }
 Variant i_magickreducenoiseimage(CArrRef params) {
   FUNCTION_INJECTION(magickreducenoiseimage);
@@ -9927,11 +10075,12 @@ Variant i_magickreducenoiseimage(CArrRef params) {
   if (count != 2) return throw_wrong_arguments("magickreducenoiseimage", count, 2, 2, 1);
   return (f_magickreducenoiseimage(params[0], params[1]));
 }
-Variant i_magicksetimagerenderingintent(CArrRef params) {
-  FUNCTION_INJECTION(magicksetimagerenderingintent);
+Variant i_magickblurimage(CArrRef params) {
+  FUNCTION_INJECTION(magickblurimage);
   int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("magicksetimagerenderingintent", count, 2, 2, 1);
-  return (f_magicksetimagerenderingintent(params[0], params[1]));
+  if (count < 3 || count > 4) return throw_wrong_arguments("magickblurimage", count, 3, 4, 1);
+  if (count <= 3) return (f_magickblurimage(params[0], params[1], params[2]));
+  return (f_magickblurimage(params[0], params[1], params[2], params[3]));
 }
 Variant i_magicktintimage(CArrRef params) {
   FUNCTION_INJECTION(magicktintimage);
@@ -9945,18 +10094,18 @@ Variant i_rawurldecode(CArrRef params) {
   if (count != 1) return throw_wrong_arguments("rawurldecode", count, 1, 1, 1);
   return (f_rawurldecode(params[0]));
 }
-Variant i_xmlwriter_start_element_ns(CArrRef params) {
-  FUNCTION_INJECTION(xmlwriter_start_element_ns);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 4) return throw_wrong_arguments("xmlwriter_start_element_ns", count, 4, 4, 1);
-  return (f_xmlwriter_start_element_ns(params[0], params[1], params[2], params[3]));
-}
 Variant i_strftime(CArrRef params) {
   FUNCTION_INJECTION(strftime);
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) return throw_wrong_arguments("strftime", count, 1, 2, 1);
   if (count <= 1) return (f_strftime(params[0]));
   return (f_strftime(params[0], params[1]));
+}
+Variant i_xmlwriter_start_element_ns(CArrRef params) {
+  FUNCTION_INJECTION(xmlwriter_start_element_ns);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 4) return throw_wrong_arguments("xmlwriter_start_element_ns", count, 4, 4, 1);
+  return (f_xmlwriter_start_element_ns(params[0], params[1], params[2], params[3]));
 }
 Variant i_imagecolorstotal(CArrRef params) {
   FUNCTION_INJECTION(imagecolorstotal);
@@ -9970,17 +10119,17 @@ Variant i_hphp_splfileinfo_getowner(CArrRef params) {
   if (count != 1) return throw_wrong_arguments("hphp_splfileinfo_getowner", count, 1, 1, 1);
   return (f_hphp_splfileinfo_getowner(params[0]));
 }
-Variant i_dom_node_has_child_nodes(CArrRef params) {
-  FUNCTION_INJECTION(dom_node_has_child_nodes);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("dom_node_has_child_nodes", count, 1, 1, 1);
-  return (f_dom_node_has_child_nodes(params[0]));
-}
 Variant i_write_hdf_string(CArrRef params) {
   FUNCTION_INJECTION(write_hdf_string);
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) return throw_wrong_arguments("write_hdf_string", count, 1, 1, 1);
   return (f_write_hdf_string(params[0]));
+}
+Variant i_dom_node_has_child_nodes(CArrRef params) {
+  FUNCTION_INJECTION(dom_node_has_child_nodes);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("dom_node_has_child_nodes", count, 1, 1, 1);
+  return (f_dom_node_has_child_nodes(params[0]));
 }
 Variant i_apc_bin_dumpfile(CArrRef params) {
   FUNCTION_INJECTION(apc_bin_dumpfile);
@@ -10077,6 +10226,15 @@ Variant i_ldap_close(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) return throw_wrong_arguments("ldap_close", count, 1, 1, 1);
   return (f_ldap_close(params[0]));
+}
+Variant i_memcache_pconnect(CArrRef params) {
+  FUNCTION_INJECTION(memcache_pconnect);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 4) return throw_wrong_arguments("memcache_pconnect", count, 1, 4, 1);
+  if (count <= 1) return (f_memcache_pconnect(params[0]));
+  if (count == 2) return (f_memcache_pconnect(params[0], params[1]));
+  if (count == 3) return (f_memcache_pconnect(params[0], params[1], params[2]));
+  return (f_memcache_pconnect(params[0], params[1], params[2], params[3]));
 }
 Variant i_mcrypt_enc_get_algorithms_name(CArrRef params) {
   FUNCTION_INJECTION(mcrypt_enc_get_algorithms_name);
@@ -11059,17 +11217,17 @@ Variant i_apc_dec(CArrRef params) {
   if (count == 3) return (f_apc_dec(params[0], params[1], ref(const_cast<Array&>(params).lvalAt(2))));
   return (f_apc_dec(params[0], params[1], ref(const_cast<Array&>(params).lvalAt(2)), params[3]));
 }
-Variant i_iptcparse(CArrRef params) {
-  FUNCTION_INJECTION(iptcparse);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("iptcparse", count, 1, 1, 1);
-  return (f_iptcparse(params[0]));
-}
 Variant i_posix_get_last_error(CArrRef params) {
   FUNCTION_INJECTION(posix_get_last_error);
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) return throw_toomany_arguments("posix_get_last_error", 0, 1);
   return (f_posix_get_last_error());
+}
+Variant i_iptcparse(CArrRef params) {
+  FUNCTION_INJECTION(iptcparse);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("iptcparse", count, 1, 1, 1);
+  return (f_iptcparse(params[0]));
 }
 Variant i_iterator_count(CArrRef params) {
   FUNCTION_INJECTION(iterator_count);
@@ -12065,17 +12223,17 @@ Variant i_dns_get_mx(CArrRef params) {
   if (count <= 2) return (f_dns_get_mx(params[0], ref(const_cast<Array&>(params).lvalAt(1))));
   return (f_dns_get_mx(params[0], ref(const_cast<Array&>(params).lvalAt(1)), ref(const_cast<Array&>(params).lvalAt(2))));
 }
-Variant i_escapeshellarg(CArrRef params) {
-  FUNCTION_INJECTION(escapeshellarg);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("escapeshellarg", count, 1, 1, 1);
-  return (f_escapeshellarg(params[0]));
-}
 Variant i_headers_list(CArrRef params) {
   FUNCTION_INJECTION(headers_list);
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) return throw_toomany_arguments("headers_list", 0, 1);
   return (f_headers_list());
+}
+Variant i_escapeshellarg(CArrRef params) {
+  FUNCTION_INJECTION(escapeshellarg);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("escapeshellarg", count, 1, 1, 1);
+  return (f_escapeshellarg(params[0]));
 }
 Variant i_is_scalar(CArrRef params) {
   FUNCTION_INJECTION(is_scalar);
@@ -12373,17 +12531,17 @@ Variant i_abs(CArrRef params) {
   if (count != 1) return throw_wrong_arguments("abs", count, 1, 1, 1);
   return (f_abs(params[0]));
 }
-Variant i_shell_exec(CArrRef params) {
-  FUNCTION_INJECTION(shell_exec);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("shell_exec", count, 1, 1, 1);
-  return (f_shell_exec(params[0]));
-}
 Variant i_restore_exception_handler(CArrRef params) {
   FUNCTION_INJECTION(restore_exception_handler);
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) return throw_toomany_arguments("restore_exception_handler", 0, 1);
   return (f_restore_exception_handler());
+}
+Variant i_shell_exec(CArrRef params) {
+  FUNCTION_INJECTION(shell_exec);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("shell_exec", count, 1, 1, 1);
+  return (f_shell_exec(params[0]));
 }
 Variant i_curl_multi_exec(CArrRef params) {
   FUNCTION_INJECTION(curl_multi_exec);
@@ -12813,6 +12971,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 188:
       HASH_INVOKE(0x3900350CD9D990BCLL, imagecreatefromjpeg);
       break;
+    case 192:
+      HASH_INVOKE(0x6EDC1E7A8D5710C0LL, memcache_add_server);
+      break;
     case 197:
       HASH_INVOKE(0x7424946F7ED520C5LL, magickgetimagefilename);
       HASH_INVOKE(0x6B477F3B9CDB10C5LL, base64_decode);
@@ -13055,6 +13216,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 419:
       HASH_INVOKE(0x735B81C45C2971A3LL, drawgetfillopacity);
       break;
+    case 422:
+      HASH_INVOKE(0x37B4612178EF91A6LL, memcache_get_version);
+      break;
     case 425:
       HASH_INVOKE(0x740DC7FFAD8BB1A9LL, imagecolorat);
       HASH_INVOKE(0x0DDFE3B1F6EEE1A9LL, array_reduce);
@@ -13138,6 +13302,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 477:
       HASH_INVOKE(0x04666D6F67C7A1DDLL, mysql_list_processes);
       HASH_INVOKE(0x03A183D73942B1DDLL, apc_filehits);
+      break;
+    case 478:
+      HASH_INVOKE(0x44563CC8FA9B11DELL, memcache_set_server_params);
       break;
     case 479:
       HASH_INVOKE(0x7403251412E931DFLL, syslog);
@@ -13255,6 +13422,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 552:
       HASH_INVOKE(0x44911AEE34D63228LL, time_sleep_until);
+      HASH_INVOKE(0x7CD3C6F6495D3228LL, memcache_get_stats);
       break;
     case 556:
       HASH_INVOKE(0x4129FFBF3548E22CLL, mb_strpos);
@@ -13302,6 +13470,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 598:
       HASH_INVOKE(0x0384346A8857D256LL, clonemagickwand);
+      break;
+    case 600:
+      HASH_INVOKE(0x32C51FFF185F4258LL, memcache_set);
       break;
     case 603:
       HASH_INVOKE(0x2F8F40E95EDF925BLL, sizeof);
@@ -13487,6 +13658,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x45382D0BA5B262E3LL, mysql_get_proto_info);
       break;
     case 749:
+      HASH_INVOKE(0x1B9FC9E27B8AB2EDLL, memcache_flush);
       HASH_INVOKE(0x215E0E2EFA7422EDLL, drawgetstrokeantialias);
       break;
     case 750:
@@ -13518,6 +13690,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 770:
       HASH_INVOKE(0x0103FE1E2C307302LL, socket_recvfrom);
+      break;
+    case 772:
+      HASH_INVOKE(0x33A532FDB8EAC304LL, memcache_delete);
       break;
     case 773:
       HASH_INVOKE(0x65D40C6B4842F305LL, clearpixelwand);
@@ -13745,6 +13920,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 936:
       HASH_INVOKE(0x4120B8157ED413A8LL, i18n_loc_set_strength);
       break;
+    case 937:
+      HASH_INVOKE(0x7F9E810BC93023A9LL, memcache_close);
+      break;
     case 938:
       HASH_INVOKE(0x3238A5BD362443AALL, escapeshellcmd);
       break;
@@ -13889,6 +14067,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 1071:
       HASH_INVOKE(0x316F2725AC15042FLL, stream_resolve_include_path);
+      break;
+    case 1072:
+      HASH_INVOKE(0x6349C9658B2A2430LL, memcache_pconnect);
       break;
     case 1074:
       HASH_INVOKE(0x71C6E38BC56CE432LL, stream_wrapper_register);
@@ -14174,6 +14355,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 1300:
       HASH_INVOKE(0x100385A0988FD514LL, magickgetfilename);
       break;
+    case 1305:
+      HASH_INVOKE(0x54EDBB6BAF318519LL, memcache_add);
+      break;
     case 1314:
       HASH_INVOKE(0x7DA98E0379D33522LL, chdir);
       break;
@@ -14209,6 +14393,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 1334:
       HASH_INVOKE(0x0E80D04691227536LL, eval);
+      HASH_INVOKE(0x746DC7AD953EA536LL, memcache_set_compress_threshold);
       break;
     case 1335:
       HASH_INVOKE(0x0830FF7C379D7537LL, dom_text_split_text);
@@ -14663,6 +14848,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x798B4197212456B5LL, bcpowmod);
       HASH_INVOKE(0x623CE67C41A9E6B5LL, ldap_next_attribute);
       HASH_INVOKE(0x7E773A36449576B5LL, imagecharup);
+      break;
+    case 1719:
+      HASH_INVOKE(0x0C44E5EEB9C646B7LL, memcache_connect);
       break;
     case 1721:
       HASH_INVOKE(0x316F054CB76446B9LL, openssl_sign);
@@ -15402,6 +15590,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 2329:
       HASH_INVOKE(0x022B16C0D64D7919LL, file_put_contents);
       break;
+    case 2331:
+      HASH_INVOKE(0x37A3DF6E0795091BLL, memcache_increment);
+      break;
     case 2333:
       HASH_INVOKE(0x069C028EFEF8C91DLL, date);
       break;
@@ -15689,6 +15880,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x2394D4E030AB69FDLL, getmypid);
       break;
     case 2564:
+      HASH_INVOKE(0x0B88D3F582D16A04LL, memcache_get_extended_stats);
       HASH_INVOKE(0x17B83C425BD09A04LL, atanh);
       break;
     case 2567:
@@ -15735,6 +15927,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 2602:
       HASH_INVOKE(0x3CAEA6B8D1C92A2ALL, stream_bucket_prepend);
       break;
+    case 2604:
+      HASH_INVOKE(0x073ACDF9B3F06A2CLL, memcache_setoptimeout);
+      break;
     case 2609:
       HASH_INVOKE(0x1F3E32847C1CCA31LL, mb_ereg_match);
       break;
@@ -15780,6 +15975,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 2638:
       HASH_INVOKE(0x1635DCC4882CBA4ELL, dom_node_has_attributes);
+      break;
+    case 2640:
+      HASH_INVOKE(0x506BBFC1B32AEA50LL, memcache_replace);
       break;
     case 2647:
       HASH_INVOKE(0x5088945958DD4A57LL, mktime);
@@ -16142,6 +16340,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x6158E2E0A5ACCB58LL, idn_to_ascii);
       break;
     case 2907:
+      HASH_INVOKE(0x29203294F6214B5BLL, memcache_debug);
       HASH_INVOKE(0x23FD09A13E0D8B5BLL, xmlwriter_open_memory);
       break;
     case 2909:
@@ -16435,6 +16634,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x1FC294B806F76C52LL, php_sapi_name);
       break;
     case 3159:
+      HASH_INVOKE(0x793259E03C37CC57LL, memcache_decrement);
       HASH_INVOKE(0x313E8EB28A111C57LL, hphp_splfileinfo_setinfoclass);
       HASH_INVOKE(0x6E0ECBA9F415AC57LL, fb_is_tainted);
       break;
@@ -16894,6 +17094,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3490:
       HASH_INVOKE(0x71583A8FEF5C7DA2LL, sys_get_temp_dir);
       break;
+    case 3493:
+      HASH_INVOKE(0x46B2F287D2FC7DA5LL, memcache_get);
+      break;
     case 3494:
       HASH_INVOKE(0x28DC1AD6DA9E7DA6LL, gethostbyname);
       break;
@@ -17300,6 +17503,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x7A1C6E429399CEE0LL, iconv_set_encoding);
       break;
     case 3811:
+      HASH_INVOKE(0x1F4AACF075E9CEE3LL, memcache_get_server_status);
       HASH_INVOKE(0x28A98134BD97BEE3LL, mb_regex_encoding);
       HASH_INVOKE(0x0E1368A3BDFE6EE3LL, hphp_recursiveiteratoriterator_rewind);
       break;
@@ -17804,6 +18008,31 @@ Variant ei_curl_multi_remove_handle(Eval::VariableEnvironment &env, const Eval::
     (*it)->eval(env);
   }
   return (x_curl_multi_remove_handle(a0, a1));
+}
+Variant ei_memcache_get_server_status(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("memcache_get_server_status", count, 2, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_memcache_get_server_status(a0, a1));
+  else return (x_memcache_get_server_status(a0, a1, a2));
 }
 Variant ei_mysql_result(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -19871,6 +20100,26 @@ Variant ei_realpath(Eval::VariableEnvironment &env, const Eval::FunctionCallExpr
   }
   return (x_realpath(a0));
 }
+Variant ei_memcache_setoptimeout(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("memcache_setoptimeout", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_memcache_setoptimeout(a0, a1));
+}
 Variant ei_stream_filter_append(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -21631,6 +21880,31 @@ Variant ei_log(Eval::VariableEnvironment &env, const Eval::FunctionCallExpressio
   if (count <= 1) return (x_log(a0));
   else return (x_log(a0, a1));
 }
+Variant ei_memcache_decrement(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("memcache_decrement", count, 2, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_memcache_decrement(a0, a1));
+  else return (x_memcache_decrement(a0, a1, a2));
+}
 Variant ei_drawskewx(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -22255,6 +22529,22 @@ Variant ei_drawsettextundercolor(Eval::VariableEnvironment &env, const Eval::Fun
     (*it)->eval(env);
   }
   return (x_drawsettextundercolor(a0, a1), null);
+}
+Variant ei_memcache_get_version(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("memcache_get_version", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_memcache_get_version(a0));
 }
 Variant ei_hphp_splfileobject_getflags(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -23040,6 +23330,27 @@ Variant ei_socket_sendto(Eval::VariableEnvironment &env, const Eval::FunctionCal
   if (count <= 5) return (x_socket_sendto(a0, a1, a2, a3, a4));
   else return (x_socket_sendto(a0, a1, a2, a3, a4, a5));
 }
+Variant ei_memcache_flush(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("memcache_flush", count, 1, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_memcache_flush(a0));
+  else return (x_memcache_flush(a0, a1));
+}
 Variant ei_mb_output_handler(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -23584,6 +23895,40 @@ Variant ei_imagegrabwindow(Eval::VariableEnvironment &env, const Eval::FunctionC
   }
   if (count <= 1) return (x_imagegrabwindow(a0));
   else return (x_imagegrabwindow(a0, a1));
+}
+Variant ei_memcache_add(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 5) return throw_wrong_arguments("memcache_add", count, 3, 5, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 3) return (x_memcache_add(a0, a1, a2));
+  else if (count == 4) return (x_memcache_add(a0, a1, a2, a3));
+  else return (x_memcache_add(a0, a1, a2, a3, a4));
 }
 Variant ei_magickstereoimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -25811,6 +26156,31 @@ Variant ei_natcasesort(Eval::VariableEnvironment &env, const Eval::FunctionCallE
   }
   return (x_natcasesort(ref(a0)));
 }
+Variant ei_memcache_get(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("memcache_get", count, 2, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = ref((*it)->refval(env));
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_memcache_get(a0, a1));
+  else return (x_memcache_get(a0, a1, ref(a2)));
+}
 Variant ei_fb_is_tainted(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -26142,6 +26512,37 @@ Variant ei_file(Eval::VariableEnvironment &env, const Eval::FunctionCallExpressi
   if (count <= 1) return (x_file(a0));
   else if (count == 2) return (x_file(a0, a1));
   else return (x_file(a0, a1, a2));
+}
+Variant ei_memcache_get_extended_stats(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 4) return throw_wrong_arguments("memcache_get_extended_stats", count, 1, 4, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_memcache_get_extended_stats(a0));
+  else if (count == 2) return (x_memcache_get_extended_stats(a0, a1));
+  else if (count == 3) return (x_memcache_get_extended_stats(a0, a1, a2));
+  else return (x_memcache_get_extended_stats(a0, a1, a2, a3));
 }
 Variant ei_hphp_crash_log(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -29142,6 +29543,22 @@ Variant ei_exit(Eval::VariableEnvironment &env, const Eval::FunctionCallExpressi
   if (count <= 0) return (x_exit());
   else return (x_exit(a0));
 }
+Variant ei_memcache_debug(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("memcache_debug", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_memcache_debug(a0));
+}
 Variant ei_apc_sma_info(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -29406,6 +29823,40 @@ Variant ei_readgzfile(Eval::VariableEnvironment &env, const Eval::FunctionCallEx
   }
   if (count <= 1) return (x_readgzfile(a0));
   else return (x_readgzfile(a0, a1));
+}
+Variant ei_memcache_set(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 5) return throw_wrong_arguments("memcache_set", count, 3, 5, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 3) return (x_memcache_set(a0, a1, a2));
+  else if (count == 4) return (x_memcache_set(a0, a1, a2, a3));
+  else return (x_memcache_set(a0, a1, a2, a3, a4));
 }
 Variant ei_magicksampleimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -30845,6 +31296,31 @@ Variant ei_restore_include_path(Eval::VariableEnvironment &env, const Eval::Func
     (*it)->eval(env);
   }
   return (x_restore_include_path(), null);
+}
+Variant ei_memcache_set_compress_threshold(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("memcache_set_compress_threshold", count, 2, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_memcache_set_compress_threshold(a0, a1));
+  else return (x_memcache_set_compress_threshold(a0, a1, a2));
 }
 Variant ei_dom_element_set_id_attribute_ns(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -33554,6 +34030,51 @@ Variant ei_apc_compile_file(Eval::VariableEnvironment &env, const Eval::Function
   if (count <= 1) return (x_apc_compile_file(a0));
   else if (count == 2) return (x_apc_compile_file(a0, a1));
   else return (x_apc_compile_file(a0, a1, a2));
+}
+Variant ei_memcache_set_server_params(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  Variant a5;
+  Variant a6;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 7) return throw_wrong_arguments("memcache_set_server_params", count, 2, 7, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a5 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a6 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_memcache_set_server_params(a0, a1));
+  else if (count == 3) return (x_memcache_set_server_params(a0, a1, a2));
+  else if (count == 4) return (x_memcache_set_server_params(a0, a1, a2, a3));
+  else if (count == 5) return (x_memcache_set_server_params(a0, a1, a2, a3, a4));
+  else if (count == 6) return (x_memcache_set_server_params(a0, a1, a2, a3, a4, a5));
+  else return (x_memcache_set_server_params(a0, a1, a2, a3, a4, a5, a6));
 }
 Variant ei_magicksetpassphrase(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -36867,6 +37388,22 @@ Variant ei_socket_getpeername(Eval::VariableEnvironment &env, const Eval::Functi
   if (count <= 2) return (x_socket_getpeername(a0, ref(a1)));
   else return (x_socket_getpeername(a0, ref(a1), ref(a2)));
 }
+Variant ei_memcache_close(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("memcache_close", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_memcache_close(a0));
+}
 Variant ei_mysql_error(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -37951,6 +38488,37 @@ Variant ei_array_count_values(Eval::VariableEnvironment &env, const Eval::Functi
     (*it)->eval(env);
   }
   return (x_array_count_values(a0));
+}
+Variant ei_memcache_connect(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 4) return throw_wrong_arguments("memcache_connect", count, 1, 4, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_memcache_connect(a0));
+  else if (count == 2) return (x_memcache_connect(a0, a1));
+  else if (count == 3) return (x_memcache_connect(a0, a1, a2));
+  else return (x_memcache_connect(a0, a1, a2, a3));
 }
 Variant ei_pixelgetexception(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -46162,6 +46730,66 @@ Variant ei_hphp_directoryiterator___tostring(Eval::VariableEnvironment &env, con
   }
   return (x_hphp_directoryiterator___tostring(a0));
 }
+Variant ei_memcache_add_server(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  Variant a5;
+  Variant a6;
+  Variant a7;
+  Variant a8;
+  Variant a9;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 10) return throw_wrong_arguments("memcache_add_server", count, 2, 10, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a5 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a6 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a7 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a8 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a9 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_memcache_add_server(a0, a1));
+  else if (count == 3) return (x_memcache_add_server(a0, a1, a2));
+  else if (count == 4) return (x_memcache_add_server(a0, a1, a2, a3));
+  else if (count == 5) return (x_memcache_add_server(a0, a1, a2, a3, a4));
+  else if (count == 6) return (x_memcache_add_server(a0, a1, a2, a3, a4, a5));
+  else if (count == 7) return (x_memcache_add_server(a0, a1, a2, a3, a4, a5, a6));
+  else if (count == 8) return (x_memcache_add_server(a0, a1, a2, a3, a4, a5, a6, a7));
+  else if (count == 9) return (x_memcache_add_server(a0, a1, a2, a3, a4, a5, a6, a7, a8));
+  else return (x_memcache_add_server(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9));
+}
 Variant ei_dom_node_remove_child(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -47280,6 +47908,31 @@ Variant ei_apd_breakpoint(Eval::VariableEnvironment &env, const Eval::FunctionCa
   }
   return (x_apd_breakpoint());
 }
+Variant ei_memcache_delete(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("memcache_delete", count, 2, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_memcache_delete(a0, a1));
+  else return (x_memcache_delete(a0, a1, a2));
+}
 Variant ei_magickgetimageblueprimary(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -47359,6 +48012,40 @@ Variant ei_dom_element_set_attribute_node(Eval::VariableEnvironment &env, const 
     (*it)->eval(env);
   }
   return (x_dom_element_set_attribute_node(a0, a1));
+}
+Variant ei_memcache_replace(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 5) return throw_wrong_arguments("memcache_replace", count, 3, 5, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 3) return (x_memcache_replace(a0, a1, a2));
+  else if (count == 4) return (x_memcache_replace(a0, a1, a2, a3));
+  else return (x_memcache_replace(a0, a1, a2, a3, a4));
 }
 Variant ei_stream_set_write_buffer(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -48244,18 +48931,6 @@ Variant ei_hphp_splfileinfo_gettype(Eval::VariableEnvironment &env, const Eval::
   }
   return (x_hphp_splfileinfo_gettype(a0));
 }
-Variant ei_libxml_clear_errors(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("libxml_clear_errors", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_libxml_clear_errors(), null);
-}
 Variant ei_xmlwriter_start_document(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -48286,6 +48961,18 @@ Variant ei_xmlwriter_start_document(Eval::VariableEnvironment &env, const Eval::
   else if (count == 2) return (x_xmlwriter_start_document(a0, a1));
   else if (count == 3) return (x_xmlwriter_start_document(a0, a1, a2));
   else return (x_xmlwriter_start_document(a0, a1, a2, a3));
+}
+Variant ei_libxml_clear_errors(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("libxml_clear_errors", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_libxml_clear_errors(), null);
 }
 Variant ei_magicknormalizeimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -48573,6 +49260,37 @@ Variant ei_ldap_err2str(Eval::VariableEnvironment &env, const Eval::FunctionCall
     (*it)->eval(env);
   }
   return (x_ldap_err2str(a0));
+}
+Variant ei_memcache_get_stats(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 4) return throw_wrong_arguments("memcache_get_stats", count, 1, 4, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_memcache_get_stats(a0));
+  else if (count == 2) return (x_memcache_get_stats(a0, a1));
+  else if (count == 3) return (x_memcache_get_stats(a0, a1, a2));
+  else return (x_memcache_get_stats(a0, a1, a2, a3));
 }
 Variant ei_xmlwriter_end_attribute(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -48883,6 +49601,31 @@ Variant ei_pixelsetblack(Eval::VariableEnvironment &env, const Eval::FunctionCal
   }
   return (x_pixelsetblack(a0, a1), null);
 }
+Variant ei_memcache_increment(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("memcache_increment", count, 2, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_memcache_increment(a0, a1));
+  else return (x_memcache_increment(a0, a1, a2));
+}
 Variant ei_magickenhanceimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -49044,6 +49787,26 @@ Variant ei_apd_set_pprof_trace(Eval::VariableEnvironment &env, const Eval::Funct
   else if (count == 1) return (x_apd_set_pprof_trace(a0));
   else return (x_apd_set_pprof_trace(a0, a1));
 }
+Variant ei_ini_set(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("ini_set", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_ini_set(a0, a1));
+}
 Variant ei_sort(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -49069,26 +49832,6 @@ Variant ei_sort(Eval::VariableEnvironment &env, const Eval::FunctionCallExpressi
   if (count <= 1) return (x_sort(ref(a0)));
   else if (count == 2) return (x_sort(ref(a0), a1));
   else return (x_sort(ref(a0), a1, a2));
-}
-Variant ei_ini_set(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("ini_set", count, 2, 2, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_ini_set(a0, a1));
 }
 Variant ei_drawgetfont(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -49139,6 +49882,46 @@ Variant ei_mysql_close(Eval::VariableEnvironment &env, const Eval::FunctionCallE
   if (count <= 0) return (x_mysql_close());
   else return (x_mysql_close(a0));
 }
+Variant ei_magicksetimagerenderingintent(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("magicksetimagerenderingintent", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_magicksetimagerenderingintent(a0, a1));
+}
+Variant ei_magickreducenoiseimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("magickreducenoiseimage", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_magickreducenoiseimage(a0, a1));
+}
 Variant ei_magickblurimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -49167,46 +49950,6 @@ Variant ei_magickblurimage(Eval::VariableEnvironment &env, const Eval::FunctionC
   }
   if (count <= 3) return (x_magickblurimage(a0, a1, a2));
   else return (x_magickblurimage(a0, a1, a2, a3));
-}
-Variant ei_magickreducenoiseimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("magickreducenoiseimage", count, 2, 2, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_magickreducenoiseimage(a0, a1));
-}
-Variant ei_magicksetimagerenderingintent(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("magicksetimagerenderingintent", count, 2, 2, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_magicksetimagerenderingintent(a0, a1));
 }
 Variant ei_magicktintimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -49248,6 +49991,27 @@ Variant ei_rawurldecode(Eval::VariableEnvironment &env, const Eval::FunctionCall
   }
   return (x_rawurldecode(a0));
 }
+Variant ei_strftime(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("strftime", count, 1, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_strftime(a0));
+  else return (x_strftime(a0, a1));
+}
 Variant ei_xmlwriter_start_element_ns(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -49275,27 +50039,6 @@ Variant ei_xmlwriter_start_element_ns(Eval::VariableEnvironment &env, const Eval
     (*it)->eval(env);
   }
   return (x_xmlwriter_start_element_ns(a0, a1, a2, a3));
-}
-Variant ei_strftime(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 2) return throw_wrong_arguments("strftime", count, 1, 2, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  if (count <= 1) return (x_strftime(a0));
-  else return (x_strftime(a0, a1));
 }
 Variant ei_imagecolorstotal(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -49329,22 +50072,6 @@ Variant ei_hphp_splfileinfo_getowner(Eval::VariableEnvironment &env, const Eval:
   }
   return (x_hphp_splfileinfo_getowner(a0));
 }
-Variant ei_dom_node_has_child_nodes(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("dom_node_has_child_nodes", count, 1, 1, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_dom_node_has_child_nodes(a0));
-}
 Variant ei_write_hdf_string(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -49360,6 +50087,22 @@ Variant ei_write_hdf_string(Eval::VariableEnvironment &env, const Eval::Function
     (*it)->eval(env);
   }
   return (x_write_hdf_string(a0));
+}
+Variant ei_dom_node_has_child_nodes(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("dom_node_has_child_nodes", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_dom_node_has_child_nodes(a0));
 }
 Variant ei_apc_bin_dumpfile(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -49647,6 +50390,37 @@ Variant ei_ldap_close(Eval::VariableEnvironment &env, const Eval::FunctionCallEx
     (*it)->eval(env);
   }
   return (x_ldap_close(a0));
+}
+Variant ei_memcache_pconnect(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 4) return throw_wrong_arguments("memcache_pconnect", count, 1, 4, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_memcache_pconnect(a0));
+  else if (count == 2) return (x_memcache_pconnect(a0, a1));
+  else if (count == 3) return (x_memcache_pconnect(a0, a1, a2));
+  else return (x_memcache_pconnect(a0, a1, a2, a3));
 }
 Variant ei_mcrypt_enc_get_algorithms_name(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -52807,6 +53581,18 @@ Variant ei_apc_dec(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   else if (count == 3) return (x_apc_dec(a0, a1, ref(a2)));
   else return (x_apc_dec(a0, a1, ref(a2), a3));
 }
+Variant ei_posix_get_last_error(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_get_last_error", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_posix_get_last_error());
+}
 Variant ei_iptcparse(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -52822,18 +53608,6 @@ Variant ei_iptcparse(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
     (*it)->eval(env);
   }
   return (x_iptcparse(a0));
-}
-Variant ei_posix_get_last_error(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_get_last_error", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_posix_get_last_error());
 }
 Variant ei_iterator_count(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -56043,6 +56817,18 @@ Variant ei_dns_get_mx(Eval::VariableEnvironment &env, const Eval::FunctionCallEx
   if (count <= 2) return (x_dns_get_mx(a0, ref(a1)));
   else return (x_dns_get_mx(a0, ref(a1), ref(a2)));
 }
+Variant ei_headers_list(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("headers_list", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_headers_list());
+}
 Variant ei_escapeshellarg(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -56058,18 +56844,6 @@ Variant ei_escapeshellarg(Eval::VariableEnvironment &env, const Eval::FunctionCa
     (*it)->eval(env);
   }
   return (x_escapeshellarg(a0));
-}
-Variant ei_headers_list(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("headers_list", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_headers_list());
 }
 Variant ei_is_scalar(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -57013,6 +57787,18 @@ Variant ei_abs(Eval::VariableEnvironment &env, const Eval::FunctionCallExpressio
   }
   return (x_abs(a0));
 }
+Variant ei_restore_exception_handler(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("restore_exception_handler", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_restore_exception_handler());
+}
 Variant ei_shell_exec(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -57028,18 +57814,6 @@ Variant ei_shell_exec(Eval::VariableEnvironment &env, const Eval::FunctionCallEx
     (*it)->eval(env);
   }
   return (x_shell_exec(a0));
-}
-Variant ei_restore_exception_handler(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("restore_exception_handler", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_restore_exception_handler());
 }
 Variant ei_curl_multi_exec(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -57943,6 +58717,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 188:
       HASH_INVOKE_FROM_EVAL(0x3900350CD9D990BCLL, imagecreatefromjpeg);
       break;
+    case 192:
+      HASH_INVOKE_FROM_EVAL(0x6EDC1E7A8D5710C0LL, memcache_add_server);
+      break;
     case 197:
       HASH_INVOKE_FROM_EVAL(0x7424946F7ED520C5LL, magickgetimagefilename);
       HASH_INVOKE_FROM_EVAL(0x6B477F3B9CDB10C5LL, base64_decode);
@@ -58185,6 +58962,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 419:
       HASH_INVOKE_FROM_EVAL(0x735B81C45C2971A3LL, drawgetfillopacity);
       break;
+    case 422:
+      HASH_INVOKE_FROM_EVAL(0x37B4612178EF91A6LL, memcache_get_version);
+      break;
     case 425:
       HASH_INVOKE_FROM_EVAL(0x740DC7FFAD8BB1A9LL, imagecolorat);
       HASH_INVOKE_FROM_EVAL(0x0DDFE3B1F6EEE1A9LL, array_reduce);
@@ -58268,6 +59048,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 477:
       HASH_INVOKE_FROM_EVAL(0x04666D6F67C7A1DDLL, mysql_list_processes);
       HASH_INVOKE_FROM_EVAL(0x03A183D73942B1DDLL, apc_filehits);
+      break;
+    case 478:
+      HASH_INVOKE_FROM_EVAL(0x44563CC8FA9B11DELL, memcache_set_server_params);
       break;
     case 479:
       HASH_INVOKE_FROM_EVAL(0x7403251412E931DFLL, syslog);
@@ -58385,6 +59168,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 552:
       HASH_INVOKE_FROM_EVAL(0x44911AEE34D63228LL, time_sleep_until);
+      HASH_INVOKE_FROM_EVAL(0x7CD3C6F6495D3228LL, memcache_get_stats);
       break;
     case 556:
       HASH_INVOKE_FROM_EVAL(0x4129FFBF3548E22CLL, mb_strpos);
@@ -58432,6 +59216,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 598:
       HASH_INVOKE_FROM_EVAL(0x0384346A8857D256LL, clonemagickwand);
+      break;
+    case 600:
+      HASH_INVOKE_FROM_EVAL(0x32C51FFF185F4258LL, memcache_set);
       break;
     case 603:
       HASH_INVOKE_FROM_EVAL(0x2F8F40E95EDF925BLL, sizeof);
@@ -58617,6 +59404,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x45382D0BA5B262E3LL, mysql_get_proto_info);
       break;
     case 749:
+      HASH_INVOKE_FROM_EVAL(0x1B9FC9E27B8AB2EDLL, memcache_flush);
       HASH_INVOKE_FROM_EVAL(0x215E0E2EFA7422EDLL, drawgetstrokeantialias);
       break;
     case 750:
@@ -58648,6 +59436,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 770:
       HASH_INVOKE_FROM_EVAL(0x0103FE1E2C307302LL, socket_recvfrom);
+      break;
+    case 772:
+      HASH_INVOKE_FROM_EVAL(0x33A532FDB8EAC304LL, memcache_delete);
       break;
     case 773:
       HASH_INVOKE_FROM_EVAL(0x65D40C6B4842F305LL, clearpixelwand);
@@ -58875,6 +59666,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 936:
       HASH_INVOKE_FROM_EVAL(0x4120B8157ED413A8LL, i18n_loc_set_strength);
       break;
+    case 937:
+      HASH_INVOKE_FROM_EVAL(0x7F9E810BC93023A9LL, memcache_close);
+      break;
     case 938:
       HASH_INVOKE_FROM_EVAL(0x3238A5BD362443AALL, escapeshellcmd);
       break;
@@ -59019,6 +59813,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1071:
       HASH_INVOKE_FROM_EVAL(0x316F2725AC15042FLL, stream_resolve_include_path);
+      break;
+    case 1072:
+      HASH_INVOKE_FROM_EVAL(0x6349C9658B2A2430LL, memcache_pconnect);
       break;
     case 1074:
       HASH_INVOKE_FROM_EVAL(0x71C6E38BC56CE432LL, stream_wrapper_register);
@@ -59304,6 +60101,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1300:
       HASH_INVOKE_FROM_EVAL(0x100385A0988FD514LL, magickgetfilename);
       break;
+    case 1305:
+      HASH_INVOKE_FROM_EVAL(0x54EDBB6BAF318519LL, memcache_add);
+      break;
     case 1314:
       HASH_INVOKE_FROM_EVAL(0x7DA98E0379D33522LL, chdir);
       break;
@@ -59339,6 +60139,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1334:
       HASH_INVOKE_FROM_EVAL(0x0E80D04691227536LL, eval);
+      HASH_INVOKE_FROM_EVAL(0x746DC7AD953EA536LL, memcache_set_compress_threshold);
       break;
     case 1335:
       HASH_INVOKE_FROM_EVAL(0x0830FF7C379D7537LL, dom_text_split_text);
@@ -59793,6 +60594,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x798B4197212456B5LL, bcpowmod);
       HASH_INVOKE_FROM_EVAL(0x623CE67C41A9E6B5LL, ldap_next_attribute);
       HASH_INVOKE_FROM_EVAL(0x7E773A36449576B5LL, imagecharup);
+      break;
+    case 1719:
+      HASH_INVOKE_FROM_EVAL(0x0C44E5EEB9C646B7LL, memcache_connect);
       break;
     case 1721:
       HASH_INVOKE_FROM_EVAL(0x316F054CB76446B9LL, openssl_sign);
@@ -60532,6 +61336,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2329:
       HASH_INVOKE_FROM_EVAL(0x022B16C0D64D7919LL, file_put_contents);
       break;
+    case 2331:
+      HASH_INVOKE_FROM_EVAL(0x37A3DF6E0795091BLL, memcache_increment);
+      break;
     case 2333:
       HASH_INVOKE_FROM_EVAL(0x069C028EFEF8C91DLL, date);
       break;
@@ -60819,6 +61626,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x2394D4E030AB69FDLL, getmypid);
       break;
     case 2564:
+      HASH_INVOKE_FROM_EVAL(0x0B88D3F582D16A04LL, memcache_get_extended_stats);
       HASH_INVOKE_FROM_EVAL(0x17B83C425BD09A04LL, atanh);
       break;
     case 2567:
@@ -60865,6 +61673,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2602:
       HASH_INVOKE_FROM_EVAL(0x3CAEA6B8D1C92A2ALL, stream_bucket_prepend);
       break;
+    case 2604:
+      HASH_INVOKE_FROM_EVAL(0x073ACDF9B3F06A2CLL, memcache_setoptimeout);
+      break;
     case 2609:
       HASH_INVOKE_FROM_EVAL(0x1F3E32847C1CCA31LL, mb_ereg_match);
       break;
@@ -60910,6 +61721,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2638:
       HASH_INVOKE_FROM_EVAL(0x1635DCC4882CBA4ELL, dom_node_has_attributes);
+      break;
+    case 2640:
+      HASH_INVOKE_FROM_EVAL(0x506BBFC1B32AEA50LL, memcache_replace);
       break;
     case 2647:
       HASH_INVOKE_FROM_EVAL(0x5088945958DD4A57LL, mktime);
@@ -61272,6 +62086,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x6158E2E0A5ACCB58LL, idn_to_ascii);
       break;
     case 2907:
+      HASH_INVOKE_FROM_EVAL(0x29203294F6214B5BLL, memcache_debug);
       HASH_INVOKE_FROM_EVAL(0x23FD09A13E0D8B5BLL, xmlwriter_open_memory);
       break;
     case 2909:
@@ -61565,6 +62380,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x1FC294B806F76C52LL, php_sapi_name);
       break;
     case 3159:
+      HASH_INVOKE_FROM_EVAL(0x793259E03C37CC57LL, memcache_decrement);
       HASH_INVOKE_FROM_EVAL(0x313E8EB28A111C57LL, hphp_splfileinfo_setinfoclass);
       HASH_INVOKE_FROM_EVAL(0x6E0ECBA9F415AC57LL, fb_is_tainted);
       break;
@@ -62024,6 +62840,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3490:
       HASH_INVOKE_FROM_EVAL(0x71583A8FEF5C7DA2LL, sys_get_temp_dir);
       break;
+    case 3493:
+      HASH_INVOKE_FROM_EVAL(0x46B2F287D2FC7DA5LL, memcache_get);
+      break;
     case 3494:
       HASH_INVOKE_FROM_EVAL(0x28DC1AD6DA9E7DA6LL, gethostbyname);
       break;
@@ -62430,6 +63249,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x7A1C6E429399CEE0LL, iconv_set_encoding);
       break;
     case 3811:
+      HASH_INVOKE_FROM_EVAL(0x1F4AACF075E9CEE3LL, memcache_get_server_status);
       HASH_INVOKE_FROM_EVAL(0x28A98134BD97BEE3LL, mb_regex_encoding);
       HASH_INVOKE_FROM_EVAL(0x0E1368A3BDFE6EE3LL, hphp_recursiveiteratoriterator_rewind);
       break;

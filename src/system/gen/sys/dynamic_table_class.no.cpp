@@ -14790,6 +14790,1060 @@ struct ObjectStaticCallbacks cw_simplexmlelement = {
   c_simplexmlelement::os_invoke,
   c_simplexmlelement::os_constant,
 };
+Object co_memcache(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_memcache)())->dynCreate(params, init));
+}
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_memcache
+Variant c_memcache::os_getInit(const char *s, int64 hash) {
+  return c_ObjectData::os_getInit(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_memcache
+Variant c_memcache::os_get(const char *s, int64 hash) {
+  return c_ObjectData::os_get(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_memcache
+Variant &c_memcache::os_lval(const char *s, int64 hash) {
+  return c_ObjectData::os_lval(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_memcache
+void c_memcache::o_get(Array &props) const {
+  c_ObjectData::o_get(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_get_memcache
+Variant c_memcache::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+  return c_memcache::o_getPublic(prop, phash, error);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_get_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_memcache
+Variant c_memcache::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+  return c_ObjectData::o_getPublic(s, hash, error);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_memcache
+Variant c_memcache::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+  return o_getPublic(s, hash, error);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_memcache
+bool c_memcache::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_memcache::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_memcache
+bool c_memcache::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_memcache
+bool c_memcache::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_set_memcache
+Variant c_memcache::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+  return c_memcache::o_setPublic(prop, phash, v, forInit);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_set_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_memcache
+Variant c_memcache::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+  return c_ObjectData::o_setPublic(s, hash, v, forInit);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_memcache
+Variant c_memcache::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+  return o_setPublic(s, hash, v, forInit);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_memcache
+Variant& c_memcache::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+  return c_memcache::o_lvalPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_lval_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_memcache
+Variant& c_memcache::o_lvalPublic(CStrRef s, int64 hash) {
+  return c_ObjectData::o_lvalPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_memcache
+Variant& c_memcache::o_lvalPrivate(CStrRef s, int64 hash) {
+  return o_lvalPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_memcache
+Variant c_memcache::os_constant(const char *s) {
+  return c_ObjectData::os_constant(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_memcache
+IMPLEMENT_CLASS(memcache)
+c_memcache *c_memcache::create() {
+  CountableHelper h(this);
+  init();
+  t___construct();
+  return this;
+}
+ObjectData *c_memcache::dynCreate(CArrRef params, bool construct /* = true */) {
+  init();
+  if (construct) {
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
+    (t___construct());
+  }
+  return this;
+}
+void c_memcache::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
+  (t___construct());
+}
+void c_memcache::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  (t___construct(), null);
+}
+void c_memcache::destruct() {
+  if (!inCtorDtor()) {
+    incRefCount();
+    try {
+      t___destruct();
+    } catch (...) { handle_destructor_exception();}
+  }
+}
+ObjectData *c_memcache::cloneImpl() {
+  c_memcache *obj = NEW(c_memcache)();
+  cloneSet(obj);
+  return obj;
+}
+void c_memcache::cloneSet(c_memcache *clone) {
+  ObjectData::cloneSet(clone);
+}
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_memcache
+Variant c_memcache::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 63) {
+    case 1:
+      HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
+        if (count > 0) return throw_toomany_arguments("close", 0, 1);
+        return (t_close());
+      }
+      break;
+    case 6:
+      HASH_GUARD(0x42FAC655280A6146LL, replace) {
+        if (count < 2 || count > 4) return throw_wrong_arguments("replace", count, 2, 4, 1);
+        if (count <= 2) return (t_replace(params[0], params[1]));
+        if (count == 3) return (t_replace(params[0], params[1], params[2]));
+        return (t_replace(params[0], params[1], params[2], params[3]));
+      }
+      break;
+    case 7:
+      HASH_GUARD(0x39099707DF7945C7LL, increment) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("increment", count, 1, 2, 1);
+        if (count <= 1) return (t_increment(params[0]));
+        return (t_increment(params[0], params[1]));
+      }
+      break;
+    case 11:
+      HASH_GUARD(0x3BF3710A1661DE0BLL, setoptimeout) {
+        if (count != 1) return throw_wrong_arguments("setoptimeout", count, 1, 1, 1);
+        return (t_setoptimeout(params[0]));
+      }
+      HASH_GUARD(0x15D34462FC79458BLL, add) {
+        if (count < 2 || count > 4) return throw_wrong_arguments("add", count, 2, 4, 1);
+        if (count <= 2) return (t_add(params[0], params[1]));
+        if (count == 3) return (t_add(params[0], params[1], params[2]));
+        return (t_add(params[0], params[1], params[2], params[3]));
+      }
+      break;
+    case 15:
+      HASH_GUARD(0x710DE893BB376C4FLL, getserverstatus) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("getserverstatus", count, 1, 2, 1);
+        if (count <= 1) return (t_getserverstatus(params[0]));
+        return (t_getserverstatus(params[0], params[1]));
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x030429D528A8EA92LL, setcompressthreshold) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("setcompressthreshold", count, 1, 2, 1);
+        if (count <= 1) return (t_setcompressthreshold(params[0]));
+        return (t_setcompressthreshold(params[0], params[1]));
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x1C660E5BFA6F55D3LL, delete) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("delete", count, 1, 2, 1);
+        if (count <= 1) return (t_delete(params[0]));
+        return (t_delete(params[0], params[1]));
+      }
+      break;
+    case 22:
+      HASH_GUARD(0x7521E8833BE3D316LL, getversion) {
+        if (count > 0) return throw_toomany_arguments("getversion", 0, 1);
+        return (t_getversion());
+      }
+      break;
+    case 25:
+      HASH_GUARD(0x1CCDC4317CE59BD9LL, getstats) {
+        if (count > 3) return throw_toomany_arguments("getstats", 3, 1);
+        if (count <= 0) return (t_getstats());
+        if (count == 1) return (t_getstats(params[0]));
+        if (count == 2) return (t_getstats(params[0], params[1]));
+        return (t_getstats(params[0], params[1], params[2]));
+      }
+      break;
+    case 26:
+      HASH_GUARD(0x2A733FC12BA4C1DALL, decrement) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("decrement", count, 1, 2, 1);
+        if (count <= 1) return (t_decrement(params[0]));
+        return (t_decrement(params[0], params[1]));
+      }
+      break;
+    case 31:
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
+        return (t___construct(), null);
+      }
+      break;
+    case 33:
+      HASH_GUARD(0x399A6427C2185621LL, set) {
+        if (count < 2 || count > 4) return throw_wrong_arguments("set", count, 2, 4, 1);
+        if (count <= 2) return (t_set(params[0], params[1]));
+        if (count == 3) return (t_set(params[0], params[1], params[2]));
+        return (t_set(params[0], params[1], params[2], params[3]));
+      }
+      break;
+    case 37:
+      HASH_GUARD(0x4770E54B86BF7765LL, getextendedstats) {
+        if (count > 3) return throw_toomany_arguments("getextendedstats", 3, 1);
+        if (count <= 0) return (t_getextendedstats());
+        if (count == 1) return (t_getextendedstats(params[0]));
+        if (count == 2) return (t_getextendedstats(params[0], params[1]));
+        return (t_getextendedstats(params[0], params[1], params[2]));
+      }
+      break;
+    case 38:
+      HASH_GUARD(0x56CD24186237AAE6LL, addserver) {
+        if (count < 1 || count > 9) return throw_wrong_arguments("addserver", count, 1, 9, 1);
+        if (count <= 1) return (t_addserver(params[0]));
+        if (count == 2) return (t_addserver(params[0], params[1]));
+        if (count == 3) return (t_addserver(params[0], params[1], params[2]));
+        if (count == 4) return (t_addserver(params[0], params[1], params[2], params[3]));
+        if (count == 5) return (t_addserver(params[0], params[1], params[2], params[3], params[4]));
+        if (count == 6) return (t_addserver(params[0], params[1], params[2], params[3], params[4], params[5]));
+        if (count == 7) return (t_addserver(params[0], params[1], params[2], params[3], params[4], params[5], params[6]));
+        if (count == 8) return (t_addserver(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]));
+        return (t_addserver(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7], params[8]));
+      }
+      break;
+    case 40:
+      HASH_GUARD(0x25DCCC35D69AD828LL, get) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("get", count, 1, 2, 1);
+        if (count <= 1) return (t_get(params[0]));
+        return (t_get(params[0], ref(const_cast<Array&>(params).lvalAt(1))));
+      }
+      break;
+    case 51:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        return (t___destruct());
+      }
+      break;
+    case 57:
+      HASH_GUARD(0x742B441E13CD7279LL, pconnect) {
+        if (count < 1 || count > 4) return throw_wrong_arguments("pconnect", count, 1, 4, 1);
+        if (count <= 1) return (t_pconnect(params[0]), null);
+        if (count == 2) return (t_pconnect(params[0], params[1]), null);
+        if (count == 3) return (t_pconnect(params[0], params[1], params[2]), null);
+        return (t_pconnect(params[0], params[1], params[2], params[3]), null);
+      }
+      break;
+    case 58:
+      HASH_GUARD(0x6A3D9F8EDB005E7ALL, flush) {
+        if (count > 1) return throw_toomany_arguments("flush", 1, 1);
+        if (count <= 0) return (t_flush());
+        return (t_flush(params[0]));
+      }
+      break;
+    case 61:
+      HASH_GUARD(0x1780351E8EFF92BDLL, setserverparams) {
+        if (count < 1 || count > 6) return throw_wrong_arguments("setserverparams", count, 1, 6, 1);
+        if (count <= 1) return (t_setserverparams(params[0]));
+        if (count == 2) return (t_setserverparams(params[0], params[1]));
+        if (count == 3) return (t_setserverparams(params[0], params[1], params[2]));
+        if (count == 4) return (t_setserverparams(params[0], params[1], params[2], params[3]));
+        if (count == 5) return (t_setserverparams(params[0], params[1], params[2], params[3], params[4]));
+        return (t_setserverparams(params[0], params[1], params[2], params[3], params[4], params[5]));
+      }
+      break;
+    case 62:
+      HASH_GUARD(0x7032C660AD16D7FELL, connect) {
+        if (count < 1 || count > 4) return throw_wrong_arguments("connect", count, 1, 4, 1);
+        if (count <= 1) return (t_connect(params[0]), null);
+        if (count == 2) return (t_connect(params[0], params[1]), null);
+        if (count == 3) return (t_connect(params[0], params[1], params[2]), null);
+        return (t_connect(params[0], params[1], params[2], params[3]), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_memcache
+Variant c_memcache::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 63) {
+    case 1:
+      HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
+        if (count > 0) return throw_toomany_arguments("close", 0, 1);
+        return (t_close());
+      }
+      break;
+    case 6:
+      HASH_GUARD(0x42FAC655280A6146LL, replace) {
+        if (count < 2 || count > 4) return throw_wrong_arguments("replace", count, 2, 4, 1);
+        if (count <= 2) return (t_replace(a0, a1));
+        if (count == 3) return (t_replace(a0, a1, a2));
+        return (t_replace(a0, a1, a2, a3));
+      }
+      break;
+    case 7:
+      HASH_GUARD(0x39099707DF7945C7LL, increment) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("increment", count, 1, 2, 1);
+        if (count <= 1) return (t_increment(a0));
+        return (t_increment(a0, a1));
+      }
+      break;
+    case 11:
+      HASH_GUARD(0x3BF3710A1661DE0BLL, setoptimeout) {
+        if (count != 1) return throw_wrong_arguments("setoptimeout", count, 1, 1, 1);
+        return (t_setoptimeout(a0));
+      }
+      HASH_GUARD(0x15D34462FC79458BLL, add) {
+        if (count < 2 || count > 4) return throw_wrong_arguments("add", count, 2, 4, 1);
+        if (count <= 2) return (t_add(a0, a1));
+        if (count == 3) return (t_add(a0, a1, a2));
+        return (t_add(a0, a1, a2, a3));
+      }
+      break;
+    case 15:
+      HASH_GUARD(0x710DE893BB376C4FLL, getserverstatus) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("getserverstatus", count, 1, 2, 1);
+        if (count <= 1) return (t_getserverstatus(a0));
+        return (t_getserverstatus(a0, a1));
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x030429D528A8EA92LL, setcompressthreshold) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("setcompressthreshold", count, 1, 2, 1);
+        if (count <= 1) return (t_setcompressthreshold(a0));
+        return (t_setcompressthreshold(a0, a1));
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x1C660E5BFA6F55D3LL, delete) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("delete", count, 1, 2, 1);
+        if (count <= 1) return (t_delete(a0));
+        return (t_delete(a0, a1));
+      }
+      break;
+    case 22:
+      HASH_GUARD(0x7521E8833BE3D316LL, getversion) {
+        if (count > 0) return throw_toomany_arguments("getversion", 0, 1);
+        return (t_getversion());
+      }
+      break;
+    case 25:
+      HASH_GUARD(0x1CCDC4317CE59BD9LL, getstats) {
+        if (count > 3) return throw_toomany_arguments("getstats", 3, 1);
+        if (count <= 0) return (t_getstats());
+        if (count == 1) return (t_getstats(a0));
+        if (count == 2) return (t_getstats(a0, a1));
+        return (t_getstats(a0, a1, a2));
+      }
+      break;
+    case 26:
+      HASH_GUARD(0x2A733FC12BA4C1DALL, decrement) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("decrement", count, 1, 2, 1);
+        if (count <= 1) return (t_decrement(a0));
+        return (t_decrement(a0, a1));
+      }
+      break;
+    case 31:
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
+        return (t___construct(), null);
+      }
+      break;
+    case 33:
+      HASH_GUARD(0x399A6427C2185621LL, set) {
+        if (count < 2 || count > 4) return throw_wrong_arguments("set", count, 2, 4, 1);
+        if (count <= 2) return (t_set(a0, a1));
+        if (count == 3) return (t_set(a0, a1, a2));
+        return (t_set(a0, a1, a2, a3));
+      }
+      break;
+    case 37:
+      HASH_GUARD(0x4770E54B86BF7765LL, getextendedstats) {
+        if (count > 3) return throw_toomany_arguments("getextendedstats", 3, 1);
+        if (count <= 0) return (t_getextendedstats());
+        if (count == 1) return (t_getextendedstats(a0));
+        if (count == 2) return (t_getextendedstats(a0, a1));
+        return (t_getextendedstats(a0, a1, a2));
+      }
+      break;
+    case 38:
+      HASH_GUARD(0x56CD24186237AAE6LL, addserver) {
+        if (count < 1 || count > 9) return throw_wrong_arguments("addserver", count, 1, 9, 1);
+        if (count <= 1) return (t_addserver(a0));
+        if (count == 2) return (t_addserver(a0, a1));
+        if (count == 3) return (t_addserver(a0, a1, a2));
+        if (count == 4) return (t_addserver(a0, a1, a2, a3));
+        if (count == 5) return (t_addserver(a0, a1, a2, a3, a4));
+        return (t_addserver(a0, a1, a2, a3, a4, a5));
+      }
+      break;
+    case 40:
+      HASH_GUARD(0x25DCCC35D69AD828LL, get) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("get", count, 1, 2, 1);
+        if (count <= 1) return (t_get(a0));
+        return (t_get(a0, ref(a1)));
+      }
+      break;
+    case 51:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        return (t___destruct());
+      }
+      break;
+    case 57:
+      HASH_GUARD(0x742B441E13CD7279LL, pconnect) {
+        if (count < 1 || count > 4) return throw_wrong_arguments("pconnect", count, 1, 4, 1);
+        if (count <= 1) return (t_pconnect(a0), null);
+        if (count == 2) return (t_pconnect(a0, a1), null);
+        if (count == 3) return (t_pconnect(a0, a1, a2), null);
+        return (t_pconnect(a0, a1, a2, a3), null);
+      }
+      break;
+    case 58:
+      HASH_GUARD(0x6A3D9F8EDB005E7ALL, flush) {
+        if (count > 1) return throw_toomany_arguments("flush", 1, 1);
+        if (count <= 0) return (t_flush());
+        return (t_flush(a0));
+      }
+      break;
+    case 61:
+      HASH_GUARD(0x1780351E8EFF92BDLL, setserverparams) {
+        if (count < 1 || count > 6) return throw_wrong_arguments("setserverparams", count, 1, 6, 1);
+        if (count <= 1) return (t_setserverparams(a0));
+        if (count == 2) return (t_setserverparams(a0, a1));
+        if (count == 3) return (t_setserverparams(a0, a1, a2));
+        if (count == 4) return (t_setserverparams(a0, a1, a2, a3));
+        if (count == 5) return (t_setserverparams(a0, a1, a2, a3, a4));
+        return (t_setserverparams(a0, a1, a2, a3, a4, a5));
+      }
+      break;
+    case 62:
+      HASH_GUARD(0x7032C660AD16D7FELL, connect) {
+        if (count < 1 || count > 4) return throw_wrong_arguments("connect", count, 1, 4, 1);
+        if (count <= 1) return (t_connect(a0), null);
+        if (count == 2) return (t_connect(a0, a1), null);
+        if (count == 3) return (t_connect(a0, a1, a2), null);
+        return (t_connect(a0, a1, a2, a3), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_memcache
+Variant c_memcache::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_memcache
+Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 63) {
+    case 1:
+      HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("close", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_close());
+      }
+      break;
+    case 6:
+      HASH_GUARD(0x42FAC655280A6146LL, replace) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 4) return throw_wrong_arguments("replace", count, 2, 4, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 2) return (t_replace(a0, a1));
+        else if (count == 3) return (t_replace(a0, a1, a2));
+        else return (t_replace(a0, a1, a2, a3));
+      }
+      break;
+    case 7:
+      HASH_GUARD(0x39099707DF7945C7LL, increment) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("increment", count, 1, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 1) return (t_increment(a0));
+        else return (t_increment(a0, a1));
+      }
+      break;
+    case 11:
+      HASH_GUARD(0x3BF3710A1661DE0BLL, setoptimeout) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("setoptimeout", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_setoptimeout(a0));
+      }
+      HASH_GUARD(0x15D34462FC79458BLL, add) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 4) return throw_wrong_arguments("add", count, 2, 4, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 2) return (t_add(a0, a1));
+        else if (count == 3) return (t_add(a0, a1, a2));
+        else return (t_add(a0, a1, a2, a3));
+      }
+      break;
+    case 15:
+      HASH_GUARD(0x710DE893BB376C4FLL, getserverstatus) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("getserverstatus", count, 1, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 1) return (t_getserverstatus(a0));
+        else return (t_getserverstatus(a0, a1));
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x030429D528A8EA92LL, setcompressthreshold) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("setcompressthreshold", count, 1, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 1) return (t_setcompressthreshold(a0));
+        else return (t_setcompressthreshold(a0, a1));
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x1C660E5BFA6F55D3LL, delete) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("delete", count, 1, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 1) return (t_delete(a0));
+        else return (t_delete(a0, a1));
+      }
+      break;
+    case 22:
+      HASH_GUARD(0x7521E8833BE3D316LL, getversion) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getversion", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getversion());
+      }
+      break;
+    case 25:
+      HASH_GUARD(0x1CCDC4317CE59BD9LL, getstats) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 3) return throw_toomany_arguments("getstats", 3, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 0) return (t_getstats());
+        else if (count == 1) return (t_getstats(a0));
+        else if (count == 2) return (t_getstats(a0, a1));
+        else return (t_getstats(a0, a1, a2));
+      }
+      break;
+    case 26:
+      HASH_GUARD(0x2A733FC12BA4C1DALL, decrement) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("decrement", count, 1, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 1) return (t_decrement(a0));
+        else return (t_decrement(a0, a1));
+      }
+      break;
+    case 31:
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(), null);
+      }
+      break;
+    case 33:
+      HASH_GUARD(0x399A6427C2185621LL, set) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 4) return throw_wrong_arguments("set", count, 2, 4, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 2) return (t_set(a0, a1));
+        else if (count == 3) return (t_set(a0, a1, a2));
+        else return (t_set(a0, a1, a2, a3));
+      }
+      break;
+    case 37:
+      HASH_GUARD(0x4770E54B86BF7765LL, getextendedstats) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 3) return throw_toomany_arguments("getextendedstats", 3, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 0) return (t_getextendedstats());
+        else if (count == 1) return (t_getextendedstats(a0));
+        else if (count == 2) return (t_getextendedstats(a0, a1));
+        else return (t_getextendedstats(a0, a1, a2));
+      }
+      break;
+    case 38:
+      HASH_GUARD(0x56CD24186237AAE6LL, addserver) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        Variant a4;
+        Variant a5;
+        Variant a6;
+        Variant a7;
+        Variant a8;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 9) return throw_wrong_arguments("addserver", count, 1, 9, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a4 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a5 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a6 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a7 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a8 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 1) return (t_addserver(a0));
+        else if (count == 2) return (t_addserver(a0, a1));
+        else if (count == 3) return (t_addserver(a0, a1, a2));
+        else if (count == 4) return (t_addserver(a0, a1, a2, a3));
+        else if (count == 5) return (t_addserver(a0, a1, a2, a3, a4));
+        else if (count == 6) return (t_addserver(a0, a1, a2, a3, a4, a5));
+        else if (count == 7) return (t_addserver(a0, a1, a2, a3, a4, a5, a6));
+        else if (count == 8) return (t_addserver(a0, a1, a2, a3, a4, a5, a6, a7));
+        else return (t_addserver(a0, a1, a2, a3, a4, a5, a6, a7, a8));
+      }
+      break;
+    case 40:
+      HASH_GUARD(0x25DCCC35D69AD828LL, get) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("get", count, 1, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = ref((*it)->refval(env));
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 1) return (t_get(a0));
+        else return (t_get(a0, ref(a1)));
+      }
+      break;
+    case 51:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___destruct());
+      }
+      break;
+    case 57:
+      HASH_GUARD(0x742B441E13CD7279LL, pconnect) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 4) return throw_wrong_arguments("pconnect", count, 1, 4, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 1) return (t_pconnect(a0), null);
+        else if (count == 2) return (t_pconnect(a0, a1), null);
+        else if (count == 3) return (t_pconnect(a0, a1, a2), null);
+        else return (t_pconnect(a0, a1, a2, a3), null);
+      }
+      break;
+    case 58:
+      HASH_GUARD(0x6A3D9F8EDB005E7ALL, flush) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("flush", 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 0) return (t_flush());
+        else return (t_flush(a0));
+      }
+      break;
+    case 61:
+      HASH_GUARD(0x1780351E8EFF92BDLL, setserverparams) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        Variant a4;
+        Variant a5;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 6) return throw_wrong_arguments("setserverparams", count, 1, 6, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a4 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a5 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 1) return (t_setserverparams(a0));
+        else if (count == 2) return (t_setserverparams(a0, a1));
+        else if (count == 3) return (t_setserverparams(a0, a1, a2));
+        else if (count == 4) return (t_setserverparams(a0, a1, a2, a3));
+        else if (count == 5) return (t_setserverparams(a0, a1, a2, a3, a4));
+        else return (t_setserverparams(a0, a1, a2, a3, a4, a5));
+      }
+      break;
+    case 62:
+      HASH_GUARD(0x7032C660AD16D7FELL, connect) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 4) return throw_wrong_arguments("connect", count, 1, 4, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 1) return (t_connect(a0), null);
+        else if (count == 2) return (t_connect(a0, a1), null);
+        else if (count == 3) return (t_connect(a0, a1, a2), null);
+        else return (t_connect(a0, a1, a2, a3), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_memcache::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+struct ObjectStaticCallbacks cw_memcache = {
+  c_memcache::os_getInit,
+  c_memcache::os_get,
+  c_memcache::os_lval,
+  c_memcache::os_invoke,
+  c_memcache::os_constant,
+};
 Object co_domprocessinginstruction(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domprocessinginstruction)())->dynCreate(params, init));
 }
@@ -27832,6 +28886,9 @@ Variant get_builtin_class_var_init(const char *s, const char *var) {
     case 203:
       HASH_GET_CLASS_VAR_INIT(0x253AC17234FC8CCBLL, libxmlerror);
       break;
+    case 208:
+      HASH_GET_CLASS_VAR_INIT(0x3C122DF8859C72D0LL, memcache);
+      break;
     case 210:
       HASH_GET_CLASS_VAR_INIT(0x52E5CC58B841AED2LL, sqlite3stmt);
       HASH_GET_CLASS_VAR_INIT(0x297ECCC7A259EDD2LL, splfileobject);
@@ -28051,6 +29108,9 @@ Object create_builtin_object(const char *s, CArrRef params, bool init /* = true 
     case 203:
       HASH_CREATE_OBJECT(0x253AC17234FC8CCBLL, libxmlerror);
       break;
+    case 208:
+      HASH_CREATE_OBJECT(0x3C122DF8859C72D0LL, memcache);
+      break;
     case 210:
       HASH_CREATE_OBJECT(0x52E5CC58B841AED2LL, sqlite3stmt);
       HASH_CREATE_OBJECT(0x297ECCC7A259EDD2LL, splfileobject);
@@ -28269,6 +29329,9 @@ Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef 
       break;
     case 203:
       HASH_INVOKE_STATIC_METHOD(0x253AC17234FC8CCBLL, libxmlerror);
+      break;
+    case 208:
+      HASH_INVOKE_STATIC_METHOD(0x3C122DF8859C72D0LL, memcache);
       break;
     case 210:
       HASH_INVOKE_STATIC_METHOD(0x52E5CC58B841AED2LL, sqlite3stmt);
@@ -28493,6 +29556,9 @@ const ObjectStaticCallbacks * get_builtin_object_static_callbacks(const char *s)
       break;
     case 203:
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x253AC17234FC8CCBLL, libxmlerror);
+      break;
+    case 208:
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x3C122DF8859C72D0LL, memcache);
       break;
     case 210:
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x52E5CC58B841AED2LL, sqlite3stmt);

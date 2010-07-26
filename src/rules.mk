@@ -223,6 +223,7 @@ CPPFLAGS += \
   -isystem $(EXT_DIR)/libmcrypt/include \
   -isystem $(EXT_DIR)/libfbi/include \
   -isystem $(EXT_DIR)/readline/include \
+  -isystem $(EXT_DIR)/libmemcached/include \
   -I $(PROJECT_ROOT)/src \
   -I $(PROJECT_ROOT)/src/system/gen \
 
@@ -446,6 +447,8 @@ HTTP_LIBS = $(EXT_DIR)/libafdt/lib/libafdt.a $(EXT_DIR)/libevent/lib/libevent.a
 MCC_LIBS = $(EXT_DIR)/libmcc/lib/libmcc.a $(EXT_DIR)/libch/lib/libch.a \
 	$(EXT_DIR)/libevent/lib/libevent.a
 
+LIBMEMCACHED_LIBS = $(EXT_DIR)/libmemcached/lib/libmemcached.a
+
 GD_LIBS = $(EXT_DIR)/gd/lib/libgd.a -lpng -ljpeg -lfreetype -lfontconfig
 
 MOZILLA_LIBS = $(EXT_DIR)/mozilla/libmozutil_s.a \
@@ -528,13 +531,14 @@ ALL_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \
 	$(GD_LIBS) $(LIBXML_LIBS) $(FBML_LIBS) $(MBFL_LIBS) \
 	$(MCRYPT_LIBS) $(JEMALLOC_LIBS) $(GOOGLE_LIBS) $(ICU_LIBS) \
 	$(HTTP_LIBS) $(XHP_LIBS) $(TIME_LIBS) $(TBB_LIBS) $(FBI_LIBS) \
-	$(LDAP_LIBS) $(READLINE_LIBS) $(ORACLE_LIBS)
+	$(LDAP_LIBS) $(READLINE_LIBS) $(LIBMEMCACHED_LIBS) $(ORACLE_LIBS)
 
 LIB_PATHS = $(HPHP_LIB) \
   $(EXT_DIR)/libcurl/lib \
   $(EXT_DIR)/mysql/lib/mysql \
   $(EXT_DIR)/boost/lib \
   $(EXT_DIR)/libmcc/lib \
+  $(EXT_DIR)/libmemcached/lib \
   $(EXT_DIR)/gd/lib \
   $(EXT_DIR)/iconv/lib \
   $(EXT_DIR)/libevent/lib \

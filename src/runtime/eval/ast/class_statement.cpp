@@ -81,7 +81,7 @@ void ClassVariable::getInfo(ClassInfo::PropertyInfo &info) const {
 }
 
 void ClassVariable::eval(VariableEnvironment &env, Variant &res) const {
-  res = m_value->eval(env);
+  res = m_value ? m_value->eval(env) : null_variant;
 }
 
 ClassStatement::ClassStatement(STATEMENT_ARGS, const string &name,

@@ -104,6 +104,9 @@ public:
   }
 
   virtual void requestShutdown() {
+    input_encoding.reset();
+    output_encoding.reset();
+    internal_encoding.reset();
   }
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(ICONVGlobals, s_iconv_globals);
@@ -1486,7 +1489,7 @@ Variant f_iconv_mime_encode(CStrRef field_name, CStrRef field_value,
 
         ret.append('Q');
         char_cnt--;
-	ret.append('?');
+        ret.append('?');
         char_cnt--;
 
         prev_in_left = ini_in_left = in_left;

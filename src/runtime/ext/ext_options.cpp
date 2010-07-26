@@ -44,7 +44,9 @@ public:
     assertBail = 0;
   }
 
-  virtual void requestShutdown() { }
+  virtual void requestShutdown() {
+    assertCallback.unset();
+  }
 
   int assertActive;
   int assertWarning;

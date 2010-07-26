@@ -680,10 +680,17 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     case T_PRINT:         cg_printf("print(");     break;
     case T_EVAL:
       if (Option::EnableEval > Option::NoEval) {
+        bool instance;
+        if (ar->getClassScope()) {
+          FunctionScopePtr fs = ar->getFunctionScope();
+          instance = fs && !fs->isStatic();
+        } else {
+          instance = false;
+        }
         cg_printf("eval(%s, Object(%s), ",
                   ar->getScope()->inPseudoMain() ?
                   "get_variable_table()" : "variables",
-                  ar->getClassScope() ? "this" : "");
+                  instance ? "this" : "");
       } else {
         cg_printf("f_eval(");
       }

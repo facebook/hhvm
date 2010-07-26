@@ -3052,8 +3052,9 @@ SharedVariant *Variant::getSharedVariant() const {
     return m_data.pvar->getSharedVariant();
   }
   if (m_type == KindOfString) {
-    if (m_data.pstr->isShared()) return m_data.pstr->getSharedVariant();
-  } else if (m_type == KindOfArray) {
+    return m_data.pstr->getSharedVariant();
+  }
+  if (m_type == KindOfArray) {
     return m_data.parr->getSharedVariant();
   }
   return NULL;

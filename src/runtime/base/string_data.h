@@ -73,8 +73,8 @@ class StringData {
    * Get the wrapped SharedVariant.
    */
   SharedVariant *getSharedVariant() const {
-    ASSERT(isShared());
-    return m_shared;
+    if (isShared()) return m_shared;
+    return NULL;
   }
 
   /**

@@ -208,8 +208,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
 
   server.set("REQUEST_URI", String(transport->getUrl(), CopyString));
   server.set("SCRIPT_URL", r.originalURL());
-  server.set("SCRIPT_URI", String(string("http://") + hostName.data() +
-                                  r.originalURL().data()));
+  server.set("SCRIPT_URI", String(string("http://") +
+                                  (hostHeader.empty() ? hostName : hostHeader).
+                                  data() + r.originalURL().data()));
   if (r.rewritten()) {
     // when URL is rewritten, PHP decided to put original URL as SCRIPT_NAME
     String name = r.originalURL();

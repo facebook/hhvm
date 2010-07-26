@@ -146,7 +146,6 @@ class c_domnode : public ExtObjectData, public Sweepable {
 public:
   sp_domdocument m_doc;
   xmlNodePtr m_node;
-  bool m_owner;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -368,6 +367,8 @@ public:
   bool m_stricterror;
   bool m_recover;
   Array m_classmap;
+  Array m_orphans;
+  bool m_owner;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

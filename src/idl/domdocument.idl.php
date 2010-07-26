@@ -62,8 +62,7 @@ c('DOMNode', null, array('Sweepable' => 'internal'),
   "\n".
   "public:\n".
   "  sp_domdocument m_doc;\n".
-  "  xmlNodePtr m_node;\n".
-  "  bool m_owner;"
+  "  xmlNodePtr m_node;"
  );
 
 c('DOMAttr', 'DOMNode', array(),
@@ -226,7 +225,9 @@ c('DOMDocument', 'DOMNode', array(),
   "  bool m_substituteentities;\n".
   "  bool m_stricterror;\n".
   "  bool m_recover;\n".
-  "  Array m_classmap;"
+  "  Array m_classmap;\n"
+  "  Array m_orphans;\n".
+  "  bool m_owner;"
  );
 
 c('DOMDocumentFragment', 'DOMNode', array(),

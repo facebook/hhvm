@@ -1124,6 +1124,20 @@ static xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
   return ret;
 }
 
+static void appendOrphan(Array &orphans, xmlNodePtr node) {
+  if (node) {
+    ASSERT(!orphans.exists((int64)node));
+    orphans.set((int64)node, true);
+  }
+}
+
+static void removeOrphan(Array &orphans, xmlNodePtr node) {
+  if (node) {
+    ASSERT(orphans.exists((int64)node));
+    orphans.remove((int64)node);
+  }
+}
+
 static Variant php_dom_create_object(xmlNodePtr obj, sp_domdocument doc,
                                      bool owner = false) {
   const char *clsname = NULL;
@@ -1154,9 +1168,11 @@ static Variant php_dom_create_object(xmlNodePtr obj, sp_domdocument doc,
   }
   Object wrapper = create_object(clsname, Array(), false);
   c_domnode *nodeobj = wrapper.getTyped<c_domnode>();
-  nodeobj->m_node = obj;
   nodeobj->m_doc = doc;
-  nodeobj->m_owner = owner;
+  nodeobj->m_node = obj;
+  if (owner && doc.get()) {
+    appendOrphan(doc->m_orphans, obj);
+  }
   return wrapper;
 }
 
@@ -1846,15 +1862,10 @@ static PropertyAccessorMap domnode_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domnode::c_domnode() : m_node(NULL), m_owner(false) {
+c_domnode::c_domnode() : m_node(NULL) {
 }
 
 c_domnode::~c_domnode() {
-  if (m_owner && m_node) {
-    xmlUnlinkNode(m_node);
-    php_libxml_node_free(m_node);
-    m_node = NULL;
-  }
 }
 
 void c_domnode::t___construct() {
@@ -1944,7 +1955,9 @@ Variant c_domnode::t_appendchild(CObjRef newnode) {
       return false;
     }
   }
-  newdomnode->m_owner = false;
+  if (newdomnode->m_doc.get()) {
+    removeOrphan(newdomnode->m_doc->m_orphans, newdomnode->m_node);
+  }
   dom_reconcile_ns(nodep->doc, new_child);
   return create_node_object(new_child, m_doc, false);
 }
@@ -2132,7 +2145,9 @@ Variant c_domnode::t_insertbefore(CObjRef newnode,
     raise_warning("Couldn't add newnode as the previous sibling of refnode");
     return false;
   }
-  domchildnode->m_owner = false;
+  if (domchildnode->m_doc.get()) {
+    removeOrphan(domchildnode->m_doc->m_orphans, domchildnode->m_node);
+  }
   dom_reconcile_ns(parentp->doc, new_child);
   return create_node_object(new_child, m_doc, false);
 }
@@ -2790,7 +2805,7 @@ Variant c_domtext::t_splittext(int64 offset) {
   c_domtext *ret = NEW(c_domtext)();
   ret->m_doc = m_doc;
   ret->m_node = nnode;
-  ret->m_owner = true;
+  appendOrphan(m_doc->m_orphans, nnode);
   return ret;
 }
 
@@ -2999,10 +3014,17 @@ c_domdocument::c_domdocument() :
   m_preservewhitespace(true),
   m_substituteentities(false),
   m_stricterror(true),
-  m_recover(false) {
+  m_recover(false),
+  m_owner(false) {
 }
 
 c_domdocument::~c_domdocument() {
+  for (ArrayIter iter(m_orphans); iter; ++iter) {
+    xmlNodePtr node = (xmlNodePtr)iter.first().toInt64();
+    xmlUnlinkNode(node);
+    php_libxml_node_free(node);
+  }
+
   if (m_owner && m_node) {
     xmlDocPtr doc = (xmlDocPtr)m_node;
     if (doc->URL) {
@@ -3010,7 +3032,6 @@ c_domdocument::~c_domdocument() {
       doc->URL = NULL;
     }
     xmlFreeDoc(doc);
-    m_node = NULL; // so ~c_domnode() won't do anything
   }
 }
 
@@ -3059,7 +3080,7 @@ Variant c_domdocument::t_createattribute(CStrRef name) {
   c_domattr *ret = NEW(c_domattr)();
   ret->m_doc = this;
   ret->m_node = (xmlNodePtr)node;
-  ret->m_owner = true;
+  appendOrphan(m_orphans, (xmlNodePtr)node);
   return ret;
 }
 
@@ -3113,7 +3134,7 @@ Variant c_domdocument::t_createattributens(CStrRef namespaceuri,
   c_domattr *ret = NEW(c_domattr)();
   ret->m_doc = this;
   ret->m_node = nodep;
-  ret->m_owner = true;
+  appendOrphan(m_orphans, nodep);
   return ret;
 }
 
@@ -3127,7 +3148,7 @@ Variant c_domdocument::t_createcdatasection(CStrRef data) {
   c_domcdatasection *ret = NEW(c_domcdatasection)();
   ret->m_doc = this;
   ret->m_node = node;
-  ret->m_owner = true;
+  appendOrphan(m_orphans, node);
   return ret;
 }
 
@@ -3141,7 +3162,7 @@ Variant c_domdocument::t_createcomment(CStrRef data) {
   c_domcomment *ret = NEW(c_domcomment)();
   ret->m_doc = this;
   ret->m_node = node;
-  ret->m_owner = true;
+  appendOrphan(m_orphans, node);
   return ret;
 }
 
@@ -3155,7 +3176,7 @@ Variant c_domdocument::t_createdocumentfragment() {
   c_domdocumentfragment *ret = NEW(c_domdocumentfragment)();
   ret->m_doc = this;
   ret->m_node = node;
-  ret->m_owner = true;
+  appendOrphan(m_orphans, node);
   return ret;
 }
 
@@ -3175,7 +3196,7 @@ Variant c_domdocument::t_createelement(CStrRef name,
   c_domelement *ret = NEW(c_domelement)();
   ret->m_doc = this;
   ret->m_node = node;
-  ret->m_owner = true;
+  appendOrphan(m_orphans, node);
   return ret;
 }
 
@@ -3225,7 +3246,7 @@ Variant c_domdocument::t_createelementns(CStrRef namespaceuri,
   c_domelement *ret = NEW(c_domelement)();
   ret->m_doc = this;
   ret->m_node = nodep;
-  ret->m_owner = true;
+  appendOrphan(m_orphans, nodep);
   return ret;
 }
 
@@ -3243,7 +3264,7 @@ Variant c_domdocument::t_createentityreference(CStrRef name) {
   c_domentity *ret = NEW(c_domentity)();
   ret->m_doc = this;
   ret->m_node = node;
-  ret->m_owner = true;
+  appendOrphan(m_orphans, node);
   return ret;
 }
 
@@ -3265,7 +3286,7 @@ Variant c_domdocument::t_createprocessinginstruction(CStrRef target,
   c_domprocessinginstruction *ret = NEW(c_domprocessinginstruction)();
   ret->m_doc = this;
   ret->m_node = node;
-  ret->m_owner = true;
+  appendOrphan(m_orphans, node);
   return ret;
 }
 
@@ -3279,7 +3300,7 @@ Variant c_domdocument::t_createtextnode(CStrRef data) {
   c_domtext *ret = NEW(c_domtext)();
   ret->m_doc = this;
   ret->m_node = node;
-  ret->m_owner = true;
+  appendOrphan(m_orphans, node);
   return ret;
 }
 
@@ -3908,7 +3929,9 @@ Variant c_domelement::t_getattributenode(CStrRef name) {
   c_domnode *ret = NEW(c_domattr)();
   ret->m_doc = m_doc;
   ret->m_node = (xmlNodePtr)attrp;
-  ret->m_owner = owner;
+  if (owner) {
+    appendOrphan(m_doc->m_orphans, (xmlNodePtr)attrp);
+  }
   return ret;
 }
 
@@ -4044,7 +4067,7 @@ Variant c_domelement::t_removeattributenode(CObjRef oldattr) {
   c_domattr *ret = NEW(c_domattr)();
   ret->m_doc = m_doc;
   ret->m_node = (xmlNodePtr)attrp;
-  ret->m_owner = true;
+  appendOrphan(m_doc->m_orphans, (xmlNodePtr)attrp);
   return ret;
 }
 

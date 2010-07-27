@@ -603,9 +603,6 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // ConcurrentThreadSharedStore
 
-static string_data_hash g_hash;
-static string_data_equal g_equal;
-
 class ConcurrentTableSharedStore : public SharedStore,
                                    private ThreadSharedVariantFactory {
 public:
@@ -646,17 +643,19 @@ protected:
   virtual SharedVariant* construct(CStrRef key, CVarRef v) {
     return create(key, v);
   }
-  struct StringHashCompare {
-    bool equal(StringData *s1, StringData *s2) const {
+
+  struct charHashCompare {
+    bool equal(const char *s1, const char *s2) const {
       ASSERT(s1 && s2);
-      return g_equal(s1, s2);
+      return strcmp(s1, s2) == 0;
     }
-    size_t hash(StringData *s) const {
+    size_t hash(const char *s) const {
       ASSERT(s);
-      return g_hash(s);
+      return hash_string(s);
     }
   };
-  typedef tbb::concurrent_hash_map<StringData*, StoreValue, StringHashCompare>
+
+  typedef tbb::concurrent_hash_map<const char*, StoreValue, charHashCompare>
     Map;
 
   virtual void clear() {
@@ -664,7 +663,7 @@ protected:
     for (Map::iterator iter = m_vars.begin(); iter != m_vars.end();
          ++iter) {
       iter->second.var->decRef();
-      iter->first->destruct();
+      free((void *)iter->first);
     }
     m_vars.clear();
   }
@@ -680,7 +679,7 @@ protected:
     if (key.isNull()) return false;
     ReadLock l(m_lock);
     Map::accessor acc;
-    if (m_vars.find(acc, key.get())) {
+    if (m_vars.find(acc, key.data())) {
       if (expired && !acc->second.expired()) {
         return false;
       }
@@ -692,15 +691,15 @@ protected:
 
   void eraseAcc(Map::accessor &acc) {
     acc->second.var->decRef();
-    StringData *pkey = acc->first;
+    const char *pkey = acc->first;
     m_vars.erase(acc);
-    pkey->destruct();
+    free((void *)pkey);
   }
   void eraseAcc(Map::const_accessor &acc) {
     acc->second.var->decRef();
-    StringData *pkey = acc->first;
+    const char *pkey = acc->first;
     m_vars.erase(acc);
-    pkey->destruct();
+    free((void *)pkey);
   }
 
   Map m_vars;
@@ -708,7 +707,7 @@ protected:
   // Write lock is acquired for whole table operations
   ReadWriteMutex m_lock;
 
-  typedef std::pair<StringData*, time_t> ExpirationPair;
+  typedef std::pair<const char*, time_t> ExpirationPair;
   class ExpirationCompare {
   public:
     bool operator()(const ExpirationPair &p1, const ExpirationPair &p2) {
@@ -737,7 +736,7 @@ protected:
     // Purge items n at a time. The only operation under the write lock is
     // the pop
 #define PURGE_RATE 256
-    StringData* s[PURGE_RATE];
+    const char* s[PURGE_RATE];
     while (true) {
       int i;
       {
@@ -750,9 +749,8 @@ protected:
         }
       }
       for (int j = 0; j < i; ++j) {
-        String k(s[j]->data(), s[j]->size(), AttachLiteral);
-        eraseImpl(k, true);
-        s[j]->destruct();
+        eraseImpl(s[j], true);
+        free((void *)s[j]);
       }
       if (i < PURGE_RATE) {
         // No work left
@@ -761,8 +759,9 @@ protected:
     }
   }
 
-  void addToExpirationQueue(CStrRef key, int64 etime) {
-    ExpirationPair p(key.get()->copy(true), etime);
+  void addToExpirationQueue(const char* key, int64 etime) {
+    const char *copy = strdup(key);
+    ExpirationPair p(copy, etime);
     WriteLock lock(m_expirationQueueLock);
     m_expirationQueue.push(p);
   }
@@ -835,7 +834,7 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
  bool expired = false;
  {
    Map::const_accessor acc;
-   if (!m_vars.find(acc, key.get())) {
+   if (!m_vars.find(acc, key.data())) {
      if (stats) ServerStats::Log("apc.miss", 1);
      return false;
    } else {
@@ -933,7 +932,7 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
   SharedVariant* var = construct(key, val);
   ReadLock l(m_lock);
 
-  StringData *kcp = key.get()->copy(true);
+  const char *kcp = strdup(key.data());
   bool present;
   time_t expiry;
   {
@@ -941,7 +940,7 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
     present = !m_vars.insert(acc, kcp);
     sval = &acc->second;
     if (present) {
-      kcp->destruct();
+      free((void *)kcp);
       if (overwrite || sval->expired()) {
         sval->var->decRef();
       } else {
@@ -954,7 +953,7 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
   }
   if (RuntimeOption::ApcExpireOnSets) {
     if (ttl) {
-      addToExpirationQueue(key, expiry);
+      addToExpirationQueue(key.data(), expiry);
     }
     purgeExpired();
   }
@@ -1044,7 +1043,8 @@ void ConcurrentTableSharedStore::prime
     Map::accessor acc;
     String k(item.key, item.len, CopyString);
     k.checkStatic();
-    m_vars.insert(acc, k.get()->copy(true));
+    const char *copy = strdup(k.data());
+    m_vars.insert(acc, copy);
     acc->second.set(item.value, 0);
   }
 }
@@ -1110,7 +1110,7 @@ int64 ConcurrentTableSharedStore::inc(CStrRef key, int64 step, bool &found) {
   StoreValue *val;
   {
     Map::accessor acc;
-    if (m_vars.find(acc, key.get())) {
+    if (m_vars.find(acc, key.data())) {
       val = &acc->second;
       if (val->expired()) {
         eraseAcc(acc);
@@ -1203,7 +1203,7 @@ bool ConcurrentTableSharedStore::cas(CStrRef key, int64 old, int64 val) {
   StoreValue *sval;
   {
     Map::accessor acc;
-    if (m_vars.find(acc, key.get())) {
+    if (m_vars.find(acc, key.data())) {
       sval = &acc->second;
       Variant v = sval->var->toLocal();
       if (v.toInt64() == old) {

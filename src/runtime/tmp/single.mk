@@ -30,6 +30,5 @@ all: $(TARGETS)
 
 $(TEST_LIB): $(OBJECTS)
 	$(V)echo $(OBJECTS) > $@.response
-	$(if $(OUT_TOP),cd $(PROJECT_ROOT) &&) \
-		$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wl,-soname,lib$(PROJECT_NAME).so \
-			-o $(call STRIP_ROOT,$@ $(OBJECTS) $(EXTERNAL))
+	$(V)$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wl,-soname,lib$(PROJECT_NAME).so \
+			-o $@ $(OBJECTS) $(EXTERNAL)

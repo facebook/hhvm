@@ -484,7 +484,7 @@ bool TestExtArray::test_array_merge() {
        ")\n");
   }
   {
-    int64 id = 100000000000022;
+    int64 id = 100000000000022LL;
     Array a = CREATE_MAP1(id, 1);
     Array b = CREATE_MAP1(id, 2);
     Array r = f_array_merge(2, a, CREATE_VECTOR1(b));
@@ -584,7 +584,7 @@ bool TestExtArray::test_array_replace() {
        ")\n");
   }
   {
-    int64 id = 100000000000022;
+    int64 id = 100000000000022LL;
     Array a = CREATE_MAP1(id, 1);
     Array b = CREATE_MAP1(id, 2);
     Array r = f_array_replace(2, a, CREATE_VECTOR1(b));

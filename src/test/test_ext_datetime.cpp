@@ -265,7 +265,7 @@ bool TestExtDatetime::test_date() {
   d = f_strtotime("1955-03-10 05:16:18");
   VS(f_date("Ymd", d), "19550310");
 
-  VS(f_date("r", -5000000000), "Tue, 23 Jul 1811 07:06:40 -0800");
+  VS(f_date("r", -5000000000LL), "Tue, 23 Jul 1811 07:06:40 -0800");
 
   VS(f_mktime(0, 0, 0, 2, 26 - 91, 2010), 1259308800);
 

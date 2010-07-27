@@ -20,6 +20,7 @@
 "fb_taint", T(Void), S(0), "str", T(String), NULL, S(0), NULL, S(0), 
 "fb_untaint", T(Void), S(0), "str", T(String), NULL, S(0), NULL, S(0), 
 "fb_is_tainted", T(Boolean), S(0), "str", T(String), NULL, S(0), NULL, S(0), 
+"fb_const_fetch", T(Variant), S(0), "key", T(Variant), NULL, S(0), NULL, S(0), 
 #elif EXT_TYPE == 1
 "FB_UNSERIALIZE_NONSTRING_VALUE", T(Int64),
 "FB_UNSERIALIZE_UNEXPECTED_END", T(Int64),

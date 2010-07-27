@@ -4080,6 +4080,12 @@ Variant i_fopen(CArrRef params) {
   if (count == 3) return (f_fopen(params[0], params[1], params[2]));
   return (f_fopen(params[0], params[1], params[2], params[3]));
 }
+Variant i_fb_const_fetch(CArrRef params) {
+  FUNCTION_INJECTION(fb_const_fetch);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("fb_const_fetch", count, 1, 1, 1);
+  return (f_fb_const_fetch(params[0]));
+}
 Variant i_mcrypt_generic_end(CArrRef params) {
   FUNCTION_INJECTION(mcrypt_generic_end);
   int count __attribute__((__unused__)) = params.size();
@@ -11053,17 +11059,17 @@ Variant i_apc_dec(CArrRef params) {
   if (count == 3) return (f_apc_dec(params[0], params[1], ref(const_cast<Array&>(params).lvalAt(2))));
   return (f_apc_dec(params[0], params[1], ref(const_cast<Array&>(params).lvalAt(2)), params[3]));
 }
-Variant i_posix_get_last_error(CArrRef params) {
-  FUNCTION_INJECTION(posix_get_last_error);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_get_last_error", 0, 1);
-  return (f_posix_get_last_error());
-}
 Variant i_iptcparse(CArrRef params) {
   FUNCTION_INJECTION(iptcparse);
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) return throw_wrong_arguments("iptcparse", count, 1, 1, 1);
   return (f_iptcparse(params[0]));
+}
+Variant i_posix_get_last_error(CArrRef params) {
+  FUNCTION_INJECTION(posix_get_last_error);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_get_last_error", 0, 1);
+  return (f_posix_get_last_error());
 }
 Variant i_iterator_count(CArrRef params) {
   FUNCTION_INJECTION(iterator_count);
@@ -17608,6 +17614,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x3A3CFC1F001A6FCFLL, magickreadimagefile);
       break;
     case 4048:
+      HASH_INVOKE(0x21104CCA2942AFD0LL, fb_const_fetch);
       HASH_INVOKE(0x2EAA47FA6C3FEFD0LL, drawgetstrokealpha);
       HASH_INVOKE(0x53DB5D0490C51FD0LL, xhprof_sample_disable);
       break;
@@ -30496,6 +30503,22 @@ Variant ei_fopen(Eval::VariableEnvironment &env, const Eval::FunctionCallExpress
   if (count <= 2) return (x_fopen(a0, a1));
   else if (count == 3) return (x_fopen(a0, a1, a2));
   else return (x_fopen(a0, a1, a2, a3));
+}
+Variant ei_fb_const_fetch(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("fb_const_fetch", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_fb_const_fetch(a0));
 }
 Variant ei_mcrypt_generic_end(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -52784,18 +52807,6 @@ Variant ei_apc_dec(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   else if (count == 3) return (x_apc_dec(a0, a1, ref(a2)));
   else return (x_apc_dec(a0, a1, ref(a2), a3));
 }
-Variant ei_posix_get_last_error(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_get_last_error", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_posix_get_last_error());
-}
 Variant ei_iptcparse(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -52811,6 +52822,18 @@ Variant ei_iptcparse(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
     (*it)->eval(env);
   }
   return (x_iptcparse(a0));
+}
+Variant ei_posix_get_last_error(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_get_last_error", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_posix_get_last_error());
 }
 Variant ei_iterator_count(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -62721,6 +62744,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x3A3CFC1F001A6FCFLL, magickreadimagefile);
       break;
     case 4048:
+      HASH_INVOKE_FROM_EVAL(0x21104CCA2942AFD0LL, fb_const_fetch);
       HASH_INVOKE_FROM_EVAL(0x2EAA47FA6C3FEFD0LL, drawgetstrokealpha);
       HASH_INVOKE_FROM_EVAL(0x53DB5D0490C51FD0LL, xhprof_sample_disable);
       break;

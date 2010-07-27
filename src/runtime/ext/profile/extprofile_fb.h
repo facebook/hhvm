@@ -130,6 +130,11 @@ inline bool x_fb_is_tainted(CStrRef str) {
   return f_fb_is_tainted(str);
 }
 
+inline Variant x_fb_const_fetch(CVarRef key) {
+  FUNCTION_INJECTION_BUILTIN(fb_const_fetch);
+  return f_fb_const_fetch(key);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

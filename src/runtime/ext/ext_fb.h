@@ -58,6 +58,12 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff, int buff_len,
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// const index interface and load function
+Variant f_fb_const_fetch(CVarRef key);
+void const_load();
+void const_load_set(Variant key, Variant value);
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // __EXT_FB_H__

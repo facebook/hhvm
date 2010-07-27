@@ -24,6 +24,7 @@
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/eval/runtime/code_coverage.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/array/zend_array.h>
 
 using namespace std;
 
@@ -852,4 +853,24 @@ bool f_fb_is_tainted(CStrRef str){
   #endif
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// const index functions
+
+static ZendArray const_data;
+
+Variant f_fb_const_fetch(CVarRef key) {
+  String k = key.toString();
+  return const_data.fetch(k);
+}
+
+void const_load() {
+  // after all loading
+  const_load_set("zend_array_size", const_data.size());
+}
+
+void const_load_set(Variant key, Variant value) {
+  const_data.set(key, value, false);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

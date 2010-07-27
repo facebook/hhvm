@@ -99,3 +99,10 @@ f('fb_taint', null, array('str' => String));
 f('fb_untaint', null, array('str' => String));
 
 f('fb_is_tainted', Boolean, array('str' => String));
+
+///////////////////////////////////////////////////////////////////////////////
+// const index functions
+
+f('fb_const_fetch', Variant,
+  array('key' => Variant));
+

@@ -248,37 +248,42 @@ void Util::syncdir(const std::string &dest_, const std::string &src_,
   closedir(ddest);
 }
 
-int Util::rename(const char *oldname, const char *newname) {
-  int ret = ::rename(oldname, newname);
-  if (ret == 0) return 0;
-  if (errno != EXDEV) return -1;
-
-  int oldFd = open(oldname, O_RDONLY);
-  if (oldFd == -1) return -1;
-  int newFd = open(newname, O_WRONLY | O_CREAT | O_TRUNC, 0666);
-  if (newFd == -1) return -1;
+int Util::copy(const char *srcfile, const char *dstfile) {
+  int srcFd = open(srcfile, O_RDONLY);
+  if (srcFd == -1) return -1;
+  int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+  if (dstFd == -1) return -1;
   char buf[8192];
   ssize_t bytes;
 
   while (1) {
     bool err = false;
-    bytes = read(oldFd, buf, sizeof(buf));
+    bytes = read(srcFd, buf, sizeof(buf));
     if (bytes == 0) break;
     if (bytes == -1) {
       err = true;
       Logger::Error("read failed: %s", safe_strerror(errno).c_str());
-    } else if (write(newFd, buf, bytes) == -1) {
+    } else if (write(dstFd, buf, bytes) == -1) {
       err = true;
       Logger::Error("write failed: %s", safe_strerror(errno).c_str());
     }
     if (err) {
-      close(oldFd);
-      close(newFd);
+      close(srcFd);
+      close(dstFd);
       return -1;
     }
   }
-  close(oldFd);
-  close(newFd);
+  close(srcFd);
+  close(dstFd);
+  return 0;
+}
+
+int Util::rename(const char *oldname, const char *newname) {
+  int ret = ::rename(oldname, newname);
+  if (ret == 0) return 0;
+  if (errno != EXDEV) return -1;
+
+  copy(oldname, newname);
   unlink(oldname);
   return 0;
 }

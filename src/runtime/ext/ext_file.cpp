@@ -948,12 +948,9 @@ bool f_touch(CStrRef filename, int64 mtime /* = 0 */, int64 atime /* = 0 */) {
 
 bool f_copy(CStrRef source, CStrRef dest,
             CObjRef context /* = null_object */) {
-  Variant content = f_file_get_contents(source);
-  if (same(content, false)) {
-    return false;
-  }
-  Variant ret = f_file_put_contents(File::TranslatePath(dest), content);
-  return !same(ret, false);
+  int ret = Util::copy(File::TranslatePath(source).data(),
+                       File::TranslatePath(dest).data());
+  return (ret == 0);
 }
 
 bool f_rename(CStrRef oldname, CStrRef newname,

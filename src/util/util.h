@@ -68,6 +68,11 @@ void syncdir(const std::string &dest, const std::string &src,
              bool keepSrc = false);
 
 /**
+ * Copy srcfile to dstfile, return 0 on success, -1 otherwise
+ */
+int copy(const char *srcfile, const char *dstfile);
+
+/**
  * Like rename(2), but takes care of cross-filesystem rename.
  */
 int rename(const char *oldname, const char *newname);

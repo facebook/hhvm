@@ -227,6 +227,7 @@ public:
   static bool UseZendArray; // ignored: ZendArray is always enabled
   static bool UseSmallArray;
   static bool EnableApc;
+  static bool EnableConstLoad;
   static bool ApcUseSharedMemory;
   static int ApcSharedMemorySize;
   static std::string ApcPrimeLibrary;

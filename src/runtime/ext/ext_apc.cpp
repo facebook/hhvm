@@ -247,7 +247,10 @@ void apc_load(int thread) {
     f_apc_store(String(*iter), 1);
   }
 
-  apc_load_func(handle, "_hphp_const_load_all")();
+  if (RuntimeOption::EnableConstLoad) {
+    apc_load_func(handle, "_hphp_const_load_all")();
+  }
+
   // We've copied all the data out, so close it out.
   dlclose(handle);
 }

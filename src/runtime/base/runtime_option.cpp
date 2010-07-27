@@ -228,6 +228,7 @@ bool RuntimeOption::CheckMemory = false;
 bool RuntimeOption::UseZendArray = true;
 bool RuntimeOption::UseSmallArray = true;
 bool RuntimeOption::EnableApc = true;
+bool RuntimeOption::EnableConstLoad = false;
 bool RuntimeOption::ApcUseSharedMemory = false;
 int RuntimeOption::ApcSharedMemorySize = 1024; // 1GB
 std::string RuntimeOption::ApcPrimeLibrary;
@@ -570,6 +571,7 @@ void RuntimeOption::Load(Hdf &config) {
 
     Hdf apc = server["APC"];
     EnableApc = apc["EnableApc"].getBool(true);
+    EnableConstLoad = apc["EnableConstLoad"].getBool(false);
     ApcUseSharedMemory = apc["UseSharedMemory"].getBool();
     ApcSharedMemorySize = apc["SharedMemorySize"].getInt32(1024 /* 1GB */);
     ApcPrimeLibrary = apc["PrimeLibrary"].getString();

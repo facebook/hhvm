@@ -832,49 +832,59 @@ static bool hphp_warmup(ExecutionContext *context,
   s_warmup_state->atCheckpoint = false;
   return ret;
 }
+
+static void handle_invoke_exception(bool &ret, ExecutionContext *context,
+                                    std::string &errorMsg, bool &error) {
+  try {
+    if (!handle_exception(context, errorMsg, InvokeException, error)) {
+      ret = false;
+    }
+  } catch (...) {
+    if (!handle_exception(context, errorMsg, HandlerException, error)) {
+      ret = false;
+    }
+    context->obEndAll();
+  }
+}
+
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool func, CArrRef funcParams, Variant funcRet,
                  const std::string &warmupDoc, const std::string &reqInitFunc,
                  const std::string &reqInitDoc,
                  bool &error, std::string &errorMsg) {
-  bool ret = false;
   bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
   error = false;
   String oldCwd;
-  try {
-    try {
-      if (isServer) {
-        oldCwd = context->getCwd();
-        if (!warmupDoc.empty()) {
-          hphp_chdir_file(warmupDoc);
-        }
-      }
-      if (!hphp_warmup(context, warmupDoc, reqInitFunc, reqInitDoc, error)) {
-        if (isServer) context->setCwd(oldCwd);
-        return false;
-      }
-      ServerStatsHelper ssh("invoke");
-      if (func) {
-        funcRet = invoke(cmd.c_str(), funcParams);
-      } else {
-        if (isServer) hphp_chdir_file(cmd);
-        invoke_file(cmd.c_str(), true, get_variable_table());
-      }
-      ret = true;
-    } catch (...) {
-      ret = handle_exception(context, errorMsg, InvokeException, error);
+  if (isServer) {
+    oldCwd = context->getCwd();
+    if (!warmupDoc.empty()) {
+      hphp_chdir_file(warmupDoc);
     }
-    if (ret) {
-      try {
-        context->onShutdownPreSend();
-      } catch (...) {
-        ret = handle_exception(context, errorMsg, InvokeException, error);
-      }
+  }
+  if (!hphp_warmup(context, warmupDoc, reqInitFunc, reqInitDoc, error)) {
+    if (isServer) context->setCwd(oldCwd);
+    return false;
+  }
+
+  bool ret = true;
+  try {
+    ServerStatsHelper ssh("invoke");
+    if (func) {
+      funcRet = invoke(cmd.c_str(), funcParams);
+    } else {
+      if (isServer) hphp_chdir_file(cmd);
+      invoke_file(cmd.c_str(), true, get_variable_table());
     }
   } catch (...) {
-    ret = handle_exception(context, errorMsg, HandlerException, error);
-    context->obEndAll();
+    handle_invoke_exception(ret, context, errorMsg, error);
   }
+
+  try {
+    context->onShutdownPreSend();
+  } catch (...) {
+    handle_invoke_exception(ret, context, errorMsg, error);
+  }
+
   if (isServer) context->setCwd(oldCwd);
   return ret;
 }

@@ -20,6 +20,7 @@
 #include <compiler/statement/statement_list.h>
 #include <compiler/option.h>
 #include <compiler/analysis/file_scope.h>
+#include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/variable_table.h>
 #include <util/util.h>
@@ -353,6 +354,18 @@ int CodeGenerator::createNewId(const std::string &key) {
 }
 
 int CodeGenerator::createNewId(AnalysisResultPtr ar) {
+  FileScopePtr fs = ar->getFileScope();
+  if (fs) {
+    return createNewId(fs->getName());
+  }
+  return createNewId("");
+}
+
+int CodeGenerator::createNewLocalId(AnalysisResultPtr ar) {
+  FunctionScopePtr func = ar->getFunctionScope();
+  if (func) {
+    return func->nextInlineIndex();
+  }
   FileScopePtr fs = ar->getFileScope();
   if (fs) {
     return createNewId(fs->getName());

@@ -256,16 +256,21 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
   bool hasResult;
 
   ar->preOptimize(m_exp);
-  if (m_exp && m_op == T_UNSET) {
-    if (m_exp->isScalar()) {
+  if (m_exp && ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
+    if (m_op == '(') {
       return m_exp;
     }
-    if (m_exp->is(KindOfExpressionList)) {
-      if (static_pointer_cast<ExpressionList>(m_exp)->getCount() == 0) {
-        return CONSTANT("null");
+    if (m_op == T_UNSET) {
+      if (m_exp->isScalar()) {
+        return m_exp;
       }
+      if (m_exp->is(KindOfExpressionList)) {
+        if (static_pointer_cast<ExpressionList>(m_exp)->getCount() == 0) {
+          return CONSTANT("null");
+        }
+      }
+      return ExpressionPtr();
     }
-    return ExpressionPtr();
   }
 
   if (!m_exp || !m_exp->isScalar()) return ExpressionPtr();

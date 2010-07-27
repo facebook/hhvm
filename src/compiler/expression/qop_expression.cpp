@@ -215,24 +215,46 @@ bool QOpExpression::outputCPPUnneeded(CodeGenerator &cg, AnalysisResultPtr ar) {
   return m_cppValue.empty() && Expression::outputCPPUnneeded(cg, ar);
 }
 
+static void outputUnneededExpr(CodeGenerator &cg, AnalysisResultPtr ar,
+                               ExpressionPtr exp) {
+  cg_printf("(");
+  if (exp->outputCPPUnneeded(cg, ar)) {
+    cg_printf(",");
+  }
+  cg_printf("false)");
+}
+
 void QOpExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (!m_cppValue.empty()) {
     cg_printf("%s", m_cppValue.c_str());
   } else {
-    cg_printf("(");
+    bool wrapped = !isUnused();
+    if (wrapped) {
+      cg_printf("(");
+    }
     m_condition->outputCPP(cg, ar);
-    TypePtr typeYes = m_expYes->getActualType();
-    TypePtr typeNo = m_expNo->getActualType();
-    const char *castType =
-      typeYes && typeNo && Type::SameType(typeYes, typeNo) &&
-      !typeYes->is(Type::KindOfVariant) &&
-      m_expYes->isLiteralString() == m_expNo->isLiteralString()
-      ? "" : "(Variant)";
+    if (isUnused()) {
+      cg_printf(" ? ");
+      outputUnneededExpr(cg, ar, m_expYes);
+      cg_printf(" : ");
+      outputUnneededExpr(cg, ar, m_expNo);
+    } else {
+      TypePtr typeYes = m_expYes->getActualType();
+      TypePtr typeNo = m_expNo->getActualType();
+      const char *castType =
+        typeYes && typeNo && Type::SameType(typeYes, typeNo) &&
+        !typeYes->is(Type::KindOfVariant) &&
+        m_expYes->isLiteralString() == m_expNo->isLiteralString()
+        ? "" : "(Variant)";
 
-    cg_printf(" ? (%s(", castType);
-    m_expYes->outputCPP(cg, ar);
-    cg_printf(")) : (%s(", castType);
-    m_expNo->outputCPP(cg, ar);
-    cg_printf(")))");
+      cg_printf(" ? (%s(", castType);
+      m_expYes->outputCPP(cg, ar);
+      cg_printf(")) : (%s(", castType);
+      m_expNo->outputCPP(cg, ar);
+      cg_printf("))");
+    }
+    if (wrapped) {
+      cg_printf(")");
+    }
   }
 }

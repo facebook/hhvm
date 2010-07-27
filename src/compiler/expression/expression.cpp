@@ -332,11 +332,7 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
                                          value /* =ExpressionPtr() */) {
   TypePtr ret = type;
   if (value) {
-    if (coerce) {
-      ret = value->inferAndCheck(ar, type, coerce);
-    } else {
-      ret = value->inferAndCheck(ar, NEW_TYPE(Some), coerce);
-    }
+    ret = value->inferAndCheck(ar, NEW_TYPE(Some), false);
   }
 
   BlockScopePtr scope = ar->getScope();
@@ -558,7 +554,7 @@ void Expression::outputCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 std::string Expression::genCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar) {
   std::ostringstream os;
-  os << Option::TempPrefix << cg.createNewId(ar);
+  os << Option::TempPrefix << cg.createNewLocalId(ar);
   return os.str();
 }
 
@@ -880,6 +876,7 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 bool Expression::outputCPPUnneeded(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (hasEffect() && m_cppTemp.empty()) {
+    setUnused(true);
     outputCPP(cg, ar);
     return true;
   }
@@ -889,12 +886,29 @@ bool Expression::outputCPPUnneeded(CodeGenerator &cg, AnalysisResultPtr ar) {
 void Expression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool inExpression = ar->inExpression();
   bool wrapped = false;
+  TypePtr et = m_expectedType;
+  TypePtr at = m_actualType;
+  TypePtr it = m_implementedType;
+  if (isUnused()) {
+    if (et) {
+      m_expectedType.reset();
+    }
+    if (it) {
+      m_implementedType.reset();
+      m_actualType = it;
+    }
+  }
+
   if (!inExpression) {
     ar->setInExpression(true);
     wrapped = preOutputCPP(cg, ar, 0);
   }
 
   outputCPPInternal(cg, ar);
+
+  m_implementedType = it;
+  m_actualType = at;
+  m_expectedType = et;
 
   if (!inExpression) {
     if (wrapped) cg_printf(";");

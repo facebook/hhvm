@@ -185,10 +185,10 @@ void ForEachStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_indentBegin("{\n");
-  int labelId = cg.createNewId(ar);
+  int labelId = cg.createNewLocalId(ar);
   cg.pushBreakScope(labelId);
 
-  int mapId = cg.createNewId(ar);
+  int mapId = cg.createNewLocalId(ar);
   bool passTemp = true;
   bool isArray = false;
 
@@ -224,7 +224,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   cppDeclareBufs(cg, ar);
-  int iterId = cg.createNewId(ar);
+  int iterId = cg.createNewLocalId(ar);
   cg_printf("for (");
   if (m_ref) {
     cg_printf("MutableArrayIterPtr %s%d = %s%d.begin(",

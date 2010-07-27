@@ -302,15 +302,20 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
     if (exp->isNull()) setNull = true;
   }
 
+  bool wrapped = true;
   if (setNull) {
     cg_printf("setNull(");
     m_variable->outputCPP(cg, ar);
   } else {
-    cg_printf("(");
+    if ((wrapped = !isUnused())) {
+      cg_printf("(");
+    }
     m_variable->outputCPP(cg, ar);
     cg_printf(" = ");
 
     wrapValue(cg, ar, m_value, ref, arrayLike);
   }
-  cg_printf(")");
+  if (wrapped) {
+    cg_printf(")");
+  }
 }

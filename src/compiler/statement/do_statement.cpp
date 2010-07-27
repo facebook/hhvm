@@ -123,7 +123,7 @@ void DoStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_indentBegin("{\n");
   bool e_order = m_condition->preOutputCPP(cg, ar, 0);
 
-  int labelId = cg.createNewId(ar);
+  int labelId = cg.createNewLocalId(ar);
   cg.pushBreakScope(e_order ? labelId | CodeGenerator::InsideSwitch : labelId);
 
   cppDeclareBufs(cg, ar);

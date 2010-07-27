@@ -125,7 +125,7 @@ void WhileStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void WhileStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  int labelId = cg.createNewId(ar);
+  int labelId = cg.createNewLocalId(ar);
   cg.pushBreakScope(labelId);
   cg_indentBegin("{\n");
 

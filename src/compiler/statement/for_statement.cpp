@@ -178,7 +178,7 @@ void ForStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool e2_order = m_exp2 && m_exp2->preOutputCPP(cg, ar, 0);
   bool e3_order = m_exp3 && m_exp3->preOutputCPP(cg, ar, 0);
 
-  int labelId = cg.createNewId(ar);
+  int labelId = cg.createNewLocalId(ar);
 
   cg.pushBreakScope(e3_order ? labelId | CodeGenerator::InsideSwitch : labelId);
 

@@ -151,6 +151,7 @@ public:
   void resetIdCount(const std::string &key);
   int createNewId(const std::string &key);
   int createNewId(AnalysisResultPtr ar);
+  int createNewLocalId(AnalysisResultPtr ar);
   static std::string GetNewLambda(); // for create_function()
 
   /**

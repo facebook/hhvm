@@ -1076,6 +1076,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   case '%':                   cg_printf("modulo");        break;
   case T_INSTANCEOF:          cg_printf("instanceOf");    break;
   default:
+    wrapped = !isUnused();
     break;
   }
 
@@ -1110,12 +1111,6 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   case T_SL:
   case T_SR:
     cg_printf("toInt64(");
-    first->outputCPP(cg, ar);
-    cg_printf(")");
-    break;
-  case T_LOGICAL_AND:
-  case T_LOGICAL_OR:
-    cg_printf("(");
     first->outputCPP(cg, ar);
     cg_printf(")");
     break;
@@ -1202,11 +1197,19 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       }
       break;
     }
+  case T_BOOLEAN_OR:
+  case T_BOOLEAN_AND:
   case T_LOGICAL_AND:
   case T_LOGICAL_OR:
-    cg_printf("(");
-    second->outputCPP(cg, ar);
-    cg_printf(")");
+    if (isUnused()) {
+      cg_printf("(");
+      if (second->outputCPPUnneeded(cg, ar)) {
+        cg_printf(",");
+      }
+      cg_printf("false)");
+    } else {
+      second->outputCPP(cg, ar);
+    }
     break;
   default:
     second->outputCPP(cg, ar);

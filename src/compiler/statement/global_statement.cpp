@@ -168,7 +168,7 @@ void GlobalStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       DynamicVariablePtr var = dynamic_pointer_cast<DynamicVariable>(exp);
       ExpressionPtr exp = var->getSubExpression();
       exp->outputCPPBegin(cg, ar);
-      int id = cg.createNewId("dgv");
+      int id = cg.createNewLocalId(ar);
       cg_printf("CStrRef dgv_%d((", id);
       exp->outputCPP(cg, ar);
       cg_printf("));\n");

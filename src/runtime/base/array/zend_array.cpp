@@ -376,6 +376,17 @@ Variant ZendArray::get(CVarRef k, int64 prehash /* = -1 */,
   return null;
 }
 
+Variant ZendArray::fetch(CStrRef k) const {
+  StringData *key = k.get();
+  int64 prehash = -1;
+  if (key->isStatic()) prehash = key->getStaticHash();
+  Bucket *p = find(key->data(), key->size(), prehash);
+  if (p) {
+    return p->data;
+  }
+  return false;
+}
+
 ssize_t ZendArray::getIndex(int64 k, int64 prehash /* = -1 */) const {
   Bucket *p = find(k);
   if (p) {

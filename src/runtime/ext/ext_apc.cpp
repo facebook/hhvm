@@ -247,6 +247,7 @@ void apc_load(int thread) {
     f_apc_store(String(*iter), 1);
   }
 
+  apc_load_func(handle, "_hphp_const_load_all")();
   // We've copied all the data out, so close it out.
   dlclose(handle);
 }
@@ -257,6 +258,102 @@ static int count_items(const char **p, int step) {
     count++;
   }
   return count;
+}
+
+//define in ext_fb.cpp
+extern void const_load_set(Variant key, Variant value);
+
+void const_load_impl(const char **int_keys, int64 *int_values,
+                   const char **char_keys, char *char_values,
+                   const char **strings, const char **objects,
+                   const char **thrifts, const char **others) {
+  {
+    int count = count_items(int_keys, 2);
+    if (count) {
+      const char **k = int_keys;
+      int64 *v = int_values;
+      for (int i = 0; i < count; i++, k += 2) {
+        String key(*k, (int)(int64)*(k+1), CopyString);
+        int64 value = *v++;
+        const_load_set(key, value);
+      }
+    }
+  }
+  {
+    int count = count_items(char_keys, 2);
+    if (count) {
+      const char **k = char_keys;
+      char *v = char_values;
+      for (int i = 0; i < count; i++, k += 2) {
+        String key(*k, (int)(int64)*(k+1), CopyString);
+        Variant value;
+        switch (*v++) {
+        case 0: value = false; break;
+        case 1: value = true; break;
+        case 2: value = null; break;
+        default:
+          throw Exception("bad apc archive, unknown char type");
+        }
+        const_load_set(key, value);
+      }
+    }
+  }
+  {
+    int count = count_items(strings, 4);
+    if (count) {
+      const char **p = strings;
+      for (int i = 0; i < count; i++, p += 4) {
+        String key(*p, (int)(int64)*(p+1), CopyString);
+        String value(*(p+2), (int)(int64)*(p+3), CopyString);
+        const_load_set(key, value);
+      }
+    }
+  }
+  // f_unserialize object is extreamly slow here;
+  // currently turned off: no objects in haste_maps.
+  if (false) {
+    int count = count_items(objects, 4);
+    if (count) {
+      const char **p = objects;
+      for (int i = 0; i < count; i++, p += 4) {
+        String key(*p, (int)(int64)*(p+1), CopyString);
+        String value(*(p+2), (int)(int64)*(p+3), CopyString);
+        const_load_set(key, f_unserialize(value));
+      }
+    }
+  }
+  {
+    int count = count_items(thrifts, 4);
+    if (count) {
+      vector<SharedStore::KeyValuePair> vars(count);
+      const char **p = thrifts;
+      for (int i = 0; i < count; i++, p += 4) {
+        String key(*p, (int)(int64)*(p+1), CopyString);
+        String value(*(p+2), (int)(int64)*(p+3), CopyString);
+        Variant success;
+        Variant v = f_fb_thrift_unserialize(value, ref(success));
+        if (same(success, false)) {
+          throw Exception("bad apc archive, f_fb_thrift_unserialize failed");
+        }
+        const_load_set(key, v);
+      }
+    }
+  }
+  {//Would we use others[]?
+    int count = count_items(others, 4);
+    if (count) {
+      const char **p = others;
+      for (int i = 0; i < count; i++, p += 4) {
+        String key(*p, (int)(int64)*(p+1), CopyString);
+        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        Variant v = f_unserialize(value);
+        if (same(v, false)) {
+          throw Exception("bad apc archive, f_unserialize failed");
+        }
+        const_load_set(key, v);
+      }
+    }
+  }
 }
 
 void apc_load_impl(const char **int_keys, int64 *int_values,

@@ -105,6 +105,10 @@ public:
 int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
                          unsigned int event, void *event_data, void **extra);
 
+void const_load_impl(const char **int_keys, int64 *int_values,
+                   const char **char_keys, char *char_values,
+                   const char **strings, const char **objects,
+                   const char **thrifts, const char **others);
 ///////////////////////////////////////////////////////////////////////////////
 }
 

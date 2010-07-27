@@ -76,7 +76,7 @@ namespace HPHP {
  * -RL
  */
 #define RAND_RANGE(__n, __min, __max, __tmax) \
-  (__n) = (__min) + (long) ((double) ((double)(__max) - (__min) + 1.0) * \
+  (__n) = (__min) + (int64) ((double) ((double)(__max) - (__min) + 1.0) * \
                             ((__n) / ((__tmax) + 1.0)))
 
 #define GENERATE_SEED() \
@@ -85,7 +85,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void math_mt_srand(uint32 seed);
-long math_mt_rand(long min = 0, long max = RAND_MAX);
+int64 math_mt_rand(int64 min = 0, int64 max = RAND_MAX);
 double math_combined_lcg();
 
 ///////////////////////////////////////////////////////////////////////////////

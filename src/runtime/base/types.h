@@ -146,10 +146,6 @@ enum StringDataMode {
  * for being able to vertically align type-specialized functions so they look
  * cleaner.
  */
-typedef char int8;
-typedef int int32;
-typedef long long int64;
-typedef unsigned long long uint64;
 typedef const char * litstr; /* literal string */
 typedef const String & CStrRef;
 typedef const Array & CArrRef;

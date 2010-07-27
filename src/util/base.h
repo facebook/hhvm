@@ -60,7 +60,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // system includes
 
+#if __WORDSIZE == 64
+#define WORDSIZE_IS_64
+#endif
+
 typedef unsigned char uchar;
+typedef char int8;
 typedef unsigned char uint8;
 typedef short int16;
 typedef unsigned short uint16;

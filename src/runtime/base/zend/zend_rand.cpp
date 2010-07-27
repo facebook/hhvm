@@ -179,7 +179,7 @@ static inline uint32 php_mt_rand() {
 }
 
 // Returns a random number from Mersenne Twister
-long math_mt_rand(long min /* = 0 */, long max /* = RAND_MAX */) {
+int64 math_mt_rand(int64 min /* = 0 */, int64 max /* = RAND_MAX */) {
   if (!s_rand_data->seeded) {
     math_mt_srand(GENERATE_SEED());
   }
@@ -192,7 +192,7 @@ long math_mt_rand(long min /* = 0 */, long max /* = RAND_MAX */) {
    * Update:
    * I talked with Cokus via email and it won't ruin the algorithm
    */
-  long number = (php_mt_rand() >> 1);
+  int64 number = (php_mt_rand() >> 1);
   if (min != 0 || max != RAND_MAX) {
     RAND_RANGE(number, min, max, MT_RAND_MAX);
   }

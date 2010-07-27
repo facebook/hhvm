@@ -602,12 +602,19 @@ $(ECHO_COMPILE)
 $(CV)$(1) -c $(if $(OUT_TOP),-I$(OUT_TOP)src) $(CPPFLAGS) $(2) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 endef
 
+define PREPROCESS_IT
+$(ECHO_PREPROCESS)
+$(CV)$(1) -c $(if $(OUT_TOP),-I$(OUT_TOP)src) $(CPPFLAGS) $(2) $< -E > $<.E
+endef
+
+
 define LINK_OBJECTS
 $(ECHO_LINK)
 $(LV)$(LD) $@ $(LDFLAGS) $(filter %.o,$^) $(LIBS)
 endef
 
 OBJECT_FILES = $(addprefix $(OUT_DIR),$(patsubst %.$(2),%.o,$(1)))
+PREPROCESSED_FILES = $(addprefix $(OUT_DIR),$(patsubst %.$(2),%.cpp.E,$(1)))
 
 ifdef NOT_NOW
 %:%.o
@@ -631,6 +638,26 @@ $(call OBJECT_FILES,$(GENERATED_CPP_SOURCES),c): $(OUT_DIR)%.o:%.c
 
 $(OUT_DIR)%.o:$(OUT_DIR)%.cpp
 	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
+
+
+$(OUT_DIR)%.cpp.E:$(OUT_DIR)%.cpp
+	$(call PREPROCESS_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
+
+$(call PREPROCESSED_FILES,$(CXX_NOOPT_SOURCES) $(GENERATED_CXX_NOOPT_SOURCES),cpp): $(OUT_DIR)%.cpp.E:%.cpp
+	$(call PREPROCESS_IT,$(P_CXX),$(CXXFLAGS))
+
+$(call PREPROCESSED_FILES,$(CXX_SOURCES) $(GENERATED_CXX_SOURCES),cpp): $(OUT_DIR)%.cpp.E:%.cpp
+	$(call PREPROCESS_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
+
+$(call PREPROCESSED_FILES,$(C_SOURCES) $(GENERATED_C_SOURCES),c): $(OUT_DIR)%.cpp.E:%.c
+	$(call PREPROCESS_IT,$(P_CC),$(OPT))
+
+$(call PREPROCESSED_FILES,$(GENERATED_CPP_SOURCES),c): $(OUT_DIR)%.cpp.E:%.c
+	$(call PREPROCESS_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
+
+$(OUT_DIR)%.cpp.E:$(OUT_DIR)%.cpp
+	$(call PREPROCESS_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
+
 
 .EXPORT_ALL_VARIABLES:;
 unexport CXX_NOOPT_SOURCES CXX_SOURCES C_SOURCES GENERATED_CXX_NOOPT_SOURCES GENERATED_CXX_SOURCES GENERATED_C_SOURCES GENERATED_CPP_SOURCES ALL_SOURCES SOURCES OBJECTS DEPEND_FILES CPPFLAGS CXXFLAGS LDFLAGS PROGRAMS LIB_TARGETS DEP_LIBS

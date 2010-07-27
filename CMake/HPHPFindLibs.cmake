@@ -169,6 +169,14 @@ include_directories(${ONIGURUMA_INCLUDE_DIRS})
 find_package(Ldap REQUIRED)
 include_directories(${LDAP_INCLUDE_DIR})
 
+# ncuses, readline and history
+find_package(Curses REQUIRED)
+include_directories(${CURSES_INCLUDE_PATH})
+
+find_package(Readline REQUIRED)
+include_directories(${READLINE_INCLUDE_DIR})
+
+
 
 FIND_LIBRARY (CRYPT_LIB crypt)
 FIND_LIBRARY (RESOLV_LIB resolv)
@@ -251,4 +259,8 @@ macro(hphp_link target)
 
 	target_link_libraries(${target} afdt)
 	target_link_libraries(${target} mbfl)
+
+	target_link_libraries(${target} ${READLINE_LIBRARY})
+	target_link_libraries(${target} ${CURSES_LIBRARIES})
+
 endmacro()

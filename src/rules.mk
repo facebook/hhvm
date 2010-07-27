@@ -634,6 +634,7 @@ $(OUT_DIR)%.o:$(OUT_DIR)%.cpp
 
 .EXPORT_ALL_VARIABLES:;
 unexport CXX_NOOPT_SOURCES CXX_SOURCES C_SOURCES GENERATED_CXX_NOOPT_SOURCES GENERATED_CXX_SOURCES GENERATED_C_SOURCES GENERATED_CPP_SOURCES ALL_SOURCES SOURCES OBJECTS DEPEND_FILES CPPFLAGS CXXFLAGS LDFLAGS PROGRAMS LIB_TARGETS DEP_LIBS
+unexport LINK_OBJECTS MAKEFILE_LIST COMPILE_IT OBJECT_DIR_DEPS REC_SOURCES
 
 # Since these variables start with += in this file, when calling submake,
 # they will not start with empty list. SUB_XXX will always start with empty.
@@ -651,19 +652,14 @@ SUB_INTERMEDIATE_FILES = $(INTERMEDIATE_FILES)
 
 $(OBJECTS): $(GENERATED_SOURCES)
 
-STRIP_ROOT = $(if $(OUT_TOP), $(patsubst -L$(PROJECT_ROOT)/%,-L%,$(patsubst $(PROJECT_ROOT)/%,%,$(patsubst $(ABS_PROJECT_ROOT)/%,%, $(1)))), $(1))
-
 ifdef SHOW_LINK
 
 $(SHARED_LIB): $(OBJECTS)
-	$(if $(OUT_TOP),cd $(PROJECT_ROOT) &&) \
-		$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,lib$(PROJECT_NAME).so \
-			-o $(call STRIP_ROOT,$@ $(OBJECTS) $(EXTERNAL))
+	$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,lib$(PROJECT_NAME).so \
+			-o $@ $(OBJECTS) $(EXTERNAL)
 
 $(STATIC_LIB): $(OBJECTS)
-	@echo $(words $(OBJECTS))
-	$(if $(OUT_TOP),cd $(PROJECT_ROOT) &&) \
-		$(AR) $(call STRIP_ROOT,$@ $(OBJECTS))
+	$(AR) $@ $(OBJECTS)
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 	$(LD) $@ $(LDFLAGS) $< $(LIBS)
@@ -672,14 +668,12 @@ else
 
 $(SHARED_LIB): $(OBJECTS)
 	@echo 'Linking $@ ...'
-	$(V)$(if $(OUT_TOP),cd $(PROJECT_ROOT) &&) \
-		$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,lib$(PROJECT_NAME).so \
-			-o $(call STRIP_ROOT,$@ $(OBJECTS) $(EXTERNAL))
+	$(V)$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,lib$(PROJECT_NAME).so \
+		-o $@ $(OBJECTS) $(EXTERNAL)
 
 $(STATIC_LIB): $(OBJECTS)
 	@echo 'Linking $@ ...'
-	$(V)$(if $(OUT_TOP),cd $(PROJECT_ROOT) &&) \
-		$(AR) $(call STRIP_ROOT,$@ $(OBJECTS))
+	$(V)$(AR) $@ $(OBJECTS)
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 	@echo 'Linking $@ ...'

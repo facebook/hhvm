@@ -374,9 +374,13 @@ void DateTime::setTime(int hour, int minute, int second) {
 }
 
 void DateTime::setTimezone(SmartObject<TimeZone> timezone) {
-  m_tz = timezone->cloneTimeZone();
-  timelib_set_timezone(m_time.get(), m_tz->get());
-  timelib_unixtime2local(m_time.get(), m_time->sse);
+  if (!timezone.isNull()) {
+    m_tz = timezone->cloneTimeZone();
+    if (m_tz.get() && m_tz->get()) {
+      timelib_set_timezone(m_time.get(), m_tz->get());
+      timelib_unixtime2local(m_time.get(), m_time->sse);
+    }
+  }
 }
 
 void DateTime::modify(CStrRef diff) {

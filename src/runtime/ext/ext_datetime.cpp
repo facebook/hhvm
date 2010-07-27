@@ -130,6 +130,10 @@ c_datetimezone::~c_datetimezone() {
 void c_datetimezone::t___construct(CStrRef timezone) {
   INSTANCE_METHOD_INJECTION_BUILTIN(datetimezone, datetimezone::__construct);
   m_tz = NEW(TimeZone)(timezone);
+  if (!m_tz->isValid()) {
+    raise_error("DateTimeZone::__construct(): Unknown or bad timezone (%s)",
+                timezone.data());
+  }
 }
 
 String c_datetimezone::t_getname() {

@@ -25,28 +25,17 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdInterrupt);
 class CmdInterrupt : public DebuggerCommand {
 public:
-  enum SubType {
-    SessionStarted,
-    SessionEnded,
-    RequestStarted,
-    RequestEnded,
-    PSPEnded,
-    BreakPointReached,
-    ExceptionThrown,
-  };
-
-  static const char *GetBreakpointName(SubType subtype);
-
-public:
   CmdInterrupt()
+      : DebuggerCommand(KindOfInterrupt), m_interrupt(-1), m_site(NULL) {}
+
+  CmdInterrupt(InterruptType interrupt, const char *program,
+               InterruptSite *site)
       : DebuggerCommand(KindOfInterrupt),
-        m_subtype(-1) {
-  }
-  CmdInterrupt(SubType subtype, const char *file, int line, const char *cls)
-      : DebuggerCommand(KindOfInterrupt),
-        m_subtype(subtype), m_exceptionClass(cls ? cls : "") {
-    m_bpi.file = file ? file : "";
-    m_bpi.line = line;
+        m_interrupt(interrupt), m_program(program ? program : ""),
+        m_site(site) {}
+
+  InterruptType getInterruptType() const {
+    return (InterruptType)m_interrupt;
   }
 
   virtual bool onClient(DebuggerClient *client);
@@ -55,12 +44,16 @@ public:
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
-  bool shouldBreak(const BreakPointInfoMap &bps);
+  bool shouldBreak(const BreakPointInfoPtrVec &bps);
+  FrameInjection *getFrame() { return m_site ? m_site->getFrame() : NULL;}
+  std::string getFileLine() const;
 
 private:
-  int32 m_subtype;
-  BreakPointInfo m_bpi;
-  std::string m_exceptionClass;
+  int16 m_interrupt;
+  std::string m_program;   // informational only
+  InterruptSite *m_site;   // server side
+  BreakPointInfoPtr m_bpi; // client side
+  BreakPointInfoPtrVec m_matched;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

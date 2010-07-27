@@ -372,7 +372,7 @@ do { \
 #define FRAME_INJECTION_FLAGS(c, n, f) \
   FrameInjection fi(info, #c, #n, NULL, f);
 #define FRAME_INJECTION_WITH_THIS(c, n) FrameInjection fi(info, #c, #n, this);
-#define LINE(n, e) (set_ln(fi.line, n), e)
+#define LINE(n, e) (fi.setLine(n), e)
 
 // code injected into beginning of every function/method
 #define FUNCTION_INJECTION(n)                   \

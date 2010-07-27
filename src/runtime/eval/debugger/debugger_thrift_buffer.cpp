@@ -20,11 +20,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 String DebuggerThriftBuffer::readImpl() {
-  char buf[1024 + 1];
-  ASSERT(m_size <= 1024);
-  int nread = m_socket->readImpl(buf, m_size);
-  buf[nread] = '\0';
-  return String(buf, nread, AttachLiteral);
+  ASSERT(m_size <= BUFFER_SIZE);
+  int nread = m_socket->readImpl(m_buffer, m_size);
+  m_buffer[nread] = '\0';
+  return String(m_buffer, nread, AttachLiteral);
 }
 
 void DebuggerThriftBuffer::flushImpl(CStrRef data) {

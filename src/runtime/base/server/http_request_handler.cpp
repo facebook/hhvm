@@ -280,7 +280,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
 
   if (ret) {
     if (RuntimeOption::EnableDebugger) {
-      Eval::Debugger::InterruptRequestStarted();
+      Eval::Debugger::InterruptRequestStarted(transport->getUrl());
     }
 
     bool error = false;
@@ -338,13 +338,13 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     }
 
     if (RuntimeOption::EnableDebugger) {
-      Eval::Debugger::InterruptRequestEnded();
+      Eval::Debugger::InterruptRequestEnded(transport->getUrl());
     }
   }
 
   transport->onSendEnd();
   ServerStats::LogPage(file, code);
-  hphp_context_exit(context, true);
+  hphp_context_exit(context, true, true, transport->getUrl());
   return ret;
 }
 

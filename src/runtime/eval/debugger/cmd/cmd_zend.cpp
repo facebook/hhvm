@@ -26,8 +26,8 @@ bool CmdZend::help(DebuggerClient *client) {
   client->helpTitle("Zend Command");
   client->help("[z]end: running the most recent code snippet in Zend PHP");
   client->helpBody(
-    "This is mainly for comparing results from PHP vs. HPHPi. After you type "
-    "in some PHP code, it will be evaluated immediately in HPHPi. Then you "
+    "This is mainly for comparing results from PHP vs. HipHop. After you type "
+    "in some PHP code, it will be evaluated immediately in HipHop. Then you "
     "can type '[z]end' command to re-run the same script in Zend PHP. Please "
     "note that only the most recent block of code you manually typed in was "
     "evaluated, not any earlier ones, nor the ones from a PHP file."

@@ -17,25 +17,17 @@
 #ifndef __HPHP_EVAL_DEBUGGER_CMD_OUT_H__
 #define __HPHP_EVAL_DEBUGGER_CMD_OUT_H__
 
-#include <runtime/eval/debugger/debugger_command.h>
+#include <runtime/eval/debugger/cmd/cmd_flow_control.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(CmdOut);
-class CmdOut : public DebuggerCommand {
+class CmdOut : public CmdFlowControl {
 public:
-  CmdOut() : DebuggerCommand(KindOfOut) {}
+  CmdOut() : CmdFlowControl(KindOfOut) {}
 
   virtual bool help(DebuggerClient *client);
-
-  virtual bool onClient(DebuggerClient *client);
-  virtual bool onServer(DebuggerProxy *proxy);
-
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
-
-private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////

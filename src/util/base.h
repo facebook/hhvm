@@ -147,6 +147,7 @@ typedef hphp_hash_map<void*, int, pointer_hash<void> > PointerCounterMap;
 typedef hphp_hash_set<void*, pointer_hash<void> > PointerSet;
 
 typedef std::vector<std::string> StringVec;
+typedef boost::shared_ptr<std::vector<std::string> > StringVecPtr;
 typedef std::vector<std::pair<std::string, std::string> > StringPairVec;
 typedef std::vector<StringPairVec> StringPairVecVec;
 

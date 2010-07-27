@@ -25,7 +25,7 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdBreak);
 class CmdBreak : public DebuggerCommand {
 public:
-  CmdBreak() : DebuggerCommand(KindOfBreak) {}
+  CmdBreak() : DebuggerCommand(KindOfBreak), m_breakpoints(NULL) {}
 
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
@@ -36,7 +36,20 @@ public:
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
+  /**
+   * Sync breakpoints from client to server.
+   */
+  bool update(DebuggerClient *client);
+
+protected:
+  bool validate(DebuggerClient *client, BreakPointInfoPtr bpi, int index);
+
 private:
+  BreakPointInfoPtrVec *m_breakpoints;
+  BreakPointInfoPtrVec m_bps;
+
+  bool processList(DebuggerClient *client);
+  bool processUpdate(DebuggerClient *client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

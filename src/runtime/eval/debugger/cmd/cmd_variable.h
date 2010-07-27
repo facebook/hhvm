@@ -25,6 +25,10 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdVariable);
 class CmdVariable : public DebuggerCommand {
 public:
+  static void PrintVariables(DebuggerClient *client, CArrRef variables,
+                             bool global, CStrRef text);
+
+public:
   CmdVariable() : DebuggerCommand(KindOfVariable) {}
 
   virtual bool help(DebuggerClient *client);
@@ -36,6 +40,9 @@ public:
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
+  int m_frame;
+  Array m_variables;
+  bool m_global;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

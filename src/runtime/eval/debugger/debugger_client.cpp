@@ -19,6 +19,8 @@
 #include <runtime/eval/debugger/cmd/all.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/string_util.h>
+#include <runtime/base/preg.h>
+#include <runtime/ext/ext_json.h>
 #include <runtime/ext/ext_socket.h>
 #include <util/logger.h>
 #include <util/text_color.h>
@@ -63,11 +65,25 @@ void DebuggerClient::Stop() {
   s_debugger_client.stop();
 }
 
+bool DebuggerClient::IsValidNumber(const std::string &arg) {
+  for (unsigned int i = 0; i < arg.size(); i++) {
+    if (!isdigit(arg[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 DebuggerClient::DebuggerClient()
     : m_thread(this, &DebuggerClient::run), m_stopped(false),
-      m_color(true), m_inputState(TakingCommand), m_runState(NotYet) {
+      m_color(true), m_inputState(TakingCommand), m_runState(NotYet),
+      m_frame(0) {
+}
+
+void DebuggerClient::reset() {
+  m_stacktrace.reset();
 }
 
 SmartPtr<Socket> DebuggerClient::connectLocal() {
@@ -79,8 +95,8 @@ SmartPtr<Socket> DebuggerClient::connectLocal() {
   SmartPtr<Socket> socket2(new Socket(fds[1], AF_UNIX));
 
   MachineInfoPtr machine(new MachineInfo());
-  machine->name = "local";
-  machine->thrift.create(socket1);
+  machine->m_name = "hphpd";
+  machine->m_thrift.create(socket1);
   m_machines.push_back(machine);
   m_machine = machine;
   return socket2;
@@ -97,8 +113,8 @@ void DebuggerClient::connectRemote(const std::string &host, int port) {
     throw Exception("unable to connect to %s:%d", host.c_str(), port);
   }
   MachineInfoPtr machine(new MachineInfo());
-  machine->name = host;
-  machine->thrift.create(SmartPtr<Socket>(sock));
+  machine->m_name = host;
+  machine->m_thrift.create(SmartPtr<Socket>(sock));
   m_machines.push_back(machine);
   m_machine = machine;
 }
@@ -106,13 +122,13 @@ void DebuggerClient::connectRemote(const std::string &host, int port) {
 std::string DebuggerClient::getPrompt() {
   if (m_inputState == TakingCode) {
     string prompt = " ";
-    for (unsigned int i = 2; i < m_machine->name.size() + 2; i++) {
+    for (unsigned int i = 2; i < m_machine->m_name.size() + 2; i++) {
       prompt += '.';
     }
     prompt += ' ';
     return prompt;
   }
-  return m_machine->name + "> ";
+  return m_machine->m_name + "> ";
 }
 
 void DebuggerClient::start() {
@@ -128,6 +144,7 @@ void DebuggerClient::run() {
   hphp_session_init();
   ExecutionContext *context = hphp_context_init();
   runImpl();
+  reset();
   hphp_context_exit(context, false);
   hphp_session_exit();
 }
@@ -268,7 +285,7 @@ void DebuggerClient::runImpl() {
   try {
     while (!m_stopped) {
       DebuggerCommandPtr cmd;
-      if (DebuggerCommand::Receive(m_machine->thrift, cmd, func)) {
+      if (DebuggerCommand::Receive(m_machine->m_thrift, cmd, func)) {
         if (!cmd) {
           Logger::Error("%s: debugger error", func);
           return;
@@ -277,12 +294,16 @@ void DebuggerClient::runImpl() {
           Logger::Error("%s: bad cmd type: %d", func, cmd->getType());
           return;
         }
+        if (!cmd->onClient(this)) {
+          Logger::Error("%s: unable to process %d", func, cmd->getType());
+          return;
+        }
         if (!console()) {
           return;
         }
       }
     }
-  } catch (DebuggerExitException &e) { /* normal exit */ }
+  } catch (DebuggerClientExitException &e) { /* normal exit */ }
 }
 
 bool DebuggerClient::console() {
@@ -300,9 +321,11 @@ bool DebuggerClient::console() {
             if (!process()) {
               error("command not found");
               m_command.clear();
-            } else if (m_inputState == ShouldQuit) {
-              return false;
             }
+          } catch (DebuggerClientExitException &e) {
+            return false;
+          } catch (DebuggerConsoleExitException &e) {
+            return true;
           } catch (DebuggerProtocolException &e) {
             return false;
           }
@@ -312,8 +335,11 @@ bool DebuggerClient::console() {
           case 'c': // continue
           case 's': // step
           case 'n': // next
+          case 'o': // out
             try {
               process(); // replay the same command
+            } catch (DebuggerConsoleExitException &e) {
+              return true;
             } catch (DebuggerProtocolException &e) {
               return false;
             }
@@ -330,6 +356,23 @@ bool DebuggerClient::console() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
+
+void DebuggerClient::code(const char *str) {
+  print("%s", str);
+}
+
+char DebuggerClient::ask(const char *fmt, ...) {
+  string msg;
+  va_list ap;
+  va_start(ap, fmt);
+  Logger::VSNPrintf(msg, fmt, ap); va_end(ap);
+  if (m_color) {
+    msg = ANSI_COLOR_GREEN + msg + ANSI_COLOR_END;
+  }
+  fwrite(msg.data(), 1, msg.length(), stdout);
+  fflush(stdout);
+  return tolower(getchar());
+}
 
 void DebuggerClient::print(const char *fmt, ...) {
   string msg;
@@ -363,10 +406,11 @@ void DebuggerClient::print(const std::string &s) {
     name("%s", s.c_str());                                              \
   }                                                                     \
 
-IMPLEMENT_COLOR_OUTPUT(help,   stdout, ANSI_COLOR_BROWN);
-IMPLEMENT_COLOR_OUTPUT(info,   stdout, ANSI_COLOR_GREEN);
-IMPLEMENT_COLOR_OUTPUT(output, stdout, Util::s_stdout_color);
-IMPLEMENT_COLOR_OUTPUT(error,  stderr, Util::s_stderr_color);
+IMPLEMENT_COLOR_OUTPUT(help,     stdout,  ANSI_COLOR_BROWN);
+IMPLEMENT_COLOR_OUTPUT(info,     stdout,  ANSI_COLOR_GREEN);
+IMPLEMENT_COLOR_OUTPUT(output,   stdout,  Util::s_stdout_color);
+IMPLEMENT_COLOR_OUTPUT(error,    stderr,  Util::s_stderr_color);
+IMPLEMENT_COLOR_OUTPUT(comment,  stdout,  ANSI_COLOR_RED);
 
 string DebuggerClient::wrap(const std::string &s) {
   String ret = StringUtil::WordWrap(String(s.c_str(), s.size(), AttachLiteral),
@@ -389,7 +433,8 @@ void DebuggerClient::helpSection(const std::string &s) {
 }
 
 void DebuggerClient::tutorial(const char *text) {
-  String ret = StringUtil::WordWrap(String(text), LINE_WIDTH - 4, "\n", true);
+  String ret = String(text).replace("\t", "    ");
+  ret = StringUtil::WordWrap(ret, LINE_WIDTH - 4, "\n", true);
   Array lines = StringUtil::Explode(ret, "\n").toArray();
 
   StringBuffer sb;
@@ -458,6 +503,13 @@ const char **DebuggerClient::GetCommands() {
   return cmds;
 }
 
+void DebuggerClient::shiftCommand() {
+  if (m_command.size() > 1) {
+    m_args.insert(m_args.begin(), m_command.substr(1));
+    m_command = m_command.substr(0, 1);
+  }
+}
+
 DebuggerCommand *DebuggerClient::createCommand() {
   switch (tolower(m_command[0])) {
     case 'a': return (match("abort")     ) ? new CmdAbort    () : NULL;
@@ -483,10 +535,12 @@ DebuggerCommand *DebuggerClient::createCommand() {
     case 'u': return (match("up")        ) ? new CmdUp       () : NULL;
     case 'v': return (match("variable")  ) ? new CmdVariable () : NULL;
     case 'w': return (match("where")     ) ? new CmdWhere    () : NULL;
-    case 'x': return (match("x")         ) ? new CmdExtended () : NULL;
-    case 'y': return (match("y")         ) ? new CmdUser     () : NULL;
     case 'z': return (match("zend")      ) ? new CmdZend     () : NULL;
-    case '!': return (match("!")         ) ? new CmdShell    () : NULL;
+
+    // these single lettter commands allow "x{cmd}" and "x {cmd}"
+    case 'x': shiftCommand(); return new CmdExtended();
+    case 'y': shiftCommand(); return new CmdUser();
+    case '!': shiftCommand(); return new CmdShell();
   }
   return NULL;
 }
@@ -535,8 +589,12 @@ void DebuggerClient::parseCommand(const char *line) {
     char ch = *p;
     switch (ch) {
       case ' ':
-        if (!quote && !token.empty()) {
-          addToken(token);
+        if (!quote) {
+          if (!token.empty()) {
+            addToken(token);
+          }
+        } else {
+          token += ch;
         }
         break;
       case '"':
@@ -601,6 +659,10 @@ bool DebuggerClient::match(const char *cmd) {
   return !strncasecmp(m_command.c_str(), cmd, m_command.size());
 }
 
+bool DebuggerClient::Match(const char *input, const char *cmd) {
+  return !strncasecmp(input, cmd, strlen(input));
+}
+
 bool DebuggerClient::arg(int index, const char *s) {
   ASSERT(s && *s);
   ASSERT(index > 0);
@@ -618,6 +680,19 @@ std::string DebuggerClient::argValue(int index) {
   return "";
 }
 
+std::string DebuggerClient::argRest(int index) {
+  ASSERT(index > 0);
+  --index;
+  if (index >= 0 && index < (int)m_args.size()) {
+    string ret = m_args[index];
+    while (++index < (int)m_args.size()) {
+      ret += " " + m_args[index];
+    }
+    return ret;
+  }
+  return "";
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // comunication with DebuggerProxy
 
@@ -626,12 +701,12 @@ DebuggerCommandPtr DebuggerClient::xend(DebuggerCommand *cmd) {
 }
 
 DebuggerCommandPtr DebuggerClient::send(DebuggerCommand *cmd, int expected) {
-  if (cmd->send(m_machine->thrift)) {
+  if (cmd->send(m_machine->m_thrift)) {
     DebuggerCommandPtr res;
     if (expected) {
-      while (!DebuggerCommand::Receive(m_machine->thrift, res,
+      while (!DebuggerCommand::Receive(m_machine->m_thrift, res,
                                        "DebuggerClient::send()")) {
-        if (m_stopped) throw DebuggerExitException();
+        if (m_stopped) throw DebuggerClientExitException();
       }
       if (res) {
         if (res->is((DebuggerCommand::Type)expected)) {
@@ -707,7 +782,7 @@ void DebuggerClient::swapHelp() {
 }
 
 void DebuggerClient::quit() {
-  m_inputState = ShouldQuit;
+  throw DebuggerClientExitException();
 }
 
 std::string DebuggerClient::getSandbox(int index) const {
@@ -718,6 +793,82 @@ std::string DebuggerClient::getSandbox(int index) const {
     }
   }
   return "";
+}
+
+void DebuggerClient::setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints) {
+  m_matched = breakpoints;
+}
+
+void DebuggerClient::setCurrentLocation(BreakPointInfoPtr breakpoint) {
+  m_breakpoint = breakpoint;
+  m_stacktrace.reset();
+}
+
+void DebuggerClient::setStackTrace(CArrRef stacktrace) {
+  m_stacktrace = stacktrace;
+  m_frame = 0;
+}
+
+void DebuggerClient::moveToFrame(int index) {
+  m_frame = index;
+  if (m_frame >= m_stacktrace.size()) {
+    m_frame = m_stacktrace.size() - 1;
+  }
+  if (m_frame < 0) {
+    m_frame = 0;
+  }
+  if (m_stacktrace.exists(m_frame)) {
+    printFrame(m_frame, m_stacktrace[m_frame]);
+  }
+}
+
+String DebuggerClient::PrintVariable(CVarRef v, int maxlen /* = 80 */) {
+  String value = f_json_encode(v);
+
+  Variant replaced;
+  preg_replace(replaced,
+               "/\{\"__PHP_Incomplete_Class_Name\":\"(.*?)\"(,|)/",
+               "$1{", value);
+  value = replaced.toString();
+
+  if (maxlen <= 0 || value.length() - maxlen < 30) {
+    return value;
+  }
+
+  StringBuffer sb;
+  sb.append(value.substr(0, maxlen / 2));
+  sb.append(" ...(omitted ");
+  sb.append(value.size() - maxlen);
+  sb.append(" chars)... ");
+  sb.append(value.substr(value.size() - maxlen / 2));
+  return sb.detach();
+}
+
+void DebuggerClient::printFrame(int index, CArrRef frame) {
+  StringBuffer args;
+  for (ArrayIter iter(frame["args"]); iter; ++iter) {
+    if (!args.empty()) args.append(", ");
+    String value = PrintVariable(iter.second());
+    args.append(value);
+  }
+
+  StringBuffer func;
+  if (frame.exists("namespace")) {
+    func.append(frame["namespace"].toString());
+    func.append("::");
+  }
+  if (frame.exists("class")) {
+    func.append(frame["class"].toString());
+    func.append("::");
+  }
+  func.append(frame["function"].toString());
+
+  print("#%d  %s (%s)\n    at %s:%d",
+        index,
+        func.data() ? func.data() : "",
+        args.data() ? args.data() : "",
+        frame["file"].toString().data(),
+        (int)frame["line"].toInt32());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

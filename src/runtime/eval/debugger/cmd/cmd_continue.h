@@ -17,25 +17,17 @@
 #ifndef __HPHP_EVAL_DEBUGGER_CMD_CONTINUE_H__
 #define __HPHP_EVAL_DEBUGGER_CMD_CONTINUE_H__
 
-#include <runtime/eval/debugger/debugger_command.h>
+#include <runtime/eval/debugger/cmd/cmd_flow_control.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(CmdContinue);
-class CmdContinue : public DebuggerCommand {
+class CmdContinue : public CmdFlowControl {
 public:
-  CmdContinue() : DebuggerCommand(KindOfContinue) {}
+  CmdContinue() : CmdFlowControl(KindOfContinue) {}
 
   virtual bool help(DebuggerClient *client);
-
-  virtual bool onClient(DebuggerClient *client);
-  virtual bool onServer(DebuggerProxy *proxy);
-
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
-
-private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -25,6 +25,7 @@
 #include <test/test_ext_ctype.h>
 #include <test/test_ext_curl.h>
 #include <test/test_ext_datetime.h>
+#include <test/test_ext_debugger.h>
 #include <test/test_ext_domdocument.h>
 #include <test/test_ext_error.h>
 #include <test/test_ext_fb.h>

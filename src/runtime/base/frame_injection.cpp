@@ -31,7 +31,7 @@ const char *FrameInjection::GetClassName(bool skip /* = false */) {
   // function, we should walk up to find that class
   if (t) {
     while (t->m_prev && !*t->m_class &&
-        t->flags & (PseudoMain | BuiltinFunction)) {
+           t->m_flags & (PseudoMain | BuiltinFunction)) {
       t = t->m_prev;
     }
   }
@@ -77,7 +77,8 @@ String FrameInjection::GetContainingFileName(bool skip /* = false */) {
 }
 
 Array FrameInjection::GetBacktrace(bool skip /* = false */,
-                                   bool withSelf /* = false */) {
+                                   bool withSelf /* = false */,
+                                   bool withThis /* = true */) {
   Array bt = Array::Create();
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (skip && t) {
@@ -91,7 +92,7 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
     if (filename != "") {
       Array frame = Array::Create();
       frame.set("file", filename, -1, true);
-      frame.set("line", t->line, -1, true);
+      frame.set("line", t->m_line, -1, true);
       bt.append(frame);
     }
   }
@@ -100,16 +101,16 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
 
     if (t->m_prev) {
       String file = t->m_prev->getFileName();
-      if (!file.empty() && t->m_prev->line) {
+      if (!file.empty() && t->m_prev->m_line) {
         frame.set("file", file, -1, true);
-        frame.set("line", t->m_prev->line, -1, true);
+        frame.set("line", t->m_prev->m_line, -1, true);
       }
-    } else if (t->flags & PseudoMain) {
+    } else if (t->m_flags & PseudoMain) {
       // Stop at top, don't include top file
       break;
     }
 
-    if (t->flags & PseudoMain) {
+    if (t->m_flags & PseudoMain) {
       frame.set("function", "include", -1, true);
       frame.set("args", Array::Create(t->getFileName()), -1, true);
     } else {
@@ -118,7 +119,9 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
         frame.set("function", String(c + 2), -1, true);
         frame.set("class", String(t->m_class), -1, true);
         if (!t->m_object.isNull()) {
-          frame.set("object", t->m_object, -1, true);
+          if (withThis) {
+            frame.set("object", t->m_object, -1, true);
+          }
           frame.set("type", "->", -1, true);
         } else {
           frame.set("type", "::", -1, true);
@@ -147,13 +150,13 @@ int FrameInjection::GetLine(bool skip /* = false */) {
     t = t->m_prev;
   }
   if (t) {
-    return t->line;
+    return t->m_line;
   }
   return -1;
 }
 
 String FrameInjection::getFileName() {
-  if (flags & PseudoMain) {
+  if (m_flags & PseudoMain) {
     return m_name + 10;
   }
   const char *c = strstr(m_name, "::");

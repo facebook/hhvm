@@ -44,6 +44,9 @@ public:
   virtual String getFileName();
   virtual Array getArgs();
   static void SetLine(const Construct *c);
+
+  VariableEnvironment &getEnv() { return m_env;}
+
 private:
   VariableEnvironment &m_env;
   const char *m_file;

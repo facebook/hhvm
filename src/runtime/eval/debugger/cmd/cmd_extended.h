@@ -22,8 +22,14 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+typedef hphp_string_map<std::string> ExtendedCommandMap;
+
 DECLARE_BOOST_TYPES(CmdExtended);
 class CmdExtended : public DebuggerCommand {
+public:
+  static const ExtendedCommandMap &GetExtendedCommandMap();
+  static DebuggerCommandPtr CreateExtendedCommand(const std::string &cls);
+
 public:
   CmdExtended() : DebuggerCommand(KindOfExtended) {}
 
@@ -35,7 +41,20 @@ public:
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
+  // so CmdUser can override these functions
+  virtual const ExtendedCommandMap &getCommandMap();
+  virtual bool invokeHelp(DebuggerClient *client, const std::string &cls);
+  virtual bool invokeClient(DebuggerClient *client, const std::string &cls);
+
+protected:
+  void helpImpl(DebuggerClient *client, const char *name);
+
 private:
+  std::string m_class;
+  DebuggerCommandPtr m_cmd;
+
+  ExtendedCommandMap match(DebuggerClient *client, int argIndex);
+  bool helpCommands(DebuggerClient *client, const ExtendedCommandMap &matches);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

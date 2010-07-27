@@ -15,6 +15,7 @@
 */
 
 #include <runtime/eval/debugger/cmd/cmd_user.h>
+#include <runtime/ext/ext_debugger.h>
 
 using namespace std;
 
@@ -23,34 +24,93 @@ namespace HPHP { namespace Eval {
 
 void CmdUser::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
+  thrift.write(m_cmd);
 }
 
 void CmdUser::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
+  thrift.read(m_cmd);
 }
 
 bool CmdUser::help(DebuggerClient *client) {
-  client->error("not implemented yet"); return true;
-
-  client->helpTitle("User Command");
-  client->help("user: ");
+  helpImpl(client, "y");
   client->helpBody(
-    ""
+    "These commands are implemented and installed in PHP by implementing "
+    "DebuggerCommand and calling hphpd_install_user_command(). For example\n"
+    "\n"
+    "  class MyCommand implements DebuggerCommand {\n"
+    "    public function help($client) {\n"
+    "      $client->helpTitle(\"Hello Command\");\n"
+    "      $client->help(\"y [h]ello     prints welcome message\");\n"
+    "      return true;\n"
+    "    }\n"
+    "    public function onClient($client) {\n"
+    "      $client->output(\"Hello, world!\");\n"
+    "      return true;\n"
+    "    }\n"
+    "  }\n"
+    "  \n"
+    "  hphpd_install_user_command('hello', 'MyCommand');\n"
+    "\n"
+    "Type '[i]nfo DebuggerCommand' for complete DebuggerCommand interface. "
+    "Type '[i]nfo DebuggerClient' for complete DebuggerClient interface that "
+    "you can use when implementing those $client callbacks. "
+    "Type '[i]nfo DebuggerProxy' for complete DebuggerProxy interface that "
+    "you can use when implementing those $proxy callbacks. "
   );
   return true;
 }
 
-bool CmdUser::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
+const ExtendedCommandMap &CmdUser::getCommandMap() {
+  return s_commands;
+}
 
-  //TODO
+bool CmdUser::invokeHelp(DebuggerClient *client, const std::string &cls) {
+  p_debuggerclient pclient(NEW(c_debuggerclient)());
+  pclient->m_client = client;
+  Object cmd = create_object(cls.c_str(), null_array);
+  Variant ret = cmd->o_invoke("help", CREATE_VECTOR1(pclient), -1);
+  return !same(ret, false);
+}
 
-  return help(client);
+bool CmdUser::invokeClient(DebuggerClient *client, const std::string &cls) {
+  p_debuggerclient pclient(NEW(c_debuggerclient)());
+  pclient->m_client = client;
+  Object cmd = create_object(cls.c_str(), null_array);
+  Variant ret = cmd->o_invoke("onClient", CREATE_VECTOR1(pclient), -1);
+  return !same(ret, false);
 }
 
 bool CmdUser::onServer(DebuggerProxy *proxy) {
-  ASSERT(false); // this command is processed entirely locally
+  if (m_cmd.isNull()) return false;
+  p_debuggerproxy pproxy(NEW(c_debuggerproxy)());
+  pproxy->m_proxy = proxy;
+  Variant ret = m_cmd->o_invoke("onServer", CREATE_VECTOR1(pproxy), -1);
+  return !same(ret, false);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+Mutex CmdUser::s_mutex;
+ExtendedCommandMap CmdUser::s_commands;
+
+bool CmdUser::InstallCommand(CStrRef cmd, CStrRef clsname) {
+  Lock lock(s_mutex);
+  if (s_commands.find(cmd.data()) == s_commands.end()) {
+    s_commands[cmd.data()] = string(clsname.data());
+    return true;
+  }
   return false;
+}
+
+Array CmdUser::GetCommands() {
+  Lock lock(s_mutex);
+  Array ret(Array::Create());
+  for (ExtendedCommandMap::const_iterator iter = s_commands.begin();
+       iter != s_commands.end(); ++iter) {
+    ret.set(String(iter->first), String(iter->second));
+  }
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

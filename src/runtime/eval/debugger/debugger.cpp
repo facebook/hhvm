@@ -36,7 +36,7 @@ void Debugger::StartServer() {
 void Debugger::StartClient(const std::string &host, int port) {
   SmartPtr<Socket> localProxy = DebuggerClient::Start(host, port);
   if (localProxy.get()) {
-    RegisterProxy(localProxy, false);
+    RegisterProxy(localProxy, false, true);
   }
 }
 
@@ -56,8 +56,8 @@ void Debugger::GetRegisteredSandboxes(StringVec &ids) {
   s_debugger.getSandboxes(ids);
 }
 
-void Debugger::RegisterProxy(SmartPtr<Socket> socket, bool dummy) {
-  s_debugger.addProxy(socket, dummy);
+void Debugger::RegisterProxy(SmartPtr<Socket> socket, bool dummy, bool local) {
+  s_debugger.addProxy(socket, dummy, local);
 }
 
 void Debugger::RemoveProxy(DebuggerProxyPtr proxy) {
@@ -75,74 +75,58 @@ DebuggerProxyPtrSet Debugger::GetProxies() {
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
   Variant &server = g->gv__SERVER;
   SandboxInfo sandbox;
-  sandbox.user = server["HPHP_SANDBOX_USER"].toString().data();
-  sandbox.name = server["HPHP_SANDBOX_NAME"].toString().data();
-  sandbox.path = server["HPHP_SANDBOX_PATH"].toString().data();
+  sandbox.m_user = server["HPHP_SANDBOX_USER"].toString().data();
+  sandbox.m_name = server["HPHP_SANDBOX_NAME"].toString().data();
+  sandbox.m_path = server["HPHP_SANDBOX_PATH"].toString().data();
   return s_debugger.findProxies(sandbox);
 }
 
-void Debugger::InterruptSessionStarted() {
-  Interrupt(CmdInterrupt::SessionStarted);
+void Debugger::InterruptSessionStarted(const char *file) {
+  Interrupt(SessionStarted, file);
 }
 
-void Debugger::InterruptSessionEnded() {
-  Interrupt(CmdInterrupt::SessionEnded);
+void Debugger::InterruptSessionEnded(const char *file) {
+  Interrupt(SessionEnded, file);
 }
 
-void Debugger::InterruptRequestStarted() {
-  Interrupt(CmdInterrupt::RequestStarted);
+void Debugger::InterruptRequestStarted(const char *url) {
+  Interrupt(RequestStarted, url);
 }
 
-void Debugger::InterruptRequestEnded() {
-  Interrupt(CmdInterrupt::RequestEnded);
+void Debugger::InterruptRequestEnded(const char *url) {
+  Interrupt(RequestEnded, url);
 }
 
-void Debugger::InterruptPSPEnded() {
-  Interrupt(CmdInterrupt::PSPEnded);
+void Debugger::InterruptPSPEnded(const char *url) {
+  Interrupt(PSPEnded, url);
 }
 
-void Debugger::InterruptFileLine(const char *filename, int line) {
-  Interrupt(CmdInterrupt::BreakPointReached, filename, line);
+void Debugger::InterruptFileLine(InterruptSite &site) {
+  Interrupt(BreakPointReached, NULL, &site);
 }
 
-void Debugger::InterruptException(const char *filename, int line,
-                                  const char *clsname) {
-  Interrupt(CmdInterrupt::ExceptionThrown, filename, line, clsname);
+void Debugger::InterruptException(InterruptSite &site) {
+  Interrupt(ExceptionThrown, NULL, &site);
 }
 
-void Debugger::Interrupt(int type, const char *file /* = NULL */,
-                         int line /* = 0 */,
-                         const char *clsname /* = NULL */) {
+void Debugger::Interrupt(int type, const char *program,
+                         InterruptSite *site /* = NULL */) {
   ASSERT(RuntimeOption::EnableDebugger);
 
   DebuggerProxyPtrSet proxies = GetProxies();
   if (proxies.empty()) {
     // debugger clients are disconnected abnormally
-    if (type == CmdInterrupt::SessionStarted ||
-        type == CmdInterrupt::SessionEnded) {
+    if (type == SessionStarted || type == SessionEnded) {
       // for command line programs, we need this exception to exit from
       // the infinite execution loop
-      throw DebuggerExitException();
+      throw DebuggerClientExitException();
     }
     return;
   }
 
-  // validate break points
-  if (type == CmdInterrupt::BreakPointReached ||
-      type == CmdInterrupt::ExceptionThrown) {
-    if (!file || !*file || line <= 0) {
-      return;
-    }
-    if (type == CmdInterrupt::ExceptionThrown) {
-      if (!clsname || !*clsname) {
-        return;
-      }
-    }
-  }
-
   for (DebuggerProxyPtrSet::const_iterator iter = proxies.begin();
        iter != proxies.end(); ++iter) {
-    CmdInterrupt cmd((CmdInterrupt::SubType)type, file, line, clsname);
+    CmdInterrupt cmd((InterruptType)type, program, site);
     (*iter)->interrupt(cmd);
   }
 }
@@ -191,8 +175,8 @@ void Debugger::getSandboxes(StringVec &ids) {
   }
 }
 
-void Debugger::addProxy(SmartPtr<Socket> socket, bool dummy) {
-  DebuggerProxyPtr proxy(new DebuggerProxy(socket));
+void Debugger::addProxy(SmartPtr<Socket> socket, bool dummy, bool local) {
+  DebuggerProxyPtr proxy(new DebuggerProxy(socket, local));
   {
     WriteLock lock(m_mutex);
     m_proxies[proxy->getSandboxId()].insert(proxy);

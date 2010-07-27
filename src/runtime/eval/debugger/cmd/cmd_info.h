@@ -36,6 +36,32 @@ public:
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
+  enum SymbolType {
+    KindOfUnknown,
+    KindOfClass,
+    KindOfFunction,
+  };
+
+  int8   m_type;
+  String m_symbol;
+  Array  m_info;
+
+  String GetParams(CArrRef params, bool detailed = false);
+  String GetModifier(CArrRef info, const char *name);
+
+  String FindSubSymbol(CArrRef symbols, const std::string &symbol);
+
+  bool TryConstant(DebuggerClient *client, CArrRef info,
+                   const std::string &subsymbol);
+  bool TryProperty(DebuggerClient *client, CArrRef info,
+                   const std::string &subsymbol);
+  bool TryMethod(DebuggerClient *client, CArrRef info,
+                 std::string subsymbol);
+
+  void PrintDocComments(DebuggerClient *client, CArrRef info);
+  void PrintHeader(DebuggerClient *client, CArrRef info, const char *type);
+  void PrintInfo(DebuggerClient *client, CArrRef info,
+                 const std::string &subsymbol);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

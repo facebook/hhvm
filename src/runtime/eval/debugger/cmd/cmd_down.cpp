@@ -15,42 +15,35 @@
 */
 
 #include <runtime/eval/debugger/cmd/cmd_down.h>
+#include <runtime/eval/debugger/cmd/cmd_up.h>
+#include <runtime/eval/debugger/cmd/cmd_where.h>
 
 using namespace std;
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-void CmdDown::sendImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::sendImpl(thrift);
-}
-
-void CmdDown::recvImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::recvImpl(thrift);
-}
-
 bool CmdDown::help(DebuggerClient *client) {
-  client->error("not implemented yet"); return true;
-
   client->helpTitle("Down Command");
-  client->help("down: ");
+  client->help("[d]own {num=1}: moves to inner frames (callees) on "
+               "stacktrace");
   client->helpBody(
-    ""
+    "Use this command to walk down on stacktrace to find out inner callees of "
+    "current frame. By default it moves down by one level. Specify a number "
+    "to move down several levels a time."
   );
   return true;
 }
 
 bool CmdDown::onClient(DebuggerClient *client) {
   if (DebuggerCommand::onClient(client)) return true;
+  if (client->argCount() > 1) {
+    return help(client);
+  }
 
-  //TODO
-
-  return help(client);
-}
-
-bool CmdDown::onServer(DebuggerProxy *proxy) {
-  ASSERT(false); // this command is processed entirely locally
-  return false;
+  CmdWhere().fetchStackTrace(client);
+  client->moveToFrame(client->getFrame() - CmdUp::ParseNumber(client));
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

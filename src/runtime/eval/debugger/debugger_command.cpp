@@ -108,6 +108,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     case KindOfUser     :  cmd = DebuggerCommandPtr(new CmdUser     ()); break;
     case KindOfEval     :  cmd = DebuggerCommandPtr(new CmdEval     ()); break;
     case KindOfInterrupt:  cmd = DebuggerCommandPtr(new CmdInterrupt()); break;
+    case KindOfShell    :  cmd = DebuggerCommandPtr(new CmdShell    ()); break;
 
     default:
       ASSERT(false);

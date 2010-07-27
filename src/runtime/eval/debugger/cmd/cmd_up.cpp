@@ -15,42 +15,48 @@
 */
 
 #include <runtime/eval/debugger/cmd/cmd_up.h>
+#include <runtime/eval/debugger/cmd/cmd_where.h>
 
 using namespace std;
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-void CmdUp::sendImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::sendImpl(thrift);
-}
-
-void CmdUp::recvImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::recvImpl(thrift);
-}
-
 bool CmdUp::help(DebuggerClient *client) {
-  client->error("not implemented yet"); return true;
-
   client->helpTitle("Up Command");
-  client->help("up: ");
+  client->help("[u]p {num=1}: moves to outer frames (callers) on stacktrace");
   client->helpBody(
-    ""
+    "Use this command to walk up on stacktrace to find out outer callers of "
+    "current frame. By default it moves up by one level. Specify a number "
+    "to move up several levels a time."
   );
   return true;
 }
 
-bool CmdUp::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
-
-  //TODO
-
-  return help(client);
+int CmdUp::ParseNumber(DebuggerClient *client) {
+  if (client->argCount() == 1) {
+    string snum = client->argValue(1);
+    if (!DebuggerClient::IsValidNumber(snum)) {
+      client->error("Please specify a number.");
+      client->tutorial(
+        "Run '[w]here' command to see the entire stacktrace."
+      );
+      return true;
+    }
+    return atoi(snum.c_str());
+  }
+  return 1;
 }
 
-bool CmdUp::onServer(DebuggerProxy *proxy) {
-  ASSERT(false); // this command is processed entirely locally
-  return false;
+bool CmdUp::onClient(DebuggerClient *client) {
+  if (DebuggerCommand::onClient(client)) return true;
+  if (client->argCount() > 1) {
+    return help(client);
+  }
+
+  CmdWhere().fetchStackTrace(client);
+  client->moveToFrame(client->getFrame() + ParseNumber(client));
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

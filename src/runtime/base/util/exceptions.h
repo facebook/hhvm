@@ -218,9 +218,6 @@ public:
   }
 };
 
-class DebuggerRestartException : public Exception {};
-class DebuggerExitException : public Exception {};
-
 class PhpFileDoesNotExistException : public ExtendedException {
 public:
   PhpFileDoesNotExistException(const char *file)

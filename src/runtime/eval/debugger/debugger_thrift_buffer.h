@@ -29,7 +29,10 @@ namespace HPHP {
  */
 class DebuggerThriftBuffer: public ThriftBuffer {
 public:
-  DebuggerThriftBuffer() : ThriftBuffer(1024) {}
+  static const int BUFFER_SIZE = 1024;
+
+public:
+  DebuggerThriftBuffer() : ThriftBuffer(BUFFER_SIZE) {}
 
   SmartPtr<Socket> getSocket() { return m_socket;}
 
@@ -45,6 +48,7 @@ protected:
   virtual void flushImpl(CStrRef data);
 
 private:
+  char m_buffer[BUFFER_SIZE + 1];
   SmartPtr<Socket> m_socket;
 };
 

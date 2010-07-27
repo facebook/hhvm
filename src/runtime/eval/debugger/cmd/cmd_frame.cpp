@@ -15,42 +15,34 @@
 */
 
 #include <runtime/eval/debugger/cmd/cmd_frame.h>
+#include <runtime/eval/debugger/cmd/cmd_up.h>
+#include <runtime/eval/debugger/cmd/cmd_where.h>
 
 using namespace std;
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-void CmdFrame::sendImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::sendImpl(thrift);
-}
-
-void CmdFrame::recvImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::recvImpl(thrift);
-}
-
 bool CmdFrame::help(DebuggerClient *client) {
-  client->error("not implemented yet"); return true;
-
   client->helpTitle("Frame Command");
-  client->help("frame: ");
+  client->help("[f]rame {index}: jumps to one particular frame");
   client->helpBody(
-    ""
+    "Use '[w]here' command to find out the frame number. Use 'f 0' to jump "
+    "back to the most recent frame or the innermost frame. Use 'f 999' or "
+    "some big number to jump to the outermost frame."
   );
   return true;
 }
 
 bool CmdFrame::onClient(DebuggerClient *client) {
   if (DebuggerCommand::onClient(client)) return true;
+  if (client->argCount() != 1) {
+    return help(client);
+  }
 
-  //TODO
-
-  return help(client);
-}
-
-bool CmdFrame::onServer(DebuggerProxy *proxy) {
-  ASSERT(false); // this command is processed entirely locally
-  return false;
+  CmdWhere().fetchStackTrace(client);
+  client->moveToFrame(CmdUp::ParseNumber(client));
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,25 +17,43 @@
 #ifndef __HPHP_EVAL_DEBUGGER_CMD_USER_H__
 #define __HPHP_EVAL_DEBUGGER_CMD_USER_H__
 
-#include <runtime/eval/debugger/debugger_command.h>
+#include <runtime/eval/debugger/cmd/cmd_extended.h>
+#include <util/lock.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(CmdUser);
-class CmdUser : public DebuggerCommand {
+class CmdUser : public CmdExtended {
 public:
-  CmdUser() : DebuggerCommand(KindOfUser) {}
+  static bool InstallCommand(CStrRef cmd, CStrRef clsname);
+  static Array GetCommands();
+
+public:
+  CmdUser() {
+    m_type = KindOfUser;
+  }
+  CmdUser(Object cmd) : m_cmd(cmd) {
+    m_type = KindOfUser;
+  }
+
+  Object getUserCommand() { return m_cmd;}
 
   virtual bool help(DebuggerClient *client);
-
-  virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
+  virtual const ExtendedCommandMap &getCommandMap();
+  virtual bool invokeHelp(DebuggerClient *client, const std::string &cls);
+  virtual bool invokeClient(DebuggerClient *client, const std::string &cls);
+
 private:
+  static Mutex s_mutex;
+  static ExtendedCommandMap s_commands;
+
+  Object m_cmd;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

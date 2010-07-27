@@ -20,6 +20,7 @@
 #include <runtime/base/runtime_option.h>
 #include <util/shared_memory_allocator.h>
 #include <system/gen/sys/system_globals.h>
+#include <system/gen/php/globals/symbols.h>
 #include <runtime/base/server/pagelet_server.h>
 #include <runtime/base/server/xbox_server.h>
 #include <runtime/base/server/http_server.h>
@@ -67,7 +68,7 @@ namespace HPHP {
 struct ProgramOptions {
   string mode;
   string config;
-  vector<string> confStrings;
+  StringVec confStrings;
   int    port;
   int    admin_port;
   string debug_host;
@@ -76,7 +77,7 @@ struct ProgramOptions {
   string file;
   int    count;
   bool   noSafeAccessCheck;
-  vector<string> args;
+  StringVec args;
   string buildId;
   int    xhprofFlags;
 };
@@ -236,7 +237,9 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
   bool ret = false;
   try {
     throw;
-  } catch (const DebuggerRestartException &e) {
+  } catch (const Eval::DebuggerRestartException &e) {
+    throw;
+  } catch (const Eval::DebuggerClientExitException &e) {
     throw;
   } catch (const ExitException &e) {
     ret = true;
@@ -358,6 +361,10 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   context->obSetImplicitFlush(true);
 
   SystemGlobals *g = (SystemGlobals *)get_global_variables();
+
+  // reset global symbols to nulls or empty arrays
+  pm_php$globals$symbols_php();
+
   process_env_variables(g->gv__ENV);
   g->gv__ENV.set("HPHP", 1);
 
@@ -390,11 +397,11 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   }
 }
 
-void execute_command_line_end(int xhprof, bool coverage) {
+void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   if (xhprof) {
     f_var_dump(f_json_encode(f_xhprof_disable()));
   }
-  hphp_context_exit(g_context.get(), true);
+  hphp_context_exit(g_context.get(), true, true, program);
   hphp_session_exit();
   if (coverage && RuntimeOption::RecordCodeCoverage &&
       !RuntimeOption::CodeCoverageOutputFile.empty()) {
@@ -494,6 +501,17 @@ void translate_rtti(const char *rttiDirectory) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static void prepare_args(int &argc, char **&argv, const StringVec &args,
+                         const char *file) {
+  argc = args.size() + 1;
+  argv = (char **)malloc((argc + 1) * sizeof(char*));
+  argv[0] = (char*)file;
+  for (int i = 1; i < argc; i++) {
+    argv[i] = (char*)args[i-1].c_str();
+  }
+  argv[argc] = NULL;
+}
+
 static int execute_program_impl(int argc, char **argv);
 int execute_program(int argc, char **argv) {
   try {
@@ -525,7 +543,7 @@ static int run_program(ProgramOptions &po, int argc, char **argv,
         ret = ExitException::ExitCode;
       }
     }
-    execute_command_line_end(po.xhprofFlags, true);
+    execute_command_line_end(po.xhprofFlags, true, argv[0]);
   }
   return ret;
 }
@@ -546,7 +564,7 @@ static int execute_program_impl(int argc, char **argv) {
      "run | debug | server | daemon | replay | translate")
     ("config,c", value<string>(&po.config),
      "load specified config file")
-    ("config-value,v", value<vector<string> >(&po.confStrings)->composing(),
+    ("config-value,v", value<StringVec >(&po.confStrings)->composing(),
      "individual configuration string in a format of name=value, where "
      "name can be any valid configuration for a config file")
     ("port,p", value<int>(&po.port)->default_value(-1),
@@ -566,7 +584,7 @@ static int execute_program_impl(int argc, char **argv) {
     ("no-safe-access-check",
       value<bool>(&po.noSafeAccessCheck)->default_value(false),
      "whether to ignore safe file access check")
-    ("arg", value<vector<string> >(&po.args)->composing(),
+    ("arg", value<StringVec >(&po.args)->composing(),
      "arguments")
     ("extra-header", value<string>(&Logger::ExtraHeader),
      "extra-header to add to log lines")
@@ -637,13 +655,9 @@ static int execute_program_impl(int argc, char **argv) {
   if (argc <= 1 || po.mode == "run" || po.mode == "debug") {
     RuntimeOption::ExecutionMode = "cli";
 
-    int new_argc = po.args.size() + 1;
-    char **new_argv = (char **)malloc((new_argc + 1) * sizeof(char*));
-    new_argv[0] = (char*)po.file.c_str();
-    for (int i = 1; i < new_argc; i++) {
-      new_argv[i] = (char*)po.args[i-1].c_str();
-    }
-    new_argv[new_argc] = NULL;
+    int new_argc;
+    char **new_argv;
+    prepare_args(new_argc, new_argv, po.args, po.file.c_str());
 
     int ret = 0;
     hphp_process_init();
@@ -652,21 +666,27 @@ static int execute_program_impl(int argc, char **argv) {
       RuntimeOption::EnableDebugger = true;
       Eval::Debugger::StartClient(po.debug_host, po.debug_port);
 
-      try {
-        while (true) {
-          try {
-            execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
-            Eval::Debugger::InterruptSessionStarted();
-            ret = run_program(po, new_argc, new_argv, true);
-            Eval::Debugger::InterruptSessionEnded();
-            execute_command_line_end(po.xhprofFlags, true);
-          } catch (const DebuggerRestartException &e) {
-            execute_command_line_end(0, false);
+      StringVecPtr client_args;
+      while (true) {
+        try {
+          execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
+          if (!client_args) {
+            Eval::Debugger::InterruptSessionStarted(new_argv[0]);
           }
+          ret = run_program(po, new_argc, new_argv, true);
+          Eval::Debugger::InterruptSessionEnded(new_argv[0]);
+        } catch (const Eval::DebuggerRestartException &e) {
+          execute_command_line_end(0, false, NULL);
+
+          client_args = e.m_args;
+          free(new_argv);
+          prepare_args(new_argc, new_argv, *client_args, po.file.c_str());
+        } catch (const Eval::DebuggerClientExitException &e) {
+          execute_command_line_end(0, false, NULL);
+          break; // end user quitting debugger
+        } catch (...) {
+          execute_command_line_end(0, false, NULL);
         }
-      } catch (const DebuggerExitException &e) {
-        // end user quitting debugger
-        execute_command_line_end(0, false);
       }
 
     } else {
@@ -890,11 +910,12 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
 }
 
 void hphp_context_exit(ExecutionContext *context, bool psp,
-                       bool shutdown /* = true */) {
+                       bool shutdown /* = true */,
+                       const char *program /* = NULL */) {
   if (psp) {
     context->onShutdownPostSend();
     if (RuntimeOption::EnableDebugger) {
-      Eval::Debugger::InterruptPSPEnded();
+      Eval::Debugger::InterruptPSPEnded(program);
     }
   }
   Eval::RequestEvalState::DestructObjects();

@@ -28,7 +28,7 @@ namespace HPHP {
  */
 int execute_program(int argc, char **argv);
 void execute_command_line_begin(int argc, char **argv, int xhprof);
-void execute_command_line_end(int xhprof, bool coverage);
+void execute_command_line_end(int xhprof, bool coverage, const char *program);
 
 /**
  * Setting up environment variables.
@@ -73,7 +73,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  const std::string &reqInitDoc,
                  bool &error, std::string &errorMsg);
 void hphp_context_exit(ExecutionContext *context, bool psp,
-                       bool shutdown = true);
+                       bool shutdown = true, const char *program = NULL);
 
 void hphp_session_exit();
 void hphp_process_exit();

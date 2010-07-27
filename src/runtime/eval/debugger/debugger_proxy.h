@@ -26,14 +26,16 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-class DebuggerCommand;
 class CmdInterrupt;
 DECLARE_BOOST_TYPES(DebuggerProxy);
+DECLARE_BOOST_TYPES(DebuggerCommand);
+DECLARE_BOOST_TYPES(CmdFlowControl);
 class DebuggerProxy : public Synchronizable,
                       public boost::enable_shared_from_this<DebuggerProxy> {
 public:
-  DebuggerProxy(SmartPtr<Socket> socket);
+  DebuggerProxy(SmartPtr<Socket> socket, bool local);
 
+  bool isLocal() const { return m_local;}
   std::string getSandboxId() const { return m_sandbox.id();}
 
   void startDummySandbox();
@@ -42,11 +44,22 @@ public:
   void interrupt(CmdInterrupt &cmd);
   bool send(DebuggerCommand *cmd);
 
+  void setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
+    m_breakpoints = breakpoints;
+  }
+
 private:
+  bool m_local;
   DebuggerThriftBuffer m_thrift;
   SandboxInfo m_sandbox;
   DummySandboxPtr m_dummySandbox;
-  BreakPointInfoMap m_breakpoints;
+
+  BreakPointInfoPtrVec m_breakpoints;
+  CmdFlowControlPtr m_burner; // c, s, n, o commands that can burn breakpoints
+
+  // helpers
+  void processFlowControl(CmdInterrupt &cmd);
+  bool breakByFlowControl(CmdInterrupt &cmd);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

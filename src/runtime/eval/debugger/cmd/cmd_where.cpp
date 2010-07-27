@@ -23,34 +23,61 @@ namespace HPHP { namespace Eval {
 
 void CmdWhere::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
+  thrift.write(m_stacktrace);
 }
 
 void CmdWhere::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
+  thrift.read(m_stacktrace);
 }
 
 bool CmdWhere::help(DebuggerClient *client) {
-  client->error("not implemented yet"); return true;
-
   client->helpTitle("Where Command");
-  client->help("where: ");
+  client->help("[w]here: displays current stacktrace");
   client->helpBody(
-    ""
+    "Use '[u]p {num}' or '[d]own {num}' to walk up or down the stacktrace. "
+    "Use '[f]rame {index}' to jump to one particular frame. At any frame, "
+    "use '[v]ariable' command to display all local variables."
   );
   return true;
 }
 
+Array CmdWhere::fetchStackTrace(DebuggerClient *client) {
+  Array st = client->getStackTrace();
+  if (st.isNull()) {
+    CmdWherePtr cmd = client->xend<CmdWhere>(this);
+    client->setStackTrace(cmd->m_stacktrace);
+  }
+  return st;
+}
+
 bool CmdWhere::onClient(DebuggerClient *client) {
   if (DebuggerCommand::onClient(client)) return true;
+  if (client->argCount() != 0) {
+    return help(client);
+  }
 
-  //TODO
+  Array st = fetchStackTrace(client);
+  if (st.empty()) {
+    client->info("(no stacktrace to display)");
+  } else {
+    int i = 0;
+    for (ArrayIter iter(st); iter; ++iter) {
+      client->printFrame(iter.first().toInt32(), iter.second());
+      if (++i % 10 == 0 &&
+          client->ask("There are %d more frames. Continue? [Y/n]",
+                      st.size() - i) == 'n') {
+        break;
+      }
+    }
+  }
 
-  return help(client);
+  return true;
 }
 
 bool CmdWhere::onServer(DebuggerProxy *proxy) {
-  ASSERT(false); // this command is processed entirely locally
-  return false;
+  m_stacktrace = FrameInjection::GetBacktrace(false, false, false);
+  return proxy->send(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

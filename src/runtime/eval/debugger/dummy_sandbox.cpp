@@ -45,34 +45,31 @@ void DummySandbox::stop() {
 }
 
 void DummySandbox::run() {
-  try {
-    while (true) {
-      try {
-        char *argv[] = {"", NULL};
-        execute_command_line_begin(1, argv, 0);
+  while (true) {
+    try {
+      char *argv[] = {"", NULL};
+      execute_command_line_begin(1, argv, 0);
 
-        SystemGlobals *g = (SystemGlobals *)get_global_variables();
-        Variant &server = g->gv__SERVER;
-        server.set("HPHP_SANDBOX_USER", m_sandbox.user);
-        server.set("HPHP_SANDBOX_NAME", m_sandbox.name);
-        server.set("HPHP_SANDBOX_PATH", m_sandbox.path);
+      SystemGlobals *g = (SystemGlobals *)get_global_variables();
+      Variant &server = g->gv__SERVER;
+      server.set("HPHP_SANDBOX_USER", m_sandbox.m_user);
+      server.set("HPHP_SANDBOX_NAME", m_sandbox.m_name);
+      server.set("HPHP_SANDBOX_PATH", m_sandbox.m_path);
 
-        if (!m_startupFile.empty()) {
-          string file = m_sandbox.path + m_startupFile;
-          bool error; string errorMsg;
-          hphp_invoke(g_context.get(), file.c_str(),
-                      false, Array(), null, "", "", "", error, errorMsg);
-        }
-
-        Debugger::InterruptSessionStarted();
-
-      } catch (const DebuggerRestartException &e) {
-        execute_command_line_end(0, false);
+      if (!m_startupFile.empty()) {
+        string file = m_sandbox.m_path + m_startupFile;
+        bool error; string errorMsg;
+        hphp_invoke(g_context.get(), file.c_str(),
+                    false, Array(), null, "", "", "", error, errorMsg);
       }
+
+      Debugger::InterruptSessionStarted(NULL);
+    } catch (const DebuggerClientExitException &e) {
+      execute_command_line_end(0, false, NULL);
+      break; // end user quitting debugger
+    } catch (...) {
+      execute_command_line_end(0, false, NULL);
     }
-  } catch (const DebuggerExitException &e) {
-    // end user quitting debugger
-    execute_command_line_end(0, false);
   }
 }
 

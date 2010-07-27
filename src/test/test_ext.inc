@@ -10,6 +10,7 @@ RUN_TESTSUITE(TestExtClass);
 RUN_TESTSUITE(TestExtCtype);
 RUN_TESTSUITE(TestExtCurl);
 RUN_TESTSUITE(TestExtDatetime);
+RUN_TESTSUITE(TestExtDebugger);
 RUN_TESTSUITE(TestExtDomdocument);
 RUN_TESTSUITE(TestExtError);
 RUN_TESTSUITE(TestExtFb);

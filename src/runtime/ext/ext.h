@@ -27,6 +27,7 @@
 #include <runtime/ext/profile/extprofile_ctype.h>
 #include <runtime/ext/profile/extprofile_curl.h>
 #include <runtime/ext/profile/extprofile_datetime.h>
+#include <runtime/ext/profile/extprofile_debugger.h>
 #include <runtime/ext/profile/extprofile_domdocument.h>
 #include <runtime/ext/profile/extprofile_error.h>
 #include <runtime/ext/profile/extprofile_fb.h>

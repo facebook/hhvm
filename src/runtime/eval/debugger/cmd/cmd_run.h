@@ -36,6 +36,7 @@ public:
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
+  StringVecPtr m_args;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

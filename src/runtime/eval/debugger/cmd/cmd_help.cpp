@@ -36,7 +36,7 @@ void CmdHelp::HelpAll(DebuggerClient *client) {
   client->help("[c]ontinue *   continues program execution");
   client->help("[s]tep     *   steps into a function call or an expression");
   client->help("[n]ext     *   steps over a function call or a line");
-  client->help("[o]ut          steps out a function call");
+  client->help("[o]ut      *   steps out a function call");
   client->help("[j]ump         jumps to specified line of code for execution");
 
   client->helpTitle("Display Commands");

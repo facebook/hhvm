@@ -23,35 +23,26 @@ namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 const std::string &SandboxInfo::id() const {
-  if (cached_id.empty() && !user.empty()) {
-    cached_id = user + "\t" + name + "\t" + path;
+  if (m_cached_id.empty() && !m_user.empty()) {
+    m_cached_id = m_user + "\t" + m_name + "\t" + m_path;
   }
-  return cached_id;
+  return m_cached_id;
 }
 
 void SandboxInfo::set(const std::string &id) {
-  cached_id.clear();
-  user.clear();
-  name.clear();
-  path.clear();
+  m_cached_id.clear();
+  m_user.clear();
+  m_name.clear();
+  m_path.clear();
   if (!id.empty()) {
     vector<string> tokens;
     Util::split('\n', id.c_str(), tokens);
     if (tokens.size() == 3) {
-      user = tokens[0];
-      name = tokens[1];
-      path = tokens[2];
+      m_user = tokens[0];
+      m_name = tokens[1];
+      m_path = tokens[2];
     }
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-const std::string &BreakPointInfo::id() const {
-  if (cached_id.empty()) {
-    cached_id = file + ":" + boost::lexical_cast<string>(line);
-  }
-  return cached_id;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

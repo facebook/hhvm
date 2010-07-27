@@ -2426,6 +2426,1109 @@ struct ObjectStaticCallbacks cw_domtext = {
   c_domtext::os_invoke,
   c_domtext::os_constant,
 };
+Object co_debuggerclient(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_debuggerclient)())->dynCreate(params, init));
+}
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_debuggerclient
+Variant c_debuggerclient::os_getInit(const char *s, int64 hash) {
+  return c_ObjectData::os_getInit(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_debuggerclient
+Variant c_debuggerclient::os_get(const char *s, int64 hash) {
+  return c_ObjectData::os_get(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_debuggerclient
+Variant &c_debuggerclient::os_lval(const char *s, int64 hash) {
+  return c_ObjectData::os_lval(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_debuggerclient
+void c_debuggerclient::o_get(Array &props) const {
+  c_ObjectData::o_get(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_get_debuggerclient
+Variant c_debuggerclient::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+  return c_debuggerclient::o_getPublic(prop, phash, error);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_get_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_debuggerclient
+Variant c_debuggerclient::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+  return c_ObjectData::o_getPublic(s, hash, error);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_debuggerclient
+Variant c_debuggerclient::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+  return o_getPublic(s, hash, error);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_debuggerclient
+bool c_debuggerclient::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_debuggerclient::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_debuggerclient
+bool c_debuggerclient::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_debuggerclient
+bool c_debuggerclient::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_set_debuggerclient
+Variant c_debuggerclient::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+  return c_debuggerclient::o_setPublic(prop, phash, v, forInit);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_set_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_debuggerclient
+Variant c_debuggerclient::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+  return c_ObjectData::o_setPublic(s, hash, v, forInit);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_debuggerclient
+Variant c_debuggerclient::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+  return o_setPublic(s, hash, v, forInit);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_debuggerclient
+Variant& c_debuggerclient::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+  return c_debuggerclient::o_lvalPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_lval_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_debuggerclient
+Variant& c_debuggerclient::o_lvalPublic(CStrRef s, int64 hash) {
+  return c_ObjectData::o_lvalPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_debuggerclient
+Variant& c_debuggerclient::o_lvalPrivate(CStrRef s, int64 hash) {
+  return o_lvalPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_debuggerclient
+Variant c_debuggerclient::os_constant(const char *s) {
+  int64 hash = hash_string(s);
+  switch (hash & 15) {
+    case 2:
+      HASH_RETURN(0x2038737F45604DE2LL, q_debuggerclient_AUTO_COMPLETE_VARIABLES, "AUTO_COMPLETE_VARIABLES");
+      break;
+    case 3:
+      HASH_RETURN(0x78221A7B002235D3LL, q_debuggerclient_AUTO_COMPLETE_CONSTANTS, "AUTO_COMPLETE_CONSTANTS");
+      break;
+    case 14:
+      HASH_RETURN(0x73A1D25FC6A0290ELL, q_debuggerclient_AUTO_COMPLETE_FILENAMES, "AUTO_COMPLETE_FILENAMES");
+      HASH_RETURN(0x36AB172DD5953FDELL, q_debuggerclient_AUTO_COMPLETE_CLASSES, "AUTO_COMPLETE_CLASSES");
+      break;
+    case 15:
+      HASH_RETURN(0x7CAE318E6EF6449FLL, q_debuggerclient_AUTO_COMPLETE_FUNCTIONS, "AUTO_COMPLETE_FUNCTIONS");
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_constant(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_debuggerclient
+IMPLEMENT_CLASS(debuggerclient)
+c_debuggerclient *c_debuggerclient::create() {
+  CountableHelper h(this);
+  init();
+  t___construct();
+  return this;
+}
+ObjectData *c_debuggerclient::dynCreate(CArrRef params, bool construct /* = true */) {
+  init();
+  if (construct) {
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
+    (t___construct());
+  }
+  return this;
+}
+void c_debuggerclient::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
+  (t___construct());
+}
+void c_debuggerclient::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  (t___construct(), null);
+}
+void c_debuggerclient::destruct() {
+  if (!inCtorDtor()) {
+    incRefCount();
+    try {
+      t___destruct();
+    } catch (...) { handle_destructor_exception();}
+  }
+}
+ObjectData *c_debuggerclient::cloneImpl() {
+  c_debuggerclient *obj = NEW(c_debuggerclient)();
+  cloneSet(obj);
+  return obj;
+}
+void c_debuggerclient::cloneSet(c_debuggerclient *clone) {
+  ObjectData::cloneSet(clone);
+}
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_debuggerclient
+Variant c_debuggerclient::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 63) {
+    case 0:
+      HASH_GUARD(0x07768FF90B181780LL, addcompletion) {
+        if (count != 1) return throw_wrong_arguments("addcompletion", count, 1, 1, 1);
+        return (t_addcompletion(params[0]), null);
+      }
+      break;
+    case 2:
+      HASH_GUARD(0x20F2EA2BBFF5AA42LL, ask) {
+        if (count < 1) return throw_missing_arguments("ask", count+1, 1);
+        if (count <= 1) return (t_ask(count, params[0]));
+        return (t_ask(count,params[0], params.slice(1, count - 1, false)));
+      }
+      break;
+    case 4:
+      HASH_GUARD(0x0E836DA3377C4984LL, getframe) {
+        if (count > 0) return throw_toomany_arguments("getframe", 0, 1);
+        return (t_getframe());
+      }
+      break;
+    case 5:
+      HASH_GUARD(0x1D033DFD1DCAEA85LL, printframe) {
+        if (count != 1) return throw_wrong_arguments("printframe", count, 1, 1, 1);
+        return (t_printframe(params[0]), null);
+      }
+      break;
+    case 8:
+      HASH_GUARD(0x3E0170A7802E3888LL, send) {
+        if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
+        return (t_send(params[0]));
+      }
+      break;
+    case 13:
+      HASH_GUARD(0x16AD79F9AF3ECC0DLL, comment) {
+        if (count < 1) return throw_missing_arguments("comment", count+1, 1);
+        if (count <= 1) return (t_comment(count, params[0]), null);
+        return (t_comment(count,params[0], params.slice(1, count - 1, false)), null);
+      }
+      break;
+    case 14:
+      HASH_GUARD(0x7A24AFD8ADE43B8ELL, args) {
+        if (count > 0) return throw_toomany_arguments("args", 0, 1);
+        return (t_args());
+      }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("getcode", 0, 1);
+        return (t_getcode());
+      }
+      HASH_GUARD(0x6B3BF595A55159CFLL, helpbody) {
+        if (count != 1) return throw_wrong_arguments("helpbody", count, 1, 1, 1);
+        return (t_helpbody(params[0]), null);
+      }
+      break;
+    case 17:
+      HASH_GUARD(0x1015EB3F52B098D1LL, print) {
+        if (count < 1) return throw_missing_arguments("print", count+1, 1);
+        if (count <= 1) return (t_print(count, params[0]), null);
+        return (t_print(count,params[0], params.slice(1, count - 1, false)), null);
+      }
+      break;
+    case 23:
+      HASH_GUARD(0x182AC39D2C493A97LL, getcommand) {
+        if (count > 0) return throw_toomany_arguments("getcommand", 0, 1);
+        return (t_getcommand());
+      }
+      HASH_GUARD(0x67A7ABCB74D168D7LL, argrest) {
+        if (count != 1) return throw_wrong_arguments("argrest", count, 1, 1, 1);
+        return (t_argrest(params[0]));
+      }
+      break;
+    case 31:
+      HASH_GUARD(0x016509DCA13DB6DFLL, error) {
+        if (count < 1) return throw_missing_arguments("error", count+1, 1);
+        if (count <= 1) return (t_error(count, params[0]), null);
+        return (t_error(count,params[0], params.slice(1, count - 1, false)), null);
+      }
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
+        return (t___construct(), null);
+      }
+      HASH_GUARD(0x0F2EF58F157D479FLL, info) {
+        if (count < 1) return throw_missing_arguments("info", count+1, 1);
+        if (count <= 1) return (t_info(count, params[0]), null);
+        return (t_info(count,params[0], params.slice(1, count - 1, false)), null);
+      }
+      break;
+    case 35:
+      HASH_GUARD(0x5F8B4ACA3731C423LL, helptitle) {
+        if (count != 1) return throw_wrong_arguments("helptitle", count, 1, 1, 1);
+        return (t_helptitle(params[0]), null);
+      }
+      break;
+    case 38:
+      HASH_GUARD(0x2191643700554726LL, getcurrentlocation) {
+        if (count > 0) return throw_toomany_arguments("getcurrentlocation", 0, 1);
+        return (t_getcurrentlocation());
+      }
+      break;
+    case 40:
+      HASH_GUARD(0x620C55BAC770E928LL, argvalue) {
+        if (count != 1) return throw_wrong_arguments("argvalue", count, 1, 1, 1);
+        return (t_argvalue(params[0]));
+      }
+      break;
+    case 44:
+      HASH_GUARD(0x6CB0A07E0516B6ACLL, tutorial) {
+        if (count != 1) return throw_wrong_arguments("tutorial", count, 1, 1, 1);
+        return (t_tutorial(params[0]), null);
+      }
+      break;
+    case 47:
+      HASH_GUARD(0x5412C8462A696DEFLL, argcount) {
+        if (count > 0) return throw_toomany_arguments("argcount", 0, 1);
+        return (t_argcount());
+      }
+      HASH_GUARD(0x5CE665973E2B4C6FLL, helpsection) {
+        if (count != 1) return throw_wrong_arguments("helpsection", count, 1, 1, 1);
+        return (t_helpsection(params[0]), null);
+      }
+      break;
+    case 51:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        return (t___destruct());
+      }
+      break;
+    case 52:
+      HASH_GUARD(0x64C0B4BCDA99F6F4LL, arg) {
+        if (count != 2) return throw_wrong_arguments("arg", count, 2, 2, 1);
+        return (t_arg(params[0], params[1]));
+      }
+      HASH_GUARD(0x665AFB5CDFD23534LL, help) {
+        if (count < 1) return throw_missing_arguments("help", count+1, 1);
+        if (count <= 1) return (t_help(count, params[0]), null);
+        return (t_help(count,params[0], params.slice(1, count - 1, false)), null);
+      }
+      break;
+    case 54:
+      HASH_GUARD(0x04A108469024B7B6LL, xend) {
+        if (count != 1) return throw_wrong_arguments("xend", count, 1, 1, 1);
+        return (t_xend(params[0]));
+      }
+      break;
+    case 55:
+      HASH_GUARD(0x7C41EEC813FC6FB7LL, getstacktrace) {
+        if (count > 0) return throw_toomany_arguments("getstacktrace", 0, 1);
+        return (t_getstacktrace());
+      }
+      HASH_GUARD(0x6C5E35754AA2B277LL, wrap) {
+        if (count != 1) return throw_wrong_arguments("wrap", count, 1, 1, 1);
+        return (t_wrap(params[0]));
+      }
+      break;
+    case 57:
+      HASH_GUARD(0x58C72230857ACDB9LL, code) {
+        if (count < 1) return throw_missing_arguments("code", count+1, 1);
+        if (count <= 1) return (t_code(count, params[0]), null);
+        return (t_code(count,params[0], params.slice(1, count - 1, false)), null);
+      }
+      break;
+    case 58:
+      HASH_GUARD(0x0732FA520631017ALL, quit) {
+        if (count > 0) return throw_toomany_arguments("quit", 0, 1);
+        return (t_quit(), null);
+      }
+      break;
+    case 63:
+      HASH_GUARD(0x07B89E83B77C677FLL, output) {
+        if (count < 1) return throw_missing_arguments("output", count+1, 1);
+        if (count <= 1) return (t_output(count, params[0]), null);
+        return (t_output(count,params[0], params.slice(1, count - 1, false)), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_debuggerclient
+Variant c_debuggerclient::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 63) {
+    case 0:
+      HASH_GUARD(0x07768FF90B181780LL, addcompletion) {
+        if (count != 1) return throw_wrong_arguments("addcompletion", count, 1, 1, 1);
+        return (t_addcompletion(a0), null);
+      }
+      break;
+    case 2:
+      HASH_GUARD(0x20F2EA2BBFF5AA42LL, ask) {
+        if (count < 1) return throw_missing_arguments("ask", count+1, 1);
+        if (count <= 1) return (t_ask(count, a0));
+        Array params;
+        if (count >= 2) params.append(a1);
+        if (count >= 3) params.append(a2);
+        if (count >= 4) params.append(a3);
+        if (count >= 5) params.append(a4);
+        if (count >= 6) params.append(a5);
+        return (t_ask(count,a0, params));
+      }
+      break;
+    case 4:
+      HASH_GUARD(0x0E836DA3377C4984LL, getframe) {
+        if (count > 0) return throw_toomany_arguments("getframe", 0, 1);
+        return (t_getframe());
+      }
+      break;
+    case 5:
+      HASH_GUARD(0x1D033DFD1DCAEA85LL, printframe) {
+        if (count != 1) return throw_wrong_arguments("printframe", count, 1, 1, 1);
+        return (t_printframe(a0), null);
+      }
+      break;
+    case 8:
+      HASH_GUARD(0x3E0170A7802E3888LL, send) {
+        if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
+        return (t_send(a0));
+      }
+      break;
+    case 13:
+      HASH_GUARD(0x16AD79F9AF3ECC0DLL, comment) {
+        if (count < 1) return throw_missing_arguments("comment", count+1, 1);
+        if (count <= 1) return (t_comment(count, a0), null);
+        Array params;
+        if (count >= 2) params.append(a1);
+        if (count >= 3) params.append(a2);
+        if (count >= 4) params.append(a3);
+        if (count >= 5) params.append(a4);
+        if (count >= 6) params.append(a5);
+        return (t_comment(count,a0, params), null);
+      }
+      break;
+    case 14:
+      HASH_GUARD(0x7A24AFD8ADE43B8ELL, args) {
+        if (count > 0) return throw_toomany_arguments("args", 0, 1);
+        return (t_args());
+      }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        if (count > 0) return throw_toomany_arguments("getcode", 0, 1);
+        return (t_getcode());
+      }
+      HASH_GUARD(0x6B3BF595A55159CFLL, helpbody) {
+        if (count != 1) return throw_wrong_arguments("helpbody", count, 1, 1, 1);
+        return (t_helpbody(a0), null);
+      }
+      break;
+    case 17:
+      HASH_GUARD(0x1015EB3F52B098D1LL, print) {
+        if (count < 1) return throw_missing_arguments("print", count+1, 1);
+        if (count <= 1) return (t_print(count, a0), null);
+        Array params;
+        if (count >= 2) params.append(a1);
+        if (count >= 3) params.append(a2);
+        if (count >= 4) params.append(a3);
+        if (count >= 5) params.append(a4);
+        if (count >= 6) params.append(a5);
+        return (t_print(count,a0, params), null);
+      }
+      break;
+    case 23:
+      HASH_GUARD(0x182AC39D2C493A97LL, getcommand) {
+        if (count > 0) return throw_toomany_arguments("getcommand", 0, 1);
+        return (t_getcommand());
+      }
+      HASH_GUARD(0x67A7ABCB74D168D7LL, argrest) {
+        if (count != 1) return throw_wrong_arguments("argrest", count, 1, 1, 1);
+        return (t_argrest(a0));
+      }
+      break;
+    case 31:
+      HASH_GUARD(0x016509DCA13DB6DFLL, error) {
+        if (count < 1) return throw_missing_arguments("error", count+1, 1);
+        if (count <= 1) return (t_error(count, a0), null);
+        Array params;
+        if (count >= 2) params.append(a1);
+        if (count >= 3) params.append(a2);
+        if (count >= 4) params.append(a3);
+        if (count >= 5) params.append(a4);
+        if (count >= 6) params.append(a5);
+        return (t_error(count,a0, params), null);
+      }
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
+        return (t___construct(), null);
+      }
+      HASH_GUARD(0x0F2EF58F157D479FLL, info) {
+        if (count < 1) return throw_missing_arguments("info", count+1, 1);
+        if (count <= 1) return (t_info(count, a0), null);
+        Array params;
+        if (count >= 2) params.append(a1);
+        if (count >= 3) params.append(a2);
+        if (count >= 4) params.append(a3);
+        if (count >= 5) params.append(a4);
+        if (count >= 6) params.append(a5);
+        return (t_info(count,a0, params), null);
+      }
+      break;
+    case 35:
+      HASH_GUARD(0x5F8B4ACA3731C423LL, helptitle) {
+        if (count != 1) return throw_wrong_arguments("helptitle", count, 1, 1, 1);
+        return (t_helptitle(a0), null);
+      }
+      break;
+    case 38:
+      HASH_GUARD(0x2191643700554726LL, getcurrentlocation) {
+        if (count > 0) return throw_toomany_arguments("getcurrentlocation", 0, 1);
+        return (t_getcurrentlocation());
+      }
+      break;
+    case 40:
+      HASH_GUARD(0x620C55BAC770E928LL, argvalue) {
+        if (count != 1) return throw_wrong_arguments("argvalue", count, 1, 1, 1);
+        return (t_argvalue(a0));
+      }
+      break;
+    case 44:
+      HASH_GUARD(0x6CB0A07E0516B6ACLL, tutorial) {
+        if (count != 1) return throw_wrong_arguments("tutorial", count, 1, 1, 1);
+        return (t_tutorial(a0), null);
+      }
+      break;
+    case 47:
+      HASH_GUARD(0x5412C8462A696DEFLL, argcount) {
+        if (count > 0) return throw_toomany_arguments("argcount", 0, 1);
+        return (t_argcount());
+      }
+      HASH_GUARD(0x5CE665973E2B4C6FLL, helpsection) {
+        if (count != 1) return throw_wrong_arguments("helpsection", count, 1, 1, 1);
+        return (t_helpsection(a0), null);
+      }
+      break;
+    case 51:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        return (t___destruct());
+      }
+      break;
+    case 52:
+      HASH_GUARD(0x64C0B4BCDA99F6F4LL, arg) {
+        if (count != 2) return throw_wrong_arguments("arg", count, 2, 2, 1);
+        return (t_arg(a0, a1));
+      }
+      HASH_GUARD(0x665AFB5CDFD23534LL, help) {
+        if (count < 1) return throw_missing_arguments("help", count+1, 1);
+        if (count <= 1) return (t_help(count, a0), null);
+        Array params;
+        if (count >= 2) params.append(a1);
+        if (count >= 3) params.append(a2);
+        if (count >= 4) params.append(a3);
+        if (count >= 5) params.append(a4);
+        if (count >= 6) params.append(a5);
+        return (t_help(count,a0, params), null);
+      }
+      break;
+    case 54:
+      HASH_GUARD(0x04A108469024B7B6LL, xend) {
+        if (count != 1) return throw_wrong_arguments("xend", count, 1, 1, 1);
+        return (t_xend(a0));
+      }
+      break;
+    case 55:
+      HASH_GUARD(0x7C41EEC813FC6FB7LL, getstacktrace) {
+        if (count > 0) return throw_toomany_arguments("getstacktrace", 0, 1);
+        return (t_getstacktrace());
+      }
+      HASH_GUARD(0x6C5E35754AA2B277LL, wrap) {
+        if (count != 1) return throw_wrong_arguments("wrap", count, 1, 1, 1);
+        return (t_wrap(a0));
+      }
+      break;
+    case 57:
+      HASH_GUARD(0x58C72230857ACDB9LL, code) {
+        if (count < 1) return throw_missing_arguments("code", count+1, 1);
+        if (count <= 1) return (t_code(count, a0), null);
+        Array params;
+        if (count >= 2) params.append(a1);
+        if (count >= 3) params.append(a2);
+        if (count >= 4) params.append(a3);
+        if (count >= 5) params.append(a4);
+        if (count >= 6) params.append(a5);
+        return (t_code(count,a0, params), null);
+      }
+      break;
+    case 58:
+      HASH_GUARD(0x0732FA520631017ALL, quit) {
+        if (count > 0) return throw_toomany_arguments("quit", 0, 1);
+        return (t_quit(), null);
+      }
+      break;
+    case 63:
+      HASH_GUARD(0x07B89E83B77C677FLL, output) {
+        if (count < 1) return throw_missing_arguments("output", count+1, 1);
+        if (count <= 1) return (t_output(count, a0), null);
+        Array params;
+        if (count >= 2) params.append(a1);
+        if (count >= 3) params.append(a2);
+        if (count >= 4) params.append(a3);
+        if (count >= 5) params.append(a4);
+        if (count >= 6) params.append(a5);
+        return (t_output(count,a0, params), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_debuggerclient
+Variant c_debuggerclient::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_debuggerclient
+Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 63) {
+    case 0:
+      HASH_GUARD(0x07768FF90B181780LL, addcompletion) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("addcompletion", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_addcompletion(a0), null);
+      }
+      break;
+    case 2:
+      HASH_GUARD(0x20F2EA2BBFF5AA42LL, ask) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1) return throw_missing_arguments("ask", count+1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 1) return (t_ask(count, a0));
+        return (t_ask(count, a0,vargs));
+      }
+      break;
+    case 4:
+      HASH_GUARD(0x0E836DA3377C4984LL, getframe) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getframe", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getframe());
+      }
+      break;
+    case 5:
+      HASH_GUARD(0x1D033DFD1DCAEA85LL, printframe) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("printframe", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_printframe(a0), null);
+      }
+      break;
+    case 8:
+      HASH_GUARD(0x3E0170A7802E3888LL, send) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_send(a0));
+      }
+      break;
+    case 13:
+      HASH_GUARD(0x16AD79F9AF3ECC0DLL, comment) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1) return throw_missing_arguments("comment", count+1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 1) return (t_comment(count, a0), null);
+        return (t_comment(count, a0,vargs), null);
+      }
+      break;
+    case 14:
+      HASH_GUARD(0x7A24AFD8ADE43B8ELL, args) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("args", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_args());
+      }
+      break;
+    case 15:
+      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      HASH_GUARD(0x6B3BF595A55159CFLL, helpbody) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("helpbody", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_helpbody(a0), null);
+      }
+      break;
+    case 17:
+      HASH_GUARD(0x1015EB3F52B098D1LL, print) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1) return throw_missing_arguments("print", count+1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 1) return (t_print(count, a0), null);
+        return (t_print(count, a0,vargs), null);
+      }
+      break;
+    case 23:
+      HASH_GUARD(0x182AC39D2C493A97LL, getcommand) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getcommand", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcommand());
+      }
+      HASH_GUARD(0x67A7ABCB74D168D7LL, argrest) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("argrest", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_argrest(a0));
+      }
+      break;
+    case 31:
+      HASH_GUARD(0x016509DCA13DB6DFLL, error) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1) return throw_missing_arguments("error", count+1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 1) return (t_error(count, a0), null);
+        return (t_error(count, a0,vargs), null);
+      }
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(), null);
+      }
+      HASH_GUARD(0x0F2EF58F157D479FLL, info) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1) return throw_missing_arguments("info", count+1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 1) return (t_info(count, a0), null);
+        return (t_info(count, a0,vargs), null);
+      }
+      break;
+    case 35:
+      HASH_GUARD(0x5F8B4ACA3731C423LL, helptitle) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("helptitle", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_helptitle(a0), null);
+      }
+      break;
+    case 38:
+      HASH_GUARD(0x2191643700554726LL, getcurrentlocation) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getcurrentlocation", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcurrentlocation());
+      }
+      break;
+    case 40:
+      HASH_GUARD(0x620C55BAC770E928LL, argvalue) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("argvalue", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_argvalue(a0));
+      }
+      break;
+    case 44:
+      HASH_GUARD(0x6CB0A07E0516B6ACLL, tutorial) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("tutorial", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_tutorial(a0), null);
+      }
+      break;
+    case 47:
+      HASH_GUARD(0x5412C8462A696DEFLL, argcount) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("argcount", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_argcount());
+      }
+      HASH_GUARD(0x5CE665973E2B4C6FLL, helpsection) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("helpsection", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_helpsection(a0), null);
+      }
+      break;
+    case 51:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___destruct());
+      }
+      break;
+    case 52:
+      HASH_GUARD(0x64C0B4BCDA99F6F4LL, arg) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("arg", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_arg(a0, a1));
+      }
+      HASH_GUARD(0x665AFB5CDFD23534LL, help) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1) return throw_missing_arguments("help", count+1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 1) return (t_help(count, a0), null);
+        return (t_help(count, a0,vargs), null);
+      }
+      break;
+    case 54:
+      HASH_GUARD(0x04A108469024B7B6LL, xend) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("xend", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_xend(a0));
+      }
+      break;
+    case 55:
+      HASH_GUARD(0x7C41EEC813FC6FB7LL, getstacktrace) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getstacktrace", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getstacktrace());
+      }
+      HASH_GUARD(0x6C5E35754AA2B277LL, wrap) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("wrap", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_wrap(a0));
+      }
+      break;
+    case 57:
+      HASH_GUARD(0x58C72230857ACDB9LL, code) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1) return throw_missing_arguments("code", count+1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 1) return (t_code(count, a0), null);
+        return (t_code(count, a0,vargs), null);
+      }
+      break;
+    case 58:
+      HASH_GUARD(0x0732FA520631017ALL, quit) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("quit", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_quit(), null);
+      }
+      break;
+    case 63:
+      HASH_GUARD(0x07B89E83B77C677FLL, output) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1) return throw_missing_arguments("output", count+1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 1) return (t_output(count, a0), null);
+        return (t_output(count, a0,vargs), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_debuggerclient::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+struct ObjectStaticCallbacks cw_debuggerclient = {
+  c_debuggerclient::os_getInit,
+  c_debuggerclient::os_get,
+  c_debuggerclient::os_lval,
+  c_debuggerclient::os_invoke,
+  c_debuggerclient::os_constant,
+};
 Object co_domcdatasection(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domcdatasection)())->dynCreate(params, init));
 }
@@ -10059,6 +11162,297 @@ struct ObjectStaticCallbacks cw_domnotation = {
   c_domnotation::os_lval,
   c_domnotation::os_invoke,
   c_domnotation::os_constant,
+};
+Object co_debuggerproxy(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_debuggerproxy)())->dynCreate(params, init));
+}
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_debuggerproxy
+Variant c_debuggerproxy::os_getInit(const char *s, int64 hash) {
+  return c_ObjectData::os_getInit(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_debuggerproxy
+Variant c_debuggerproxy::os_get(const char *s, int64 hash) {
+  return c_ObjectData::os_get(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_debuggerproxy
+Variant &c_debuggerproxy::os_lval(const char *s, int64 hash) {
+  return c_ObjectData::os_lval(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_debuggerproxy
+void c_debuggerproxy::o_get(Array &props) const {
+  c_ObjectData::o_get(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_get_debuggerproxy
+Variant c_debuggerproxy::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+  return c_debuggerproxy::o_getPublic(prop, phash, error);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_get_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_debuggerproxy
+Variant c_debuggerproxy::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+  return c_ObjectData::o_getPublic(s, hash, error);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_debuggerproxy
+Variant c_debuggerproxy::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+  return o_getPublic(s, hash, error);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_debuggerproxy
+bool c_debuggerproxy::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_debuggerproxy::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_debuggerproxy
+bool c_debuggerproxy::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_debuggerproxy
+bool c_debuggerproxy::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_set_debuggerproxy
+Variant c_debuggerproxy::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+  return c_debuggerproxy::o_setPublic(prop, phash, v, forInit);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_set_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_debuggerproxy
+Variant c_debuggerproxy::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+  return c_ObjectData::o_setPublic(s, hash, v, forInit);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_debuggerproxy
+Variant c_debuggerproxy::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+  return o_setPublic(s, hash, v, forInit);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_debuggerproxy
+Variant& c_debuggerproxy::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+  return c_debuggerproxy::o_lvalPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_lval_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_debuggerproxy
+Variant& c_debuggerproxy::o_lvalPublic(CStrRef s, int64 hash) {
+  return c_ObjectData::o_lvalPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_debuggerproxy
+Variant& c_debuggerproxy::o_lvalPrivate(CStrRef s, int64 hash) {
+  return o_lvalPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_debuggerproxy
+Variant c_debuggerproxy::os_constant(const char *s) {
+  return c_ObjectData::os_constant(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_debuggerproxy
+IMPLEMENT_CLASS(debuggerproxy)
+c_debuggerproxy *c_debuggerproxy::create() {
+  CountableHelper h(this);
+  init();
+  t___construct();
+  return this;
+}
+ObjectData *c_debuggerproxy::dynCreate(CArrRef params, bool construct /* = true */) {
+  init();
+  if (construct) {
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
+    (t___construct());
+  }
+  return this;
+}
+void c_debuggerproxy::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
+  (t___construct());
+}
+void c_debuggerproxy::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  (t___construct(), null);
+}
+void c_debuggerproxy::destruct() {
+  if (!inCtorDtor()) {
+    incRefCount();
+    try {
+      t___destruct();
+    } catch (...) { handle_destructor_exception();}
+  }
+}
+ObjectData *c_debuggerproxy::cloneImpl() {
+  c_debuggerproxy *obj = NEW(c_debuggerproxy)();
+  cloneSet(obj);
+  return obj;
+}
+void c_debuggerproxy::cloneSet(c_debuggerproxy *clone) {
+  ObjectData::cloneSet(clone);
+}
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_debuggerproxy
+Variant c_debuggerproxy::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 7) {
+    case 0:
+      HASH_GUARD(0x3E0170A7802E3888LL, send) {
+        if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
+        return (t_send(params[0]));
+      }
+      break;
+    case 3:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        return (t___destruct());
+      }
+      break;
+    case 4:
+      HASH_GUARD(0x7B58587A529D270CLL, islocal) {
+        if (count > 0) return throw_toomany_arguments("islocal", 0, 1);
+        return (t_islocal());
+      }
+      break;
+    case 7:
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
+        return (t___construct(), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_debuggerproxy
+Variant c_debuggerproxy::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 7) {
+    case 0:
+      HASH_GUARD(0x3E0170A7802E3888LL, send) {
+        if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
+        return (t_send(a0));
+      }
+      break;
+    case 3:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        return (t___destruct());
+      }
+      break;
+    case 4:
+      HASH_GUARD(0x7B58587A529D270CLL, islocal) {
+        if (count > 0) return throw_toomany_arguments("islocal", 0, 1);
+        return (t_islocal());
+      }
+      break;
+    case 7:
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
+        return (t___construct(), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_debuggerproxy
+Variant c_debuggerproxy::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_debuggerproxy
+Variant c_debuggerproxy::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 7) {
+    case 0:
+      HASH_GUARD(0x3E0170A7802E3888LL, send) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_send(a0));
+      }
+      break;
+    case 3:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___destruct());
+      }
+      break;
+    case 4:
+      HASH_GUARD(0x7B58587A529D270CLL, islocal) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("islocal", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_islocal());
+      }
+      break;
+    case 7:
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_debuggerproxy::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+struct ObjectStaticCallbacks cw_debuggerproxy = {
+  c_debuggerproxy::os_getInit,
+  c_debuggerproxy::os_get,
+  c_debuggerproxy::os_lval,
+  c_debuggerproxy::os_invoke,
+  c_debuggerproxy::os_constant,
 };
 Object co_domcomment(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domcomment)())->dynCreate(params, init));
@@ -28720,6 +30114,9 @@ Variant get_builtin_class_var_init(const char *s, const char *var) {
       HASH_GET_CLASS_VAR_INIT(0x4365BE9E5A85E60BLL, domnotation);
       HASH_GET_CLASS_VAR_INIT(0x69EDCA1CC29CFE0BLL, errorexception);
       break;
+    case 18:
+      HASH_GET_CLASS_VAR_INIT(0x78B42582709BAF12LL, debuggerproxy);
+      break;
     case 19:
       HASH_GET_CLASS_VAR_INIT(0x6A76B9AABB7CC713LL, simplexmlelement);
       break;
@@ -28796,6 +30193,9 @@ Variant get_builtin_class_var_init(const char *s, const char *var) {
       break;
     case 98:
       HASH_GET_CLASS_VAR_INIT(0x70747A09B3523662LL, domnode);
+      break;
+    case 99:
+      HASH_GET_CLASS_VAR_INIT(0x7D1235273F521A63LL, debuggerclient);
       break;
     case 101:
       HASH_GET_CLASS_VAR_INIT(0x2FF1EF6EBB3DA065LL, xmlwriter);
@@ -28942,6 +30342,9 @@ Object create_builtin_object(const char *s, CArrRef params, bool init /* = true 
       HASH_CREATE_OBJECT(0x4365BE9E5A85E60BLL, domnotation);
       HASH_CREATE_OBJECT(0x69EDCA1CC29CFE0BLL, errorexception);
       break;
+    case 18:
+      HASH_CREATE_OBJECT(0x78B42582709BAF12LL, debuggerproxy);
+      break;
     case 19:
       HASH_CREATE_OBJECT(0x6A76B9AABB7CC713LL, simplexmlelement);
       break;
@@ -29018,6 +30421,9 @@ Object create_builtin_object(const char *s, CArrRef params, bool init /* = true 
       break;
     case 98:
       HASH_CREATE_OBJECT(0x70747A09B3523662LL, domnode);
+      break;
+    case 99:
+      HASH_CREATE_OBJECT(0x7D1235273F521A63LL, debuggerclient);
       break;
     case 101:
       HASH_CREATE_OBJECT(0x2FF1EF6EBB3DA065LL, xmlwriter);
@@ -29164,6 +30570,9 @@ Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef 
       HASH_INVOKE_STATIC_METHOD(0x4365BE9E5A85E60BLL, domnotation);
       HASH_INVOKE_STATIC_METHOD(0x69EDCA1CC29CFE0BLL, errorexception);
       break;
+    case 18:
+      HASH_INVOKE_STATIC_METHOD(0x78B42582709BAF12LL, debuggerproxy);
+      break;
     case 19:
       HASH_INVOKE_STATIC_METHOD(0x6A76B9AABB7CC713LL, simplexmlelement);
       break;
@@ -29240,6 +30649,9 @@ Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef 
       break;
     case 98:
       HASH_INVOKE_STATIC_METHOD(0x70747A09B3523662LL, domnode);
+      break;
+    case 99:
+      HASH_INVOKE_STATIC_METHOD(0x7D1235273F521A63LL, debuggerclient);
       break;
     case 101:
       HASH_INVOKE_STATIC_METHOD(0x2FF1EF6EBB3DA065LL, xmlwriter);
@@ -29391,6 +30803,9 @@ const ObjectStaticCallbacks * get_builtin_object_static_callbacks(const char *s)
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x4365BE9E5A85E60BLL, domnotation);
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x69EDCA1CC29CFE0BLL, errorexception);
       break;
+    case 18:
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x78B42582709BAF12LL, debuggerproxy);
+      break;
     case 19:
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x6A76B9AABB7CC713LL, simplexmlelement);
       break;
@@ -29467,6 +30882,9 @@ const ObjectStaticCallbacks * get_builtin_object_static_callbacks(const char *s)
       break;
     case 98:
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x70747A09B3523662LL, domnode);
+      break;
+    case 99:
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x7D1235273F521A63LL, debuggerclient);
       break;
     case 101:
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x2FF1EF6EBB3DA065LL, xmlwriter);

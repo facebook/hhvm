@@ -29,6 +29,7 @@
 #include <runtime/base/server/server_stats.h>
 #include <util/logger.h>
 #include <util/process.h>
+#include <util/text_color.h>
 
 using namespace std;
 
@@ -186,11 +187,21 @@ void ExecutionContext::write(CStrRef s) {
   write(s.data(), s.size());
 }
 
+static void writeStdout(const char *s, int len) {
+  if (Util::s_stdout_color) {
+    fwrite(Util::s_stdout_color, strlen(Util::s_stdout_color), 1, stdout);
+    fwrite(s, len, 1, stdout);
+    fwrite(ANSI_COLOR_END, strlen(ANSI_COLOR_END), 1, stdout);
+  } else {
+    fwrite(s, len, 1, stdout);
+  }
+}
+
 void ExecutionContext::write(const char *s, int len) {
   if (m_out) {
     m_out->append(s, len);
   } else {
-    fwrite(s, len, 1, stdout);
+    writeStdout(s, len);
   }
   if (m_implicitFlush) flush();
 }
@@ -264,7 +275,7 @@ bool ExecutionContext::obFlush() {
       }
       return true;
     }
-    fwrite(last->oss.data(), last->oss.size(), 1, stdout);
+    writeStdout(last->oss.data(), last->oss.size());
     last->oss.reset();
     return true;
   }
@@ -322,7 +333,7 @@ void ExecutionContext::flush() {
       if (m_transport) {
         m_transport->sendRaw((void*)oss.data(), oss.size(), 200, false, true);
       } else {
-        fwrite(oss.data(), oss.size(), 1, stdout);
+        writeStdout(oss.data(), oss.size());
         fflush(stdout);
       }
       oss.reset();

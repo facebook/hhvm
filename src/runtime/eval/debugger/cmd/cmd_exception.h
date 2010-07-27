@@ -17,25 +17,20 @@
 #ifndef __HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H__
 #define __HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H__
 
-#include <runtime/eval/debugger/debugger_command.h>
+#include <runtime/eval/debugger/cmd/cmd_break.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(CmdException);
-class CmdException : public DebuggerCommand {
+class CmdException : public CmdBreak {
 public:
-  CmdException() : DebuggerCommand(KindOfException) {}
+  CmdException() {
+    m_type = KindOfException;
+  }
 
   virtual bool help(DebuggerClient *client);
-
   virtual bool onClient(DebuggerClient *client);
-  virtual bool onServer(DebuggerProxy *proxy);
-
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
-
-private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////

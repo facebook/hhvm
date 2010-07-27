@@ -17,17 +17,28 @@
 #ifndef __HPHP_EVAL_DEBUGGER_BASE_H__
 #define __HPHP_EVAL_DEBUGGER_BASE_H__
 
-#include <util/async_func.h>
-#include <runtime/eval/debugger/debugger_thrift_buffer.h>
+#include <runtime/eval/debugger/break_point.h>
+#include <runtime/base/util/exceptions.h>
 
 namespace HPHP { namespace Eval {
+///////////////////////////////////////////////////////////////////////////////
+
+class DebuggerClientExitException : public Exception {};
+class DebuggerConsoleExitException : public Exception {};
+
+class DebuggerRestartException : public Exception {
+public:
+  DebuggerRestartException(StringVecPtr args) : m_args(args) {}
+  StringVecPtr m_args;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(MachineInfo);
 class MachineInfo {
 public:
-  std::string name;
-  DebuggerThriftBuffer thrift;
+  std::string m_name;
+  DebuggerThriftBuffer m_thrift;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,35 +48,16 @@ public:
   SandboxInfo() {}
   SandboxInfo(const std::string &id) { set(id);}
 
-  std::string user;
-  std::string name;
-  std::string path;
+  std::string m_user;
+  std::string m_name;
+  std::string m_path;
 
   const std::string &id() const;
   void set(const std::string &id);
 
 private:
-  mutable std::string cached_id;
+  mutable std::string m_cached_id;
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-DECLARE_BOOST_TYPES(BreakPointInfo);
-class BreakPointInfo {
-public:
-  BreakPointInfo() : line(0) {}
-
-  std::string file;
-  int line;
-  std::string condition;
-
-  const std::string &id() const;
-
-private:
-  mutable std::string cached_id;
-};
-
-typedef hphp_string_map<BreakPointInfoPtr> BreakPointInfoMap;
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

@@ -10,6 +10,7 @@
 #include "ctype.inc"
 #include "curl.inc"
 #include "datetime.inc"
+#include "debugger.inc"
 #include "domdocument.inc"
 #include "error.inc"
 #include "fb.inc"

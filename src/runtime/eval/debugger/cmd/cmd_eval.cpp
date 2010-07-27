@@ -34,7 +34,8 @@ bool CmdEval::onServer(DebuggerProxy *proxy) {
   String output;
   try {
     g_context->obStart("");
-    eval(get_variable_table(), Object(), String(m_body), false);
+    eval(get_variable_table(), Object(),
+         String(m_body.c_str(), m_body.size(), AttachLiteral), false);
     output = Debugger::ColorStdout(g_context->obDetachContents());
     g_context->obClean();
     g_context->obEnd();

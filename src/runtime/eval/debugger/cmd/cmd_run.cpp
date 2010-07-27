@@ -23,33 +23,34 @@ namespace HPHP { namespace Eval {
 
 void CmdRun::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
+  thrift.write(*m_args);
 }
 
 void CmdRun::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
+  m_args = StringVecPtr(new StringVec());
+  thrift.read(*m_args);
 }
 
 bool CmdRun::help(DebuggerClient *client) {
-  client->error("not implemented yet"); return true;
-
   client->helpTitle("Run Command");
-  client->help("run: ");
+  client->help("[r]un {arg1} {arg2} ...     start or restart program");
   client->helpBody(
-    ""
+    "Aborts current execution and restarts program with specified arguments. "
+    "In server mode, this command will simply abort current page handling "
+    "without restarting anything."
   );
   return true;
 }
 
 bool CmdRun::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
-
-  //TODO
-
-  return help(client);
+  m_args = StringVecPtr(client->args(), null_deleter());
+  client->send(this);
+  throw DebuggerConsoleExitException();
 }
 
 bool CmdRun::onServer(DebuggerProxy *proxy) {
-  throw DebuggerRestartException();
+  throw DebuggerRestartException(m_args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -35,7 +35,10 @@ public:
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
+  Array fetchStackTrace(DebuggerClient *client);
+
 private:
+  Array m_stacktrace;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

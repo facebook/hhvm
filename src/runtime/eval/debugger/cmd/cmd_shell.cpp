@@ -15,6 +15,7 @@
 */
 
 #include <runtime/eval/debugger/cmd/cmd_shell.h>
+#include <util/process.h>
 
 using namespace std;
 
@@ -23,34 +24,49 @@ namespace HPHP { namespace Eval {
 
 void CmdShell::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
+  thrift.write(m_args);
+  thrift.write(m_out);
 }
 
 void CmdShell::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
+  thrift.read(m_args);
+  thrift.read(m_out);
 }
 
 bool CmdShell::help(DebuggerClient *client) {
-  client->error("not implemented yet"); return true;
-
   client->helpTitle("Shell Command");
-  client->help("shell: ");
+  client->help("! {cmd} {arg1} {arg2} ...    remotely executes shell command");
+  client->help("!{cmd} {arg1} {arg2} ...     remotely executes shell command");
   client->helpBody(
-    ""
+    "Executes the shell command on connected machine."
   );
   return true;
 }
 
 bool CmdShell::onClient(DebuggerClient *client) {
   if (DebuggerCommand::onClient(client)) return true;
+  if (client->argCount() == 0) {
+    return help(client);
+  }
 
-  //TODO
+  m_args = *client->args();
 
-  return help(client);
+  CmdShellPtr cmd = client->xend<CmdShell>(this);
+  client->print(cmd->m_out);
+  return true;
 }
 
 bool CmdShell::onServer(DebuggerProxy *proxy) {
-  ASSERT(false); // this command is processed entirely locally
-  return false;
+  const char **argv =
+    (const char **)malloc((m_args.size() + 1) * sizeof(char*));
+  for (unsigned int i = 0; i < m_args.size(); i++) {
+    argv[i] = (char*)m_args[i].c_str();
+  }
+  argv[m_args.size()] = NULL;
+  Process::Exec(argv[0], argv, NULL, m_out, &m_out, true);
+  free(argv);
+  return proxy->send(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

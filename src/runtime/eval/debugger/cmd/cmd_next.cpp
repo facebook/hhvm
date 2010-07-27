@@ -21,36 +21,14 @@ using namespace std;
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-void CmdNext::sendImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::sendImpl(thrift);
-}
-
-void CmdNext::recvImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::recvImpl(thrift);
-}
-
 bool CmdNext::help(DebuggerClient *client) {
-  client->error("not implemented yet"); return true;
-
   client->helpTitle("Next Command");
-  client->help("next: ");
+  client->help("[n]ext {count=1}: steps over lines of code");
   client->helpBody(
-    ""
+    "Use this command at break to step over lines of code. Specify a "
+    "count to step over more than one line of code."
   );
   return true;
-}
-
-bool CmdNext::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
-
-  //TODO
-
-  return help(client);
-}
-
-bool CmdNext::onServer(DebuggerProxy *proxy) {
-  ASSERT(false); // this command is processed entirely locally
-  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

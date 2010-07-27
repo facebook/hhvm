@@ -41,8 +41,16 @@ public:
   static const char **AUTO_COMPLETE_FUNCTIONS;
   static const char **GetCommands();
 
+  /**
+   * Helpers
+   */
+  static bool Match(const char *input, const char *cmd);
+  static bool IsValidNumber(const std::string &arg);
+  static String PrintVariable(CVarRef v, int maxlen = 80);
+
 public:
   DebuggerClient();
+  void reset();
 
   /**
    * Thread functions.
@@ -66,12 +74,17 @@ public:
   void info   (const char *fmt, ...);
   void output (const char *fmt, ...);
   void error  (const char *fmt, ...);
+  void comment(const char *fmt, ...);
 
   void print  (const std::string &s);
   void help   (const std::string &s);
   void info   (const std::string &s);
   void output (const std::string &s);
   void error  (const std::string &s);
+  void comment(const std::string &s);
+
+  void code(const char *str);
+  char ask(const char *fmt, ...);
 
   std::string wrap(const std::string &s);
   void helpTitle(const char *title);
@@ -88,9 +101,12 @@ public:
   /**
    * Test if argument matches specified. "index" is 1-based.
    */
+  const std::string &getCommand() const { return m_command;}
   bool arg(int index, const char *s);
   int argCount() { return m_args.size();}
   std::string argValue(int index);
+  std::string argRest(int index);
+  StringVec *args() { return &m_args;}
 
   /**
    * Send the commmand to DebuggerProxy and expect same type of command back.
@@ -109,6 +125,24 @@ public:
   std::string getSandbox(int index) const;
 
   /**
+   * Current source location and breakpoints.
+   */
+  BreakPointInfoPtr getCurrentLocation() const { return m_breakpoint;}
+  BreakPointInfoPtrVec *getBreakPoints() { return &m_breakpoints;}
+  void setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints);
+  void setCurrentLocation(BreakPointInfoPtr breakpoint);
+  BreakPointInfoPtrVec *getMatchedBreakPoints() { return &m_matched;}
+
+  /**
+   * Stacktraces.
+   */
+  Array getStackTrace() { return m_stacktrace;}
+  void setStackTrace(CArrRef stacktrace);
+  void moveToFrame(int index);
+  void printFrame(int index, CArrRef frame);
+  int getFrame() const { return m_frame;}
+
+  /**
    * Auto-completion.
    */
   bool setCompletion(const char *text, int start, int end);
@@ -121,7 +155,6 @@ private:
   enum InputState {
     TakingCommand,
     TakingCode,
-    ShouldQuit,
   };
   enum RunState {
     NotYet,
@@ -153,11 +186,19 @@ private:
 
   StringVec m_sandboxes;
 
+  BreakPointInfoPtrVec m_breakpoints;
+  BreakPointInfoPtr m_breakpoint;
+  BreakPointInfoPtrVec m_matched;
+
+  Array m_stacktrace;
+  int m_frame;
+
   // helpers
   void runImpl();
   std::string getPrompt();
   void addToken(std::string &token);
   void parseCommand(const char *line);
+  void shiftCommand();
   bool parse(const char *line);
   bool match(const char *cmd);
   int  checkEvalEnd();

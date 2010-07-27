@@ -17,6 +17,7 @@
 #include <runtime/base/util/thrift_buffer.h>
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/externals.h>
+#include <runtime/base/builtin_functions.h>
 
 #define INVALID_DATA 1
 
@@ -225,6 +226,39 @@ void ThriftBuffer::write(const std::vector<std::string> &data) {
   for (int i = 0; i < size; i++) {
     write(data[i]);
   }
+}
+
+void ThriftBuffer::read(Array &data) {
+  String sdata;
+  read(sdata);
+  data = f_unserialize(sdata).toArray();
+}
+
+void ThriftBuffer::write(CArrRef data) {
+  String sdata = f_serialize(data);
+  write(sdata);
+}
+
+void ThriftBuffer::read(Object &data) {
+  String sdata;
+  read(sdata);
+  data = f_unserialize(sdata).toObject();
+}
+
+void ThriftBuffer::write(CObjRef data) {
+  String sdata = f_serialize(data);
+  write(sdata);
+}
+
+void ThriftBuffer::read(Variant &data) {
+  String sdata;
+  read(sdata);
+  data = f_unserialize(sdata);
+}
+
+void ThriftBuffer::write(CVarRef data) {
+  String sdata = f_serialize(data);
+  write(sdata);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

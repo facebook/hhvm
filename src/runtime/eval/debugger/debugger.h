@@ -42,7 +42,7 @@ public:
   /**
    * Add/remove/change DebuggerProxy.
    */
-  static void RegisterProxy(SmartPtr<Socket> socket, bool dummy);
+  static void RegisterProxy(SmartPtr<Socket> socket, bool dummy, bool local);
   static void RemoveProxy(DebuggerProxyPtr proxy);
   static void SwitchSandbox(DebuggerProxyPtr proxy,
                             const SandboxInfo &sandbox);
@@ -50,18 +50,17 @@ public:
   /**
    * Called from differnt time point of execution thread.
    */
-  static void InterruptSessionStarted();
-  static void InterruptSessionEnded();
-  static void InterruptRequestStarted();
-  static void InterruptRequestEnded();
-  static void InterruptPSPEnded();
+  static void InterruptSessionStarted(const char *file);
+  static void InterruptSessionEnded(const char *file);
+  static void InterruptRequestStarted(const char *url);
+  static void InterruptRequestEnded(const char *url);
+  static void InterruptPSPEnded(const char *url);
 
   /**
    * A new line of PHP code is reached from execution thread.
    */
-  static void InterruptFileLine(const char *filename, int line);
-  static void InterruptException(const char *filename, int line,
-                                 const char *clsname);
+  static void InterruptFileLine(InterruptSite &site);
+  static void InterruptException(InterruptSite &site);
 
   /**
    * Surround text with color, if set.
@@ -74,8 +73,8 @@ private:
   static Debugger s_debugger;
 
   static DebuggerProxyPtrSet GetProxies();
-  static void Interrupt(int type, const char *file = NULL, int line = 0,
-                        const char *clsname = NULL);
+  static void Interrupt(int type, const char *program,
+                        InterruptSite *site = NULL);
 
   ReadWriteMutex m_mutex;
   StringToDebuggerProxyPtrSetMap m_proxies;
@@ -85,7 +84,7 @@ private:
   void addSandbox(const SandboxInfo &sandbox);
   void getSandboxes(StringVec &ids);
 
-  void addProxy(SmartPtr<Socket> socket, bool dummy);
+  void addProxy(SmartPtr<Socket> socket, bool dummy, bool local);
   void removeProxy(DebuggerProxyPtr proxy);
 
   DebuggerProxyPtrSet findProxies(const SandboxInfo &sandbox);

@@ -182,8 +182,16 @@ public:
 
   void read(std::string &data);
   void write(const std::string &data);
+  void write(const char *data) { write(std::string(data ? data : ""));}
   void read(std::vector<std::string> &data);
   void write(const std::vector<std::string> &data);
+
+  void read(Array   &data);
+  void read(Object  &data);
+  void read(Variant &data);
+  void write(CArrRef data);
+  void write(CObjRef data);
+  void write(CVarRef data);
 
   void skip(int8 type);
 

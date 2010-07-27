@@ -6199,6 +6199,12 @@ Variant i_dom_xpath_query(CArrRef params) {
   if (count <= 2) return (f_dom_xpath_query(params[0], params[1]));
   return (f_dom_xpath_query(params[0], params[1], params[2]));
 }
+Variant i_hphpd_install_user_command(CArrRef params) {
+  FUNCTION_INJECTION(hphpd_install_user_command);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("hphpd_install_user_command", count, 2, 2, 1);
+  return (f_hphpd_install_user_command(params[0], params[1]));
+}
 Variant i_dom_element_set_id_attribute_node(CArrRef params) {
   FUNCTION_INJECTION(dom_element_set_id_attribute_node);
   int count __attribute__((__unused__)) = params.size();
@@ -9645,19 +9651,19 @@ Variant i_magicksetimagefilename(CArrRef params) {
   if (count <= 1) return (f_magicksetimagefilename(params[0]));
   return (f_magicksetimagefilename(params[0], params[1]));
 }
-Variant i_call_user_func(CArrRef params) {
-  FUNCTION_INJECTION(call_user_func);
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1) return throw_missing_arguments("call_user_func", count+1, 1);
-  if (count <= 1) return (f_call_user_func(count, params[0]));
-  return (f_call_user_func(count,params[0], params.slice(1, count - 1, false)));
-}
 Variant i_mysql_list_tables(CArrRef params) {
   FUNCTION_INJECTION(mysql_list_tables);
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) return throw_wrong_arguments("mysql_list_tables", count, 1, 2, 1);
   if (count <= 1) return (f_mysql_list_tables(params[0]));
   return (f_mysql_list_tables(params[0], params[1]));
+}
+Variant i_call_user_func(CArrRef params) {
+  FUNCTION_INJECTION(call_user_func);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1) return throw_missing_arguments("call_user_func", count+1, 1);
+  if (count <= 1) return (f_call_user_func(count, params[0]));
+  return (f_call_user_func(count,params[0], params.slice(1, count - 1, false)));
 }
 Variant i_magickgetinterlacescheme(CArrRef params) {
   FUNCTION_INJECTION(magickgetinterlacescheme);
@@ -10108,6 +10114,12 @@ Variant i_magickblurimage(CArrRef params) {
   if (count < 3 || count > 4) return throw_wrong_arguments("magickblurimage", count, 3, 4, 1);
   if (count <= 3) return (f_magickblurimage(params[0], params[1], params[2]));
   return (f_magickblurimage(params[0], params[1], params[2], params[3]));
+}
+Variant i_hphpd_get_user_commands(CArrRef params) {
+  FUNCTION_INJECTION(hphpd_get_user_commands);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("hphpd_get_user_commands", 0, 1);
+  return (f_hphpd_get_user_commands());
 }
 Variant i_magicktintimage(CArrRef params) {
   FUNCTION_INJECTION(magicktintimage);
@@ -15421,6 +15433,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x5A017A4C6A41E85CLL, curl_multi_add_handle);
       break;
     case 2142:
+      HASH_INVOKE(0x3D8327794429585ELL, hphpd_install_user_command);
       HASH_INVOKE(0x6B4DE6865142285ELL, destroypixeliterator);
       break;
     case 2145:
@@ -17607,6 +17620,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3862:
       HASH_INVOKE(0x23B7D9E4EC992F16LL, stream_get_line);
       HASH_INVOKE(0x38664EFE3E0A0F16LL, json_decode);
+      HASH_INVOKE(0x0287B907DDA3EF16LL, hphpd_get_user_commands);
       break;
     case 3867:
       HASH_INVOKE(0x27A4633381195F1BLL, chown);
@@ -37671,6 +37685,26 @@ Variant ei_dom_xpath_query(Eval::VariableEnvironment &env, const Eval::FunctionC
   if (count <= 2) return (x_dom_xpath_query(a0, a1));
   else return (x_dom_xpath_query(a0, a1, a2));
 }
+Variant ei_hphpd_install_user_command(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("hphpd_install_user_command", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_hphpd_install_user_command(a0, a1));
+}
 Variant ei_dom_element_set_id_attribute_node(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -48682,24 +48716,6 @@ Variant ei_magicksetimagefilename(Eval::VariableEnvironment &env, const Eval::Fu
   if (count <= 1) return (x_magicksetimagefilename(a0));
   else return (x_magicksetimagefilename(a0, a1));
 }
-Variant ei_call_user_func(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1) return throw_missing_arguments("call_user_func", count+1, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  Array vargs;
-  for (; it != params.end(); ++it) {
-    vargs.append(ref((*it)->refval(env, false)));
-  }
-  if (count <= 1) return (x_call_user_func(count, a0));
-  return (x_call_user_func(count, a0,vargs));
-}
 Variant ei_mysql_list_tables(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -48720,6 +48736,24 @@ Variant ei_mysql_list_tables(Eval::VariableEnvironment &env, const Eval::Functio
   }
   if (count <= 1) return (x_mysql_list_tables(a0));
   else return (x_mysql_list_tables(a0, a1));
+}
+Variant ei_call_user_func(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1) return throw_missing_arguments("call_user_func", count+1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  Array vargs;
+  for (; it != params.end(); ++it) {
+    vargs.append(ref((*it)->refval(env, false)));
+  }
+  if (count <= 1) return (x_call_user_func(count, a0));
+  return (x_call_user_func(count, a0,vargs));
 }
 Variant ei_magickgetinterlacescheme(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -50078,6 +50112,18 @@ Variant ei_magickblurimage(Eval::VariableEnvironment &env, const Eval::FunctionC
   }
   if (count <= 3) return (x_magickblurimage(a0, a1, a2));
   else return (x_magickblurimage(a0, a1, a2, a3));
+}
+Variant ei_hphpd_get_user_commands(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("hphpd_get_user_commands", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_hphpd_get_user_commands());
 }
 Variant ei_magicktintimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -61268,6 +61314,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x5A017A4C6A41E85CLL, curl_multi_add_handle);
       break;
     case 2142:
+      HASH_INVOKE_FROM_EVAL(0x3D8327794429585ELL, hphpd_install_user_command);
       HASH_INVOKE_FROM_EVAL(0x6B4DE6865142285ELL, destroypixeliterator);
       break;
     case 2145:
@@ -63454,6 +63501,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3862:
       HASH_INVOKE_FROM_EVAL(0x23B7D9E4EC992F16LL, stream_get_line);
       HASH_INVOKE_FROM_EVAL(0x38664EFE3E0A0F16LL, json_decode);
+      HASH_INVOKE_FROM_EVAL(0x0287B907DDA3EF16LL, hphpd_get_user_commands);
       break;
     case 3867:
       HASH_INVOKE_FROM_EVAL(0x27A4633381195F1BLL, chown);

@@ -25,17 +25,13 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdUp);
 class CmdUp : public DebuggerCommand {
 public:
+  static int ParseNumber(DebuggerClient *client);
+
+public:
   CmdUp() : DebuggerCommand(KindOfUp) {}
 
   virtual bool help(DebuggerClient *client);
-
   virtual bool onClient(DebuggerClient *client);
-  virtual bool onServer(DebuggerProxy *proxy);
-
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
-
-private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////

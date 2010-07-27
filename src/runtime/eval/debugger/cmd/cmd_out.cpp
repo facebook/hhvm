@@ -21,36 +21,14 @@ using namespace std;
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-void CmdOut::sendImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::sendImpl(thrift);
-}
-
-void CmdOut::recvImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::recvImpl(thrift);
-}
-
 bool CmdOut::help(DebuggerClient *client) {
-  client->error("not implemented yet"); return true;
-
   client->helpTitle("Out Command");
-  client->help("out: ");
+  client->help("[o]ut {count=1}: steps out function calls");
   client->helpBody(
-    ""
+    "Use this command at break to step out function calls. Specify a "
+    "count to step out more than one level of function calls."
   );
   return true;
-}
-
-bool CmdOut::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
-
-  //TODO
-
-  return help(client);
-}
-
-bool CmdOut::onServer(DebuggerProxy *proxy) {
-  ASSERT(false); // this command is processed entirely locally
-  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

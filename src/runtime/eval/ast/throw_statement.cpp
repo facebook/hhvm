@@ -16,6 +16,7 @@
 
 #include <runtime/eval/ast/throw_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/debugger/debugger.h>
 
 namespace HPHP {
 namespace Eval {
@@ -26,7 +27,12 @@ ThrowStatement::ThrowStatement(STATEMENT_ARGS, ExpressionPtr value)
 
 void ThrowStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
-  throw m_value->eval(env).toObject();
+  Object e = m_value->eval(env).toObject();
+  if (RuntimeOption::EnableDebugger) {
+    InterruptSite site(ThreadInfo::s_threadInfo->m_top, e);
+    Debugger::InterruptException(site);
+  }
+  throw e;
 }
 
 void ThrowStatement::dump() const {

@@ -21,36 +21,14 @@ using namespace std;
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-void CmdContinue::sendImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::sendImpl(thrift);
-}
-
-void CmdContinue::recvImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::recvImpl(thrift);
-}
-
 bool CmdContinue::help(DebuggerClient *client) {
-  client->error("not implemented yet"); return true;
-
   client->helpTitle("Continue Command");
-  client->help("continue: ");
+  client->help("[c]ontinue {count=1}: continues program execution");
   client->helpBody(
-    ""
+    "Use this command at break to resume program execution. Specify a "
+    "count to repeat the same command many times."
   );
   return true;
-}
-
-bool CmdContinue::onClient(DebuggerClient *client) {
-  if (DebuggerCommand::onClient(client)) return true;
-
-  //TODO
-
-  return help(client);
-}
-
-bool CmdContinue::onServer(DebuggerProxy *proxy) {
-  ASSERT(false); // this command is processed entirely locally
-  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -22,6 +22,7 @@ namespace HPHP {
 
 SystemGlobals::SystemGlobals() : dummy(false),
   run_pm_php$classes$arrayaccess_php(false),
+  run_pm_php$classes$debugger_php(false),
   run_pm_php$classes$directory_php(false),
   run_pm_php$classes$exception_php(false),
   run_pm_php$classes$iterator_php(false),
@@ -44,6 +45,7 @@ SystemGlobals::SystemGlobals() : dummy(false),
 
 void SystemGlobals::initialize() {
   pm_php$classes$arrayaccess_php(false);
+  pm_php$classes$debugger_php(false);
   pm_php$classes$directory_php(false);
   pm_php$classes$exception_php(false);
   pm_php$classes$iterator_php(false);

@@ -34,13 +34,15 @@ Array EvalFrameInjection::getArgs() {
 }
 
 void EvalFrameInjection::SetLine(const Construct *c) {
-  int line0 = c->loc()->line1; // TODO: fix parser to record line0
   int line1 = c->loc()->line1;
-  ThreadInfo::s_threadInfo->m_top->line = line1;
+  FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
+  frame->setLine(line1);
   if (RuntimeOption::EnableDebugger) {
-    Debugger::InterruptFileLine(c->loc()->file, line1);
+    InterruptSite site(frame);
+    Debugger::InterruptFileLine(site);
   }
   if (RuntimeOption::RecordCodeCoverage) {
+    int line0 = c->loc()->line1; // TODO: fix parser to record line0
     CodeCoverage::Record(c->loc()->file, line0, line1);
   }
 }

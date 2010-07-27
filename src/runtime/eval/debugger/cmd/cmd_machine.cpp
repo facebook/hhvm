@@ -38,7 +38,7 @@ bool CmdMachine::help(DebuggerClient *client) {
   client->help("[m]achine [c]onnect {host}         debugging remote server");
   client->help("[m]achine [c]onnect {host}:{port}  debugging remote server");
   client->help("[m]achine [l]ist                   list all sandboxes");
-  client->help("[m]achine [a]ttach {num}           attach to a sandbox");
+  client->help("[m]achine [a]ttach {index}         attach to a sandbox");
   client->helpBody(
     "Use this command to switch between different machines or "
     "sandboxes.\n"
@@ -69,17 +69,17 @@ bool CmdMachine::processList(DebuggerClient *client) {
   m_body = "list";
   CmdMachinePtr res = client->xend<CmdMachine>(this);
   if (res->m_sandboxes.empty()) {
-    client->output("(no sandbox was found)");
+    client->info("(no sandbox was found)");
     client->tutorial(
       "Please hit the sandbox from browser at least once. Then run "
       "'[m]achine [l]ist' again."
     );
   } else {
     for (int i = 0; i < (int)res->m_sandboxes.size(); i++) {
-      client->output("  %d\t%s", i + 1, res->m_sandboxes[i].c_str());
+      client->print("  %d\t%s", i + 1, res->m_sandboxes[i].c_str());
     }
     client->tutorial(
-      "Use '[m]achine [a]ttach {num}' to attach to one sandbox. For "
+      "Use '[m]achine [a]ttach {index}' to attach to one sandbox. For "
       "example, 'm a 1'. If desired sandbox is not on the list, please "
       "hit the sandbox from browser once. Then run '[m]achine [l]ist' "
       "again."
@@ -100,8 +100,8 @@ bool CmdMachine::onClient(DebuggerClient *client) {
 
   if (client->arg(1, "attach")) {
     string snum = client->argValue(2);
-    if (snum.empty()) {
-      client->error("'[m]achine [a]attach' needs a {num} argument.");
+    if (snum.empty() || !DebuggerClient::IsValidNumber(snum)) {
+      client->error("'[m]achine [a]attach' needs an {index} argument.");
       client->tutorial(
         "You will have to run '[m]achine [l]ist' first to see a list of valid "
         "numbers or indices to specify."
@@ -113,7 +113,7 @@ bool CmdMachine::onClient(DebuggerClient *client) {
     string sandbox = client->getSandbox(num);
     if (sandbox.empty()) {
       client->error("\"%s\" is not a valid sandbox index. Choose one from "
-                    "this list", snum.c_str());
+                    "this list:", snum.c_str());
       processList(client);
       return true;
     }
@@ -121,7 +121,7 @@ bool CmdMachine::onClient(DebuggerClient *client) {
     m_body = "attach";
     m_sandboxes.push_back(sandbox);
     client->send(this);
-    client->output("attached to sandbox %s", sandbox.c_str());
+    client->info("attached to sandbox %s", sandbox.c_str());
     return true;
   }
 

@@ -1,6 +1,8 @@
 #if EXT_TYPE == 0
 "mysql_connect", T(Variant), S(0), "server", T(String), "null_string", S(0), "username", T(String), "null_string", S(0), "password", T(String), "null_string", S(0), "new_link", T(Boolean), "false", S(0), "client_flags", T(Int32), "0", S(0), "connect_timeout_ms", T(Int32), "-1", S(0), "query_timeout_ms", T(Int32), "-1", S(0), NULL, S(0), 
 "mysql_pconnect", T(Variant), S(0), "server", T(String), "null_string", S(0), "username", T(String), "null_string", S(0), "password", T(String), "null_string", S(0), "client_flags", T(Int32), "0", S(0), "connect_timeout_ms", T(Int32), "-1", S(0), "query_timeout_ms", T(Int32), "-1", S(0), NULL, S(0), 
+"mysql_connect_with_db", T(Variant), S(0), "server", T(String), "null_string", S(0), "username", T(String), "null_string", S(0), "password", T(String), "null_string", S(0), "database", T(String), "null_string", S(0), "new_link", T(Boolean), "false", S(0), "client_flags", T(Int32), "0", S(0), "connect_timeout_ms", T(Int32), "-1", S(0), "query_timeout_ms", T(Int32), "-1", S(0), NULL, S(0), 
+"mysql_pconnect_with_db", T(Variant), S(0), "server", T(String), "null_string", S(0), "username", T(String), "null_string", S(0), "password", T(String), "null_string", S(0), "database", T(String), "null_string", S(0), "client_flags", T(Int32), "0", S(0), "connect_timeout_ms", T(Int32), "-1", S(0), "query_timeout_ms", T(Int32), "-1", S(0), NULL, S(0), 
 "mysql_set_charset", T(Variant), S(0), "charset", T(String), NULL, S(0), "link_identifier", T(Variant), "null", S(0), NULL, S(0), 
 "mysql_ping", T(Variant), S(0), "link_identifier", T(Variant), "null", S(0), NULL, S(0), 
 "mysql_escape_string", T(String), S(0), "unescaped_string", T(String), NULL, S(0), NULL, S(0), 

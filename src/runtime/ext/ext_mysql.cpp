@@ -222,12 +222,13 @@ static MYSQL *create_new_conn() {
 }
 
 MySQL::MySQL(const char *host, int port, const char *username,
-             const char *password)
+             const char *password, const char *database)
     : m_port(port), m_last_error_set(false), m_last_errno(0),
       m_xaction_count(0) {
   if (host) m_host = host;
   if (username) m_username = username;
   if (password) m_password = password;
+  if (database) m_database = database;
 
   m_conn = create_new_conn();
 }
@@ -257,7 +258,8 @@ void MySQL::close() {
 }
 
 bool MySQL::connect(CStrRef host, int port, CStrRef socket, CStrRef username,
-                    CStrRef password, int client_flags, int connect_timeout) {
+                    CStrRef password, CStrRef database,
+                    int client_flags, int connect_timeout) {
   if (m_conn == NULL) {
     m_conn = create_new_conn();
   }
@@ -271,9 +273,11 @@ bool MySQL::connect(CStrRef host, int port, CStrRef socket, CStrRef username,
   IOStatusHelper io("mysql::connect", host.data(), port);
   m_xaction_count = 0;
   bool ret = mysql_real_connect(m_conn, host.data(), username.data(),
-                                password.data(), NULL, port,
-                                socket.empty() ? NULL : socket.data(),
-                                client_flags);
+                            password.data(),
+                            (database.empty() ? NULL : database.data()),
+                            port,
+                            socket.empty() ? NULL : socket.data(),
+                            client_flags);
   if (ret && RuntimeOption::MySQLWaitTimeout > 0) {
     String query("set session wait_timeout=");
     query += String((int64)(RuntimeOption::MySQLWaitTimeout / 1000));
@@ -286,8 +290,8 @@ bool MySQL::connect(CStrRef host, int port, CStrRef socket, CStrRef username,
 }
 
 bool MySQL::reconnect(CStrRef host, int port, CStrRef socket, CStrRef username,
-                      CStrRef password, int client_flags,
-                      int connect_timeout) {
+                      CStrRef password, CStrRef database,
+                      int client_flags, int connect_timeout) {
   if (m_conn == NULL) {
     m_conn = create_new_conn();
     if (connect_timeout >= 0) {
@@ -299,13 +303,17 @@ bool MySQL::reconnect(CStrRef host, int port, CStrRef socket, CStrRef username,
     }
     IOStatusHelper io("mysql::connect", host.data(), port);
     return mysql_real_connect(m_conn, host.data(), username.data(),
-                              password.data(), NULL, port, socket.data(),
-                              client_flags);
+                              password.data(),
+                              (database.empty() ? NULL : database.data()),
+                              port, socket.data(), client_flags);
   }
 
   if (!mysql_ping(m_conn)) {
     if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
       ServerStats::Log("sql.reconn_ok", 1);
+    }
+    if (!database.empty()) {
+      mysql_select_db(m_conn, database.data());
     }
     return true;
   }
@@ -320,8 +328,9 @@ bool MySQL::reconnect(CStrRef host, int port, CStrRef socket, CStrRef username,
   IOStatusHelper io("mysql::connect", host.data(), port);
   m_xaction_count = 0;
   return mysql_real_connect(m_conn, host.data(), username.data(),
-                            password.data(), NULL, port, socket.data(),
-                            client_flags);
+                            password.data(),
+                            (database.empty() ? NULL : database.data()),
+                            port, socket.data(), client_flags);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -489,8 +498,8 @@ static Variant php_mysql_field_info(CVarRef result, int field,
 }
 
 static Variant php_mysql_do_connect(String server, String username,
-                                    String password, int client_flags,
-                                    bool persistent,
+                                    String password, String database,
+                                    int client_flags, bool persistent,
                                     int connect_timeout_ms,
                                     int query_timeout_ms) {
   if (connect_timeout_ms < 0) {
@@ -502,6 +511,7 @@ static Variant php_mysql_do_connect(String server, String username,
   if (server.empty()) server = MySQL::GetDefaultServer();
   if (username.empty()) username = MySQL::GetDefaultUsername();
   if (password.empty()) password = MySQL::GetDefaultPassword();
+  if (database.empty()) database = MySQL::GetDefaultDatabase();
 
   // server format: hostname[:port][:/path/to/socket]
   String host, socket;
@@ -535,17 +545,17 @@ static Variant php_mysql_do_connect(String server, String username,
   }
 
   if (mySQL == NULL) {
-    mySQL = new MySQL(host, port, username, password);
+    mySQL = new MySQL(host, port, username, password, database);
     ret = mySQL;
     if (!mySQL->connect(host, port, socket, username, password,
-                        client_flags, connect_timeout_ms)) {
+                        database, client_flags, connect_timeout_ms)) {
       mySQL->setLastError("mysql_connect");
       return false;
     }
   } else {
     ret = mySQL;
     if (!mySQL->reconnect(host, port, socket, username, password,
-                          client_flags, connect_timeout_ms)) {
+                          database, client_flags, connect_timeout_ms)) {
       mySQL->setLastError("mysql_connect");
       return false;
     }
@@ -568,7 +578,21 @@ Variant f_mysql_connect(CStrRef server /* = null_string */,
                         int client_flags /* = 0 */,
                         int connect_timeout_ms /* = -1 */,
                         int query_timeout_ms /* = -1 */) {
-  return php_mysql_do_connect(server, username, password, client_flags, false,
+  return php_mysql_do_connect(server, username, password, "",
+                              client_flags, false,
+                              connect_timeout_ms, query_timeout_ms);
+}
+
+Variant f_mysql_connect_with_db(CStrRef server /* = null_string */,
+                        CStrRef username /* = null_string */,
+                        CStrRef password /* = null_string */,
+                        CStrRef database /* = null_string */,
+                        bool new_link /* = false */,
+                        int client_flags /* = 0 */,
+                        int connect_timeout_ms /* = -1 */,
+                        int query_timeout_ms /* = -1 */) {
+  return php_mysql_do_connect(server, username, password, database,
+                              client_flags, false,
                               connect_timeout_ms, query_timeout_ms);
 }
 
@@ -578,7 +602,20 @@ Variant f_mysql_pconnect(CStrRef server /* = null_string */,
                          int client_flags /* = 0 */,
                          int connect_timeout_ms /* = -1 */,
                          int query_timeout_ms /* = -1 */) {
-  return php_mysql_do_connect(server, username, password, client_flags, true,
+  return php_mysql_do_connect(server, username, password, "",
+                              client_flags, true,
+                              connect_timeout_ms, query_timeout_ms);
+}
+
+Variant f_mysql_pconnect_with_db(CStrRef server /* = null_string */,
+                         CStrRef username /* = null_string */,
+                         CStrRef password /* = null_string */,
+                         CStrRef database /* = null_string */,
+                         int client_flags /* = 0 */,
+                         int connect_timeout_ms /* = -1 */,
+                         int query_timeout_ms /* = -1 */) {
+  return php_mysql_do_connect(server, username, password, database,
+                              client_flags, true,
                               connect_timeout_ms, query_timeout_ms);
 }
 

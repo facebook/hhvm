@@ -35,6 +35,16 @@ inline Variant x_mysql_pconnect(CStrRef server = null_string, CStrRef username =
   return f_mysql_pconnect(server, username, password, client_flags, connect_timeout_ms, query_timeout_ms);
 }
 
+inline Variant x_mysql_connect_with_db(CStrRef server = null_string, CStrRef username = null_string, CStrRef password = null_string, CStrRef database = null_string, bool new_link = false, int client_flags = 0, int connect_timeout_ms = -1, int query_timeout_ms = -1) {
+  FUNCTION_INJECTION_BUILTIN(mysql_connect_with_db);
+  return f_mysql_connect_with_db(server, username, password, database, new_link, client_flags, connect_timeout_ms, query_timeout_ms);
+}
+
+inline Variant x_mysql_pconnect_with_db(CStrRef server = null_string, CStrRef username = null_string, CStrRef password = null_string, CStrRef database = null_string, int client_flags = 0, int connect_timeout_ms = -1, int query_timeout_ms = -1) {
+  FUNCTION_INJECTION_BUILTIN(mysql_pconnect_with_db);
+  return f_mysql_pconnect_with_db(server, username, password, database, client_flags, connect_timeout_ms, query_timeout_ms);
+}
+
 inline Variant x_mysql_set_charset(CStrRef charset, CVarRef link_identifier = null) {
   FUNCTION_INJECTION_BUILTIN(mysql_set_charset);
   return f_mysql_set_charset(charset, link_identifier);

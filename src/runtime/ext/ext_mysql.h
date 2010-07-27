@@ -48,6 +48,7 @@ public:
   static String GetDefaultSocket();
   static String GetDefaultUsername() { return String();}
   static String GetDefaultPassword() { return String();}
+  static String GetDefaultDatabase() { return String();}
 
   /**
    * A connection may be persistent across multiple HTTP requests.
@@ -88,7 +89,7 @@ private:
 
 public:
   MySQL(const char *host, int port, const char *username,
-        const char *password);
+        const char *password, const char *database);
   ~MySQL();
   void setLastError(const char *func);
   void close();
@@ -98,9 +99,9 @@ public:
   virtual bool isResource() const { return m_conn != NULL;}
 
   bool connect(CStrRef host, int port, CStrRef socket, CStrRef username,
-               CStrRef password, int client_flags, int connect_timeout);
+               CStrRef password, CStrRef database, int client_flags, int connect_timeout);
   bool reconnect(CStrRef host, int port, CStrRef socket, CStrRef username,
-                 CStrRef password, int client_flags, int connect_timeout);
+                 CStrRef password, CStrRef database, int client_flags, int connect_timeout);
 
   MYSQL *get() { return m_conn;}
 
@@ -112,6 +113,7 @@ public:
   int m_port;
   std::string m_username;
   std::string m_password;
+  std::string m_database;
   bool m_last_error_set;
   int m_last_errno;
   std::string m_last_error;
@@ -214,6 +216,22 @@ Variant f_mysql_connect(CStrRef server = null_string,
 Variant f_mysql_pconnect(CStrRef server = null_string,
                          CStrRef username = null_string,
                          CStrRef password = null_string,
+                         int client_flags = 0,
+                         int connect_timeout_ms = -1,
+                         int query_timeout_ms = -1);
+
+Variant f_mysql_connect_with_db(CStrRef server = null_string,
+                        CStrRef username = null_string,
+                        CStrRef password = null_string,
+                        CStrRef database = null_string,
+                        bool new_link = false,
+                        int client_flags = 0,
+                        int connect_timeout_ms = -1,
+                        int query_timeout_ms = -1);
+Variant f_mysql_pconnect_with_db(CStrRef server = null_string,
+                         CStrRef username = null_string,
+                         CStrRef password = null_string,
+                         CStrRef database = null_string,
                          int client_flags = 0,
                          int connect_timeout_ms = -1,
                          int query_timeout_ms = -1);

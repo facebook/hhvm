@@ -559,6 +559,20 @@ Variant i_php_check_syntax(CArrRef params) {
   if (count <= 1) return (f_php_check_syntax(params[0]));
   return (f_php_check_syntax(params[0], ref(const_cast<Array&>(params).lvalAt(1))));
 }
+Variant i_mysql_connect_with_db(CArrRef params) {
+  FUNCTION_INJECTION(mysql_connect_with_db);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 8) return throw_toomany_arguments("mysql_connect_with_db", 8, 1);
+  if (count <= 0) return (f_mysql_connect_with_db());
+  if (count == 1) return (f_mysql_connect_with_db(params[0]));
+  if (count == 2) return (f_mysql_connect_with_db(params[0], params[1]));
+  if (count == 3) return (f_mysql_connect_with_db(params[0], params[1], params[2]));
+  if (count == 4) return (f_mysql_connect_with_db(params[0], params[1], params[2], params[3]));
+  if (count == 5) return (f_mysql_connect_with_db(params[0], params[1], params[2], params[3], params[4]));
+  if (count == 6) return (f_mysql_connect_with_db(params[0], params[1], params[2], params[3], params[4], params[5]));
+  if (count == 7) return (f_mysql_connect_with_db(params[0], params[1], params[2], params[3], params[4], params[5], params[6]));
+  return (f_mysql_connect_with_db(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]));
+}
 Variant i_drawgetstrokemiterlimit(CArrRef params) {
   FUNCTION_INJECTION(drawgetstrokemiterlimit);
   int count __attribute__((__unused__)) = params.size();
@@ -3991,6 +4005,19 @@ Variant i_hphp_thread_is_warmup_enabled(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) return throw_toomany_arguments("hphp_thread_is_warmup_enabled", 0, 1);
   return (f_hphp_thread_is_warmup_enabled());
+}
+Variant i_mysql_pconnect_with_db(CArrRef params) {
+  FUNCTION_INJECTION(mysql_pconnect_with_db);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 7) return throw_toomany_arguments("mysql_pconnect_with_db", 7, 1);
+  if (count <= 0) return (f_mysql_pconnect_with_db());
+  if (count == 1) return (f_mysql_pconnect_with_db(params[0]));
+  if (count == 2) return (f_mysql_pconnect_with_db(params[0], params[1]));
+  if (count == 3) return (f_mysql_pconnect_with_db(params[0], params[1], params[2]));
+  if (count == 4) return (f_mysql_pconnect_with_db(params[0], params[1], params[2], params[3]));
+  if (count == 5) return (f_mysql_pconnect_with_db(params[0], params[1], params[2], params[3], params[4]));
+  if (count == 6) return (f_mysql_pconnect_with_db(params[0], params[1], params[2], params[3], params[4], params[5]));
+  return (f_mysql_pconnect_with_db(params[0], params[1], params[2], params[3], params[4], params[5], params[6]));
 }
 Variant i_imagepsslantfont(CArrRef params) {
   FUNCTION_INJECTION(imagepsslantfont);
@@ -12834,6 +12861,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x6370CF455EA8604BLL, socket_create);
       break;
     case 76:
+      HASH_INVOKE(0x7848970191D5A04CLL, mysql_connect_with_db);
       HASH_INVOKE(0x03047FD5FC67204CLL, exif_read_data);
       break;
     case 83:
@@ -13918,6 +13946,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x40E0D496EE29B3A6LL, call_user_func_array);
       break;
     case 936:
+      HASH_INVOKE(0x0121CD6CDCE1C3A8LL, mysql_pconnect_with_db);
       HASH_INVOKE(0x4120B8157ED413A8LL, i18n_loc_set_strength);
       break;
     case 937:
@@ -19511,6 +19540,58 @@ Variant ei_php_check_syntax(Eval::VariableEnvironment &env, const Eval::Function
   }
   if (count <= 1) return (x_php_check_syntax(a0));
   else return (x_php_check_syntax(a0, ref(a1)));
+}
+Variant ei_mysql_connect_with_db(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  Variant a5;
+  Variant a6;
+  Variant a7;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 8) return throw_toomany_arguments("mysql_connect_with_db", 8, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a5 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a6 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a7 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 0) return (x_mysql_connect_with_db());
+  else if (count == 1) return (x_mysql_connect_with_db(a0));
+  else if (count == 2) return (x_mysql_connect_with_db(a0, a1));
+  else if (count == 3) return (x_mysql_connect_with_db(a0, a1, a2));
+  else if (count == 4) return (x_mysql_connect_with_db(a0, a1, a2, a3));
+  else if (count == 5) return (x_mysql_connect_with_db(a0, a1, a2, a3, a4));
+  else if (count == 6) return (x_mysql_connect_with_db(a0, a1, a2, a3, a4, a5));
+  else if (count == 7) return (x_mysql_connect_with_db(a0, a1, a2, a3, a4, a5, a6));
+  else return (x_mysql_connect_with_db(a0, a1, a2, a3, a4, a5, a6, a7));
 }
 Variant ei_drawgetstrokemiterlimit(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -30440,6 +30521,53 @@ Variant ei_hphp_thread_is_warmup_enabled(Eval::VariableEnvironment &env, const E
     (*it)->eval(env);
   }
   return (x_hphp_thread_is_warmup_enabled());
+}
+Variant ei_mysql_pconnect_with_db(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  Variant a5;
+  Variant a6;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 7) return throw_toomany_arguments("mysql_pconnect_with_db", 7, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a5 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a6 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 0) return (x_mysql_pconnect_with_db());
+  else if (count == 1) return (x_mysql_pconnect_with_db(a0));
+  else if (count == 2) return (x_mysql_pconnect_with_db(a0, a1));
+  else if (count == 3) return (x_mysql_pconnect_with_db(a0, a1, a2));
+  else if (count == 4) return (x_mysql_pconnect_with_db(a0, a1, a2, a3));
+  else if (count == 5) return (x_mysql_pconnect_with_db(a0, a1, a2, a3, a4));
+  else if (count == 6) return (x_mysql_pconnect_with_db(a0, a1, a2, a3, a4, a5));
+  else return (x_mysql_pconnect_with_db(a0, a1, a2, a3, a4, a5, a6));
 }
 Variant ei_imagepsslantfont(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -58580,6 +58708,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x6370CF455EA8604BLL, socket_create);
       break;
     case 76:
+      HASH_INVOKE_FROM_EVAL(0x7848970191D5A04CLL, mysql_connect_with_db);
       HASH_INVOKE_FROM_EVAL(0x03047FD5FC67204CLL, exif_read_data);
       break;
     case 83:
@@ -59664,6 +59793,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x40E0D496EE29B3A6LL, call_user_func_array);
       break;
     case 936:
+      HASH_INVOKE_FROM_EVAL(0x0121CD6CDCE1C3A8LL, mysql_pconnect_with_db);
       HASH_INVOKE_FROM_EVAL(0x4120B8157ED413A8LL, i18n_loc_set_strength);
       break;
     case 937:

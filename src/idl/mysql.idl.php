@@ -21,6 +21,26 @@ f('mysql_pconnect', Variant,
         'connect_timeout_ms' => array(Int32, '-1'),
         'query_timeout_ms' => array(Int32, '-1')));
 
+
+f('mysql_connect_with_db', Variant,
+  array('server' => array(String, 'null_string'),
+        'username' => array(String, 'null_string'),
+        'password' => array(String, 'null_string'),
+        'database' => array(String, 'null_string'),
+        'new_link' => array(Boolean, 'false'),
+        'client_flags' => array(Int32, '0'),
+        'connect_timeout_ms' => array(Int32, '-1'),
+        'query_timeout_ms' => array(Int32, '-1')));
+
+f('mysql_pconnect_with_db', Variant,
+  array('server' => array(String, 'null_string'),
+        'username' => array(String, 'null_string'),
+        'password' => array(String, 'null_string'),
+        'database' => array(String, 'null_string'),
+        'client_flags' => array(Int32, '0'),
+        'connect_timeout_ms' => array(Int32, '-1'),
+        'query_timeout_ms' => array(Int32, '-1')));
+
 f('mysql_set_charset', Variant,
   array('charset' => String,
         'link_identifier' => array(Variant, 'null')));

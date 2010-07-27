@@ -19,6 +19,7 @@
 
 #include <util/base.h>
 #include <util/thread_local.h>
+#include <util/mutex.h>
 #include <vector>
 
 namespace HPHP {
@@ -158,14 +159,18 @@ typedef const Variant & CVarRef;
 class RequestInjectionData {
 public:
   RequestInjectionData()
-    : started(0), timeoutSeconds(-1), timedout(false), signaled(false),
-      memExceeded(false) {}
+    : started(0), timeoutSeconds(-1), memExceeded(false), timedout(false),
+      signaled(false), surprised(false) {}
 
   time_t started;     // when a request was started
   int timeoutSeconds; // how many seconds to timeout
-  bool timedout;      // flag to set when timeout is detected
-  bool signaled;      // flag to set when a signal was raised
-  bool memExceeded;   // memory limit was exceeded
+
+  bool memExceeded;            // memory limit was exceeded
+  bool timedout;               // flag to set when timeout is detected
+  bool signaled;               // flag to set when a signal was raised
+
+  bool surprised;              // any surprise happened
+  Mutex surpriseMutex;         // mutex protecting per-request data
 };
 
 class FrameInjection;
@@ -221,13 +226,11 @@ extern bool SegFaulting;
 class RequestInjection {
 public:
   RequestInjection(ThreadInfo *info) {
-    RequestInjectionData &p = info->m_reqInjectionData;
     if (SegFaulting) pauseAndExit();
-    if (p.timedout) throw_request_timeout_exception();
-    if (p.memExceeded) throw_memory_exceeded_exception();
-    if (p.signaled) f_pcntl_signal_dispatch();
+    if (info->m_reqInjectionData.surprised) checkSurprise(info);
   }
 private:
+  void checkSurprise(ThreadInfo *info) __attribute__((cold));
   void pauseAndExit() __attribute__((cold, noreturn));
 };
 

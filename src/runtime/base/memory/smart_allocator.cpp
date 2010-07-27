@@ -174,7 +174,12 @@ void SmartAllocatorImpl::checkMemUsage() {
   m_stats->peakUsage = m_stats->usage;
   if (m_stats->maxBytes > 0 && m_stats->peakUsage > m_stats->maxBytes &&
       prevPeakUsage <= m_stats->maxBytes) {
-    ThreadInfo::s_threadInfo->m_reqInjectionData.memExceeded = true;
+    RequestInjectionData &data = ThreadInfo::s_threadInfo.get()->
+                                   m_reqInjectionData;
+    data.surpriseMutex.lock();
+    data.memExceeded = true;
+    data.surprised = true;
+    data.surpriseMutex.unlock();
   }
 }
 

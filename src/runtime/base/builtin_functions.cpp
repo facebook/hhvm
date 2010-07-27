@@ -224,6 +224,33 @@ void throw_instance_method_fatal(const char *name) {
   }
 }
 
+void RequestInjection::checkSurprise(ThreadInfo *info) {
+  RequestInjectionData &p = info->m_reqInjectionData;
+  bool do_timedout, do_memExceeded, do_signaled;
+
+  p.surpriseMutex.lock();
+
+  // Even though we checked surprise outside of the lock, we don't need to
+  // check again, because the only code that can ever set surprised to false
+  // is right here - and this function is never called from another thread.
+
+  p.surprised = false;
+
+  do_timedout = p.timedout;
+  do_memExceeded = p.memExceeded;
+  do_signaled = p.signaled;
+
+  p.timedout = false;
+  p.memExceeded = false;
+  p.signaled = false;
+
+  p.surpriseMutex.unlock();
+
+  if (do_timedout) throw_request_timeout_exception();
+  if (do_memExceeded) throw_memory_exceeded_exception();
+  if (do_signaled) f_pcntl_signal_dispatch();
+}
+
 Variant throw_missing_arguments(const char *fn, int num, int level /* = 0 */) {
   if (level == 2 || RuntimeOption::ThrowMissingArguments) {
     raise_error("Missing argument %d for %s()", num, fn);
@@ -299,9 +326,6 @@ void throw_request_timeout_exception() {
   ThreadInfo *info = ThreadInfo::s_threadInfo.get();
   RequestInjectionData &data = info->m_reqInjectionData;
   if (data.timeoutSeconds > 0) {
-    ASSERT(data.timedout);
-    data.timedout = false; // avoid going through here twice in a row
-
     // This extra checking is needed, because there may be a race condition
     // a TimeoutThread sets flag "true" right after an old request finishes and
     // right before a new requets resets "started". In this case, we flag
@@ -315,9 +339,6 @@ void throw_request_timeout_exception() {
 void throw_memory_exceeded_exception() {
   // NOTE: This is marked as __attribute__((noreturn))
   // in base/types.h AND base/builtin_functions.h
-  ThreadInfo *info = ThreadInfo::s_threadInfo.get();
-  RequestInjectionData &data = info->m_reqInjectionData;
-  data.memExceeded = false;
   throw UncatchableException("request has exceeded memory limit");
 }
 

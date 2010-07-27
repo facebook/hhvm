@@ -198,7 +198,12 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(SignalHandlers, s_signal_handlers);
 static void pcntl_signal_handler(int signo) {
   if (signo > 0 && signo < _NSIG) {
     s_signal_handlers->signaled[signo] = 1;
-    ThreadInfo::s_threadInfo->m_reqInjectionData.signaled = true;
+    RequestInjectionData &data = ThreadInfo::s_threadInfo.get()->
+                                   m_reqInjectionData;
+    data.surpriseMutex.lock();
+    data.signaled = true;
+    data.surprised = true;
+    data.surpriseMutex.unlock();
   }
 }
 class SignalHandlersStaticInitializer {
@@ -212,7 +217,6 @@ public:
 static SignalHandlersStaticInitializer s_signal_handlers_initializer;
 
 bool f_pcntl_signal_dispatch() {
-  ThreadInfo::s_threadInfo->m_reqInjectionData.signaled = false;
   int *signaled = s_signal_handlers->signaled;
   bool error = false;
   for (int i = 0; i < _NSIG; i++) {

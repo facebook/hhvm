@@ -136,7 +136,10 @@ void TimeoutThread::onTimer(int index) {
     int delta = now - data->started;
     if (delta >= m_timeoutSeconds) {
       timeout.tv_sec = m_timeoutSeconds + 2;
+      data->surpriseMutex.lock();
       data->timedout = true; // finally sure request is timed out
+      data->surprised = true;
+      data->surpriseMutex.unlock();
     } else {
       // Negative delta means start time was adjusted forward to give more time
       if (delta < 0) delta = 0;

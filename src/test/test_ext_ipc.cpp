@@ -117,6 +117,8 @@ bool TestExtIpc::test_semaphore() {
     // This isn't a sure test, but may be false if f_sem_acquire() didn't work
     time_t then = time(0);
     assert(then - now > 1);
+    (void)then;
+    (void)now;
 
     assert(f_sem_release(sem));
     VERIFY(f_sem_remove(sem));

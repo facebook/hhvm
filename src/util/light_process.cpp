@@ -98,13 +98,17 @@ static void do_popen(FILE *fin, FILE *fout, int afdt_fd) {
   string old_cwd = Process::GetCurrentDirectory();
   read_buf(fin, cwd);
   if (old_cwd != cwd) {
-    chdir(cwd);
+    if (chdir(cwd)) {
+      fprintf(fout, "error\n");
+      fflush(fout);
+      return;
+    }
   }
 
   FILE *f = buf[0] ? ::popen(buf, read_only ? "r" : "w") : NULL;
 
-  if (old_cwd != cwd) {
-    chdir(old_cwd.c_str());
+  if (old_cwd != cwd && chdir(old_cwd.c_str())) {
+    // only here if we can't change the cwd back
   }
 
   if (f == NULL) {
@@ -439,9 +443,13 @@ FILE *LightProcess::HeavyPopenImpl(const char *cmd, const char *type,
     string old_cwd = Process::GetCurrentDirectory();
     if (old_cwd != cwd) {
       Lock lock(s_mutex);
-      chdir(cwd);
+      if (chdir(cwd)) {
+        return NULL;
+      }
       FILE *f = ::popen(cmd, type);
-      chdir(old_cwd.c_str());
+      if (chdir(old_cwd.c_str())) {
+        // error occured changing cwd back
+      }
       return f;
     }
   }

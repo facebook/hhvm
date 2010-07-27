@@ -43,8 +43,8 @@ hash_sha256::hash_sha256() : HashEngine(32, 64, sizeof(PHP_SHA256_CTX)) {
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef struct {
-  unsigned long state[8];     /* state */
-  unsigned long count[2];     /* number of bits, modulo 2^128 */
+  uint64 state[8];     /* state */
+  uint64 count[2];     /* number of bits, modulo 2^128 */
   unsigned char buffer[128];  /* input buffer */
 } PHP_SHA384_CTX;
 
@@ -54,8 +54,8 @@ hash_sha384::hash_sha384() : HashEngine(48, 128, sizeof(PHP_SHA384_CTX)) {
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef struct {
-  unsigned long state[8];     /* state */
-  unsigned long count[2];     /* number of bits, modulo 2^128 */
+  uint64 state[8];     /* state */
+  uint64 count[2];     /* number of bits, modulo 2^128 */
   unsigned char buffer[128];  /* input buffer */
 } PHP_SHA512_CTX;
 
@@ -527,7 +527,7 @@ void hash_sha256::hash_final(unsigned char *digest, void *context_) {
 /* OM1 */
 #define SHA512_F5(x)		(ROTR64(19, x) ^ ROTR64(61, x) ^ SHR(6, x))
 
-static const unsigned long SHA512_K[128] = {
+static const uint64 SHA512_K[128] = {
   L64(0x428a2f98d728ae22), L64(0x7137449123ef65cd), L64(0xb5c0fbcfec4d3b2f), L64(0xe9b5dba58189dbbc),
   L64(0x3956c25bf348b538), L64(0x59f111f1b605d019), L64(0x923f82a4af194f9b), L64(0xab1c5ed5da6d8118),
   L64(0xd807aa98a3030242), L64(0x12835b0145706fbe), L64(0x243185be4ee4b28c), L64(0x550c7dc3d5ffb4e2),
@@ -550,10 +550,10 @@ static const unsigned long SHA512_K[128] = {
   L64(0x4cc5d4becb3e42b6), L64(0x597f299cfc657e2a), L64(0x5fcb6fab3ad6faec), L64(0x6c44198c4a475817) };
 
 /*
-  Encodes input (unsigned long) into output (unsigned char). Assumes len is
+  Encodes input (uint64) into output (unsigned char). Assumes len is
   a multiple of 8.
 */
-static void SHAEncode64(unsigned char *output, unsigned long *input,
+static void SHAEncode64(unsigned char *output, uint64 *input,
                         unsigned int len) {
   unsigned int i, j;
 
@@ -570,23 +570,23 @@ static void SHAEncode64(unsigned char *output, unsigned long *input,
 }
 
 /*
-  Decodes input (unsigned char) into output (unsigned long). Assumes len is
+  Decodes input (unsigned char) into output (uint64). Assumes len is
   a multiple of 8.
 */
-static void SHADecode64(unsigned long *output, const unsigned char *input,
+static void SHADecode64(uint64 *output, const unsigned char *input,
                         unsigned int len) {
   unsigned int i, j;
 
   for (i = 0, j = 0; j < len; i++, j += 8)
     output[i] =
-      ((unsigned long) input[j + 7]) |
-      (((unsigned long) input[j + 6]) << 8) |
-      (((unsigned long) input[j + 5]) << 16) |
-      (((unsigned long) input[j + 4]) << 24) |
-      (((unsigned long) input[j + 3]) << 32) |
-      (((unsigned long) input[j + 2]) << 40) |
-      (((unsigned long) input[j + 1]) << 48) |
-      (((unsigned long) input[j]) << 56);
+      ((uint64) input[j + 7]) |
+      (((uint64) input[j + 6]) << 8) |
+      (((uint64) input[j + 5]) << 16) |
+      (((uint64) input[j + 4]) << 24) |
+      (((uint64) input[j + 3]) << 32) |
+      (((uint64) input[j + 2]) << 40) |
+      (((uint64) input[j + 1]) << 48) |
+      (((uint64) input[j]) << 56);
 }
 
 /*
@@ -611,11 +611,11 @@ void hash_sha384::hash_init(void *context_) {
  * SHA512 basic transformation. Transforms state based on block.
  * SHA384 uses the exact same algorithm
  */
-static void SHA512Transform(unsigned long state[8],
+static void SHA512Transform(uint64 state[8],
                             const unsigned char block[128]) {
-  unsigned long a = state[0], b = state[1], c = state[2], d = state[3];
-  unsigned long e = state[4], f = state[5], g = state[6], h = state[7];
-  unsigned long x[16], T1, T2, W[80];
+  uint64 a = state[0], b = state[1], c = state[2], d = state[3];
+  uint64 e = state[4], f = state[5], g = state[6], h = state[7];
+  uint64 x[16], T1, T2, W[80];
   int i;
 
   SHADecode64(x, block, 128);
@@ -663,10 +663,10 @@ void hash_sha384::hash_update(void *context_, const unsigned char *input,
 
   /* Update number of bits */
   if ((context->count[0] +=
-       ((unsigned long) inputLen << 3)) < ((unsigned long) inputLen << 3)) {
+       ((uint64) inputLen << 3)) < ((uint64) inputLen << 3)) {
     context->count[1]++;
   }
-  context->count[1] += ((unsigned long) inputLen >> 61);
+  context->count[1] += ((uint64) inputLen >> 61);
 
   partLen = 128 - index;
 
@@ -765,10 +765,10 @@ void hash_sha512::hash_update(void *context_, const unsigned char *input,
 
   /* Update number of bits */
   if ((context->count[0] +=
-       ((unsigned long) inputLen << 3)) < ((unsigned long) inputLen << 3)) {
+       ((uint64) inputLen << 3)) < ((uint64) inputLen << 3)) {
     context->count[1]++;
   }
-  context->count[1] += ((unsigned long) inputLen >> 61);
+  context->count[1] += ((uint64) inputLen >> 61);
 
   partLen = 128 - index;
 

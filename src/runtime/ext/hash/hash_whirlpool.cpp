@@ -45,10 +45,10 @@ hash_whirlpool::hash_whirlpool() :
 
 static void WhirlpoolTransform(PHP_WHIRLPOOL_CTX *context) {
   int i, r;
-  unsigned long K[8];        /* the round key */
-  unsigned long block[8];    /* mu(buffer) */
-  unsigned long state[8];    /* the cipher state */
-  unsigned long L[8];
+  uint64 K[8];        /* the round key */
+  uint64 block[8];    /* mu(buffer) */
+  uint64 state[8];    /* the cipher state */
+  uint64 L[8];
   unsigned char *buffer = context->buffer.data;
 
   /*
@@ -56,14 +56,14 @@ static void WhirlpoolTransform(PHP_WHIRLPOOL_CTX *context) {
    */
   for (i = 0; i < 8; i++, buffer += 8) {
     block[i] =
-      (((unsigned long)buffer[0]        ) << 56) ^
-      (((unsigned long)buffer[1] & 0xffL) << 48) ^
-      (((unsigned long)buffer[2] & 0xffL) << 40) ^
-      (((unsigned long)buffer[3] & 0xffL) << 32) ^
-      (((unsigned long)buffer[4] & 0xffL) << 24) ^
-      (((unsigned long)buffer[5] & 0xffL) << 16) ^
-      (((unsigned long)buffer[6] & 0xffL) <<  8) ^
-      (((unsigned long)buffer[7] & 0xffL)      );
+      (((uint64)buffer[0]        ) << 56) ^
+      (((uint64)buffer[1] & 0xffL) << 48) ^
+      (((uint64)buffer[2] & 0xffL) << 40) ^
+      (((uint64)buffer[3] & 0xffL) << 32) ^
+      (((uint64)buffer[4] & 0xffL) << 24) ^
+      (((uint64)buffer[5] & 0xffL) << 16) ^
+      (((uint64)buffer[6] & 0xffL) <<  8) ^
+      (((uint64)buffer[7] & 0xffL)      );
   }
   /*
    * compute and apply K^0 to the cipher state:
@@ -280,7 +280,7 @@ void hash_whirlpool::hash_update(void *context_, const unsigned char *input,
                                  unsigned int len) {
   PHP_WHIRLPOOL_CTX *context = (PHP_WHIRLPOOL_CTX*)context_;
 
-  unsigned long sourceBits = len * 8;
+  uint64 sourceBits = len * 8;
   /* index of leftmost source unsigned char containing data (1 to 8 bits). */
   int sourcePos    = 0;
   /* space on source[sourcePos]. */
@@ -298,7 +298,7 @@ void hash_whirlpool::hash_update(void *context_, const unsigned char *input,
   /*
    * tally the length of the added data:
    */
-  unsigned long value = sourceBits;
+  uint64 value = sourceBits;
   for (i = 31, carry = 0; i >= 0 && (carry != 0 || value != L64(0)); i--) {
     carry += bitLength[i] + ((unsigned int)value & 0xff);
     bitLength[i] = (unsigned char)carry;

@@ -455,13 +455,13 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
 
 int process(const ProgramOptions &po) {
   if (po.coredump) {
-    struct rlimit rl;
-    getrlimit(RLIMIT_CORE, &rl);
+    struct rlimit64 rl;
+    getrlimit64(RLIMIT_CORE, &rl);
     rl.rlim_cur = 8000000000LL;
     if (rl.rlim_max < rl.rlim_cur) {
       rl.rlim_max = rl.rlim_cur;
     }
-    setrlimit(RLIMIT_CORE, &rl);
+    setrlimit64(RLIMIT_CORE, &rl);
   }
 
   // lint doesn't need analysis

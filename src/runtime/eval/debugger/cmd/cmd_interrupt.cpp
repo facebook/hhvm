@@ -79,6 +79,7 @@ const char *CmdInterrupt::GetBreakpointName(SubType subtype) {
       ASSERT(false);
       break;
   }
+  return NULL;
 }
 
 bool CmdInterrupt::shouldBreak(const BreakPointInfoMap &bps) {

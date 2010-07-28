@@ -191,7 +191,6 @@ ExpressionPtr ScalarExpression::postOptimize(AnalysisResultPtr ar) {
                               Expression::KindOfScalarExpression,
                               T_STRING, svalue, true));
       sc->setActualType(Type::String);
-      if (Option::PrecomputeLiteralStrings) ar->addLiteralString(svalue, sc);
       return sc;
     }
   default:
@@ -241,13 +240,6 @@ TypePtr ScalarExpression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
   default:
     ASSERT(false);
     break;
-  }
-
-  if (Option::PrecomputeLiteralStrings &&
-      Type::SameType(actualType, Type::String)) {
-    ScalarExpressionPtr self =
-      dynamic_pointer_cast<ScalarExpression>(shared_from_this());
-    ar->addLiteralString(getLiteralString(), self);
   }
 
   TypePtr ret = checkTypesImpl(ar, type, actualType, coerce);

@@ -2119,9 +2119,9 @@ void AnalysisResult::getLiteralStringCompressed(std::string &zsdata,
   int nstrings = m_stringLiterals.size();
   ASSERT(nstrings > 0);
   string *sortedById = new string[nstrings];
-  for (map<string, pair<int, ScalarExpressionPtr> >::const_iterator it =
+  for (map<string, int>::const_iterator it =
        m_stringLiterals.begin(); it != m_stringLiterals.end(); ++it) {
-    int index = it->second.first;
+    int index = it->second;
     ASSERT(0 <= index && index < nstrings);
     sortedById[index] = it->first;
   }
@@ -3223,22 +3223,15 @@ void AnalysisResult::outputSwigFFIStubs() {
 /**
  * Literal string to String precomputation
  */
-void AnalysisResult::addLiteralString(const std::string s,
-                                      ScalarExpressionPtr sc) {
-  map<string, pair<int, ScalarExpressionPtr> >::const_iterator it =
-    m_stringLiterals.find(s);
-  if (it == m_stringLiterals.end()) {
-    int ct = m_stringLiterals.size();
-    m_stringLiterals[s] = pair<int, ScalarExpressionPtr>(ct, sc);
-  }
-}
 int AnalysisResult::getLiteralStringId(const std::string &s) {
-  map<string, pair<int, ScalarExpressionPtr> >::const_iterator it =
+  map<string, int>::const_iterator it =
     m_stringLiterals.find(s);
   if (it != m_stringLiterals.end()) {
-    return it->second.first;
+    return it->second;
   }
-  return -1;
+  int ct = m_stringLiterals.size();
+  m_stringLiterals[s] = ct;
+  return ct;
 }
 
 string AnalysisResult::getFuncId(ClassScopePtr cls, FunctionScopePtr func) {
@@ -3357,7 +3350,7 @@ void AnalysisResult::outputCPPLiteralStringPrecomputation() {
     cg_printf("#endif // __GENERATED_sys_literal_strings_h__\n");
     f.close();
   }
-  map<string, pair<int, ScalarExpressionPtr> >::const_iterator it =
+  map<string, int>::const_iterator it =
     m_stringLiterals.begin();
   const char *lsname = "literalStrings";
   for (uint i = 0; i < bucketCount; i++) {
@@ -3397,9 +3390,8 @@ void AnalysisResult::outputCPPLiteralStringPrecomputation() {
     } else {
       for (int j = 0; j < bucketSize &&
            it != m_stringLiterals.end(); ++it, ++j) {
-        std::string str = it->second.second->getCPPLiteralString(cg);
-        cg_printf("%s[%d].init(LITSTR_INIT(%s));", lsname,
-                  it->second.first, str.c_str());
+        cg_printf("%s[%d].init(LITSTR_INIT(\"%s\"));",
+                  lsname, it->second, cg.escapeLabel(it->first).c_str());
       }
     }
     cg_indentEnd("}\n");

@@ -336,7 +336,6 @@ public:
   /**
    * Literal string to String precomputation
    */
-  void addLiteralString(const std::string s, ScalarExpressionPtr sc);
   int getLiteralStringId(const std::string &s);
   void getLiteralStringCompressed(std::string &zsdata, std::string &zldata);
 
@@ -444,8 +443,7 @@ private:
   std::map<std::string, std::set<std::string> > m_clsNameMap;
   std::map<std::string, std::set<std::string> > m_funcNameMap;
 
-  std::map<std::string,
-           std::pair<int, ScalarExpressionPtr> > m_stringLiterals;
+  std::map<std::string, int> m_stringLiterals;
 
   int m_funcTableSize;
   CodeGenerator::MapIntToStringVec m_funcTable;

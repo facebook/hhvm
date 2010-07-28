@@ -415,8 +415,7 @@ int CodeGenerator::checkLiteralString(const std::string &str,
   if (Option::PrecomputeLiteralStrings &&
       getOutput() != CodeGenerator::SystemCPP &&
       getContext() != CodeGenerator::CppConstantsDecl &&
-      getContext() != CodeGenerator::CppClassConstantsImpl &&
-      ar->getLiteralStringCount() > 0) {
+      getContext() != CodeGenerator::CppClassConstantsImpl) {
     int stringId = ar->getLiteralStringId(str);
     if (stringId >= 0) return stringId;
   }

@@ -294,8 +294,7 @@ Array f_token_get_all(CStrRef source) {
   istringstream iss(input);
   stringstream ss;
 
-  istream *is = RuntimeOption::EnableXHP ? preprocessXHP(iss, ss, input) : &iss;
-  Eval::Scanner scanner(new ylmm::basic_buffer(*is, false, true),
+  Eval::Scanner scanner(new ylmm::basic_buffer(iss, false, true),
                         true, false, true);
   Eval::Token tok;
   ylmm::basic_location loc;

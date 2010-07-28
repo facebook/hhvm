@@ -33,6 +33,7 @@ public:
 
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
   virtual bool isRefable(bool checkError = false) const { return checkError; }
+  void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar, int state);
 
 private:
   bool m_redeclared;

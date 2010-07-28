@@ -1983,8 +1983,8 @@ Variant c_reflectionobject::ti_export(const char* cls, Variant v_obj, CVarRef v_
 
   {
     p_reflectionobject tmp1 = NEWOBJ(c_reflectionobject)();
-    p_reflectionobject tmp2(((tmp1->create(v_obj), tmp1)));
-    v_obj = tmp2;
+    (tmp1->create(v_obj));
+    v_obj = tmp1;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -3963,24 +3963,24 @@ Variant c_reflectionclass::t_fetch(CVarRef v_what) {
             {
               {
                 p_reflectionclass tmp3 = NEWOBJ(c_reflectionclass)();
-                p_reflectionclass tmp4(((tmp3->create(m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)), tmp3)));
-                v_p = tmp4;
+                (tmp3->create(m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)));
+                v_p = tmp3;
               }
               {
-                Variant tmp5((m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)));
-                lval(m_info.lvalAt("interfaces", 0x0C5BD661CFB9E254LL, false, true)).append((tmp5));
+                Variant tmp4((m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)));
+                lval(m_info.lvalAt("interfaces", 0x0C5BD661CFB9E254LL, false, true)).append((tmp4));
               }
               {
-                const Variant &tmp6((v_p->t_fetch("interfaces")));
-                m_info.setOpEqual(277, "interfaces", (tmp6), 0x0C5BD661CFB9E254LL, true);
+                const Variant &tmp5((v_p->t_fetch("interfaces")));
+                m_info.setOpEqual(277, "interfaces", (tmp5), 0x0C5BD661CFB9E254LL, true);
               }
               {
-                Variant tmp7((v_p->m_info.rvalAt("methods", 0x2A7E90235B229AD5LL, true, true)));
-                m_info.setOpEqual(277, "methods", (tmp7), 0x2A7E90235B229AD5LL, true);
+                Variant tmp6((v_p->m_info.rvalAt("methods", 0x2A7E90235B229AD5LL, true, true)));
+                m_info.setOpEqual(277, "methods", (tmp6), 0x2A7E90235B229AD5LL, true);
               }
               {
-                Variant tmp8((v_p->m_info.rvalAt("constants", 0x61A5DA894BD05406LL, true, true)));
-                m_info.setOpEqual(277, "constants", (tmp8), 0x61A5DA894BD05406LL, true);
+                Variant tmp7((v_p->m_info.rvalAt("constants", 0x61A5DA894BD05406LL, true, true)));
+                m_info.setOpEqual(277, "constants", (tmp7), 0x61A5DA894BD05406LL, true);
               }
             }
           }
@@ -3989,29 +3989,29 @@ Variant c_reflectionclass::t_fetch(CVarRef v_what) {
       else {
         {
           {
-            LOOP_COUNTER(9);
-            Variant map10 = m_info.rvalAt("interfaces", 0x0C5BD661CFB9E254LL, true, true);
-            for (ArrayIterPtr iter11 = map10.begin("reflectionclass"); !iter11->end(); iter11->next()) {
-              LOOP_COUNTER_CHECK(9);
-              iter11->second(v__);
-              v_interface = iter11->first();
+            LOOP_COUNTER(8);
+            Variant map9 = m_info.rvalAt("interfaces", 0x0C5BD661CFB9E254LL, true, true);
+            for (ArrayIterPtr iter10 = map9.begin("reflectionclass"); !iter10->end(); iter10->next()) {
+              LOOP_COUNTER_CHECK(8);
+              iter10->second(v__);
+              v_interface = iter10->first();
               {
                 {
-                  p_reflectionclass tmp12 = NEWOBJ(c_reflectionclass)();
-                  p_reflectionclass tmp13(((tmp12->create(v_interface), tmp12)));
-                  v_p = tmp13;
+                  p_reflectionclass tmp11 = NEWOBJ(c_reflectionclass)();
+                  (tmp11->create(v_interface));
+                  v_p = tmp11;
                 }
                 {
-                  const Variant &tmp14((v_p->t_fetch("methods")));
-                  m_info.setOpEqual(277, "methods", (tmp14), 0x2A7E90235B229AD5LL, true);
+                  const Variant &tmp12((v_p->t_fetch("methods")));
+                  m_info.setOpEqual(277, "methods", (tmp12), 0x2A7E90235B229AD5LL, true);
                 }
                 {
-                  Variant tmp15((v_p->m_info.rvalAt("constants", 0x61A5DA894BD05406LL, true, true)));
-                  m_info.setOpEqual(277, "constants", (tmp15), 0x61A5DA894BD05406LL, true);
+                  Variant tmp13((v_p->m_info.rvalAt("constants", 0x61A5DA894BD05406LL, true, true)));
+                  m_info.setOpEqual(277, "constants", (tmp13), 0x61A5DA894BD05406LL, true);
                 }
                 {
-                  Variant tmp16((v_p->m_info.rvalAt("interfaces", 0x0C5BD661CFB9E254LL, true, true)));
-                  m_info.setOpEqual(277, "interfaces", (tmp16), 0x0C5BD661CFB9E254LL, true);
+                  Variant tmp14((v_p->m_info.rvalAt("interfaces", 0x0C5BD661CFB9E254LL, true, true)));
+                  m_info.setOpEqual(277, "interfaces", (tmp14), 0x0C5BD661CFB9E254LL, true);
                 }
               }
             }
@@ -4019,25 +4019,25 @@ Variant c_reflectionclass::t_fetch(CVarRef v_what) {
           if (!(empty(m_info, "parent", 0x3E764E41E4A6ACA5LL, true))) {
             {
               {
-                p_reflectionclass tmp17 = NEWOBJ(c_reflectionclass)();
-                p_reflectionclass tmp18(((tmp17->create(m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)), tmp17)));
-                v_p = tmp18;
+                p_reflectionclass tmp15 = NEWOBJ(c_reflectionclass)();
+                (tmp15->create(m_info.rvalAt("parent", 0x3E764E41E4A6ACA5LL, true, true)));
+                v_p = tmp15;
               }
               {
-                const Variant &tmp19((v_p->t_fetch("interfaces")));
-                m_info.setOpEqual(277, "interfaces", (tmp19), 0x0C5BD661CFB9E254LL, true);
+                const Variant &tmp16((v_p->t_fetch("interfaces")));
+                m_info.setOpEqual(277, "interfaces", (tmp16), 0x0C5BD661CFB9E254LL, true);
               }
               {
-                Variant tmp20((v_p->m_info.rvalAt("properties", 0x5D7B5CC390269404LL, true, true)));
-                m_info.setOpEqual(277, "properties", (tmp20), 0x5D7B5CC390269404LL, true);
+                Variant tmp17((v_p->m_info.rvalAt("properties", 0x5D7B5CC390269404LL, true, true)));
+                m_info.setOpEqual(277, "properties", (tmp17), 0x5D7B5CC390269404LL, true);
               }
               {
-                Variant tmp21((v_p->m_info.rvalAt("methods", 0x2A7E90235B229AD5LL, true, true)));
-                m_info.setOpEqual(277, "methods", (tmp21), 0x2A7E90235B229AD5LL, true);
+                Variant tmp18((v_p->m_info.rvalAt("methods", 0x2A7E90235B229AD5LL, true, true)));
+                m_info.setOpEqual(277, "methods", (tmp18), 0x2A7E90235B229AD5LL, true);
               }
               {
-                Variant tmp22((v_p->m_info.rvalAt("constants", 0x61A5DA894BD05406LL, true, true)));
-                m_info.setOpEqual(277, "constants", (tmp22), 0x61A5DA894BD05406LL, true);
+                Variant tmp19((v_p->m_info.rvalAt("constants", 0x61A5DA894BD05406LL, true, true)));
+                m_info.setOpEqual(277, "constants", (tmp19), 0x61A5DA894BD05406LL, true);
               }
             }
           }
@@ -4071,8 +4071,8 @@ Variant c_reflectionclass::ti_export(const char* cls, CVarRef v_name, CVarRef v_
 
   {
     p_reflectionclass tmp1 = NEWOBJ(c_reflectionclass)();
-    p_reflectionclass tmp2(((tmp1->create(v_name), tmp1)));
-    v_obj = tmp2;
+    (tmp1->create(v_name));
+    v_obj = tmp1;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -4360,15 +4360,15 @@ Variant c_reflectionclass::t_getinterfaces() {
       {
         {
           p_reflectionclass tmp4 = NEWOBJ(c_reflectionclass)();
-          p_reflectionclass tmp5(((tmp4->create(v_name), tmp4)));
-          v_cls = tmp5;
+          (tmp4->create(v_name));
+          v_cls = tmp4;
         }
         if (toBoolean(v_cls->t_isinterface())) {
           {
             {
-              const Variant &tmp6((v_cls->t_getname()));
-              p_reflectionclass tmp7((v_cls));
-              v_ret.set(tmp6, (tmp7));
+              const Variant &tmp5((v_cls->t_getname()));
+              p_reflectionclass tmp6((v_cls));
+              v_ret.set(tmp5, (tmp6));
             }
           }
         }
@@ -4396,14 +4396,14 @@ Array c_reflectionclass::t_getinterfacenames() {
       {
         {
           p_reflectionclass tmp4 = NEWOBJ(c_reflectionclass)();
-          p_reflectionclass tmp5(((tmp4->create(v_name), tmp4)));
-          v_cls = tmp5;
+          (tmp4->create(v_name));
+          v_cls = tmp4;
         }
         if (toBoolean(v_cls->t_isinterface())) {
           {
             {
-              const Variant &tmp6((v_cls->t_getname()));
-              v_ret.append((tmp6));
+              const Variant &tmp5((v_cls->t_getname()));
+              v_ret.append((tmp5));
             }
           }
         }
@@ -5278,8 +5278,8 @@ Variant c_reflectionextension::ti_export(const char* cls, CVarRef v_name, CVarRe
 
   {
     p_reflectionextension tmp1 = NEWOBJ(c_reflectionextension)();
-    p_reflectionextension tmp2(((tmp1->create(v_name), tmp1)));
-    v_obj = tmp2;
+    (tmp1->create(v_name));
+    v_obj = tmp1;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -6434,27 +6434,27 @@ void c_reflectionmethod::t___construct(Variant v_cls, Variant v_name) {
       if (!(x_is_object(v_cls))) {
         {
           p_reflectionclass tmp1 = NEWOBJ(c_reflectionclass)();
-          p_reflectionclass tmp2(((tmp1->create(v_cls), tmp1)));
-          v_cls = tmp2;
+          (tmp1->create(v_cls));
+          v_cls = tmp1;
         }
       }
       {
-        Variant tmp3((v_cls. BIND_CLASS_DOT o_invoke_few_args("getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
-        v_method = tmp3;
+        Variant tmp2((v_cls. BIND_CLASS_DOT o_invoke_few_args("getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
+        v_method = tmp2;
       }
       if (toBoolean(v_method)) {
         {
           {
-            Variant tmp4((v_method.o_get("info", 0x3255DC7C4A035C47LL)));
-            m_info = tmp4;
+            Variant tmp3((v_method.o_get("info", 0x3255DC7C4A035C47LL)));
+            m_info = tmp3;
           }
           {
-            Variant tmp5((v_method.o_get("name", 0x0BCDB293DC3DBDDCLL)));
-            m_name = tmp5;
+            Variant tmp4((v_method.o_get("name", 0x0BCDB293DC3DBDDCLL)));
+            m_name = tmp4;
           }
           {
-            Variant tmp6((v_method.o_get("class", 0x45397FE5C82CBD12LL)));
-            m_class = tmp6;
+            Variant tmp5((v_method.o_get("class", 0x45397FE5C82CBD12LL)));
+            m_class = tmp5;
           }
         }
       }
@@ -6476,13 +6476,13 @@ Variant c_reflectionmethod::ti_export(const char* cls, Variant v_cls, CVarRef v_
   if (!(x_is_object(v_cls))) {
     {
       p_reflectionclass tmp1 = NEWOBJ(c_reflectionclass)();
-      p_reflectionclass tmp2(((tmp1->create(v_cls), tmp1)));
-      v_cls = tmp2;
+      (tmp1->create(v_cls));
+      v_cls = tmp1;
     }
   }
   {
-    const Variant &tmp3((v_cls.o_invoke_few_args("getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
-    v_obj = tmp3;
+    const Variant &tmp2((v_cls.o_invoke_few_args("getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
+    v_obj = tmp2;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -7344,27 +7344,27 @@ void c_reflectionproperty::t___construct(Variant v_cls, Variant v_name) {
       if (!(x_is_object(v_cls))) {
         {
           p_reflectionclass tmp1 = NEWOBJ(c_reflectionclass)();
-          p_reflectionclass tmp2(((tmp1->create(v_cls), tmp1)));
-          v_cls = tmp2;
+          (tmp1->create(v_cls));
+          v_cls = tmp1;
         }
       }
       {
-        Variant tmp3((v_cls. BIND_CLASS_DOT o_invoke_few_args("getProperty", 0x0FD73627FB023047LL, 1, v_name)));
-        v_prop = tmp3;
+        Variant tmp2((v_cls. BIND_CLASS_DOT o_invoke_few_args("getProperty", 0x0FD73627FB023047LL, 1, v_name)));
+        v_prop = tmp2;
       }
       if (toBoolean(v_prop)) {
         {
           {
-            Variant tmp4((v_prop.o_get("info", 0x3255DC7C4A035C47LL)));
-            m_info = tmp4;
+            Variant tmp3((v_prop.o_get("info", 0x3255DC7C4A035C47LL)));
+            m_info = tmp3;
           }
           {
-            Variant tmp5((v_prop.o_get("name", 0x0BCDB293DC3DBDDCLL)));
-            m_name = tmp5;
+            Variant tmp4((v_prop.o_get("name", 0x0BCDB293DC3DBDDCLL)));
+            m_name = tmp4;
           }
           {
-            Variant tmp6((v_prop.o_get("class", 0x45397FE5C82CBD12LL)));
-            m_class = tmp6;
+            Variant tmp5((v_prop.o_get("class", 0x45397FE5C82CBD12LL)));
+            m_class = tmp5;
           }
         }
       }
@@ -7386,13 +7386,13 @@ Variant c_reflectionproperty::ti_export(const char* cls, Variant v_cls, CVarRef 
   if (!(x_is_object(v_cls))) {
     {
       p_reflectionclass tmp1 = NEWOBJ(c_reflectionclass)();
-      p_reflectionclass tmp2(((tmp1->create(v_cls), tmp1)));
-      v_cls = tmp2;
+      (tmp1->create(v_cls));
+      v_cls = tmp1;
     }
   }
   {
-    const Variant &tmp3((v_cls.o_invoke_few_args("getProperty", 0x0FD73627FB023047LL, 1, v_name)));
-    v_obj = tmp3;
+    const Variant &tmp2((v_cls.o_invoke_few_args("getProperty", 0x0FD73627FB023047LL, 1, v_name)));
+    v_obj = tmp2;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -8236,8 +8236,8 @@ Variant c_reflectionfunction::ti_export(const char* cls, CVarRef v_name, CVarRef
 
   {
     p_reflectionfunction tmp1 = NEWOBJ(c_reflectionfunction)();
-    p_reflectionfunction tmp2(((tmp1->create(v_name), tmp1)));
-    v_obj = tmp2;
+    (tmp1->create(v_name));
+    v_obj = tmp1;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -8923,8 +8923,8 @@ Variant c_reflectionparameter::ti_export(const char* cls, CVarRef v_func, CVarRe
 
   {
     p_reflectionparameter tmp1 = NEWOBJ(c_reflectionparameter)();
-    p_reflectionparameter tmp2(((tmp1->create(v_func, v_param), tmp1)));
-    v_obj = tmp2;
+    (tmp1->create(v_func, v_param));
+    v_obj = tmp1;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {

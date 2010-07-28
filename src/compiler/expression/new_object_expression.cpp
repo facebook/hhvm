@@ -157,6 +157,20 @@ void NewObjectExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf(")");
 }
 
+void NewObjectExpression::preOutputStash(CodeGenerator &cg,
+                                         AnalysisResultPtr ar, int state) {
+  if (!m_receiverTemp.empty()) {
+    bool unused = isUnused();
+    setUnused(true);
+    outputCPPImpl(cg, ar);
+    setUnused(unused);
+    setCPPTemp(m_receiverTemp);
+    cg_printf(";\n");
+  } else {
+    Expression::preOutputStash(cg, ar, state);
+  }
+}
+
 void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   bool linemap = outputLineMap(cg, ar, true);
@@ -185,7 +199,11 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
         cls->outputVolatileCheckEnd(cg);
       }
     } else {
-      cg_printf("), %s)", m_receiverTemp.c_str());
+      cg_printf(")");
+      if (!isUnused()) {
+        cg_printf(", %s", m_receiverTemp.c_str());
+      }
+      cg_printf(")");
     }
   } else {
     if (m_redeclared) {

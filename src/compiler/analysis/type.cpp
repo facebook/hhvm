@@ -19,6 +19,7 @@
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/expression/expression.h>
+#include <boost/format.hpp>
 
 using namespace HPHP;
 using namespace std;
@@ -35,22 +36,6 @@ TypePtr Type::Double (new Type(Type::KindOfDouble   ));
 TypePtr Type::String (new Type(Type::KindOfString   ));
 TypePtr Type::Array  (new Type(Type::KindOfArray    ));
 TypePtr Type::Variant(new Type(Type::KindOfVariant  ));
-
-TypePtr Type::CreateType(KindOf uncertain) {
-  switch (uncertain) {
-  case KindOfObject:
-  case KindOfNumeric:
-  case KindOfPrimitive:
-  case KindOfPlusOperand:
-  case KindOfSequence:
-  case KindOfSome:
-  case KindOfAny:
-    return TypePtr(new Type(uncertain));
-  default:
-    ASSERT(false);
-  }
-  return TypePtr();
-}
 
 TypePtr Type::CreateObjectType(const std::string &classname) {
   return TypePtr(new Type(KindOfObject, classname));
@@ -73,7 +58,7 @@ TypePtr Type::GetType(KindOf kindOf) {
   case KindOfPlusOperand:
   case KindOfSequence:
   case KindOfSome:
-  case KindOfAny:         return CreateType(kindOf);
+  case KindOfAny:         return TypePtr(new Type(kindOf));
   default:
     ASSERT(false);
     break;
@@ -81,204 +66,90 @@ TypePtr Type::GetType(KindOf kindOf) {
   return TypePtr();
 }
 
-bool Type::IsLegalCast(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
-  if (from->m_kindOf == to->m_kindOf ||
-      from->m_kindOf == KindOfVariant ||
-      from->m_kindOf == KindOfSome ||
-      from->m_kindOf == KindOfAny) return true;
-
-  switch (to->m_kindOf) {
-  case KindOfBoolean:
-    return true;
-  case KindOfByte:
-  case KindOfInt16:
-  case KindOfInt32:
-  case KindOfInt64:
-  case KindOfDouble:
-  case KindOfNumeric:
-    switch (from->m_kindOf) {
-    case KindOfArray:
-    case KindOfObject:
-      return false;
-    default:
-      return true;
-    }
-  case KindOfString:
-    switch (from->m_kindOf) {
-    case KindOfArray:
-      return false;
-    case KindOfObject:
-      if (!from->m_name.empty()) {
-        ClassScopePtr cls = ar->findClass(from->m_name);
-        if (cls) {
-          return cls->findFunction(ar, "__tostring", true);
-        }
-      }
-      return true; // we can't really be sure
-    default:
-      return true;
-    }
-  case KindOfArray:
-    return false;
-  case KindOfObject:
-    switch (from->m_kindOf) {
-    case KindOfObject:
-      if (!to->m_name.empty() && !from->m_name.empty() &&
-          to->m_name != from->m_name) {
-        ClassScopePtr cls = ar->findClass(from->m_name);
-        if (cls && !cls->isRedeclaring()) {
-          return cls->derivesFrom(ar, to->m_name, true, true);
-        }
-      }
-      return true; // we can't really be sure
-    default:
-      return false;
-    }
-  case KindOfVariant:
-    return true;
-  case KindOfPrimitive:
-    switch (from->m_kindOf) {
-    case KindOfArray:
-      return false;
-    case KindOfObject:
-      if (!from->m_name.empty()) {
-        ClassScopePtr cls = ar->findClass(from->m_name);
-        if (cls) {
-          return cls->findFunction(ar, "__tostring", true);
-        }
-      }
-      return true; // we can't really be sure
-    default:
-      return true;
-    }
-  case KindOfPlusOperand:
-    switch (from->m_kindOf) {
-    case KindOfBoolean:
-    case KindOfString:
-    case KindOfObject:
-      return false;
-    default:
-      return true;
-    }
-  case KindOfSequence:
-    switch (from->m_kindOf) {
-    case KindOfBoolean:
-    case KindOfByte:
-    case KindOfInt16:
-    case KindOfInt32:
-    case KindOfInt64:
-    case KindOfDouble:
-    case KindOfObject:
-      return false;
-    default:
-      return true;
-    }
-  case KindOfSome:
-  case KindOfAny:
-    return true;
-  default:
-    ASSERT(false);
-  }
-  return false;
-}
-
-TypePtr Type::Cast(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
-  switch (to->m_kindOf) {
-  case KindOfObject:
-    if (from->m_kindOf == KindOfObject && to->m_name.empty() &&
-        !from->m_name.empty()) return from;
-    return to;
-  case KindOfNumeric:
-    switch (from->m_kindOf) {
-    case KindOfBoolean:     return Type::Byte;
-    case KindOfByte:
-    case KindOfInt16:
-    case KindOfInt32:
-    case KindOfInt64:
-    case KindOfDouble:      return from;
-    case KindOfString:
-    case KindOfSequence:    return to;
-    case KindOfArray:
-    case KindOfObject:      return Type::Byte;
-    case KindOfVariant:
-    case KindOfNumeric:
-    case KindOfPrimitive:
-    case KindOfPlusOperand:
-    case KindOfSome:
-    case KindOfAny:         return to;
-    default:
-      ASSERT(false);
-      break;
-    }
-  case KindOfPrimitive:
-    switch (from->m_kindOf) {
-    case KindOfBoolean:     return Type::Byte;
-    case KindOfByte:
-    case KindOfInt16:
-    case KindOfInt32:
-    case KindOfInt64:
-    case KindOfDouble:
-    case KindOfString:      return from;
-    case KindOfArray:       return Type::Byte;
-    case KindOfObject:
-      if (!from->m_name.empty()) {
-        ClassScopePtr cls = ar->findClass(from->m_name);
-        if (cls && cls->findFunction(ar, "__tostring", true)) {
-          return Type::String;
-        }
-      }
-      return Type::Byte;
-    case KindOfVariant:     return to;
-    case KindOfNumeric:     return from;
-    case KindOfPrimitive:   return to;
-    case KindOfPlusOperand: return CreateType(KindOfNumeric);
-    case KindOfSequence:    return Type::String;
-    case KindOfSome:
-    case KindOfAny:         return to;
-    default:
-      ASSERT(false);
-      break;
-    }
-  case KindOfPlusOperand:
-    switch (from->m_kindOf) {
-    case KindOfBoolean:     return Type::Byte;
-    case KindOfByte:
-    case KindOfInt16:
-    case KindOfInt32:
-    case KindOfInt64:
-    case KindOfDouble:
-    case KindOfString:
-    case KindOfArray:       return from;
-    case KindOfObject:      return to;
-    case KindOfVariant:     return from;
-    case KindOfNumeric:     return from;
-    case KindOfPrimitive:   return CreateType(KindOfNumeric);
-    case KindOfPlusOperand: return to;
-    case KindOfSequence:    return Type::Array;
-    case KindOfSome:
-    case KindOfAny:         return to;
-    default:
-      ASSERT(false);
-      break;
-    }
-  case KindOfSome:
-  case KindOfAny:
+TypePtr Type::Intersection(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
+  // Special case: if we're casting to Some or Any, return the "from" type;
+  // if we're casting to Variant, return Variant.
+  if (to->m_kindOf == KindOfSome || to->m_kindOf == KindOfAny) {
     return from;
-  default:
-    return to;
+  } else if (to->m_kindOf == KindOfVariant) {
+    return Variant;
   }
+
+  int resultKind = to->m_kindOf & from->m_kindOf;
+  std::string resultName = "";
+
+  if (resultKind & KindOfObject) {
+    // if they're the same, or we don't know one's name, then use
+    // the other
+    if (to->m_name == from->m_name || from->m_name.empty()) {
+      resultName = to->m_name;
+    } else if (to->m_name.empty()) {
+      resultName = from->m_name;
+    } else {
+      // make sure there's a subclass relation
+      ClassScopePtr cls = ar->findClass(from->m_name);
+      if (cls) {
+        if (cls->derivesFrom(ar, to->m_name, true, false)) {
+          resultName = to->m_name;
+        } else {
+          resultKind &= ~KindOfObject;
+        }
+      }
+    }
+  }
+
+  TypePtr res;
+
+  // If there is overlap (for instance, they were the same, or we've narrowed
+  // down something like Sequenece to be more specific), then return the
+  // intersection of the types.
+  if (resultKind) {
+    res = TypePtr(new Type((KindOf)resultKind, resultName));
+  } else if (from->mustBe(KindOfObject) && to->m_kindOf == KindOfPrimitive) {
+    // Special case Object -> Primitive: can we tostring it?
+    if (!from->m_name.empty()) {
+      ClassScopePtr cls = ar->findClass(from->m_name);
+      if (cls && cls->findFunction(ar, "__tostring", true)) {
+        res = Type::String;
+      }
+    }
+
+    // Otherwise, return Byte
+    res = Byte;
+  } else if (from->m_kindOf == KindOfBoolean
+             && to->mustBe(KindOfNumeric | KindOfArray | KindOfString)
+             && !IsExactType(to->m_kindOf)) {
+    res = Byte;
+  } else {
+    res = to;
+  }
+
+  if (from->mustBe(KindOfBoolean) && to->m_kindOf == KindOfPrimitive) {
+    res = Byte;
+  }
+
+  return res;
 }
 
 bool Type::IsCastNeeded(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
   if (SameType(from, to)) return false;
+  if (!from->m_kindOf) return true;
+  if (!to->m_kindOf) return true;
+
+  // Special case: all Sequence operations are implemented on both String and
+  // Array, and vice versa, therefore no need to cast between these types.
+  if ((from->m_kindOf == KindOfSequence && to->mustBe(KindOfSequence))
+   || (to->m_kindOf == KindOfSequence && from->mustBe(KindOfSequence))) {
+    return false;
+  }
 
   switch (to->m_kindOf) {
   case KindOfVariant:
   case KindOfNumeric:
   case KindOfPrimitive:
   case KindOfPlusOperand:
-  case KindOfSequence:
   case KindOfSome:
+  case KindOfSequence:
   case KindOfAny:
     // Currently these types are all mapped to Variant in runtime/base, and
     // that's why these casting are not needed.
@@ -286,33 +157,12 @@ bool Type::IsCastNeeded(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
   case KindOfObject:
     if (from->m_kindOf == KindOfObject && to->m_name.empty() &&
         !from->m_name.empty()) return false;
+    else return true;
   default:
-    break;
+    // if we don't have a specific type narrowed down, then
+    // it will be a Variant at at runtime, so no cast is needed.
+    return IsExactType(to->m_kindOf);
   }
-
-  // All Sequence operations are implemented on String and Array classes, and
-  // vice versa, therefore no need to cast between these types.
-  switch (from->m_kindOf) {
-  case KindOfString:
-  case KindOfArray:
-    if (to->m_kindOf == KindOfSequence) {
-      return false;
-    }
-    break;
-  case KindOfSequence:
-    switch (to->m_kindOf) {
-    case KindOfString:
-    case KindOfArray:
-      return false;
-    default:
-      break;
-    }
-    break;
-  default:
-    break;
-  }
-
-  return true;
 }
 
 bool Type::IsCoercionNeeded(AnalysisResultPtr ar, TypePtr t1, TypePtr t2) {
@@ -331,75 +181,6 @@ bool Type::IsCoercionNeeded(AnalysisResultPtr ar, TypePtr t1, TypePtr t2) {
   return !Type::IsLegalCast(ar, t1, t2);
 }
 
-/* We have inferred type1 and type2 as the actual types for the same
-   expression.
-   Assert that the types are compatible (it cant be both a string and
-   an integer, for example), and return the combined type.
-*/
-TypePtr Type::Inferred(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {
-  if (!type1) return type2;
-  if (!type2) return type1;
-  KindOf k1 = type1->m_kindOf;
-  KindOf k2 = type2->m_kindOf;
-
-  /* This relation is symmetric. Simplify logic by enforcing k1 < k2 */
-  if (k1 > k2) return Type::Inferred(ar, type2, type1);
-
-  if (k1 == k2) return type1;
-
-  if (k2 == KindOfAny) return type1;
-  if (k2 == KindOfSome) return type1;
-  if (k1 == KindOfVariant) return type2;
-  if (k2 == KindOfVariant) return type1;
-
-
-  if (k1 <= KindOfDouble) {
-    if (k2 <= KindOfDouble ||
-        k2 == KindOfNumeric ||
-        k2 == KindOfPrimitive ||
-        k2 == KindOfPlusOperand)
-      return type1;
-  }
-
-  if (k2 <= KindOfDouble) {
-    if (k1 == KindOfNumeric ||
-           k1 == KindOfPrimitive ||
-           k1 == KindOfPlusOperand)
-      return type2;
-  }
-
-  if (k1 == KindOfArray) {
-    if (k2 == KindOfSequence ||
-        k2 == KindOfPlusOperand)
-      return type1;
-  }
-
-  if (k1 == KindOfString) {
-    if (k2 == KindOfPrimitive ||
-        k2 == KindOfSequence)
-      return type1;
-  }
-
-  if (k1 == KindOfNumeric) {
-    if (k2 == KindOfPrimitive ||
-        k2 == KindOfPlusOperand)
-      return type1;
-  }
-
-  if (k1 == KindOfPrimitive) {
-    if (k2 == KindOfPlusOperand) {
-      return Type::GetType(Type::KindOfNumeric);
-    } else if (k2 == KindOfSequence) {
-      return Type::String;
-    }
-  }
-
-  if (k1 == KindOfPlusOperand && k2 == KindOfSequence)
-    return Type::Array;
-
-  return TypePtr();
-}
-
 TypePtr Type::Coerce(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {
   if (SameType(type1, type2)) return type1;
   if (type1->m_kindOf == KindOfVariant ||
@@ -408,53 +189,125 @@ TypePtr Type::Coerce(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {
   if (type2->m_kindOf == KindOfSome ||
       type2->m_kindOf == KindOfAny) return type1;
 
-  switch (type1->m_kindOf) {
-  case KindOfByte:
-  case KindOfInt16:
-  case KindOfInt32:
-  case KindOfInt64:
-    if (type2->m_kindOf == KindOfDouble) return CreateType(KindOfNumeric);
-    // fall through
-  case KindOfDouble:
-    switch (type2->m_kindOf) {
-    case KindOfInt16:
-    case KindOfInt32:
-    case KindOfInt64:
-    case KindOfDouble:
-    case KindOfNumeric:     return type2;
-    default:
-      break;
+  if (type1->mustBe(KindOfNumeric) && type2->mustBe(Type::KindOfDouble)) {
+    return TypePtr(new Type(KindOfNumeric));
+  } else if (type1->mustBe(KindOfNumeric) &&
+             type2->mustBe(Type::KindOfNumeric)) {
+    return type2;
+  } else if (type1->mustBe(Type::KindOfObject) &&
+             type2->mustBe(Type::KindOfObject)) {
+    if (type1->m_name.empty()) return type1;
+    if (type2->m_name.empty()) return type2;
+    ClassScopePtr cls1 = ar->findClass(type1->m_name);
+     if (cls1 && !cls1->isRedeclaring() &&
+        cls1->derivesFrom(ar, type2->m_name, true, false)) {
+      return type2;
     }
-    break;
-  case KindOfObject:
-    if (type2->m_kindOf == KindOfObject) {
-      if (type1->m_name.empty()) return type1;
-      if (type2->m_name.empty()) return type2;
-      ClassScopePtr cls1 = ar->findClass(type1->m_name);
-      if (cls1 && !cls1->isRedeclaring() &&
-          cls1->derivesFrom(ar, type2->m_name, true, false)) {
-        return type2;
-      }
-      ClassScopePtr cls2 = ar->findClass(type2->m_name);
-      if (cls2 && !cls2->isRedeclaring() &&
-          cls2->derivesFrom(ar, type1->m_name, true, false)) {
-        return type1;
-      }
+    ClassScopePtr cls2 = ar->findClass(type2->m_name);
+    if (cls2 && !cls2->isRedeclaring() &&
+        cls2->derivesFrom(ar, type1->m_name, true, false)) {
+      return type1;
     }
-    break;
-  default:
-    break;
   }
+
   return Type::Variant;
 }
 
+TypePtr Type::Union(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {
+  if (SameType(type1, type2)) {
+    return type1;
+  }
+
+  int resultKind = type1->m_kindOf | type2->m_kindOf;
+  std::string resultName("");
+
+  if (resultKind & KindOfObject) {
+    // if they're the same, or we don't know one's name, then use
+    // the other
+    if (type1->m_name == type2->m_name) {
+      resultName = type1->m_name;
+    } else if (type1->m_name.empty() || type2->m_name.empty()) {
+      // resultName was initialized to "", so leave it as such;
+      // we know it's an object but not what kind.
+    } else {
+      // take the superclass
+      resultName = ClassScope::findCommonParent(ar, type1->m_name,
+                                                    type2->m_name);
+
+    }
+  }
+
+  return TypePtr(new Type((KindOf)resultKind));
+}
+
 bool Type::SameType(TypePtr type1, TypePtr type2) {
+  if (!type1 && !type2) return true;
+  if (!type1 || !type2) return false;
   if (type1->m_kindOf == type2->m_kindOf) {
-    if (type1->m_kindOf == KindOfObject &&
+    if ((type1->m_kindOf & KindOfObject) &&
         type1->m_name != type2->m_name) return false;
     return true;
   }
   return false;
+}
+
+bool Type::IsExactType(KindOf kindOf) {
+  // clever trick thanks to mwilliams - this will evaluate
+  // to true iff exactly one bit is set in kindOf
+  return kindOf && !(kindOf & (kindOf-1));
+}
+
+/* This new IsLegalCast returns true in a few cases where the old version
+ * (which was basically a hardcoded truth table) returned false; it seems
+ * like "true" is in fact the right thing to return. The cases that appear
+ * when compiling www are:
+ *   Sequence -> Array
+ *   PlusOperand -> Array
+ *   String -> PlusOperand
+ *   Boolean -> PlusOperand
+ */
+
+bool Type::IsLegalCast(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
+  if (!from->m_kindOf) return true;
+
+  // since both 'from' and 'to' represent sets of types, we do
+  // this by computing the set of types that we could possibly cast 'from'
+  // to, and then determining whether that overlaps with 'to'.
+  int canCastTo = KindOfBoolean | from->m_kindOf;
+
+  if (from->m_kindOf & KindOfVoid) canCastTo |= KindOfVoid;
+
+  // Boolean, Numeric, and String can all be cast among each other
+  if (from->m_kindOf & (KindOfBoolean | KindOfNumeric | KindOfString)) {
+    canCastTo |= KindOfNumeric | KindOfString;
+  }
+
+  if (from->m_kindOf & KindOfObject) {
+    // Objects can only cast to string if they have __tostring
+    if (from->m_name.empty()) {
+      canCastTo |= KindOfString; // we don't know which class it is
+    } else {
+      ClassScopePtr cls = ar->findClass(from->m_name);
+      if (!cls || cls->isRedeclaring() ||
+          cls->findFunction(ar, "__tostring", true)) {
+        canCastTo |= KindOfString;
+      }
+    }
+
+    // can only cast between objects if there's a subclass relation
+    if ((to->m_kindOf & KindOfObject)  && !to->m_name.empty() &&
+        !from->m_name.empty() && to->m_name != from->m_name) {
+      ClassScopePtr cls = ar->findClass(from->m_name);
+      if (cls && (cls->isRedeclaring() ||
+                  !cls->derivesFrom(ar, to->m_name, true, true))) {
+        canCastTo &= ~KindOfObject;
+      }
+
+    }
+  }
+
+  bool overlap = (to->m_kindOf & canCastTo);
+  return overlap;
 }
 
 bool Type::IsBadTypeConversion(AnalysisResultPtr ar, TypePtr from,
@@ -509,22 +362,11 @@ bool Type::isNonConvertibleType() const {
 }
 
 bool Type::isNoObjectInvolved() const {
-  switch (m_kindOf) {
-  case KindOfVoid:
-  case KindOfBoolean:
-  case KindOfByte:
-  case KindOfInt16:
-  case KindOfInt32:
-  case KindOfInt64:
-  case KindOfDouble:
-  case KindOfString:
-  case KindOfNumeric:
-  case KindOfPrimitive:
+  if (couldBe(KindOfObject)
+   || couldBe(KindOfArray))
+    return false;
+  else
     return true;
-  default:
-    break;
-  }
-  return false;
 }
 
 TypePtr Type::combinedPrimType(TypePtr t1, TypePtr t2) {
@@ -572,9 +414,6 @@ string Type::getCPPDecl() {
   case KindOfDouble:      return "double";
   case KindOfString:      return "String";
   case KindOfArray:       return "Array";
-  case KindOfVariant:
-  case KindOfSome:
-  case KindOfAny:         return "Variant";
   case KindOfNumeric:     return "Numeric";
   case KindOfPrimitive:   return "Primitive";
   case KindOfPlusOperand: return "PlusOperand";
@@ -583,9 +422,9 @@ string Type::getCPPDecl() {
     if (m_name.empty()) return "Object";
     return string("p_") + m_name;
   default:
-    ASSERT(false);
+    return "Variant";
+    break;
   }
-  return "";
 }
 
 void Type::outputCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar) {
@@ -602,7 +441,6 @@ void Type::outputCPPCast(CodeGenerator &cg, AnalysisResultPtr ar) {
   case KindOfDouble:      cg_printf("toDouble");    break;
   case KindOfString:      cg_printf("toString");    break;
   case KindOfArray:       cg_printf("toArray");     break;
-  case KindOfVariant:     cg_printf("Variant");     break;
   case KindOfNumeric:     cg_printf("Numeric");     break;
   case KindOfPrimitive:   cg_printf("Primitive");   break;
   case KindOfPlusOperand: cg_printf("PlusOperand"); break;
@@ -615,7 +453,8 @@ void Type::outputCPPCast(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
     break;
   default:
-    ASSERT(false);
+    cg_printf("Variant");
+    break;
   }
 }
 
@@ -626,21 +465,12 @@ const char *Type::getCPPInitializer() {
   case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:       return "0";
-  case KindOfDouble:      return "0.0";
-  case KindOfString:
-  case KindOfArray:
-  case KindOfSequence:
-  case KindOfVariant:
-  case KindOfSome:
-  case KindOfAny:
-  case KindOfObject:      return NULL;
   case KindOfNumeric:
   case KindOfPrimitive:
   case KindOfPlusOperand: return "0";
-  default:
-    ASSERT(false);
+  case KindOfDouble:      return "0.0";
+  default:                return NULL;
   }
-  return NULL;
 }
 
 std::string Type::getPHPName() {
@@ -671,7 +501,7 @@ std::string Type::toString() const {
   case KindOfPlusOperand: return "PlusOperand";
   case KindOfSequence:    return "Sequence";
   default:
-    ASSERT(false);
+    return boost::str(boost::format("[%x]") % m_kindOf);
   }
   return "(unknown)";
 }
@@ -700,29 +530,68 @@ void Type::count(std::map<std::string, int> &counts) {
     counts[toString()]++;
   }
 
-  switch (m_kindOf) {
-  case KindOfBoolean:
-  case KindOfByte:
-  case KindOfInt16:
-  case KindOfInt32:
-  case KindOfInt64:
-  case KindOfDouble:
-  case KindOfString:
-  case KindOfArray:
-  case KindOfObject:
+  if (IsExactType(m_kindOf)) {
     counts["_strong"]++;
-    break;
-  case KindOfVariant:
-  case KindOfSome:
-  case KindOfAny:
-  case KindOfNumeric:
-  case KindOfPrimitive:
-  case KindOfPlusOperand:
-  case KindOfSequence:
+  } else {
     counts["_weak"]++;
-    break;
-  default:
-    ASSERT(false);
   }
+
   counts["_all"]++;
+}
+
+/* We have inferred type1 and type2 as the actual types for the same
+   expression.
+   Check that the types are compatible (it cant be both a string and
+   an integer, for example), and return the combined type. If they
+   are not compatible, return a null pointer.
+ */
+TypePtr Type::Inferred(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {
+  if (!type1) return type2;
+  if (!type2) return type1;
+  KindOf k1 = type1->m_kindOf;
+  KindOf k2 = type2->m_kindOf;
+
+  if (k1 == k2) return type1;
+
+  // If one set is a subset of the other, return the subset.
+  if ((k1 & k2) == k1) return type1;
+  if ((k1 & k2) == k2) return type2;
+
+  // If one type must be numeric and the other might be, then assume numeric
+  if (type1->mustBe(KindOfNumeric) && type2->couldBe(KindOfNumeric))
+    return type1;
+  if (type2->mustBe(KindOfNumeric) && type1->couldBe(KindOfNumeric))
+    return type2;
+
+  // Otherwise, take the intersection
+  int resultKind = type1->m_kindOf & type2->m_kindOf;
+  std::string resultName = "";
+
+  if (resultKind & KindOfObject) {
+    // if they're the same, or we don't know one's name, then use
+    // the other
+    if (type1->m_name == type2->m_name || type1->m_name.empty()) {
+      resultName = type2->m_name;
+    } else if (type2->m_name.empty()) {
+      resultName = type1->m_name;
+    } else {
+      // take the subclass
+      ClassScopePtr cls1 = ar->findClass(type1->m_name);
+        ClassScopePtr cls2 = ar->findClass(type2->m_name);
+      if (cls1 && !cls1->isRedeclaring()
+          && cls1->derivesFrom(ar, type2->m_name, true, false)) {
+        resultName = type1->m_name;
+      } else if (cls2 && !cls2->isRedeclaring()
+                 && cls2->derivesFrom(ar, type1->m_name, true, false)) {
+        resultName = type2->m_name;
+      } else {
+        resultKind &= ~KindOfObject;
+      }
+    }
+  }
+
+  if (resultKind)
+    return TypePtr(new Type((KindOf)resultKind, resultName));
+  else
+    return TypePtr();
 }

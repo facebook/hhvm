@@ -247,7 +247,7 @@ TypePtr Expression::checkTypesImpl(AnalysisResultPtr ar, TypePtr expectedType,
       ar->getCodeError()->record(shared_from_this(), expectedType->getKindOf(),
                                  actualType->getKindOf());
     }
-    ret = Type::Cast(ar, actualType, expectedType);
+    ret = Type::Intersection(ar, actualType, expectedType);
     setTypes(actualType, ret);
   }
   return ret;

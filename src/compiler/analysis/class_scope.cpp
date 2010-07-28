@@ -332,6 +332,27 @@ bool ClassScope::derivesFrom(AnalysisResultPtr ar,
   return false;
 }
 
+std::string ClassScope::findCommonParent(AnalysisResultPtr ar,
+                                         const std::string cn1,
+                                         const std::string cn2) {
+
+  ClassScopePtr cls1 = ar->findClass(cn1);
+  ClassScopePtr cls2 = ar->findClass(cn2);
+
+  if (!cls1 || cls1->derivesFrom(ar, cn2, true, false)) return cn2;
+  if (!cls2 || cls2->derivesFrom(ar, cn1, true, false)) return cn1;
+
+  // walk up the class hierarchy.
+  BOOST_FOREACH(std::string base1, cls1->m_bases) {
+    BOOST_FOREACH(std::string base2, cls2->m_bases) {
+      std::string parent = findCommonParent(ar, base1, base2);
+      if (!parent.empty()) return parent;
+    }
+  }
+
+  return "";
+}
+
 FunctionScopePtr ClassScope::findFunction(AnalysisResultPtr ar,
                                           const std::string &name,
                                           bool recursive,

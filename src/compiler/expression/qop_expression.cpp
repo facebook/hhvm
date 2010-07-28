@@ -118,9 +118,8 @@ TypePtr QOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                   bool coerce) {
   m_condition->inferAndCheck(ar, Type::Boolean, false);
 
-  TypePtr typeSome = Type::CreateType(Type::KindOfSome);
-  TypePtr typeYes = m_expYes->inferAndCheck(ar, typeSome, coerce);
-  TypePtr typeNo = m_expNo->inferAndCheck(ar, typeSome, coerce);
+  TypePtr typeYes = m_expYes->inferAndCheck(ar, NEW_TYPE(Some), coerce);
+  TypePtr typeNo = m_expNo->inferAndCheck(ar, NEW_TYPE(Some), coerce);
   if (Type::SameType(typeYes, typeNo)
    && m_expYes->isLiteralString() == m_expNo->isLiteralString()) {
     // already the same type, no coercion needed

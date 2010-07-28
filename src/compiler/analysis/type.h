@@ -20,7 +20,7 @@
 #include <compiler/hphp.h>
 #include <util/json.h>
 
-#define NEW_TYPE(s) Type::CreateType(Type::KindOf ## s)
+#define NEW_TYPE(s) TypePtr(new Type(Type::KindOf ## s))
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,27 +32,27 @@ DECLARE_BOOST_TYPES(Type);
 
 class Type : public JSON::ISerializable {
 public:
-  enum KindOf {
-    KindOfVoid = -1,
+  typedef int KindOf;
 
-    KindOfBoolean,
-    KindOfByte,
-    KindOfInt16,
-    KindOfInt32,
-    KindOfInt64,
-    KindOfDouble,
-    KindOfString,
-    KindOfArray,
-    KindOfObject,      // with classname
-    KindOfVariant,
+  static const KindOf KindOfVoid    = 0x0001;
+  static const KindOf KindOfBoolean = 0x0002;
+  static const KindOf KindOfByte    = 0x0004;
+  static const KindOf KindOfInt16   = 0x0008;
+  static const KindOf KindOfInt32   = 0x0010;
+  static const KindOf KindOfInt64   = 0x0020;
+  static const KindOf KindOfDouble  = 0x0040;
+  static const KindOf KindOfString  = 0x0080;
+  static const KindOf KindOfArray   = 0x0100;
+  static const KindOf KindOfObject  = 0x0200;   // with classname
+  static const KindOf KindOfVariant = 0xFFFF;
 
-    KindOfNumeric,     // Byte, Int16, Int32, Int64 or Double
-    KindOfPrimitive,   // Numeric or String
-    KindOfPlusOperand, // Numeric or Array
-    KindOfSequence,    // String  or Array
-    KindOfSome,        // any type except void
-    KindOfAny,         // any type including void
-  };
+  static const KindOf KindOfNumeric = (KindOf)(KindOfDouble | KindOfInt64
+                                    | KindOfInt32 | KindOfInt16 | KindOfByte);
+  static const KindOf KindOfPrimitive = (KindOf)(KindOfNumeric | KindOfString);
+  static const KindOf KindOfPlusOperand = (KindOf)(KindOfNumeric | KindOfArray);
+  static const KindOf KindOfSequence = (KindOf)(KindOfString | KindOfArray);
+  static const KindOf KindOfSome = (KindOf)0x7FFE;
+  static const KindOf KindOfAny = (KindOf)0x7FFF;
 
   /**
    * Inferred types: types that a variable or a constant is sure to be.
@@ -70,7 +70,6 @@ public:
   /**
    * Uncertain types: types that are ambiguous yet.
    */
-  static TypePtr CreateType(KindOf uncertain);
   static TypePtr CreateObjectType(const std::string &classname);
 
   /**
@@ -85,14 +84,17 @@ public:
   static bool IsLegalCast(AnalysisResultPtr ar, TypePtr from, TypePtr to);
 
   /**
-   * Get one single type that both types can convert to.
+   * Find the intersection between two sets of types.
    */
+  static TypePtr Intersection(AnalysisResultPtr ar, TypePtr from, TypePtr to);
   static TypePtr Cast(AnalysisResultPtr ar, TypePtr from, TypePtr to);
 
   /**
    * Whether or not a cast is needed during code generation.
    */
   static bool IsCastNeeded(AnalysisResultPtr ar, TypePtr from, TypePtr to);
+  static bool OldIsCastNeeded(AnalysisResultPtr ar, TypePtr from, TypePtr to);
+  static bool NewIsCastNeeded(AnalysisResultPtr ar, TypePtr from, TypePtr to);
 
   /**
    * When a variable's type is t1, and it's used as t2, do we need to
@@ -106,6 +108,7 @@ public:
    * should be?
    */
   static TypePtr Coerce(AnalysisResultPtr ar, TypePtr type1, TypePtr type2);
+  static TypePtr Union(AnalysisResultPtr ar, TypePtr type1, TypePtr type2);
 
   /**
    * When two types have been inferred for an expression, what type
@@ -123,21 +126,28 @@ public:
    */
   static bool IsBadTypeConversion(AnalysisResultPtr ar, TypePtr from,
                                   TypePtr to, bool coercing);
+  static bool IsExactType(KindOf kindOf);
 
 private:
-  Type(KindOf kindOf);
   Type(KindOf kindOf, const std::string &name);
 
 public:
   /**
    * KindOf testing.
    */
+  Type(KindOf kindOf);
   bool is(KindOf kindOf) const { return m_kindOf == kindOf;}
+  bool isExactType() const { return IsExactType(m_kindOf); }
+  bool mustBe(KindOf kindOf) const { return !(m_kindOf & ~kindOf); }
+  bool couldBe(KindOf kindOf) const { return m_kindOf & kindOf; }
+
   KindOf getKindOf() const { return m_kindOf;}
   bool isInteger() const;
   bool isSpecificObject() const;
   bool isNonConvertibleType() const; // other types cannot convert to them
-  bool isPrimitive() const { return m_kindOf <= KindOfDouble;}
+  bool isPrimitive() const {
+    return IsExactType(m_kindOf) && (m_kindOf <= KindOfDouble);
+  }
   bool isNoObjectInvolved() const;
   const std::string &getName() const { return m_name;}
   static TypePtr combinedPrimType(TypePtr t1, TypePtr t2);

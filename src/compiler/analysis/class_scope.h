@@ -195,6 +195,13 @@ public:
   bool derivesFrom(AnalysisResultPtr ar, const std::string &base,
                    bool strict, bool def) const;
 
+ /**
+  * Find a common parent of two classes; returns "" if there is no such.
+  */
+  static std::string findCommonParent(AnalysisResultPtr ar,
+                                      const std::string cn1,
+                                      const std::string cn2);
+
   /**
    * Look up function by name.
    */

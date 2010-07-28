@@ -290,10 +290,10 @@ ExpressionPtr BinaryOpExpression::simplifyArithmetic(AnalysisResultPtr ar) {
       if ((ival1 == 1 && m_op == '*') || (ival1 == 0 && m_op == '+')) {
         TypePtr actType2 = m_exp2->getActualType();
         TypePtr expType2 = m_exp2->getExpectedType();
-        if ((actType2 &&
-             (actType2->isInteger() || actType2->is(Type::KindOfDouble))) ||
-            (expType2 && expType2->is(Type::KindOfNumeric) &&
-             Type::IsCastNeeded(ar, actType2, expType2))) {
+        if ((actType2 && actType2->mustBe(Type::KindOfNumeric)
+                      && actType2->isExactType()) ||
+            (expType2 && expType2->mustBe(Type::KindOfNumeric)
+                      && Type::IsCastNeeded(ar, actType2, expType2))) {
           return m_exp2;
         }
       }
@@ -318,10 +318,10 @@ ExpressionPtr BinaryOpExpression::simplifyArithmetic(AnalysisResultPtr ar) {
       if ((ival2 == 1 && m_op == '*') || (ival2 == 0 && m_op == '+')) {
         TypePtr actType1 = m_exp1->getActualType();
         TypePtr expType1 = m_exp1->getExpectedType();
-        if ((actType1 &&
-             (actType1->isInteger() || actType1->is(Type::KindOfDouble))) ||
-            (expType1 && expType1->is(Type::KindOfNumeric) &&
-             Type::IsCastNeeded(ar, actType1, expType1))) {
+        if ((actType1 && actType1->mustBe(Type::KindOfNumeric)
+                      && actType1->isExactType()) ||
+            (expType1 && expType1->mustBe(Type::KindOfNumeric)
+                      && Type::IsCastNeeded(ar, actType1, expType1))) {
           return m_exp1;
         }
       }
@@ -618,7 +618,7 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     break;
 
   case T_INSTANCEOF:
-    et1 = Type::CreateType(Type::KindOfAny);
+    et1 = NEW_TYPE(Any);
     et2 = Type::String;
     rt = Type::Boolean;
     break;

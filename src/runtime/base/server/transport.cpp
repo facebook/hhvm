@@ -22,6 +22,7 @@
 #include <util/compression.h>
 #include <util/util.h>
 #include <util/logger.h>
+#include <runtime/base/string_util.h>
 #include <runtime/base/time/datetime.h>
 #include <runtime/base/zend/zend_url.h>
 #include <runtime/base/runtime_option.h>
@@ -523,7 +524,7 @@ bool Transport::setCookie(CStrRef name, CStrRef value, int expire /* = 0 */,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Transport::prepareHeaders(bool compressed) {
+void Transport::prepareHeaders(bool compressed, const void *data, int size) {
   FiberReadLock lock(this);
   for (HeaderMap::const_iterator iter = m_responseHeaders.begin();
        iter != m_responseHeaders.end(); ++iter) {
@@ -541,7 +542,12 @@ void Transport::prepareHeaders(bool compressed) {
   if (compressed) {
     addHeaderImpl("Content-Encoding", "gzip");
     removeHeaderImpl("Content-Length");
-    removeHeaderImpl("Content-MD5");
+    if (m_responseHeaders.find("Content-MD5") != m_responseHeaders.end()) {
+      String response((const char *)data, size, AttachLiteral);
+      replaceHeader("Content-MD5",
+                    StringUtil::Base64Encode(
+                      StringUtil::MD5(response, true)).c_str());
+    }
   }
 
   if (m_responseHeaders.find("Content-Type") == m_responseHeaders.end()) {
@@ -631,7 +637,7 @@ void Transport::sendRaw(void *data, int size, int code /* = 200 */,
 
   // HTTP header handling
   if (!m_headerSent) {
-    prepareHeaders(compressed);
+    prepareHeaders(compressed, data, size);
     m_headerSent = true;
   }
 

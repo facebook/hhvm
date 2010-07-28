@@ -333,7 +333,7 @@ protected:
   static void urlUnescape(char *value);
   bool splitHeader(CStrRef header, String &name, const char *&value);
 
-  void prepareHeaders(bool compressed);
+  void prepareHeaders(bool compressed, const void *data, int size);
   String prepareResponse(const void *data, int size, bool &compressed,
                          bool last);
 };

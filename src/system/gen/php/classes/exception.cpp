@@ -4508,7 +4508,7 @@ void c_exception::t___init__() {
 
   {
     const Array &tmp1((x_debug_backtrace()));
-    (m_trace = tmp1);
+    m_trace = tmp1;
   }
   LOOP_COUNTER(2);
   {
@@ -4517,7 +4517,7 @@ void c_exception::t___init__() {
       {
         {
           Variant tmp3((m_trace.rvalAt(0LL, 0x77CFA1EEF01BCA90LL, true)));
-          (v_top = tmp3);
+          v_top = tmp3;
         }
         {
           bool tmp4;
@@ -4530,9 +4530,9 @@ void c_exception::t___init__() {
                 String tmp8((toString(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
                 tmp6 = (toBoolean(x_strcasecmp(tmp7, tmp8)));
               }
-              tmp5 = ((tmp6));
+              tmp5 = (tmp6);
             }
-            tmp4 = ((tmp5 || ((toBoolean(x_strcasecmp(toString(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)), "exception")) && !(x_is_subclass_of(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true), "exception"))))));
+            tmp4 = ((tmp5 || (toBoolean(x_strcasecmp(toString(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true)), "exception")) && !(x_is_subclass_of(v_top.rvalAt("class", 0x45397FE5C82CBD12LL, true, true), "exception")))));
           }
           if (tmp4) {
             {
@@ -4542,7 +4542,7 @@ void c_exception::t___init__() {
         }
         {
           const Variant &tmp9((x_array_shift(ref(lval(m_trace)))));
-          (v_frame = tmp9);
+          v_frame = tmp9;
         }
       }
     }
@@ -4550,13 +4550,13 @@ void c_exception::t___init__() {
   if (isset(v_frame, "file", 0x08C19339767C0884LL, true)) {
     {
       Variant tmp10((v_frame.rvalAt("file", 0x08C19339767C0884LL, true, true)));
-      (m_file = tmp10);
+      m_file = tmp10;
     }
   }
   if (isset(v_frame, "line", 0x21093C71DDF9728CLL, true)) {
     {
       Variant tmp11((v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true)));
-      (m_line = tmp11);
+      m_line = tmp11;
     }
   }
 } /* function */
@@ -4566,8 +4566,8 @@ void c_exception::t___construct(Variant v_message //  = ""
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__construct);
   bool oldInCtor = gasInCtor(true);
-  (m_message = v_message);
-  (m_code = v_code);
+  m_message = v_message;
+  m_code = v_code;
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/exception.php line 43 */
@@ -4602,42 +4602,42 @@ String c_exception::t_gettraceasstring() {
   String v_s;
   Variant v_frame;
 
-  (v_i = 0LL);
-  (v_s = "");
+  v_i = 0LL;
+  v_s = "";
   {
-    LOOP_COUNTER(12);
-    Variant map13 = t_gettrace();
+    LOOP_COUNTER(1);
+    Variant map2 = t_gettrace();
     {
       StringBuffer tmp_sbuf_v_s(512);
-      for (ArrayIterPtr iter14 = map13.begin("exception"); !iter14->end(); iter14->next()) {
-        LOOP_COUNTER_CHECK(12);
-        iter14->second(v_frame);
+      for (ArrayIterPtr iter3 = map2.begin("exception"); !iter3->end(); iter3->next()) {
+        LOOP_COUNTER_CHECK(1);
+        iter3->second(v_frame);
         {
           if (!(x_is_array(v_frame))) {
             continue;
           }
           {
-            StringBuffer tmp15_buf;
-            tmp15_buf.append("#", 1);
-            tmp15_buf.append(toString(v_i));
-            tmp15_buf.append(" ", 1);
-            tmp15_buf.append(toString(v_frame.rvalAt("file", 0x08C19339767C0884LL, true, true)));
-            tmp15_buf.append("(", 1);
-            tmp15_buf.append(toString(v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true)));
-            tmp15_buf.append("): ", 3);
-            Variant tmp16;
+            StringBuffer tmp4_buf;
+            tmp4_buf.append("#", 1);
+            tmp4_buf.append(toString(v_i));
+            tmp4_buf.append(" ", 1);
+            tmp4_buf.append(toString(v_frame.rvalAt("file", 0x08C19339767C0884LL, true, true)));
+            tmp4_buf.append("(", 1);
+            tmp4_buf.append(toString(v_frame.rvalAt("line", 0x21093C71DDF9728CLL, true, true)));
+            tmp4_buf.append("): ", 3);
+            Variant tmp5;
             if (isset(v_frame, "class", 0x45397FE5C82CBD12LL, true)) {
-              String tmp17((toString(v_frame.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
-              String tmp18((toString(v_frame.rvalAt("type", 0x508FC7C8724B760ALL, true, true))));
-              tmp16 = (concat(tmp17, tmp18));
+              String tmp6((toString(v_frame.rvalAt("class", 0x45397FE5C82CBD12LL, true, true))));
+              String tmp7((toString(v_frame.rvalAt("type", 0x508FC7C8724B760ALL, true, true))));
+              tmp5 = (concat(tmp6, tmp7));
             } else {
-              tmp16 = ("");
+              tmp5 = ("");
             }
-            tmp15_buf.append(toString(tmp16));
-            tmp15_buf.append(toString(v_frame.rvalAt("function", 0x736D912A52413931LL, true, true)));
-            tmp15_buf.append("()\n", 3);
-            CStrRef tmp15(tmp15_buf.detach());
-            tmp_sbuf_v_s.add(tmp15);
+            tmp4_buf.append(toString(tmp5));
+            tmp4_buf.append(toString(v_frame.rvalAt("function", 0x736D912A52413931LL, true, true)));
+            tmp4_buf.append("()\n", 3);
+            CStrRef tmp4(tmp4_buf.detach());
+            tmp_sbuf_v_s.add(tmp4);
           }
           v_i++;
         }
@@ -5216,15 +5216,15 @@ void c_errorexception::t___construct(Variant v_message //  = ""
   INSTANCE_METHOD_INJECTION_BUILTIN(ErrorException, ErrorException::__construct);
   bool oldInCtor = gasInCtor(true);
   c_exception::t___construct(v_message, v_code);
-  (m_severity = v_severity);
+  m_severity = v_severity;
   if (!(x_is_null(v_filename))) {
     {
-      (m_file = v_filename);
+      m_file = v_filename;
     }
   }
   if (!(x_is_null(v_lineno))) {
     {
-      (m_line = v_lineno);
+      m_line = v_lineno;
     }
   }
   gasInCtor(oldInCtor);

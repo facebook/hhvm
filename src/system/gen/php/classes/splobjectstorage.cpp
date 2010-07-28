@@ -576,8 +576,8 @@ void c_splobjectstorage::t_attach(CVarRef v_obj) {
   if ((x_is_object(v_obj) && !(t_contains(v_obj)))) {
     {
       {
-        Variant tmp4((v_obj));
-        m_storage.append((tmp4));
+        Variant tmp1((v_obj));
+        m_storage.append((tmp1));
       }
     }
   }
@@ -592,12 +592,12 @@ void c_splobjectstorage::t_detach(CVarRef v_obj) {
   if (x_is_object(v_obj)) {
     {
       {
-        LOOP_COUNTER(5);
-        Variant map6 = m_storage;
-        for (ArrayIterPtr iter7 = map6.begin("splobjectstorage"); !iter7->end(); iter7->next()) {
-          LOOP_COUNTER_CHECK(5);
-          iter7->second(v_object);
-          v_idx = iter7->first();
+        LOOP_COUNTER(1);
+        Variant map2 = m_storage;
+        for (ArrayIterPtr iter3 = map2.begin("splobjectstorage"); !iter3->end(); iter3->next()) {
+          LOOP_COUNTER_CHECK(1);
+          iter3->second(v_object);
+          v_idx = iter3->first();
           {
             if (same(v_object, v_obj)) {
               {

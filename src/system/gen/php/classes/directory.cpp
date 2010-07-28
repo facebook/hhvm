@@ -369,10 +369,10 @@ void c_directory::init() {
 void c_directory::t___construct(Variant v_path) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::__construct);
   bool oldInCtor = gasInCtor(true);
-  (m_path = v_path);
+  m_path = v_path;
   {
     const Variant &tmp1((x_opendir(toString(v_path))));
-    (m_handle = tmp1);
+    m_handle = tmp1;
   }
   gasInCtor(oldInCtor);
 } /* function */

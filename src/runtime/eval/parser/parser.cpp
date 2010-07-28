@@ -97,7 +97,7 @@ StatementPtr Parser::parseString(const char *input,
   stringstream ss;
   istream *is = RuntimeOption::EnableXHP ? preprocessXHP(iss, ss, "") : &iss;
   Scanner scanner(new ylmm::basic_buffer(*is, false, true), true, false);
-  Parser parser(scanner, NULL, statics);
+  Parser parser(scanner, "eval()'d code", statics);
   if (parser.parse()) {
     scanner.flushFlex();
     raise_error("Error parsing %s: %s", input,

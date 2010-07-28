@@ -30,7 +30,8 @@ SourceRootInfo::SourceRootInfo(const char *host)
   : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxOn : SandboxOff) {
   if (!sandboxOn()) return;
   Variant matches;
-  Variant r = preg_match(RuntimeOption::SandboxPattern, host, matches);
+  Variant r = preg_match(String(RuntimeOption::SandboxPattern.c_str(),
+        RuntimeOption::SandboxPattern.size(), AttachLiteral), host, matches);
   if (!r.same(1)) {
     m_sandboxCond = SandboxOff;
     return;

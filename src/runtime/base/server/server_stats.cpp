@@ -148,7 +148,9 @@ void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
              riter != rules.end(); ++riter) {
           const string &rule = riter->first;
           if (rule[0] == ':') {
-            Variant ret = preg_match(String(rule), String(key));
+            Variant ret = preg_match(String(rule.c_str(), rule.size(),
+                  AttachLiteral),
+                String(key.c_str(), key.size(), AttachLiteral));
             if (!same(ret, false) && more(ret, 0)) {
               wantedKeys[key] |= riter->second;
             }

@@ -249,16 +249,19 @@ void Util::syncdir(const std::string &dest_, const std::string &src_,
 }
 
 int Util::copy(const char *srcfile, const char *dstfile) {
-  int srcFd = open(srcfile, O_RDONLY);
+#define BUFSIZE (1 << 20)
+  int srcFd = open(srcfile, O_RDONLY | O_DIRECT);
   if (srcFd == -1) return -1;
-  int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+  int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC | O_DIRECT, 0666);
   if (dstFd == -1) return -1;
-  char buf[8192];
-  ssize_t bytes;
+  int pagesize = getpagesize();
+  char *rbuf = (char *)malloc(BUFSIZE + pagesize);
+  char *buf = (char *) // align for O_DIRECT
+    ((((unsigned long)rbuf + pagesize - 1) / pagesize) * pagesize);
 
   while (1) {
     bool err = false;
-    bytes = read(srcFd, buf, sizeof(buf));
+    ssize_t bytes = read(srcFd, buf, BUFSIZE);
     if (bytes == 0) break;
     if (bytes == -1) {
       err = true;
@@ -270,11 +273,13 @@ int Util::copy(const char *srcfile, const char *dstfile) {
     if (err) {
       close(srcFd);
       close(dstFd);
+      free(rbuf);
       return -1;
     }
   }
   close(srcFd);
   close(dstFd);
+  free(rbuf);
   return 0;
 }
 

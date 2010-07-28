@@ -437,17 +437,38 @@ public:
   /**
    * Start a new frame with the specified symbol.
    */
-  void beginFrame(const char *symbol) __attribute__ ((noinline)) ;
+  virtual void beginFrame(const char *symbol) __attribute__ ((noinline)) ;
 
   /**
    * End top of the stack.
    */
-  void endFrame(bool endMain = false) __attribute__ ((noinline)) ;
+  virtual void endFrame(bool endMain = false) __attribute__ ((noinline)) ;
 
   void endAllFrames() {
     while (m_stack) {
       endFrame(true);
     }
+  }
+
+  template<class phpret, class StatsMap>
+  bool extractStats(phpret& ret, StatsMap& m_stats, bool cpu, bool memory)
+  { 
+    for (typename StatsMap::const_iterator iter = m_stats.begin();
+         iter != m_stats.end(); ++iter) {
+      const typename StatsMap::mapped_type &counts = iter->second;
+      Array arr;
+      arr.set("ct",  counts.count);
+      arr.set("wt",  cycles_to_usec(counts.wall_time, m_cur_cpu_id));
+      if (cpu) {
+        arr.set("cpu", cycles_to_usec(counts.cpu, m_cur_cpu_id));
+      }
+      if (memory) {
+        arr.set("mu",  counts.memory);
+        arr.set("pmu", counts.peak_memory);
+      }
+      ret.set(String(iter->first), arr);
+    }
+    return true;
   }
 
 protected:
@@ -643,6 +664,8 @@ public:
     TrackCPU      = 2,
     TrackMemory   = 4,
     TrackVtsc     = 8,
+    Trace         = 16,
+    MeasureXhprofDisable = 32,
   };
 
 public:
@@ -686,26 +709,232 @@ public:
   }
 
   virtual void writeStats(Array &ret) {
-    for (StatsMap::const_iterator iter = m_stats.begin();
-         iter != m_stats.end(); ++iter) {
-      const CountMap &counts = iter->second;
-      Array arr;
-      arr.set("ct",  counts.count);
-      arr.set("wt",  cycles_to_usec(counts.wall_time, m_cur_cpu_id));
-      if (m_flags & TrackCPU) {
-        arr.set("cpu", cycles_to_usec(counts.cpu, m_cur_cpu_id));
-      }
-      if (m_flags & TrackMemory) {
-        arr.set("mu",  counts.memory);
-        arr.set("pmu", counts.peak_memory);
-      }
-      ret.set(String(iter->first), arr);
-    }
+    extractStats(ret, m_stats, m_flags & TrackCPU, m_flags & TrackMemory);
   }
 
 private:
   uint32 m_flags;
 };
+
+using namespace std;
+
+template <class TraceIt, class Stats>
+class walkTraceClass {
+public:
+  struct Frame {
+    TraceIt trace;
+    int level;
+    int len;
+  };
+  typedef vector<std::pair<char *, int> >Recursion;
+  vector<std::pair<char *, int> >recursion;
+  map<const char *, unsigned>functionLevel;
+  vector<Frame> stack;
+
+  walkTraceClass() : arc_buff_len(200), arc_buff((char*)malloc(200)) {}
+  ~walkTraceClass() {
+    free((void*)arc_buff);
+    if (recursion.size() > 1) {
+      Recursion::iterator r_it = recursion.begin();
+      while (++r_it != recursion.end()) {
+        delete[] r_it->first;
+      }
+    }
+  }
+
+  int arc_buff_len;
+  char *arc_buff;
+
+  void checkArcBuff(int len) {
+    len = 2*len + HP_STACK_DELIM_LEN + 2;
+    if (len >= arc_buff_len) {
+      arc_buff_len *= 2;
+      arc_buff = (char *)realloc(arc_buff, arc_buff_len);
+      if (arc_buff) {
+        throw bad_alloc();
+      }
+    }
+  }
+
+  void incStats(const char *arc, TraceIt tr, const Frame& fr, Stats& stats)
+  {
+    typename Stats::mapped_type& st = stats[arc];
+    ++st.count;
+    st.wall_time += tr->wall_time - fr.trace->wall_time;
+    st.cpu += tr->cpu - fr.trace->cpu;
+    st.memory += tr->memory - fr.trace->memory;
+    st.peak_memory += tr->peak_memory - fr.trace->peak_memory;
+  }
+
+  void popFrame(TraceIt trace, std::vector<Frame>& stack, Stats& stats)
+  {
+    Frame callee = stack.back();
+    stack.pop_back();
+    const char* arc;
+    Frame& caller = stack.back();
+    char *cp = arc_buff;
+    memcpy(cp, caller.trace->symbol, caller.len);
+    cp += caller.len;
+    if (caller.level >= 1) {
+      pair<char *, int>& lvl = recursion[caller.level];
+      memcpy(cp, lvl.first, lvl.second);
+      cp += lvl.second;
+    }
+    memcpy(cp, HP_STACK_DELIM, HP_STACK_DELIM_LEN);
+    cp += HP_STACK_DELIM_LEN;
+    memcpy(cp, callee.trace->symbol, callee.len);
+    cp += callee.len;
+    if (callee.level >= 1) {
+      pair<char *, int>& lvl = recursion[callee.level];
+      memcpy(cp, lvl.first, lvl.second);
+      cp += lvl.second;
+    }
+    *cp = 0;
+    arc = arc_buff;
+    incStats(arc, trace, callee, stats);
+  }
+
+  void walk(TraceIt begin, TraceIt end, Stats& stats)
+  {
+    recursion.push_back(make_pair((char *)NULL, 0));
+    while (begin != end && !begin->symbol) {
+      ++begin;
+    }
+    TraceIt lastIt = begin;
+    while (begin != end) {
+      lastIt = begin;
+      if (begin->symbol) {
+        unsigned level = ++functionLevel[begin->symbol];
+        if (level >= recursion.size()) {
+          char *level_string = new char[8];
+          sprintf(level_string, "@%u", level);
+          recursion.push_back(make_pair(level_string, strlen(level_string)));
+        }
+        Frame fr;
+        fr.trace = begin;
+        fr.level = level - 1;
+        fr.len = strlen(begin->symbol);
+        checkArcBuff(fr.len);
+        stack.push_back(fr);
+      } else if (stack.size() > 1) {
+        --functionLevel[stack.back().trace->symbol];
+        popFrame(begin, stack, stats);
+      }
+      ++begin;
+    }
+  }
+
+  void finishTrace(TraceIt finishIt, Stats& stats) {
+    while (stack.size() > 1) {
+      popFrame(finishIt, stack, stats);
+    }
+    if (!stack.empty()) {
+      incStats(stack.back().trace->symbol, finishIt, stack.back(),  stats);
+    }
+  }
+};
+
+template<class TraceIt, class Stats, class Tracer>
+static void
+walkTrace(TraceIt begin, TraceIt end, Stats& stats, Tracer& tracer)
+{
+  walkTraceClass<TraceIt, Stats>walker;
+  walker.walk(begin, end, stats);
+  walker.finishTrace(tracer.finish(), stats);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// TraceProfiler
+
+class TraceProfiler : public Profiler {
+public:
+  struct TraceEnt {
+    const char *symbol;	// null on function return
+    int64 wall_time;
+    int64 cpu;
+    int64 memory;
+    int64 peak_memory;
+  };
+  typedef std::deque<TraceEnt> Trace;
+  Trace trace;
+  enum Flag {
+    TrackBuiltins = 1,
+    TrackCPU      = 2,
+    TrackMemory   = 4,
+    TrackVtsc     = 8,
+    MeasureXhprofDisable = 32,
+  };
+
+  class CountMap {
+  public:
+    CountMap() : count(0), wall_time(0), cpu(0), memory(0), peak_memory(0) {}
+
+    int64 count;
+    int64 wall_time;
+    int64 cpu;
+    int64 memory;
+    int64 peak_memory;
+  };
+  typedef __gnu_cxx::hash_map<std::string, CountMap, string_hash> StatsMap;
+  StatsMap m_stats; // outcome
+
+  TraceProfiler(int flags) : Profiler(), m_flags(flags) { }
+
+  virtual void beginFrame(const char *symbol) {
+    doTrace(symbol);
+  }
+
+  virtual void endFrame(bool endMain = false) {
+    doTrace(NULL);
+  }
+
+  void collectStats(const char *symbol, TraceEnt& te) {
+    te.symbol = symbol;
+    te.wall_time = tsc();
+    te.cpu = 0;
+    if (m_flags & TrackCPU) {
+      te.cpu = vtsc(m_cur_cpu_id);
+    } 
+    if (m_flags & TrackMemory) {
+      MemoryManager *mm = MemoryManager::TheMemoryManager().get();
+      const MemoryUsageStats &stats = mm->getStats();
+      te.memory = stats.usage;
+      te.peak_memory = stats.peakUsage;
+    } else {
+      te.memory = 0;
+      te.peak_memory = 0;
+    }
+  }
+
+  void doTrace(const char *symbol) {
+    TraceEnt te;
+    collectStats(symbol, te);
+    trace.push_back(te);
+  }
+
+  Trace::iterator finish() {
+    TraceEnt te;
+    if (m_flags & MeasureXhprofDisable) {
+      // add a new trace point reflecting the cost of measurement
+      collectStats(NULL, te);
+    } else {
+      // duplicate the last trace point to exclude measurement cost
+      te = trace.back();
+      te.symbol = NULL;
+    }
+    trace.push_front(te);
+    return trace.begin();
+  }
+
+  virtual void writeStats(Array &ret) {
+    walkTrace(trace.begin(), trace.end(), m_stats, *this);
+    extractStats(ret, m_stats, m_flags & TrackCPU, m_flags & TrackMemory);
+  }
+
+private:
+  uint32 m_flags;
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // SampleProfiler
@@ -824,6 +1053,7 @@ public:
     Simple       = 1,
     Hierarchical = 2,
     Memory       = 3,
+    Trace        = 4,
     Sample       = 620002, // Rockfort's zip code
   };
 
@@ -857,6 +1087,9 @@ public:
         break;
       case Sample:
         m_profiler = new SampleProfiler();
+        break;
+      case Trace:
+        m_profiler = new TraceProfiler(flags);
         break;
       default:
         throw_invalid_argument("level: %d", level);
@@ -939,7 +1172,11 @@ void f_xhprof_enable(int flags/* = 0 */,
   if (flags & HierarchicalProfiler::TrackVtsc) {
     flags |= HierarchicalProfiler::TrackCPU;
   }
-  s_factory->start(ProfilerFactory::Hierarchical, flags);
+  if (flags & HierarchicalProfiler::Trace) {
+    s_factory->start(ProfilerFactory::Trace, flags);
+  } else {
+    s_factory->start(ProfilerFactory::Hierarchical, flags);
+  }
 #endif
 }
 
@@ -971,6 +1208,9 @@ const int64 k_XHPROF_FLAGS_NO_BUILTINS = HierarchicalProfiler::TrackBuiltins;
 const int64 k_XHPROF_FLAGS_CPU = HierarchicalProfiler::TrackCPU;
 const int64 k_XHPROF_FLAGS_MEMORY = HierarchicalProfiler::TrackMemory;
 const int64 k_XHPROF_FLAGS_VTSC = HierarchicalProfiler::TrackVtsc;
+const int64 k_XHPROF_FLAGS_TRACE = HierarchicalProfiler::Trace;
+const int64 k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE
+                                  = HierarchicalProfiler::MeasureXhprofDisable;
 
 ///////////////////////////////////////////////////////////////////////////////
 // injected code

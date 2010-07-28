@@ -116,6 +116,7 @@ extern const int64 k_UCOL_HIRAGANA_QUATERNARY_MODE;
 extern const int64 k_UCOL_STRENGTH;
 extern const int64 k_UCOL_TERTIARY;
 extern const int64 k_XHPROF_FLAGS_NO_BUILTINS;
+extern const int64 k_XHPROF_FLAGS_TRACE;
 extern const int64 k_XHPROF_FLAGS_VTSC;
 extern const int64 k_FB_UNSERIALIZE_NONSTRING_VALUE;
 extern const int64 k_UCOL_UPPER_FIRST;
@@ -141,6 +142,7 @@ extern const int64 k_SQLITE3_NULL;
 extern const int64 k_UCOL_NON_IGNORABLE;
 extern const int64 k_FB_UNSERIALIZE_UNEXPECTED_END;
 extern const int64 k_SQLITE3_BLOB;
+extern const int64 k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE;
 
 
 ///////////////////////////////////////////////////////////////////////////////

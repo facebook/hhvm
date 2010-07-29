@@ -122,7 +122,7 @@ bool f_defined(CStrRef name) {
       }
     }
     if (class_exists(className)) { // taking care of volatile class
-      const ClassInfo::ClassInfo *info;
+      const ClassInfo *info;
       for (const char *parentClass = className.data();
            parentClass && *parentClass;
            parentClass = info->getParentClass()) {

@@ -86,7 +86,7 @@ Variant f_gethostbyaddr(CStrRef ip_address) {
 
   for (res = res0; res; res = res->ai_next) {
     if (getnameinfo(res->ai_addr, res->ai_addrlen, h_name, NI_MAXHOST,
-          NULL, NULL, 0) < 0) {
+          NULL, 0, 0) < 0) {
       continue;
     }
     freeaddrinfo(res0);

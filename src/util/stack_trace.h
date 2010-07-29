@@ -175,17 +175,17 @@ private:
   /**
    * Generate an output of the written stack trace.
    */
-  void print(FILE *f) const;
+  void printStackTrace(int fd) const;
 
   /**
    * Translate a frame pointer to file name and line number pair.
    */
-  static bool Translate(FILE *f, void *bt, int frame_num) ;
+  static bool Translate(int fd, void *bt, int frame_num) ;
 
   /**
    * Demangle a function name.
    */
-  static void Demangle(FILE *f, const char *mangled);
+  static void Demangle(int fd, const char *mangled);
 
   void *m_btpointers[MAXFRAME];
   unsigned int m_btpointers_cnt;

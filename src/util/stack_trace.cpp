@@ -218,11 +218,12 @@ const std::string &StackTrace::toString() const {
   return m_bt;
 }
 
-void StackTraceNoHeap::print(FILE *f) const {
-  int frame=0;
-  for (unsigned int i=0; i<m_btpointers_cnt; i++) {
-    if (!Translate(f, m_btpointers[i], frame)) continue;;
-    frame++;
+void StackTraceNoHeap::printStackTrace(int fd) const {
+  int frame = 0;
+  for (unsigned int i = 0; i < m_btpointers_cnt; i++) {
+    if (Translate(fd, m_btpointers[i], frame)) {
+      frame++;
+    }
   }
 }
 
@@ -286,6 +287,8 @@ void StackTraceNoHeap::log(const char *errorType, const char *tracefn,
     dprintf(fd, "%s: %s\n", iter->first.c_str(), iter->second.c_str());
   }
   dprintf(fd, "\n");
+
+  printStackTrace(fd);
 
   ::close(fd);
 }
@@ -355,7 +358,7 @@ StackTrace::FramePtr StackTrace::Translate(void *frame) {
   return f;
 }
 
-bool StackTraceNoHeap::Translate(FILE *fp, void *frame, int frame_num) {
+bool StackTraceNoHeap::Translate(int fd, void *frame, int frame_num) {
   // frame pointer offset in previous frame
   Dl_info dlInfo;
   addr2line_data adata;
@@ -373,9 +376,9 @@ bool StackTraceNoHeap::Translate(FILE *fp, void *frame, int frame_num) {
   // ignore frames in the StackTrace class
   if (strstr(funcname, "StackTraceNoHeap")) return false ;
 
-  fprintf(fp, "# %d%s ", frame_num, frame_num < 10 ? " " : "");
-  Demangle(fp, funcname);
-  fprintf(fp, " at %s:%u\n", filename, f.lineno);
+  dprintf(fd, "# %d%s ", frame_num, frame_num < 10 ? " " : "");
+  Demangle(fd, funcname);
+  dprintf(fd, " at %s:%u\n", filename, f.lineno);
 
   return true;
 }
@@ -555,10 +558,10 @@ std::string StackTrace::Demangle(const char *mangled) {
 #endif
 }
 
-void StackTraceNoHeap::Demangle(FILE *f, const char *mangled) {
+void StackTraceNoHeap::Demangle(int fd, const char *mangled) {
   assert(mangled);
   if (!mangled || !*mangled) {
-    fprintf(f, "??");
+    dprintf(fd, "??");
     return ;
   }
 
@@ -567,15 +570,16 @@ void StackTraceNoHeap::Demangle(FILE *f, const char *mangled) {
   if (mangled[0] == '.' || mangled[0] == '$') ++skip_first;
   //if (mangled[skip_first] == '_') ++skip_first;
 
-  char *result = cplus_demangle(mangled + skip_first, DMGL_PARAMS | DMGL_ANSI | DMGL_VERBOSE);
+  char *result = cplus_demangle(mangled + skip_first,
+                                DMGL_PARAMS | DMGL_ANSI | DMGL_VERBOSE);
   if (result == NULL) {
-    fprintf (f, "%s", mangled);
+    dprintf(fd, "%s", mangled);
     return;
   }
-  fprintf (f, "%s%s", mangled[0]=='.' ? "." : "", result);
+  dprintf(fd, "%s%s", mangled[0]=='.' ? "." : "", result);
   return ;
 #else
-  fprintf (f, "%s", mangled);
+  dprintf(fd, "%s", mangled);
   return ;
 #endif
 }

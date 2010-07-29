@@ -581,6 +581,8 @@ int process(const ProgramOptions &po) {
     int seconds = timer.getMicroSeconds() / 1000000;
 
     Logger::Info("saving code errors, dependency graph and stats...");
+    Timer timer(Timer::WallTime, "saving stats");
+
     if (!po.dbStats.empty()) {
       try {
         ServerDataPtr server = ServerData::Create(po.dbStats);

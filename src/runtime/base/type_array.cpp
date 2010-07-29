@@ -397,12 +397,6 @@ Variant Array::rvalAt(int64 key, int64 prehash /* = -1 */,
   return null_variant;
 }
 
-Variant Array::rvalAt(ssize_t key, int64 prehash /* = -1 */,
-                      bool error /* = false */) const {
-  if (m_px) return m_px->get((int64)key, error);
-  return null_variant;
-}
-
 Variant Array::rvalAt(double key, int64 prehash /* = -1 */,
                       bool error /* = false */) const {
   if (m_px) return m_px->get((int64)key, prehash, error);

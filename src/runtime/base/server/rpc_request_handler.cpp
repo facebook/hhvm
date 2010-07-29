@@ -50,6 +50,7 @@ bool RPCRequestHandler::needReset() const {
 
 void RPCRequestHandler::handleRequest(Transport *transport) {
   Logger::OnNewRequest();
+  m_context->setTransport(transport);
   transport->enableCompression();
 
   ServerStatsHelper ssh("all", true);

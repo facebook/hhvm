@@ -497,7 +497,6 @@ Array c_memcache::t_getextendedstats(CStrRef type /* = null_string */,
   }
 
   int server_count = memcached_server_count(&m_memcache);
-  memcached_server_st *servers = memcached_server_list(&m_memcache);
 
   Array return_val;
 
@@ -507,7 +506,7 @@ Array c_memcache::t_getextendedstats(CStrRef type /* = null_string */,
     char stats_key[30] = {0};
     size_t key_len;
 
-    server = servers + server_id;
+    server = &m_memcache.servers[server_id];
     stat = stats + server_id;
 
     Array server_stats = memcache_build_stats(&m_memcache, stat, &ret);

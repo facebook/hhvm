@@ -33,7 +33,7 @@ link_directories(${MYSQL_LIB_DIR})
 
 # libmemcached checks
 find_package(Libmemcached REQUIRED)
-include_directories(${LIBMEMCACHED_INCLUDE_DIRS})
+include_directories(${LIBMEMCACHED_INCLUDE_DIR})
 
 # pcre checks
 find_package(PCRE REQUIRED)

@@ -24,6 +24,7 @@ namespace HPHP { namespace JSON {
 
 string Escape(const char *s) {
   string ret;
+  char hex[3];
   for (const char *p = s; *p; p++) {
     switch (*p) {
     case '\r': ret += "\\r";  break;
@@ -32,7 +33,14 @@ string Escape(const char *s) {
     case '/':  ret += "\\/";  break;
     case '\"': ret += "\\\""; break;
     case '\\': ret += "\\\\"; break;
-    default:   ret += *p;     break;
+    default:
+      if (*p < ' ') {
+        snprintf(hex, sizeof(hex), "%02x", *p);
+        ret += "\\u00" + string(hex);
+      } else {
+        ret += *p;
+      }
+      break;
     }
   }
   return ret;

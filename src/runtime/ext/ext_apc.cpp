@@ -320,7 +320,7 @@ void const_load_impl(const char **int_keys, int64 *int_values,
       const char **p = objects;
       for (int i = 0; i < count; i++, p += 4) {
         String key(*p, (int)(int64)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64)*(p+3), CopyString);
+        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
         const_load_set(key, f_unserialize(value));
       }
     }
@@ -332,7 +332,7 @@ void const_load_impl(const char **int_keys, int64 *int_values,
       const char **p = thrifts;
       for (int i = 0; i < count; i++, p += 4) {
         String key(*p, (int)(int64)*(p+1), CopyString);
-        String value(*(p+2), (int)(int64)*(p+3), CopyString);
+        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
         Variant success;
         Variant v = f_fb_thrift_unserialize(value, ref(success));
         if (same(success, false)) {
@@ -439,7 +439,7 @@ void apc_load_impl(const char **int_keys, int64 *int_values,
         SharedStore::KeyValuePair &item = vars[i];
         item.key = *p;
         item.len = (int)(int64)*(p+1);
-        String value(*(p+2), (int)(int64)*(p+3), CopyString);
+        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
         Variant success;
         Variant v = f_fb_thrift_unserialize(value, ref(success));
         if (same(success, false)) {

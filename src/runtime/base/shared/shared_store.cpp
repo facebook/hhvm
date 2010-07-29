@@ -1041,9 +1041,7 @@ void ConcurrentTableSharedStore::prime
   for (unsigned int i = 0; i < vars.size(); i++) {
     const SharedStore::KeyValuePair &item = vars[i];
     Map::accessor acc;
-    String k(item.key, item.len, CopyString);
-    k.checkStatic();
-    const char *copy = strdup(k.data());
+    const char *copy = strdup(item.key);
     m_vars.insert(acc, copy);
     acc->second.set(item.value, 0);
   }

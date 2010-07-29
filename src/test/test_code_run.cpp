@@ -3734,6 +3734,18 @@ bool TestCodeRun::TestNewObjectExpression() {
       "function f() { echo \"f\\n\"; throw new Exception(); }\n"
       "function test() { $a = new A(f()); }\n"
       "try { test(); } catch (Exception $e) { }\n");
+  MVCR("<?php ";
+      "class foo {"
+      "  static function ioo($y, &$x) {"
+      "    return new self(1);"
+      "  }"
+      "  function __construct($a, $b) {}"
+      "}"
+      "function t() {"
+      "  $x = 1;"
+      "  foo::ioo($x, $y);"
+      "}"
+      "t();");
 
   return true;
 }

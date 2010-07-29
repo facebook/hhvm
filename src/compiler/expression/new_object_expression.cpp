@@ -160,13 +160,15 @@ void NewObjectExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   bool linemap = outputLineMap(cg, ar, true);
+  string &cname = (m_origName == "self" || m_origName == "parent") ?
+    m_name : m_origName;
   bool outsideClass = !ar->checkClassPresent(m_origName);
   if (!m_name.empty() && !m_redeclared && m_validClass && !m_dynamic) {
     ClassScopePtr cls = ar->resolveClass(m_name);
     ASSERT(cls);
     if (m_receiverTemp.empty()) {
       if (outsideClass) {
-        cls->outputVolatileCheckBegin(cg, ar, m_origName);
+        cls->outputVolatileCheckBegin(cg, ar, cname);
       }
       cg_printf("%s%s((NEWOBJ(%s%s)())->create(",
                 Option::SmartPtrPrefix, m_name.c_str(),
@@ -188,14 +190,14 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
   } else {
     if (m_redeclared) {
       if (outsideClass) {
-        ClassScope::OutputVolatileCheckBegin(cg, ar, m_origName);
+        ClassScope::OutputVolatileCheckBegin(cg, ar, cname);
       }
       cg_printf("g->%s%s->create(", Option::ClassStaticsObjectPrefix,
                 m_name.c_str());
     } else {
       cg_printf("create_object(");
-      if (!m_origName.empty()) {
-        cg_printf("\"%s\"", m_origName.c_str());
+      if (!cname.empty()) {
+        cg_printf("\"%s\"", cname.c_str());
       } else if (m_nameExp->is(Expression::KindOfSimpleVariable)) {
         m_nameExp->outputCPP(cg, ar);
       } else {
@@ -240,6 +242,9 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     tempRcvr = false;
   }
 
+  string &cname = (m_origName == "self" || m_origName == "parent") ?
+    m_name : m_origName;
+
   if (tempRcvr && ar->inExpression()) {
     ar->wrapExpressionBegin(cg);
     m_receiverTemp = genCPPTemp(cg, ar);
@@ -249,7 +254,7 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     ClassScopePtr cls = ar->resolveClass(m_name);
     ASSERT(cls);
     if (outsideClass) {
-      cls->outputVolatileCheckBegin(cg, ar, m_origName);
+      cls->outputVolatileCheckBegin(cg, ar, cname);
     }
     cg_printf("NEWOBJ(%s%s)()", Option::ClassPrefix, m_name.c_str());
     if (outsideClass) {

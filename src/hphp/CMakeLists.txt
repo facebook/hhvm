@@ -4,16 +4,21 @@ list(APPEND CXX_SOURCES ${files})
 
 add_executable(hphp ${CXX_SOURCES})
 find_library(DL_LIBRARY dl)
-if (DL_LIBRARY)
+
+IF(DL_LIBRARY)
     target_link_libraries(hphp ${DL_LIBRARY})
-endif(DL_LIBRARY)
+ENDIF()
 
 target_link_libraries(hphp hphp_analysis hphp_runtime_static)
+
+IF(EXISTS "${HPHP_HOME}/src/hphpi/gen/CMakeCache.txt")
+  file(REMOVE "${HPHP_HOME}/src/hphpi/gen/CMakeCache.txt")
+ENDIF()
 
 add_custom_command(TARGET hphp
         POST_BUILD
         COMMAND hphp ARGS -t cpp -f exe --input-dir . -i hphpi.php -o gen -c hphpi_build.hdf --log=1
-	COMMAND mv ARGS gen/program hphpi
+        COMMAND mv ARGS gen/program hphpi
         WORKING_DIRECTORY ${HPHP_HOME}/src/hphpi
         COMMENT "Building hphpi"
 )

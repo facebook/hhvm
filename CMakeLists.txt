@@ -1,12 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4 FATAL_ERROR)
 PROJECT(hphp C CXX)
 
-IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
-	IF("$ENV{HPHP_FORCE_32BIT}" STREQUAL "")
-		message(FATAL_ERROR "HipHop currently only supports 64-bit machines")
-	ENDIF()
-ENDIF()
-
 IF("$ENV{HPHP_HOME}" STREQUAL "")
 	message(FATAL_ERROR "You should set the HPHP_HOME environmental")
 ENDIF()
@@ -22,9 +16,8 @@ SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/HPHPFunctions.cmake")
 include(CheckFunctionExists)
 
-IF(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/third_party/libmbfl/mbfl/mbfilter.h")
-	message(FATAL_ERROR "Please setup the git submodule to pull dependencies")
-ENDIF()
-
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
+	message(STATUS "32-bit support is experimental, things may be broke")
+ENDIF()

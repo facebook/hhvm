@@ -501,12 +501,12 @@ Array c_memcache::t_getextendedstats(CStrRef type /* = null_string */,
   Array return_val;
 
   for (int server_id = 0; server_id < server_count; server_id++) {
-    memcached_server_st *server;
+    memcached_server_instance_st server;
     memcached_stat_st *stat;
     char stats_key[30] = {0};
     size_t key_len;
 
-    server = &m_memcache.servers[server_id];
+    server = memcached_server_instance_by_position(&m_memcache, server_id);
     stat = stats + server_id;
 
     Array server_stats = memcache_build_stats(&m_memcache, stat, &ret);

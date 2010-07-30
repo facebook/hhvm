@@ -643,9 +643,9 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
     int save = m_context;
     if (m_context & RefValue) {
       m_context &= ~RefValue;
-      if ((is(KindOfArrayElementExpression) ||
-           is(KindOfObjectPropertyExpression)) &&
-          !(m_context & InvokeArgument)) {
+      if (is(KindOfObjectPropertyExpression) ||
+          (is(KindOfArrayElementExpression) &&
+           !(m_context & InvokeArgument))) {
         m_context |= LValue;
         m_context &= ~NoLValueWrapper;
       }

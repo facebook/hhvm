@@ -50,7 +50,7 @@ typedef Variant Sequence;
 extern const Variant null_variant;
 extern const String null_string;
 extern const Array null_array;
-#if defined(__GNUC__)
+#if defined(__GNUC__) && defined(WORDSIZE_IS_64)
 #define FAST_REFCOUNT_FOR_VARIANT
 #define FAST_REFCOUNT_OFFSET (sizeof(void*))
 #endif

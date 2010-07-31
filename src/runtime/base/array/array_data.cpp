@@ -111,6 +111,10 @@ int ArrayData::compare(const ArrayData *v2, bool strict) const {
   return 0;
 }
 
+void ArrayData::load(CVarRef k, Variant &v) const {
+  if (exists(k)) v = get(k);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // stack and queue operations
 

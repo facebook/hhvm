@@ -53,12 +53,17 @@ Variant &c_directory::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_directory
-void c_directory::o_get(Array &props) const {
+void c_directory::o_getArray(Array &props) const {
   if (isInitialized(m_path)) props.set("path", m_path.isReferenced() ? ref(m_path) : m_path, 0x42DD5992F363B3C4LL, true);
   if (isInitialized(m_handle)) props.set("handle", m_handle.isReferenced() ? ref(m_handle) : m_handle, 0x48E8F48146EEEF5CLL, true);
-  c_ObjectData::o_get(props);
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_directory
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_directory
+void c_directory::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_get_directory
 Variant c_directory::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_directory::o_getPublic(prop, phash, error);

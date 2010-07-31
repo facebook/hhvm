@@ -44,14 +44,15 @@ class DynamicObjectData : public ObjectData {
   virtual Array o_getDynamicProperties() const;
   virtual bool o_exists(CStrRef s, int64 hash,
       const char *context = NULL) const;
-  virtual void o_get(Array &props) const;
   virtual Variant o_get(CStrRef s, int64 hash, bool error = true,
       const char *context = NULL);
   virtual Variant o_set(CStrRef s, int64 hash, CVarRef v, bool forInit = false,
       const char *context = NULL);
   virtual Variant &o_lval(CStrRef s, int64 hash,
       const char *context = NULL);
-  void o_set(const Array properties);
+
+  virtual void o_getArray(Array &props) const;
+  virtual void o_setArray(CArrRef props);
 
   // methods
   virtual Variant o_invoke(const char *s, CArrRef params, int64 hash,

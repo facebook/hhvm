@@ -146,7 +146,6 @@ class ObjectData : public Countable {
   virtual bool o_exists(CStrRef s, int64 hash,
                         const char *context = NULL) const;
   virtual bool o_existsPublic(CStrRef s, int64 hash) const;
-  virtual void o_get(Array &props) const {}
   virtual Variant o_get(CStrRef s, int64 hash, bool error = true,
                         const char *context = NULL);
   virtual Variant o_getPublic(CStrRef s, int64 hash, bool error = true);
@@ -157,7 +156,9 @@ class ObjectData : public Countable {
   virtual Variant o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit);
   virtual Variant &o_lval(CStrRef s, int64 hash, const char *context = NULL);
   virtual Variant &o_lvalPublic(CStrRef s, int64 hash);
-  void o_set(const Array properties);
+
+  virtual void o_setArray(CArrRef properties);
+  virtual void o_getArray(Array &props) const {}
 
   /**
    * This is different from o_exists(), which is isset() semantics. This one

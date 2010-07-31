@@ -46,10 +46,15 @@ Variant &c_splfileobject::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileobject
-void c_splfileobject::o_get(Array &props) const {
-  c_splfileinfo::o_get(props);
+void c_splfileobject::o_getArray(Array &props) const {
+  c_splfileinfo::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileobject
+void c_splfileobject::o_setArray(CArrRef props) {
+  c_splfileinfo::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_get_splfileobject
 Variant c_splfileobject::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_splfileobject::o_getPublic(prop, phash, error);
@@ -2002,10 +2007,15 @@ Variant &c_splfileinfo::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileinfo
-void c_splfileinfo::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_splfileinfo::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileinfo
+void c_splfileinfo::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_get_splfileinfo
 Variant c_splfileinfo::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_splfileinfo::o_getPublic(prop, phash, error);

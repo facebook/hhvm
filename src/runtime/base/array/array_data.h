@@ -138,6 +138,12 @@ class ArrayData : public Countable {
                       bool error = false) const = 0;
 
   /**
+   * Loading value at specified key to a variable, preserving reference,
+   * if possible.
+   */
+  virtual void load(CVarRef k, Variant &v) const;
+
+  /**
    * Get the numeric index for a key. Only these need to be
    * in ArrayData.
    */

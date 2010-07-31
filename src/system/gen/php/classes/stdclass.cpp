@@ -41,10 +41,15 @@ Variant &c_stdclass::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_stdclass
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_stdclass
-void c_stdclass::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_stdclass::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_stdclass
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_stdclass
+void c_stdclass::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_stdclass
 #ifndef OMIT_JUMP_TABLE_CLASS_get_stdclass
 Variant c_stdclass::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_stdclass::o_getPublic(prop, phash, error);
@@ -168,10 +173,15 @@ Variant &c___php_incomplete_class::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL___php_incomplete_class
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY___php_incomplete_class
-void c___php_incomplete_class::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c___php_incomplete_class::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY___php_incomplete_class
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY___php_incomplete_class
+void c___php_incomplete_class::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY___php_incomplete_class
 #ifndef OMIT_JUMP_TABLE_CLASS_get___php_incomplete_class
 Variant c___php_incomplete_class::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c___php_incomplete_class::o_getPublic(prop, phash, error);

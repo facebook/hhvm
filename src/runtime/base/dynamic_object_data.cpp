@@ -112,11 +112,19 @@ Variant DynamicObjectData::o_get(CStrRef propName, int64 hash,
   }
 }
 
-void DynamicObjectData::o_get(Array &props) const {
+void DynamicObjectData::o_getArray(Array &props) const {
   if (!parent.isNull()) {
-    return parent->o_get(props);
+    return parent->o_getArray(props);
   } else {
-    return ObjectData::o_get(props);
+    return ObjectData::o_getArray(props);
+  }
+}
+
+void DynamicObjectData::o_setArray(CArrRef props) {
+  if (!parent.isNull()) {
+    return parent->o_setArray(props);
+  } else {
+    return ObjectData::o_setArray(props);
   }
 }
 

@@ -83,10 +83,15 @@ Variant &c_pdoexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_pdoexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_pdoexception
-void c_pdoexception::o_get(Array &props) const {
-  c_exception::o_get(props);
+void c_pdoexception::o_getArray(Array &props) const {
+  c_exception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_pdoexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_pdoexception
+void c_pdoexception::o_setArray(CArrRef props) {
+  c_exception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_pdoexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_pdoexception
 Variant c_pdoexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_pdoexception::o_getPublic(prop, phash, error);
@@ -520,10 +525,15 @@ Variant &c_domdocumentfragment::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domdocumentfragment
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domdocumentfragment
-void c_domdocumentfragment::o_get(Array &props) const {
-  c_domnode::o_get(props);
+void c_domdocumentfragment::o_getArray(Array &props) const {
+  c_domnode::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domdocumentfragment
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domdocumentfragment
+void c_domdocumentfragment::o_setArray(CArrRef props) {
+  c_domnode::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domdocumentfragment
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domdocumentfragment
 Variant c_domdocumentfragment::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domdocumentfragment::o_getPublic(prop, phash, error);
@@ -1379,10 +1389,15 @@ Variant &c_domtext::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domtext
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domtext
-void c_domtext::o_get(Array &props) const {
-  c_domcharacterdata::o_get(props);
+void c_domtext::o_getArray(Array &props) const {
+  c_domcharacterdata::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domtext
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domtext
+void c_domtext::o_setArray(CArrRef props) {
+  c_domcharacterdata::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domtext
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domtext
 Variant c_domtext::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domtext::o_getPublic(prop, phash, error);
@@ -2445,10 +2460,15 @@ Variant &c_debuggerclient::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_debuggerclient
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_debuggerclient
-void c_debuggerclient::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_debuggerclient::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_debuggerclient
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_debuggerclient
+void c_debuggerclient::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_debuggerclient
 #ifndef OMIT_JUMP_TABLE_CLASS_get_debuggerclient
 Variant c_debuggerclient::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_debuggerclient::o_getPublic(prop, phash, error);
@@ -3548,10 +3568,15 @@ Variant &c_domcdatasection::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domcdatasection
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domcdatasection
-void c_domcdatasection::o_get(Array &props) const {
-  c_domtext::o_get(props);
+void c_domcdatasection::o_getArray(Array &props) const {
+  c_domtext::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domcdatasection
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domcdatasection
+void c_domcdatasection::o_setArray(CArrRef props) {
+  c_domtext::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domcdatasection
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domcdatasection
 Variant c_domcdatasection::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domcdatasection::o_getPublic(prop, phash, error);
@@ -4605,10 +4630,15 @@ Variant &c_domdocumenttype::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domdocumenttype
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domdocumenttype
-void c_domdocumenttype::o_get(Array &props) const {
-  c_domnode::o_get(props);
+void c_domdocumenttype::o_getArray(Array &props) const {
+  c_domnode::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domdocumenttype
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domdocumenttype
+void c_domdocumenttype::o_setArray(CArrRef props) {
+  c_domnode::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domdocumenttype
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domdocumenttype
 Variant c_domdocumenttype::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domdocumenttype::o_getPublic(prop, phash, error);
@@ -5443,10 +5473,15 @@ Variant &c_sqlite3stmt::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_sqlite3stmt
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_sqlite3stmt
-void c_sqlite3stmt::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_sqlite3stmt::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_sqlite3stmt
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_sqlite3stmt
+void c_sqlite3stmt::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_sqlite3stmt
 #ifndef OMIT_JUMP_TABLE_CLASS_get_sqlite3stmt
 Variant c_sqlite3stmt::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_sqlite3stmt::o_getPublic(prop, phash, error);
@@ -5906,10 +5941,15 @@ Variant &c_domnodelist::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domnodelist
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domnodelist
-void c_domnodelist::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_domnodelist::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domnodelist
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domnodelist
+void c_domnodelist::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domnodelist
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domnodelist
 Variant c_domnodelist::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domnodelist::o_getPublic(prop, phash, error);
@@ -6252,10 +6292,15 @@ Variant &c_normalizer::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_normalizer
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_normalizer
-void c_normalizer::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_normalizer::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_normalizer
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_normalizer
+void c_normalizer::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_normalizer
 #ifndef OMIT_JUMP_TABLE_CLASS_get_normalizer
 Variant c_normalizer::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_normalizer::o_getPublic(prop, phash, error);
@@ -6663,10 +6708,15 @@ Variant &c_domcharacterdata::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domcharacterdata
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domcharacterdata
-void c_domcharacterdata::o_get(Array &props) const {
-  c_domnode::o_get(props);
+void c_domcharacterdata::o_getArray(Array &props) const {
+  c_domnode::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domcharacterdata
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domcharacterdata
+void c_domcharacterdata::o_setArray(CArrRef props) {
+  c_domnode::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domcharacterdata
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domcharacterdata
 Variant c_domcharacterdata::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domcharacterdata::o_getPublic(prop, phash, error);
@@ -7665,10 +7715,15 @@ Variant &c_domentityreference::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domentityreference
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domentityreference
-void c_domentityreference::o_get(Array &props) const {
-  c_domnode::o_get(props);
+void c_domentityreference::o_getArray(Array &props) const {
+  c_domnode::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domentityreference
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domentityreference
+void c_domentityreference::o_setArray(CArrRef props) {
+  c_domnode::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domentityreference
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domentityreference
 Variant c_domentityreference::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domentityreference::o_getPublic(prop, phash, error);
@@ -8508,10 +8563,15 @@ Variant &c_simplexmlelementiterator::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_simplexmlelementiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_simplexmlelementiterator
-void c_simplexmlelementiterator::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_simplexmlelementiterator::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_simplexmlelementiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_simplexmlelementiterator
+void c_simplexmlelementiterator::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_simplexmlelementiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_simplexmlelementiterator
 Variant c_simplexmlelementiterator::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_simplexmlelementiterator::o_getPublic(prop, phash, error);
@@ -8873,10 +8933,15 @@ Variant &c_datetimezone::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_datetimezone
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_datetimezone
-void c_datetimezone::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_datetimezone::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_datetimezone
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_datetimezone
+void c_datetimezone::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_datetimezone
 #ifndef OMIT_JUMP_TABLE_CLASS_get_datetimezone
 Variant c_datetimezone::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_datetimezone::o_getPublic(prop, phash, error);
@@ -9341,10 +9406,15 @@ Variant &c_domnodeiterator::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domnodeiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domnodeiterator
-void c_domnodeiterator::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_domnodeiterator::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domnodeiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domnodeiterator
+void c_domnodeiterator::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domnodeiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domnodeiterator
 Variant c_domnodeiterator::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domnodeiterator::o_getPublic(prop, phash, error);
@@ -9706,10 +9776,15 @@ Variant &c_domimplementation::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domimplementation
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domimplementation
-void c_domimplementation::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_domimplementation::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domimplementation
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domimplementation
+void c_domimplementation::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domimplementation
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domimplementation
 Variant c_domimplementation::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domimplementation::o_getPublic(prop, phash, error);
@@ -10057,10 +10132,15 @@ Variant &c_soapheader::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapheader
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_soapheader
-void c_soapheader::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_soapheader::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_soapheader
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_soapheader
+void c_soapheader::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_soapheader
 #ifndef OMIT_JUMP_TABLE_CLASS_get_soapheader
 Variant c_soapheader::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_soapheader::o_getPublic(prop, phash, error);
@@ -10344,10 +10424,15 @@ Variant &c_domnotation::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domnotation
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domnotation
-void c_domnotation::o_get(Array &props) const {
-  c_domnode::o_get(props);
+void c_domnotation::o_getArray(Array &props) const {
+  c_domnode::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domnotation
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domnotation
+void c_domnotation::o_setArray(CArrRef props) {
+  c_domnode::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domnotation
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domnotation
 Variant c_domnotation::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domnotation::o_getPublic(prop, phash, error);
@@ -11182,10 +11267,15 @@ Variant &c_debuggerproxy::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_debuggerproxy
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_debuggerproxy
-void c_debuggerproxy::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_debuggerproxy::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_debuggerproxy
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_debuggerproxy
+void c_debuggerproxy::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_debuggerproxy
 #ifndef OMIT_JUMP_TABLE_CLASS_get_debuggerproxy
 Variant c_debuggerproxy::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_debuggerproxy::o_getPublic(prop, phash, error);
@@ -11473,10 +11563,15 @@ Variant &c_domcomment::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domcomment
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domcomment
-void c_domcomment::o_get(Array &props) const {
-  c_domcharacterdata::o_get(props);
+void c_domcomment::o_getArray(Array &props) const {
+  c_domcharacterdata::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domcomment
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domcomment
+void c_domcomment::o_setArray(CArrRef props) {
+  c_domcharacterdata::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domcomment
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domcomment
 Variant c_domcomment::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domcomment::o_getPublic(prop, phash, error);
@@ -12486,10 +12581,15 @@ Variant &c_sqlite3::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_sqlite3
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_sqlite3
-void c_sqlite3::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_sqlite3::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_sqlite3
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_sqlite3
+void c_sqlite3::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_sqlite3
 #ifndef OMIT_JUMP_TABLE_CLASS_get_sqlite3
 Variant c_sqlite3::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_sqlite3::o_getPublic(prop, phash, error);
@@ -13233,10 +13333,15 @@ Variant &c_domattr::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domattr
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domattr
-void c_domattr::o_get(Array &props) const {
-  c_domnode::o_get(props);
+void c_domattr::o_getArray(Array &props) const {
+  c_domnode::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domattr
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domattr
+void c_domattr::o_setArray(CArrRef props) {
+  c_domnode::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domattr
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domattr
 Variant c_domattr::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domattr::o_getPublic(prop, phash, error);
@@ -14113,10 +14218,15 @@ Variant &c_soapvar::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapvar
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_soapvar
-void c_soapvar::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_soapvar::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_soapvar
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_soapvar
+void c_soapvar::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_soapvar
 #ifndef OMIT_JUMP_TABLE_CLASS_get_soapvar
 Variant c_soapvar::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_soapvar::o_getPublic(prop, phash, error);
@@ -14414,10 +14524,15 @@ Variant &c_domnamednodemap::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domnamednodemap
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domnamednodemap
-void c_domnamednodemap::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_domnamednodemap::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domnamednodemap
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domnamednodemap
+void c_domnamednodemap::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domnamednodemap
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domnamednodemap
 Variant c_domnamednodemap::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domnamednodemap::o_getPublic(prop, phash, error);
@@ -14824,10 +14939,15 @@ Variant &c_sqlite3result::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_sqlite3result
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_sqlite3result
-void c_sqlite3result::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_sqlite3result::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_sqlite3result
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_sqlite3result
+void c_sqlite3result::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_sqlite3result
 #ifndef OMIT_JUMP_TABLE_CLASS_get_sqlite3result
 Variant c_sqlite3result::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_sqlite3result::o_getPublic(prop, phash, error);
@@ -15230,10 +15350,15 @@ Variant &c_simplexmlelement::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_simplexmlelement
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_simplexmlelement
-void c_simplexmlelement::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_simplexmlelement::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_simplexmlelement
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_simplexmlelement
+void c_simplexmlelement::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_simplexmlelement
 #ifndef OMIT_JUMP_TABLE_CLASS_get_simplexmlelement
 Variant c_simplexmlelement::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_simplexmlelement::o_getPublic(prop, phash, error);
@@ -16203,10 +16328,15 @@ Variant &c_memcache::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_memcache
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_memcache
-void c_memcache::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_memcache::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_memcache
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_memcache
+void c_memcache::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_memcache
 #ifndef OMIT_JUMP_TABLE_CLASS_get_memcache
 Variant c_memcache::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_memcache::o_getPublic(prop, phash, error);
@@ -17257,10 +17387,15 @@ Variant &c_domprocessinginstruction::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domprocessinginstruction
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domprocessinginstruction
-void c_domprocessinginstruction::o_get(Array &props) const {
-  c_domnode::o_get(props);
+void c_domprocessinginstruction::o_getArray(Array &props) const {
+  c_domnode::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domprocessinginstruction
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domprocessinginstruction
+void c_domprocessinginstruction::o_setArray(CArrRef props) {
+  c_domnode::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domprocessinginstruction
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domprocessinginstruction
 Variant c_domprocessinginstruction::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domprocessinginstruction::o_getPublic(prop, phash, error);
@@ -18117,10 +18252,15 @@ Variant &c_pdostatement::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_pdostatement
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_pdostatement
-void c_pdostatement::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_pdostatement::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_pdostatement
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_pdostatement
+void c_pdostatement::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_pdostatement
 #ifndef OMIT_JUMP_TABLE_CLASS_get_pdostatement
 Variant c_pdostatement::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_pdostatement::o_getPublic(prop, phash, error);
@@ -19059,10 +19199,15 @@ Variant &c_soapclient::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapclient
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_soapclient
-void c_soapclient::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_soapclient::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_soapclient
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_soapclient
+void c_soapclient::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_soapclient
 #ifndef OMIT_JUMP_TABLE_CLASS_get_soapclient
 Variant c_soapclient::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_soapclient::o_getPublic(prop, phash, error);
@@ -19692,10 +19837,15 @@ Variant &c_soapparam::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapparam
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_soapparam
-void c_soapparam::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_soapparam::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_soapparam
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_soapparam
+void c_soapparam::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_soapparam
 #ifndef OMIT_JUMP_TABLE_CLASS_get_soapparam
 Variant c_soapparam::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_soapparam::o_getPublic(prop, phash, error);
@@ -19937,10 +20087,15 @@ Variant &c_datetime::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_datetime
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_datetime
-void c_datetime::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_datetime::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_datetime
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_datetime
+void c_datetime::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_datetime
 #ifndef OMIT_JUMP_TABLE_CLASS_get_datetime
 Variant c_datetime::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_datetime::o_getPublic(prop, phash, error);
@@ -20486,10 +20641,15 @@ Variant &c_pdo::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_pdo
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_pdo
-void c_pdo::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_pdo::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_pdo
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_pdo
+void c_pdo::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_pdo
 #ifndef OMIT_JUMP_TABLE_CLASS_get_pdo
 Variant c_pdo::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_pdo::o_getPublic(prop, phash, error);
@@ -21462,10 +21622,15 @@ Variant &c_domentity::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domentity
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domentity
-void c_domentity::o_get(Array &props) const {
-  c_domnode::o_get(props);
+void c_domentity::o_getArray(Array &props) const {
+  c_domnode::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domentity
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domentity
+void c_domentity::o_setArray(CArrRef props) {
+  c_domnode::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domentity
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domentity
 Variant c_domentity::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domentity::o_getPublic(prop, phash, error);
@@ -22300,10 +22465,15 @@ Variant &c_xmlwriter::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_xmlwriter
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_xmlwriter
-void c_xmlwriter::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_xmlwriter::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_xmlwriter
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_xmlwriter
+void c_xmlwriter::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_xmlwriter
 #ifndef OMIT_JUMP_TABLE_CLASS_get_xmlwriter
 Variant c_xmlwriter::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_xmlwriter::o_getPublic(prop, phash, error);
@@ -23881,10 +24051,15 @@ Variant &c_domexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domexception
-void c_domexception::o_get(Array &props) const {
-  c_exception::o_get(props);
+void c_domexception::o_getArray(Array &props) const {
+  c_exception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domexception
+void c_domexception::o_setArray(CArrRef props) {
+  c_exception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domexception
 Variant c_domexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domexception::o_getPublic(prop, phash, error);
@@ -24346,10 +24521,15 @@ Variant &c_domxpath::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domxpath
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domxpath
-void c_domxpath::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_domxpath::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domxpath
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domxpath
+void c_domxpath::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domxpath
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domxpath
 Variant c_domxpath::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domxpath::o_getPublic(prop, phash, error);
@@ -24785,10 +24965,15 @@ Variant &c_soapserver::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapserver
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_soapserver
-void c_soapserver::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_soapserver::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_soapserver
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_soapserver
+void c_soapserver::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_soapserver
 #ifndef OMIT_JUMP_TABLE_CLASS_get_soapserver
 Variant c_soapserver::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_soapserver::o_getPublic(prop, phash, error);
@@ -25310,10 +25495,15 @@ Variant &c_domnode::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domnode
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domnode
-void c_domnode::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_domnode::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domnode
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domnode
+void c_domnode::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domnode
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domnode
 Variant c_domnode::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domnode::o_getPublic(prop, phash, error);
@@ -26148,10 +26338,15 @@ Variant &c_domdocument::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domdocument
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domdocument
-void c_domdocument::o_get(Array &props) const {
-  c_domnode::o_get(props);
+void c_domdocument::o_getArray(Array &props) const {
+  c_domnode::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domdocument
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domdocument
+void c_domdocument::o_setArray(CArrRef props) {
+  c_domnode::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domdocument
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domdocument
 Variant c_domdocument::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domdocument::o_getPublic(prop, phash, error);
@@ -27934,10 +28129,15 @@ Variant &c_libxmlerror::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_libxmlerror
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_libxmlerror
-void c_libxmlerror::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_libxmlerror::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_libxmlerror
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_libxmlerror
+void c_libxmlerror::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_libxmlerror
 #ifndef OMIT_JUMP_TABLE_CLASS_get_libxmlerror
 Variant c_libxmlerror::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_libxmlerror::o_getPublic(prop, phash, error);
@@ -28163,10 +28363,15 @@ Variant &c_soapfault::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_soapfault
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_soapfault
-void c_soapfault::o_get(Array &props) const {
-  c_exception::o_get(props);
+void c_soapfault::o_getArray(Array &props) const {
+  c_exception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_soapfault
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_soapfault
+void c_soapfault::o_setArray(CArrRef props) {
+  c_exception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_soapfault
 #ifndef OMIT_JUMP_TABLE_CLASS_get_soapfault
 Variant c_soapfault::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_soapfault::o_getPublic(prop, phash, error);
@@ -28672,10 +28877,15 @@ Variant &c_domelement::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domelement
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domelement
-void c_domelement::o_get(Array &props) const {
-  c_domnode::o_get(props);
+void c_domelement::o_getArray(Array &props) const {
+  c_domnode::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domelement
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domelement
+void c_domelement::o_setArray(CArrRef props) {
+  c_domnode::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domelement
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domelement
 Variant c_domelement::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domelement::o_getPublic(prop, phash, error);

@@ -387,6 +387,23 @@ Variant ZendArray::fetch(CStrRef k) const {
   return false;
 }
 
+void ZendArray::load(CVarRef k, Variant &v) const {
+  Bucket *p;
+  if (k.isNumeric()) {
+    p = find(k.toInt64());
+  } else {
+    String key = k.toString();
+    StringData *strkey = key.get();
+    int64 prehash = -1;
+    if (strkey->isStatic()) prehash = key->getStaticHash();
+    p = find(strkey->data(), strkey->size(), prehash);
+  }
+  if (p) {
+    if (p->data.isReferenced()) v = ref(p->data);
+    else v = p->data;
+  }
+}
+
 ssize_t ZendArray::getIndex(int64 k, int64 prehash /* = -1 */) const {
   Bucket *p = find(k);
   if (p) {

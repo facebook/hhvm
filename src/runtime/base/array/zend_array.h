@@ -19,7 +19,6 @@
 
 #include <runtime/base/types.h>
 #include <runtime/base/array/array_data.h>
-#include <runtime/base/array/small_array.h>
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/complex_types.h>
 
@@ -69,6 +68,8 @@ public:
   virtual Variant get(litstr  k, int64 prehash = -1, bool error = false) const;
   virtual Variant get(CStrRef k, int64 prehash = -1, bool error = false) const;
   virtual Variant get(CVarRef k, int64 prehash = -1, bool error = false) const;
+
+  virtual void load(CVarRef k, Variant &v) const;
 
   Variant fetch(CStrRef k) const;
 

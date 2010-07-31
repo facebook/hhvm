@@ -43,7 +43,8 @@ class c_reflectionproperty : public ExtObjectData {
   virtual bool o_exists(CStrRef s, int64 hash,
                         const char *context = NULL) const;
   bool o_existsPrivate(CStrRef s, int64 hash) const;
-  virtual void o_get(Array &props) const;
+  virtual void o_getArray(Array &props) const;
+  virtual void o_setArray(CArrRef props);
   virtual Variant o_get(CStrRef s, int64 hash, bool error = true,
                         const char *context = NULL);
   Variant o_getPrivate(CStrRef s, int64 hash, bool error = true);

@@ -56,12 +56,19 @@ Variant &c_splobjectstorage::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splobjectstorage
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_splobjectstorage
-void c_splobjectstorage::o_get(Array &props) const {
-  if (isInitialized(m_storage)) props.set(String("\000splobjectstorage\000storage", 25, AttachLiteral), m_storage.isReferenced() ? ref(m_storage) : m_storage, 0x360C5717AFE5B19ALL, true);
-  props.set(String("\000splobjectstorage\000index", 23, AttachLiteral), m_index, 0x1F201FBBDDA9FEA5LL, true);
-  c_ObjectData::o_get(props);
+void c_splobjectstorage::o_getArray(Array &props) const {
+  if (isInitialized(m_storage)) props.set(String("\000SplObjectStorage\000storage", 25, AttachLiteral), m_storage.isReferenced() ? ref(m_storage) : m_storage, 0x56E3143B78CB1B27LL, true);
+  props.set(String("\000SplObjectStorage\000index", 23, AttachLiteral), m_index, 0x6EB02C38EF32BE8DLL, true);
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_splobjectstorage
+void c_splobjectstorage::o_setArray(CArrRef props) {
+  props->load(String("\000SplObjectStorage\000storage", 25, AttachLiteral), m_storage);
+  m_index = props->get(String("\000SplObjectStorage\000index", 23, AttachLiteral));
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_splobjectstorage
 #ifndef OMIT_JUMP_TABLE_CLASS_get_splobjectstorage
 Variant c_splobjectstorage::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   const char *s = context;

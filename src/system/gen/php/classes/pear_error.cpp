@@ -41,10 +41,15 @@ Variant &c_pear_error::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_pear_error
-void c_pear_error::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_pear_error::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_pear_error
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_pear_error
+void c_pear_error::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_get_pear_error
 Variant c_pear_error::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_pear_error::o_getPublic(prop, phash, error);

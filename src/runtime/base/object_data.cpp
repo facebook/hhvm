@@ -173,9 +173,13 @@ Variant ObjectData::o_setPublic(CStrRef propName, int64 hash, CVarRef v,
   }
 }
 
-void ObjectData::o_set(const Array properties) {
+void ObjectData::o_setArray(CArrRef properties) {
   for (ArrayIter iter(properties); iter; ++iter) {
-    o_set(iter.first().toString(), -1, iter.second());
+    String key = iter.first().toString();
+    if (key.empty() || key.charAt(0) != '\0') {
+      // public property
+      o_setPublic(key, -1, iter.second(), false);
+    }
   }
 }
 
@@ -208,7 +212,7 @@ Variant &ObjectData::o_lvalPublic(CStrRef propName, int64 hash) {
 
 Array ObjectData::o_toArray() const {
   Array ret(ArrayData::Create());
-  o_get(ret);
+  o_getArray(ret);
   if (o_properties && !o_properties->empty()) {
     ret += (*o_properties);
     return ret;
@@ -634,8 +638,8 @@ Object ObjectData::fiberMarshal(FiberReferenceMap &refMap) const {
     // ahead of deep copy
     refMap.insert(const_cast<ObjectData*>(this), copy.get());
     Array props;
-    o_get(props);
-    copy->o_set(props.fiberMarshal(refMap));
+    o_getArray(props);
+    copy->o_setArray(props.fiberMarshal(refMap));
     return copy;
   }
   return px;
@@ -655,8 +659,8 @@ Object ObjectData::fiberUnmarshal(FiberReferenceMap &refMap) const {
     // ahead of deep copy
     refMap.insert(const_cast<ObjectData*>(this), px);
     Array props;
-    o_get(props);
-    px->o_set(props.fiberUnmarshal(refMap));
+    o_getArray(props);
+    px->o_setArray(props.fiberUnmarshal(refMap));
   }
   return Object(px);
 }

@@ -309,7 +309,8 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   cg_printf("virtual bool o_exists(CStrRef s, int64 hash,\n");
   cg_printf("                      const char *context = NULL) const;\n");
   cg_printf("bool o_existsPrivate(CStrRef s, int64 hash) const;\n");
-  cg_printf("virtual void o_get(Array &props) const;\n");
+  cg_printf("virtual void o_getArray(Array &props) const;\n");
+  cg_printf("virtual void o_setArray(CArrRef props);\n");
   cg_printf("virtual Variant o_get(CStrRef s, int64 hash, "
             "bool error = true,\n");
   cg_printf("                      const char *context = NULL);\n");

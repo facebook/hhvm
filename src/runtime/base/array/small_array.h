@@ -67,6 +67,8 @@ public:
   virtual Variant get(CStrRef k, int64 prehash = -1, bool error = false) const;
   virtual Variant get(CVarRef k, int64 prehash = -1, bool error = false) const;
 
+  virtual void load(CVarRef k, Variant &v) const;
+
   virtual ssize_t getIndex(int64 k, int64 prehash = -1) const;
   virtual ssize_t getIndex(litstr k, int64 prehash = -1) const;
   virtual ssize_t getIndex(CStrRef k, int64 prehash = -1) const;

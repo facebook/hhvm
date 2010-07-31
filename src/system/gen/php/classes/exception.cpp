@@ -41,10 +41,15 @@ Variant &c_unexpectedvalueexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_unexpectedvalueexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_unexpectedvalueexception
-void c_unexpectedvalueexception::o_get(Array &props) const {
-  c_runtimeexception::o_get(props);
+void c_unexpectedvalueexception::o_getArray(Array &props) const {
+  c_runtimeexception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_unexpectedvalueexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_unexpectedvalueexception
+void c_unexpectedvalueexception::o_setArray(CArrRef props) {
+  c_runtimeexception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_unexpectedvalueexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_unexpectedvalueexception
 Variant c_unexpectedvalueexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_unexpectedvalueexception::o_getPublic(prop, phash, error);
@@ -432,10 +437,15 @@ Variant &c_overflowexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_overflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_overflowexception
-void c_overflowexception::o_get(Array &props) const {
-  c_runtimeexception::o_get(props);
+void c_overflowexception::o_getArray(Array &props) const {
+  c_runtimeexception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_overflowexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_overflowexception
+void c_overflowexception::o_setArray(CArrRef props) {
+  c_runtimeexception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_overflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_overflowexception
 Variant c_overflowexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_overflowexception::o_getPublic(prop, phash, error);
@@ -823,10 +833,15 @@ Variant &c_outofboundsexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_outofboundsexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_outofboundsexception
-void c_outofboundsexception::o_get(Array &props) const {
-  c_runtimeexception::o_get(props);
+void c_outofboundsexception::o_getArray(Array &props) const {
+  c_runtimeexception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_outofboundsexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_outofboundsexception
+void c_outofboundsexception::o_setArray(CArrRef props) {
+  c_runtimeexception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_outofboundsexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_outofboundsexception
 Variant c_outofboundsexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_outofboundsexception::o_getPublic(prop, phash, error);
@@ -1214,10 +1229,15 @@ Variant &c_logicexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_logicexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_logicexception
-void c_logicexception::o_get(Array &props) const {
-  c_exception::o_get(props);
+void c_logicexception::o_getArray(Array &props) const {
+  c_exception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_logicexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_logicexception
+void c_logicexception::o_setArray(CArrRef props) {
+  c_exception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_logicexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_logicexception
 Variant c_logicexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_logicexception::o_getPublic(prop, phash, error);
@@ -1605,10 +1625,15 @@ Variant &c_rangeexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_rangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_rangeexception
-void c_rangeexception::o_get(Array &props) const {
-  c_runtimeexception::o_get(props);
+void c_rangeexception::o_getArray(Array &props) const {
+  c_runtimeexception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_rangeexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_rangeexception
+void c_rangeexception::o_setArray(CArrRef props) {
+  c_runtimeexception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_rangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_rangeexception
 Variant c_rangeexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_rangeexception::o_getPublic(prop, phash, error);
@@ -1996,10 +2021,15 @@ Variant &c_invalidargumentexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_invalidargumentexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_invalidargumentexception
-void c_invalidargumentexception::o_get(Array &props) const {
-  c_logicexception::o_get(props);
+void c_invalidargumentexception::o_getArray(Array &props) const {
+  c_logicexception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_invalidargumentexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_invalidargumentexception
+void c_invalidargumentexception::o_setArray(CArrRef props) {
+  c_logicexception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_invalidargumentexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_invalidargumentexception
 Variant c_invalidargumentexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_invalidargumentexception::o_getPublic(prop, phash, error);
@@ -2387,10 +2417,15 @@ Variant &c_underflowexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_underflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_underflowexception
-void c_underflowexception::o_get(Array &props) const {
-  c_runtimeexception::o_get(props);
+void c_underflowexception::o_getArray(Array &props) const {
+  c_runtimeexception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_underflowexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_underflowexception
+void c_underflowexception::o_setArray(CArrRef props) {
+  c_runtimeexception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_underflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_underflowexception
 Variant c_underflowexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_underflowexception::o_getPublic(prop, phash, error);
@@ -2778,10 +2813,15 @@ Variant &c_outofrangeexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_outofrangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_outofrangeexception
-void c_outofrangeexception::o_get(Array &props) const {
-  c_logicexception::o_get(props);
+void c_outofrangeexception::o_getArray(Array &props) const {
+  c_logicexception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_outofrangeexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_outofrangeexception
+void c_outofrangeexception::o_setArray(CArrRef props) {
+  c_logicexception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_outofrangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_outofrangeexception
 Variant c_outofrangeexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_outofrangeexception::o_getPublic(prop, phash, error);
@@ -3169,10 +3209,15 @@ Variant &c_badmethodcallexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_badmethodcallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_badmethodcallexception
-void c_badmethodcallexception::o_get(Array &props) const {
-  c_badfunctioncallexception::o_get(props);
+void c_badmethodcallexception::o_getArray(Array &props) const {
+  c_badfunctioncallexception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_badmethodcallexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_badmethodcallexception
+void c_badmethodcallexception::o_setArray(CArrRef props) {
+  c_badfunctioncallexception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_badmethodcallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_badmethodcallexception
 Variant c_badmethodcallexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_badmethodcallexception::o_getPublic(prop, phash, error);
@@ -3560,10 +3605,15 @@ Variant &c_runtimeexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_runtimeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_runtimeexception
-void c_runtimeexception::o_get(Array &props) const {
-  c_exception::o_get(props);
+void c_runtimeexception::o_getArray(Array &props) const {
+  c_exception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_runtimeexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_runtimeexception
+void c_runtimeexception::o_setArray(CArrRef props) {
+  c_exception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_runtimeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_runtimeexception
 Variant c_runtimeexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_runtimeexception::o_getPublic(prop, phash, error);
@@ -3975,15 +4025,20 @@ Variant &c_exception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_exception
-void c_exception::o_get(Array &props) const {
+void c_exception::o_getArray(Array &props) const {
   if (isInitialized(m_message)) props.set("message", m_message.isReferenced() ? ref(m_message) : m_message, 0x3EAA4B97155266DFLL, true);
   if (isInitialized(m_code)) props.set("code", m_code.isReferenced() ? ref(m_code) : m_code, 0x33997C0BC1E6CC87LL, true);
   if (isInitialized(m_file)) props.set("file", m_file.isReferenced() ? ref(m_file) : m_file, 0x08C19339767C0884LL, true);
   if (isInitialized(m_line)) props.set("line", m_line.isReferenced() ? ref(m_line) : m_line, 0x21093C71DDF9728CLL, true);
   if (isInitialized(m_trace)) props.set("trace", m_trace.isReferenced() ? ref(m_trace) : m_trace, 0x0253015494C8CE77LL, true);
-  c_ObjectData::o_get(props);
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_exception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_exception
+void c_exception::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_exception
 Variant c_exception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_exception::o_getPublic(prop, phash, error);
@@ -4680,11 +4735,16 @@ Variant &c_errorexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_errorexception
-void c_errorexception::o_get(Array &props) const {
+void c_errorexception::o_getArray(Array &props) const {
   if (isInitialized(m_severity)) props.set("severity", m_severity.isReferenced() ? ref(m_severity) : m_severity, 0x78B6E7FAB84C8CFALL, true);
-  c_exception::o_get(props);
+  c_exception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_errorexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_errorexception
+void c_errorexception::o_setArray(CArrRef props) {
+  c_exception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_errorexception
 Variant c_errorexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_errorexception::o_getPublic(prop, phash, error);
@@ -5251,10 +5311,15 @@ Variant &c_badfunctioncallexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_badfunctioncallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_badfunctioncallexception
-void c_badfunctioncallexception::o_get(Array &props) const {
-  c_logicexception::o_get(props);
+void c_badfunctioncallexception::o_getArray(Array &props) const {
+  c_logicexception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_badfunctioncallexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_badfunctioncallexception
+void c_badfunctioncallexception::o_setArray(CArrRef props) {
+  c_logicexception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_badfunctioncallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_badfunctioncallexception
 Variant c_badfunctioncallexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_badfunctioncallexception::o_getPublic(prop, phash, error);
@@ -5642,10 +5707,15 @@ Variant &c_lengthexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_lengthexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_lengthexception
-void c_lengthexception::o_get(Array &props) const {
-  c_logicexception::o_get(props);
+void c_lengthexception::o_getArray(Array &props) const {
+  c_logicexception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_lengthexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_lengthexception
+void c_lengthexception::o_setArray(CArrRef props) {
+  c_logicexception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_lengthexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_lengthexception
 Variant c_lengthexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_lengthexception::o_getPublic(prop, phash, error);
@@ -6033,10 +6103,15 @@ Variant &c_domainexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domainexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domainexception
-void c_domainexception::o_get(Array &props) const {
-  c_logicexception::o_get(props);
+void c_domainexception::o_getArray(Array &props) const {
+  c_logicexception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domainexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domainexception
+void c_domainexception::o_setArray(CArrRef props) {
+  c_logicexception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domainexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_domainexception
 Variant c_domainexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_domainexception::o_getPublic(prop, phash, error);

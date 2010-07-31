@@ -59,12 +59,19 @@ Variant &c_arrayiterator::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_arrayiterator
-void c_arrayiterator::o_get(Array &props) const {
-  if (isInitialized(m_arr)) props.set(String("\000arrayiterator\000arr", 18, AttachLiteral), m_arr.isReferenced() ? ref(m_arr) : m_arr, 0x6CDE66253326681DLL, true);
-  if (isInitialized(m_flags)) props.set(String("\000arrayiterator\000flags", 20, AttachLiteral), m_flags.isReferenced() ? ref(m_flags) : m_flags, 0x644DF75C0CB1D76BLL, true);
-  c_ObjectData::o_get(props);
+void c_arrayiterator::o_getArray(Array &props) const {
+  if (isInitialized(m_arr)) props.set(String("\000ArrayIterator\000arr", 18, AttachLiteral), m_arr.isReferenced() ? ref(m_arr) : m_arr, 0x4DA5FC28BB861135LL, true);
+  if (isInitialized(m_flags)) props.set(String("\000ArrayIterator\000flags", 20, AttachLiteral), m_flags.isReferenced() ? ref(m_flags) : m_flags, 0x7D8AFAB3547A172BLL, true);
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_arrayiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_arrayiterator
+void c_arrayiterator::o_setArray(CArrRef props) {
+  props->load(String("\000ArrayIterator\000arr", 18, AttachLiteral), m_arr);
+  props->load(String("\000ArrayIterator\000flags", 20, AttachLiteral), m_flags);
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_arrayiterator
 Variant c_arrayiterator::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   const char *s = context;
@@ -1108,11 +1115,17 @@ Variant &c_appenditerator::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_appenditerator
-void c_appenditerator::o_get(Array &props) const {
-  if (isInitialized(m_iterators)) props.set(String("\000appenditerator\000iterators", 25, AttachLiteral), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, 0x370B757E55B5993DLL, true);
-  c_ObjectData::o_get(props);
+void c_appenditerator::o_getArray(Array &props) const {
+  if (isInitialized(m_iterators)) props.set(String("\000AppendIterator\000iterators", 25, AttachLiteral), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, 0x5D674D07CA685755LL, true);
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_appenditerator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_appenditerator
+void c_appenditerator::o_setArray(CArrRef props) {
+  props->load(String("\000AppendIterator\000iterators", 25, AttachLiteral), m_iterators);
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_appenditerator
 Variant c_appenditerator::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   const char *s = context;
@@ -1699,10 +1712,15 @@ Variant &c_recursivedirectoryiterator::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_recursivedirectoryiterator
-void c_recursivedirectoryiterator::o_get(Array &props) const {
-  c_directoryiterator::o_get(props);
+void c_recursivedirectoryiterator::o_getArray(Array &props) const {
+  c_directoryiterator::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_recursivedirectoryiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_recursivedirectoryiterator
+void c_recursivedirectoryiterator::o_setArray(CArrRef props) {
+  c_directoryiterator::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_recursivedirectoryiterator
 Variant c_recursivedirectoryiterator::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_recursivedirectoryiterator::o_getPublic(prop, phash, error);
@@ -3027,10 +3045,15 @@ Variant &c_directoryiterator::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_directoryiterator
-void c_directoryiterator::o_get(Array &props) const {
-  c_splfileinfo::o_get(props);
+void c_directoryiterator::o_getArray(Array &props) const {
+  c_splfileinfo::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_directoryiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_directoryiterator
+void c_directoryiterator::o_setArray(CArrRef props) {
+  c_splfileinfo::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_directoryiterator
 Variant c_directoryiterator::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_directoryiterator::o_getPublic(prop, phash, error);
@@ -4203,10 +4226,15 @@ Variant &c_recursiveiteratoriterator::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_recursiveiteratoriterator
-void c_recursiveiteratoriterator::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_recursiveiteratoriterator::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_recursiveiteratoriterator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_recursiveiteratoriterator
+void c_recursiveiteratoriterator::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_recursiveiteratoriterator
 Variant c_recursiveiteratoriterator::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_recursiveiteratoriterator::o_getPublic(prop, phash, error);
@@ -4648,10 +4676,15 @@ Variant &c_filteriterator::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_filteriterator
-void c_filteriterator::o_get(Array &props) const {
-  c_ObjectData::o_get(props);
+void c_filteriterator::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_filteriterator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_filteriterator
+void c_filteriterator::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_filteriterator
 Variant c_filteriterator::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_filteriterator::o_getPublic(prop, phash, error);

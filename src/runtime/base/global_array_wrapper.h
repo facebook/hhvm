@@ -93,6 +93,14 @@ public:
     return Variant();
   }
 
+  virtual void load(CVarRef k, Variant &v) const {
+    ssize_t idx = getIndex(k);
+    if (idx >= 0) {
+      CVarRef r = getValueRef(idx);
+      if (r.isReferenced()) v = ref(r); else v = r;
+    }
+  }
+
   virtual ssize_t getIndex(int64 k, int64 prehash = -1) const {
     return m_globals->getIndex(toString(k), prehash);
   }

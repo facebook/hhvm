@@ -1472,7 +1472,7 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
   }
 
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_GETARRAY_%s", cls);
-  cg_indentBegin("void %s%s::%sget(Array &props) const {\n",
+  cg_indentBegin("void %s%s::%sgetArray(Array &props) const {\n",
                  Option::ClassPrefix, cls, Option::ObjectPrefix);
   bool empty = true;
   for (unsigned int i = 0; i < m_symbols.size(); i++) {
@@ -1484,7 +1484,8 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
     if (!isStatic(s)) {
       empty = false;
       if (priv) {
-        prop = '\0' + m_blockScope.getName() + '\0' + prop;
+        ClassScope clsScope = dynamic_cast<ClassScope &>(m_blockScope);
+        prop = '\0' + clsScope.getOriginalName() + '\0' + prop;
         prehash = hash_string(prop.c_str(), prop.length());
       }
       if (getFinalType(s)->is(Type::KindOfVariant)) {
@@ -1504,11 +1505,37 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
       }
     }
   }
-  cg_printf("%s%s::%sget(props);\n", Option::ClassPrefix, parent,
+  cg_printf("%s%s::%sgetArray(props);\n", Option::ClassPrefix, parent,
             Option::ObjectPrefix);
   cg_indentEnd("}\n");
   cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_GETARRAY_%s", cls);
   if (empty) m_emptyJumpTables.insert(JumpTableClassGetArray);
+
+  cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_SETARRAY_%s", cls);
+  cg_indentBegin("void %s%s::%ssetArray(CArrRef props) {\n",
+                 Option::ClassPrefix, cls, Option::ObjectPrefix);
+  empty = true;
+  for (unsigned int i = 0; i < m_symbols.size(); i++) {
+    if (!isPrivate(m_symbols[i]) || isStatic(m_symbols[i])) continue;
+    empty = false;
+    const char *s = m_symbols[i].c_str();
+    ClassScope clsScope = dynamic_cast<ClassScope &>(m_blockScope);
+    string prop = '\0' + clsScope.getOriginalName() + '\0' + m_symbols[i];
+    if (getFinalType(s)->is(Type::KindOfVariant)) {
+      cg_printf("props->load(");
+      cg_printString(prop, ar);
+      cg_printf(", %s%s);\n", Option::PropertyPrefix, s);
+    } else {
+      cg_printf("%s%s = props->get(", Option::PropertyPrefix, s);
+      cg_printString(prop, ar);
+      cg_printf(");\n");
+    }
+  }
+  cg_printf("%s%s::%ssetArray(props);\n", Option::ClassPrefix, parent,
+            Option::ObjectPrefix);
+  cg_indentEnd("}\n");
+  cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_SETARRAY_%s", cls);
+  if (empty) m_emptyJumpTables.insert(JumpTableClassSetArray);
 
   outputCPPPropertyOp(cg, ar, cls, parent, "get", ", bool error /* = true */",
                       ", error", "Variant", false, JumpReturnString, false,

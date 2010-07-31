@@ -42,7 +42,8 @@ public:
 
   // properties
   virtual Array o_toArray() const;
-  virtual void o_get(Array &props) const;
+  virtual void o_getArray(Array &props) const;
+  virtual void o_setArray(CArrRef props);
   virtual bool o_exists(CStrRef s, int64 hash, const char *context = NULL)
     const;
   virtual Variant o_get(CStrRef s, int64 hash, bool error = true,

@@ -110,7 +110,7 @@ bool EvalObjectData::o_exists(CStrRef s, int64 hash,
     DynamicObjectData::o_exists(s, hash, context);
 }
 
-void EvalObjectData::o_get(Array &props) const {
+void EvalObjectData::o_getArray(Array &props) const {
   String zero("\0", 1, AttachLiteral);
   for (ArrayIter it(m_privates); !it.end(); it.next()) {
     String prefix(zero);
@@ -123,7 +123,20 @@ void EvalObjectData::o_get(Array &props) const {
       }
     }
   }
-  DynamicObjectData::o_get(props);
+  DynamicObjectData::o_getArray(props);
+}
+
+void EvalObjectData::o_setArray(CArrRef props) {
+  for (ArrayIter it(props); !it.end(); it.next()) {
+    String k = it.first();
+    if (!k.empty() && k.charAt(0) == '\0') {
+      int subLen = k.find('\0', 1) + 1;
+      String cls = k.substr(1, subLen - 2);
+      String key = k.substr(subLen);
+      props->load(k, o_lval(key, -1, cls));
+    }
+  }
+  DynamicObjectData::o_setArray(props);
 }
 
 Variant EvalObjectData::o_get(CStrRef s, int64 hash, bool error /* = true */,

@@ -340,6 +340,20 @@ Variant SmallArray::get(CVarRef k, int64 prehash /* = -1 */,
   return null;
 }
 
+void SmallArray::load(CVarRef k, Variant &v) const {
+  int p;
+  if (k.isNumeric()) {
+    p = find(k.toInt64());
+  } else {
+    String key = k.toString();
+    p = find(key.data(), key.size());
+  }
+  const Bucket &b = m_arBuckets[p];
+  if (b.kind != Empty) {
+    if (b.data.isReferenced()) v = ref(b.data); else v = b.data;
+  }
+}
+
 ssize_t SmallArray::getIndex(int64 k, int64 prehash /* = -1 */) const {
   int p = find(k);
   if (m_arBuckets[p].kind != Empty) return p;

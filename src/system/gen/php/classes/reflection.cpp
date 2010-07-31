@@ -53,11 +53,16 @@ Variant &c_reflectionfunctionabstract::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionfunctionabstract
-void c_reflectionfunctionabstract::o_get(Array &props) const {
+void c_reflectionfunctionabstract::o_getArray(Array &props) const {
   if (isInitialized(m_info)) props.set("info", m_info.isReferenced() ? ref(m_info) : m_info, 0x3255DC7C4A035C47LL, true);
-  c_ObjectData::o_get(props);
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionfunctionabstract
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionfunctionabstract
+void c_reflectionfunctionabstract::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionfunctionabstract
 Variant c_reflectionfunctionabstract::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_reflectionfunctionabstract::o_getPublic(prop, phash, error);
@@ -670,10 +675,15 @@ Variant &c_reflectionobject::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionobject
-void c_reflectionobject::o_get(Array &props) const {
-  c_reflectionclass::o_get(props);
+void c_reflectionobject::o_getArray(Array &props) const {
+  c_reflectionclass::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionobject
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionobject
+void c_reflectionobject::o_setArray(CArrRef props) {
+  c_reflectionclass::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionobject
 Variant c_reflectionobject::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   const char *s = context;
@@ -2012,10 +2022,15 @@ Variant &c_reflectionexception::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionexception
-void c_reflectionexception::o_get(Array &props) const {
-  c_exception::o_get(props);
+void c_reflectionexception::o_getArray(Array &props) const {
+  c_exception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionexception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionexception
+void c_reflectionexception::o_setArray(CArrRef props) {
+  c_exception::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionexception
 Variant c_reflectionexception::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_reflectionexception::o_getPublic(prop, phash, error);
@@ -2420,12 +2435,18 @@ Variant &c_reflectionclass::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionclass
-void c_reflectionclass::o_get(Array &props) const {
+void c_reflectionclass::o_getArray(Array &props) const {
   if (isInitialized(m_name)) props.set("name", m_name.isReferenced() ? ref(m_name) : m_name, 0x0BCDB293DC3DBDDCLL, true);
-  if (isInitialized(m_info)) props.set(String("\000reflectionclass\000info", 21, AttachLiteral), m_info.isReferenced() ? ref(m_info) : m_info, 0x76CD1386A6B652C3LL, true);
-  c_ObjectData::o_get(props);
+  if (isInitialized(m_info)) props.set(String("\000ReflectionClass\000info", 21, AttachLiteral), m_info.isReferenced() ? ref(m_info) : m_info, 0x6C1B113D84E0D89DLL, true);
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionclass
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionclass
+void c_reflectionclass::o_setArray(CArrRef props) {
+  props->load(String("\000ReflectionClass\000info", 21, AttachLiteral), m_info);
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionclass
 Variant c_reflectionclass::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   const char *s = context;
@@ -4673,12 +4694,19 @@ Variant &c_reflectionextension::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionextension
-void c_reflectionextension::o_get(Array &props) const {
-  if (isInitialized(m_name)) props.set(String("\000reflectionextension\000name", 25, AttachLiteral), m_name.isReferenced() ? ref(m_name) : m_name, 0x19A2EB7C8F3C0D32LL, true);
-  if (isInitialized(m_info)) props.set(String("\000reflectionextension\000info", 25, AttachLiteral), m_info.isReferenced() ? ref(m_info) : m_info, 0x63734519071A4FA3LL, true);
-  c_ObjectData::o_get(props);
+void c_reflectionextension::o_getArray(Array &props) const {
+  if (isInitialized(m_name)) props.set(String("\000ReflectionExtension\000name", 25, AttachLiteral), m_name.isReferenced() ? ref(m_name) : m_name, 0x4D1C5D03A227FDB9LL, true);
+  if (isInitialized(m_info)) props.set(String("\000ReflectionExtension\000info", 25, AttachLiteral), m_info.isReferenced() ? ref(m_info) : m_info, 0x479598263F2B39E7LL, true);
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionextension
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionextension
+void c_reflectionextension::o_setArray(CArrRef props) {
+  props->load(String("\000ReflectionExtension\000name", 25, AttachLiteral), m_name);
+  props->load(String("\000ReflectionExtension\000info", 25, AttachLiteral), m_info);
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionextension
 Variant c_reflectionextension::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   const char *s = context;
@@ -5385,12 +5413,17 @@ Variant &c_reflectionmethod::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionmethod
-void c_reflectionmethod::o_get(Array &props) const {
+void c_reflectionmethod::o_getArray(Array &props) const {
   if (isInitialized(m_name)) props.set("name", m_name.isReferenced() ? ref(m_name) : m_name, 0x0BCDB293DC3DBDDCLL, true);
   if (isInitialized(m_class)) props.set("class", m_class.isReferenced() ? ref(m_class) : m_class, 0x45397FE5C82CBD12LL, true);
-  c_reflectionfunctionabstract::o_get(props);
+  c_reflectionfunctionabstract::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionmethod
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionmethod
+void c_reflectionmethod::o_setArray(CArrRef props) {
+  c_reflectionfunctionabstract::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionmethod
 Variant c_reflectionmethod::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_reflectionmethod::o_getPublic(prop, phash, error);
@@ -6623,13 +6656,18 @@ Variant &c_reflectionproperty::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionproperty
-void c_reflectionproperty::o_get(Array &props) const {
+void c_reflectionproperty::o_getArray(Array &props) const {
   if (isInitialized(m_info)) props.set("info", m_info.isReferenced() ? ref(m_info) : m_info, 0x3255DC7C4A035C47LL, true);
   if (isInitialized(m_name)) props.set("name", m_name.isReferenced() ? ref(m_name) : m_name, 0x0BCDB293DC3DBDDCLL, true);
   if (isInitialized(m_class)) props.set("class", m_class.isReferenced() ? ref(m_class) : m_class, 0x45397FE5C82CBD12LL, true);
-  c_ObjectData::o_get(props);
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionproperty
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionproperty
+void c_reflectionproperty::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionproperty
 Variant c_reflectionproperty::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_reflectionproperty::o_getPublic(prop, phash, error);
@@ -7522,10 +7560,15 @@ Variant &c_reflectionfunction::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionfunction
-void c_reflectionfunction::o_get(Array &props) const {
-  c_reflectionfunctionabstract::o_get(props);
+void c_reflectionfunction::o_getArray(Array &props) const {
+  c_reflectionfunctionabstract::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionfunction
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionfunction
+void c_reflectionfunction::o_setArray(CArrRef props) {
+  c_reflectionfunctionabstract::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionfunction
 Variant c_reflectionfunction::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_reflectionfunction::o_getPublic(prop, phash, error);
@@ -8298,11 +8341,16 @@ Variant &c_reflectionparameter::os_lval(const char *s, int64 hash) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionparameter
-void c_reflectionparameter::o_get(Array &props) const {
+void c_reflectionparameter::o_getArray(Array &props) const {
   if (isInitialized(m_info)) props.set("info", m_info.isReferenced() ? ref(m_info) : m_info, 0x3255DC7C4A035C47LL, true);
-  c_ObjectData::o_get(props);
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionparameter
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionparameter
+void c_reflectionparameter::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionparameter
 Variant c_reflectionparameter::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
   return c_reflectionparameter::o_getPublic(prop, phash, error);

@@ -90,6 +90,7 @@ public:
 
     // this order is significant in outputCPPPropertyOp()
     JumpTableClassGetArray,
+    JumpTableClassSetArray,
     JumpTableClassGet,
     JumpTableClassGetPublic,
     JumpTableClassGetPrivate,

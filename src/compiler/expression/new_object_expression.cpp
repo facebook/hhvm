@@ -121,7 +121,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                          m_validClass);
       m_variableArgument = func->isVariableArgument();
     }
-    if (!m_validClass) {
+    if (!m_validClass || m_dynamic) {
       m_implementedType = NEW_TYPE(Object);
     } else {
       m_implementedType.reset();

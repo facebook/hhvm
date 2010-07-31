@@ -1854,6 +1854,14 @@ bool TestCodeRun::TestArrayIterator() {
       "$a = array(1, 2, 3, 4, 5, 6);\n"
       "foreach ($a as $k => $v) { if ($v >= 4) $a = $v + $v; }\n"
       "var_dump($a);\n");
+  MVCR("<?php\n"
+      "$arr = array('bar', 'bar', 'bar', 'bar', 'bar', 'bar', 'foo');\n"
+      "function foo() {\n"
+      "  var_dump(__FUNCTION__); global $arr; $arr[] = 'bar';\n"
+      "}\n"
+      "function bar() { var_dump(__FUNCTION__); }\n"
+      "reset($arr);\n"
+      "while ($func = each($arr)) { $f = $func[1]; $f(); }\n");
   return true;
 }
 

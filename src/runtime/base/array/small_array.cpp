@@ -403,6 +403,8 @@ ArrayData *SmallArray::escalateToZendArray() const {
       ASSERT(b.key);
       ret->setPosition(ret->getIndex(String(b.key)));
     }
+  } else {
+    ret->setPosition(0);
   }
   return ret;
 }

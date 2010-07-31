@@ -3,7 +3,7 @@
 "function_exists", T(Boolean), S(0), "function_name", T(String), NULL, S(0), NULL, S(0), 
 "is_callable", T(Boolean), S(0), "v", T(Some), NULL, S(0), "syntax", T(Boolean), "false", S(0), "name", T(Variant), "null", S(1), NULL, S(0), 
 "call_user_func_array", T(Variant), S(0), "function", T(Variant), NULL, S(0), "params", T(Array), NULL, S(0), NULL, S(0), 
-"call_user_func", T(Variant), S(0), "function", T(Variant), NULL, S(0), NULL, S(16), 
+"call_user_func", T(Variant), S(0), "function", T(Variant), NULL, S(0), NULL, S(4294967312), (const char*)(int64)hphp_opt_call_user_func, 
 "call_user_func_array_async", T(Object), S(0), "function", T(Variant), NULL, S(0), "params", T(Array), NULL, S(0), NULL, S(0), 
 "call_user_func_async", T(Object), S(0), "function", T(Variant), NULL, S(0), NULL, S(16), 
 "end_user_func_async", T(Variant), S(0), "handle", T(Object), NULL, S(0), "default_strategy", T(Int32), "k_GLOBAL_STATE_IGNORE", S(0), "additional_strategies", T(Variant), "null", S(0), NULL, S(0), 
@@ -21,5 +21,8 @@
 #elif EXT_TYPE == 1
 #elif EXT_TYPE == 2
 #elif EXT_TYPE == 3
+
+#elif EXT_TYPE == 4
+extern ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg, AnalysisResultPtr ar, SimpleFunctionCallPtr call, int mode);
 
 #endif

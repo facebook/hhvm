@@ -1389,9 +1389,13 @@ void ClassScope::OutputVolatileCheckBegin(CodeGenerator &cg,
   string lwrName(Util::toLower(origName));
   cg_printf("(checkClassExists(");
   cg_printString(origName, ar);
-  cg_printf(", &%s->CDEC(%s), %s->FVF(__autoload)), (",
-            cg.getGlobals(ar), cg.formatLabel(lwrName).c_str(),
-            cg.getGlobals(ar));
+  if (ar->findClass(lwrName)) {
+    cg_printf(", &%s->CDEC(%s)",
+              cg.getGlobals(ar), cg.formatLabel(lwrName).c_str());
+  } else {
+    cg_printf(", (bool*)0");
+  }
+  cg_printf(", %s->FVF(__autoload)), (", cg.getGlobals(ar));
 }
 
 void ClassScope::OutputVolatileCheckEnd(CodeGenerator &cg) {

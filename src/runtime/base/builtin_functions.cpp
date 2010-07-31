@@ -731,17 +731,16 @@ void checkClassExists(CStrRef name, Globals *g, bool nothrow /* = false */) {
 
 bool checkClassExists(CStrRef name, const bool *declared, bool autoloadExists,
                       bool nothrow /* = false */) {
-  if (*declared) return true;
+  if (declared && *declared) return true;
   if (autoloadExists) {
     invoke(s___autoload, CREATE_VECTOR1(name), -1, true, false);
   }
-  if (!*declared) {
-    if (nothrow) return false;
-    string msg = "unknown class ";
-    msg += name.c_str();
-    throw_fatal(msg.c_str());
-  }
-  return true;
+  if (declared && *declared) return true;
+  if (nothrow) return false;
+  string msg = "unknown class ";
+  msg += name.c_str();
+  throw_fatal(msg.c_str());
+  return false;
 }
 
 bool checkInterfaceExists(CStrRef name, const bool *declared,

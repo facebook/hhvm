@@ -6,8 +6,8 @@
 "fb_renamed_functions", T(Void), S(0), "names", T(Array), NULL, S(0), NULL, S(0), 
 "fb_rename_function", T(Boolean), S(0), "orig_func_name", T(String), NULL, S(0), "new_func_name", T(String), NULL, S(0), NULL, S(0), 
 "fb_utf8ize", T(Boolean), S(0), "input", T(Variant), NULL, S(1), NULL, S(0), 
-"fb_call_user_func_safe", T(Array), S(0), "function", T(Variant), NULL, S(0), NULL, S(1), 
-"fb_call_user_func_safe_return", T(Variant), S(0), "function", T(Variant), NULL, S(0), "def", T(Variant), NULL, S(0), NULL, S(1), 
+"fb_call_user_func_safe", T(Array), S(0), "function", T(Variant), NULL, S(0), NULL, S(4294967297), (const char*)(int64)hphp_opt_fb_call_user_func, 
+"fb_call_user_func_safe_return", T(Variant), S(0), "function", T(Variant), NULL, S(0), "def", T(Variant), NULL, S(0), NULL, S(4294967297), (const char*)(int64)hphp_opt_fb_call_user_func, 
 "fb_call_user_func_array_safe", T(Array), S(0), "function", T(Variant), NULL, S(0), "params", T(Array), NULL, S(0), NULL, S(0), 
 "fb_get_code_coverage", T(Variant), S(0), NULL, S(0), 
 "xhprof_enable", T(Void), S(0), "flags", T(Int32), NULL, S(0), "args", T(Array), "null_array", S(0), NULL, S(0), 
@@ -32,5 +32,8 @@
 "XHPROF_FLAGS_VTSC", T(Int64),
 #elif EXT_TYPE == 2
 #elif EXT_TYPE == 3
+
+#elif EXT_TYPE == 4
+extern ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg, AnalysisResultPtr ar, SimpleFunctionCallPtr call, int mode);
 
 #endif

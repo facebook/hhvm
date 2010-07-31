@@ -55,7 +55,17 @@ public:
   }
 
   void addDependencies(AnalysisResultPtr ar);
+  void addLateDependencies(AnalysisResultPtr ar);
   const std::string &getName() const { return m_name;}
+  ExpressionListPtr getParams() const { return m_params; }
+  void setSafeCall(int flag) { m_safe = flag; }
+  void setSafeDefault(ExpressionPtr def) { m_safeDef = def; }
+  virtual ConstructPtr getNthKid(int n) const;
+  virtual void setNthKid(int n, ConstructPtr cp);
+  static SimpleFunctionCallPtr getFunctionCallForCallUserFunc(
+    AnalysisResultPtr ar, SimpleFunctionCallPtr call, int firstParam,
+    bool &error);
+
 private:
   enum FunctionType {
     UnknownType,
@@ -92,6 +102,8 @@ private:
   bool canInvokeFewArgs();
   bool m_invokeFewArgsDecision;
   bool m_dynamicInvoke;
+  int m_safe;
+  ExpressionPtr m_safeDef;
 
   ExpressionPtr optimize(AnalysisResultPtr ar);
   // hook

@@ -38,16 +38,16 @@ f('fb_utf8ize', Boolean,
 
 f('fb_call_user_func_safe', VariantVec,
   array('function' => Variant),
-  VariableArguments);
+  VariableArguments, 'hphp_opt_fb_call_user_func');
 
 f('fb_call_user_func_safe_return', Variant,
   array('function' => Variant,
         'def' => Variant),
-  VariableArguments);
+  VariableArguments, 'hphp_opt_fb_call_user_func');
 
 f('fb_call_user_func_array_safe', VariantVec,
   array('function' => Variant,
-        'params' => VariantVec));
+        'params' => VariantVec), DefaultFlags);
 
 f('fb_get_code_coverage', Variant);
 

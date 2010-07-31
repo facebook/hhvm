@@ -102,6 +102,9 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
   m_dynamic = Option::IsDynamicFunction(method, m_name) ||
     Option::EnableEval == Option::FullEval;
 
+  m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
+    Option::DynamicInvokeFunctions.end();
+
   if (modifiers) {
     m_virtual = modifiers->isAbstract();
   }
@@ -141,6 +144,8 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_nrvoFix(true), m_inlineAsExpr(false), m_inlineIndex(0),
       m_optFunction(0) {
   m_dynamic = Option::IsDynamicFunction(method, m_name);
+  m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
+    Option::DynamicInvokeFunctions.end();
 }
 
 void FunctionScope::setParamCounts(AnalysisResultPtr ar, int minParam,

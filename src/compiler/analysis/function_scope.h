@@ -79,6 +79,7 @@ public:
   bool isFinal() const;
   bool isRefParam(int index) const;
   bool isRefReturn() const { return m_refReturn;}
+  bool isDynamicInvoke() const { return m_dynamicInvoke; }
   bool hasImpl() const;
 
   void setInlineAsExpr(bool f) { m_inlineAsExpr = f; }
@@ -393,6 +394,7 @@ private:
   bool m_virtual;
   bool m_perfectVirtual;
   bool m_dynamic;
+  bool m_dynamicInvoke;
   bool m_overriding; // overriding a virtual function
   int m_redeclaring; // multiple definition of the same function
   bool m_volatile; // for function_exists

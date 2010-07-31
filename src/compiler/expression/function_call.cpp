@@ -201,7 +201,8 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
 
 bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                 int state) {
-  if (m_className.empty() ||
+  if (isUnused() ||
+      m_className.empty() ||
       m_origClassName == "self" ||
       m_origClassName == "parent") {
     return Expression::preOutputCPP(cg, ar, state);

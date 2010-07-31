@@ -12,15 +12,16 @@ f('function_exists', Boolean,
 f('is_callable', Boolean,
   array('v' => Any,
         'syntax' => array(Boolean, 'false'),
-        'name' => array(String | Reference, 'null')));
+        'name' => array(String | Reference, 'null')),
+  DefaultFlags);
 
 f('call_user_func_array', Variant,
   array('function' => Variant,
-        'params' => VariantVec));
+        'params' => VariantVec), DefaultFlags);
 
 f('call_user_func', Variant,
   array('function' => Variant),
-  MixedVariableArguments);
+  MixedVariableArguments, 'hphp_opt_call_user_func');
 
 f('call_user_func_array_async', Object,
   array('function' => Variant,

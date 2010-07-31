@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <util/light_process.h>
 
 using namespace std;
 using namespace boost;
@@ -60,6 +61,7 @@ static void bt_handler(int sig) {
   // from flushing bad data or generating more faults meanwhile
   if (sig==SIGQUIT || sig==SIGILL || sig==SIGSEGV || sig==SIGBUS) {
     SegFaulting=true;
+    LightProcess::Close();
     // leave running for SIGTERM SIGFPE SIGABRT
   }
 

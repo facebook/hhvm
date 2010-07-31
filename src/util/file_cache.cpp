@@ -132,13 +132,11 @@ void FileCache::write(const char *name, const char *fullpath) {
     if (is_compressible_file(name)) {
       int new_len = buffer.len;
       char *compressed = gzencode(buffer.data, new_len, 9, CODING_GZIP);
-      if (compressed) {
-        if (new_len < buffer.len) {
-          buffer.clen = new_len;
-          buffer.cdata = compressed;
-        } else {
-          free(compressed);
-        }
+      if (compressed && new_len < ((buffer.len * 3) / 4)) {
+        buffer.clen = new_len;
+        buffer.cdata = compressed;
+      } else {
+        free(compressed);
       }
     }
   }
@@ -183,7 +181,7 @@ void FileCache::save(const char *filename) {
   fclose(f);
 }
 
-void FileCache::load(const char *filename) {
+void FileCache::load(const char *filename, bool onDemandUncompress) {
   ASSERT(filename && *filename);
 
   FILE *f = fopen(filename, "r");
@@ -230,16 +228,23 @@ void FileCache::load(const char *filename) {
       }
       buffer.data[len] = '\0';
       if (c) {
-        int new_len = buffer.len;
-        char *uncompressed = gzdecode(buffer.data, new_len);
-        if (uncompressed == NULL) {
-          throw Exception("Bad compressed data in archive %s", filename);
-        }
+        if (onDemandUncompress) {
+          buffer.clen = buffer.len;
+          buffer.cdata = buffer.data;
+          buffer.len = -1;
+          buffer.data = NULL;
+        } else {
+          int new_len = buffer.len;
+          char *uncompressed = gzdecode(buffer.data, new_len);
+          if (uncompressed == NULL) {
+            throw Exception("Bad compressed data in archive %s", filename);
+          }
 
-        buffer.clen = buffer.len;
-        buffer.cdata = buffer.data;
-        buffer.len = new_len;
-        buffer.data = uncompressed;
+          buffer.clen = buffer.len;
+          buffer.cdata = buffer.data;
+          buffer.len = new_len;
+          buffer.data = uncompressed;
+        }
       }
     }
   }
@@ -290,6 +295,14 @@ char *FileCache::read(const char *name, int &len, bool &compressed) const {
     if (iter != m_files.end()) {
       const Buffer &buf = iter->second;
       if (compressed && buf.cdata) {
+        len = buf.clen;
+        ASSERT(len > 0);
+        return buf.cdata;
+      }
+      if (!compressed && !buf.data) {
+        // only compressed data available, the client has to uncompress it
+        compressed = true;
+        ASSERT(buf.cdata);
         len = buf.clen;
         ASSERT(len > 0);
         return buf.cdata;

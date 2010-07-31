@@ -38,7 +38,8 @@ void StaticContentCache::load() {
 
   if (!RuntimeOption::FileCache.empty()) {
     TheFileCache = FileCachePtr(new FileCache());
-    TheFileCache->load(RuntimeOption::FileCache.c_str());
+    TheFileCache->load(RuntimeOption::FileCache.c_str(),
+                       RuntimeOption::EnableOnDemandUncompress);
     Logger::Info("loaded file cache from %s",
                  RuntimeOption::FileCache.c_str());
     return;

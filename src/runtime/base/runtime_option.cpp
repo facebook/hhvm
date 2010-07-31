@@ -145,6 +145,7 @@ std::string RuntimeOption::FatalErrorMessage;
 std::string RuntimeOption::FontPath;
 bool RuntimeOption::EnableStaticContentCache = true;
 bool RuntimeOption::EnableStaticContentFromDisk = true;
+bool RuntimeOption::EnableOnDemandUncompress = true;
 
 std::string RuntimeOption::RTTIDirectory;
 bool RuntimeOption::EnableCliRTTI = false;
@@ -535,6 +536,8 @@ void RuntimeOption::Load(Hdf &config) {
       server["EnableStaticContentCache"].getBool(true);
     EnableStaticContentFromDisk =
       server["EnableStaticContentFromDisk"].getBool(true);
+    EnableOnDemandUncompress =
+      server["EnableOnDemandUncompress"].getBool(true);
 
     RTTIDirectory = server["RTTIDirectory"].getString("/tmp/");
     if (!RTTIDirectory.empty() &&

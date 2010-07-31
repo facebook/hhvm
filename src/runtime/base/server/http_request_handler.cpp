@@ -157,6 +157,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   // If this is not a php file, check the static and dynamic content caches
   if (ext && strcasecmp(ext, "php") != 0) {
     if (RuntimeOption::EnableStaticContentCache) {
+      bool original = compressed;
       // check against static content cache
       if (StaticContentCache::TheCache.find(path, data, len, compressed)) {
         struct stat st;
@@ -165,8 +166,15 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
         // local cache file is not valuable, maybe misleading. This way
         // the Last-Modified header will not show in response.
         // stat(RuntimeOption::FileCache.c_str(), &st);
-        sendStaticContent(transport, data, len, st.st_mtime, compressed, path);
+        if (!original && compressed) {
+          data = gzdecode(data, len);
+          if (data == NULL) {
+            throw FatalErrorException("cannot unzip compressed data");
+          }
+        }
+        sendStaticContent(transport, data, len, st.st_mtime, original, path);
         ServerStats::LogPage(path, 200);
+        if (!original && compressed) free((void*)data);
         return;
       }
     }

@@ -44,7 +44,7 @@ public:
   /**
    * Reading data.
    */
-  void load(const char *filename);
+  void load(const char *filename, bool onDemandUncompress);
   bool fileExists(const char *name, bool isRelative = true) const;
   bool dirExists(const char *name, bool isRelative = true) const;
   bool exists(const char *name, bool isRelative = true) const;

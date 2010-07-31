@@ -143,7 +143,8 @@ static int check_header(z_stream &stream) {
 
 bool is_compressible_file(const char *filename) {
   static const char *ext[] = {
-    "gif", "png", "jpeg", "jpg", "tiff", "swf", "zip", "gz", "cab"
+    "gif", "png", "jpeg", "jpg", "tiff", "swf", "zip", "gz", "bz2", "cab",
+    "bmp", "xcf", "mp3", "wav", "rsrc", "ico", "jar", "exe", "dll", "so",
   };
   const char *dot = NULL;
   for (const char *p = filename; *p; p++) {

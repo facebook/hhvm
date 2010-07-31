@@ -144,6 +144,7 @@ public:
   static std::string FontPath;
   static bool EnableStaticContentCache;
   static bool EnableStaticContentFromDisk;
+  static bool EnableOnDemandUncompress;
 
   static std::string RTTIDirectory;
   static bool EnableCliRTTI;

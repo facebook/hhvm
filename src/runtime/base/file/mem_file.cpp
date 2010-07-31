@@ -18,8 +18,8 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/util/http_client.h>
 #include <runtime/base/server/static_content_cache.h>
+#include <runtime/base/runtime_option.h>
 #include <util/compression.h>
-
 using namespace std;
 
 namespace HPHP {
@@ -59,6 +59,17 @@ bool MemFile::open(CStrRef filename, CStrRef mode) {
   char *data =
     StaticContentCache::TheFileCache->read(filename.c_str(), len, compressed);
   if (len != -1) {
+    if (compressed) {
+      ASSERT(RuntimeOption::EnableOnDemandUncompress);
+      data = gzdecode(data, len);
+      if (data == NULL) {
+        throw FatalErrorException("cannot unzip compressed data");
+      }
+      m_data = data;
+      m_malloced = true;
+      m_len = len;
+      return true;
+    }
     m_name = filename;
     m_data = data;
     m_len = len;

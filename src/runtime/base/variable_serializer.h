@@ -43,6 +43,7 @@ public:
     DebugDump,
     Serialize,
     JSON,
+    APCSerialize,
   };
 
   /**
@@ -109,8 +110,7 @@ private:
   int m_objId;                   // for object serialization
   int m_rsrcId;                  // for resource serialization
   int m_maxCount;                // for max recursive levels
-  int64 m_outputLimit;             // Maximum size of output
-
+  int64 m_outputLimit;           // Maximum size of output
 
   struct ArrayInfo {
     const ClassInfo *class_info; // The class info if an object

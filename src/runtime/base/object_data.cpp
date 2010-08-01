@@ -447,10 +447,13 @@ bool ObjectData::php_sleep(Variant &ret) {
   return getAttribute(HasSleep);
 }
 
+StaticString s_zero("\0", 1);
+
 void ObjectData::serialize(VariableSerializer *serializer) const {
   if (serializer->incNestedLevel((void*)this, true)) {
     serializer->writeOverflow((void*)this, true);
-  } else if (serializer->getType() == VariableSerializer::Serialize &&
+  } else if ((serializer->getType() == VariableSerializer::Serialize ||
+              serializer->getType() == VariableSerializer::APCSerialize) &&
              o_instanceof("serializable")) {
     Variant ret =
       const_cast<ObjectData*>(this)->o_invoke("serialize", Array(), -1);
@@ -464,15 +467,22 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
     }
   } else {
     Variant ret;
-    if (serializer->getType() == VariableSerializer::Serialize &&
+    if ((serializer->getType() == VariableSerializer::Serialize ||
+         serializer->getType() == VariableSerializer::APCSerialize) &&
         const_cast<ObjectData*>(this)->php_sleep(ret)) {
       if (ret.isArray()) {
+        const ClassInfo *cls = ClassInfo::FindClass(o_getClassName());
         Array wanted = Array::Create();
         Array props = ret.toArray();
         for (ArrayIter iter(props); iter; ++iter) {
           String name = iter.second().toString();
           if (o_exists(name, -1, o_getClassName())) {
-            wanted.set(name, const_cast<ObjectData*>(this)->
+            ClassInfo::PropertyInfo *p = cls->getPropertyInfo(name);
+            String propName = name;
+            if (p && (p->attribute & ClassInfo::IsPrivate)) {
+              propName = s_zero + o_getClassName() + s_zero + name;
+            }
+            wanted.set(propName, const_cast<ObjectData*>(this)->
                        o_getUnchecked(name, -1, o_getClassName()));
           } else {
             raise_warning("\"%s\" returned as member variable from "

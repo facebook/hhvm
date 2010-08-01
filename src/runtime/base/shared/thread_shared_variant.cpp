@@ -16,6 +16,7 @@
 
 #include <runtime/base/shared/thread_shared_variant.h>
 #include <runtime/ext/ext_variable.h>
+#include <runtime/ext/ext_apc.h>
 #include <runtime/base/shared/shared_map.h>
 #include <runtime/base/runtime_option.h>
 
@@ -59,6 +60,10 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
     {
       String s = source.toString();
       m_type = serialized ? KindOfObject : KindOfString;
+      if (serialized) {
+        Object obj = f_unserialize(s).toObject();
+        s = apc_serialize(obj);
+      }
       m_data.str = s->copy(true);
       break;
     }
@@ -74,7 +79,7 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
         if (arr->hasInternalReference(seen)) {
           m_serializedArray = true;
           m_shouldCache = true;
-          String s = f_serialize(source);
+          String s = apc_serialize(source);
           m_data.str = new StringData(s.data(), s.size(), CopyString);
           break;
         }
@@ -106,7 +111,7 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
     {
       m_type = KindOfObject;
       m_shouldCache = true;
-      String s = f_serialize(source);
+      String s = apc_serialize(source);
       m_data.str = new StringData(s.data(), s.size(), CopyString);
       break;
     }
@@ -136,16 +141,16 @@ Variant ThreadSharedVariant::toLocal() {
   case KindOfArray:
     {
       if (m_serializedArray) {
-        return f_unserialize(String(m_data.str->data(), m_data.str->size(),
-                                    AttachLiteral));
+        return apc_unserialize(String(m_data.str->data(), m_data.str->size(),
+                                      AttachLiteral));
       }
       return NEW(SharedMap)(this);
     }
   default:
     {
       ASSERT(m_type == KindOfObject);
-      return f_unserialize(String(m_data.str->data(), m_data.str->size(),
-                                  AttachLiteral));
+      return apc_unserialize(String(m_data.str->data(), m_data.str->size(),
+                                    AttachLiteral));
     }
   }
 }

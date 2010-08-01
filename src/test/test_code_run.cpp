@@ -12653,6 +12653,18 @@ bool TestCodeRun::TestAPC() {
         "int(100)\n"
       );
 
+  MVCRO("<?php\n"
+        "class A { private $b = 10; }\n"
+        "class B extends A { private $b = 100; }\n"
+        "apc_store('key', new B());\n"
+        "var_dump(apc_fetch('key'));\n",
+        "object(B)#1 (2) {\n"
+        "  [\"b:private\"]=>\n"
+        "  int(100)\n"
+        "  [\"b:private\"]=>\n"
+        "  int(10)\n"
+        "}\n"
+      );
   return true;
 }
 

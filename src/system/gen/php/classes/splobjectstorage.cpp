@@ -65,7 +65,7 @@ void c_splobjectstorage::o_getArray(Array &props) const {
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_splobjectstorage
 void c_splobjectstorage::o_setArray(CArrRef props) {
   props->load(String("\000SplObjectStorage\000storage", 25, AttachLiteral), m_storage);
-  m_index = props->get(String("\000SplObjectStorage\000index", 23, AttachLiteral));
+  if (props->exists(String("\000SplObjectStorage\000index", 23, AttachLiteral))) m_index = props->get(String("\000SplObjectStorage\000index", 23, AttachLiteral));
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_splobjectstorage

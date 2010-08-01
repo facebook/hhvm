@@ -1527,7 +1527,9 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
       cg_printString(prop, ar);
       cg_printf(", %s%s);\n", Option::PropertyPrefix, s);
     } else {
-      cg_printf("%s%s = props->get(", Option::PropertyPrefix, s);
+      cg_printf("if (props->exists(");
+      cg_printString(prop, ar);
+      cg_printf(")) %s%s = props->get(", Option::PropertyPrefix, s);
       cg_printString(prop, ar);
       cg_printf(");\n");
     }

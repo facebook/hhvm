@@ -110,6 +110,12 @@ void const_load_impl(const char **int_keys, int64 *int_values,
                    const char **strings, const char **objects,
                    const char **thrifts, const char **others);
 ///////////////////////////////////////////////////////////////////////////////
+// apc serialization
+
+String apc_serialize(CVarRef value);
+Variant apc_unserialize(CStrRef str);
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // __EXT_APC_H__

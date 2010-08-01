@@ -24,6 +24,7 @@
 #include <dlfcn.h>
 #include <runtime/base/program_functions.h>
 #include <runtime/base/builtin_functions.h>
+#include <runtime/base/variable_serializer.h>
 
 using namespace std;
 
@@ -639,6 +640,18 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
     break;
   }
   return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// apc serialization
+
+String apc_serialize(CVarRef value) {
+  VariableSerializer vs(VariableSerializer::APCSerialize);
+  return vs.serialize(value, true);
+}
+
+Variant apc_unserialize(CStrRef str) {
+  return f_unserialize(str);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

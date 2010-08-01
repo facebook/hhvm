@@ -2779,7 +2779,8 @@ void Variant::serialize(VariableSerializer *serializer,
                         bool isArrayKey /* = false */) const {
   if (m_type == KindOfVariant) {
     // Ugly, but behavior is different for serialize
-    if (serializer->getType() == VariableSerializer::Serialize) {
+    if (serializer->getType() == VariableSerializer::Serialize ||
+        serializer->getType() == VariableSerializer::APCSerialize) {
       if (serializer->incNestedLevel(m_data.pvar)) {
         serializer->writeOverflow(m_data.pvar);
       } else {
@@ -2904,11 +2905,57 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
       operator=(v);
     }
     break;
+  case 'S':
+    {
+      union {
+        char buf[8];
+        StringData *sd;
+      } u;
+      in.read(u.buf, 8);
+      operator=(u.sd);
+    }
+    break;
   case 'a':
     {
       Array v = Array::Create();
       v.unserialize(unserializer);
       operator=(v);
+      return; // array has '}' terminating
+    }
+    break;
+  case 'A':
+    {
+      union {
+        char buf[8];
+        ArrayData *ad;
+      } u;
+      in.read(u.buf, 8);
+      operator=(u.ad);
+    }
+    break;
+  case 'o':
+    {
+      String clsName;
+      clsName.unserialize(in);
+
+      in >> sep;
+      if (sep != ':') {
+        throw Exception("Expected ':' but got '%c'", sep);
+      }
+
+      Object obj;
+      try {
+        obj = create_object(clsName.data(), Array::Create(), false);
+      } catch (ClassNotFoundException &e) {
+        ASSERT(false);
+      }
+      operator=(obj);
+
+      Array v = Array::Create();
+      v.unserialize(unserializer);
+      obj->o_setArray(v);
+
+      obj->t___wakeup();
       return; // array has '}' terminating
     }
     break;

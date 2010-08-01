@@ -88,6 +88,7 @@ void VariableSerializer::write(bool v) {
     m_buf->append('\n');
     break;
   case Serialize:
+  case APCSerialize:
     m_buf->append(v ? "b:1;" : "b:0;");
     break;
   default:
@@ -119,6 +120,7 @@ void VariableSerializer::write(int64 v) {
     m_buf->append('\n');
     break;
   case Serialize:
+  case APCSerialize:
     m_buf->append("i:");
     m_buf->append(v);
     m_buf->append(';');
@@ -169,6 +171,7 @@ void VariableSerializer::write(double v) {
     }
     break;
   case Serialize:
+  case APCSerialize:
     m_buf->append("d:");
     if (isnan(v)) {
       m_buf->append("NAN");
@@ -236,20 +239,13 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
     break;
   }
   case Serialize:
-    if (len < 0) {
-      len = strlen(v);
-      m_buf->append("s:");
-      m_buf->append(len);
-      m_buf->append(":\"");
-      m_buf->append(v);
-      m_buf->append("\";");
-    } else {
-      m_buf->append("s:");
-      m_buf->append(len);
-      m_buf->append(":\"");
-      m_buf->append(v, len);
-      m_buf->append("\";");
-    }
+  case APCSerialize:
+    if (len < 0) len = strlen(v);
+    m_buf->append("s:");
+    m_buf->append(len);
+    m_buf->append(":\"");
+    m_buf->append(v, len);
+    m_buf->append("\";");
     break;
   case JSON:
     {
@@ -267,11 +263,33 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
 }
 
 void VariableSerializer::write(CStrRef v) {
-  v.serialize(this);
+  if (m_type == APCSerialize && !v.isNull() && v->isStatic()) {
+    union {
+      char buf[8];
+      StringData *sd;
+    } u;
+    u.sd = v.get();
+    m_buf->append("S:");
+    m_buf->append(u.buf, 8);
+    m_buf->append(';');
+  } else {
+    v.serialize(this);
+  }
 }
 
 void VariableSerializer::write(CArrRef v) {
-  v.serialize(this);
+  if (m_type == APCSerialize && !v.isNull() && v->isStatic()) {
+    union {
+      char buf[8];
+      ArrayData *ad;
+    } u;
+    u.ad = v.get();
+    m_buf->append("A:");
+    m_buf->append(u.buf, 8);
+    m_buf->append(';');
+  } else {
+    v.serialize(this);
+  }
 }
 
 void VariableSerializer::write(CObjRef v) {
@@ -324,6 +342,7 @@ void VariableSerializer::writeNull() {
     m_buf->append('\n');
     break;
   case Serialize:
+  case APCSerialize:
     m_buf->append("N;");
     break;
   case JSON:
@@ -356,6 +375,7 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
     m_buf->append("*RECURSION*\n");
     break;
   case Serialize:
+  case APCSerialize:
     {
       PointerCounterMap::const_iterator iter = m_arrayIds.find(ptr);
       ASSERT(iter != m_arrayIds.end());
@@ -474,6 +494,21 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
       m_buf->append(":{");
     }
     break;
+  case APCSerialize:
+    if (!m_objClass.empty()) {
+      m_buf->append("o:");
+      m_buf->append((int)m_objClass.size());
+      m_buf->append(":\"");
+      m_buf->append(m_objClass);
+      m_buf->append("\":");
+      m_buf->append(size);
+      m_buf->append(":{");
+    } else {
+      m_buf->append("a:");
+      m_buf->append(size);
+      m_buf->append(":{");
+    }
+    break;
   case JSON:
     if (info.is_vector) {
       m_buf->append("[");
@@ -551,6 +586,10 @@ void VariableSerializer::writeSerializedProperty(CStrRef prop,
 }
 
 void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
+  if (m_type == APCSerialize && key.isString()) {
+    write(key.toString());
+    return;
+  }
   ArrayInfo &info = m_arrayInfos.back();
   const ClassInfo *cls = info.class_info;
   if (info.is_object) {
@@ -599,6 +638,7 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
     }
     break;
   case Serialize:
+  case APCSerialize:
     if (info.is_object) {
       writeSerializedProperty(key.toString(), cls);
     } else {
@@ -622,7 +662,7 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
 
 void VariableSerializer::writeArrayValue(const ArrayData *arr, CVarRef value) {
   // Do not count referenced values after the first
-  if (m_type == Serialize &&
+  if ((m_type == Serialize || m_type == APCSerialize) &&
       !(value.isReferenced() &&
         m_arrayIds.find(value.getVariantData()) != m_arrayIds.end()))
     m_valueCount++;
@@ -671,6 +711,7 @@ void VariableSerializer::writeArrayFooter(const ArrayData *arr) {
     }
     break;
   case Serialize:
+  case APCSerialize:
     m_buf->append('}');
     break;
   case JSON:
@@ -722,6 +763,7 @@ bool VariableSerializer::incNestedLevel(void *ptr,
   case DebugDump:
     return ++m_counts[ptr] >= m_maxCount;
   case Serialize:
+  case APCSerialize:
     {
       int ct = ++m_counts[ptr];
       if (m_arrayIds.find(ptr) != m_arrayIds.end() &&

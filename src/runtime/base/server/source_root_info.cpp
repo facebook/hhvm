@@ -139,7 +139,7 @@ void SourceRootInfo::setServerVariables(Variant &server) const {
   server.set("HPHP_SANDBOX_USER", m_user);
   server.set("HPHP_SANDBOX_NAME", m_sandbox);
   server.set("HPHP_SANDBOX_PATH", m_path);
-  Eval::SandboxInfo sandbox;
+  Eval::DSandboxInfo sandbox;
   sandbox.m_user = m_user.data();
   sandbox.m_name = m_sandbox.data();
   sandbox.m_path = m_path.data();

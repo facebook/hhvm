@@ -33,18 +33,23 @@ Array EvalFrameInjection::getArgs() {
   return m_env.getParams();
 }
 
-void EvalFrameInjection::SetLine(const Construct *c) {
+bool EvalFrameInjection::SetLine(const Construct *c) {
   int line1 = c->loc()->line1;
-  FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+  FrameInjection *frame = ti->m_top;
   frame->setLine(line1);
-  if (RuntimeOption::EnableDebugger) {
+  if (RuntimeOption::EnableDebugger && ti->m_reqInjectionData.debugger) {
     InterruptSite site(frame);
     Debugger::InterruptFileLine(site);
+    if (site.isJumping()) {
+      return false;
+    }
   }
   if (RuntimeOption::RecordCodeCoverage) {
     int line0 = c->loc()->line1; // TODO: fix parser to record line0
     CodeCoverage::Record(c->loc()->file, line0, line1);
   }
+  return true;
 }
 
 EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper

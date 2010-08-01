@@ -81,29 +81,35 @@ f('curl_multi_close', Variant,
 f('evhttp_set_cache', NULL,
   array('address' => String,
         'max_conn' => Int32,
-        'port' => array(Int32, '80')));
+        'port' => array(Int32, '80')),
+  HipHopSpecific);
 
 f('evhttp_get', Variant,
   array('url' => String,
         'headers' => array(StringVec, 'null_array'),
-        'timeout' => array(Int32, '5')));
+        'timeout' => array(Int32, '5')),
+  HipHopSpecific);
 
 f('evhttp_post', Variant,
   array('url' => String,
         'data' => String,
         'headers' => array(StringVec, 'null_array'),
-        'timeout' => array(Int32, '5')));
+        'timeout' => array(Int32, '5')),
+  HipHopSpecific);
 
 f('evhttp_async_get', Variant,
   array('url' => String,
         'headers' => array(StringVec, 'null_array'),
-        'timeout' => array(Int32, '5')));
+        'timeout' => array(Int32, '5')),
+  HipHopSpecific);
 
 f('evhttp_async_post', Variant,
   array('url' => String,
         'data' => String,
         'headers' => array(StringVec, 'null_array'),
-        'timeout' => array(Int32, '5')));
+        'timeout' => array(Int32, '5')),
+  HipHopSpecific);
 
 f('evhttp_recv', Variant,
-  array('handle' => Object));
+  array('handle' => Object),
+  HipHopSpecific);

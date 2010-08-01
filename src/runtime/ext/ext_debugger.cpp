@@ -25,15 +25,25 @@ namespace HPHP {
 using namespace Eval;
 
 const int64 q_debuggerclient_AUTO_COMPLETE_FILENAMES =
-  (int64)DebuggerClient::AUTO_COMPLETE_FILENAMES;
+  DebuggerClient::AutoCompleteFileNames;
 const int64 q_debuggerclient_AUTO_COMPLETE_VARIABLES =
-  (int64)DebuggerClient::AUTO_COMPLETE_VARIABLES;
+  DebuggerClient::AutoCompleteVariables;
 const int64 q_debuggerclient_AUTO_COMPLETE_CONSTANTS =
-  (int64)DebuggerClient::AUTO_COMPLETE_CONSTANTS;
+  DebuggerClient::AutoCompleteConstants;
 const int64 q_debuggerclient_AUTO_COMPLETE_CLASSES   =
-  (int64)DebuggerClient::AUTO_COMPLETE_CLASSES;
+  DebuggerClient::AutoCompleteClasses;
 const int64 q_debuggerclient_AUTO_COMPLETE_FUNCTIONS =
-  (int64)DebuggerClient::AUTO_COMPLETE_FUNCTIONS;
+  DebuggerClient::AutoCompleteFunctions;
+const int64 q_debuggerclient_AUTO_COMPLETE_CLASS_METHODS =
+  DebuggerClient::AutoCompleteClassMethods;
+const int64 q_debuggerclient_AUTO_COMPLETE_CLASS_PROPERTIES =
+  DebuggerClient::AutoCompleteClassProperties;
+const int64 q_debuggerclient_AUTO_COMPLETE_CLASS_CONSTANTS =
+  DebuggerClient::AutoCompleteClassConstants;
+const int64 q_debuggerclient_AUTO_COMPLETE_KEYWORDS =
+  DebuggerClient::AutoCompleteKeyword;
+const int64 q_debuggerclient_AUTO_COMPLETE_CODE =
+  DebuggerClient::AutoCompleteCode;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -102,50 +112,36 @@ static String format_string(DebuggerClient *client,
 void c_debuggerclient::t_print(int _argc, CStrRef format,
                                CArrRef _argv /* = null_array */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::print);
-  String ret = format_string(m_client, _argc, format, _argv);
-  m_client->print("%s", ret.data());
+  m_client->print(format_string(m_client, _argc, format, _argv));
 }
 
 void c_debuggerclient::t_help(int _argc, CStrRef format,
                               CArrRef _argv /* = null_array */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::help);
-  String ret = format_string(m_client, _argc, format, _argv);
-  m_client->help("%s", ret.data());
+  m_client->help(format_string(m_client, _argc, format, _argv));
 }
 
 void c_debuggerclient::t_info(int _argc, CStrRef format,
                               CArrRef _argv /* = null_array */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::info);
-  String ret = format_string(m_client, _argc, format, _argv);
-  m_client->info("%s", ret.data());
+  m_client->info(format_string(m_client, _argc, format, _argv));
 }
 
 void c_debuggerclient::t_output(int _argc, CStrRef format,
                                 CArrRef _argv /* = null_array */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::output);
-  String ret = format_string(m_client, _argc, format, _argv);
-  m_client->output("%s", ret.data());
+  m_client->output(format_string(m_client, _argc, format, _argv));
 }
 
 void c_debuggerclient::t_error(int _argc, CStrRef format,
                                CArrRef _argv /* = null_array */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::error);
-  String ret = format_string(m_client, _argc, format, _argv);
-  m_client->error("%s", ret.data());
+  m_client->error(format_string(m_client, _argc, format, _argv));
 }
 
-void c_debuggerclient::t_comment(int _argc, CStrRef format,
-                                 CArrRef _argv /* = null_array */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::comment);
-  String ret = format_string(m_client, _argc, format, _argv);
-  m_client->comment("%s", ret.data());
-}
-
-void c_debuggerclient::t_code(int _argc, CStrRef format,
-                              CArrRef _argv /* = null_array */) {
+void c_debuggerclient::t_code(CStrRef source, int start_line_no /* = 0 */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::code);
-  String ret = format_string(m_client, _argc, format, _argv);
-  m_client->code(ret.data());
+  m_client->code(source, start_line_no);
 }
 
 Variant c_debuggerclient::t_ask(int _argc, CStrRef format,
@@ -163,6 +159,21 @@ String c_debuggerclient::t_wrap(CStrRef str) {
 void c_debuggerclient::t_helptitle(CStrRef str) {
   INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::helptitle);
   m_client->helpTitle(str.data());
+}
+
+void c_debuggerclient::t_helpcmds(int _argc, CStrRef cmd, CStrRef desc,
+                                  CArrRef _argv /* = null_array */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::helpcmds);
+  std::vector<String> holders;
+  std::vector<const char *> cmds;
+  cmds.push_back(cmd.data());
+  cmds.push_back(desc.data());
+  for (int i = 0; i < _argv.size(); i++) {
+    String s = _argv[i].toString();
+    holders.push_back(s);
+    cmds.push_back(s.data());
+  }
+  m_client->helpCmds(cmds);
 }
 
 void c_debuggerclient::t_helpbody(CStrRef str) {
@@ -192,29 +203,29 @@ String c_debuggerclient::t_getcommand() {
 
 bool c_debuggerclient::t_arg(int index, CStrRef str) {
   INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::arg);
-  return m_client->arg(index, str.data());
+  return m_client->arg(index + 1, str.data());
 }
 
 int c_debuggerclient::t_argcount() {
   INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::argcount);
-  return m_client->argCount();
+  return m_client->argCount() - 1;
 }
 
 String c_debuggerclient::t_argvalue(int index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::argvalue);
-  return m_client->argValue(index);
+  return m_client->argValue(index + 1);
 }
 
 String c_debuggerclient::t_argrest(int index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::argrest);
-  return m_client->argRest(index);
+  return m_client->argRest(index + 1);
 }
 
 Array c_debuggerclient::t_args() {
   INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::args);
   StringVec *args = m_client->args();
   Array ret(Array::Create());
-  for (unsigned int i = 0; i < args->size(); i++) {
+  for (unsigned int i = 1; i < args->size(); i++) {
     ret.append(String(args->at(i)));
   }
   return ret;
@@ -241,9 +252,9 @@ Variant c_debuggerclient::t_getcurrentlocation() {
   if (bpi) {
     ret.set("file",      String(bpi->m_file));
     ret.set("line",      (int64)bpi->m_line1);
-    ret.set("namespace", String(bpi->m_namespace));
-    ret.set("class",     String(bpi->m_class));
-    ret.set("function",  String(bpi->m_function));
+    ret.set("namespace", String(bpi->getNamespace()));
+    ret.set("class",     String(bpi->getClass()));
+    ret.set("function",  String(bpi->getFunction()));
     ret.set("text",      String(bpi->site()));
   }
   return ret;
@@ -267,9 +278,14 @@ void c_debuggerclient::t_printframe(int index) {
 void c_debuggerclient::t_addcompletion(CVarRef list) {
   INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::addcompletion);
   if (list.isInteger()) {
-    m_client->addCompletion((const char **)list.toInt64());
+    m_client->addCompletion((DebuggerClient::AutoComplete)list.toInt64());
   } else {
-    // TODO: support user completion list
+    Array arr = list.toArray(); // handles string, array and iterators
+    std::vector<String> items;
+    for (ArrayIter iter(arr); iter; ++iter) {
+      items.push_back(iter.second().toString());
+    }
+    m_client->addCompletion(items);
   }
 }
 

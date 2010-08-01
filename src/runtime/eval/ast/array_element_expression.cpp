@@ -134,7 +134,7 @@ void ArrayElementExpression::unset(VariableEnvironment &env) const {
   Variant *arr;
   if (m_arr->weakLval(env, arr)) {
     Variant idx(m_idx->eval(env));
-    SET_LINE;
+    SET_LINE_VOID;
     arr->weakRemove(idx);
   }
 }

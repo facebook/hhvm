@@ -23,7 +23,10 @@ namespace HPHP { namespace Eval {
 
 bool CmdContinue::help(DebuggerClient *client) {
   client->helpTitle("Continue Command");
-  client->help("[c]ontinue {count=1}: continues program execution");
+  client->helpCmds(
+    "[c]ontinue {count=1}", "continues program execution",
+    NULL
+  );
   client->helpBody(
     "Use this command at break to resume program execution. Specify a "
     "count to repeat the same command many times."

@@ -18,6 +18,7 @@
 #define __HPHP_EVAL_DUMMY_SANDBOX_H__
 
 #include <util/async_func.h>
+#include <util/synchronizable.h>
 #include <runtime/eval/debugger/debugger_base.h>
 
 namespace HPHP { namespace Eval {
@@ -27,10 +28,12 @@ namespace HPHP { namespace Eval {
  * Serves as execution thread when remote debugger is not attached to a web
  * request.
  */
+class DebuggerProxy;
 DECLARE_BOOST_TYPES(DummySandbox);
-class DummySandbox {
+class DummySandbox : public Synchronizable {
 public:
-  DummySandbox(const SandboxInfo &sandbox, const std::string &startupFile);
+  DummySandbox(DebuggerProxy *proxy, const std::string &defaultPath,
+               const std::string &startupFile);
   ~DummySandbox();
 
   void start();
@@ -39,12 +42,18 @@ public:
   // execution thread
   void run();
 
+  void notifySignal(int signum);
+
 private:
-  SandboxInfo m_sandbox;
+  DebuggerProxy *m_proxy;
+  std::string m_defaultPath;
   std::string m_startupFile;
 
   AsyncFunc<DummySandbox> m_thread;
   bool m_stopped;
+  int m_signum;
+
+  std::string getStartupDoc(const DSandboxInfo &sandbox);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

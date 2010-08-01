@@ -20,6 +20,8 @@
 
 #define POLLING_SECONDS 1
 
+using namespace std;
+
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 // send/recv
@@ -50,6 +52,7 @@ bool DebuggerCommand::recv(DebuggerThriftBuffer &thrift) {
 
 void DebuggerCommand::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write((int32)m_type);
+  thrift.write(m_class);
   thrift.write(m_body);
 }
 
@@ -73,9 +76,11 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
   }
 
   int32 type;
+  string clsname;
   try {
     thrift.reset(true);
     thrift.read(type);
+    thrift.read(clsname);
   } catch (...) {
     Logger::Error("%s => DebuggerCommand::Receive(): socket error", caller);
     return true;
@@ -104,11 +109,18 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     case KindOfUp       :  cmd = DebuggerCommandPtr(new CmdUp       ()); break;
     case KindOfVariable :  cmd = DebuggerCommandPtr(new CmdVariable ()); break;
     case KindOfWhere    :  cmd = DebuggerCommandPtr(new CmdWhere    ()); break;
-    case KindOfExtended :  cmd = DebuggerCommandPtr(new CmdExtended ()); break;
     case KindOfUser     :  cmd = DebuggerCommandPtr(new CmdUser     ()); break;
     case KindOfEval     :  cmd = DebuggerCommandPtr(new CmdEval     ()); break;
     case KindOfInterrupt:  cmd = DebuggerCommandPtr(new CmdInterrupt()); break;
+    case KindOfSignal   :  cmd = DebuggerCommandPtr(new CmdSignal   ()); break;
     case KindOfShell    :  cmd = DebuggerCommandPtr(new CmdShell    ()); break;
+
+    case KindOfExtended: {
+      ASSERT(!clsname.empty());
+      cmd = CmdExtended::CreateExtendedCommand(clsname);
+      ASSERT(cmd);
+      break;
+    }
 
     default:
       ASSERT(false);

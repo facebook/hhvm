@@ -39,8 +39,11 @@ void CmdVariable::recvImpl(DebuggerThriftBuffer &thrift) {
 
 bool CmdVariable::help(DebuggerClient *client) {
   client->helpTitle("Variable Command");
-  client->help("[v]ariable           lists all local variables on stack");
-  client->help("[v]ariable {text}    full-text search local variables");
+  client->helpCmds(
+    "[v]ariable",           "lists all local variables on stack",
+    "[v]ariable {text}",    "full-text search local variables",
+    NULL
+  );
   client->helpBody(
     "This will print names and values of all variables that are currently "
     "accessible by simple names. Use '[w]here', '[u]p {num}', '[d]own {num}', "
@@ -61,9 +64,9 @@ void CmdVariable::PrintVariables(DebuggerClient *client, CArrRef variables,
   bool found = false;
   for (ArrayIter iter(variables); iter; ++iter) {
     String name = iter.first().toString();
-    String value = DebuggerClient::PrintVariable(iter.second(), 200);
+    String value = DebuggerClient::FormatVariable(iter.second(), 200);
     if (!text.empty()) {
-      String fullvalue = DebuggerClient::PrintVariable(iter.second(), -1);
+      String fullvalue = DebuggerClient::FormatVariable(iter.second(), -1);
       if (name.find(text, 0, false) >= 0 ||
           fullvalue.find(text, 0, false) >= 0) {
         client->print("%s = %s", name.data(), value.data());
@@ -82,7 +85,7 @@ void CmdVariable::PrintVariables(DebuggerClient *client, CArrRef variables,
         system = false;
       }
 
-      if (++i % 30 == 0 &&
+      if (++i % DebuggerClient::ScrollBlockSize == 0 &&
           client->ask("There are %d more variables. Continue? [Y/n]",
                       variables.size() - i) == 'n') {
         break;

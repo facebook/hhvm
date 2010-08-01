@@ -23,7 +23,10 @@ namespace HPHP { namespace Eval {
 
 bool CmdQuit::help(DebuggerClient *client) {
   client->helpTitle("Quit Command");
-  client->help("[q]uit: quits this program");
+  client->helpCmds(
+    "[q]uit", "quits this program",
+    NULL
+  );
   client->helpBody(
     "After you type this command, you will not see me anymore."
   );

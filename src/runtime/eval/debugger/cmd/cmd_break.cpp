@@ -48,48 +48,45 @@ void CmdBreak::list(DebuggerClient *client) {
       NULL
     };
     client->addCompletion(keywords1);
-    client->addCompletion(DebuggerClient::AUTO_COMPLETE_FILENAMES);
-    client->addCompletion(DebuggerClient::AUTO_COMPLETE_FUNCTIONS);
-    client->addCompletion(DebuggerClient::AUTO_COMPLETE_CLASSES);
-  } else if (client->argCount() == 1 &&
-             (client->arg(1, "clear") || client->arg(1, "toggle"))) {
-    static const char *keywords2[] = {
-      "all",
-      NULL
-    };
-    client->addCompletion(keywords2);
+    client->addCompletion(DebuggerClient::AutoCompleteFileNames);
+    client->addCompletion(DebuggerClient::AutoCompleteFunctions);
+    client->addCompletion(DebuggerClient::AutoCompleteClasses);
+    client->addCompletion(DebuggerClient::AutoCompleteClassMethods);
   } else if (client->argCount() == 1) {
-    client->addCompletion(DebuggerClient::AUTO_COMPLETE_FILENAMES);
-  } else if (client->argCount() > 1) {
-    client->addCompletion(DebuggerClient::AUTO_COMPLETE_FILENAMES);
-    client->addCompletion(DebuggerClient::AUTO_COMPLETE_VARIABLES);
-    client->addCompletion(DebuggerClient::AUTO_COMPLETE_CONSTANTS);
-    client->addCompletion(DebuggerClient::AUTO_COMPLETE_FUNCTIONS);
-    client->addCompletion(DebuggerClient::AUTO_COMPLETE_CLASSES);
+    if (client->arg(1, "clear") || client->arg(1, "toggle")) {
+      client->addCompletion("all");
+    } else if (!client->arg(1, "list")) {
+      client->addCompletion(DebuggerClient::AutoCompleteFileNames);
+    }
+  } else {
+    client->addCompletion(DebuggerClient::AutoCompleteCode);
   }
 }
 
 bool CmdBreak::help(DebuggerClient *client) {
   client->helpTitle("Break Command");
-  client->help("[b]reak                  breaks at current line of code");
-  client->help("[b]reak {exp}            breaks at matching location");
-  client->help("[b]reak [s]tart {url}    breaks at start of web request");
-  client->help("[b]reak [e]nd   {url}    breaks at end of web request");
-  client->help("[b]reak [p]sp   {url}    breaks at end of psp");
-  client->help("");
-  client->help("[b]reak [r]egex {above}  breaks at matching regex pattern");
-  client->help("[b]reak [o]nce  {above}  breaks just once then disables it");
-  client->help("");
-  client->help("[b]reak {above} if {php} breaks if condition meets");
-  client->help("[b]reak {above} && {php} breaks and evaluates an expression");
-  client->help("");
-  client->help("[b]reak [l]ist           lists all breakpoints");
-  client->help("[b]reak [c]lear {index}  clears the n-th breakpoint on list");
-  client->help("[b]reak [c]lear [a]ll    clears all breakpoints");
-  client->help("[b]reak [c]lear          clears current breakpoint");
-  client->help("[b]reak [t]oggle {index} toggles the n-th breakpoint on list");
-  client->help("[b]reak [t]oggle [a]ll   toggles all breakpoints");
-  client->help("[b]reak [t]oggle         toggles current breakpoint");
+  client->helpCmds(
+    "[b]reak",                  "breaks at current line of code",
+    "[b]reak {exp}",            "breaks at matching location",
+    "[b]reak [s]tart {url}",    "breaks at start of web request",
+    "[b]reak [e]nd   {url}",    "breaks at end of web request",
+    "[b]reak [p]sp   {url}",    "breaks at end of psp",
+    "",                         "",
+    "[b]reak [r]egex {above}",  "breaks at matching regex pattern",
+    "[b]reak [o]nce  {above}",  "breaks just once then disables it",
+    "",                         "",
+    "[b]reak {above} if {php}", "breaks if condition meets",
+    "[b]reak {above} && {php}", "breaks and evaluates an expression",
+    "",                         "",
+    "[b]reak [l]ist",           "lists all breakpoints",
+    "[b]reak [c]lear {index}",  "clears the n-th breakpoint on list",
+    "[b]reak [c]lear [a]ll",    "clears all breakpoints",
+    "[b]reak [c]lear",          "clears current breakpoint",
+    "[b]reak [t]oggle {index}", "toggles the n-th breakpoint on list",
+    "[b]reak [t]oggle [a]ll",   "toggles all breakpoints",
+    "[b]reak [t]oggle",         "toggles current breakpoint",
+    NULL
+  );
 
   client->helpTitle("Where to break?");
   client->helpSection(
@@ -97,11 +94,23 @@ bool CmdBreak::help(DebuggerClient *client) {
     "breakpoint, but it's ONE single string without whitespaces. The complete "
     "format, though every field is optional, looks like this,\n"
     "\n"
-    "\t{file}:{line1}-{line2}:{namespace}::{cls}::{func}()@{url}\n"
+    "\t{file location}:{call}=>{call}()@{url}\n"
+    "\t{call}=>{call}():{file location}@{url}\n"
     "\n"
-    "Pay attention to those delimiters, and they are required to tell what a "
-    "field should be interpreted as, unless it is a number, then it must be "
-    "line numbers. Otherwise, use them to indicate what the names are:\n"
+    "\tfile location: {file}:{line1}-{line2}\n"
+    "\tfunction call: {namespace}::{cls}::{func}\n"
+    "\turl matching:  @{url}\n"
+    "\n"
+    "(1) Url has to be specified at end.\n"
+    "\n"
+    "(2) Function calls can be 1, 2 or more, matching a call chain. If more "
+    "than one function are specified, they don't have to be direct callers "
+    "to match. It will match any caller on the stack.\n"
+    "\n"
+    "(3) Pay attention to those delimiters, and they are required to tell "
+    "what a field should be interpreted as, unless it is a number, then it "
+    "must be line numbers. Otherwise, use them to indicate what the names "
+    "are:\n"
     "\n"
     "\t{file}:                filename\n"
     "\t{line1}-{line2}        any line between them (inclusive)\n"
@@ -110,6 +119,7 @@ bool CmdBreak::help(DebuggerClient *client) {
     "\t{namespace}::{cls}::   a class in specified namespace\n"
     "\t{cls}::                a class in any namespace\n"
     "\t{func}()               function or method\n"
+    "\t{func}=>{func}()       function called by specified function\n"
     "\t{cls}::{method}()      class method (static or instance)\n"
     "\t@{url}                 breaks only when this URL is visited\n"
     "\n"
@@ -123,8 +133,8 @@ bool CmdBreak::help(DebuggerClient *client) {
     "\tb html/mypage.php:MyClass::foo()\n"
     "\tb mypage.php:123@index.php\n"
     "\n"
-    "You may also use regular expressions to match any of these names, except "
-    "line numbers. For examples,\n"
+    "(4) You may also use regular expressions to match any of these names, "
+    "except line numbers. For examples,\n"
     "\n"
     "\tb r Feed.*::on.*()\n"
     "\n"
@@ -204,6 +214,9 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
   m_breakpoints = client->getBreakPoints();
   if (m_breakpoints->empty()) {
     client->error("There is no breakpoint to clear or toggle.");
+    client->tutorial(
+      "Use '[b]reak ?|[h]elp' to read how to set breakpoints. "
+    );
     return true;
   }
 
@@ -266,7 +279,7 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
   }
 
   string snum = client->argValue(2);
-  if (snum.empty() || !DebuggerClient::IsValidNumber(snum)) {
+  if (!DebuggerClient::IsValidNumber(snum)) {
     client->error("'[b]reak [c]lear|[t]oggle' needs an {index} argument.");
     client->tutorial(
       "You will have to run '[b]reak [l]ist' first to see a list of valid "
@@ -410,8 +423,12 @@ bool CmdBreak::onClient(DebuggerClient *client) {
       "\n"
       "These are the components in a breakpoint {exp}:\n"
       "\n"
-      "\t{file}:{line1}-{line2}:{namespace}::{cls}::{func}()@{url}"
+      "\t{file location}:{call}=>{call}()@{url}\n"
+      "\t{call}=>{call}():{file location}@{url}\n"
       "\n"
+      "\tfile location: {file}:{line1}-{line2}\n"
+      "\tfunction call: {namespace}::{cls}::{func}\n"
+      "\turl matching:  @{url}\n"
     );
   }
   return true;

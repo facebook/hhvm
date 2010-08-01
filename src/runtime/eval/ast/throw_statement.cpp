@@ -29,8 +29,14 @@ void ThrowStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
   Object e = m_value->eval(env).toObject();
   if (RuntimeOption::EnableDebugger) {
-    InterruptSite site(ThreadInfo::s_threadInfo->m_top, e);
-    Debugger::InterruptException(site);
+    ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+    if (ti->m_reqInjectionData.debugger) {
+      InterruptSite site(ti->m_top, e);
+      Debugger::InterruptException(site);
+      if (site.isJumping()) {
+        return;
+      }
+    }
   }
   throw e;
 }

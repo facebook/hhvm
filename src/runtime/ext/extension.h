@@ -19,6 +19,7 @@
 #define __EXTENSION_H__
 
 #include <runtime/base/complex_types.h>
+#include <runtime/base/debuggable.h>
 #include <util/hdf.h>
 
 namespace HPHP {
@@ -45,10 +46,11 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class Extension {
+class Extension : public IDebuggable {
 public:
   static bool IsLoaded(CStrRef name);
   static Array GetLoadedExtensions();
+  static Extension *GetExtension(CStrRef name);
 
   // called by RuntimeOption to initialize all configurations of extension
   static void LoadModules(Hdf hdf);
@@ -58,8 +60,10 @@ public:
   static void ShutdownModules();
 
 public:
-  Extension(litstr name);
+  Extension(litstr name, const char *version = "");
   virtual ~Extension() {}
+
+  const char *getVersion() const { return m_version.c_str();}
 
   // override these functions to implement module specific init/shutdown
   // sequences and information display.
@@ -70,6 +74,7 @@ public:
 
 private:
   const char *m_name;
+  std::string m_version;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

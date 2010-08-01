@@ -25,7 +25,10 @@ namespace HPHP { namespace Eval {
 
 bool CmdFrame::help(DebuggerClient *client) {
   client->helpTitle("Frame Command");
-  client->help("[f]rame {index}: jumps to one particular frame");
+  client->helpCmds(
+    "[f]rame {index}",  "jumps to one particular frame",
+    NULL
+  );
   client->helpBody(
     "Use '[w]here' command to find out the frame number. Use 'f 0' to jump "
     "back to the most recent frame or the innermost frame. Use 'f 999' or "

@@ -50,7 +50,8 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
                              bool inPseudoMain /* = false */)
     : BlockScope(name, docComment, stmt, BlockScope::FunctionScope),
       m_method(method), m_file(file), m_minParam(0), m_maxParam(0),
-      m_attribute(attribute), m_refReturn(reference), m_modifiers(modifiers),
+      m_attribute(attribute), m_attributeClassInfo(0),
+      m_refReturn(reference), m_modifiers(modifiers),
       m_virtual(false), m_perfectVirtual(false), m_overriding(false),
       m_redeclaring(-1), m_volatile(false), m_pseudoMain(inPseudoMain),
       m_magicMethod(false), m_system(false), m_inlineable(false), m_sep(false),
@@ -135,7 +136,7 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
                              bool reference)
     : BlockScope(name, "", StatementPtr(), BlockScope::FunctionScope),
       m_method(method), m_minParam(0), m_maxParam(0),
-      m_attribute(0), m_refReturn(reference),
+      m_attribute(0), m_attributeClassInfo(0), m_refReturn(reference),
       m_modifiers(ModifierExpressionPtr()),
       m_virtual(false), m_perfectVirtual(false), m_overriding(false),
       m_redeclaring(-1), m_volatile(false), m_pseudoMain(false),
@@ -1260,6 +1261,8 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
   if (isFinal()) attribute |= ClassInfo::IsFinal;
   if (!m_docComment.empty()) attribute |= ClassInfo::HasDocComment;
+
+  attribute |= m_attributeClassInfo;
 
   // Use the original cased name, for reflection to work correctly.
   cg_printf("(const char *)0x%04X, \"%s\", NULL, NULL,\n", attribute,

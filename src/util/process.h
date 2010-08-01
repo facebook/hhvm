@@ -67,23 +67,12 @@ public:
   /**
    * Current executable's name.
    */
-  static std::string GetAppName() {
-    const char* progname = getenv("_");
-    if (!progname || !*progname) {
-      progname = "unknown program";
-    }
-    return progname;
-  }
+  static std::string GetAppName();
 
   /**
    * This machine'a name.
    */
-  static std::string GetHostName() {
-    char hostbuf[128];
-    gethostname(hostbuf, 127);
-    hostbuf[127] = '\0';
-    return hostbuf;
-  }
+  static std::string GetHostName();
 
   /**
    * Process identifier.
@@ -129,11 +118,17 @@ public:
   /**
    * Get current working directory.
    */
-  static std::string GetCurrentDirectory() {
-    char buf[PATH_MAX];
-    memset(buf, 0, PATH_MAX);
-    return getcwd(buf, PATH_MAX);
-  }
+  static std::string GetCurrentDirectory();
+
+  /**
+   * Get current user's name.
+   */
+  static std::string GetCurrentUser();
+
+  /**
+   * Get current user's home directory.
+   */
+  static std::string GetHomeDirectory();
 
 public:
   /**

@@ -23,7 +23,10 @@ namespace HPHP { namespace Eval {
 
 bool CmdOut::help(DebuggerClient *client) {
   client->helpTitle("Out Command");
-  client->help("[o]ut {count=1}: steps out function calls");
+  client->helpCmds(
+    "[o]ut {count=1}", "steps out function calls",
+    NULL
+  );
   client->helpBody(
     "Use this command at break to step out function calls. Specify a "
     "count to step out more than one level of function calls."

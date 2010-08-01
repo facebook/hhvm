@@ -18,13 +18,17 @@
 #define __HPHP_EVAL_DEBUGGER_BASE_H__
 
 #include <runtime/eval/debugger/break_point.h>
+#include <runtime/base/util/string_buffer.h>
 #include <runtime/base/util/exceptions.h>
+#include <util/hdf.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+// exceptions
 
-class DebuggerClientExitException : public Exception {};
+class DebuggerClientExitException  : public Exception {};
 class DebuggerConsoleExitException : public Exception {};
+class DebuggerProtocolException    : public Exception {};
 
 class DebuggerRestartException : public Exception {
 public:
@@ -33,9 +37,29 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// utility functions
 
-DECLARE_BOOST_TYPES(MachineInfo);
-class MachineInfo {
+enum CodeColor {
+  CodeColorNone,
+  CodeColorKeyword,
+  CodeColorComment,
+  CodeColorString,
+  CodeColorVariable,
+  CodeColorHtml,
+  CodeColorTag,
+  CodeColorDeclaration,
+  CodeColorConstant,
+  CodeColorLineNo,
+};
+
+String highlight_php(CStrRef source, int line);
+
+extern const char *PHP_KEYWORDS[];
+
+///////////////////////////////////////////////////////////////////////////////
+
+DECLARE_BOOST_TYPES(DMachineInfo);
+class DMachineInfo {
 public:
   std::string m_name;
   DebuggerThriftBuffer m_thrift;
@@ -43,10 +67,11 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SandboxInfo {
+DECLARE_BOOST_TYPES(DSandboxInfo);
+class DSandboxInfo {
 public:
-  SandboxInfo() {}
-  SandboxInfo(const std::string &id) { set(id);}
+  DSandboxInfo() {}
+  DSandboxInfo(const std::string &id) { set(id);}
 
   std::string m_user;
   std::string m_name;
@@ -57,6 +82,54 @@ public:
 
 private:
   mutable std::string m_cached_id;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+DECLARE_BOOST_TYPES(DThreadInfo);
+class DThreadInfo {
+public:
+  int64 m_id;
+  std::string m_desc;
+  std::string m_type;
+  std::string m_url;
+
+  int m_index; // used by DebuggerClient
+
+  void sendImpl(ThriftBuffer &thrift);
+  void recvImpl(ThriftBuffer &thrift);
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class BreakPointInfo;
+DECLARE_BOOST_TYPES(DFunctionInfo);
+class DFunctionInfo {
+public:
+  std::string m_namespace;
+  std::string m_class;
+  std::string m_function;
+
+  std::string site(std::string &preposition) const;
+  std::string desc(const BreakPointInfo *bpi) const;
+
+  void sendImpl(ThriftBuffer &thrift);
+  void recvImpl(ThriftBuffer &thrift);
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+DECLARE_BOOST_TYPES(Macro);
+class Macro {
+public:
+  std::string m_name;
+  std::vector<std::string> m_cmds;
+
+  unsigned int m_index; // currently playing position
+
+  std::string desc(const char *indent);
+  void load(Hdf node);
+  void save(Hdf node);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

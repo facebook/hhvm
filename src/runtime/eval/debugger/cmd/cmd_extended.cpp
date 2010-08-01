@@ -15,26 +15,41 @@
 */
 
 #include <runtime/eval/debugger/cmd/cmd_extended.h>
+#include <runtime/eval/debugger/cmd/all.h>
 
 using namespace std;
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-void CmdExtended::sendImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::sendImpl(thrift);
-  thrift.write(m_class);
-  m_cmd->sendImpl(thrift);
+void CmdExtended::list(DebuggerClient *client) {
+  if (client->argCount() == 0) {
+    const ExtendedCommandMap &cmds = getCommandMap();
+    for (ExtendedCommandMap::const_iterator iter = cmds.begin();
+         iter != cmds.end(); ++iter) {
+      client->addCompletion(iter->first.c_str());
+    }
+  } else {
+    ExtendedCommandMap matches = match(client, 1);
+    if (matches.size() == 1) {
+      invokeList(client, matches.begin()->second);
+    }
+  }
 }
 
-void CmdExtended::recvImpl(DebuggerThriftBuffer &thrift) {
-  DebuggerCommand::recvImpl(thrift);
-  m_cmd = CreateExtendedCommand(m_class);
-  m_cmd->recvImpl(thrift);
+static string format_unique_prefix(const std::string &cmd,
+                                   const std::string &prev,
+                                   const std::string &next) {
+  for (unsigned int i = 1; i < cmd.size(); i++) {
+    if (strncasecmp(cmd.c_str(), prev.c_str(), i) &&
+        strncasecmp(cmd.c_str(), next.c_str(), i)) {
+      return "[" + cmd.substr(0, i) + "]" + cmd.substr(i);
+    }
+  }
+  return cmd + " (ambigulously bad command)";
 }
 
 void CmdExtended::helpImpl(DebuggerClient *client, const char *name) {
-  client->helpTitle("User Extended Command");
   client->help("%s {cmd} {arg1} {arg2} ...    invoke specified command", name);
   client->help("%s{cmd} {arg1} {arg2} ...     invoke specified command", name);
   const ExtendedCommandMap &cmds = getCommandMap();
@@ -42,9 +57,15 @@ void CmdExtended::helpImpl(DebuggerClient *client, const char *name) {
     client->help("");
     client->help("where {cmd} can be:");
     client->help("");
+    vector<string> vcmds;
     for (ExtendedCommandMap::const_iterator iter = cmds.begin();
          iter != cmds.end(); ++iter) {
-      client->help("\t%s", iter->first.c_str());
+      vcmds.push_back(iter->first);
+    }
+    for (unsigned int i = 0; i < vcmds.size(); i++) {
+      client->help("\t%s", format_unique_prefix
+                   (vcmds[i], i ? vcmds[i-1] : "",
+                    i < vcmds.size() - 1 ? vcmds[i+1] : "").c_str());
     }
     client->help("");
     client->help("Type '%s [h]elp|? {cmd} to read their usages.", name);
@@ -61,7 +82,7 @@ ExtendedCommandMap CmdExtended::match(DebuggerClient *client, int argIndex) {
     }
   }
   if (matches.empty()) {
-    client->error("cannot find the specified user command: %s",
+    client->error("Cannot find the specified user command: %s",
                   client->argValue(argIndex).c_str());
   }
   return matches;
@@ -93,7 +114,7 @@ bool CmdExtended::onClient(DebuggerClient *client) {
     return help(client);
   }
   if (matches.size() > 1) {
-    client->error("need more letters to tell which one of these:");
+    client->error("Need more letters to tell which one of these:");
     for (ExtendedCommandMap::const_iterator iter = matches.begin();
          iter != matches.end(); ++iter) {
       client->error("\t%s", iter->first.c_str());
@@ -112,12 +133,20 @@ bool CmdExtended::onClient(DebuggerClient *client) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool CmdExtended::help(DebuggerClient *client) {
+  client->helpTitle("Extended Command");
   helpImpl(client, "x");
   return true;
 }
 
 const ExtendedCommandMap &CmdExtended::getCommandMap() {
   return GetExtendedCommandMap();
+}
+
+void CmdExtended::invokeList(DebuggerClient *client, const std::string &cls){
+  DebuggerCommandPtr cmd = CreateExtendedCommand(cls);
+  if (cmd) {
+    cmd->list(client);
+  }
 }
 
 bool CmdExtended::invokeHelp(DebuggerClient *client, const std::string &cls) {
@@ -137,7 +166,8 @@ bool CmdExtended::invokeClient(DebuggerClient *client, const std::string &cls){
 }
 
 bool CmdExtended::onServer(DebuggerProxy *proxy) {
-  return m_cmd->onServer(proxy);
+  ASSERT(false);
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,14 +175,32 @@ bool CmdExtended::onServer(DebuggerProxy *proxy) {
 const ExtendedCommandMap &CmdExtended::GetExtendedCommandMap() {
   static ExtendedCommandMap s_command_map;
   if (s_command_map.empty()) {
-    s_command_map["ample"] = "CmdExtendedExample";
+    // add one line for each command
+    s_command_map["ample"]   = "CmdExample";
+    s_command_map["tension"] = "CmdExtension";
   }
   return s_command_map;
 }
 
+#define ELSE_IF_CMD(name) \
+  } else if (cls == "Cmd" #name) { ret = CmdExtendedPtr(new Cmd ## name());
+
 DebuggerCommandPtr CmdExtended::CreateExtendedCommand(const std::string &cls) {
-  Logger::Error("Unable to create %s extended command", cls.c_str());
-  return DebuggerCommandPtr();
+  CmdExtendedPtr ret;
+  if (cls.empty()) {
+
+    // add one line for each command
+    ELSE_IF_CMD(Example);
+    ELSE_IF_CMD(Extension);
+
+  }
+
+  if (ret) {
+    ret->m_class = cls;
+  } else {
+    Logger::Error("Unable to create %s extended command", cls.c_str());
+  }
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

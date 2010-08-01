@@ -25,16 +25,18 @@ f('call_user_func', Variant,
 
 f('call_user_func_array_async', Object,
   array('function' => Variant,
-        'params' => VariantVec));
+        'params' => VariantVec),
+  HipHopSpecific);
 
 f('call_user_func_async', Object,
   array('function' => Variant),
-  MixedVariableArguments);
+  MixedVariableArguments|HipHopSpecific);
 
 f('end_user_func_async', Variant,
   array('handle' => Object,
         'default_strategy' => array(Int32, 'k_GLOBAL_STATE_IGNORE'),
-        'additional_strategies' => array(Variant, 'null')));
+        'additional_strategies' => array(Variant, 'null')),
+  HipHopSpecific);
 
 f('forward_static_call_array', Variant,
   array('function' => Variant,
@@ -61,7 +63,7 @@ f('func_num_args', Int32);
 
 f('register_postsend_function', NULL,
   array('function' => Variant),
-  VariableArguments);
+  VariableArguments|HipHopSpecific);
 
 f('register_shutdown_function', NULL,
   array('function' => Variant),
@@ -69,7 +71,7 @@ f('register_shutdown_function', NULL,
 
 f('register_cleanup_function', NULL,
   array('function' => Variant),
-  VariableArguments);
+  VariableArguments|HipHopSpecific);
 
 f('register_tick_function', Boolean,
   array('function' => Variant),

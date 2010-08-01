@@ -18,15 +18,17 @@
 #define __HPHP_EVAL_DEBUGGER_CMD_THREAD_H__
 
 #include <runtime/eval/debugger/debugger_command.h>
+#include <runtime/base/debuggable.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(CmdThread);
-class CmdThread : public DebuggerCommand {
+class CmdThread : public DebuggerCommand, public IDebuggable {
 public:
   CmdThread() : DebuggerCommand(KindOfThread) {}
 
+  virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
 
   virtual bool onClient(DebuggerClient *client);
@@ -36,6 +38,13 @@ public:
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
+  // implementing IDebuggable
+  virtual void debuggerInfo(InfoVec &info);
+
+  String m_out;
+  DThreadInfoPtrVec m_threads;
+
+  void processList(DebuggerClient *client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

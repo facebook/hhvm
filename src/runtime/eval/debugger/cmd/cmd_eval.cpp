@@ -15,8 +15,6 @@
 */
 
 #include <runtime/eval/debugger/cmd/cmd_eval.h>
-#include <runtime/eval/eval.h>
-#include <runtime/base/externals.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,20 +27,8 @@ bool CmdEval::onClient(DebuggerClient *client) {
 }
 
 bool CmdEval::onServer(DebuggerProxy *proxy) {
-  PSEUDOMAIN_INJECTION(_); // using "_" as filename
-
   String output;
-  try {
-    g_context->obStart("");
-    eval(get_variable_table(), Object(),
-         String(m_body.c_str(), m_body.size(), AttachLiteral), false);
-    output = Debugger::ColorStdout(g_context->obDetachContents());
-    g_context->obClean();
-    g_context->obEnd();
-  } catch (Exception &e) {
-    output = Debugger::ColorStderr(String(e.what()));
-  }
-
+  DebuggerProxy::ExecutePHP(m_body, output);
   m_body = std::string(output.data(), output.size());
   return proxy->send(this);
 }

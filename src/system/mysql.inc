@@ -23,7 +23,7 @@
 "mysql_select_db", T(Variant), S(0), "db", T(String), NULL, S(0), "link_identifier", T(Variant), "null", S(0), NULL, S(0), 
 "mysql_drop_db", T(Variant), S(0), "db", T(String), NULL, S(0), "link_identifier", T(Variant), "null", S(0), NULL, S(0), 
 "mysql_affected_rows", T(Variant), S(0), "link_identifier", T(Variant), "null", S(0), NULL, S(0), 
-"mysql_set_timeout", T(Boolean), S(0), "query_timeout_ms", T(Int32), "-1", S(0), "link_identifier", T(Variant), "null", S(0), NULL, S(0), 
+"mysql_set_timeout", T(Boolean), S(0), "query_timeout_ms", T(Int32), "-1", S(0), "link_identifier", T(Variant), "null", S(0), NULL, S(64), 
 "mysql_query", T(Variant), S(0), "query", T(String), NULL, S(0), "link_identifier", T(Variant), "null", S(0), NULL, S(0), 
 "mysql_unbuffered_query", T(Variant), S(0), "query", T(String), NULL, S(0), "link_identifier", T(Variant), "null", S(0), NULL, S(0), 
 "mysql_db_query", T(Variant), S(0), "database", T(String), NULL, S(0), "query", T(String), NULL, S(0), "link_identifier", T(Variant), "null", S(0), NULL, S(0), 

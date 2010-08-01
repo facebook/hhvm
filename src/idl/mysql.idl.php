@@ -110,7 +110,8 @@ f('mysql_affected_rows', Variant,
 
 f('mysql_set_timeout', Boolean,
   array('query_timeout_ms' => array(Int32, '-1'),
-        'link_identifier' => array(Variant, 'null')));
+        'link_identifier' => array(Variant, 'null')),
+  HipHopSpecific);
 
 f('mysql_query', Variant,
   array('query' => String,

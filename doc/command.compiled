@@ -43,6 +43,10 @@ When running "debug" mode, specifies which HPHPi server to attach to.
 
 When running "debug" mode, specifies which HPHPi server port to connect.
 
+= --debug-extension
+
+When running "debug" mode, specifies which debugger extension PHP file to load.
+
 = -f, --file
 
 When mode is <b>run</b>, specifies which PHP to execute.

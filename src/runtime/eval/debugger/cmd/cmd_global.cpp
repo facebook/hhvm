@@ -36,8 +36,11 @@ void CmdGlobal::recvImpl(DebuggerThriftBuffer &thrift) {
 
 bool CmdGlobal::help(DebuggerClient *client) {
   client->helpTitle("Global Command");
-  client->help("[g]lobal           lists all global variables");
-  client->help("[g]lobal {text}    full-text search global variables");
+  client->helpCmds(
+    "[g]lobal",           "lists all global variables",
+    "[g]lobal {text}",    "full-text search global variables",
+    NULL
+  );
   client->helpBody(
     "This will print names and values of all global variables, if {text} is "
     "not speified. Otherwise, it will print global variables that contain the "

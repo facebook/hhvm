@@ -21,6 +21,7 @@
 #include <runtime/base/server/transport.h>
 #include <runtime/base/resource_data.h>
 #include <runtime/base/fiber_safe.h>
+#include <runtime/base/debuggable.h>
 #include <runtime/base/util/string_buffer.h>
 #include <util/thread_local.h>
 
@@ -56,7 +57,7 @@ protected:
  * variable for easy access.
  */
 
-class ExecutionContext : public FiberLocal {
+class ExecutionContext : public FiberLocal, public IDebuggable {
 public:
   enum ShutdownType {
     ShutDown,
@@ -90,6 +91,9 @@ public:
   // implementing FiberSafe
   virtual void fiberInit(FiberLocal *src, FiberReferenceMap &refMap);
   virtual void fiberExit(FiberLocal *src, FiberReferenceMap &refMap);
+
+  // implementing IDebuggable
+  virtual void debuggerInfo(InfoVec &info);
 
   /**
    * System settings.

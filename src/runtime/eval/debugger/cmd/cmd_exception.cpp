@@ -21,18 +21,33 @@ using namespace std;
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool CmdException::help(DebuggerClient *c) {
-  c->helpTitle("Exception Command");
-  c->help("[e]xception {cls}            breaks if class of exception throws");
-  c->help("[e]xception {ns}::{cls}      breaks if class of exception throws");
-  c->help("[e]xception {above}@{url}    breaks only if url also matches");
-  c->help("");
-  c->help("[e]xception [r]egex {above}  breaks at matching regex pattern");
-  c->help("[e]xception [o]nce  {above}  breaks just once then disables it");
-  c->help("");
-  c->help("[e]xception {above} if {php} breaks if condition meets");
-  c->help("[e]xception {above} && {php} breaks and evaluates an expression");
-  c->helpBody(
+void CmdException::list(DebuggerClient *client) {
+  if (client->argCount() == 0) {
+    client->addCompletion(DebuggerClient::AutoCompleteClasses);
+    client->addCompletion("regex");
+    client->addCompletion("once");
+  } else if (client->arg(1, "regex") || client->arg(1, "once")) {
+    client->addCompletion(DebuggerClient::AutoCompleteClasses);
+  } else {
+    client->addCompletion(DebuggerClient::AutoCompleteCode);
+  }
+}
+
+bool CmdException::help(DebuggerClient *client) {
+  client->helpTitle("Exception Command");
+  client->helpCmds(
+    "[e]xception {cls}",            "breaks if class of exception throws",
+    "[e]xception {ns}::{cls}",      "breaks if class of exception throws",
+    "[e]xception {above}@{url}",    "breaks only if url also matches",
+    "",                             "",
+    "[e]xception [r]egex {above}",  "breaks at matching regex pattern",
+    "[e]xception [o]nce  {above}",  "breaks just once then disables it",
+    "",                             "",
+    "[e]xception {above} if {php}", "breaks if condition meets",
+    "[e]xception {above} && {php}", "breaks and evaluates an expression",
+    NULL
+  );
+  client->helpBody(
     "Exception command is similar to '[b]reak' command, except it's used "
     "to specify how to break on (or catch) a throw of an exception. Program "
     "stops right before the exception is about to throw. Resuming program "

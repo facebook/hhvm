@@ -32,11 +32,23 @@ void CmdRun::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(*m_args);
 }
 
+void CmdRun::list(DebuggerClient *client) {
+  client->addCompletion(DebuggerClient::AutoCompleteFileNames);
+}
+
 bool CmdRun::help(DebuggerClient *client) {
   client->helpTitle("Run Command");
-  client->help("[r]un {arg1} {arg2} ...     start or restart program");
+  client->helpCmds(
+    "[r]un",                             "restarts program",
+    "[r]un {file} {arg1} {arg2} ...",    "starts a new program",
+    NULL
+  );
   client->helpBody(
     "Aborts current execution and restarts program with specified arguments. "
+    "If no arguments are specified, it will reuse the PHP file and old "
+    "arguments. If arguments are to be changed, please include file name, "
+    "even if it is the same, as the first one.\n"
+    "\n"
     "In server mode, this command will simply abort current page handling "
     "without restarting anything."
   );

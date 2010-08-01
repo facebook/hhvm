@@ -160,7 +160,7 @@ class RequestInjectionData {
 public:
   RequestInjectionData()
     : started(0), timeoutSeconds(-1), memExceeded(false), timedout(false),
-      signaled(false), surprised(false) {}
+      signaled(false), surprised(false), debugger(false) {}
 
   time_t started;     // when a request was started
   int timeoutSeconds; // how many seconds to timeout
@@ -171,6 +171,10 @@ public:
 
   bool surprised;              // any surprise happened
   Mutex surpriseMutex;         // mutex protecting per-request data
+
+  bool debugger; // whether there is a DebuggerProxy attached to me
+
+  void onSessionInit();
 };
 
 class FrameInjection;
@@ -193,7 +197,8 @@ public:
   Profiler *m_profiler;
 
   ThreadInfo();
-  void reset();
+
+  void onSessionInit();
 };
 
 extern void throw_infinite_recursion_exception();

@@ -44,6 +44,9 @@ namespace HPHP { namespace Util {
 extern const char *s_stdout_color;
 extern const char *s_stderr_color;
 
+const char *get_color_by_name(const char *name);
+void get_supported_colors(std::vector<std::string> &names);
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

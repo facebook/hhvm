@@ -25,8 +25,10 @@ namespace HPHP { namespace Eval {
 
 bool CmdDown::help(DebuggerClient *client) {
   client->helpTitle("Down Command");
-  client->help("[d]own {num=1}: moves to inner frames (callees) on "
-               "stacktrace");
+  client->helpCmds(
+    "[d]own {num=1}", "moves to inner frames (callees) on stacktrace",
+    NULL
+  );
   client->helpBody(
     "Use this command to walk down on stacktrace to find out inner callees of "
     "current frame. By default it moves down by one level. Specify a number "

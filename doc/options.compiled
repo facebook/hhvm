@@ -675,6 +675,7 @@ users can use the same machine serving their own source files.
       EnableDebuggerServer = false
       Port = 8089
       StartupDocument =
+      DefaultSandboxPath =
     }
 
     # experimental, please ignore

@@ -71,15 +71,16 @@ $REFNAMES = array('String'      => 'CStrRef',
                   );
 
 // Flags for functions (used in "system/builtin_symbols.cpp")
-define('DefaultFlags', 0);
-define('VariableArguments', 1);
-define('ReferenceVariableArguments', 2);
-define('NoEffect', 4);
-define('NoInjection', 8);
-define('MixedVariableArguments', 16);
-define('FunctionIsFoldable', 32);
-define('HasOptFunction', 0x100000000);
-define('HasDocComment', 0x200000000);
+define('DefaultFlags',                        0);
+define('VariableArguments',                   1);
+define('ReferenceVariableArguments',          2);
+define('NoEffect',                            4);
+define('NoInjection',                         8);
+define('MixedVariableArguments',           0x10);
+define('FunctionIsFoldable',               0x20);
+define('HipHopSpecific',                   0x40);
+define('HasOptFunction',            0x100000000);
+define('HasDocComment',             0x200000000);
 
 // Mask for checking the flags related to variable arguments
 define('VarArgsMask', (VariableArguments | ReferenceVariableArguments |
@@ -182,6 +183,7 @@ function f($name,
            $flags = DefaultFlags,
            $opt = null) {
   global $funcs;
+  if (preg_match('/^(hphp_|fb_|fbml_)/', $name)) $flags |= HipHopSpecific;
   $funcs[] = build_function_def($name, $return, $args, $flags, $opt);
 }
 

@@ -24,7 +24,10 @@ namespace HPHP { namespace Eval {
 
 bool CmdUp::help(DebuggerClient *client) {
   client->helpTitle("Up Command");
-  client->help("[u]p {num=1}: moves to outer frames (callers) on stacktrace");
+  client->helpCmds(
+    "[u]p {num=1}", "moves to outer frames (callers) on stacktrace",
+    NULL
+  );
   client->helpBody(
     "Use this command to walk up on stacktrace to find out outer callers of "
     "current frame. By default it moves up by one level. Specify a number "

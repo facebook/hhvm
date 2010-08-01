@@ -45,6 +45,11 @@ struct string_eqstri {
       strncasecmp(s1.data(), s2.data(), s1.size()) == 0;
   }
 };
+struct string_lessi {
+  bool operator()(const std::string &s1, const std::string &s2) const {
+    return strcasecmp(s1.data(), s2.data()) < 0;
+  }
+};
 
 template<typename T>
 class hphp_const_char_imap :

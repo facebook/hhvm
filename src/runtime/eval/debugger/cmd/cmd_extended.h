@@ -22,7 +22,8 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef hphp_string_map<std::string> ExtendedCommandMap;
+// we want to use std::map for sorted commands
+typedef std::map<std::string, std::string> ExtendedCommandMap;
 
 DECLARE_BOOST_TYPES(CmdExtended);
 class CmdExtended : public DebuggerCommand {
@@ -33,16 +34,15 @@ public:
 public:
   CmdExtended() : DebuggerCommand(KindOfExtended) {}
 
+  virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
 
   virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
 
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
-
   // so CmdUser can override these functions
   virtual const ExtendedCommandMap &getCommandMap();
+  virtual void invokeList(DebuggerClient *client, const std::string &cls);
   virtual bool invokeHelp(DebuggerClient *client, const std::string &cls);
   virtual bool invokeClient(DebuggerClient *client, const std::string &cls);
 
@@ -50,9 +50,6 @@ protected:
   void helpImpl(DebuggerClient *client, const char *name);
 
 private:
-  std::string m_class;
-  DebuggerCommandPtr m_cmd;
-
   ExtendedCommandMap match(DebuggerClient *client, int argIndex);
   bool helpCommands(DebuggerClient *client, const ExtendedCommandMap &matches);
 };

@@ -280,6 +280,7 @@ bool RuntimeOption::EnableDebugger = false;
 bool RuntimeOption::EnableDebuggerServer = false;
 int RuntimeOption::DebuggerServerPort = 8089;
 std::string RuntimeOption::DebuggerStartupDocument;
+std::string RuntimeOption::DebuggerDefaultSandboxPath;
 
 std::string RuntimeOption::SendmailPath;
 std::string RuntimeOption::MailForceExtraParameters;
@@ -824,6 +825,7 @@ void RuntimeOption::Load(Hdf &config) {
       EnableDebuggerServer = debugger["EnableDebuggerServer"].getBool();
       DebuggerServerPort = debugger["Port"].getInt16(8089);
       DebuggerStartupDocument = debugger["StartupDocument"].getString();
+      DebuggerDefaultSandboxPath = debugger["DefaultSandboxPath"].getString();
     }
   }
   {

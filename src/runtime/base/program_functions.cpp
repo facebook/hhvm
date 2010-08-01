@@ -73,6 +73,7 @@ struct ProgramOptions {
   int    admin_port;
   string debug_host;
   int    debug_port;
+  string debug_extension;
   string user;
   string file;
   int    count;
@@ -505,11 +506,13 @@ void translate_rtti(const char *rttiDirectory) {
 
 static void prepare_args(int &argc, char **&argv, const StringVec &args,
                          const char *file) {
-  argc = args.size() + 1;
-  argv = (char **)malloc((argc + 1) * sizeof(char*));
-  argv[0] = (char*)file;
-  for (int i = 1; i < argc; i++) {
-    argv[i] = (char*)args[i-1].c_str();
+  argv = (char **)malloc((args.size() + 2) * sizeof(char*));
+  argc = 0;
+  if (file) {
+    argv[argc++] = (char*)file;
+  }
+  for (int i = 0; i < (int)args.size(); i++) {
+    argv[argc++] = (char*)args[i].c_str();
   }
   argv[argc] = NULL;
 }
@@ -526,28 +529,6 @@ int execute_program(int argc, char **argv) {
     cerr << "Uncaught exception: (unknown)\n";
   }
   return -1;
-}
-
-static int run_program(ProgramOptions &po, int argc, char **argv,
-                       bool began) {
-  int ret = 0;
-  for (int i = 0; i < po.count; i++) {
-    if (!began) {
-      execute_command_line_begin(argc, argv, po.xhprofFlags);
-    } else {
-      began = false;
-    }
-    if (!po.file.empty()) {
-      ret = -1;
-      bool error; string errorMsg;
-      if (hphp_invoke(g_context.get(), po.file.c_str(),
-                      false, Array(), null, "", "", "", error, errorMsg)) {
-        ret = ExitException::ExitCode;
-      }
-    }
-    execute_command_line_end(po.xhprofFlags, true, argv[0]);
-  }
-  return ret;
 }
 
 static int execute_program_impl(int argc, char **argv) {
@@ -577,6 +558,8 @@ static int execute_program_impl(int argc, char **argv) {
      "connect to debugger server at specified address")
     ("debug-port", value<int>(&po.debug_port)->default_value(-1),
      "connect to debugger server at specified port")
+    ("debug-extension", value<string>(&po.debug_extension),
+     "PHP file that extends y command")
     ("user,u", value<string>(&po.user),
      "run server under this user account")
     ("file,f", value<string>(&po.file),
@@ -671,33 +654,51 @@ static int execute_program_impl(int argc, char **argv) {
 
     if (po.mode == "debug") {
       RuntimeOption::EnableDebugger = true;
-      Eval::Debugger::StartClient(po.debug_host, po.debug_port);
+      Eval::Debugger::StartClient(po.debug_host, po.debug_port,
+                                  po.debug_extension);
 
-      StringVecPtr client_args;
+      string file = po.file;
+      StringVecPtr client_args; bool restarting = false;
+      ret = 0;
       while (true) {
         try {
           execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
-          if (!client_args) {
+          if (!po.debug_extension.empty()) {
+            hphp_invoke_simple(po.debug_extension);
+          }
+          Eval::Debugger::RegisterSandbox(Eval::DSandboxInfo());
+          if (!restarting) {
             Eval::Debugger::InterruptSessionStarted(new_argv[0]);
           }
-          ret = run_program(po, new_argc, new_argv, true);
+          hphp_invoke_simple(file);
           Eval::Debugger::InterruptSessionEnded(new_argv[0]);
+          execute_command_line_end(po.xhprofFlags, true, new_argv[0]);
         } catch (const Eval::DebuggerRestartException &e) {
           execute_command_line_end(0, false, NULL);
 
-          client_args = e.m_args;
-          free(new_argv);
-          prepare_args(new_argc, new_argv, *client_args, po.file.c_str());
+          if (!e.m_args->empty()) {
+            file = e.m_args->at(0);
+            client_args = e.m_args;
+            free(new_argv);
+            prepare_args(new_argc, new_argv, *client_args, NULL);
+          }
+          restarting = true;
         } catch (const Eval::DebuggerClientExitException &e) {
           execute_command_line_end(0, false, NULL);
           break; // end user quitting debugger
-        } catch (...) {
-          execute_command_line_end(0, false, NULL);
         }
       }
 
     } else {
-      ret = run_program(po, new_argc, new_argv, false);
+      ret = 0;
+      for (int i = 0; i < po.count; i++) {
+        execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
+        ret = -1;
+        if (hphp_invoke_simple(po.file)) {
+          ret = ExitException::ExitCode;
+        }
+        execute_command_line_end(po.xhprofFlags, true, new_argv[0]);
+      }
     }
 
     free(new_argv);
@@ -783,11 +784,7 @@ void hphp_process_init() {
 }
 
 void hphp_session_init() {
-  ThreadInfo *info = ThreadInfo::s_threadInfo.get();
-  info->m_reqInjectionData.started = time(0);
-  info->m_reqInjectionData.timedout = false;
-  info->reset();
-
+  ThreadInfo::s_threadInfo->onSessionInit();
   MemoryManager::TheMemoryManager()->resetStats();
 
   if (!s_warmup_state->done) {
@@ -879,6 +876,12 @@ static void handle_invoke_exception(bool &ret, ExecutionContext *context,
   }
 }
 
+bool hphp_invoke_simple(const std::string &filename) {
+  bool error; string errorMsg;
+  return hphp_invoke(g_context.get(), filename, false, null_array, null,
+                     "", "", "", error, errorMsg);
+}
+
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool func, CArrRef funcParams, Variant funcRet,
                  const std::string &warmupDoc, const std::string &reqInitFunc,
@@ -926,9 +929,9 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
                        const char *program /* = NULL */) {
   if (psp) {
     context->onShutdownPostSend();
-    if (RuntimeOption::EnableDebugger) {
-      Eval::Debugger::InterruptPSPEnded(program);
-    }
+  }
+  if (RuntimeOption::EnableDebugger) {
+    Eval::Debugger::InterruptPSPEnded(program);
   }
   Eval::RequestEvalState::DestructObjects();
   if (shutdown) {

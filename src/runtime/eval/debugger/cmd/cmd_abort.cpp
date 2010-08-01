@@ -23,7 +23,10 @@ namespace HPHP { namespace Eval {
 
 bool CmdAbort::help(DebuggerClient *client) {
   client->helpTitle("Abort Command");
-  client->help("[a]bort: aborts current PHP code input");
+  client->helpCmds(
+    "[a]bort", "aborts current PHP code input",
+    NULL
+  );
   client->helpBody(
     "You will have to type this command on a new line, while you're typing "
     "ad-hoc PHP code to evaluate. In other words, it only works when you see "

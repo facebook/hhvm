@@ -23,7 +23,10 @@ namespace HPHP { namespace Eval {
 
 bool CmdStep::help(DebuggerClient *client) {
   client->helpTitle("Step Command");
-  client->help("[s]tep {count=1}: steps into lines of code");
+  client->helpCmds(
+    "[s]tep {count=1}", "steps into lines of code",
+    NULL
+  );
   client->helpBody(
     "Use this command at break to step into lines of code. Specify a "
     "count to step more than once."

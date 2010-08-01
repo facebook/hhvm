@@ -18,6 +18,9 @@
 #define __HPHP_EVAL_DEBUGGER_CLIENT_H__
 
 #include <runtime/eval/debugger/debugger.h>
+#include <runtime/base/debuggable.h>
+#include <util/text_color.h>
+#include <util/hdf.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,37 +28,76 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(DebuggerCommand);
 class DebuggerClient {
 public:
+  static int LineWidth;
+  static int CodeBlockSize;
+  static int ScrollBlockSize;
+  static const char *LineNoFormat;
+  static const char *LocalPrompt;
+  static const char *ConfigFileName;
+  static const char *HistoryFileName;
+
+  static bool UseColor;
+  static const char *HelpColor;
+  static const char *InfoColor;
+  static const char *OutputColor;
+  static const char *ErrorColor;
+  static const char *ItemNameColor;
+  static const char *DefaultCodeColors[];
+
+public:
   /**
    * Starts/stops a debugger client.
    */
-  static SmartPtr<Socket> Start(const std::string &host, int port);
+  static SmartPtr<Socket> Start(const std::string &host, int port,
+                                const std::string &extension);
   static void Stop();
 
   /**
-   * Pre-defined auto-complete lists.
+   * Pre-defined auto-complete lists. Append-only, as they will be used in
+   * binary communication protocol.
    */
-  static const char **AUTO_COMPLETE_FILENAMES;
-  static const char **AUTO_COMPLETE_VARIABLES;
-  static const char **AUTO_COMPLETE_CONSTANTS;
-  static const char **AUTO_COMPLETE_CLASSES;
-  static const char **AUTO_COMPLETE_FUNCTIONS;
+  enum AutoComplete {
+    AutoCompleteFileNames,
+    AutoCompleteVariables,
+    AutoCompleteConstants,
+    AutoCompleteClasses,
+    AutoCompleteFunctions,
+    AutoCompleteClassMethods,
+    AutoCompleteClassProperties,
+    AutoCompleteClassConstants,
+    AutoCompleteKeyword,
+    AutoCompleteCode,
+
+    AutoCompleteCount
+  };
   static const char **GetCommands();
+
+  typedef std::vector<String> LiveLists[DebuggerClient::AutoCompleteCount];
+  typedef boost::shared_ptr<LiveLists> LiveListsPtr;
+  static LiveListsPtr CreateNewLiveLists() {
+    return LiveListsPtr(new LiveLists[DebuggerClient::AutoCompleteCount]());
+  }
 
   /**
    * Helpers
    */
+  static void AdjustScreenMetrics();
   static bool Match(const char *input, const char *cmd);
   static bool IsValidNumber(const std::string &arg);
-  static String PrintVariable(CVarRef v, int maxlen = 80);
+  static String FormatVariable(CVarRef v, int maxlen = 80);
+  static String FormatInfoVec(const IDebuggable::InfoVec &info,
+                              int *nameLen = NULL);
+  static String FormatTitle(const char *title);
 
 public:
   DebuggerClient();
+  ~DebuggerClient();
   void reset();
 
   /**
    * Thread functions.
    */
-  void start();
+  void start(const std::string &extension);
   void stop();
   void run();
 
@@ -65,6 +107,8 @@ public:
   bool console();
   bool process();
   void quit();
+  void onSignal(int sig);
+  int pollSignal();
 
   /**
    * Output functions
@@ -74,23 +118,31 @@ public:
   void info   (const char *fmt, ...);
   void output (const char *fmt, ...);
   void error  (const char *fmt, ...);
-  void comment(const char *fmt, ...);
 
   void print  (const std::string &s);
   void help   (const std::string &s);
   void info   (const std::string &s);
   void output (const std::string &s);
   void error  (const std::string &s);
-  void comment(const std::string &s);
 
-  void code(const char *str);
+  void print  (CStrRef s);
+  void help   (CStrRef s);
+  void info   (CStrRef s);
+  void output (CStrRef s);
+  void error  (CStrRef s);
+
+  void code(CStrRef source, int line1 = 0, int line2 = 0);
   char ask(const char *fmt, ...);
 
   std::string wrap(const std::string &s);
   void helpTitle(const char *title);
+  void helpCmds(const char *cmd, const char *desc, ...);
+  void helpCmds(const std::vector<const char *> &cmds);
   void helpBody(const std::string &s);
   void helpSection(const std::string &s);
+
   void tutorial(const char *text);
+  void setTutorial(int mode);
 
   /**
    * Input functions.
@@ -117,6 +169,12 @@ public:
   void send(DebuggerCommand *cmd) { send(cmd, 0);}
 
   /**
+   * Machine functions.
+   */
+  void connect(const std::string &host, int port);
+  void disconnect();
+
+  /**
    * Sandbox functions.
    */
   void updateSandboxes(const StringVec &sandboxes) {
@@ -125,13 +183,31 @@ public:
   std::string getSandbox(int index) const;
 
   /**
+   * Thread functions.
+   */
+  void updateThreads(DThreadInfoPtrVec threads);
+  DThreadInfoPtr getThread(int index) const;
+  int64 getCurrentThreadId() const { return m_threadId;}
+
+  /**
    * Current source location and breakpoints.
    */
   BreakPointInfoPtr getCurrentLocation() const { return m_breakpoint;}
   BreakPointInfoPtrVec *getBreakPoints() { return &m_breakpoints;}
   void setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints);
-  void setCurrentLocation(BreakPointInfoPtr breakpoint);
+  void setCurrentLocation(int64 threadId, BreakPointInfoPtr breakpoint);
   BreakPointInfoPtrVec *getMatchedBreakPoints() { return &m_matched;}
+  void getListLocation(std::string &file, int &line);
+  void setListLocation(const std::string &file, int line);
+
+  /**
+   * Watch expressions.
+   */
+  typedef std::pair<const char *, std::string> Watch;
+  typedef boost::shared_ptr<Watch> WatchPtr;
+  typedef std::vector<WatchPtr> WatchPtrVec;
+  WatchPtrVec &getWatches() { return m_watches;}
+  void addWatch(const char *fmt, const std::string &php);
 
   /**
    * Stacktraces.
@@ -147,9 +223,21 @@ public:
    */
   bool setCompletion(const char *text, int start, int end);
   char *getCompletion(const char *text, int state);
+  void addCompletion(AutoComplete type);
   void addCompletion(const char **list);
   void addCompletion(const char *name);
+  void addCompletion(const std::vector<String> &items);
   void phpCompletion(const char *text);
+  void setLiveLists(LiveListsPtr liveLists) { m_acLiveLists = liveLists;}
+
+  /**
+   * Macro functions
+   */
+  void startMacro(std::string name);
+  void endMacro();
+  bool playMacro(std::string name);
+  const MacroPtrVec &getMacros() const { return m_macros;}
+  bool deleteMacro(int index);
 
 private:
   enum InputState {
@@ -162,33 +250,56 @@ private:
     Stopped,
   };
 
-  AsyncFunc<DebuggerClient> m_thread;
+  std::string m_configFileName;
+  Hdf m_config;
+  int m_tutorial;
+  std::set<std::string> m_tutorialVisited;
+
+  std::string m_extension;
+  AsyncFunc<DebuggerClient> m_mainThread;
   bool m_stopped;
 
-  bool m_color;
   InputState m_inputState;
   RunState m_runState;
+  int m_signum;
 
   // auto-completion states
   int m_acLen;
   int m_acIndex;
   int m_acPos;
   std::vector<const char **> m_acLists;
-  StringVec m_acStrings;
+  std::vector<const char *> m_acStrings;
+  std::vector<String> m_acItems;
+  bool m_acLiveListsDirty;
+  LiveListsPtr m_acLiveLists;
 
   std::string m_line;
   std::string m_command;
+  std::string m_prevCmd;
   StringVec m_args;
   std::string m_code;
 
-  MachineInfoPtrVec m_machines; // all connected ones
-  MachineInfoPtr m_machine;     // current
+  MacroPtrVec m_macros;
+  MacroPtr m_macroRecording;
+  MacroPtr m_macroPlaying;
+
+  DMachineInfoPtrVec m_machines; // all connected ones
+  DMachineInfoPtr m_machine;     // current
 
   StringVec m_sandboxes;
+  DThreadInfoPtrVec m_threads;
+  int64 m_threadId;
+  std::map<int64, int> m_threadIdMap; // maps threadId to index
 
   BreakPointInfoPtrVec m_breakpoints;
   BreakPointInfoPtr m_breakpoint;
   BreakPointInfoPtrVec m_matched;
+
+  // list command's current location, which may be different from m_breakpoint
+  std::string m_listFile;
+  int m_listLine;
+
+  WatchPtrVec m_watches;
 
   Array m_stacktrace;
   int m_frame;
@@ -206,7 +317,22 @@ private:
   bool processEval();
   DebuggerCommand *createCommand();
 
+  void updateLiveLists();
+  char *getCompletion(const std::vector<String> &items,
+                      const char *text);
+  char *getCompletion(const std::vector<const char *> &items,
+                      const char *text);
+
+  // config and macros
+  void defineColors();
+  const char *loadColor(Hdf hdf, const char *defaultName);
+  void loadCodeColor(CodeColor index, Hdf hdf, const char *defaultName);
+  void loadConfig();
+  void saveConfig();
+  void record(const char *line);
+
   // communications
+  void switchMachine(DMachineInfoPtr machine);
   SmartPtr<Socket> connectLocal();
   void connectRemote(const std::string &host, int port);
 

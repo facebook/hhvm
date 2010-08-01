@@ -15,12 +15,55 @@
 */
 
 #include "text_color.h"
+#include "util.h"
+
+using namespace std;
 
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
 
 const char *s_stdout_color = NULL;
 const char *s_stderr_color = NULL;
+
+const char *get_color_by_name(const char *name) {
+  string upper = toUpper(name);
+  if (upper == "BLACK"         ) return  ANSI_COLOR_BLACK;
+  if (upper == "RED"           ) return  ANSI_COLOR_RED;
+  if (upper == "GREEN"         ) return  ANSI_COLOR_GREEN;
+  if (upper == "BROWN"         ) return  ANSI_COLOR_BROWN;
+  if (upper == "BLUE"          ) return  ANSI_COLOR_BLUE;
+  if (upper == "MAGENTA"       ) return  ANSI_COLOR_MAGENTA;
+  if (upper == "CYAN"          ) return  ANSI_COLOR_CYAN;
+  if (upper == "GRAY"          ) return  ANSI_COLOR_GRAY;
+  if (upper == "DARK_GRAY"     ) return  ANSI_COLOR_DARK_GRAY;
+  if (upper == "LIGHT_RED"     ) return  ANSI_COLOR_LIGHT_RED;
+  if (upper == "LIGHT_GREEN"   ) return  ANSI_COLOR_LIGHT_GREEN;
+  if (upper == "YELLOW"        ) return  ANSI_COLOR_YELLOW;
+  if (upper == "LIGHT_BLUE"    ) return  ANSI_COLOR_LIGHT_BLUE;
+  if (upper == "LIGHT_MAGENTA" ) return  ANSI_COLOR_LIGHT_MAGENTA;
+  if (upper == "LIGHT_CYAN"    ) return  ANSI_COLOR_LIGHT_CYAN;
+  if (upper == "WHITE"         ) return  ANSI_COLOR_WHITE;
+  return NULL;
+}
+
+void get_supported_colors(std::vector<std::string> &names) {
+  names.push_back(toLower("BLACK"         ));
+  names.push_back(toLower("RED"           ));
+  names.push_back(toLower("GREEN"         ));
+  names.push_back(toLower("BROWN"         ));
+  names.push_back(toLower("BLUE"          ));
+  names.push_back(toLower("MAGENTA"       ));
+  names.push_back(toLower("CYAN"          ));
+  names.push_back(toLower("GRAY"          ));
+  names.push_back(toLower("DARK_GRAY"     ));
+  names.push_back(toLower("LIGHT_RED"     ));
+  names.push_back(toLower("LIGHT_GREEN"   ));
+  names.push_back(toLower("YELLOW"        ));
+  names.push_back(toLower("LIGHT_BLUE"    ));
+  names.push_back(toLower("LIGHT_MAGENTA" ));
+  names.push_back(toLower("LIGHT_CYAN"    ));
+  names.push_back(toLower("WHITE"         ));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

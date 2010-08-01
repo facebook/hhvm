@@ -292,6 +292,7 @@ public:
   static bool EnableDebugger;
   static bool EnableDebuggerServer;
   static int DebuggerServerPort;
+  static std::string DebuggerDefaultSandboxPath;
   static std::string DebuggerStartupDocument;
 
   // Mail options

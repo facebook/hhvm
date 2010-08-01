@@ -61,14 +61,21 @@ k("XHPROF_FLAGS_VTSC", Int64);
 k("XHPROF_FLAGS_TRACE", Int64);
 k("XHPROF_FLAGS_MEASURE_XHPROF_DISABLE", Int64);
 
-f('xhprof_enable',  NULL,
+f('xhprof_enable', NULL,
   array('flags' => Int32,
-        'args' => array(StringVec, 'null_array')));
+        'args' => array(StringVec, 'null_array')),
+  HipHopSpecific);
 
-f('xhprof_disable', Variant);
+f('xhprof_disable', Variant,
+  array(),
+  HipHopSpecific);
 
-f('xhprof_sample_enable',  NULL);
-f('xhprof_sample_disable',  Variant);
+f('xhprof_sample_enable', NULL,
+  array(),
+  HipHopSpecific);
+f('xhprof_sample_disable', Variant,
+  array(),
+  HipHopSpecific);
 
 ///////////////////////////////////////////////////////////////////////////////
 // php_query

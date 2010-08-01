@@ -46,6 +46,10 @@
 #include <runtime/eval/debugger/cmd/cmd_zend.h>
 #include <runtime/eval/debugger/cmd/cmd_shell.h>
 #include <runtime/eval/debugger/cmd/cmd_interrupt.h>
+#include <runtime/eval/debugger/cmd/cmd_example.h>
+#include <runtime/eval/debugger/cmd/cmd_extension.h>
+#include <runtime/eval/debugger/cmd/cmd_signal.h>
+#include <runtime/eval/debugger/cmd/cmd_macro.h>
 //tag: new_cmd.php inserts new command here, do NOT remove/modify this line
 
 #endif // __HPHP_EVAL_DEBUGGER_CMD_ALL_H__

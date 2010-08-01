@@ -82,6 +82,10 @@ public:
   bool isDynamicInvoke() const { return m_dynamicInvoke; }
   bool hasImpl() const;
 
+  void setClassInfoAttribute(int flag) {
+    m_attributeClassInfo |= flag;
+  }
+
   void setInlineAsExpr(bool f) { m_inlineAsExpr = f; }
   bool getInlineAsExpr() const { return m_inlineAsExpr; }
   int nextInlineIndex() { return ++m_inlineIndex; }
@@ -384,6 +388,7 @@ private:
   int m_minParam;
   int m_maxParam;
   int m_attribute;
+  int m_attributeClassInfo;
   std::vector<std::string> m_paramNames;
   TypePtrVec m_paramTypes;
   TypePtrVec m_paramTypeSpecs;

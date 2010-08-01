@@ -671,6 +671,18 @@ void ExecutionContext::setErrorLog(CStrRef filename) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// IDebuggable
+
+void ExecutionContext::debuggerInfo(InfoVec &info) {
+  if (m_maxMemory <= 0) {
+    Add(info, "Max Memory", "(unlimited)");
+  } else {
+    Add(info, "Max Memory", FormatSize(m_maxMemory));
+  }
+  Add(info, "Max Time", FormatTime(m_maxTime * 1000));
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 void ExecutionContext::setenv(CStrRef name, CStrRef value) {
   m_envs.set(name, value);

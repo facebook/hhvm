@@ -15,6 +15,8 @@
 */
 
 #include <runtime/eval/debugger/cmd/cmd_info.h>
+#include <runtime/eval/runtime/eval_frame_injection.h>
+#include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/ext/ext_reflection.h>
 #include <runtime/base/preg.h>
 
@@ -28,6 +30,15 @@ void CmdInfo::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write(m_type);
   thrift.write(m_symbol);
   thrift.write(m_info);
+  if (m_acLiveLists) {
+    thrift.write(true);
+    thrift.write((int8)DebuggerClient::AutoCompleteCount);
+    for (int i = 0; i < DebuggerClient::AutoCompleteCount; i++) {
+      thrift.write((*m_acLiveLists)[i]);
+    }
+  } else {
+    thrift.write(false);
+  }
 }
 
 void CmdInfo::recvImpl(DebuggerThriftBuffer &thrift) {
@@ -35,16 +46,42 @@ void CmdInfo::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_type);
   thrift.read(m_symbol);
   thrift.read(m_info);
+  bool hasLists;
+  thrift.read(hasLists);
+  if (hasLists) {
+    m_acLiveLists = DebuggerClient::CreateNewLiveLists();
+    int8 count;
+    thrift.read(count);
+    for (int i = 0; i < count; i++) {
+      if (i < DebuggerClient::AutoCompleteCount) {
+        thrift.read((*m_acLiveLists)[i]);
+      } else {
+        vector<String> future;
+        thrift.read(future);
+      }
+    }
+  }
+}
+
+void CmdInfo::list(DebuggerClient *client) {
+  client->addCompletion(DebuggerClient::AutoCompleteFunctions);
+  client->addCompletion(DebuggerClient::AutoCompleteClasses);
+  client->addCompletion(DebuggerClient::AutoCompleteClassMethods);
+  client->addCompletion(DebuggerClient::AutoCompleteClassProperties);
+  client->addCompletion(DebuggerClient::AutoCompleteClassConstants);
 }
 
 bool CmdInfo::help(DebuggerClient *client) {
   client->helpTitle("Info Command");
-  client->help("info                   displays current function's info");
-  client->help("info {cls}             displays declaration of this class");
-  client->help("info {function}        displays declaration of this function");
-  client->help("info {cls::method}     displays declaration of this method");
-  client->help("info {cls::name}       displays declaration of this constant");
-  client->help("info {cls::$property}  displays declaration of this property");
+  client->helpCmds(
+    "info",                   "displays current function's info",
+    "info {cls}",             "displays declaration of this class",
+    "info {function}",        "displays declaration of this function",
+    "info {cls::method}",     "displays declaration of this method",
+    "info {cls::constant}",   "displays declaration of this constant",
+    "info {cls::$property}",  "displays declaration of this property",
+    NULL
+  );
   client->helpBody(
     "Use this command to display declaration of a symbol."
   );
@@ -59,10 +96,10 @@ bool CmdInfo::onClient(DebuggerClient *client) {
   if (client->argCount() == 0) {
     BreakPointInfoPtr bpi = client->getCurrentLocation();
     if (bpi) {
-      m_symbol = bpi->m_class;
+      m_symbol = bpi->getClass();
       m_type = KindOfClass;
       if (m_symbol.empty()) {
-        m_symbol = bpi->m_function;
+        m_symbol = bpi->getFunction();
         m_type = KindOfFunction;
       }
     }
@@ -99,14 +136,63 @@ bool CmdInfo::onClient(DebuggerClient *client) {
     client->info("(specified symbol cannot be found)");
   } else {
     for (ArrayIter iter(info); iter; ++iter) {
-      PrintInfo(client, iter.second(), subsymbol);
+      StringBuffer sb;
+      PrintInfo(client, sb, iter.second(), subsymbol);
+      client->code(sb.detach());
     }
   }
 
   return true;
 }
 
+void CmdInfo::UpdateLiveLists(DebuggerClient *client) {
+  CmdInfo cmd;
+  cmd.m_type = KindOfLiveLists;
+  CmdInfoPtr res = client->xend<CmdInfo>(&cmd);
+  client->setLiveLists(res->m_acLiveLists);
+}
+
 bool CmdInfo::onServer(DebuggerProxy *proxy) {
+  if (m_type == KindOfLiveLists) {
+    m_acLiveLists = DebuggerClient::CreateNewLiveLists();
+    ClassInfo::GetSymbolNames(
+      (*m_acLiveLists)[DebuggerClient::AutoCompleteClasses],
+      (*m_acLiveLists)[DebuggerClient::AutoCompleteFunctions],
+      (*m_acLiveLists)[DebuggerClient::AutoCompleteConstants],
+      &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassMethods],
+      &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassProperties],
+      &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassConstants]);
+
+    FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
+    if (frame) {
+      Array variables, globals;
+      EvalFrameInjection *eframe1 = dynamic_cast<EvalFrameInjection*>(frame);
+      if (eframe1) {
+        variables = eframe1->getEnv().getDefinedVariables();
+        variables.remove("GLOBALS");
+      }
+      // get outermost frame
+      while (frame->getPrev()) frame = frame->getPrev();
+      EvalFrameInjection *eframe2 = dynamic_cast<EvalFrameInjection*>(frame);
+      if (eframe2 && eframe2 != eframe1) {
+        globals = eframe2->getEnv().getDefinedVariables();
+        globals.remove("GLOBALS");
+      }
+
+      vector<String> &vars =
+        (*m_acLiveLists)[DebuggerClient::AutoCompleteVariables];
+      vars.reserve(variables.size() + globals.size());
+      for (ArrayIter iter(variables); iter; ++iter) {
+        vars.push_back(String("$") + iter.second().toString());
+      }
+      for (ArrayIter iter(globals); iter; ++iter) {
+        vars.push_back(String("$") + iter.second().toString());
+      }
+    }
+
+    return proxy->send(this);
+  }
+
   if (m_type == KindOfUnknown || m_type == KindOfClass) {
     Array ret = f_hphp_get_class_info(m_symbol);
     if (!ret.empty()) {
@@ -124,7 +210,7 @@ bool CmdInfo::onServer(DebuggerProxy *proxy) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void CmdInfo::PrintDocComments(DebuggerClient *client, CArrRef info) {
+void CmdInfo::PrintDocComments(StringBuffer &sb, CArrRef info) {
   if (info["doc"].isString()) {
     String doc = info["doc"].toString();
     int space1 = 0; // best guess
@@ -138,33 +224,32 @@ void CmdInfo::PrintDocComments(DebuggerClient *client, CArrRef info) {
       space2 = matches2[1].toString().size();
     }
     String spaces = StringUtil::Repeat(" ", space2 - space1 - 1);
-    client->comment("%s%s", spaces.data(), doc.data());
+    sb.printf("%s%s\n", spaces.data(), doc.data());
   }
 }
 
-void CmdInfo::PrintHeader(DebuggerClient *client, CArrRef info,
+void CmdInfo::PrintHeader(StringBuffer &sb, CArrRef info,
                           const char *type) {
   if (info["internal"].toBoolean()) {
     if (info["hphp"].toBoolean()) {
-      client->comment("// HipHop builtin %s", type);
+      sb.printf("// HipHop builtin %s\n", type);
     } else {
-      client->comment("// PHP builtin %s: "
-                      "http://php.net/manual/en/%s.%s.php",
-                      type, type, StringUtil::ToLower(info["name"]).data());
+      sb.printf("// PHP builtin %s: http://php.net/manual/en/%s.%s.php\n",
+                type, type, StringUtil::ToLower(info["name"]).data());
     }
   } else {
     String file = info["file"].toString();
     int line = info["line1"].toInt32();
     if (file.empty() && line == 0) {
-      client->comment("// user %s (source unknown)", type);
+      sb.printf("// user %s (source unknown)\n", type);
     } else if (line == 0) {
-      client->comment("// defined in %s", file.data());
+      sb.printf("// defined in %s\n", file.data());
     } else {
-      client->comment("// defined on line %d of %s", line, file.data());
+      sb.printf("// defined on line %d of %s\n", line, file.data());
     }
   }
 
-  PrintDocComments(client, info);
+  PrintDocComments(sb, info);
 }
 
 String CmdInfo::GetParams(CArrRef params, bool detailed /* = false */) {
@@ -186,9 +271,9 @@ String CmdInfo::GetParams(CArrRef params, bool detailed /* = false */) {
     if (arg.exists("default")) {
       args.append(" = ");
       if (detailed) {
-        args.append(DebuggerClient::PrintVariable(arg["default"], -1));
+        args.append(DebuggerClient::FormatVariable(arg["default"], -1));
       } else {
-        args.append(DebuggerClient::PrintVariable(arg["default"]));
+        args.append(DebuggerClient::FormatVariable(arg["default"]));
       }
     }
   }
@@ -212,36 +297,36 @@ String CmdInfo::FindSubSymbol(CArrRef symbols, const std::string &symbol) {
   return String();
 }
 
-bool CmdInfo::TryConstant(DebuggerClient *client, CArrRef info,
+bool CmdInfo::TryConstant(StringBuffer &sb, CArrRef info,
                           const std::string &subsymbol) {
   String key = FindSubSymbol(info["constants"], subsymbol);
   if (!key.isNull()) {
-    client->help("  const %s = %s;", key.data(),
-                 DebuggerClient::PrintVariable
-                 (info["constants"][key], -1).data());
+    sb.printf("  const %s = %s;\n", key.data(),
+              DebuggerClient::FormatVariable
+              (info["constants"][key], -1).data());
     return true;
   }
   return false;
 }
 
-bool CmdInfo::TryProperty(DebuggerClient *client, CArrRef info,
+bool CmdInfo::TryProperty(StringBuffer &sb, CArrRef info,
                           const std::string &subsymbol) {
   String key = FindSubSymbol(info["properties"],
                              subsymbol[0] == '$' ?
                              subsymbol.substr(1) : subsymbol);
   if (!key.isNull()) {
     Array prop = info["properties"][key];
-    PrintDocComments(client, prop);
-    client->help("  %s %s$%s;",
-                 prop["access"].toString().data(),
-                 GetModifier(prop, "static").data(),
-                 prop["name"].toString().data());
+    PrintDocComments(sb, prop);
+    sb.printf("  %s %s$%s;\n",
+              prop["access"].toString().data(),
+              GetModifier(prop, "static").data(),
+              prop["name"].toString().data());
     return true;
   }
   return false;
 }
 
-bool CmdInfo::TryMethod(DebuggerClient *client, CArrRef info,
+bool CmdInfo::TryMethod(StringBuffer &sb, CArrRef info,
                         std::string subsymbol) {
   if (subsymbol.size() > 2 && subsymbol.substr(subsymbol.size() - 2) == "()") {
     subsymbol = subsymbol.substr(0, subsymbol.size() - 2);
@@ -250,41 +335,41 @@ bool CmdInfo::TryMethod(DebuggerClient *client, CArrRef info,
   String key = FindSubSymbol(info["methods"], subsymbol);
   if (!key.isNull()) {
     Array func = info["methods"][key].toArray();
-    PrintDocComments(client, func);
-    client->help("  %s %s%s%sfunction %s%s(%s);",
-                 func["access"].toString().data(),
-                 GetModifier(func, "static").data(),
-                 GetModifier(func, "final").data(),
-                 GetModifier(func, "abstract").data(),
-                 func["ref"].toBoolean() ? "&" : "",
-                 func["name"].toString().data(),
-                 GetParams(func["params"]).data(), true);
+    PrintDocComments(sb, func);
+    sb.printf("  %s %s%s%sfunction %s%s(%s);\n",
+              func["access"].toString().data(),
+              GetModifier(func, "static").data(),
+              GetModifier(func, "final").data(),
+              GetModifier(func, "abstract").data(),
+              func["ref"].toBoolean() ? "&" : "",
+              func["name"].toString().data(),
+              GetParams(func["params"]).data(), true);
     return true;
   }
   return false;
 }
 
-void CmdInfo::PrintInfo(DebuggerClient *client, CArrRef info,
+void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
                         const std::string &subsymbol) {
   if (info.exists("params")) {
-    PrintHeader(client, info, "function");
-    client->help("function %s%s(%s);",
-                 info["ref"].toBoolean() ? "&" : "",
-                 info["name"].toString().data(),
-                 GetParams(info["params"]).data());
+    PrintHeader(sb, info, "function");
+    sb.printf("function %s%s(%s);\n",
+              info["ref"].toBoolean() ? "&" : "",
+              info["name"].toString().data(),
+              GetParams(info["params"]).data());
     return;
   }
 
   bool found = false;
   if (!subsymbol.empty()) {
-    if (TryConstant(client, info, subsymbol)) found = true;
-    if (TryProperty(client, info, subsymbol)) found = true;
-    if (TryMethod(client, info, subsymbol)) found = true;
+    if (TryConstant(sb, info, subsymbol)) found = true;
+    if (TryProperty(sb, info, subsymbol)) found = true;
+    if (TryMethod(sb, info, subsymbol)) found = true;
     if (found) return;
     client->info("Specified symbol cannot be found. Here the whole class:\n");
   }
 
-  PrintHeader(client, info, "class");
+  PrintHeader(sb, info, "class");
 
   StringBuffer parents;
   String parent = info["parent"].toString();
@@ -308,51 +393,51 @@ void CmdInfo::PrintInfo(DebuggerClient *client, CArrRef info,
   }
   parent = parents.detach();
 
-  client->help("%s%s%s %s %s{",
-               GetModifier(info, "final").data(),
-               GetModifier(info, "abstract").data(),
-               info["interface"].toBoolean() ? "interface" : "class",
-               info["name"].toString().data(),
-               parent.data());
+  sb.printf("%s%s%s %s %s{\n",
+            GetModifier(info, "final").data(),
+            GetModifier(info, "abstract").data(),
+            info["interface"].toBoolean() ? "interface" : "class",
+            info["name"].toString().data(),
+            parent.data());
 
   if (!info["constants"].toArray().empty()) {
-    client->comment("  // constants");
+    sb.printf("  // constants\n");
     for (ArrayIter iter(info["constants"]); iter; ++iter) {
-      client->help("  const %s = %s;",
-                   iter.first().toString().data(),
-                   DebuggerClient::PrintVariable(iter.second()).data());
+      sb.printf("  const %s = %s;\n",
+                iter.first().toString().data(),
+                DebuggerClient::FormatVariable(iter.second()).data());
     }
   }
 
   if (!info["properties"].toArray().empty()) {
-    client->comment("  // properties");
+    sb.printf("  // properties\n");
     for (ArrayIter iter(info["properties"]); iter; ++iter) {
       Array prop = iter.second().toArray();
-      client->help("  %s%s %s$%s;",
-                   prop["doc"].toBoolean() ? "[doc] " : "",
-                   prop["access"].toString().data(),
-                   GetModifier(prop, "static").data(),
-                   prop["name"].toString().data());
+      sb.printf("  %s%s %s$%s;\n",
+                prop["doc"].toBoolean() ? "[doc] " : "",
+                prop["access"].toString().data(),
+                GetModifier(prop, "static").data(),
+                prop["name"].toString().data());
     }
   }
 
   if (!info["methods"].toArray().empty()) {
-    client->comment("  // methods");
+    sb.printf("  // methods\n");
     for (ArrayIter iter(info["methods"]); iter; ++iter) {
       Array func = iter.second().toArray();
-      client->help("  %s%s %s%s%sfunction %s%s(%s);",
-                   func["doc"].toBoolean() ? "[doc] " : "",
-                   func["access"].toString().data(),
-                   GetModifier(func, "static").data(),
-                   GetModifier(func, "final").data(),
-                   GetModifier(func, "abstract").data(),
-                   func["ref"].toBoolean() ? "&" : "",
-                   func["name"].toString().data(),
-                   GetParams(func["params"]).data());
+      sb.printf("  %s%s %s%s%sfunction %s%s(%s);\n",
+                func["doc"].toBoolean() ? "[doc] " : "",
+                func["access"].toString().data(),
+                GetModifier(func, "static").data(),
+                GetModifier(func, "final").data(),
+                GetModifier(func, "abstract").data(),
+                func["ref"].toBoolean() ? "&" : "",
+                func["name"].toString().data(),
+                GetParams(func["params"]).data());
     }
   }
 
-  client->help("}");
+  sb.printf("}\n");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

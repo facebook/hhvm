@@ -34,12 +34,17 @@ void CmdShell::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_out);
 }
 
+void CmdShell::list(DebuggerClient *client) {
+  client->addCompletion(DebuggerClient::AutoCompleteFileNames);
+}
+
 bool CmdShell::help(DebuggerClient *client) {
   client->helpTitle("Shell Command");
   client->help("! {cmd} {arg1} {arg2} ...    remotely executes shell command");
-  client->help("!{cmd} {arg1} {arg2} ...     remotely executes shell command");
   client->helpBody(
-    "Executes the shell command on connected machine."
+    "Executes the shell command on connected machine.\n"
+    "\n"
+    "The space between ! and command is not needed. '!ls' works as well."
   );
   return true;
 }

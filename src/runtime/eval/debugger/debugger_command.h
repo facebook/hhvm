@@ -66,9 +66,11 @@ public:
 
     KindOfEval                = 1000,
     KindOfShell               = 1001,
+    KindOfMacro               = 1002,
 
     // DebuggerProxy -> DebuggerClient
     KindOfInterrupt           = 10000,
+    KindOfSignal              = 10001,
   };
 
   static bool Receive(DebuggerThriftBuffer &thrift, DebuggerCommandPtr &cmd,
@@ -92,6 +94,7 @@ public:
 
 protected:
   Type m_type;
+  std::string m_class; // for CmdExtended
   std::string m_body;
 };
 

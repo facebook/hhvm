@@ -23,7 +23,10 @@ namespace HPHP { namespace Eval {
 
 bool CmdNext::help(DebuggerClient *client) {
   client->helpTitle("Next Command");
-  client->help("[n]ext {count=1}: steps over lines of code");
+  client->helpCmds(
+    "[n]ext {count=1}", "steps over lines of code",
+    NULL
+  );
   client->helpBody(
     "Use this command at break to step over lines of code. Specify a "
     "count to step over more than one line of code."

@@ -33,11 +33,16 @@ void Debugger::StartServer() {
   DebuggerServer::Start();
 }
 
-void Debugger::StartClient(const std::string &host, int port) {
-  SmartPtr<Socket> localProxy = DebuggerClient::Start(host, port);
+void Debugger::StartClient(const std::string &host, int port,
+                           const std::string &extension) {
+  SmartPtr<Socket> localProxy = DebuggerClient::Start(host, port, extension);
   if (localProxy.get()) {
-    RegisterProxy(localProxy, false, true);
+    RegisterProxy(localProxy, true);
   }
+}
+
+void Debugger::OnServerShutdown() {
+  s_debugger.clearThreadInfos();
 }
 
 void Debugger::Stop() {
@@ -48,7 +53,7 @@ void Debugger::Stop() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Debugger::RegisterSandbox(const SandboxInfo &sandbox) {
+void Debugger::RegisterSandbox(const DSandboxInfo &sandbox) {
   s_debugger.addSandbox(sandbox);
 }
 
@@ -56,8 +61,8 @@ void Debugger::GetRegisteredSandboxes(StringVec &ids) {
   s_debugger.getSandboxes(ids);
 }
 
-void Debugger::RegisterProxy(SmartPtr<Socket> socket, bool dummy, bool local) {
-  s_debugger.addProxy(socket, dummy, local);
+void Debugger::RegisterProxy(SmartPtr<Socket> socket, bool local) {
+  s_debugger.addProxy(socket, local);
 }
 
 void Debugger::RemoveProxy(DebuggerProxyPtr proxy) {
@@ -65,7 +70,7 @@ void Debugger::RemoveProxy(DebuggerProxyPtr proxy) {
 }
 
 void Debugger::SwitchSandbox(DebuggerProxyPtr proxy,
-                             const SandboxInfo &sandbox) {
+                             const DSandboxInfo &sandbox) {
   s_debugger.switchSandbox(proxy, sandbox);
 }
 
@@ -74,14 +79,20 @@ void Debugger::SwitchSandbox(DebuggerProxyPtr proxy,
 DebuggerProxyPtrSet Debugger::GetProxies() {
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
   Variant &server = g->gv__SERVER;
-  SandboxInfo sandbox;
-  sandbox.m_user = server["HPHP_SANDBOX_USER"].toString().data();
-  sandbox.m_name = server["HPHP_SANDBOX_NAME"].toString().data();
-  sandbox.m_path = server["HPHP_SANDBOX_PATH"].toString().data();
-  return s_debugger.findProxies(sandbox);
+  String id = server["HPHP_SANDBOX_ID"];
+  if (id.empty()) {
+    DSandboxInfo sandbox;
+    sandbox.m_user = server["HPHP_SANDBOX_USER"].toString().data();
+    sandbox.m_name = server["HPHP_SANDBOX_NAME"].toString().data();
+    sandbox.m_path = server["HPHP_SANDBOX_PATH"].toString().data();
+    id = String(sandbox.id());
+    server.set("HPHP_SANDBOX_ID", id);
+  }
+  return s_debugger.findProxies(id.data());
 }
 
 void Debugger::InterruptSessionStarted(const char *file) {
+  ThreadInfo::s_threadInfo->m_reqInjectionData.debugger = true;
   Interrupt(SessionStarted, file);
 }
 
@@ -90,15 +101,24 @@ void Debugger::InterruptSessionEnded(const char *file) {
 }
 
 void Debugger::InterruptRequestStarted(const char *url) {
-  Interrupt(RequestStarted, url);
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+  if (ti->m_reqInjectionData.debugger) {
+    Interrupt(RequestStarted, url);
+  }
 }
 
 void Debugger::InterruptRequestEnded(const char *url) {
-  Interrupt(RequestEnded, url);
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+  if (ti->m_reqInjectionData.debugger) {
+    Interrupt(RequestEnded, url);
+  }
 }
 
 void Debugger::InterruptPSPEnded(const char *url) {
-  Interrupt(PSPEnded, url);
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+  if (ti->m_reqInjectionData.debugger) {
+    Interrupt(PSPEnded, url);
+  }
 }
 
 void Debugger::InterruptFileLine(InterruptSite &site) {
@@ -154,14 +174,45 @@ String Debugger::ColorStderr(CStrRef s) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void Debugger::clearThreadInfos() {
+  WriteLock lock(m_mutex);
+  m_threadInfos.clear();
+}
+
 void Debugger::stop() {
   WriteLock lock(m_mutex);
   m_proxies.clear();
+  m_threadInfos.clear();
 }
 
-void Debugger::addSandbox(const SandboxInfo &sandbox) {
+void Debugger::addSandbox(const DSandboxInfo &sandbox) {
   WriteLock lock(m_mutex);
-  m_proxies.operator[](sandbox.id());
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+  string id = sandbox.id();
+  if (!m_proxies[id].empty()) {
+    ti->m_reqInjectionData.debugger = true;
+    m_threadInfos[id].erase(ti);
+  } else {
+    m_threadInfos[id].insert(ti);
+  }
+}
+
+void Debugger::addProxy(SmartPtr<Socket> socket, bool local) {
+  DebuggerProxyPtr proxy(new DebuggerProxy(socket, local));
+  {
+    WriteLock lock(m_mutex);
+    string id = proxy->getSandboxId();
+    m_proxies[id].insert(proxy);
+    flagDebugger(id);
+  }
+  if (!local) {
+    proxy->startDummySandbox();
+  }
+}
+
+void Debugger::removeProxy(DebuggerProxyPtr proxy) {
+  WriteLock lock(m_mutex);
+  m_proxies[proxy->getSandboxId()].erase(proxy);
 }
 
 void Debugger::getSandboxes(StringVec &ids) {
@@ -175,35 +226,28 @@ void Debugger::getSandboxes(StringVec &ids) {
   }
 }
 
-void Debugger::addProxy(SmartPtr<Socket> socket, bool dummy, bool local) {
-  DebuggerProxyPtr proxy(new DebuggerProxy(socket, local));
-  {
-    WriteLock lock(m_mutex);
-    m_proxies[proxy->getSandboxId()].insert(proxy);
-  }
-  if (dummy) {
-    proxy->startDummySandbox();
-  }
-}
-
-void Debugger::removeProxy(DebuggerProxyPtr proxy) {
-  WriteLock lock(m_mutex);
-  m_proxies[proxy->getSandboxId()].erase(proxy);
-}
-
-DebuggerProxyPtrSet Debugger::findProxies(const SandboxInfo &sandbox) {
+DebuggerProxyPtrSet Debugger::findProxies(const std::string &id) {
   ReadLock lock(m_mutex);
-  return m_proxies[sandbox.id()];
+  return m_proxies[id];
 }
 
 void Debugger::switchSandbox(DebuggerProxyPtr proxy,
-                             const SandboxInfo &sandbox) {
+                             const DSandboxInfo &sandbox) {
   string oldId = proxy->getSandboxId();
   string newId = sandbox.id();
   if (newId != oldId) {
     WriteLock lock(m_mutex);
     m_proxies[oldId].erase(proxy);
     m_proxies[newId].insert(proxy);
+    flagDebugger(newId);
+  }
+}
+
+void Debugger::flagDebugger(const std::string &id) {
+  ThreadInfoSet &infos = m_threadInfos[id];
+  for (ThreadInfoSet::iterator iter = infos.begin();
+       iter != infos.end(); ++iter) {
+    (*iter)->m_reqInjectionData.debugger = true;
   }
 }
 

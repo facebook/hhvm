@@ -31,7 +31,6 @@
 using namespace std;
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(mysql);
 ///////////////////////////////////////////////////////////////////////////////
 
 StaticString MySQL::s_class_name("MySQL");
@@ -1380,6 +1379,29 @@ MySQLFieldInfo *MySQLResult::fetchFieldInfo() {
   if (m_current_field < getFieldCount()) m_current_field++;
   return getFieldInfo(m_current_field);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+static class mysqlExtension : public Extension {
+public:
+  mysqlExtension() : Extension("mysql") {}
+
+  // implementing IDebuggable
+  virtual int  debuggerSupport() {
+    return SupportInfo;
+  }
+  virtual void debuggerInfo(InfoVec &info) {
+    int count = g_persistentObjects->getMap("mysql::persistent_conns").size();
+    Add(info, "Persistent", FormatNumber("%lld", count));
+
+    AddServerStats(info, "sql.conn"       );
+    AddServerStats(info, "sql.reconn_new" );
+    AddServerStats(info, "sql.reconn_ok"  );
+    AddServerStats(info, "sql.reconn_old" );
+    AddServerStats(info, "sql.query"      );
+  }
+
+} s_mysql_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

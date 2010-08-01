@@ -26,7 +26,8 @@ namespace HPHP {
 typedef std::map<std::string, Extension*, stdltistr> ExtensionMap;
 static ExtensionMap *s_registered_extensions = NULL;
 
-Extension::Extension(litstr name) : m_name(name) {
+Extension::Extension(litstr name, const char *version /* = "" */)
+    : m_name(name), m_version(version ? version : "") {
   if (s_registered_extensions == NULL) {
     s_registered_extensions = new ExtensionMap();
   }
@@ -64,6 +65,15 @@ bool Extension::IsLoaded(CStrRef name) {
   ASSERT(s_registered_extensions);
   return s_registered_extensions->find(name.data()) !=
     s_registered_extensions->end();
+}
+
+Extension *Extension::GetExtension(CStrRef name) {
+  ASSERT(s_registered_extensions);
+  ExtensionMap::iterator iter = s_registered_extensions->find(name.data());
+  if (iter != s_registered_extensions->end()) {
+    return iter->second;
+  }
+  return NULL;
 }
 
 Array Extension::GetLoadedExtensions() {

@@ -26,17 +26,19 @@ DECLARE_BOOST_TYPES(CmdInterrupt);
 class CmdInterrupt : public DebuggerCommand {
 public:
   CmdInterrupt()
-      : DebuggerCommand(KindOfInterrupt), m_interrupt(-1), m_site(NULL) {}
+      : DebuggerCommand(KindOfInterrupt),
+        m_interrupt(-1), m_site(NULL), m_pendingJump(false) {}
 
   CmdInterrupt(InterruptType interrupt, const char *program,
                InterruptSite *site)
       : DebuggerCommand(KindOfInterrupt),
         m_interrupt(interrupt), m_program(program ? program : ""),
-        m_site(site) {}
+        m_site(site), m_pendingJump(false) {}
 
   InterruptType getInterruptType() const {
     return (InterruptType)m_interrupt;
   }
+  std::string desc() const;
 
   virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
@@ -48,12 +50,18 @@ public:
   FrameInjection *getFrame() { return m_site ? m_site->getFrame() : NULL;}
   std::string getFileLine() const;
 
+  InterruptSite *getSite() { return m_site;}
+
+  void setPendingJump() { m_pendingJump = true;}
+
 private:
   int16 m_interrupt;
   std::string m_program;   // informational only
+  int64 m_threadId;
   InterruptSite *m_site;   // server side
   BreakPointInfoPtr m_bpi; // client side
   BreakPointInfoPtrVec m_matched;
+  bool m_pendingJump;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

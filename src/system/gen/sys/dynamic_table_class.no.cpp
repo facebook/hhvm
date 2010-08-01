@@ -2755,18 +2755,29 @@ Variant& c_debuggerclient::o_lvalPrivate(CStrRef s, int64 hash) {
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_debuggerclient
 Variant c_debuggerclient::os_constant(const char *s) {
   int64 hash = hash_string(s);
-  switch (hash & 15) {
+  switch (hash & 31) {
     case 2:
       HASH_RETURN(0x2038737F45604DE2LL, q_debuggerclient_AUTO_COMPLETE_VARIABLES, "AUTO_COMPLETE_VARIABLES");
-      break;
-    case 3:
-      HASH_RETURN(0x78221A7B002235D3LL, q_debuggerclient_AUTO_COMPLETE_CONSTANTS, "AUTO_COMPLETE_CONSTANTS");
       break;
     case 7:
       HASH_RETURN(0x1B352E31B034F827LL, q_debuggerclient_AUTO_COMPLETE_FILENAMES, "AUTO_COMPLETE_FILENAMES");
       HASH_RETURN(0x0F17BB5BEC004CA7LL, q_debuggerclient_AUTO_COMPLETE_CLASSES, "AUTO_COMPLETE_CLASSES");
       break;
+    case 9:
+      HASH_RETURN(0x6A811D407DC24A29LL, q_debuggerclient_AUTO_COMPLETE_CLASS_CONSTANTS, "AUTO_COMPLETE_CLASS_CONSTANTS");
+      break;
+    case 11:
+      HASH_RETURN(0x1858E5511222BC8BLL, q_debuggerclient_AUTO_COMPLETE_CLASS_PROPERTIES, "AUTO_COMPLETE_CLASS_PROPERTIES");
+      HASH_RETURN(0x1DE12226E1E87B6BLL, q_debuggerclient_AUTO_COMPLETE_CODE, "AUTO_COMPLETE_CODE");
+      break;
     case 15:
+      HASH_RETURN(0x2C29DCF63AAC70EFLL, q_debuggerclient_AUTO_COMPLETE_CLASS_METHODS, "AUTO_COMPLETE_CLASS_METHODS");
+      HASH_RETURN(0x76A6B174D3E2108FLL, q_debuggerclient_AUTO_COMPLETE_KEYWORDS, "AUTO_COMPLETE_KEYWORDS");
+      break;
+    case 19:
+      HASH_RETURN(0x78221A7B002235D3LL, q_debuggerclient_AUTO_COMPLETE_CONSTANTS, "AUTO_COMPLETE_CONSTANTS");
+      break;
+    case 31:
       HASH_RETURN(0x7CAE318E6EF6449FLL, q_debuggerclient_AUTO_COMPLETE_FUNCTIONS, "AUTO_COMPLETE_FUNCTIONS");
       break;
     default:
@@ -2881,18 +2892,6 @@ Variant c_debuggerclient::o_invoke(const char *s, CArrRef params, int64 hash, bo
         }
       }
       break;
-    case 13:
-      HASH_GUARD(0x16AD79F9AF3ECC0DLL, comment) {
-        if (count < 1) return throw_missing_arguments("comment", count+1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          if (count <= 1) return (t_comment(count, arg0), null);
-          return (t_comment(count,arg0, params.slice(1, count - 1, false)), null);
-        }
-      }
-      break;
     case 14:
       HASH_GUARD(0x7A24AFD8ADE43B8ELL, args) {
         if (count > 0) return throw_toomany_arguments("args", 0, 1);
@@ -2915,6 +2914,17 @@ Variant c_debuggerclient::o_invoke(const char *s, CArrRef params, int64 hash, bo
       }
       break;
     case 17:
+      HASH_GUARD(0x687DF38195F5B951LL, helpcmds) {
+        if (count < 2) return throw_missing_arguments("helpcmds", count+1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t_helpcmds(count, arg0, arg1), null);
+          return (t_helpcmds(count,arg0, arg1, params.slice(2, count - 2, false)), null);
+        }
+      }
       HASH_GUARD(0x1015EB3F52B098D1LL, print) {
         if (count < 1) return throw_missing_arguments("print", count+1, 1);
         {
@@ -3077,13 +3087,14 @@ Variant c_debuggerclient::o_invoke(const char *s, CArrRef params, int64 hash, bo
       break;
     case 57:
       HASH_GUARD(0x58C72230857ACDB9LL, code) {
-        if (count < 1) return throw_missing_arguments("code", count+1, 1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("code", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          if (count <= 1) return (t_code(count, arg0), null);
-          return (t_code(count,arg0, params.slice(1, count - 1, false)), null);
+          if (count <= 1) return (t_code(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_code(arg0, arg1), null);
         }
       }
       break;
@@ -3152,19 +3163,6 @@ Variant c_debuggerclient::o_invoke_few_args(const char *s, int64 hash, int count
         return (t_send(a0));
       }
       break;
-    case 13:
-      HASH_GUARD(0x16AD79F9AF3ECC0DLL, comment) {
-        if (count < 1) return throw_missing_arguments("comment", count+1, 1);
-        if (count <= 1) return (t_comment(count, a0), null);
-        Array params;
-        if (count >= 2) params.append(a1);
-        if (count >= 3) params.append(a2);
-        if (count >= 4) params.append(a3);
-        if (count >= 5) params.append(a4);
-        if (count >= 6) params.append(a5);
-        return (t_comment(count,a0, params), null);
-      }
-      break;
     case 14:
       HASH_GUARD(0x7A24AFD8ADE43B8ELL, args) {
         if (count > 0) return throw_toomany_arguments("args", 0, 1);
@@ -3182,6 +3180,16 @@ Variant c_debuggerclient::o_invoke_few_args(const char *s, int64 hash, int count
       }
       break;
     case 17:
+      HASH_GUARD(0x687DF38195F5B951LL, helpcmds) {
+        if (count < 2) return throw_missing_arguments("helpcmds", count+1, 1);
+        if (count <= 2) return (t_helpcmds(count, a0, a1), null);
+        Array params;
+        if (count >= 3) params.append(a2);
+        if (count >= 4) params.append(a3);
+        if (count >= 5) params.append(a4);
+        if (count >= 6) params.append(a5);
+        return (t_helpcmds(count,a0, a1, params), null);
+      }
       HASH_GUARD(0x1015EB3F52B098D1LL, print) {
         if (count < 1) return throw_missing_arguments("print", count+1, 1);
         if (count <= 1) return (t_print(count, a0), null);
@@ -3307,15 +3315,9 @@ Variant c_debuggerclient::o_invoke_few_args(const char *s, int64 hash, int count
       break;
     case 57:
       HASH_GUARD(0x58C72230857ACDB9LL, code) {
-        if (count < 1) return throw_missing_arguments("code", count+1, 1);
-        if (count <= 1) return (t_code(count, a0), null);
-        Array params;
-        if (count >= 2) params.append(a1);
-        if (count >= 3) params.append(a2);
-        if (count >= 4) params.append(a3);
-        if (count >= 5) params.append(a4);
-        if (count >= 6) params.append(a5);
-        return (t_code(count,a0, params), null);
+        if (count < 1 || count > 2) return throw_wrong_arguments("code", count, 1, 2, 1);
+        if (count <= 1) return (t_code(a0), null);
+        return (t_code(a0, a1), null);
       }
       break;
     case 58:
@@ -3440,26 +3442,6 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         return (t_send(a0));
       }
       break;
-    case 13:
-      HASH_GUARD(0x16AD79F9AF3ECC0DLL, comment) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count < 1) return throw_missing_arguments("comment", count+1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        Array vargs;
-        for (; it != params.end(); ++it) {
-          vargs.append((*it)->eval(env));
-        }
-        if (count <= 1) return (t_comment(count, a0), null);
-        return (t_comment(count, a0,vargs), null);
-      }
-      break;
     case 14:
       HASH_GUARD(0x7A24AFD8ADE43B8ELL, args) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -3505,6 +3487,28 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 17:
+      HASH_GUARD(0x687DF38195F5B951LL, helpcmds) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2) return throw_missing_arguments("helpcmds", count+1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 2) return (t_helpcmds(count, a0, a1), null);
+        return (t_helpcmds(count, a0, a1,vargs), null);
+      }
       HASH_GUARD(0x1015EB3F52B098D1LL, print) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -3807,21 +3811,24 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     case 57:
       HASH_GUARD(0x58C72230857ACDB9LL, code) {
         Variant a0;
+        Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count < 1) return throw_missing_arguments("code", count+1, 1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("code", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
           a0 = (*it)->eval(env);
           it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
         } while(false);
-        Array vargs;
         for (; it != params.end(); ++it) {
-          vargs.append((*it)->eval(env));
+          (*it)->eval(env);
         }
-        if (count <= 1) return (t_code(count, a0), null);
-        return (t_code(count, a0,vargs), null);
+        if (count <= 1) return (t_code(a0), null);
+        else return (t_code(a0, a1), null);
       }
       break;
     case 58:

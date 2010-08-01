@@ -25,8 +25,12 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdInfo);
 class CmdInfo : public DebuggerCommand {
 public:
+  static void UpdateLiveLists(DebuggerClient *client);
+
+public:
   CmdInfo() : DebuggerCommand(KindOfInfo) {}
 
+  virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
 
   virtual bool onClient(DebuggerClient *client);
@@ -40,27 +44,29 @@ private:
     KindOfUnknown,
     KindOfClass,
     KindOfFunction,
+
+    KindOfLiveLists, // for auto-complete
   };
 
   int8   m_type;
   String m_symbol;
   Array  m_info;
+  DebuggerClient::LiveListsPtr m_acLiveLists;
 
   String GetParams(CArrRef params, bool detailed = false);
   String GetModifier(CArrRef info, const char *name);
 
   String FindSubSymbol(CArrRef symbols, const std::string &symbol);
 
-  bool TryConstant(DebuggerClient *client, CArrRef info,
+  bool TryConstant(StringBuffer &sb, CArrRef info,
                    const std::string &subsymbol);
-  bool TryProperty(DebuggerClient *client, CArrRef info,
+  bool TryProperty(StringBuffer &sb, CArrRef info,
                    const std::string &subsymbol);
-  bool TryMethod(DebuggerClient *client, CArrRef info,
-                 std::string subsymbol);
+  bool TryMethod(StringBuffer &sb, CArrRef info, std::string subsymbol);
 
-  void PrintDocComments(DebuggerClient *client, CArrRef info);
-  void PrintHeader(DebuggerClient *client, CArrRef info, const char *type);
-  void PrintInfo(DebuggerClient *client, CArrRef info,
+  void PrintDocComments(StringBuffer &sb, CArrRef info);
+  void PrintHeader(StringBuffer &sb, CArrRef info, const char *type);
+  void PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
                  const std::string &subsymbol);
 };
 

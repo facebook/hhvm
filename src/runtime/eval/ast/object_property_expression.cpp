@@ -66,7 +66,7 @@ bool ObjectPropertyExpression::weakLval(VariableEnvironment &env,
   if (vobj.is(KindOfObject)) {
     Object obj(vobj);
     String name(m_name->get(env));
-    SET_LINE;
+    if (!SET_LINE_EXPR) return false;
     if (obj->o_exists(name, m_name->hash())) {
       v = &HPHP::lval(obj.o_lval(name, m_name->hash()));
       return true;
@@ -161,7 +161,7 @@ bool ObjectPropertyExpression::exist(VariableEnvironment &env, int op) const {
 void ObjectPropertyExpression::unset(VariableEnvironment &env) const {
   Object obj(m_obj->eval(env));
   String name(m_name->get(env));
-  SET_LINE;
+  SET_LINE_VOID;
   obj->t___unset(name);
 }
 

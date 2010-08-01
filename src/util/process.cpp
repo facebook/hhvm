@@ -15,22 +15,12 @@
 */
 
 #include "process.h"
-#include <boost/shared_ptr.hpp>
-#include <stdio.h>
-#include <signal.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/poll.h>
-#include <sys/stat.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <vector>
 #include "base.h"
 #include "util.h"
 #include "async_func.h"
 #include "text_color.h"
+
+#include <pwd.h>
 
 using namespace std;
 
@@ -439,6 +429,60 @@ int Process::GetProcessRSS(pid_t pid) {
   }
 
   return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::string Process::GetAppName() {
+  const char* progname = getenv("_");
+  if (!progname || !*progname) {
+    progname = "unknown program";
+  }
+  return progname;
+}
+
+std::string Process::GetHostName() {
+  char hostbuf[128];
+  gethostname(hostbuf, 127);
+  hostbuf[127] = '\0';
+  return hostbuf;
+}
+
+std::string Process::GetCurrentUser() {
+  const char *name = getenv("LOGNAME");
+  if (name && *name) {
+    return name;
+  }
+  passwd *pwd = getpwuid(geteuid());
+  if (pwd && pwd->pw_name) {
+    return pwd->pw_name;
+  }
+  return "";
+}
+
+std::string Process::GetCurrentDirectory() {
+  char buf[PATH_MAX];
+  memset(buf, 0, PATH_MAX);
+  return getcwd(buf, PATH_MAX);
+}
+
+std::string Process::GetHomeDirectory() {
+  string ret;
+
+  const char *home = getenv("HOME");
+  if (home && *home) {
+    ret = home;
+  } else {
+    passwd *pwd = getpwent();
+    if (pwd && pwd->pw_dir) {
+      ret = pwd->pw_dir;
+    }
+  }
+
+  if (ret.empty() || ret[ret.size() - 1] != '/') {
+    ret += '/';
+  }
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

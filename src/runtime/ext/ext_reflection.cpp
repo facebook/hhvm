@@ -141,6 +141,7 @@ static void set_method_info(Array &ret, ClassInfo::MethodInfo *info,
   ret.set("final",    (bool)(info->attribute & ClassInfo::IsFinal));
   ret.set("abstract", (bool)(info->attribute & ClassInfo::IsAbstract));
   ret.set("internal", (bool)(cls->getAttribute() & ClassInfo::IsSystem));
+  ret.set("hphp",     (bool)(cls->getAttribute() & ClassInfo::HipHopSpecific));
   ret.set("class", cls->getName());
   set_function_info(ret, info, cls->getName());
 }
@@ -182,6 +183,7 @@ Array f_hphp_get_class_info(CVarRef name) {
   {
     int attribute = cls->getAttribute();
     ret.set("internal",   (bool)(attribute & ClassInfo::IsSystem));
+    ret.set("hphp",       (bool)(attribute & ClassInfo::HipHopSpecific));
     ret.set("abstract",   (bool)(attribute & ClassInfo::IsAbstract));
     ret.set("interface",  (bool)(attribute & ClassInfo::IsInterface));
     ret.set("final",      (bool)(attribute & ClassInfo::IsFinal));
@@ -265,6 +267,7 @@ Array f_hphp_get_function_info(CStrRef name) {
 
   ret.set("name",       info->name);
   ret.set("internal",   (bool)(info->attribute & ClassInfo::IsSystem));
+  ret.set("hphp",       (bool)(info->attribute & ClassInfo::HipHopSpecific));
   ret.set("closure",    "");
 
   // setting parameters and static variables

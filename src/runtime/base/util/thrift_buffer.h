@@ -198,8 +198,43 @@ public:
   void read(std::string &data);
   void write(const std::string &data);
   void write(const char *data) { write(std::string(data ? data : ""));}
+
   void read(std::vector<std::string> &data);
   void write(const std::vector<std::string> &data);
+
+  template<typename T>
+  void read(std::vector<T> &data) {
+    int32 size;
+    read(size);
+    data.resize(size);
+    for (int i = 0; i < size; i++) {
+      read(data[i]);
+    }
+  }
+  template<typename T>
+  void write(const std::vector<T> &data) {
+    int32 size = data.size();
+    write(size);
+    for (int i = 0; i < size; i++) {
+      write(data[i]);
+    }
+  }
+  template<typename T>
+  void read(boost::shared_ptr<T> &data) {
+    bool has;
+    read(has);
+    if (has) {
+      data = boost::shared_ptr<T>(new T());
+      data->recvImpl(*this);
+    }
+  }
+  template<typename T>
+  void write(const boost::shared_ptr<T> &data) {
+    write((bool)data);
+    if (data) {
+      data->sendImpl(*this);
+    }
+  }
 
   void read(Array   &data);
   void read(Object  &data);

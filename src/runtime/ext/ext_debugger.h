@@ -65,6 +65,11 @@ extern const int64 q_debuggerclient_AUTO_COMPLETE_VARIABLES;
 extern const int64 q_debuggerclient_AUTO_COMPLETE_CONSTANTS;
 extern const int64 q_debuggerclient_AUTO_COMPLETE_CLASSES;
 extern const int64 q_debuggerclient_AUTO_COMPLETE_FUNCTIONS;
+extern const int64 q_debuggerclient_AUTO_COMPLETE_CLASS_METHODS;
+extern const int64 q_debuggerclient_AUTO_COMPLETE_CLASS_PROPERTIES;
+extern const int64 q_debuggerclient_AUTO_COMPLETE_CLASS_CONSTANTS;
+extern const int64 q_debuggerclient_AUTO_COMPLETE_KEYWORDS;
+extern const int64 q_debuggerclient_AUTO_COMPLETE_CODE;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DebuggerClient
@@ -88,11 +93,11 @@ class c_debuggerclient : public ExtObjectData {
   public: void t_info(int _argc, CStrRef format, CArrRef _argv = null_array);
   public: void t_output(int _argc, CStrRef format, CArrRef _argv = null_array);
   public: void t_error(int _argc, CStrRef format, CArrRef _argv = null_array);
-  public: void t_comment(int _argc, CStrRef format, CArrRef _argv = null_array);
-  public: void t_code(int _argc, CStrRef format, CArrRef _argv = null_array);
+  public: void t_code(CStrRef source, int start_line_no = 0);
   public: Variant t_ask(int _argc, CStrRef format, CArrRef _argv = null_array);
   public: String t_wrap(CStrRef str);
   public: void t_helptitle(CStrRef str);
+  public: void t_helpcmds(int _argc, CStrRef cmd, CStrRef desc, CArrRef _argv = null_array);
   public: void t_helpbody(CStrRef str);
   public: void t_helpsection(CStrRef str);
   public: void t_tutorial(CStrRef str);

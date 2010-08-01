@@ -27,6 +27,7 @@ class CmdJump : public DebuggerCommand {
 public:
   CmdJump() : DebuggerCommand(KindOfJump) {}
 
+  virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
 
   virtual bool onClient(DebuggerClient *client);
@@ -35,7 +36,12 @@ public:
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
+  bool match(InterruptSite *site);
+
 private:
+  std::string m_label;
+  std::string m_file;
+  int32 m_line;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

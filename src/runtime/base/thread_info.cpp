@@ -40,20 +40,30 @@ ThreadInfo::ThreadInfo() {
   pthread_attr_getstacksize(&info, &m_stacksize);
   pthread_attr_destroy(&info);
 
-  reset();
+  onSessionInit();
 }
 
-void ThreadInfo::reset() {
+void ThreadInfo::onSessionInit() {
   char marker;
 
   m_top = NULL;
+  m_reqInjectionData.onSessionInit();
 
-  // We assume that reset() will be called reasonably low in the call stack.
+  // We assume that this will be called reasonably low in the call stack.
   // Taking the address of marker gives us a location in this stack frame;
   // then, use that to calculate where the bottom of the stack should be,
   // allowing some slack for (a) stack usage above the caller of reset() and
   // (b) stack usage after the position gets checked.
   m_stacklimit = &marker - (m_stacksize - RecursionInjection::StackSlack);
+}
+
+void RequestInjectionData::onSessionInit() {
+  started     = time(0);
+  memExceeded = false;
+  timedout    = false;
+  signaled    = false;
+  surprised   = false;
+  debugger    = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

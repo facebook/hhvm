@@ -101,7 +101,7 @@ void DebuggerServer::accept() {
         Logger::Error("unable to accept incoming debugger request");
         break;
       }
-      Debugger::RegisterProxy(ret, true, false);
+      Debugger::RegisterProxy(ret, false);
     } // else timed out, then we have a chance to check m_stopped bit
   }
 }

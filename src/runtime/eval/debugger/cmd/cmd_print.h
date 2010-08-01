@@ -25,8 +25,13 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdPrint);
 class CmdPrint : public DebuggerCommand {
 public:
+  static const char *Formats[];
+  static std::string FormatResult(const char *format, CVarRef ret);
+
+public:
   CmdPrint() : DebuggerCommand(KindOfPrint) {}
 
+  virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
 
   virtual bool onClient(DebuggerClient *client);
@@ -35,7 +40,14 @@ public:
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
+  void processWatch(DebuggerClient *client, const char *format,
+                    const std::string &php);
+
 private:
+  Variant m_ret;
+
+  bool processList(DebuggerClient *client);
+  bool processClear(DebuggerClient *client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

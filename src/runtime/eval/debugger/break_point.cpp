@@ -16,10 +16,10 @@
 
 #include <runtime/eval/debugger/break_point.h>
 #include <runtime/eval/debugger/debugger.h>
+#include <runtime/eval/debugger/debugger_proxy.h>
 #include <runtime/eval/debugger/debugger_thrift_buffer.h>
-#include <runtime/eval/eval.h>
 #include <runtime/base/preg.h>
-#include <runtime/base/externals.h>
+#include <runtime/base/execution_context.h>
 
 using namespace std;
 using namespace boost;
@@ -93,7 +93,7 @@ BreakPointInfo::BreakPointInfo(bool regex, State state,
       m_regex(regex), m_check(false) {
   if (m_interrupt == ExceptionThrown) {
     parseExceptionThrown(exp);
-    if (!m_file.empty() || m_line1 || m_line2 || !m_function.empty()) {
+    if (!m_file.empty() || m_line1 || m_line2 || !m_funcs.empty()) {
       m_valid = false;
     }
   } else {
@@ -109,7 +109,7 @@ void BreakPointInfo::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write(m_line2);
   thrift.write(m_namespace);
   thrift.write(m_class);
-  thrift.write(m_function);
+  thrift.write(m_funcs);
   thrift.write(m_url);
   thrift.write(m_regex);
   thrift.write(m_check);
@@ -127,7 +127,7 @@ void BreakPointInfo::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_line2);
   thrift.read(m_namespace);
   thrift.read(m_class);
-  thrift.read(m_function);
+  thrift.read(m_funcs);
   thrift.read(m_url);
   thrift.read(m_regex);
   thrift.read(m_check);
@@ -155,8 +155,7 @@ void BreakPointInfo::toggle() {
 
 bool BreakPointInfo::valid() {
   return m_valid &&
-    ((m_line1 && m_line2) || !m_file.empty() ||
-     !m_function.empty() || !m_class.empty() || !m_namespace.empty() ||
+    ((m_line1 && m_line2) || !m_file.empty() || !m_funcs.empty() ||
      (m_interrupt != BreakPointReached && m_interrupt != ExceptionThrown));
 }
 
@@ -179,10 +178,7 @@ bool BreakPointInfo::match(InterruptType interrupt, InterruptSite &site) {
       case BreakPointReached:
         return
           Match(site.getFile(), site.getFileLen(), m_file, m_regex, false) &&
-          checkLines(site.getLine()) &&
-          Match(site.getNamespace(), 0, m_namespace, m_regex, true) &&
-          Match(site.getClass(), 0, m_class, m_regex, true) &&
-          Match(site.getFunction(), 0, m_function, m_regex, true) &&
+          checkLines(site.getLine()) && checkStack(site) &&
           checkUrl(site.url()) && checkFrame(site.getFrame()) && checkClause();
       default:
         break;
@@ -210,31 +206,37 @@ std::string BreakPointInfo::regex(const std::string &name) const {
   return name;
 }
 
+std::string BreakPointInfo::getNamespace() const {
+  if (!m_funcs.empty()) {
+    return m_funcs[0]->m_namespace;
+  }
+  return "";
+}
+
+std::string BreakPointInfo::getClass() const {
+  if (!m_funcs.empty()) {
+    return m_funcs[0]->m_class;
+  }
+  return "";
+}
+
+std::string BreakPointInfo::getFunction() const {
+  if (!m_funcs.empty()) {
+    return m_funcs[0]->m_function;
+  }
+  return "";
+}
+
 std::string BreakPointInfo::site() const {
   string ret;
+
   string preposition = "at ";
-  if (!m_namespace.empty() || !m_class.empty() || !m_function.empty()) {
-    if (!m_class.empty()) {
-      if (!m_namespace.empty()) {
-        ret = m_namespace + "::";
-      }
-      ret += m_class;
-      if (!m_function.empty()) {
-        ret += "::" + m_function + "()";
-      } else {
-        ret = "class " + ret;
-        preposition = "in ";
-      }
-    } else {
-      if (!m_function.empty()) {
-        ret = m_function + "()";
-        if (!m_namespace.empty()) {
-          ret += " in namespace " + m_namespace;
-        }
-      } else if (!m_namespace.empty()) {
-        ret = "namespace " + m_namespace;
-        preposition = "in ";
-      }
+  if (!m_funcs.empty()) {
+    ret = m_funcs[0]->site(preposition);
+    for (unsigned int i = 1; i < m_funcs.size(); i++) {
+      ret += " called by ";
+      string tmp;
+      ret += m_funcs[i]->site(tmp);
     }
   }
 
@@ -259,29 +261,9 @@ std::string BreakPointInfo::site() const {
 
 std::string BreakPointInfo::descBreakPointReached() const {
   string ret;
-  if (!m_namespace.empty() || !m_class.empty() || !m_function.empty()) {
-    ret = "upon entering ";
-    if (!m_class.empty()) {
-      string cls;
-      if (!m_namespace.empty()) {
-        cls = regex(m_namespace) + "::";
-      }
-      cls += regex(m_class);
-      if (!m_function.empty()) {
-        ret += cls + "::" + regex(m_function) + "()";
-      } else {
-        ret += "any functions in class " + cls;
-      }
-    } else {
-      if (!m_function.empty()) {
-        ret += regex(m_function) + "()";
-        if (!m_namespace.empty()) {
-          ret += " in namespace " + regex(m_namespace);
-        }
-      } else {
-        ret += "any functions in namespace " + regex(m_namespace);
-      }
-    }
+  for (unsigned int i = 0; i < m_funcs.size(); i++) {
+    ret += (i == 0 ? "upon entering " : " called by ");
+    ret += m_funcs[i]->desc(this);
   }
 
   if (!m_file.empty() || m_line1 || m_line2) {
@@ -421,6 +403,7 @@ void BreakPointInfo::parseBreakPointReached(const std::string &exp,
   vector<string> tokens;
   bool seenClass = false;
   bool seenFile = false;
+  Util::replaceAll(input, "=>", "=>:");
   Util::split(':', input.c_str(), tokens);
   for (unsigned int i = 0; i < tokens.size(); i++) {
     const std::string &token = tokens[i];
@@ -445,12 +428,28 @@ void BreakPointInfo::parseBreakPointReached(const std::string &exp,
       continue;
     }
 
-    if (token.size() >= 2 && token.substr(token.size() - 2) == "()") {
-      if (token.empty() || !m_function.empty()) {
+    string ending;
+    if (token.size() >= 2) {
+      ending = token.substr(token.size() - 2);
+    }
+    if (token.size() >= 2 && (ending == "=>" || ending == "()")) {
+      string func = token.substr(0, token.size() - 2);
+      if (ending == "=>" &&
+          func.size() >= 2 && func.substr(func.size() - 2) == "()") {
+        func = func.substr(0, func.size() - 2);
+      }
+      if (token.empty()) {
         m_valid = false;
         return;
       }
-      m_function = token.substr(0, token.size() - 2);
+      DFunctionInfoPtr pfunc(new DFunctionInfo());
+      pfunc->m_namespace = m_namespace;
+      pfunc->m_class = m_class;
+      pfunc->m_function = func;
+      m_funcs.insert(m_funcs.begin(), pfunc);
+      m_namespace.clear();
+      m_class.clear();
+      seenClass = false;
     } else {
       if (!m_file.empty()) {
         m_valid = false;
@@ -463,6 +462,13 @@ void BreakPointInfo::parseBreakPointReached(const std::string &exp,
       seenFile = true;
       m_file = token;
     }
+  }
+
+  if (!m_namespace.empty() || !m_class.empty()) {
+    DFunctionInfoPtr func(new DFunctionInfo());
+    func->m_namespace = m_namespace;
+    func->m_class = m_class;
+    m_funcs.insert(m_funcs.begin(), func);
   }
 
   if (m_line1 && m_file.empty()) {
@@ -489,6 +495,13 @@ void BreakPointInfo::parseExceptionThrown(const std::string &exp) {
   }
 }
 
+bool BreakPointInfo::MatchFile(const char *haystack, int haystack_len,
+                               const std::string &needle) {
+  int pos = haystack_len - needle.size();
+  return (pos == 0 || haystack[pos - 1] == '/') &&
+    strcasecmp(haystack + pos, needle.c_str()) == 0;
+}
+
 bool BreakPointInfo::Match(const char *haystack, int haystack_len,
                            const std::string &needle, bool regex, bool exact) {
   if (needle.empty()) {
@@ -502,9 +515,7 @@ bool BreakPointInfo::Match(const char *haystack, int haystack_len,
     if (exact) {
       return strcasecmp(haystack, needle.c_str()) == 0;
     }
-    int pos = haystack_len - needle.size();
-    return (pos == 0 || haystack[pos - 1] == '/') &&
-      strcasecmp(haystack + pos, needle.c_str()) == 0;
+    return MatchFile(haystack, haystack_len, needle);
   }
 
   Variant matches;
@@ -546,6 +557,35 @@ bool BreakPointInfo::checkLines(int line) {
   return true;
 }
 
+bool BreakPointInfo::checkStack(InterruptSite &site) {
+  if (m_funcs.empty()) return true;
+
+  if (!Match(site.getNamespace(), 0, m_funcs[0]->m_namespace, m_regex, true) ||
+      !Match(site.getClass(),     0, m_funcs[0]->m_class,     m_regex, true) ||
+      !Match(site.getFunction(),  0, m_funcs[0]->m_function,  m_regex, true)) {
+    return false;
+  }
+
+  FrameInjection *f = site.getFrame()->getPrev();
+  for (unsigned int i = 1; i < m_funcs.size(); i++) {
+    for (; f; f = f->getPrev()) {
+      InterruptSite prevSite(f);
+      if (Match(prevSite.getNamespace(), 0,
+                m_funcs[i]->m_namespace, m_regex, true) &&
+          Match(prevSite.getClass(), 0,
+                m_funcs[i]->m_class, m_regex, true) &&
+          Match(prevSite.getFunction(), 0,
+                m_funcs[i]->m_function, m_regex, true)) {
+        break;
+      }
+    }
+    if (f == NULL) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool BreakPointInfo::checkFrame(FrameInjection *frame) {
   // If we're not specifying a breakpoint's line number, we only break just
   // once per frame.
@@ -557,32 +597,18 @@ bool BreakPointInfo::checkFrame(FrameInjection *frame) {
 
 bool BreakPointInfo::checkClause() {
   if (!m_clause.empty()) {
-    PSEUDOMAIN_INJECTION(_); // using "_" as filename
-    String output;
-    Variant ret;
-    try {
-      g_context->obStart("");
-      if (m_php.empty()) {
-        if (m_check) {
-          m_php = "<?php return (" + m_clause + ");";
-        } else {
-          m_php = "<?php " + m_clause + ";";
-        }
+    if (m_php.empty()) {
+      if (m_check) {
+        m_php = DebuggerProxy::MakePHPReturn(m_clause);
+      } else {
+        m_php = DebuggerProxy::MakePHP(m_clause);
       }
-      ret = eval(get_variable_table(), Object(),
-                 String(m_php.c_str(), m_php.size(), AttachLiteral), false);
-
-      output = Debugger::ColorStdout(g_context->obDetachContents());
-      g_context->obClean();
-      g_context->obEnd();
-    } catch (Exception &e) {
-      output = Debugger::ColorStderr(String(e.what()));
     }
-
+    String output;
+    Variant ret = DebuggerProxy::ExecutePHP(m_php, output);
     if (m_check) {
       return ret.toBoolean();
     }
-
     m_output = std::string(output.data(), output.size());
     return true;
   }

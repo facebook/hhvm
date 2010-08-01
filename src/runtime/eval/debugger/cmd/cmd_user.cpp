@@ -32,7 +32,13 @@ void CmdUser::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_cmd);
 }
 
+void CmdUser::list(DebuggerClient *client) {
+  Lock lock(s_mutex);
+  CmdExtended::list(client);
+}
+
 bool CmdUser::help(DebuggerClient *client) {
+  client->helpTitle("User Extended Command");
   helpImpl(client, "y");
   client->helpBody(
     "These commands are implemented and installed in PHP by implementing "
@@ -41,7 +47,7 @@ bool CmdUser::help(DebuggerClient *client) {
     "  class MyCommand implements DebuggerCommand {\n"
     "    public function help($client) {\n"
     "      $client->helpTitle(\"Hello Command\");\n"
-    "      $client->help(\"y [h]ello     prints welcome message\");\n"
+    "      $client->helpCmds(\"y [h]ello\", \"prints welcome message\");\n"
     "      return true;\n"
     "    }\n"
     "    public function onClient($client) {\n"
@@ -63,6 +69,13 @@ bool CmdUser::help(DebuggerClient *client) {
 
 const ExtendedCommandMap &CmdUser::getCommandMap() {
   return s_commands;
+}
+
+void CmdUser::invokeList(DebuggerClient *client, const std::string &cls) {
+  p_debuggerclient pclient(NEW(c_debuggerclient)());
+  pclient->m_client = client;
+  Object cmd = create_object(cls.c_str(), null_array);
+  cmd->o_invoke("onAutoComplete", CREATE_VECTOR1(pclient), -1);
 }
 
 bool CmdUser::invokeHelp(DebuggerClient *client, const std::string &cls) {

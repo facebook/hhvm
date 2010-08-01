@@ -28,6 +28,7 @@
 #include <compiler/analysis/constant_table.h>
 #include <compiler/analysis/dependency_graph.h>
 #include <compiler/parser/hphp.tab.hpp>
+#include <runtime/base/class_info.h>
 #include <util/logger.h>
 #include <util/util.h>
 #include <dlfcn.h>
@@ -103,6 +104,7 @@ const char *BuiltinSymbols::SystemClasses[] = {
   "splobjectstorage",
   "directory",
   "splfile",
+  "debugger",
   NULL
 };
 
@@ -293,6 +295,9 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   }
   if (flags & 0x20) {
     f->setIsFoldable();
+  }
+  if (flags & 0x40) {
+    f->setClassInfoAttribute(ClassInfo::HipHopSpecific);
   }
 
   if (fields & 0x1) {

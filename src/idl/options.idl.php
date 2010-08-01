@@ -69,17 +69,20 @@ f('getrusage', VariantMap,
 f('clock_getres', Boolean,
   array('clk_id' => Int32,
         'sec' => Int64 | Reference,
-        'nsec' => Int64 | Reference));
+        'nsec' => Int64 | Reference),
+  HipHopSpecific);
 
 f('clock_gettime', Boolean,
   array('clk_id' => Int32,
         'sec' => Int64 | Reference,
-        'nsec' => Int64 | Reference));
+        'nsec' => Int64 | Reference),
+  HipHopSpecific);
 
 f('clock_settime', Boolean,
   array('clk_id' => Int32,
         'sec' => Int64,
-        'nsec' => Int64));
+        'nsec' => Int64),
+  HipHopSpecific);
 
 f('ini_alter', String,
   array('varname' => String,

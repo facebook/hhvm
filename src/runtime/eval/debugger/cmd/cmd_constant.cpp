@@ -35,8 +35,11 @@ void CmdConstant::recvImpl(DebuggerThriftBuffer &thrift) {
 
 bool CmdConstant::help(DebuggerClient *client) {
   client->helpTitle("Constant Command");
-  client->help("[k]onstant           lists all constants");
-  client->help("[k]onstant {text}    full-text search constants");
+  client->helpCmds(
+    "[k]onstant",           "lists all constants",
+    "[k]onstant {text}",    "full-text search constants",
+    NULL
+  );
   client->helpBody(
     "This will print names and values of all constants, if {text} is not "
     "speified. Otherwise, it will print names and values of all constants "
@@ -66,9 +69,9 @@ bool CmdConstant::onClient(DebuggerClient *client) {
     f_ksort(ref(constants));
     for (ArrayIter iter(constants); iter; ++iter) {
       String name = iter.first().toString();
-      String value = DebuggerClient::PrintVariable(iter.second(), 200);
+      String value = DebuggerClient::FormatVariable(iter.second(), 200);
       if (!text.empty()) {
-        String fullvalue = DebuggerClient::PrintVariable(iter.second(), -1);
+        String fullvalue = DebuggerClient::FormatVariable(iter.second(), -1);
         if (name.find(text, 0, false) >= 0 ||
             fullvalue.find(text, 0, false) >= 0) {
           client->print("%s = %s", name.data(), value.data());
@@ -76,7 +79,7 @@ bool CmdConstant::onClient(DebuggerClient *client) {
         }
       } else {
         client->print("%s = %s", name.data(), value.data());
-        if (++i % 30 == 0 &&
+        if (++i % DebuggerClient::ScrollBlockSize == 0 &&
             client->ask("There are %d more constants. Continue? [Y/n]",
                         constants.toArray().size() - i) == 'n') {
           break;

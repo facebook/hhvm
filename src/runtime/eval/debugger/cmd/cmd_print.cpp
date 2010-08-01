@@ -15,42 +15,268 @@
 */
 
 #include <runtime/eval/debugger/cmd/cmd_print.h>
+#include <runtime/base/time/datetime.h>
 
 using namespace std;
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+const char *CmdPrint::Formats[] = {
+  "x", "hex", "oct", "dec", "unsigned", "time", NULL
+};
+
+std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
+  if (format == NULL) {
+    String sret = DebuggerClient::FormatVariable(ret, -1);
+    return string(sret.data(), sret.size());
+  }
+
+  if (strcmp(format, "dec") == 0 ||
+      strcmp(format, "unsigned") == 0 ||
+      ret.isInteger()) {
+    int64 nret = ret.toInt64();
+    char buf[64];
+    if (strcmp(format, "hex") == 0 || strcmp(format, "x") == 0) {
+      snprintf(buf, sizeof(buf), "%llx", nret);
+      return buf;
+    }
+    if (strcmp(format, "oct") == 0) {
+      snprintf(buf, sizeof(buf), "%llo", nret);
+      return buf;
+    }
+    if (strcmp(format, "dec") == 0) {
+      snprintf(buf, sizeof(buf), "%lld", nret);
+      return buf;
+    }
+    if (strcmp(format, "unsigned") == 0) {
+      snprintf(buf, sizeof(buf), "%llu", (unsigned long long)nret);
+      return buf;
+    }
+    if (strcmp(format, "time") == 0) {
+      StringBuffer sb;
+      DateTime dt(nret);
+      sb.append("RFC822:            ");
+      sb.append(dt.toString(DateTime::RFC822));
+      sb.append("\nRFC850:            ");
+      sb.append(dt.toString(DateTime::RFC850));
+      sb.append("\nRFC1036:           ");
+      sb.append(dt.toString(DateTime::RFC1036));
+      sb.append("\nRFC1123/RSS:       ");
+      sb.append(dt.toString(DateTime::RFC1123));
+      sb.append("\nRFC2822:           ");
+      sb.append(dt.toString(DateTime::RFC2822));
+      sb.append("\nRFC3339/ATOM/W3C:  ");
+      sb.append(dt.toString(DateTime::RFC3339));
+      sb.append("\nISO8601:           ");
+      sb.append(dt.toString(DateTime::ISO8601));
+      sb.append("\nCookie:            ");
+      sb.append(dt.toString(DateTime::Cookie));
+      sb.append("\nHttpHeader:        ");
+      sb.append(dt.toString(DateTime::HttpHeader));
+      return sb.data();
+    }
+
+    ASSERT(false);
+  }
+
+  String sret = DebuggerClient::FormatVariable(ret, -1);
+  if (strcmp(format, "hex") == 0 || strcmp(format, "x") == 0 ||
+      strcmp(format, "oct") == 0) {
+    StringBuffer sb;
+    for (int i = 0; i < sret.size(); i++) {
+      char ch = sret[i];
+      if (isprint(ch)) {
+        sb.append(ch);
+      } else {
+        char buf[6];
+        if (strcmp(format, "oct") == 0) {
+          snprintf(buf, sizeof(buf), "\\%03o", ch);
+        } else {
+          snprintf(buf, sizeof(buf), "\\x%02x", ch);
+        }
+        sb.append(buf);
+      }
+    }
+    return sb.data();
+  }
+  if (strcmp(format, "time") == 0) {
+    DateTime dt;
+    int64 ts = -1;
+    if (dt.fromString(ret.toString(), SmartObject<TimeZone>())) {
+      bool err;
+      ts = dt.toTimeStamp(err);
+    }
+    return String(ts).data();
+  }
+
+  ASSERT(false);
+  return "";
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void CmdPrint::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
+  thrift.write(m_ret);
 }
 
 void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
+  thrift.read(m_ret);
+}
+
+void CmdPrint::list(DebuggerClient *client) {
+  if (client->argCount() == 0) {
+    client->addCompletion(Formats);
+    client->addCompletion("always");
+    client->addCompletion("list");
+    client->addCompletion("clear");
+    client->addCompletion(DebuggerClient::AutoCompleteCode);
+  } else if (client->argCount() == 1) {
+    if (client->arg(1, "always")) {
+      client->addCompletion(Formats);
+      client->addCompletion(DebuggerClient::AutoCompleteCode);
+    } else if (client->arg(1, "clear")) {
+      client->addCompletion("all");
+    }
+  }
 }
 
 bool CmdPrint::help(DebuggerClient *client) {
-  client->error("not implemented yet"); return true;
-
   client->helpTitle("Print Command");
-  client->help("print: ");
+  client->helpCmds(
+    "[p]rint {php}",              "prints result of PHP code",
+    "[p]rint x {php}",            "prints hex encoded string or number",
+    "[p]rint [h]ex {php}",        "prints hex encoded string or number",
+    "[p]rint [o]ct {php}",        "prints octal encoded string or number",
+    "[p]rint [d]ec {php}",        "prints as signed integer",
+    "[p]rint [u]nsigned {php}",   "prints as unsigned integer",
+    "[p]rint [t]ime {php}",       "converts between time and timestamp",
+    "",                           "",
+    "[p]rint [a]lways {above}",   "adds a watch expression at break",
+    "[p]rint [l]ist",             "lists watch expressions",
+    "[p]rint [c]lear {index}",    "clears a watch expression",
+    "[p]rint [c]lear [a]ll",      "clears all watch expressions",
+    NULL
+  );
   client->helpBody(
-    ""
+    "Prints result of an expression in certain format. If '[a]lways' is "
+    "specified, the expression will be added to a watch list. At every break, "
+    "either at a breakpoint or caused by step commands, these expressions "
+    "will be evaluated and printed out."
   );
   return true;
 }
 
+bool CmdPrint::processList(DebuggerClient *client) {
+  DebuggerClient::WatchPtrVec &watches = client->getWatches();
+  for (int i = 0; i < (int)watches.size(); i++) {
+    client->print("  %d\t%s  %s", i + 1,
+                  watches[i]->first,
+                  watches[i]->second.c_str());
+  }
+  if (watches.empty()) {
+    client->tutorial(
+      "Use '[p]rint [a]lways ...' to set new watch expressions. "
+      "Use '[p]rint ?|[h]elp' to read how to set them. "
+    );
+  } else {
+    client->tutorial(
+      "Use '[p]rint [c]lear {index}|[a]ll' to remove watch expression(s). "
+    );
+  }
+  return true;
+}
+
+bool CmdPrint::processClear(DebuggerClient *client) {
+  DebuggerClient::WatchPtrVec &watches = client->getWatches();
+  if (watches.empty()) {
+    client->error("There is no watch expression to clear.");
+    client->tutorial(
+      "Use '[p]rint [a]lways ...' to set new watch expressions. "
+      "Use '[p]rint ?|[h]elp' to read how to set them. "
+    );
+    return true;
+  }
+
+  if (client->arg(2, "all")) {
+    watches.clear();
+    client->info("All watch expressions are cleared.");
+    return true;
+  }
+
+  string snum = client->argValue(2);
+  if (!DebuggerClient::IsValidNumber(snum)) {
+    client->error("'[p]rint [c]lear' needs an {index} argument.");
+    client->tutorial(
+      "You will have to run '[p]rint [l]ist' first to see a list of valid "
+      "numbers or indices to specify."
+    );
+    return true;
+  }
+
+  int num = atoi(snum.c_str()) - 1;
+  if (num < 0 || num >= (int)watches.size()) {
+    client->error("\"%s\" is not a valid index. Choose one from this list:",
+                  snum.c_str());
+    processList(client);
+    return true;
+  }
+
+  watches.erase(watches.begin() + num);
+  return true;
+}
+
+void CmdPrint::processWatch(DebuggerClient *client, const char *format,
+                            const std::string &php) {
+  m_body = php;
+  CmdPrintPtr res = client->xend<CmdPrint>(this);
+  client->output(FormatResult(format, res->m_ret));
+  if (!res->m_body.empty()) {
+    client->output(res->m_body);
+  }
+}
+
 bool CmdPrint::onClient(DebuggerClient *client) {
   if (DebuggerCommand::onClient(client)) return true;
+  if (client->argCount() == 0) {
+    return help(client);
+  }
 
-  //TODO
+  bool watch = false;
+  int index = 1;
+  if (client->arg(1, "always")) {
+    watch = true;
+    index++;
+  } else if (client->arg(1, "list")) {
+    return processList(client);
+  } else if (client->arg(1, "clear")) {
+    return processClear(client);
+  }
 
-  return help(client);
+  const char *format = NULL;
+  for (const char **fmt = Formats; *fmt; fmt++) {
+    if (client->arg(index, *fmt)) {
+      format = *fmt;
+      index++;
+      break;
+    }
+  }
+  m_body = client->argRest(index);
+  if (watch) {
+    client->addWatch(format, m_body);
+  }
+  processWatch(client, format, m_body);
+  return true;
 }
 
 bool CmdPrint::onServer(DebuggerProxy *proxy) {
-  ASSERT(false); // this command is processed entirely locally
-  return false;
+  String output;
+  m_ret = DebuggerProxy::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
+                                    output);
+  m_body = std::string(output.data(), output.size());
+  return proxy->send(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

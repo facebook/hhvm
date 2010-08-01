@@ -27,6 +27,7 @@ class CmdList : public DebuggerCommand {
 public:
   CmdList() : DebuggerCommand(KindOfList) {}
 
+  virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
 
   virtual bool onClient(DebuggerClient *client);
@@ -36,6 +37,10 @@ public:
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
+  std::string m_file;
+  int32 m_line1;
+  int32 m_line2;
+  Variant m_code;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

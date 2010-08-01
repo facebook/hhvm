@@ -16,6 +16,7 @@
 
 #include <runtime/eval/debugger/cmd/cmd_machine.h>
 #include <runtime/base/runtime_option.h>
+#include <util/process.h>
 
 using namespace std;
 
@@ -32,21 +33,32 @@ void CmdMachine::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_sandboxes);
 }
 
+void CmdMachine::list(DebuggerClient *client) {
+  if (client->argCount() == 0) {
+    static const char *keywords[] =
+      { "disconnect", "connect", "list", "attach", NULL };
+    client->addCompletion(keywords);
+  }
+}
+
 bool CmdMachine::help(DebuggerClient *client) {
   client->helpTitle("Machine Command");
-  client->help("[m]achine [c]onnect local          debugging local script");
-  client->help("[m]achine [c]onnect {host}         debugging remote server");
-  client->help("[m]achine [c]onnect {host}:{port}  debugging remote server");
-  client->help("[m]achine [l]ist                   list all sandboxes");
-  client->help("[m]achine [a]ttach {index}         attach to a sandbox");
+  client->helpCmds(
+    "[m]achine [c]onnect {host}",         "debugging remote server",
+    "[m]achine [c]onnect {host}:{port}",  "debugging remote server",
+    "[m]achine [d]isconnect",             "debugging local script",
+    "[m]achine [l]ist",                   "list all sandboxes",
+    "[m]achine [a]ttach {index}",         "attach to a sandbox",
+    NULL
+  );
   client->helpBody(
     "Use this command to switch between different machines or "
     "sandboxes.\n"
     "\n"
-    "\"local\" is a special host name, and when connecting to local, "
-    "all evaluation of PHP code happens locally within the debugger. "
-    "This is the mode when debugger is started without a remote server "
-    "name. No user libraries are pre-loaded in this mode.\n"
+    "If command prompt says \"hphpd\", all evaluation of PHP code happens "
+    "locally within the debugger. This is the mode when debugger is started "
+    "without a remote server name. No user libraries are pre-loaded in this "
+    "mode.\n"
     "\n"
     "When connecting to a remote server, it will automatically attach "
     "to \"default\" sandbox under current user. If \"default\" sandbox "
@@ -55,9 +67,7 @@ bool CmdMachine::help(DebuggerClient *client) {
     "of \"Eval.Debugger.StartupDocument\" is pre-loaded.\n"
     "\n"
     "If there is no sandbox available, it will create a \"dummy\" "
-    "sandbox and attach to it. This \"dummy\" sandbox is not "
-    "associated with any PHP files, hence not pre-loading any user "
-    "libraries.\n"
+    "sandbox and attach to it.\n"
     "\n"
     "When your sandbox is not available, please hit it at least once "
     "from your browser. Then run '[m]achine [l]ist' command again."
@@ -89,9 +99,63 @@ bool CmdMachine::processList(DebuggerClient *client) {
   return true;
 }
 
+bool CmdMachine::AttachSandbox(DebuggerClient *client,
+                               const char *user /* = NULL */,
+                               const char *name /* = NULL */,
+                               const char *path /* = NULL */) {
+  string login;
+  if (user == NULL) {
+    login = Process::GetCurrentUser();
+    user = login.c_str();
+  }
+
+  DSandboxInfo sandbox;
+  sandbox.m_user = user ? user : "";
+  sandbox.m_name = name ? name : "default";
+  sandbox.m_path = path ? path : "";
+
+  return AttachSandbox(client, sandbox);
+}
+
+bool CmdMachine::AttachSandbox(DebuggerClient *client,
+                               const DSandboxInfo &sandbox) {
+  CmdMachine cmd;
+  cmd.m_body = "attach";
+  cmd.m_sandboxes.push_back(sandbox.id());
+
+  client->send(&cmd);
+  client->info("Attached to %s's %s sandbox.", sandbox.m_user.c_str(),
+               sandbox.m_name.c_str());
+  throw DebuggerConsoleExitException();
+}
+
 bool CmdMachine::onClient(DebuggerClient *client) {
   if (DebuggerCommand::onClient(client)) return true;
   if (client->argCount() == 0) return help(client);
+
+  if (client->arg(1, "connect")) {
+    if (client->argCount() != 2) {
+      return help(client);
+    }
+    string host = client->argValue(2);
+    int port = 0;
+    size_t pos = host.find(":");
+    if (pos != string::npos) {
+      if (!DebuggerClient::IsValidNumber(host.substr(pos + 1))) {
+        client->error("Port needs to be a number");
+        return help(client);
+      }
+      port = atoi(host.substr(pos + 1).c_str());
+      host = host.substr(0, pos);
+    }
+    client->connect(host, port);
+    return true;
+  }
+
+  if (client->arg(1, "disconnect")) {
+    client->disconnect();
+    return true;
+  }
 
   if (client->arg(1, "list")) {
     processList(client);
@@ -100,7 +164,7 @@ bool CmdMachine::onClient(DebuggerClient *client) {
 
   if (client->arg(1, "attach")) {
     string snum = client->argValue(2);
-    if (snum.empty() || !DebuggerClient::IsValidNumber(snum)) {
+    if (!DebuggerClient::IsValidNumber(snum)) {
       client->error("'[m]achine [a]attach' needs an {index} argument.");
       client->tutorial(
         "You will have to run '[m]achine [l]ist' first to see a list of valid "
@@ -110,19 +174,15 @@ bool CmdMachine::onClient(DebuggerClient *client) {
     }
 
     int num = atoi(snum.c_str());
-    string sandbox = client->getSandbox(num);
-    if (sandbox.empty()) {
+    string id = client->getSandbox(num);
+    if (id.empty()) {
       client->error("\"%s\" is not a valid sandbox index. Choose one from "
                     "this list:", snum.c_str());
       processList(client);
       return true;
     }
-
-    m_body = "attach";
-    m_sandboxes.push_back(sandbox);
-    client->send(this);
-    client->info("attached to sandbox %s", sandbox.c_str());
-    return true;
+    DSandboxInfo sandbox(id);
+    return AttachSandbox(client, sandbox);
   }
 
   return help(client);

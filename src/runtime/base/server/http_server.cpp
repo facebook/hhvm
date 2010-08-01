@@ -32,6 +32,7 @@
 #include <runtime/base/util/http_client.h>
 #include <runtime/base/server/replay_transport.h>
 #include <runtime/base/program_functions.h>
+#include <runtime/eval/debugger/debugger.h>
 #include <util/db_conn.h>
 #include <util/log_aggregator.h>
 #include <runtime/ext/ext_apc.h>
@@ -151,6 +152,8 @@ HttpServer::HttpServer()
 }
 
 void HttpServer::onServerShutdown() {
+  Eval::Debugger::OnServerShutdown();
+
   // When a new instance of HPHP has taken over our page server socket,
   // stop our admin server and satellites so it can acquire those ports.
   for (unsigned int i = 0; i < m_satellites.size(); i++) {

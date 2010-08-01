@@ -30,22 +30,24 @@ public:
    * Start/stop Debugger for remote debugging.
    */
   static void StartServer();
-  static void StartClient(const std::string &host, int port);
+  static void StartClient(const std::string &host, int port,
+                          const std::string &extension);
+  static void OnServerShutdown();
   static void Stop();
 
   /**
    * Add a new sandbox a debugger can connect to.
    */
-  static void RegisterSandbox(const SandboxInfo &sandbox);
+  static void RegisterSandbox(const DSandboxInfo &sandbox);
   static void GetRegisteredSandboxes(StringVec &ids);
 
   /**
    * Add/remove/change DebuggerProxy.
    */
-  static void RegisterProxy(SmartPtr<Socket> socket, bool dummy, bool local);
+  static void RegisterProxy(SmartPtr<Socket> socket, bool local);
   static void RemoveProxy(DebuggerProxyPtr proxy);
   static void SwitchSandbox(DebuggerProxyPtr proxy,
-                            const SandboxInfo &sandbox);
+                            const DSandboxInfo &sandbox);
 
   /**
    * Called from differnt time point of execution thread.
@@ -79,16 +81,31 @@ private:
   ReadWriteMutex m_mutex;
   StringToDebuggerProxyPtrSetMap m_proxies;
 
+  /**
+   * m_threadInfos stores threads by sandbox id. These threads were started
+   * without finding a matched DebuggerProxy. Newly attached DebuggerProxy
+   * can check this set to mark them with "debugger" flag on ThreadInfo's
+   * RequestInjectionData. This way, these threads will start to interrupt.
+   * The whole purpose of doing this is to make sure threads that don't have
+   * debugger attached will not keep checking whether a DebuggerProxy has been
+   * attached.
+   */
+  typedef std::set<ThreadInfo*> ThreadInfoSet;
+  typedef std::map<std::string, ThreadInfoSet> StringToThreadInfoSet;
+  StringToThreadInfoSet m_threadInfos;
+  void clearThreadInfos();
+  void flagDebugger(const std::string &id);
+
   void stop();
 
-  void addSandbox(const SandboxInfo &sandbox);
+  void addSandbox(const DSandboxInfo &sandbox);
   void getSandboxes(StringVec &ids);
 
-  void addProxy(SmartPtr<Socket> socket, bool dummy, bool local);
+  void addProxy(SmartPtr<Socket> socket, bool local);
   void removeProxy(DebuggerProxyPtr proxy);
 
-  DebuggerProxyPtrSet findProxies(const SandboxInfo &sandbox);
-  void switchSandbox(DebuggerProxyPtr proxy, const SandboxInfo &sandbox);
+  DebuggerProxyPtrSet findProxies(const std::string &id);
+  void switchSandbox(DebuggerProxyPtr proxy, const DSandboxInfo &sandbox);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

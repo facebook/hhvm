@@ -1749,6 +1749,13 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, STRING *line,
 	s+=2;
 	value = neos_strip(s);
         HDF *h = hdf_get_obj(hdf->top, value);
+        if (!h)
+        {
+	  err = nerr_raise(NERR_PARSE,
+                           "[%s:%d] Failed to copy a node that is not loaded "
+                           "yet: %s", path, *lineno, value);
+          return err;
+        }
         err = hdf_copy(hdf, name, h);
 	if (err != STATUS_OK)
         {

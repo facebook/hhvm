@@ -274,6 +274,103 @@ void ClassInfo::GetClassProperties(PropertyVec &props, const char *classname) {
   }
 }
 
+void ClassInfo::GetClassSymbolNames(CArrRef names, bool interface,
+                                    std::vector<String> &classes,
+                                    std::vector<String> *clsMethods,
+                                    std::vector<String> *clsProperties,
+                                    std::vector<String> *clsConstants) {
+  if (clsMethods || clsProperties || clsConstants) {
+    for (ArrayIter iter(names); iter; ++iter) {
+      String clsname = iter.second().toString();
+      classes.push_back(clsname);
+
+      const ClassInfo *cls;
+      if (interface) {
+        cls = FindInterface(clsname.data());
+      } else {
+        cls = FindClass(clsname.data());
+      }
+      ASSERT(cls);
+      if (clsMethods) {
+        const ClassInfo::MethodVec &methods = cls->getMethodsVec();
+        for (unsigned int i = 0; i < methods.size(); i++) {
+          clsMethods->push_back(clsname + "::" + methods[i]->name);
+        }
+      }
+      if (clsProperties) {
+        const ClassInfo::PropertyMap &properties = cls->getProperties();
+        for (ClassInfo::PropertyMap::const_iterator iter = properties.begin();
+             iter != properties.end(); ++iter) {
+          clsProperties->push_back(clsname + "::$" + iter->first);
+        }
+      }
+      if (clsConstants) {
+        const ClassInfo::ConstantMap &constants = cls->getConstants();
+        for (ClassInfo::ConstantMap::const_iterator iter = constants.begin();
+             iter != constants.end(); ++iter) {
+          clsConstants->push_back(clsname + "::" + iter->second->name);
+        }
+      }
+    }
+  } else {
+    for (ArrayIter iter(names); iter; ++iter) {
+      classes.push_back(iter.second().toString());
+    }
+  }
+}
+
+void ClassInfo::GetSymbolNames(std::vector<String> &classes,
+                               std::vector<String> &functions,
+                               std::vector<String> &constants,
+                               std::vector<String> *clsMethods,
+                               std::vector<String> *clsProperties,
+                               std::vector<String> *clsConstants) {
+  static unsigned int methodSize = 128;
+  static unsigned int propSize   = 128;
+  static unsigned int constSize  = 128;
+
+  if (clsMethods) {
+    clsMethods->reserve(methodSize);
+  }
+  if (clsProperties) {
+    clsProperties->reserve(propSize);
+  }
+  if (clsConstants) {
+    clsConstants->reserve(constSize);
+  }
+
+  GetClassSymbolNames(GetClasses(true), false, classes,
+                      clsMethods, clsProperties, clsConstants);
+  GetClassSymbolNames(GetInterfaces(true), true, classes,
+                      clsMethods, clsProperties, clsConstants);
+
+  if (clsMethods && methodSize < clsMethods->size()) {
+    methodSize = clsMethods->size();
+  }
+  if (clsProperties && propSize < clsProperties->size()) {
+    propSize = clsProperties->size();
+  }
+  if (constSize && constSize < clsConstants->size()) {
+    constSize = clsConstants->size();
+  }
+
+  Array funcs1 = ClassInfo::GetSystemFunctions();
+  Array funcs2 = ClassInfo::GetUserFunctions();
+  functions.reserve(funcs1.size() + funcs2.size());
+  for (ArrayIter iter(funcs1); iter; ++iter) {
+    functions.push_back(iter.second().toString());
+  }
+  for (ArrayIter iter(funcs2); iter; ++iter) {
+    functions.push_back(iter.second().toString());
+  }
+
+  Array consts = GetConstants();
+  constants.reserve(consts.size());
+  for (ArrayIter iter(consts); iter; ++iter) {
+    constants.push_back(iter.first().toString());
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // ClassInfo
 

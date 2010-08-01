@@ -23,7 +23,6 @@
 #include <runtime/eval/parser/scanner.h>
 #include <runtime/eval/parser/parser.h>
 #include <runtime/base/runtime_option.h>
-#include <util/preprocess.h>
 
 namespace HPHP {
 using namespace std;
@@ -292,7 +291,6 @@ Array f_token_get_all(CStrRef source) {
 
   const char *input = source.data();
   istringstream iss(input);
-  stringstream ss;
 
   Eval::Scanner scanner(new ylmm::basic_buffer(iss, false, true),
                         true, false, true);
@@ -311,129 +309,134 @@ Array f_token_get_all(CStrRef source) {
   return res;
 }
 
+#define TOKEN_NAME_ENTRY(number, name, extra) #name
+
 String f_token_name(int64 token) {
-  switch (token) {
-  case 258: return "T_REQUIRE_ONCE";
-  case 259: return "T_REQUIRE";
-  case 260: return "T_EVAL";
-  case 261: return "T_INCLUDE_ONCE";
-  case 262: return "T_INCLUDE";
-  case 263: return "T_LOGICAL_OR";
-  case 264: return "T_LOGICAL_XOR";
-  case 265: return "T_LOGICAL_AND";
-  case 266: return "T_PRINT";
-  case 267: return "T_SR_EQUAL";
-  case 268: return "T_SL_EQUAL";
-  case 269: return "T_XOR_EQUAL";
-  case 270: return "T_OR_EQUAL";
-  case 271: return "T_AND_EQUAL";
-  case 272: return "T_MOD_EQUAL";
-  case 273: return "T_CONCAT_EQUAL";
-  case 274: return "T_DIV_EQUAL";
-  case 275: return "T_MUL_EQUAL";
-  case 276: return "T_MINUS_EQUAL";
-  case 277: return "T_PLUS_EQUAL";
-  case 278: return "T_BOOLEAN_OR";
-  case 279: return "T_BOOLEAN_AND";
-  case 280: return "T_IS_NOT_IDENTICAL";
-  case 281: return "T_IS_IDENTICAL";
-  case 282: return "T_IS_NOT_EQUAL";
-  case 283: return "T_IS_EQUAL";
-  case 284: return "T_IS_GREATER_OR_EQUAL";
-  case 285: return "T_IS_SMALLER_OR_EQUAL";
-  case 286: return "T_SR";
-  case 287: return "T_SL";
-  case 288: return "T_INSTANCEOF";
-  case 289: return "T_UNSET_CAST";
-  case 290: return "T_BOOL_CAST";
-  case 291: return "T_OBJECT_CAST";
-  case 292: return "T_ARRAY_CAST";
-  case 293: return "T_STRING_CAST";
-  case 294: return "T_DOUBLE_CAST";
-  case 295: return "T_INT_CAST";
-  case 296: return "T_DEC";
-  case 297: return "T_INC";
-  case 298: return "T_CLONE";
-  case 299: return "T_NEW";
-  case 300: return "T_EXIT";
-  case 301: return "T_IF";
-  case 302: return "T_ELSEIF";
-  case 303: return "T_ELSE";
-  case 304: return "T_ENDIF";
-  case 305: return "T_LNUMBER";
-  case 306: return "T_DNUMBER";
-  case 307: return "T_STRING";
-  case 308: return "T_STRING_VARNAME";
-  case 309: return "T_VARIABLE";
-  case 310: return "T_NUM_STRING";
-  case 311: return "T_INLINE_HTML";
-  case 312: return "T_CHARACTER";
-  case 313: return "T_BAD_CHARACTER";
-  case 314: return "T_ENCAPSED_AND_WHITESPACE";
-  case 315: return "T_CONSTANT_ENCAPSED_STRING";
-  case 316: return "T_ECHO";
-  case 317: return "T_DO";
-  case 318: return "T_WHILE";
-  case 319: return "T_ENDWHILE";
-  case 320: return "T_FOR";
-  case 321: return "T_ENDFOR";
-  case 322: return "T_FOREACH";
-  case 323: return "T_ENDFOREACH";
-  case 324: return "T_DECLARE";
-  case 325: return "T_ENDDECLARE";
-  case 326: return "T_AS";
-  case 327: return "T_SWITCH";
-  case 328: return "T_ENDSWITCH";
-  case 329: return "T_CASE";
-  case 330: return "T_DEFAULT";
-  case 331: return "T_BREAK";
-  case 332: return "T_CONTINUE";
-  case 333: return "T_FUNCTION";
-  case 334: return "T_CONST";
-  case 335: return "T_RETURN";
-  case 336: return "T_TRY";
-  case 337: return "T_CATCH";
-  case 338: return "T_THROW";
-  case 339: return "T_USE";
-  case 340: return "T_GLOBAL";
-  case 341: return "T_PUBLIC";
-  case 342: return "T_PROTECTED";
-  case 343: return "T_PRIVATE";
-  case 344: return "T_FINAL";
-  case 345: return "T_ABSTRACT";
-  case 346: return "T_STATIC";
-  case 347: return "T_VAR";
-  case 348: return "T_UNSET";
-  case 349: return "T_ISSET";
-  case 350: return "T_EMPTY";
-  case 351: return "T_HALT_COMPILER";
-  case 352: return "T_CLASS";
-  case 353: return "T_INTERFACE";
-  case 354: return "T_EXTENDS";
-  case 355: return "T_IMPLEMENTS";
-  case 356: return "T_OBJECT_OPERATOR";
-  case 357: return "T_DOUBLE_ARROW";
-  case 358: return "T_LIST";
-  case 359: return "T_ARRAY";
-  case 360: return "T_CLASS_C";
-  case 361: return "T_METHOD_C";
-  case 362: return "T_FUNC_C";
-  case 363: return "T_LINE";
-  case 364: return "T_FILE";
-  case 365: return "T_COMMENT";
-  case 366: return "T_DOC_COMMENT";
-  case 367: return "T_OPEN_TAG";
-  case 368: return "T_OPEN_TAG_WITH_ECHO";
-  case 369: return "T_CLOSE_TAG";
-  case 370: return "T_WHITESPACE";
-  case 371: return "T_START_HEREDOC";
-  case 372: return "T_END_HEREDOC";
-  case 373: return "T_DOLLAR_OPEN_CURLY_BRACES";
-  case 374: return "T_CURLY_OPEN";
-  case 375: return "T_PAAMAYIM_NEKUDOTAYIM";
-  default:
-    return "UNKNOWN";
+  static const char *names[] = {
+    TOKEN_NAME_ENTRY(258, T_REQUIRE_ONCE,             RESERVED),
+    TOKEN_NAME_ENTRY(259, T_REQUIRE,                  RESERVED),
+    TOKEN_NAME_ENTRY(260, T_EVAL,                     RESERVED),
+    TOKEN_NAME_ENTRY(261, T_INCLUDE_ONCE,             RESERVED),
+    TOKEN_NAME_ENTRY(262, T_INCLUDE,                  RESERVED),
+    TOKEN_NAME_ENTRY(263, T_LOGICAL_OR,               RESERVED),
+    TOKEN_NAME_ENTRY(264, T_LOGICAL_XOR,              RESERVED),
+    TOKEN_NAME_ENTRY(265, T_LOGICAL_AND,              RESERVED),
+    TOKEN_NAME_ENTRY(266, T_PRINT,                    RESERVED),
+    TOKEN_NAME_ENTRY(267, T_SR_EQUAL,                 RESERVED),
+    TOKEN_NAME_ENTRY(268, T_SL_EQUAL,                 RESERVED),
+    TOKEN_NAME_ENTRY(269, T_XOR_EQUAL,                RESERVED),
+    TOKEN_NAME_ENTRY(270, T_OR_EQUAL,                 RESERVED),
+    TOKEN_NAME_ENTRY(271, T_AND_EQUAL,                RESERVED),
+    TOKEN_NAME_ENTRY(272, T_MOD_EQUAL,                RESERVED),
+    TOKEN_NAME_ENTRY(273, T_CONCAT_EQUAL,             RESERVED),
+    TOKEN_NAME_ENTRY(274, T_DIV_EQUAL,                RESERVED),
+    TOKEN_NAME_ENTRY(275, T_MUL_EQUAL,                RESERVED),
+    TOKEN_NAME_ENTRY(276, T_MINUS_EQUAL,              RESERVED),
+    TOKEN_NAME_ENTRY(277, T_PLUS_EQUAL,               RESERVED),
+    TOKEN_NAME_ENTRY(278, T_BOOLEAN_OR,               RESERVED),
+    TOKEN_NAME_ENTRY(279, T_BOOLEAN_AND,              RESERVED),
+    TOKEN_NAME_ENTRY(280, T_IS_NOT_IDENTICAL,         RESERVED),
+    TOKEN_NAME_ENTRY(281, T_IS_IDENTICAL,             RESERVED),
+    TOKEN_NAME_ENTRY(282, T_IS_NOT_EQUAL,             RESERVED),
+    TOKEN_NAME_ENTRY(283, T_IS_EQUAL,                 RESERVED),
+    TOKEN_NAME_ENTRY(284, T_IS_GREATER_OR_EQUAL,      RESERVED),
+    TOKEN_NAME_ENTRY(285, T_IS_SMALLER_OR_EQUAL,      RESERVED),
+    TOKEN_NAME_ENTRY(286, T_SR,                       RESERVED),
+    TOKEN_NAME_ENTRY(287, T_SL,                       RESERVED),
+    TOKEN_NAME_ENTRY(288, T_INSTANCEOF,               RESERVED),
+    TOKEN_NAME_ENTRY(289, T_UNSET_CAST,               RESERVED),
+    TOKEN_NAME_ENTRY(290, T_BOOL_CAST,                RESERVED),
+    TOKEN_NAME_ENTRY(291, T_OBJECT_CAST,              RESERVED),
+    TOKEN_NAME_ENTRY(292, T_ARRAY_CAST,               RESERVED),
+    TOKEN_NAME_ENTRY(293, T_STRING_CAST,              RESERVED),
+    TOKEN_NAME_ENTRY(294, T_DOUBLE_CAST,              RESERVED),
+    TOKEN_NAME_ENTRY(295, T_INT_CAST,                 RESERVED),
+    TOKEN_NAME_ENTRY(296, T_DEC,                      RESERVED),
+    TOKEN_NAME_ENTRY(297, T_INC,                      RESERVED),
+    TOKEN_NAME_ENTRY(298, T_CLONE,                    RESERVED),
+    TOKEN_NAME_ENTRY(299, T_NEW,                      RESERVED),
+    TOKEN_NAME_ENTRY(300, T_EXIT,                     RESERVED),
+    TOKEN_NAME_ENTRY(301, T_IF,                       RESERVED),
+    TOKEN_NAME_ENTRY(302, T_ELSEIF,                   RESERVED),
+    TOKEN_NAME_ENTRY(303, T_ELSE,                     RESERVED),
+    TOKEN_NAME_ENTRY(304, T_ENDIF,                    RESERVED),
+    TOKEN_NAME_ENTRY(305, T_LNUMBER,                  RESERVED),
+    TOKEN_NAME_ENTRY(306, T_DNUMBER,                  RESERVED),
+    TOKEN_NAME_ENTRY(307, T_STRING,                   RESERVED),
+    TOKEN_NAME_ENTRY(308, T_STRING_VARNAME,           RESERVED),
+    TOKEN_NAME_ENTRY(309, T_VARIABLE,                 RESERVED),
+    TOKEN_NAME_ENTRY(310, T_NUM_STRING,               RESERVED),
+    TOKEN_NAME_ENTRY(311, T_INLINE_HTML,              RESERVED),
+    TOKEN_NAME_ENTRY(312, T_CHARACTER,                RESERVED),
+    TOKEN_NAME_ENTRY(313, T_BAD_CHARACTER,            RESERVED),
+    TOKEN_NAME_ENTRY(314, T_ENCAPSED_AND_WHITESPACE,  RESERVED),
+    TOKEN_NAME_ENTRY(315, T_CONSTANT_ENCAPSED_STRING, RESERVED),
+    TOKEN_NAME_ENTRY(316, T_ECHO,                     RESERVED),
+    TOKEN_NAME_ENTRY(317, T_DO,                       RESERVED),
+    TOKEN_NAME_ENTRY(318, T_WHILE,                    RESERVED),
+    TOKEN_NAME_ENTRY(319, T_ENDWHILE,                 RESERVED),
+    TOKEN_NAME_ENTRY(320, T_FOR,                      RESERVED),
+    TOKEN_NAME_ENTRY(321, T_ENDFOR,                   RESERVED),
+    TOKEN_NAME_ENTRY(322, T_FOREACH,                  RESERVED),
+    TOKEN_NAME_ENTRY(323, T_ENDFOREACH,               RESERVED),
+    TOKEN_NAME_ENTRY(324, T_DECLARE,                  RESERVED),
+    TOKEN_NAME_ENTRY(325, T_ENDDECLARE,               RESERVED),
+    TOKEN_NAME_ENTRY(326, T_AS,                       RESERVED),
+    TOKEN_NAME_ENTRY(327, T_SWITCH,                   RESERVED),
+    TOKEN_NAME_ENTRY(328, T_ENDSWITCH,                RESERVED),
+    TOKEN_NAME_ENTRY(329, T_CASE,                     RESERVED),
+    TOKEN_NAME_ENTRY(330, T_DEFAULT,                  RESERVED),
+    TOKEN_NAME_ENTRY(331, T_BREAK,                    RESERVED),
+    TOKEN_NAME_ENTRY(332, T_CONTINUE,                 RESERVED),
+    TOKEN_NAME_ENTRY(333, T_FUNCTION,                 RESERVED),
+    TOKEN_NAME_ENTRY(334, T_CONST,                    RESERVED),
+    TOKEN_NAME_ENTRY(335, T_RETURN,                   RESERVED),
+    TOKEN_NAME_ENTRY(336, T_TRY,                      RESERVED),
+    TOKEN_NAME_ENTRY(337, T_CATCH,                    RESERVED),
+    TOKEN_NAME_ENTRY(338, T_THROW,                    RESERVED),
+    TOKEN_NAME_ENTRY(339, T_USE,                      RESERVED),
+    TOKEN_NAME_ENTRY(340, T_GLOBAL,                   RESERVED),
+    TOKEN_NAME_ENTRY(341, T_PUBLIC,                   RESERVED),
+    TOKEN_NAME_ENTRY(342, T_PROTECTED,                RESERVED),
+    TOKEN_NAME_ENTRY(343, T_PRIVATE,                  RESERVED),
+    TOKEN_NAME_ENTRY(344, T_FINAL,                    RESERVED),
+    TOKEN_NAME_ENTRY(345, T_ABSTRACT,                 RESERVED),
+    TOKEN_NAME_ENTRY(346, T_STATIC,                   RESERVED),
+    TOKEN_NAME_ENTRY(347, T_VAR,                      RESERVED),
+    TOKEN_NAME_ENTRY(348, T_UNSET,                    RESERVED),
+    TOKEN_NAME_ENTRY(349, T_ISSET,                    RESERVED),
+    TOKEN_NAME_ENTRY(350, T_EMPTY,                    RESERVED),
+    TOKEN_NAME_ENTRY(351, T_HALT_COMPILER,            RESERVED),
+    TOKEN_NAME_ENTRY(352, T_CLASS,                    RESERVED),
+    TOKEN_NAME_ENTRY(353, T_INTERFACE,                RESERVED),
+    TOKEN_NAME_ENTRY(354, T_EXTENDS,                  RESERVED),
+    TOKEN_NAME_ENTRY(355, T_IMPLEMENTS,               RESERVED),
+    TOKEN_NAME_ENTRY(356, T_OBJECT_OPERATOR,          RESERVED),
+    TOKEN_NAME_ENTRY(357, T_DOUBLE_ARROW,             RESERVED),
+    TOKEN_NAME_ENTRY(358, T_LIST,                     RESERVED),
+    TOKEN_NAME_ENTRY(359, T_ARRAY,                    RESERVED),
+    TOKEN_NAME_ENTRY(360, T_CLASS_C,                  RESERVED),
+    TOKEN_NAME_ENTRY(361, T_METHOD_C,                 RESERVED),
+    TOKEN_NAME_ENTRY(362, T_FUNC_C,                   RESERVED),
+    TOKEN_NAME_ENTRY(363, T_LINE,                     RESERVED),
+    TOKEN_NAME_ENTRY(364, T_FILE,                     RESERVED),
+    TOKEN_NAME_ENTRY(365, T_COMMENT,                  RESERVED),
+    TOKEN_NAME_ENTRY(366, T_DOC_COMMENT,              RESERVED),
+    TOKEN_NAME_ENTRY(367, T_OPEN_TAG,                 RESERVED),
+    TOKEN_NAME_ENTRY(368, T_OPEN_TAG_WITH_ECHO,       RESERVED),
+    TOKEN_NAME_ENTRY(369, T_CLOSE_TAG,                RESERVED),
+    TOKEN_NAME_ENTRY(370, T_WHITESPACE,               RESERVED),
+    TOKEN_NAME_ENTRY(371, T_START_HEREDOC,            RESERVED),
+    TOKEN_NAME_ENTRY(372, T_END_HEREDOC,              RESERVED),
+    TOKEN_NAME_ENTRY(373, T_DOLLAR_OPEN_CURLY_BRACES, RESERVED),
+    TOKEN_NAME_ENTRY(374, T_CURLY_OPEN,               RESERVED),
+    TOKEN_NAME_ENTRY(375, T_PAAMAYIM_NEKUDOTAYIM,     RESERVED),
+  };
+
+  if (token >= 258 && token <= 375) {
+    return names[token - 258];
   }
+  return "UNKNOWN";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

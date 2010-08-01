@@ -55,7 +55,9 @@ public:
     IsNothing    = (1 << 13), // need a non-zero number for const char * maps
     HasDocComment= (1 << 14), //                      x        x
 
-    IsLazyInit   = (1 << 15)  //    x
+    IsLazyInit   = (1 << 15), //    x
+
+    HipHopSpecific=(1 << 16),
   };
 
   struct ConstantInfo {
@@ -182,6 +184,21 @@ public:
    */
   static void GetClassProperties(PropertyMap &props, const char *classname);
   static void GetClassProperties(PropertyVec &props, const char *classname);
+
+  /**
+   * Return lists of names for auto-complete purposes.
+   */
+  static void GetClassSymbolNames(CArrRef names, bool interface,
+                                  std::vector<String> &classes,
+                                  std::vector<String> *clsMethods,
+                                  std::vector<String> *clsProperties,
+                                  std::vector<String> *clsConstants);
+  static void GetSymbolNames(std::vector<String> &classes,
+                             std::vector<String> &functions,
+                             std::vector<String> &constants,
+                             std::vector<String> *clsMethods,
+                             std::vector<String> *clsProperties,
+                             std::vector<String> *clsConstants);
 
   static void SetHook(ClassInfoHook *hook) { s_hook = hook; }
 

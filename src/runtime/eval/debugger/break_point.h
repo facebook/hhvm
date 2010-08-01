@@ -36,7 +36,8 @@ enum InterruptType {
 class InterruptSite {
 public:
   InterruptSite(FrameInjection *frame, CObjRef e = Object())
-      : m_frame(frame), m_exception(e), m_function(NULL), m_file_strlen(-1) {
+      : m_frame(frame), m_exception(e), m_function(NULL), m_file_strlen(-1),
+        m_jumping(false) {
     ASSERT(m_frame);
   }
 
@@ -51,6 +52,9 @@ public:
 
   std::string &url() const { return m_url;}
 
+  bool isJumping() const { return m_jumping;}
+  void setJumping() { m_jumping = true;}
+
 private:
   FrameInjection *m_frame;
   Object m_exception;
@@ -60,10 +64,14 @@ private:
   mutable const char *m_function;
   mutable int m_file_strlen;
   mutable std::string m_url;
+
+  // jump instruction
+  bool m_jumping;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
+DECLARE_BOOST_TYPES(DFunctionInfo);
 DECLARE_BOOST_TYPES(BreakPointInfo);
 class BreakPointInfo {
 public:
@@ -74,6 +82,8 @@ public:
   };
 
   static const char *GetInterruptName(InterruptType interrupt);
+  static bool MatchFile(const char *haystack, int haystack_len,
+                        const std::string &needle);
 
 public:
   BreakPointInfo() {} // for thrift
@@ -93,6 +103,7 @@ public:
   std::string state(bool padding) const;
   std::string desc() const;
   std::string site() const;
+  std::string regex(const std::string &name) const;
 
   void sendImpl(DebuggerThriftBuffer &thrift);
   void recvImpl(DebuggerThriftBuffer &thrift);
@@ -112,9 +123,11 @@ public:
   int32 m_line2;
 
   // class::func()
-  std::string m_namespace;
-  std::string m_class;
-  std::string m_function;
+  DFunctionInfoPtrVec m_funcs;
+
+  std::string getNamespace() const;
+  std::string getClass() const;
+  std::string getFunction() const;
 
   // URL
   std::string m_url;
@@ -133,10 +146,12 @@ public:
   std::string m_exceptionObject;
 
 private:
+  // exception class
+  std::string m_namespace;
+  std::string m_class;
+
   static bool Match(const char *haystack, int haystack_len,
                     const std::string &needle, bool regex, bool exact);
-
-  std::string regex(const std::string &name) const;
 
   std::string descBreakPointReached() const;
   std::string descExceptionThrown() const;
@@ -148,6 +163,7 @@ private:
   bool checkException(CObjRef e);
   bool checkUrl(std::string &url);
   bool checkLines(int line);
+  bool checkStack(InterruptSite &site);
   bool checkFrame(FrameInjection *frame);
   bool checkClause();
 };

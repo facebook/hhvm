@@ -24,7 +24,10 @@ namespace HPHP { namespace Eval {
 
 bool CmdZend::help(DebuggerClient *client) {
   client->helpTitle("Zend Command");
-  client->help("[z]end: running the most recent code snippet in Zend PHP");
+  client->helpCmds(
+    "[z]end", "running the most recent code snippet in Zend PHP",
+    NULL
+  );
   client->helpBody(
     "This is mainly for comparing results from PHP vs. HipHop. After you type "
     "in some PHP code, it will be evaluated immediately in HipHop. Then you "

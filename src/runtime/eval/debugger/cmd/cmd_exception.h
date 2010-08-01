@@ -29,6 +29,7 @@ public:
     m_type = KindOfException;
   }
 
+  virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
   virtual bool onClient(DebuggerClient *client);
 };

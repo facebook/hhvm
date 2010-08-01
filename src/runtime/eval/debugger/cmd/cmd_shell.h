@@ -27,6 +27,7 @@ class CmdShell : public DebuggerCommand {
 public:
   CmdShell() : DebuggerCommand(KindOfShell) {}
 
+  virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
 
   virtual bool onClient(DebuggerClient *client);

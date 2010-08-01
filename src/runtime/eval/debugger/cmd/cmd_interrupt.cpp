@@ -16,6 +16,7 @@
 
 #include <runtime/eval/debugger/cmd/cmd_interrupt.h>
 #include <runtime/eval/debugger/cmd/cmd_break.h>
+#include <runtime/eval/debugger/cmd/cmd_print.h>
 
 using namespace std;
 using namespace boost;
@@ -27,6 +28,8 @@ void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_interrupt);
   thrift.write(m_program);
+  thrift.write(m_threadId);
+  thrift.write(m_pendingJump);
   if (m_site) {
     thrift.write(true);
     thrift.write(m_site->getFile());
@@ -40,7 +43,7 @@ void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
     } else {
       thrift.write(e->o_getClassName());
     }
-    thrift.write(DebuggerClient::PrintVariable(e));
+    thrift.write(DebuggerClient::FormatVariable(e));
   } else {
     thrift.write(false);
   }
@@ -51,23 +54,81 @@ void CmdInterrupt::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_interrupt);
   thrift.read(m_program);
+  thrift.read(m_threadId);
+  thrift.read(m_pendingJump);
   m_bpi = BreakPointInfoPtr(new BreakPointInfo());
   bool site; thrift.read(site);
   if (site) {
     thrift.read(m_bpi->m_file);
     thrift.read(m_bpi->m_line1);
-    thrift.read(m_bpi->m_namespace);
-    thrift.read(m_bpi->m_class);
-    thrift.read(m_bpi->m_function);
+    DFunctionInfoPtr func(new DFunctionInfo());
+    thrift.read(func->m_namespace);
+    thrift.read(func->m_class);
+    thrift.read(func->m_function);
+    m_bpi->m_funcs.push_back(func);
     thrift.read(m_bpi->m_exceptionClass);
     thrift.read(m_bpi->m_exceptionObject);
   }
   BreakPointInfo::RecvImpl(m_matched, thrift);
 }
 
+std::string CmdInterrupt::desc() const {
+  switch (m_interrupt) {
+    case SessionStarted:
+      if (!m_program.empty()) {
+        return m_program + " loaded.";
+      }
+      return "Program loaded.";
+    case SessionEnded:
+      if (!m_program.empty()) {
+        return m_program + " exited normally.";
+      }
+      return "Program exited normally.";
+    case RequestStarted:
+      if (!m_program.empty()) {
+        return m_program + " started.";
+      }
+      return "Web request started.";
+    case RequestEnded:
+      if (!m_program.empty()) {
+        return m_program + " ended.";
+      }
+      return "Web request ended.";
+    case PSPEnded:
+      if (!m_program.empty()) {
+        return "Post-Send Processing for " + m_program + " was ended.";
+      }
+      return "Post-Send Processing was ended.";
+    case BreakPointReached:
+    case ExceptionThrown: {
+      if (m_bpi) {
+        if (m_interrupt == BreakPointReached) {
+          return m_bpi->site();
+        }
+        return "Throwing " + m_bpi->m_exceptionClass + " " + m_bpi->site();
+      }
+      return "Breakpoint reached.";
+    }
+  }
+
+  ASSERT(false);
+  return "";
+}
+
 bool CmdInterrupt::onClient(DebuggerClient *client) {
-  client->setCurrentLocation(m_bpi);
+  client->setCurrentLocation(m_threadId, m_bpi);
   client->setMatchedBreakPoints(m_matched);
+
+  switch (m_interrupt) {
+    case SessionEnded:
+    case RequestEnded:
+    case PSPEnded:
+      if (m_pendingJump) {
+        client->error("Your jump point cannot be reached. You may only jump "
+                      "to certain parallel or outer execution points.");
+      }
+      break;
+  }
 
   switch (m_interrupt) {
     case SessionStarted:
@@ -134,7 +195,7 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
         }
       }
       if (toggled) {
-        return CmdBreak().update(client);
+        CmdBreak().update(client);
       }
       if (!found) {
         client->info("Break %s", m_bpi->site().c_str());
@@ -142,12 +203,27 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
       break;
     }
   }
+
+  // watches
+  switch (m_interrupt) {
+    case SessionStarted:
+    case RequestStarted:
+      break;
+    default: {
+      DebuggerClient::WatchPtrVec &watches = client->getWatches();
+      for (int i = 0; i < (int)watches.size(); i++) {
+        if (i > 0) client->output("");
+        client->info("Watch %d: %s =", i, watches[i]->second.c_str());
+        CmdPrint().processWatch(client, watches[i]->first, watches[i]->second);
+      }
+    }
+  }
+
   return true;
 }
 
 bool CmdInterrupt::onServer(DebuggerProxy *proxy) {
-  proxy->send(this);
-  return true;
+  return proxy->send(this);
 }
 
 bool CmdInterrupt::shouldBreak(const BreakPointInfoPtrVec &bps) {
@@ -165,7 +241,9 @@ bool CmdInterrupt::shouldBreak(const BreakPointInfoPtrVec &bps) {
         for (unsigned int i = 0; i < bps.size(); i++) {
           if (bps[i]->m_state != BreakPointInfo::Disabled &&
               bps[i]->match((InterruptType)m_interrupt, *m_site)) {
-            m_matched.push_back(bps[i]);
+            BreakPointInfoPtr bp(new BreakPointInfo());
+            *bp = *bps[i]; // make a copy
+            m_matched.push_back(bp);
           }
         }
       }

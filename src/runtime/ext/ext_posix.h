@@ -66,9 +66,11 @@ Variant f_posix_getgrnam(CStrRef name);
 Variant f_posix_getgroups();
 
 inline Variant f_posix_getlogin() {
-  char *p = getlogin();
-  if (p == NULL) return false;
-  return String(p, CopyString);
+  char buf[L_cuserid];
+  if (!getlogin_r(buf, sizeof(buf) - 1)) {
+    return String(buf, CopyString);
+  }
+  return false;
 }
 
 inline Variant f_posix_getpgid(int pid) {

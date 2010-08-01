@@ -22,6 +22,7 @@
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/fiber_safe.h>
+#include <runtime/base/debuggable.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,7 +40,7 @@ typedef std::map<std::string, std::string, stdltistr> CookieMap;
  * Note that one transport object is created for each request, and
  * one transport is ONLY accessed from one single thread.
  */
-class Transport : public FiberSafe {
+class Transport : public FiberSafe, public IDebuggable {
 public:
   enum Method {
     UnknownMethod,
@@ -103,6 +104,7 @@ public:
    */
   virtual Method getMethod() = 0;
   virtual const char *getExtendedMethod() { return NULL;}
+  const char *getMethodName();
 
   /**
    * What version of HTTP was the request?
@@ -284,6 +286,10 @@ public:
 
   void setThreadType(ThreadType type) { m_threadType = type;}
   ThreadType getThreadType() const { return m_threadType;}
+  const char *getThreadTypeName() const;
+
+  // implementing IDebuggable
+  virtual void debuggerInfo(InfoVec &info);
 
 protected:
   /**

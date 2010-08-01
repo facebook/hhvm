@@ -53,6 +53,20 @@ Transport::~Transport() {
   }
 }
 
+const char *Transport::getMethodName() {
+  switch (getMethod()) {
+    case GET:  return "GET";
+    case HEAD: return "HEAD";
+    case POST: {
+      const char *m = getExtendedMethod();
+      return m ? m : "POST";
+    }
+    default:
+      break;
+    }
+  return "";
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // url
 
@@ -697,6 +711,30 @@ bool Transport::moveUploadedFile(CStrRef filename, CStrRef destination) {
   Logger::Verbose("Successfully moved uploaded file %s to %s.",
                   filename.c_str(), dest.c_str());
   return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// IDebuggable
+
+const char *Transport::getThreadTypeName() const {
+  switch (m_threadType) {
+    case RequestThread: return "REQUEST";
+    case PageletThread: return "PAGELET";
+    case XboxThread:    return "XBOX";
+    case RpcThread:     return "RPC";
+  }
+  return "(unknown)";
+}
+
+void Transport::debuggerInfo(InfoVec &info) {
+  Add(info, "Thread Type", getThreadTypeName());
+  Add(info, "URL",         getCommand());
+  Add(info, "HTTP",        getHTTPVersion());
+  Add(info, "Method",      getMethodName());
+  if (getMethod() == Transport::POST) {
+    int size; getPostData(size);
+    Add(info, "Post Data", FormatSize(size));
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

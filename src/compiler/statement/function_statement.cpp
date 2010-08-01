@@ -143,17 +143,20 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
   if (outputFFI(cg, ar)) return;
 
   if (cg.getContext() == CodeGenerator::NoContext) {
+    string rname = cg.formatLabel(m_name);
     if (funcScope->isRedeclaring()) {
       cg_printf("g->%s%s = %s%s;\n",
-                Option::InvokePrefix, cg.formatLabel(m_name).c_str(),
+                Option::InvokePrefix, rname.c_str(),
                 Option::InvokePrefix, fname.c_str());
       cg_printf("g->%s%s_few_args = %s%s_few_args;\n",
-                Option::InvokePrefix, cg.formatLabel(m_name).c_str(),
+                Option::InvokePrefix, rname.c_str(),
                 Option::InvokePrefix, fname.c_str());
     }
     if (funcScope->isVolatile()) {
-      cg_printf("g->declareFunction(\"%s\");\n",
-                m_name.c_str());
+      cg_printf("g->declareFunctionLit(");
+      cg_printString(m_name, ar);
+      cg_printf(");\n");
+      cg_printf("g->FVF(%s) = true;\n", rname.c_str());
     }
     return;
   }

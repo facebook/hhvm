@@ -324,6 +324,9 @@ do { \
 #define END_CDECS(c) }; bool cdec[c];
 #define CDEC(s) cdec[GlobalVariables::cdec_##s]
 
+// Function declared flags
+#define FVF_PREFIX "fvf_"
+#define FVF(s) fvf_##s
 ///////////////////////////////////////////////////////////////////////////////
 // code instrumentation or injections
 

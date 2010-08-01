@@ -38,6 +38,14 @@ void Globals::declareFunction(const char *name) {
   }
 }
 
+void Globals::declareFunctionLit(CStrRef name) {
+  if (m_volatileFunctions.exists(name)) {
+    raise_error("Cannot redeclare %s()", name.data());
+  } else {
+    m_volatileFunctions.set(name, true);
+  }
+}
+
 bool Globals::defined(const char *name) {
   return m_dynamicConstants.exists(name);
 }

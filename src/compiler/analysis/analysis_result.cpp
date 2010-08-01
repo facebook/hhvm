@@ -1974,19 +1974,27 @@ void AnalysisResult::outputCPPSystem() {
   outputCPPScalarArrays(true);
 }
 
-void AnalysisResult::outputCPPRedeclaredFunctionDecl(CodeGenerator &cg) {
+void AnalysisResult::outputCPPRedeclaredFunctionDecl(CodeGenerator &cg,
+                                                     bool constructor) {
+  const char *fmt = constructor ? ",\n  %s%s(false)" : "bool %s%s;\n";
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
          m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
-    const char *name = iter->first.c_str();
-    if (iter->second[0]->isRedeclaring()) {
-      cg_printf("Variant (*%s%s)(CArrRef params);\n",
-                Option::InvokePrefix, name);
-      cg_printf("Variant (*%s%s_few_args)(int count",
-                Option::InvokePrefix, name);
-      for (int i = 0; i < Option::InvokeFewArgsCount; i++) {
-        cg_printf(", CVarRef a%d", i);
+    if (iter->second[0]->isVolatile()) {
+      std::string fname = cg.formatLabel(iter->first);
+      const char *name = fname.c_str();
+      if (!constructor && iter->second[0]->isRedeclaring()) {
+        cg_printf("Variant (*%s%s)(CArrRef params);\n",
+                  Option::InvokePrefix, name);
+        cg_printf("Variant (*%s%s_few_args)(int count",
+                  Option::InvokePrefix, name);
+        for (int i = 0; i < Option::InvokeFewArgsCount; i++) {
+          cg_printf(", CVarRef a%d", i);
+        }
+        cg_printf(");\n");
       }
-      cg_printf(");\n");
+      if (strcmp(name, "__autoload")) {
+        cg_printf(fmt, FVF_PREFIX, name);
+      }
     }
   }
 }
@@ -1995,7 +2003,8 @@ void AnalysisResult::outputCPPRedeclaredFunctionImpl(CodeGenerator &cg) {
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
          m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
     if (iter->second[0]->isRedeclaring()) {
-      const char *name = iter->first.c_str();
+      std::string fname = cg.formatLabel(iter->first);
+      const char *name = fname.c_str();
       cg_printf("%s%s = invoke_failed_%s;\n", Option::InvokePrefix,
                 name, name);
     }

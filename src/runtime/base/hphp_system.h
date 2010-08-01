@@ -48,8 +48,10 @@ namespace HPHP {
 
 class Globals : public LVariableTable {
 public:
+  Globals() : FVF(__autoload)(false) {}
   CVarRef declareConstant(const char *name, Variant &constant, CVarRef value);
   void declareFunction(const char *name);
+  void declareFunctionLit(CStrRef name);
   bool defined(const char *name);
   Variant getConstant(const char *name);
   Array getDynamicConstants() const;
@@ -75,7 +77,7 @@ public:
   virtual Array getDefinedVars();
 public:
   Variant __lvalProxy;
-
+  bool FVF(__autoload);
 private:
   Array m_dynamicConstants;  // declared constants
   Array m_volatileFunctions; // declared functions

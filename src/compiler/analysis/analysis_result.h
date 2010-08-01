@@ -207,7 +207,7 @@ public:
   void outputCPPSystemImplementations(CodeGenerator &cg);
   void outputCPPFileRunDecls(CodeGenerator &cg);
   void outputCPPFileRunImpls(CodeGenerator &cg);
-  void outputCPPRedeclaredFunctionDecl(CodeGenerator &cg);
+  void outputCPPRedeclaredFunctionDecl(CodeGenerator &cg, bool constructor);
   void outputCPPRedeclaredFunctionImpl(CodeGenerator &cg);
   void outputCPPRedeclaredClassDecl(CodeGenerator &cg);
   void outputCPPRedeclaredClassImpl(CodeGenerator &cg);

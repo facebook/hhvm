@@ -692,19 +692,35 @@ void checkClassExists(CStrRef name, Globals *g, bool nothrow /* = false */) {
     throw_fatal(msg.c_str());
   }
 }
-void checkClassExists(CStrRef name, bool declared,
+
+bool checkClassExists(CStrRef name, const bool *declared, bool autoloadExists,
                       bool nothrow /* = false */) {
-  if (declared) return;
-  if (function_exists("__autoload")) {
+  if (*declared) return true;
+  if (autoloadExists) {
     invoke("__autoload", CREATE_VECTOR1(name), -1, true, false);
   }
-  if (nothrow) return;
-  Globals *g = (Globals*)get_global_variables();
-  if (!g->class_exists(name)) {
+  if (!*declared) {
+    if (nothrow) return false;
     string msg = "unknown class ";
     msg += name.c_str();
     throw_fatal(msg.c_str());
   }
+  return true;
+}
+
+bool checkInterfaceExists(CStrRef name, const bool *declared,
+                          bool autoloadExists, bool nothrow /* = false */) {
+  if (*declared) return true;
+  if (autoloadExists) {
+    invoke("__autoload", CREATE_VECTOR1(name), -1, true, false);
+  }
+  if (!*declared) {
+    if (nothrow) return false;
+    string msg = "unknown interface ";
+    msg += name.c_str();
+    throw_fatal(msg.c_str());
+  }
+  return true;
 }
 
 Variant &get_static_property_lval(const char *s, const char *prop) {

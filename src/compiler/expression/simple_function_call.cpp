@@ -636,7 +636,11 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
             FunctionScopePtr func = ar->findFunction(lname);
             if (!func) {
               return CONSTANT("false");
-            } else if (!func->isVolatile()) {
+            }
+            if (func->isUserFunction()) {
+              func->setVolatile();
+            }
+            if (!func->isVolatile()) {
               return CONSTANT("true");
             }
           }
@@ -648,9 +652,9 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
           for (ClassScopePtrVec::const_iterator it = classes.begin();
                it != classes.end(); ++it) {
             ClassScopePtr cls = *it;
+            if (cls->isUserClass()) cls->setVolatile();
             if (cls->isInterface()) {
               interfaceFound = true;
-              break;
             }
           }
           if (!interfaceFound) return CONSTANT("false");
@@ -665,9 +669,9 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
           for (ClassScopePtrVec::const_iterator it = classes.begin();
                it != classes.end(); ++it) {
             ClassScopePtr cls = *it;
+            if (cls->isUserClass()) cls->setVolatile();
             if (!cls->isInterface()) {
               classFound = true;
-              break;
             }
           }
           if (!classFound) return CONSTANT("false");
@@ -973,20 +977,21 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
     } else {
       int paramCount = m_params ? m_params->getCount() : 0;
       if (m_name == "get_class" && ar->getClassScope() && paramCount == 0) {
-        cg_printf("(\"%s\"", ar->getClassScope()->getOriginalName().c_str());
+        cg_printf("(");
+        cg_printString(ar->getClassScope()->getOriginalName(), ar);
       } else if (m_name == "get_parent_class" && ar->getClassScope() &&
                  paramCount == 0) {
         const std::string parentClass = ar->getClassScope()->getParent();
+        cg_printf("(");
         if (!parentClass.empty()) {
-          cg_printf("(\"%s\"", ar->getClassScope()->getParent().c_str());
+          cg_printString(ar->getClassScope()->getParent(), ar);
         } else {
-          cg_printf("(false");
+          cg_printf("false");
         }
       } else {
         if (m_noPrefix) {
           cg_printf("%s(", cg.formatLabel(m_name).c_str());
-        }
-        else {
+        } else {
           cg_printf("%s%s(",
                     m_builtinFunction ? Option::BuiltinFunctionPrefix :
                     Option::FunctionPrefix, cg.formatLabel(m_name).c_str());
@@ -1183,48 +1188,75 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
           }
         }
         if (literalString) {
+          const std::string &lname = Util::toLower(symbol);
           switch (m_type) {
           case FunctionExistsFunction:
             {
-              const std::string &lname = Util::toLower(symbol);
               bool dynInvoke = Option::DynamicInvokeFunctions.find(lname) !=
                 Option::DynamicInvokeFunctions.end();
               if (!dynInvoke) {
                 FunctionScopePtr func = ar->findFunction(lname);
                 if (func) {
-                  if (!func->isDynamic()) {
-                    if (func->isRedeclaring()) {
-                      const char *name = func->getName().c_str();
-                      cg_printf("(%s->%s%s != invoke_failed_%s)",
-                                cg.getGlobals(ar), Option::InvokePrefix,
-                                name, name);
-                      break;
-                    }
-                    cg_printf("true");
+                  if (func->isVolatile()) {
+                    cg_printf("%s->FVF(%s)",
+                              cg.getGlobals(ar),
+                              cg.formatLabel(lname).c_str());
                     break;
                   }
+                  cg_printf("true");
+                  break;
                 } else {
                   cg_printf("false");
                   break;
                 }
               }
-              cg_printf("f_function_exists(\"%s\")", lname.c_str());
+              cg_printf("f_function_exists(");
+              cg_printString(lname, ar);
+              cg_printf(")");
             }
             break;
           case ClassExistsFunction:
-            {
-              // All the definite cases should have been resolved in
-              // postOptimize().
-              cg_printf("f_class_exists(\"%s\")",
-                        Util::toLower(symbol).c_str());
-            }
-            break;
           case InterfaceExistsFunction:
             {
-              // All the definite cases should have been resolved in
-              // postOptimize().
-              cg_printf("f_interface_exists(\"%s\")",
-                        Util::toLower(symbol).c_str());
+              ClassScopePtrVec classes = ar->findClasses(Util::toLower(symbol));
+              int found = 0;
+              bool foundOther = false;
+              for (ClassScopePtrVec::const_iterator it = classes.begin();
+                   it != classes.end(); ++it) {
+                ClassScopePtr cls = *it;
+                if (cls->isInterface() == (m_type == InterfaceExistsFunction)) {
+                  found += cls->isVolatile() ? 2 : 1;
+                } else {
+                  foundOther = true;
+                }
+              }
+
+              if (!found) {
+                cg_printf("false");
+              } else if (!foundOther) {
+                if (found == 1) {
+                  cg_printf("true");
+                } else {
+                  if (m_type == ClassExistsFunction) {
+                    cg_printf("checkClassExists(");
+                  } else {
+                    cg_printf("checkInterfaceExists(");
+                  }
+                  cg_printString(symbol, ar);
+                  cg_printf(", &%s->CDEC(%s), %s->FVF(__autoload), true)",
+                            cg.getGlobals(ar),
+                            cg.formatLabel(lname).c_str(),
+                            cg.getGlobals(ar));
+                }
+              } else {
+                if (m_type == ClassExistsFunction) {
+                  cg_printf("f_class_exists(");
+                } else {
+                  cg_printf("f_interface_exists(");
+                }
+                cg_printString(lname, ar);
+                cg_printf(")");
+              }
             }
             break;
           default:

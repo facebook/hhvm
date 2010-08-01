@@ -68,6 +68,10 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
     m_returnType = Type::Variant;
   }
 
+  if (!strcasecmp(name.c_str(), "__autoload")) {
+    setVolatile();
+  }
+
   // FileScope's flags are from parser, but VariableTable has more flags
   // coming from type inference phase. So we are tranferring these two
   // flags just for better modularization between FileScope and VariableTable.

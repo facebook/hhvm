@@ -766,7 +766,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   }
 
   cg.printSection("Redeclared Functions");
-  ar->outputCPPRedeclaredFunctionDecl(cg);
+  ar->outputCPPRedeclaredFunctionDecl(cg, false);
 
   cg.printSection("Redeclared Classes");
   ar->outputCPPRedeclaredClassDecl(cg);
@@ -884,6 +884,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
   }
   ar->outputCPPClassStaticInitializerFlags(cg, true);
   ar->outputCPPFileRunImpls(cg);
+  ar->outputCPPRedeclaredFunctionDecl(cg, true);
 
   cg_indentBegin(" {\n");
 

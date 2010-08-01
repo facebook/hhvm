@@ -1359,10 +1359,13 @@ void ClassScope::OutputVolatileCheckBegin(CodeGenerator &cg,
                                           AnalysisResultPtr ar,
                                           const string &origName) {
   string lwrName(Util::toLower(origName));
-  cg_printf("(checkClassExists(String(\"%s\", %d, AttachLiteral), "
-            "%s->CDEC(%s)), (", origName.c_str(), origName.size(),
-            cg.getGlobals(ar), cg.formatLabel(lwrName).c_str());
+  cg_printf("(checkClassExists(");
+  cg_printString(origName, ar);
+  cg_printf(", &%s->CDEC(%s), %s->FVF(__autoload)), (",
+            cg.getGlobals(ar), cg.formatLabel(lwrName).c_str(),
+            cg.getGlobals(ar));
 }
+
 void ClassScope::OutputVolatileCheckEnd(CodeGenerator &cg) {
   cg_printf("))");
 }

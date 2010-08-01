@@ -729,7 +729,10 @@ bool function_exists(CStrRef function_name);
  */
 class Globals;
 void checkClassExists(CStrRef name, Globals *g, bool nothrow = false);
-void checkClassExists(CStrRef name, bool declared, bool nothrow = false);
+bool checkClassExists(CStrRef name, const bool *declared, bool autoloadExists,
+                      bool nothrow = false);
+bool checkInterfaceExists(CStrRef name, const bool *declared,
+                          bool autoloadExists, bool nothrow = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

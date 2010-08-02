@@ -160,15 +160,18 @@ void NewObjectExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void NewObjectExpression::preOutputStash(CodeGenerator &cg,
                                          AnalysisResultPtr ar, int state) {
   if (!m_receiverTemp.empty()) {
-    bool unused = isUnused();
-    setUnused(true);
-    outputCPPImpl(cg, ar);
-    setUnused(unused);
-    setCPPTemp(m_receiverTemp);
-    cg_printf(";\n");
-  } else {
-    Expression::preOutputStash(cg, ar, state);
+    TypePtr e = getExpectedType();
+    if (!e || !Type::IsCastNeeded(ar, getActualType(), e)) {
+      bool unused = isUnused();
+      setUnused(true);
+      outputCPPImpl(cg, ar);
+      setUnused(unused);
+      setCPPTemp(m_receiverTemp);
+      cg_printf(";\n");
+      return;
+    }
   }
+  Expression::preOutputStash(cg, ar, state);
 }
 
 void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,

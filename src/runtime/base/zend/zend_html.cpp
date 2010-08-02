@@ -368,6 +368,9 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
    *    it may not save that much.
    */
   char *ret = (char *)malloc(len * 6 + 1);
+  if (!ret) {
+    return NULL;
+  }
   char *q = ret;
   for (const char *p = input; *p; p++) {
     char c = *p;

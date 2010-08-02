@@ -24,10 +24,10 @@
 
 namespace HPHP {
 
+IMPLEMENT_REQUEST_LOCAL(IntlError, s_intl_error);
+
 #define UCHARS(len) ((len) / sizeof(UChar))
 #define UBYTES(len) ((len) * sizeof(UChar))
-
-static IMPLEMENT_THREAD_LOCAL(UErrorCode, s_errcode);
 
 static Variant collator_convert_string_to_number_if_possible(CVarRef str);
 
@@ -280,6 +280,33 @@ static DataType collator_is_numeric(UChar *str, int length, int64 *lval,
   return KindOfNull;
 }
 
+static String intl_convert_str_utf8_to_utf16(CStrRef utf8_str,
+                                             UErrorCode * status) {
+  UChar* ustr = NULL;
+  int ustr_len = 0;
+  intl_convert_utf8_to_utf16(&ustr, &ustr_len,
+                             utf8_str.data(), utf8_str.length(),
+                             status);
+  if (U_FAILURE(*status)) {
+    return (const char *)(L"");
+  }
+  return String((char*)ustr, UBYTES(ustr_len), AttachString);
+}
+
+static String intl_convert_str_utf16_to_utf8(CStrRef utf16_str,
+                                             UErrorCode * status) {
+  char* str = NULL;
+  int str_len = 0;
+  intl_convert_utf16_to_utf8(&str, &str_len,
+                             (UChar*)(utf16_str.data()),
+                             UCHARS(utf16_str.length()),
+                             status);
+  if (U_FAILURE(*status)) {
+    return "";
+  }
+  return String(str, str_len, AttachString);
+}
+
 static Variant collator_convert_string_to_number(CVarRef str) {
   Variant num = collator_convert_string_to_number_if_possible(str);
   if (num.same(false)) {
@@ -308,37 +335,6 @@ static Variant collator_convert_string_to_number_if_possible(CVarRef str) {
   return false;
 }
 
-static String collator_convert_str_utf16_to_utf8(CStrRef utf16_str,
-                                                 UErrorCode *status) {
-  char* str = NULL;
-  int str_len = 0;
-
-  /* Convert to utf8 then. */
-  intl_convert_utf16_to_utf8(&str, &str_len,
-                             (UChar*)(utf16_str.data()),
-                             UCHARS(utf16_str.length()),
-                             status);
-  if (U_FAILURE(*status)) {
-    raise_notice("Error converting utf16 to utf8");
-  }
-  return String(str, str_len, AttachString);
-}
-
-static String collator_convert_str_utf8_to_utf16(CStrRef utf8_str,
-                                                 UErrorCode *status) {
-  UChar* ustr = NULL;
-  int ustr_len = 0;
-
-  /* Convert the string to UTF-16. */
-  intl_convert_utf8_to_utf16(&ustr, &ustr_len,
-                             utf8_str.data(), utf8_str.length(),
-                             status );
-  if (U_FAILURE(*status)) {
-    raise_notice("Error converting utf16 to utf8");
-  }
-  return String((char*)ustr, UBYTES(ustr_len), AttachString);
-}
-
 static Variant collator_convert_object_to_string(CVarRef obj) {
   if (!obj.isObject()) return obj;
   String str;
@@ -347,23 +343,27 @@ static Variant collator_convert_object_to_string(CVarRef obj) {
   } catch (Exception &e) {
     return obj;
   }
-  UErrorCode status = U_ZERO_ERROR;
-  String ustr = collator_convert_str_utf8_to_utf16(obj.toString(), &status);
+  UErrorCode status;
+  String ustr = intl_convert_str_utf8_to_utf16(str, &status);
   if (U_FAILURE(status)) {
-    raise_warning("Error converting object to utf16 string");
+    raise_warning("Error casting object to string in "
+                  "collator_convert_object_to_string()");
+    return null;
   }
   return ustr;
 }
 
 static void collator_convert_array_from_utf16_to_utf8(Array &array,
-                                                      UErrorCode* status) {
+                                                      UErrorCode * status) {
   if (array->supportValueRef()) {
     for (ArrayIter iter(array); iter; ++iter) {
       CVarRef value = iter.secondRef();
       /* Process string values only. */
       if (!value.isString()) continue;
-      String str = collator_convert_str_utf16_to_utf8(value, status);
-      if (U_FAILURE(*status)) return;
+      String str = intl_convert_str_utf16_to_utf8(value, status);
+      if (U_FAILURE(*status)) {
+        return;
+      }
       /* Update current value with the converted value. */
       const_cast<Variant&>(value) = str;
     }
@@ -372,8 +372,10 @@ static void collator_convert_array_from_utf16_to_utf8(Array &array,
       CVarRef value = iter.second();
       /* Process string values only. */
       if (!value.isString()) continue;
-      String str = collator_convert_str_utf16_to_utf8(value, status);
-      if (U_FAILURE(*status)) return;
+      String str = intl_convert_str_utf16_to_utf8(value, status);
+      if (U_FAILURE(*status)) {
+        return;
+      }
       /* Update current value with the converted value. */
       Variant key = iter.first();
       array.set(key, str);
@@ -382,14 +384,16 @@ static void collator_convert_array_from_utf16_to_utf8(Array &array,
 }
 
 static void collator_convert_array_from_utf8_to_utf16(Array &array,
-                                                      UErrorCode* status) {
+                                                      UErrorCode * status) {
   if (array->supportValueRef()) {
     for (ArrayIter iter(array); iter; ++iter) {
       CVarRef value = iter.secondRef();
       /* Process string values only. */
       if (!value.isString()) continue;
-      String str = collator_convert_str_utf8_to_utf16(value, status);
-      if (U_FAILURE(*status)) return;
+      String str = intl_convert_str_utf8_to_utf16(value, status);
+      if (U_FAILURE(*status)) {
+        return;
+      }
       /* Update current value with the converted value. */
       Variant key = iter.first();
       array.set(key, str);
@@ -399,8 +403,10 @@ static void collator_convert_array_from_utf8_to_utf16(Array &array,
       CVarRef value = iter.second();
       /* Process string values only. */
       if (!value.isString()) continue;
-      String str = collator_convert_str_utf8_to_utf16(value, status);
-      if (U_FAILURE(*status)) return;
+      String str = intl_convert_str_utf8_to_utf16(value, status);
+      if (U_FAILURE(*status)) {
+        return;
+      }
       /* Update current value with the converted value. */
       Variant key = iter.first();
       array.set(key, str);
@@ -414,10 +420,12 @@ static Variant collator_normalize_sort_argument(CVarRef arg) {
   Variant n_arg = collator_convert_string_to_number_if_possible(arg);
   if (n_arg.same(false)) {
     /* Conversion to number failed. */
-    UErrorCode status = U_ZERO_ERROR;
-
-    n_arg = collator_convert_str_utf16_to_utf8(arg, &status);
-    if (U_FAILURE(status)) ASSERT(false);
+    UErrorCode status;
+    n_arg = intl_convert_str_utf16_to_utf8(arg, &status);
+    if (U_FAILURE(status)) {
+      raise_warning("Error converting utf16 to utf8 in "
+                    "collator_normalize_sort_argument()");
+    }
   }
   return n_arg;
 }
@@ -453,11 +461,13 @@ static int collator_regular_compare_function(CVarRef v1, CVarRef v2,
   /* num1 is set if str1 and str2 are strings. */
   if (!num1.isNull()) {
     if (num1.same(false)) {
-      UErrorCode status = U_ZERO_ERROR;
-
       /* str1 is string but not numeric string just convert it to utf8. */
-      norm1 = collator_convert_str_utf16_to_utf8(str1, &status);
-
+      UErrorCode status;
+      norm1 = intl_convert_str_utf16_to_utf8(str1, &status);
+      if (U_FAILURE(status)) {
+        raise_warning("Error converting utf16 to utf8 in "
+                      "collator_regular_compare_function()");
+      }
       /* num2 is not set but str2 is string => do normalization. */
       norm2 = collator_normalize_sort_argument(str2);
     } else {
@@ -466,10 +476,8 @@ static int collator_regular_compare_function(CVarRef v1, CVarRef v2,
       norm2 = num2;
     }
   } else {
-    /* num1 is not set if str1 or str2 is not a string => do normalization. */
+    /* str1 or str2 is not a string => do normalization. */
     norm1 = collator_normalize_sort_argument(str1);
-
-    /* if num1 is not set then num2 is not set as well => do normalization. */
     norm2 = collator_normalize_sort_argument(str2);
   }
   if (ascending) {
@@ -532,8 +540,29 @@ static int collator_string_compare_function(CVarRef v1, CVarRef v2,
                                             const void *data,
                                             bool ascending) {
   ASSERT(data);
-  String str1 = v1.toString();
-  String str2 = v2.toString();
+  String str1;
+  if (v1.isString()) {
+    str1 = v1.toString();
+  } else {
+    UErrorCode status;
+    str1 = intl_convert_str_utf8_to_utf16(v1.toString(), &status);
+    if (U_FAILURE(status)) {
+      raise_warning("Error converting utf8 to utf16 in "
+                    "collator_string_compare_function()");
+    }
+  }
+  String str2;
+  if (v2.isString()) {
+    str2 = v2.toString();
+  } else {
+    UErrorCode status;
+    str2 = intl_convert_str_utf8_to_utf16(v2.toString(), &status);
+    if (U_FAILURE(status)) {
+      raise_warning("Error converting utf8 to utf16 in "
+                    "collator_string_compare_function()");
+    }
+  }
+
   int ret = ucol_strcoll((const UCollator *)data,
                          (UChar*)(str1.data()),
                          UCHARS(str1.length()),
@@ -554,9 +583,10 @@ static int collator_string_compare_descending(CVarRef v1, CVarRef v2,
 
 static bool collator_sort_internal(bool renumber, Variant &array,
                                    int sort_flags, bool ascending,
-                                   UCollator *coll) {
+                                   UCollator *coll, intl_error * errcode) {
   ASSERT(coll);
-  *s_errcode = U_ZERO_ERROR;
+  errcode->clear();
+  s_intl_error->m_error.clear();
   Array temp = array.toArray();
   Array::PFUNC_CMP cmp_func;
 
@@ -577,9 +607,12 @@ static bool collator_sort_internal(bool renumber, Variant &array,
   }
 
   /* Convert strings in the specified array from UTF-8 to UTF-16. */
-  collator_convert_array_from_utf8_to_utf16(temp, &(*s_errcode));
-  if (U_FAILURE(*s_errcode)) {
-    raise_notice("Error converting array from UTF-8 to UTF-16");
+  collator_convert_array_from_utf8_to_utf16(temp, &(errcode->code));
+  if (U_FAILURE(errcode->code)) {
+    errcode->custom_error_message =
+      "Error converting array from UTF-8 to UTF-16";
+    s_intl_error->m_error.code = errcode->code;
+    s_intl_error->m_error.custom_error_message = errcode->custom_error_message;
     return false;
   }
 
@@ -587,11 +620,14 @@ static bool collator_sort_internal(bool renumber, Variant &array,
   temp.sort(cmp_func, false, renumber, coll);
 
   /* Convert strings in the specified array back to UTF-8. */
-  *s_errcode = U_ZERO_ERROR;
-  collator_convert_array_from_utf16_to_utf8(temp, &(*s_errcode));
-  if (U_FAILURE(*s_errcode)) {
-    // This should not happen
-    raise_warning("Error converting array from UTF-16 to UTF-8");
+  errcode->clear();
+  s_intl_error->m_error.clear();
+  collator_convert_array_from_utf16_to_utf8(temp, &(errcode->code));
+  if (U_FAILURE(errcode->code)) {
+    errcode->custom_error_message =
+      "Error converting array from UTF-16 to UTF-8";
+    s_intl_error->m_error.code = errcode->code;
+    s_intl_error->m_error.custom_error_message = errcode->custom_error_message;
     return false;
   }
   array = temp;
@@ -599,18 +635,18 @@ static bool collator_sort_internal(bool renumber, Variant &array,
 }
 
 bool collator_sort(Variant &array, int sort_flags, bool ascending,
-                   UCollator *coll, UErrorCode *errcode) {
+                   UCollator *coll, intl_error *errcode) {
   ASSERT(coll);
-  bool ret = collator_sort_internal(true, array, sort_flags, ascending, coll);
-  *errcode = *s_errcode;
+  bool ret = collator_sort_internal(true, array, sort_flags, ascending, coll,
+                                    errcode);
   return ret;
 }
 
 bool collator_asort(Variant &array, int sort_flags, bool ascending,
-                    UCollator *coll, UErrorCode *errcode) {
+                    UCollator *coll, intl_error *errcode) {
   ASSERT(coll);
-  bool ret = collator_sort_internal(false, array, sort_flags, ascending, coll);
-  *errcode = *s_errcode;
+  bool ret = collator_sort_internal(false, array, sort_flags, ascending, coll,
+                                    errcode);
   return ret;
 }
 

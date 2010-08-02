@@ -36,7 +36,6 @@
 #include <runtime/ext/profile/extprofile_hash.h>
 #include <runtime/ext/profile/extprofile_iconv.h>
 #include <runtime/ext/profile/extprofile_icu.h>
-#include <runtime/ext/profile/extprofile_idn.h>
 #include <runtime/ext/profile/extprofile_image.h>
 #include <runtime/ext/profile/extprofile_intl.h>
 #include <runtime/ext/profile/extprofile_ipc.h>

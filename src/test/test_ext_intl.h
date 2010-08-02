@@ -27,6 +27,27 @@ class TestExtIntl : public TestCppExt {
  public:
   virtual bool RunTests(const std::string &which);
 
+  bool test_intl_get_error_code();
+  bool test_intl_get_error_message();
+  bool test_intl_error_name();
+  bool test_intl_is_failure();
+  bool test_collator_asort();
+  bool test_collator_compare();
+  bool test_collator_create();
+  bool test_collator_get_attribute();
+  bool test_collator_get_error_code();
+  bool test_collator_get_error_message();
+  bool test_collator_get_locale();
+  bool test_collator_get_strength();
+  bool test_collator_set_attribute();
+  bool test_collator_set_strength();
+  bool test_collator_sort_with_sort_keys();
+  bool test_collator_sort();
+  bool test_idn_to_ascii();
+  bool test_idn_to_unicode();
+  bool test_idn_to_utf8();
+  bool test_Collator();
+  bool test_Locale();
   bool test_Normalizer();
 };
 

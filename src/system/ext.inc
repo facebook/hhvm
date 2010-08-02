@@ -19,7 +19,6 @@
 #include "hash.inc"
 #include "iconv.inc"
 #include "icu.inc"
-#include "idn.inc"
 #include "image.inc"
 #include "intl.inc"
 #include "ipc.inc"

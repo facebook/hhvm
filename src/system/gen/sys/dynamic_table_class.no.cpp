@@ -4611,6 +4611,249 @@ struct ObjectStaticCallbacks cw_domcdatasection = {
   c_domcdatasection::os_invoke,
   c_domcdatasection::os_constant,
 };
+Object co_locale(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_locale)())->dynCreate(params, init));
+}
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_locale
+Variant c_locale::os_getInit(const char *s, int64 hash) {
+  return c_ObjectData::os_getInit(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_locale
+Variant c_locale::os_get(const char *s, int64 hash) {
+  return c_ObjectData::os_get(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_locale
+Variant &c_locale::os_lval(const char *s, int64 hash) {
+  return c_ObjectData::os_lval(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_locale
+void c_locale::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_locale
+void c_locale::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_get_locale
+Variant c_locale::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+  return c_locale::o_getPublic(prop, phash, error);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_get_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_locale
+Variant c_locale::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+  return c_ObjectData::o_getPublic(s, hash, error);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_locale
+Variant c_locale::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+  return o_getPublic(s, hash, error);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_locale
+bool c_locale::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_locale::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_locale
+bool c_locale::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_locale
+bool c_locale::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_set_locale
+Variant c_locale::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+  return c_locale::o_setPublic(prop, phash, v, forInit);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_set_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_locale
+Variant c_locale::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+  return c_ObjectData::o_setPublic(s, hash, v, forInit);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_locale
+Variant c_locale::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+  return o_setPublic(s, hash, v, forInit);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_locale
+Variant& c_locale::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+  return c_locale::o_lvalPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_lval_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_locale
+Variant& c_locale::o_lvalPublic(CStrRef s, int64 hash) {
+  return c_ObjectData::o_lvalPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_locale
+Variant& c_locale::o_lvalPrivate(CStrRef s, int64 hash) {
+  return o_lvalPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_locale
+Variant c_locale::os_constant(const char *s) {
+  int64 hash = hash_string(s);
+  switch (hash & 3) {
+    case 0:
+      HASH_RETURN(0x50D5FAC4CAE6A9B4LL, q_locale_ACTUAL_LOCALE, "ACTUAL_LOCALE");
+      HASH_RETURN(0x0E1DA7B1D25DCDB8LL, q_locale_VALID_LOCALE, "VALID_LOCALE");
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_constant(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_locale
+IMPLEMENT_CLASS(locale)
+c_locale *c_locale::create() {
+  CountableHelper h(this);
+  init();
+  t___construct();
+  return this;
+}
+ObjectData *c_locale::dynCreate(CArrRef params, bool construct /* = true */) {
+  init();
+  if (construct) {
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
+    (t___construct());
+  }
+  return this;
+}
+void c_locale::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 2);
+  (t___construct());
+}
+void c_locale::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("__construct", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  (t___construct(), null);
+}
+void c_locale::destruct() {
+  if (!inCtorDtor()) {
+    incRefCount();
+    try {
+      t___destruct();
+    } catch (...) { handle_destructor_exception();}
+  }
+}
+ObjectData *c_locale::cloneImpl() {
+  c_locale *obj = NEW(c_locale)();
+  cloneSet(obj);
+  return obj;
+}
+void c_locale::cloneSet(c_locale *clone) {
+  ObjectData::cloneSet(clone);
+}
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_locale
+Variant c_locale::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 3) {
+    case 3:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        return (t___destruct());
+      }
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
+        return (t___construct(), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_locale
+Variant c_locale::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 3) {
+    case 3:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        return (t___destruct());
+      }
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
+        return (t___construct(), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_locale
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_locale
+Variant c_locale::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_locale
+Variant c_locale::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 3) {
+    case 3:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___destruct());
+      }
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_locale::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+struct ObjectStaticCallbacks cw_locale = {
+  c_locale::os_getInit,
+  c_locale::os_get,
+  c_locale::os_lval,
+  c_locale::os_invoke,
+  c_locale::os_constant,
+};
 Object co_domdocumenttype(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_domdocumenttype)())->dynCreate(params, init));
 }
@@ -20622,6 +20865,722 @@ struct ObjectStaticCallbacks cw_datetime = {
   c_datetime::os_invoke,
   c_datetime::os_constant,
 };
+Object co_collator(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_collator)())->dynCreate(params, init));
+}
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_collator
+Variant c_collator::os_getInit(const char *s, int64 hash) {
+  return c_ObjectData::os_getInit(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_collator
+Variant c_collator::os_get(const char *s, int64 hash) {
+  return c_ObjectData::os_get(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_collator
+Variant &c_collator::os_lval(const char *s, int64 hash) {
+  return c_ObjectData::os_lval(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_collator
+void c_collator::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_collator
+void c_collator::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_collator
+Variant c_collator::o_get(CStrRef prop, int64 phash, bool error /* = true */, const char *context /* = NULL */) {
+  return c_collator::o_getPublic(prop, phash, error);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_get_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_collator
+Variant c_collator::o_getPublic(CStrRef s, int64 hash, bool error /* = true */) {
+  return c_ObjectData::o_getPublic(s, hash, error);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_collator
+Variant c_collator::o_getPrivate(CStrRef s, int64 hash, bool error /* = true */) {
+  return o_getPublic(s, hash, error);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_collator
+bool c_collator::o_exists(CStrRef prop, int64 phash, const char *context /* = NULL */) const {
+  return c_collator::o_existsPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_collator
+bool c_collator::o_existsPublic(CStrRef s, int64 hash) const {
+  return c_ObjectData::o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_collator
+bool c_collator::o_existsPrivate(CStrRef s, int64 hash) const {
+  return o_existsPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_collator
+Variant c_collator::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit /* = false */, const char *context /* = NULL */) {
+  return c_collator::o_setPublic(prop, phash, v, forInit);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_set_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_collator
+Variant c_collator::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+  return c_ObjectData::o_setPublic(s, hash, v, forInit);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_collator
+Variant c_collator::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit /* = false */) {
+  return o_setPublic(s, hash, v, forInit);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_collator
+Variant& c_collator::o_lval(CStrRef prop, int64 phash, const char *context /* = NULL */) {
+  return c_collator::o_lvalPublic(prop, phash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_lval_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_collator
+Variant& c_collator::o_lvalPublic(CStrRef s, int64 hash) {
+  return c_ObjectData::o_lvalPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_collator
+Variant& c_collator::o_lvalPrivate(CStrRef s, int64 hash) {
+  return o_lvalPublic(s, hash);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_collator
+Variant c_collator::os_constant(const char *s) {
+  int64 hash = hash_string(s);
+  switch (hash & 63) {
+    case 3:
+      HASH_RETURN(0x243ECA9F2933DFC3LL, q_collator_ON, "ON");
+      break;
+    case 7:
+      HASH_RETURN(0x0BB74E66DFE81307LL, q_collator_SORT_STRING, "SORT_STRING");
+      HASH_RETURN(0x11D151DDDD2B4107LL, q_collator_HIRAGANA_QUATERNARY_MODE, "HIRAGANA_QUATERNARY_MODE");
+      break;
+    case 11:
+      HASH_RETURN(0x08BC1240DC22398BLL, q_collator_CASE_FIRST, "CASE_FIRST");
+      break;
+    case 12:
+      HASH_RETURN(0x12C49411F55F648CLL, q_collator_QUATERNARY, "QUATERNARY");
+      break;
+    case 15:
+      HASH_RETURN(0x5BC29B9E20C0628FLL, q_collator_NON_IGNORABLE, "NON_IGNORABLE");
+      break;
+    case 21:
+      HASH_RETURN(0x27CD27CE1FB65BD5LL, q_collator_SHIFTED, "SHIFTED");
+      break;
+    case 24:
+      HASH_RETURN(0x6DED35804EDAD218LL, q_collator_CASE_LEVEL, "CASE_LEVEL");
+      break;
+    case 28:
+      HASH_RETURN(0x1D3E7E668C0017DCLL, q_collator_SORT_REGULAR, "SORT_REGULAR");
+      break;
+    case 33:
+      HASH_RETURN(0x713FE3D58B4D7661LL, q_collator_FRENCH_COLLATION, "FRENCH_COLLATION");
+      HASH_RETURN(0x25FE54F210EC5FE1LL, q_collator_SECONDARY, "SECONDARY");
+      HASH_RETURN(0x6E252898020450A1LL, q_collator_TERTIARY, "TERTIARY");
+      HASH_RETURN(0x04D711585DF5A5A1LL, q_collator_UPPER_FIRST, "UPPER_FIRST");
+      break;
+    case 35:
+      HASH_RETURN(0x2C984380FDBE8563LL, q_collator_STRENGTH, "STRENGTH");
+      break;
+    case 39:
+      HASH_RETURN(0x7306AAA31A7C8BE7LL, q_collator_DEFAULT_STRENGTH, "DEFAULT_STRENGTH");
+      break;
+    case 44:
+      HASH_RETURN(0x6B3B0A08B028B86CLL, q_collator_DEFAULT_VALUE, "DEFAULT_VALUE");
+      break;
+    case 45:
+      HASH_RETURN(0x57544A00049D7F6DLL, q_collator_NUMERIC_COLLATION, "NUMERIC_COLLATION");
+      break;
+    case 47:
+      HASH_RETURN(0x60F0B28CF41A96AFLL, q_collator_NORMALIZATION_MODE, "NORMALIZATION_MODE");
+      break;
+    case 51:
+      HASH_RETURN(0x63512E9A825004F3LL, q_collator_LOWER_FIRST, "LOWER_FIRST");
+      break;
+    case 53:
+      HASH_RETURN(0x595FDD99C9EFE835LL, q_collator_ALTERNATE_HANDLING, "ALTERNATE_HANDLING");
+      break;
+    case 57:
+      HASH_RETURN(0x30C1385A2C2149F9LL, q_collator_PRIMARY, "PRIMARY");
+      break;
+    case 58:
+      HASH_RETURN(0x7FC78A43D5EEAB3ALL, q_collator_IDENTICAL, "IDENTICAL");
+      break;
+    case 61:
+      HASH_RETURN(0x120E2F0EC8DD183DLL, q_collator_SORT_NUMERIC, "SORT_NUMERIC");
+      HASH_RETURN(0x136402C9E51B75FDLL, q_collator_OFF, "OFF");
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_constant(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_collator
+IMPLEMENT_CLASS(collator)
+c_collator *c_collator::create(String a0) {
+  CountableHelper h(this);
+  init();
+  t___construct(a0);
+  return this;
+}
+ObjectData *c_collator::dynCreate(CArrRef params, bool construct /* = true */) {
+  init();
+  if (construct) {
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
+    (t___construct(params[0]));
+  }
+  return this;
+}
+void c_collator::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
+  (t___construct(params[0]));
+}
+void c_collator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  (t___construct(a0), null);
+}
+void c_collator::destruct() {
+  if (!inCtorDtor()) {
+    incRefCount();
+    try {
+      t___destruct();
+    } catch (...) { handle_destructor_exception();}
+  }
+}
+ObjectData *c_collator::cloneImpl() {
+  c_collator *obj = NEW(c_collator)();
+  cloneSet(obj);
+  return obj;
+}
+void c_collator::cloneSet(c_collator *clone) {
+  ObjectData::cloneSet(clone);
+}
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_collator
+Variant c_collator::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x43E057044D6296E0LL, geterrorcode) {
+        if (count > 0) return throw_toomany_arguments("geterrorcode", 0, 1);
+        return (t_geterrorcode());
+      }
+      break;
+    case 2:
+      HASH_GUARD(0x2C7E06EB2965CE02LL, getlocale) {
+        if (count > 1) return throw_toomany_arguments("getlocale", 1, 1);
+        if (count <= 0) return (t_getlocale());
+        return (t_getlocale(params[0]));
+      }
+      break;
+    case 8:
+      HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
+        if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
+        return (t_getattribute(params[0]));
+      }
+      break;
+    case 10:
+      HASH_GUARD(0x1F4984938E1DBB2ALL, sort) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("sort", count, 1, 2, 1);
+        if (count <= 1) return (t_sort(ref(const_cast<Array&>(params).lvalAt(0))));
+        return (t_sort(ref(const_cast<Array&>(params).lvalAt(0)), params[1]));
+      }
+      HASH_GUARD(0x1D5B8B8144F4AB8ALL, setattribute) {
+        if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
+        return (t_setattribute(params[0], params[1]));
+      }
+      break;
+    case 11:
+      HASH_GUARD(0x365C573D887803EBLL, sortwithsortkeys) {
+        if (count != 1) return throw_wrong_arguments("sortwithsortkeys", count, 1, 1, 1);
+        return (t_sortwithsortkeys(ref(const_cast<Array&>(params).lvalAt(0))));
+      }
+      break;
+    case 14:
+      HASH_GUARD(0x790B7C44A3442BEELL, asort) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("asort", count, 1, 2, 1);
+        if (count <= 1) return (t_asort(ref(const_cast<Array&>(params).lvalAt(0))));
+        return (t_asort(ref(const_cast<Array&>(params).lvalAt(0)), params[1]));
+      }
+      break;
+    case 17:
+      HASH_GUARD(0x3B4D97DC8C437CD1LL, geterrormessage) {
+        if (count > 0) return throw_toomany_arguments("geterrormessage", 0, 1);
+        return (t_geterrormessage());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x1BF74792BDECF352LL, compare) {
+        if (count != 2) return throw_wrong_arguments("compare", count, 2, 2, 1);
+        return (t_compare(params[0], params[1]));
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        return (t___destruct());
+      }
+      break;
+    case 22:
+      HASH_GUARD(0x3A0A2C5D90518456LL, create) {
+        if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
+        return (ti_create(o_getClassName(), params[0]));
+      }
+      break;
+    case 23:
+      HASH_GUARD(0x0B7AA0ED4CBF9ED7LL, setstrength) {
+        if (count != 1) return throw_wrong_arguments("setstrength", count, 1, 1, 1);
+        return (t_setstrength(params[0]));
+      }
+      break;
+    case 30:
+      HASH_GUARD(0x1C15B5A1A05B4C5ELL, getstrength) {
+        if (count > 0) return throw_toomany_arguments("getstrength", 0, 1);
+        return (t_getstrength());
+      }
+      break;
+    case 31:
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
+        return (t___construct(params[0]), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke(s, params, hash, fatal);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_collator
+Variant c_collator::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x43E057044D6296E0LL, geterrorcode) {
+        if (count > 0) return throw_toomany_arguments("geterrorcode", 0, 1);
+        return (t_geterrorcode());
+      }
+      break;
+    case 2:
+      HASH_GUARD(0x2C7E06EB2965CE02LL, getlocale) {
+        if (count > 1) return throw_toomany_arguments("getlocale", 1, 1);
+        if (count <= 0) return (t_getlocale());
+        return (t_getlocale(a0));
+      }
+      break;
+    case 8:
+      HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
+        if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
+        return (t_getattribute(a0));
+      }
+      break;
+    case 10:
+      HASH_GUARD(0x1F4984938E1DBB2ALL, sort) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("sort", count, 1, 2, 1);
+        if (count <= 1) return (t_sort(ref(a0)));
+        return (t_sort(ref(a0), a1));
+      }
+      HASH_GUARD(0x1D5B8B8144F4AB8ALL, setattribute) {
+        if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
+        return (t_setattribute(a0, a1));
+      }
+      break;
+    case 11:
+      HASH_GUARD(0x365C573D887803EBLL, sortwithsortkeys) {
+        if (count != 1) return throw_wrong_arguments("sortwithsortkeys", count, 1, 1, 1);
+        return (t_sortwithsortkeys(ref(a0)));
+      }
+      break;
+    case 14:
+      HASH_GUARD(0x790B7C44A3442BEELL, asort) {
+        if (count < 1 || count > 2) return throw_wrong_arguments("asort", count, 1, 2, 1);
+        if (count <= 1) return (t_asort(ref(a0)));
+        return (t_asort(ref(a0), a1));
+      }
+      break;
+    case 17:
+      HASH_GUARD(0x3B4D97DC8C437CD1LL, geterrormessage) {
+        if (count > 0) return throw_toomany_arguments("geterrormessage", 0, 1);
+        return (t_geterrormessage());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x1BF74792BDECF352LL, compare) {
+        if (count != 2) return throw_wrong_arguments("compare", count, 2, 2, 1);
+        return (t_compare(a0, a1));
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        return (t___destruct());
+      }
+      break;
+    case 22:
+      HASH_GUARD(0x3A0A2C5D90518456LL, create) {
+        if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
+        return (ti_create(o_getClassName(), a0));
+      }
+      break;
+    case 23:
+      HASH_GUARD(0x0B7AA0ED4CBF9ED7LL, setstrength) {
+        if (count != 1) return throw_wrong_arguments("setstrength", count, 1, 1, 1);
+        return (t_setstrength(a0));
+      }
+      break;
+    case 30:
+      HASH_GUARD(0x1C15B5A1A05B4C5ELL, getstrength) {
+        if (count > 0) return throw_toomany_arguments("getstrength", 0, 1);
+        return (t_getstrength());
+      }
+      break;
+    case 31:
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
+        return (t___construct(a0), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_collator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_collator
+Variant c_collator::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+  int count __attribute__((__unused__)) = params.size();
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 1) {
+    case 0:
+      HASH_GUARD(0x3A0A2C5D90518456LL, create) {
+        if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
+        return (ti_create(c, params[0]));
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_collator
+Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD(0x43E057044D6296E0LL, geterrorcode) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("geterrorcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_geterrorcode());
+      }
+      break;
+    case 2:
+      HASH_GUARD(0x2C7E06EB2965CE02LL, getlocale) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("getlocale", 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 0) return (t_getlocale());
+        else return (t_getlocale(a0));
+      }
+      break;
+    case 8:
+      HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getattribute(a0));
+      }
+      break;
+    case 10:
+      HASH_GUARD(0x1F4984938E1DBB2ALL, sort) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("sort", count, 1, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = ref((*it)->refval(env));
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 1) return (t_sort(ref(a0)));
+        else return (t_sort(ref(a0), a1));
+      }
+      HASH_GUARD(0x1D5B8B8144F4AB8ALL, setattribute) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_setattribute(a0, a1));
+      }
+      break;
+    case 11:
+      HASH_GUARD(0x365C573D887803EBLL, sortwithsortkeys) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("sortwithsortkeys", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = ref((*it)->refval(env));
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_sortwithsortkeys(ref(a0)));
+      }
+      break;
+    case 14:
+      HASH_GUARD(0x790B7C44A3442BEELL, asort) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("asort", count, 1, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = ref((*it)->refval(env));
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 1) return (t_asort(ref(a0)));
+        else return (t_asort(ref(a0), a1));
+      }
+      break;
+    case 17:
+      HASH_GUARD(0x3B4D97DC8C437CD1LL, geterrormessage) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("geterrormessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_geterrormessage());
+      }
+      break;
+    case 18:
+      HASH_GUARD(0x1BF74792BDECF352LL, compare) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("compare", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_compare(a0, a1));
+      }
+      break;
+    case 19:
+      HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___destruct());
+      }
+      break;
+    case 22:
+      HASH_GUARD(0x3A0A2C5D90518456LL, create) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_create(o_getClassName(), a0));
+      }
+      break;
+    case 23:
+      HASH_GUARD(0x0B7AA0ED4CBF9ED7LL, setstrength) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("setstrength", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_setstrength(a0));
+      }
+      break;
+    case 30:
+      HASH_GUARD(0x1C15B5A1A05B4C5ELL, getstrength) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getstrength", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getstrength());
+      }
+      break;
+    case 31:
+      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(a0), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_collator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string_i(s);
+  switch (hash & 1) {
+    case 0:
+      HASH_GUARD(0x3A0A2C5D90518456LL, create) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_create(c, a0));
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+struct ObjectStaticCallbacks cw_collator = {
+  c_collator::os_getInit,
+  c_collator::os_get,
+  c_collator::os_lval,
+  c_collator::os_invoke,
+  c_collator::os_constant,
+};
 Object co_pdo(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_pdo)())->dynCreate(params, init));
 }
@@ -30360,6 +31319,9 @@ Variant get_builtin_class_var_init(const char *s, const char *var) {
     case 56:
       HASH_GET_CLASS_VAR_INIT(0x672AD818DDE95538LL, reflectionexception);
       break;
+    case 61:
+      HASH_GET_CLASS_VAR_INIT(0x4C6991D3CF5CA03DLL, collator);
+      break;
     case 62:
       HASH_GET_CLASS_VAR_INIT(0x49FC1A1F7B878C3ELL, soapserver);
       break;
@@ -30471,6 +31433,9 @@ Variant get_builtin_class_var_init(const char *s, const char *var) {
       break;
     case 169:
       HASH_GET_CLASS_VAR_INIT(0x1D35C3EFD00E11A9LL, sqlite3);
+      break;
+    case 170:
+      HASH_GET_CLASS_VAR_INIT(0x67E31D42F2DFE4AALL, locale);
       break;
     case 173:
       HASH_GET_CLASS_VAR_INIT(0x0A34015F67C804ADLL, pdo);
@@ -30588,6 +31553,9 @@ Object create_builtin_object(const char *s, CArrRef params, bool init /* = true 
     case 56:
       HASH_CREATE_OBJECT(0x672AD818DDE95538LL, reflectionexception);
       break;
+    case 61:
+      HASH_CREATE_OBJECT(0x4C6991D3CF5CA03DLL, collator);
+      break;
     case 62:
       HASH_CREATE_OBJECT(0x49FC1A1F7B878C3ELL, soapserver);
       break;
@@ -30699,6 +31667,9 @@ Object create_builtin_object(const char *s, CArrRef params, bool init /* = true 
       break;
     case 169:
       HASH_CREATE_OBJECT(0x1D35C3EFD00E11A9LL, sqlite3);
+      break;
+    case 170:
+      HASH_CREATE_OBJECT(0x67E31D42F2DFE4AALL, locale);
       break;
     case 173:
       HASH_CREATE_OBJECT(0x0A34015F67C804ADLL, pdo);
@@ -30816,6 +31787,9 @@ Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef 
     case 56:
       HASH_INVOKE_STATIC_METHOD(0x672AD818DDE95538LL, reflectionexception);
       break;
+    case 61:
+      HASH_INVOKE_STATIC_METHOD(0x4C6991D3CF5CA03DLL, collator);
+      break;
     case 62:
       HASH_INVOKE_STATIC_METHOD(0x49FC1A1F7B878C3ELL, soapserver);
       break;
@@ -30927,6 +31901,9 @@ Variant invoke_builtin_static_method(const char *s, const char *method, CArrRef 
       break;
     case 169:
       HASH_INVOKE_STATIC_METHOD(0x1D35C3EFD00E11A9LL, sqlite3);
+      break;
+    case 170:
+      HASH_INVOKE_STATIC_METHOD(0x67E31D42F2DFE4AALL, locale);
       break;
     case 173:
       HASH_INVOKE_STATIC_METHOD(0x0A34015F67C804ADLL, pdo);
@@ -31049,6 +32026,9 @@ const ObjectStaticCallbacks * get_builtin_object_static_callbacks(const char *s)
     case 56:
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x672AD818DDE95538LL, reflectionexception);
       break;
+    case 61:
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x4C6991D3CF5CA03DLL, collator);
+      break;
     case 62:
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x49FC1A1F7B878C3ELL, soapserver);
       break;
@@ -31160,6 +32140,9 @@ const ObjectStaticCallbacks * get_builtin_object_static_callbacks(const char *s)
       break;
     case 169:
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x1D35C3EFD00E11A9LL, sqlite3);
+      break;
+    case 170:
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x67E31D42F2DFE4AALL, locale);
       break;
     case 173:
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x0A34015F67C804ADLL, pdo);

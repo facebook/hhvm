@@ -24,8 +24,8 @@
 #include <unicode/putil.h> // icu
 
 #define SORT_REGULAR            0
-#define SORT_NUMERIC            1
-#define SORT_STRING             2
+#define SORT_STRING             1
+#define SORT_NUMERIC            2
 #define SORT_LOCALE_STRING      5
 
 #define SORT_DESC               3
@@ -837,7 +837,7 @@ public:
   String getLocale() {
     return m_locale;
   }
-  UErrorCode &getErrorCodeRef() {
+  intl_error &getErrorCodeRef() {
     return m_errcode;
   }
   bool setLocale(CStrRef locale) {
@@ -848,13 +848,13 @@ public:
       ucol_close(m_ucoll);
       m_ucoll = NULL;
     }
-    m_errcode = U_ZERO_ERROR;
-    m_ucoll = ucol_open(locale.data(), &m_errcode);
+    m_errcode.clear();
+    m_ucoll = ucol_open(locale.data(), &(m_errcode.code));
     if (m_ucoll == NULL) {
       raise_warning("failed to load %s locale from icu data", locale.data());
       return false;
     }
-    if (U_FAILURE(m_errcode)) {
+    if (U_FAILURE(m_errcode.code)) {
       ucol_close(m_ucoll);
       m_ucoll = NULL;
       return false;
@@ -872,10 +872,10 @@ public:
       Logger::Verbose("m_ucoll is NULL");
       return false;
     }
-    m_errcode = U_ZERO_ERROR;
+    m_errcode.clear();
     ucol_setAttribute(m_ucoll, (UColAttribute)attr,
-                      (UColAttributeValue)val, &m_errcode);
-    if (U_FAILURE(m_errcode)) {
+                      (UColAttributeValue)val, &(m_errcode.code));
+    if (U_FAILURE(m_errcode.code)) {
       Logger::Verbose("Error setting attribute value");
       return false;
     }
@@ -896,13 +896,13 @@ public:
       Logger::Verbose("m_ucoll is NULL");
       return false;
     }
-    return m_errcode;
+    return m_errcode.code;
   }
 
   virtual void requestInit() {
     m_locale = String(uloc_getDefault(), CopyString);
-    m_errcode = U_ZERO_ERROR;
-    m_ucoll = ucol_open(m_locale.data(), &m_errcode);
+    m_errcode.clear();
+    m_ucoll = ucol_open(m_locale.data(), &(m_errcode.code));
     ASSERT(m_ucoll);
   }
   virtual void requestShutdown() {
@@ -916,7 +916,7 @@ public:
 private:
   String     m_locale;
   UCollator *m_ucoll;
-  UErrorCode m_errcode;
+  intl_error m_errcode;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(Collator, s_collator);
 
@@ -947,7 +947,7 @@ bool f_sort(Variant array, int sort_flags /* = 0 */,
   if (use_collator && sort_flags != SORT_LOCALE_STRING) {
     UCollator *coll = s_collator->getCollator();
     if (coll) {
-      UErrorCode &errcode = s_collator->getErrorCodeRef();
+      intl_error &errcode = s_collator->getErrorCodeRef();
       return collator_sort(array, sort_flags, true, coll, &errcode);
     }
   }
@@ -966,7 +966,7 @@ bool f_rsort(Variant array, int sort_flags /* = 0 */,
   if (use_collator && sort_flags != SORT_LOCALE_STRING) {
     UCollator *coll = s_collator->getCollator();
     if (coll) {
-      UErrorCode &errcode = s_collator->getErrorCodeRef();
+      intl_error &errcode = s_collator->getErrorCodeRef();
       return collator_sort(array, sort_flags, false, coll, &errcode);
     }
   }
@@ -985,7 +985,7 @@ bool f_asort(Variant array, int sort_flags /* = 0 */,
   if (use_collator && sort_flags != SORT_LOCALE_STRING) {
     UCollator *coll = s_collator->getCollator();
     if (coll) {
-      UErrorCode &errcode = s_collator->getErrorCodeRef();
+      intl_error &errcode = s_collator->getErrorCodeRef();
       return collator_asort(array, sort_flags, true, coll, &errcode);
     }
   }
@@ -1004,7 +1004,7 @@ bool f_arsort(Variant array, int sort_flags /* = 0 */,
   if (use_collator && sort_flags != SORT_LOCALE_STRING) {
     UCollator *coll = s_collator->getCollator();
     if (coll) {
-      UErrorCode &errcode = s_collator->getErrorCodeRef();
+      intl_error &errcode = s_collator->getErrorCodeRef();
       return collator_asort(array, sort_flags, false, coll, &errcode);
     }
   }

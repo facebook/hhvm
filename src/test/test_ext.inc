@@ -19,7 +19,6 @@ RUN_TESTSUITE(TestExtFunction);
 RUN_TESTSUITE(TestExtHash);
 RUN_TESTSUITE(TestExtIconv);
 RUN_TESTSUITE(TestExtIcu);
-RUN_TESTSUITE(TestExtIdn);
 RUN_TESTSUITE(TestExtImage);
 RUN_TESTSUITE(TestExtIntl);
 RUN_TESTSUITE(TestExtIpc);

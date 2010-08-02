@@ -19,15 +19,16 @@
 #define __HPHP_INTL_CONVERT_H__
 
 #include <unicode/ustring.h>
+#include <runtime/base/complex_types.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void intl_convert_utf8_to_utf16(UChar** target, int* target_len,
-                                const char* src, int  src_len,
+                                const char* src, int src_len,
                                 UErrorCode* status);
 void intl_convert_utf16_to_utf8(char** target, int* target_len,
-                                const UChar* src, int  src_len,
+                                const UChar* src, int src_len,
                                 UErrorCode*  status);
 
 ///////////////////////////////////////////////////////////////////////////////

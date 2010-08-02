@@ -19,19 +19,48 @@
 #define __HPHP_ZEND_COLLATOR_H__
 
 #include <unicode/coll.h> // icu
+#include <runtime/base/complex_types.h>
+#include <runtime/base/util/request_local.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Variant;
+struct intl_error {
+  UErrorCode code;
+  String custom_error_message;
+  intl_error() : code(U_ZERO_ERROR) {}
+  void clear() {
+    code = U_ZERO_ERROR;
+    custom_error_message.reset();
+  }
+};
+
+class IntlError : public RequestEventHandler {
+public:
+  intl_error m_error;
+  IntlError() {
+    m_error.clear();
+  }
+  virtual void requestInit() {
+    m_error.clear();
+  }
+  virtual void requestShutdown() {
+    m_error.clear();
+  }
+};
+
+DECLARE_EXTERN_REQUEST_LOCAL(IntlError, s_intl_error);
+
+///////////////////////////////////////////////////////////////////////////////
+
 #define COLLATOR_SORT_REGULAR   0
-#define COLLATOR_SORT_NUMERIC   1
-#define COLLATOR_SORT_STRING    2
+#define COLLATOR_SORT_STRING    1
+#define COLLATOR_SORT_NUMERIC   2
 
 bool collator_sort(Variant &array, int sort_flags, bool ascending,
-                   UCollator *coll, UErrorCode *errcode);
+                   UCollator *coll, intl_error *errcode);
 bool collator_asort(Variant &array, int sort_flags, bool ascending,
-                    UCollator *coll, UErrorCode *errcode);
+                    UCollator *coll, intl_error *errcode);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

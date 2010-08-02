@@ -164,6 +164,7 @@ class TestCodeRun : public TestBase {
   bool TestExtSplFile();
   bool TestExtIterator();
   bool TestExtSoap();
+  bool TestExtCollator();
   bool TestFiber();
   bool TestAPC();
   bool TestInlining();

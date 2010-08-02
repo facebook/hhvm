@@ -170,8 +170,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
       server.set(key, String(values[i]));
     }
   }
-  String hostName(VirtualHost::GetCurrent()->serverName());
-  string hostHeader(transport->getHeader("Host"));
+  string host = transport->getHeader("Host");
+  String hostName(VirtualHost::GetCurrent()->serverName(host));
+  string hostHeader(host);
   if (hostHeader.empty()) {
     server.set("HTTP_HOST", hostName);
     StackTraceNoHeap::AddExtraLogging("Server", hostName.data());

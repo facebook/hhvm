@@ -160,8 +160,11 @@ flood error logs.
     UseSmallArray = true
 
     # If ServerName is not specified for a virtual host, use prefix + this
-    # suffix to compose one
+    # suffix to compose one. If "Pattern" was specified, matched pattern,
+    # either by parentheses for the first match or without parentheses for
+    # the whole pattern, will be used as prefix for DefaultServerNameSuffix.
     DefaultServerNameSuffix = default_domain.com
+
     # Forcing $_SERVER['SERVER_NAME'] to come from request header
     ForceServerNameToHeader = false
 

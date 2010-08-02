@@ -155,13 +155,6 @@ void VirtualHost::init(Hdf vh) {
 
   vh["ServerVariables"].get(m_serverVars);
   m_serverName = vh["ServerName"].getString();
-  if (m_serverName.empty() && !m_prefix.empty() &&
-      !RuntimeOption::DefaultServerNameSuffix.empty()) {
-    m_serverName = m_prefix + RuntimeOption::DefaultServerNameSuffix;
-  }
-  if (m_serverName.empty()) {
-    m_serverName = RuntimeOption::Host;
-  }
 }
 
 bool VirtualHost::match(const string &host) const {
@@ -197,7 +190,7 @@ bool VirtualHost::rewriteURL(CStrRef host, String &url, bool &qsa,
         subject = host;
       }
       Variant ret = preg_match(String(it->pattern.c_str(), it->pattern.size(),
-            AttachLiteral), subject);
+                                      AttachLiteral), subject);
       if (!ret.same(it->negate ? 0 : 1)) {
         passed = false;
         break;
@@ -225,12 +218,35 @@ bool VirtualHost::isBlocking(const std::string &command,
   return m_ipBlocks->isBlocking(command, ip);
 }
 
-const std::string &VirtualHost::serverName() const {
-  if (m_serverName.empty()) {
-    return RuntimeOption::Host;
-  } else {
+std::string VirtualHost::serverName(const std::string &host) const {
+  if (!m_serverName.empty()) {
     return m_serverName;
   }
+
+  if (!RuntimeOption::DefaultServerNameSuffix.empty()) {
+    if (!m_pattern.empty()) {
+      Variant matches;
+      Variant ret = preg_match(String(m_pattern.c_str(), m_pattern.size(),
+                                      AttachLiteral),
+                               String(host.c_str(), host.size(),
+                                      AttachLiteral),
+                               matches);
+      if (ret.toInt64() > 0) {
+        String prefix = matches[1].toString();
+        if (prefix.empty()) {
+          prefix = matches[0].toString();
+        }
+        if (!prefix.empty()) {
+          return std::string(prefix.data()) +
+            RuntimeOption::DefaultServerNameSuffix;
+        }
+      }
+    } else if (!m_prefix.empty()) {
+      return m_prefix + RuntimeOption::DefaultServerNameSuffix;
+    }
+  }
+
+  return RuntimeOption::Host;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

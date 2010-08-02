@@ -51,7 +51,8 @@ public:
 
   static VirtualHost &GetDefault();
 
-  const std::string &serverName() const;
+  std::string serverName(const std::string &host) const;
+
 private:
   struct RewriteCond {
     enum Type {

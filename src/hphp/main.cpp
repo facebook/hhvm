@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
           _exit(ret);
         }
         wait(&ret);
-        ret = WEXITSTATUS(ret);
+        ret = WIFEXITED(ret) ? WEXITSTATUS(ret) : -1;
       } else {
         ret = process(po);
       }

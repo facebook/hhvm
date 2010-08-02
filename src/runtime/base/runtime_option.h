@@ -226,6 +226,7 @@ public:
   static bool CheckMemory;
   static bool UseZendArray; // ignored: ZendArray is always enabled
   static bool UseSmallArray;
+  static bool UseDirectCopy;
   static bool EnableApc;
   static bool EnableConstLoad;
   static bool ApcUseSharedMemory;

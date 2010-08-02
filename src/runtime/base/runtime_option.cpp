@@ -227,6 +227,7 @@ bool RuntimeOption::EnableMemoryManager = true;
 bool RuntimeOption::CheckMemory = false;
 bool RuntimeOption::UseZendArray = true;
 bool RuntimeOption::UseSmallArray = false;
+bool RuntimeOption::UseDirectCopy = false;
 bool RuntimeOption::EnableApc = true;
 bool RuntimeOption::EnableConstLoad = false;
 bool RuntimeOption::ApcUseSharedMemory = false;
@@ -568,6 +569,7 @@ void RuntimeOption::Load(Hdf &config) {
     CheckMemory = server["CheckMemory"].getBool();
     UseZendArray = server["UseZendArray"].getBool(true);
     UseSmallArray = server["UseSmallArray"].getBool(false);
+    UseDirectCopy = server["UseDirectCopy"].getBool(false);
 
     Hdf apc = server["APC"];
     EnableApc = apc["EnableApc"].getBool(true);

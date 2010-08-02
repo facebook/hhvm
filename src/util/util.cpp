@@ -249,37 +249,80 @@ void Util::syncdir(const std::string &dest_, const std::string &src_,
 }
 
 int Util::copy(const char *srcfile, const char *dstfile) {
-#define BUFSIZE (1 << 20)
-  int srcFd = open(srcfile, O_RDONLY | O_DIRECT);
+  int srcFd = open(srcfile, O_RDONLY);
   if (srcFd == -1) return -1;
-  int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC | O_DIRECT, 0666);
+  int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (dstFd == -1) return -1;
-  int pagesize = getpagesize();
-  char *rbuf = (char *)malloc(BUFSIZE + pagesize);
-  char *buf = (char *) // align for O_DIRECT
-    ((((unsigned long)rbuf + pagesize - 1) / pagesize) * pagesize);
 
   while (1) {
+    char buf[8192];
     bool err = false;
-    ssize_t bytes = read(srcFd, buf, BUFSIZE);
-    if (bytes == 0) break;
-    if (bytes == -1) {
+    ssize_t rbytes = read(srcFd, buf, sizeof(buf));
+    ssize_t wbytes;
+    if (rbytes == 0) break;
+    if (rbytes == -1) {
       err = true;
       Logger::Error("read failed: %s", safe_strerror(errno).c_str());
-    } else if (write(dstFd, buf, bytes) == -1) {
+    } else if ((wbytes = write(dstFd, buf, rbytes)) != rbytes) {
       err = true;
-      Logger::Error("write failed: %s", safe_strerror(errno).c_str());
+      Logger::Error("write failed: %d, %s", wbytes,
+                    safe_strerror(errno).c_str());
     }
     if (err) {
       close(srcFd);
       close(dstFd);
-      free(rbuf);
       return -1;
     }
   }
   close(srcFd);
   close(dstFd);
-  free(rbuf);
+  return 0;
+}
+
+int Util::directCopy(const char *srcfile, const char *dstfile) {
+  int srcFd = open(srcfile, O_RDONLY);
+  if (srcFd == -1) return -1;
+  int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+  if (dstFd == -1) return -1;
+
+  while (1) {
+    char buf[1 << 20];
+    bool err = false;
+    ssize_t rbytes = read(srcFd, buf, sizeof(buf));
+    ssize_t wbytes;
+    if (rbytes == 0) break;
+    if (rbytes == -1) {
+      err = true;
+      Logger::Error("read failed: %s", safe_strerror(errno).c_str());
+    } else if (fdatasync(srcFd) == -1) {
+      err = true;
+      Logger::Error("read fdatasync failed: %s",
+                    safe_strerror(errno).c_str());
+    } else if (posix_fadvise(srcFd, 0, 0, POSIX_FADV_DONTNEED) == -1) {
+      err = true;
+      Logger::Error("read posix_fadvise failed: %s",
+                    safe_strerror(errno).c_str());
+    } else if ((wbytes = write(dstFd, buf, rbytes)) != rbytes) {
+      err = true;
+      Logger::Error("write failed: %d, %s", wbytes,
+                    safe_strerror(errno).c_str());
+    } else if (fdatasync(dstFd) == -1) {
+      err = true;
+      Logger::Error("write fdatasync failed: %s",
+                    safe_strerror(errno).c_str());
+    } else if (posix_fadvise(dstFd, 0, 0, POSIX_FADV_DONTNEED) == -1) {
+      err = true;
+      Logger::Error("write posix_fadvise failed: %s",
+                    safe_strerror(errno).c_str());
+    }
+    if (err) {
+      close(srcFd);
+      close(dstFd);
+      return -1;
+    }
+  }
+  close(srcFd);
+  close(dstFd);
   return 0;
 }
 
@@ -289,6 +332,16 @@ int Util::rename(const char *oldname, const char *newname) {
   if (errno != EXDEV) return -1;
 
   copy(oldname, newname);
+  unlink(oldname);
+  return 0;
+}
+
+int Util::directRename(const char *oldname, const char *newname) {
+  int ret = ::rename(oldname, newname);
+  if (ret == 0) return 0;
+  if (errno != EXDEV) return -1;
+
+  directCopy(oldname, newname);
   unlink(oldname);
   return 0;
 }

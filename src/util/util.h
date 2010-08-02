@@ -73,9 +73,19 @@ void syncdir(const std::string &dest, const std::string &src,
 int copy(const char *srcfile, const char *dstfile);
 
 /**
+ * Like copy but using little disk-cache
+ */
+int directCopy(const char *srcfile, const char *dstfile);
+
+/**
  * Like rename(2), but takes care of cross-filesystem rename.
  */
 int rename(const char *oldname, const char *newname);
+
+/**
+ * Like rename but using little disk-cache
+ */
+int directRename(const char *oldname, const char *newname);
 
 /**
  * Like system(3), but automatically print errors if execution fails.

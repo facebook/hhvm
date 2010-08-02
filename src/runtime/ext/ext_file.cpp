@@ -948,15 +948,25 @@ bool f_touch(CStrRef filename, int64 mtime /* = 0 */, int64 atime /* = 0 */) {
 
 bool f_copy(CStrRef source, CStrRef dest,
             CObjRef context /* = null_object */) {
-  int ret = Util::copy(File::TranslatePath(source).data(),
-                       File::TranslatePath(dest).data());
+  int ret =
+    RuntimeOption::UseDirectCopy ?
+      Util::directCopy(File::TranslatePath(source).data(),
+                       File::TranslatePath(dest).data())
+                                 :
+      Util::copy(File::TranslatePath(source).data(),
+                 File::TranslatePath(dest).data());
   return (ret == 0);
 }
 
 bool f_rename(CStrRef oldname, CStrRef newname,
               CObjRef context /* = null_object */) {
-  int ret = Util::rename(File::TranslatePath(oldname).data(),
-                         File::TranslatePath(newname).data());
+  int ret =
+    RuntimeOption::UseDirectCopy ?
+      Util::directRename(File::TranslatePath(oldname).data(),
+                         File::TranslatePath(newname).data())
+                                 :
+      Util::rename(File::TranslatePath(oldname).data(),
+                   File::TranslatePath(newname).data());
   return (ret == 0);
 }
 

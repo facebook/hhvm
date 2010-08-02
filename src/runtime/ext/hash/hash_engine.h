@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#define L64(x) x
+#define L64(x) (x ## ULL)
 
 DECLARE_BOOST_TYPES(HashEngine);
 class HashEngine {

@@ -2178,7 +2178,11 @@
 #define SIZEOF_INTMAX_T 8
 
 /* The size of a `long', as computed by sizeof. */
+#ifdef WORDSIZE_IS_64
 #define SIZEOF_LONG 8
+#else
+#define SIZEOF_LONG 4
+#endif
 
 /* The size of a `long int', as computed by sizeof. */
 /* #undef SIZEOF_LONG_INT */
@@ -2190,16 +2194,28 @@
 #define SIZEOF_LONG_LONG_INT 8
 
 /* The size of a `ptrdiff_t', as computed by sizeof. */
+#ifdef WORDSIZE_IS_64
 #define SIZEOF_PTRDIFF_T 8
+#else
+#define SIZEOF_PTRDIFF_T 4
+#endif
 
 /* The size of a `short', as computed by sizeof. */
 #define SIZEOF_SHORT 2
 
 /* The size of a `size_t', as computed by sizeof. */
+#ifdef WORDSIZE_IS_64
 #define SIZEOF_SIZE_T 8
+#else
+#define SIZEOF_SIZE_T 4
+#endif
 
 /* The size of a `ssize_t', as computed by sizeof. */
+#ifdef WORDSIZE_IS_64
 #define SIZEOF_SSIZE_T 8
+#else
+#define SIZEOF_SSIZE_T 4
+#endif
 
 /* */
 /* #undef SOLARIS */

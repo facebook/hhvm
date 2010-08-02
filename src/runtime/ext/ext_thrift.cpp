@@ -634,7 +634,7 @@ void binary_serialize_spec(CObjRef zthis, PHPOutputTransport& transport,
       throw_tprotocolexception("Bad keytype in TSPEC (expected 'long')", INVALID_DATA);
       return;
     }
-    ulong fieldno = key.toInt64();
+    unsigned long fieldno = key.toInt64();
     Array fieldspec = key_ptr.second().toArray();
 
     // field name

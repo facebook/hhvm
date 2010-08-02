@@ -43,16 +43,16 @@ IMPLEMENT_DEFAULT_EXTENSION(hotprofiler);
  * @author cjiang
  */
 static inline uint8 hprof_inline_hash(const char * str) {
-  ulong h = 5381;
+  unsigned long h = 5381;
   uint i = 0;
   uint8 res = 0;
 
   while (*str) {
     h += (h << 5);
-    h ^= (ulong) *str++;
+    h ^= (unsigned long) *str++;
   }
 
-  for (i = 0; i < sizeof(ulong); i++) {
+  for (i = 0; i < sizeof(unsigned long); i++) {
     res += ((uint8 *)&h)[i];
   }
   return res;

@@ -133,14 +133,14 @@ public:
   };
 
 private:
-  uint     m_nTableSize;
-  uint     m_nTableMask;
-  uint     m_nNumOfElements;
-  ulong    m_nNextFreeElement;
-  Bucket * m_pListHead;
-  Bucket * m_pListTail;
-  Bucket **m_arBuckets;
-  bool     m_linear;
+  uint             m_nTableSize;
+  uint             m_nTableMask;
+  uint             m_nNumOfElements;
+  unsigned long    m_nNextFreeElement;
+  Bucket         * m_pListHead;
+  Bucket         * m_pListTail;
+  Bucket         **m_arBuckets;
+  bool             m_linear;
 
   Bucket *find(int64 h) const;
   Bucket *find(const char *k, int len, int64 prehash = -1,

@@ -17,7 +17,7 @@
 #include <runtime/base/memory/leak_detectable.h>
 #include <runtime/base/program_functions.h>
 #include <runtime/base/server/server_stats.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <tbb/concurrent_hash_map.h>
 #include <runtime/base/runtime_option.h>
 #ifdef GOOGLE_HEAP_PROFILER

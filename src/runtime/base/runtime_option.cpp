@@ -354,6 +354,8 @@ void RuntimeOption::Load(Hdf &config) {
           Tier = hdf.getName();
           config.copy(hdf["overwrite"]);
           // no break here, so we can continue to match more overwrites
+        } else {
+          hdf["overwrite"].setVisited(); // avoid lint complaining
         }
       }
     }

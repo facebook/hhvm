@@ -70,6 +70,8 @@ struct _hdf
    * load method */
   void *fileload_ctx;
   HDFFILELOAD fileload;
+
+  int visited;
 };
 
 /*
@@ -234,6 +236,16 @@ HDF_ATTR* hdf_get_attr (HDF *hdf, const char *name);
  */
 NEOERR* hdf_set_attr (HDF *hdf, const char *name, const char *key,
                       const char *value);
+
+/*
+ * Function: hdf_set_visited - Mark a node visited or not
+ */
+void hdf_set_visited (HDF *hdf, int visited);
+
+/*
+ * Function: hdf_is_visited - Return a node visited or not
+ */
+int hdf_is_visited (HDF *hdf);
 
 /*
  * Function: hdf_obj_child - Return the first child of a dataset node

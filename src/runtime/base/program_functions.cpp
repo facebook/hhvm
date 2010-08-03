@@ -629,6 +629,11 @@ static int execute_program_impl(int argc, char **argv) {
     config.fromString(po.confStrings[i].c_str());
   }
   RuntimeOption::Load(config);
+  vector<string> badnodes;
+  config.lint(badnodes);
+  for (unsigned int i = 0; i < badnodes.size(); i++) {
+    Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
+  }
 
   LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
                            RuntimeOption::LightProcessCount);

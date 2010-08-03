@@ -147,11 +147,90 @@ void Hdf::close() {
   }
 }
 
+static bool match(const std::string &name, const std::string &pattern) {
+  ASSERT(!name.empty() && !pattern.empty());
+
+  unsigned int len = pattern.size();
+  char first = pattern[0];
+  char last = pattern[len - 1];
+  if (first == '*') {
+    if (last == '*') {
+      return name.find(pattern.substr(1, len - 2)) != string::npos;
+    }
+    return name.size() >= len - 1 &&
+      name.substr(name.size() - len + 1) == pattern.substr(1);
+  }
+  if (last == '*') {
+    return strncmp(name.c_str(), pattern.c_str(), len - 1) == 0;
+  }
+  return name == pattern;
+}
+
+bool Hdf::lintImpl(std::vector<std::string> &names,
+                   const std::vector<std::string> &excludes, bool visited) {
+  unsigned int size = names.size();
+
+  bool childVisited = false;
+  for (Hdf hdf = firstChild(false); hdf.exists(); hdf = hdf.next(false)) {
+    if (hdf.lintImpl(names, excludes, visited)) {
+      childVisited = true;
+    }
+  }
+  bool meVisited = childVisited || hdf_is_visited(getRaw());
+
+  string fullname = getFullPath();
+  if (!fullname.empty()) {
+    if (meVisited == visited) {
+      bool excluded = false;
+      for (unsigned int i = 0; i < excludes.size(); i++) {
+        if (match(fullname, excludes[i])) {
+          excluded = true;
+          break;
+        }
+      }
+      if (!excluded) {
+        if (!visited) {
+          names.resize(size); // so reports about my children are gone
+        }
+        names.push_back(fullname);
+      }
+    }
+  }
+
+  return meVisited;
+}
+
+void Hdf::lint(std::vector<std::string> &names,
+               const char *excludePatternNode /* = "LintExcludePatterns" */,
+               bool visited /* = false */) {
+  std::vector<std::string> patterns;
+  if (excludePatternNode && *excludePatternNode) {
+    for (Hdf hdf = operator[](excludePatternNode).firstChild();
+         hdf.exists(); hdf = hdf.next()) {
+      string value = hdf.getString();
+      if (!value.empty()) {
+        patterns.push_back(value);
+      }
+    }
+  }
+
+  lintImpl(names, patterns, visited);
+}
+
+void Hdf::setVisited(bool visited /* = true */) {
+  hdf_set_visited(getRaw(), visited ? 1 : 0);
+  for (Hdf hdf = firstChild(false); hdf.exists(); hdf = hdf.next(false)) {
+    hdf.setVisited(visited);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // gets
 
 const char *Hdf::get(const char *defValue /* = NULL */) const {
-  const char *v = hdf_obj_value(getRaw());
+  HDF *hdf = getRaw();
+  const char *v = hdf_obj_value(hdf);
+  hdf_set_visited(hdf, 1);
   return v ? v : defValue;
 }
 
@@ -357,8 +436,10 @@ void Hdf::set(double value) {
 ///////////////////////////////////////////////////////////////////////////////
 // sub-nodes
 
-std::string Hdf::getName() const {
-  char *name = hdf_obj_name(getRaw());
+std::string Hdf::getName(bool markVisited /* = true */) const {
+  HDF *hdf = getRaw();
+  char *name = hdf_obj_name(hdf);
+  if (markVisited) hdf_set_visited(hdf, 1);
   return name ? name : "";
 }
 
@@ -476,12 +557,22 @@ void Hdf::remove(const std::string &name) const {
 ///////////////////////////////////////////////////////////////////////////////
 // iterations
 
-Hdf Hdf::firstChild() const {
-  return hdf_obj_child(getRaw());
+Hdf Hdf::firstChild(bool markVisited /* = true */) const {
+  HDF *hdf = getRaw();
+  if (markVisited) hdf_set_visited(hdf, 1);
+  Hdf ret(hdf_obj_child(hdf));
+  ret.m_path = getFullPath();
+  ret.m_name = ret.getName(markVisited);
+  return ret;
 }
 
-Hdf Hdf::next() const {
-  return hdf_obj_next(getRaw());
+Hdf Hdf::next(bool markVisited /* = true */) const {
+  HDF *hdf = getRaw();
+  if (markVisited) hdf_set_visited(hdf, 1);
+  Hdf ret(hdf_obj_next(hdf));
+  ret.m_path = m_path;
+  ret.m_name = ret.getName(markVisited);
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

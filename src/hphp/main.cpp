@@ -336,6 +336,11 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     config.fromString(po.confStrings[i].c_str());
   }
   Option::Load(config);
+  vector<string> badnodes;
+  config.lint(badnodes);
+  for (unsigned int i = 0; i < badnodes.size(); i++) {
+    Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
+  }
 
   if (po.inputDir.empty()) {
     po.inputDir = '.';

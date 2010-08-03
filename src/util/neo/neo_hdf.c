@@ -485,6 +485,14 @@ NEOERR* hdf_set_attr (HDF *hdf, const char *name, const char *key,
   return STATUS_OK;
 }
 
+void hdf_set_visited (HDF *hdf, int visited) {
+  if (hdf) hdf->visited = visited;
+}
+
+int hdf_is_visited (HDF *hdf) {
+  return hdf ? hdf->visited : 0;
+}
+
 HDF* hdf_obj_child (HDF *hdf)
 {
   HDF *obj;

@@ -73,6 +73,27 @@ public:
   void close();
 
   /**
+   * Get a list of node names that are visited or not visited. Great for lint
+   * purpose, finding nodes that are invalid for configurations, for example.
+   * Use exclusion to skip checking certain node names. For example,
+   *
+   *   LintExcludePatterns {
+   *     * = FutureConfigName
+   *     * = *endwith
+   *     * = startwith*
+   *     * = *containing*
+   *   }
+   *
+   * The pattern is NOT a full regex, but only the simple 3 as above.
+   *
+   * When visited = true, return a list of nodes that are visited.
+   */
+  void lint(std::vector<std::string> &names,
+            const char *excludePatternNode = "LintExcludePatterns",
+            bool visited = false);
+  void setVisited(bool visited = true);
+
+  /**
    * Read or dump this entire tree in HDF format.
    */
   void fromString(const char *input);
@@ -157,7 +178,7 @@ public:
    * Get this node's fully qualified path or just one-level node name.
    */
   std::string getFullPath() const;
-  std::string getName() const;
+  std::string getName(bool markVisited = true) const;
 
   /**
    * Get this node's parent.
@@ -205,8 +226,8 @@ public:
    *
    * Please use "hdf.exists()" for testing than casting it to boolean.
    */
-  Hdf firstChild() const;
-  Hdf next() const;
+  Hdf firstChild(bool markVisited = true) const;
+  Hdf next(bool markVisited = true) const;
 
   /**
    * Comparisons
@@ -338,6 +359,9 @@ private:
    * Implementation of parent() calls.
    */
   Hdf parentImpl() const;
+
+  bool lintImpl(std::vector<std::string> &names,
+                const std::vector<std::string> &excludes, bool visited);
 };
 
 /**

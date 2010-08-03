@@ -610,7 +610,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
-    int errnum = 1; // E_ERROR
+    int errnum = ErrorConstants::FATAL_ERROR;
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !RuntimeOption::AlwaysLogUnhandledExceptions) {

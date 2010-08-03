@@ -38,9 +38,20 @@ public:
     USER_NOTICE = 1024,
     STRICT = 2048,
     RECOVERABLE_ERROR = 4096,
-    ALL = ERROR | WARNING | PARSE | NOTICE | CORE_ERROR | CORE_WARNING |
-          COMPILE_ERROR | COMPILE_WARNING | USER_ERROR | USER_WARNING |
-          USER_NOTICE | RECOVERABLE_ERROR
+
+    /**
+     * PHP's fatal errors cannot be fed into error handler. HipHop can. We
+     * still need "ERROR" bit, so old PHP error handler can see this error.
+     * The extra 24th bit will help people who want to find out if it's
+     * a fatal error only HipHop throws or not.
+     */
+    FATAL_ERROR = ERROR | (1 << 24), // 16777217
+
+    PHP_ALL = ERROR | WARNING | PARSE | NOTICE | CORE_ERROR | CORE_WARNING |
+        COMPILE_ERROR | COMPILE_WARNING | USER_ERROR | USER_WARNING |
+        USER_NOTICE | RECOVERABLE_ERROR,
+
+    HPHP_ALL = PHP_ALL | FATAL_ERROR
   };
 };
 

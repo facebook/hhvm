@@ -46,7 +46,7 @@ bool RuntimeOption::InjectedStackTrace = true;
 bool RuntimeOption::NoSilencer = false;
 bool RuntimeOption::EnableApplicationLog = true;
 bool RuntimeOption::CallUserHandlerOnFatals = true;
-int RuntimeOption::RuntimeErrorReportingLevel = ErrorConstants::ALL;
+int RuntimeOption::RuntimeErrorReportingLevel = ErrorConstants::HPHP_ALL;
 
 bool RuntimeOption::NoInfiniteLoopDetection = false;
 bool RuntimeOption::NoInfiniteRecursionDetection = false;
@@ -398,7 +398,7 @@ void RuntimeOption::Load(Hdf &config) {
     NoSilencer = logger["NoSilencer"].getBool();
     EnableApplicationLog = logger["ApplicationLog"].getBool(true);
     RuntimeErrorReportingLevel =
-      logger["RuntimeErrorReportingLevel"].getInt32(ErrorConstants::ALL);
+      logger["RuntimeErrorReportingLevel"].getInt32(ErrorConstants::HPHP_ALL);
 
     AccessLogDefaultFormat = logger["AccessLogDefaultFormat"].
       getString("%h %l %u %t \"%r\" %>s %b");

@@ -18,6 +18,7 @@
 #include <runtime/ext/ext_file.h>
 #include <runtime/ext/ext_string.h>
 #include <runtime/ext/ext_stream.h>
+#include <runtime/ext/ext_options.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/ini_setting.h>
@@ -1094,7 +1095,8 @@ Variant f_glob(CStrRef pattern, int flags /* = 0 */) {
 }
 
 Variant f_tempnam(CStrRef dir, CStrRef prefix) {
-  String rootDir = File::TranslatePath(dir);
+  String rootDir =
+    File::TranslatePath(!dir.empty() ? dir : f_sys_get_temp_dir());
   String pbase = f_basename(prefix);
   if (pbase.size() > 64) pbase = pbase.substr(0, 63);
   String templ = rootDir + "/" + pbase + "XXXXXX";

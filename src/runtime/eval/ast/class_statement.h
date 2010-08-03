@@ -47,6 +47,7 @@ public:
   int getModifiers() const { return m_modifiers; }
   void eval(VariableEnvironment &env, Variant &res) const;
   int64 getHash() const { return m_hash; }
+  bool hasInitialValue() const { return m_value; }
 private:
   std::string m_name;
   int64 m_hash;

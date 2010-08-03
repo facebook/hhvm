@@ -644,6 +644,50 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
         }
       }
     }
+    // Property check
+    for (vector<ClassVariablePtr>::const_iterator it = m_variablesVec.begin();
+        it != m_variablesVec.end(); ++it) {
+      hphp_const_char_imap<ClassVariablePtr>::const_iterator vit =
+        cls->m_variables.find((*it)->name().c_str());
+      if (vit != m_variables.end()) {
+        int m1 = (*it)->getModifiers();
+        int m2 = vit->second->getModifiers();
+        // Access levels
+        int p1 = m1 & (Public|Protected|Private);
+        if (!p1) p1 = Public;
+        int p2 = m2 & (Public|Protected|Private);
+        if (!p2) p2 = Public;
+        if (p1 < p2) {
+          const char *pn1;
+          if (p1 == Private) pn1 = "private";
+          else if (p1 == Protected) pn1 = "protected";
+          else pn1 = "public";
+          // Illegal strengthening of privacy
+          raise_error("Access level to %s::%s must be %s (as in class %s) "
+              "or weaker", cls->name().c_str(), (*it)->name().c_str(), pn1,
+              name().c_str());
+        } else if (m1 & Static && p1 == Protected && p2 == Public &&
+            vit->second->hasInitialValue()) {
+          // No initial value allowed in redefinition of protected to public
+          // static
+          raise_error("Cannot change initial value of property %s::%s in class"
+          " %s", name().c_str(), (*it)->name().c_str(), cls->name().c_str());
+        }
+        // Staticness
+        if (p1 != Private) {
+          if (m1 & Static && !(m2 & Static)) {
+            raise_error("Cannot redeclare static %s::%s as non-static %s::%s",
+                name().c_str(), (*it)->name().c_str(), cls->name().c_str(),
+                vit->first);
+          } else if (!(m1 & Static) && m2 & Static) {
+            raise_error("Cannot redeclare non-static %s::%s as static %s::%s",
+                name().c_str(), (*it)->name().c_str(), cls->name().c_str(),
+                vit->first);
+          }
+        }
+      }
+    }
+
   } else {
     if (!(getModifiers() & (Interface|Abstract))) {
       for (vector<MethodStatementPtr>::const_iterator it =

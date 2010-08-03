@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [ "$1" = '--help' ] || [ "$1" = '-h' ]; then
 	echo 'usage: ./configure -Dvariable=argument ...\n'

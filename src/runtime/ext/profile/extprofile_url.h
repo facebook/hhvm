@@ -45,9 +45,7 @@ inline Array x_get_meta_tags(CStrRef filename, bool use_include_path = false) {
   return f_get_meta_tags(filename, use_include_path);
 }
 
-inline Variant x_http_build_query(CVarRef formdata,
-                                  CStrRef numeric_prefix = null_string,
-                                  CStrRef arg_separator = null_string) {
+inline Variant x_http_build_query(CVarRef formdata, CStrRef numeric_prefix = null_string, CStrRef arg_separator = null_string) {
   FUNCTION_INJECTION_BUILTIN(http_build_query);
   return f_http_build_query(formdata, numeric_prefix, arg_separator);
 }

@@ -474,6 +474,12 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
       }
       return ExpressionPtr();
     }
+    if (m_funcScope->getOptFunction()) {
+      SimpleFunctionCallPtr self(
+        static_pointer_cast<SimpleFunctionCall>(shared_from_this()));
+      ExpressionPtr e = (m_funcScope->getOptFunction())(0, ar, self, 0);
+      if (e) return e;
+    }
   }
 
   if (!m_funcScope->getInlineAsExpr() ||

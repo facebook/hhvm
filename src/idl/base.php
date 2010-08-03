@@ -78,6 +78,8 @@ define('NoEffect', 4);
 define('NoInjection', 8);
 define('MixedVariableArguments', 16);
 define('FunctionIsFoldable', 32);
+define('HasOptFunction', 0x100000000);
+define('HasDocComment', 0x200000000);
 
 // Mask for checking the flags related to variable arguments
 define('VarArgsMask', (VariableArguments | ReferenceVariableArguments |
@@ -121,7 +123,8 @@ function dyn() {
 function build_function_def($name,
                             $return,
                             $args,
-                            $flags = DefaultFlags) {
+                            $flags = DefaultFlags,
+                            $opt = null) {
   $fargs = array();
   $have_first_optional = false;
   $required_arg_count = 0;
@@ -154,11 +157,17 @@ function build_function_def($name,
     }
     $fargs[] = $farg;
   }
+  if ($opt) {
+    $flags |= HasOptFunction;
+  } else {
+    $flags &= ~HasOptFunction;
+  }
   $func = array('name' => strtolower($name),
                 'return' => $return,
                 'args' => $fargs,
                 'required_args' => $required_arg_count,
-                'flags' => $flags);
+                'flags' => $flags,
+                'opt' => $opt);
   if ($return & Reference) {
     $func['ref'] = true;
     $func['return'] = Variant;
@@ -170,9 +179,10 @@ $funcs = array();
 function f($name,
            $return = null,
            $args = array(),
-           $flags = DefaultFlags) {
+           $flags = DefaultFlags,
+           $opt = null) {
   global $funcs;
-  $funcs[] = build_function_def($name, $return, $args, $flags);
+  $funcs[] = build_function_def($name, $return, $args, $flags, $opt);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -333,7 +343,19 @@ function generateFuncCPPInclude($func, $f, $newline = true) {
   }
   fprintf($f, "NULL, ");
   fprintf($f, 'S(%d), ', $func['flags']);
+  if ($func['opt']) {
+    fprintf($f, '(const char*)(int64)%s, ', $func['opt']);
+  }
   if ($newline) fprintf($f, "\n");
+}
+
+function generateFuncOptDecls($func, $f) {
+  if ($func['opt']) {
+    fprintf($f, "extern ExpressionPtr ".
+            "%s(CodeGenerator *cg, AnalysisResultPtr ar, ".
+            "SimpleFunctionCallPtr call, int mode);\n",
+            $func['opt']);
+  }
 }
 
 function generateConstCPPInclude($const, $f) {

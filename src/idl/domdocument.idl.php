@@ -225,7 +225,7 @@ c('DOMDocument', 'DOMNode', array(),
   "  bool m_substituteentities;\n".
   "  bool m_stricterror;\n".
   "  bool m_recover;\n".
-  "  Array m_classmap;\n"
+  "  Array m_classmap;\n".
   "  Array m_orphans;\n".
   "  bool m_owner;"
  );

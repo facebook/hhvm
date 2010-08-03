@@ -49,6 +49,12 @@ bool BuiltinSymbols::Loaded = false;
 bool BuiltinSymbols::NoSuperGlobals = false;
 StringBag BuiltinSymbols::s_strings;
 
+namespace HPHP {
+#define EXT_TYPE 4
+#include <system/ext.inc>
+#undef EXT_TYPE
+}
+
 const char *BuiltinSymbols::ExtensionFunctions[] = {
 #define S(n) (const char *)n
 #define T(t) (const char *)Type::KindOf ## t
@@ -271,7 +277,8 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   }
 
   // Read function flags (these flags are defined in "idl/base.php")
-  int flags = (int)(int64)(*p++);
+  int flags = (int)((int64)(*p) & 0x7fffffff);
+  int fields = (int)((int64)(*p++) >> 32);
   // Flags for variable arguments
   if (flags & 0x10) {
     f->setVariableArgument(-1);
@@ -286,6 +293,10 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   }
   if (flags & 0x20) {
     f->setIsFoldable();
+  }
+
+  if (fields & 0x1) {
+    f->setOptFunction((FunctionOptPtr)(int64)(*p++));
   }
 
   return f;

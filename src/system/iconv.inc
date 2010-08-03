@@ -8,7 +8,7 @@
 "iconv_strlen", T(Variant), S(0), "str", T(String), NULL, S(0), "charset", T(String), "null_string", S(0), NULL, S(0), 
 "iconv_strpos", T(Variant), S(0), "haystack", T(String), NULL, S(0), "needle", T(String), NULL, S(0), "offset", T(Int32), "0", S(0), "charset", T(String), "null_string", S(0), NULL, S(0), 
 "iconv_strrpos", T(Variant), S(0), "haystack", T(String), NULL, S(0), "needle", T(String), NULL, S(0), "charset", T(String), "null_string", S(0), NULL, S(0), 
-"iconv_substr", T(Variant), S(0), "str", T(String), NULL, S(0), "offset", T(Int32), NULL, S(0), "length", T(Int32), "0", S(0), "charset", T(String), "null_string", S(0), NULL, S(0), 
+"iconv_substr", T(Variant), S(0), "str", T(String), NULL, S(0), "offset", T(Int32), NULL, S(0), "length", T(Int32), "INT_MAX", S(0), "charset", T(String), "null_string", S(0), NULL, S(0), 
 "ob_iconv_handler", T(String), S(0), "contents", T(String), NULL, S(0), "status", T(Int32), NULL, S(0), NULL, S(0), 
 #elif EXT_TYPE == 1
 #elif EXT_TYPE == 2

@@ -30,6 +30,14 @@ DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(FunctionScope);
+DECLARE_BOOST_TYPES(Expression);
+DECLARE_BOOST_TYPES(SimpleFunctionCall);
+
+class CodeGenerator;
+
+typedef ExpressionPtr (*FunctionOptPtr)(CodeGenerator *cg,
+                                        AnalysisResultPtr ar,
+                                        SimpleFunctionCallPtr, int);
 
 /**
  * A FunctionScope corresponds to a function declaration. We store all
@@ -160,6 +168,9 @@ public:
    */
   void setReturnType(AnalysisResultPtr ar, TypePtr type);
   TypePtr getReturnType() const { return m_returnType;}
+
+  void setOptFunction(FunctionOptPtr fn) { m_optFunction = fn; }
+  FunctionOptPtr getOptFunction() const { return m_optFunction; }
 
   /**
    * Whether this is a virtual function that needs to go through invoke().
@@ -397,6 +408,7 @@ private:
   bool m_nrvoFix;
   bool m_inlineAsExpr;
   int m_inlineIndex;
+  FunctionOptPtr m_optFunction;
   void outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
       bool ret, bool constructor);
 };

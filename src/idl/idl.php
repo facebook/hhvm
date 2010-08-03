@@ -170,6 +170,18 @@ if ($inc) {
       fprintf($f, "\"%s\",", $dyn);
     }
   }
+  $done = array();
+  foreach ($funcs as $func) {
+    if ($func['opt']) {
+      if (!$done) {
+        fprintf($f, "\n#elif EXT_TYPE == 4\n");
+      }
+      if (!isset($done[$func['opt']])) {
+        generateFuncOptDecls($func, $f);
+        $done[$func['opt']] = true;
+      }
+    }
+  }
   fprintf($f, "\n");
   fprintf($f, "#endif\n");
 }

@@ -211,10 +211,11 @@ CPPFLAGS += \
   -isystem $(EXT_DIR)/boost/include/boost-1_37 \
   -isystem $(EXT_DIR)/mysql/include \
   -isystem $(EXT_DIR)/sqlite/include \
-  -isystem /usr/include/libxml2 \
+  -isystem $(EXT_DIR)/libxml2/include/libxml2 \
   -isystem $(EXT_DIR)/libfbml/include \
   -isystem $(EXT_DIR)/libmbfl/include \
   -isystem $(EXT_DIR)/oniguruma/include \
+  -isystem $(EXT_DIR)/ldap/include \
   -isystem $(EXT_DIR)/oracle/include \
   -isystem $(EXT_DIR)/icu/include \
   -isystem $(EXT_DIR)/xhp/include \
@@ -500,7 +501,7 @@ MOZILLA_LIBS = $(EXT_DIR)/mozilla/libmozutil_s.a \
 
 CURL_LIBS = $(EXT_DIR)/libcurl/lib/libcurl.a
 
-LIBXML_LIBS = -lxml2 -lexpat
+LIBXML_LIBS = $(EXT_DIR)/libxml2/lib/libxml2.a -lexpat
 
 TIME_LIBS = $(EXT_DIR)/timelib/lib/libtimelib.a
 
@@ -548,7 +549,7 @@ MCRYPT_LIBS = $(EXT_DIR)/libmcrypt/lib/libmcrypt.a
 
 FBI_LIBS = $(EXT_DIR)/libfbi/lib/libfbi.a
 
-LDAP_LIBS = -lldap -llber
+LDAP_LIBS = $(EXT_DIR)/ldap/lib/libldap.a $(EXT_DIR)/ldap/lib/liblber.a
 
 READLINE_LIBS = $(EXT_DIR)/readline/lib/libreadline.a \
 	$(EXT_DIR)/readline/lib/libhistory.a -lcurses
@@ -586,6 +587,8 @@ LIB_PATHS = $(HPHP_LIB) \
   $(EXT_DIR)/libfbi/lib \
   $(EXT_DIR)/jemalloc/lib \
   $(EXT_DIR)/readline/lib \
+  $(EXT_DIR)/ldap/lib \
+  $(EXT_DIR)/libxml2/lib \
 
 ###############################################################################
 # Dependencies

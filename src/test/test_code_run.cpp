@@ -12665,6 +12665,19 @@ bool TestCodeRun::TestAPC() {
         "  int(10)\n"
         "}\n"
       );
+
+  MVCRO("<?php\n"
+        "class A { var $a, $b; }\n"
+        "$a = new A(); $a->a = 5; $a->b = &$a->a;\n"
+        "apc_store('key', $a);\n"
+        "var_dump(apc_fetch('key'));\n",
+        "object(A)#2 (2) {\n"
+        "  [\"a\"]=>\n"
+        "  &int(5)\n"
+        "  [\"b\"]=>\n"
+        "  &int(5)\n"
+        "}\n"
+      );
   return true;
 }
 

@@ -61,8 +61,9 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
       String s = source.toString();
       m_type = serialized ? KindOfObject : KindOfString;
       if (serialized) {
-        Object obj = f_unserialize(s).toObject();
-        s = apc_serialize(obj);
+        // It is priming, and there might not be the right class definitions
+        // for unserialization.
+        s = apc_reserialize(s);
       }
       m_data.str = s->copy(true);
       break;

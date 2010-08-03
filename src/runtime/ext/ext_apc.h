@@ -114,6 +114,7 @@ void const_load_impl(const char **int_keys, int64 *int_values,
 
 String apc_serialize(CVarRef value);
 Variant apc_unserialize(CStrRef str);
+String apc_reserialize(CStrRef str);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

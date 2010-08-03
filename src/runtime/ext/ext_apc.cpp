@@ -654,5 +654,155 @@ Variant apc_unserialize(CStrRef str) {
   return f_unserialize(str);
 }
 
+void reserialize(istream &in, StringBuffer &buf) {
+  char type, sep;
+  in >> type >> sep;
+
+  if (type == 'N') {
+    buf.append(type);
+    buf.append(sep);
+    return;
+  }
+
+  switch (type) {
+  case 'r':
+  case 'R':
+  case 'b':
+  case 'i':
+  case 'd':
+    {
+      buf.append(type);
+      buf.append(sep);
+      while (in.peek() != ';') {
+        char ch;
+        in >> ch;
+        buf.append(ch);
+      }
+    }
+    break;
+  case 'S':
+  case 'A':
+    {
+      // shouldn't happen, but keep the code here anyway.
+      buf.append(type);
+      buf.append(sep);
+      char pointer[8];
+      in.read(pointer, 8);
+      buf.append(pointer, 8);
+    }
+    break;
+  case 's':
+    {
+      String v;
+      v.unserialize(in);
+      ASSERT(!v.isNull());
+      if (v->isStatic()) {
+        union {
+          char pointer[8];
+          StringData *sd;
+        } u;
+        u.sd = v.get();
+        buf.append("S:");
+        buf.append(u.pointer, 8);
+        buf.append(';');
+      } else {
+        buf.append("s:");
+        buf.append(v.size());
+        buf.append(":\"");
+        buf.append(v.data(), v.size());
+        buf.append("\";");
+      }
+      in >> sep; // ';'
+      return;
+    }
+    break;
+  case 'a':
+    {
+      buf.append("a:");
+      int64 size;
+      char sep2;
+      in >> size >> sep2;
+      buf.append(size);
+      buf.append(sep2);
+      in >> sep2; // '{'
+      buf.append(sep2);
+      for (int64 i = 0; i < size; i++) {
+        reserialize(in, buf); // key
+        reserialize(in, buf); // value
+      }
+      in >> sep2; // '}'
+      buf.append(sep2);
+      return;
+    }
+    break;
+  case 'o':
+  case 'O':
+    {
+      buf.append(type);
+      buf.append(sep);
+
+      String clsName;
+      clsName.unserialize(in);
+      buf.append(clsName.size());
+      buf.append(":\"");
+      buf.append(clsName.data(), clsName.size());
+      buf.append("\":");
+
+      int64 size;
+      char sep2;
+      in >> sep2 >> size >> sep2;
+      buf.append(size);
+      buf.append(sep2);
+      in >> sep2; // '{'
+      buf.append(sep2);
+      for (int64 i = 0; i < size; i++) {
+        reserialize(in, buf); // property name
+        reserialize(in, buf); // property value
+      }
+      in >> sep2; // '}'
+      buf.append(sep2);
+      return;
+    }
+    break;
+  case 'C':
+    {
+      buf.append(type);
+      buf.append(sep);
+
+      String clsName;
+      clsName.unserialize(in);
+      buf.append(clsName.size());
+      buf.append(":\"");
+      buf.append(clsName.data(), clsName.size());
+      buf.append("\":");
+
+      in >> sep; // ':'
+      String serialized;
+      serialized.unserialize(in, '{', '}');
+      buf.append(serialized.size());
+      buf.append(":{");
+      buf.append(serialized.data(), serialized.size());
+      buf.append('}');
+      return;
+    }
+    break;
+  default:
+    throw Exception("Unknown type '%c'", type);
+  }
+
+  in >> sep; // the last ';'
+  buf.append(sep);
+}
+
+String apc_reserialize(CStrRef str) {
+  if (str.empty()) return str;
+
+  istringstream in(std::string(str.data(), str.size()));
+  StringBuffer buf;
+  reserialize(in, buf);
+
+  return buf.detach();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

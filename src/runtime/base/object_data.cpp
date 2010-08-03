@@ -174,10 +174,18 @@ Variant ObjectData::o_setPublic(CStrRef propName, int64 hash, CVarRef v,
 }
 
 void ObjectData::o_setArray(CArrRef properties) {
+  bool valueRef = properties->supportValueRef();
   for (ArrayIter iter(properties); iter; ++iter) {
     String key = iter.first().toString();
     if (key.empty() || key.charAt(0) != '\0') {
       // public property
+      if (valueRef) {
+        CVarRef secondRef = iter.secondRef();
+        if (secondRef.isReferenced()) {
+          o_setPublic(key, -1, ref(secondRef), false);
+          continue;
+        }
+      }
       o_setPublic(key, -1, iter.second(), false);
     }
   }
@@ -480,7 +488,7 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
             ClassInfo::PropertyInfo *p = cls->getPropertyInfo(name);
             String propName = name;
             if (p && (p->attribute & ClassInfo::IsPrivate)) {
-              propName = s_zero + o_getClassName() + s_zero + name;
+              propName = concat4(s_zero, o_getClassName(), s_zero, name);
             }
             wanted.set(propName, const_cast<ObjectData*>(this)->
                        o_getUnchecked(name, -1, o_getClassName()));

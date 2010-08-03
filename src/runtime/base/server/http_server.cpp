@@ -254,6 +254,7 @@ void HttpServer::run() {
                  m_danglings[i]->getName().c_str());
   }
 
+  hphp_process_exit();
   m_watchDog.waitForEnd();
   m_loggerThread.waitForEnd();
   Logger::Info("all servers stopped");

@@ -57,6 +57,7 @@ void Extension::ShutdownModules() {
        iter != s_registered_extensions->end(); ++iter) {
     iter->second->moduleShutdown();
   }
+  s_registered_extensions->clear();
 }
 
 bool Extension::IsLoaded(CStrRef name) {

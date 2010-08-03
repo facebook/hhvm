@@ -31,7 +31,7 @@ struct m_evkeyvalq {
 LibEventTransport::LibEventTransport(LibEventServer *server,
                                      evhttp_request *request,
                                      int workerId)
-  : m_server(server), m_request(request), m_epollfd(-1),
+  : m_server(server), m_request(request), m_eventBasePostData(NULL),
     m_workerId(workerId), m_sendStarted(false), m_sendEnded(false) {
   // HttpProtocol::PrepareSystemVariables needs this
   evbuffer *buf = m_request->input_buffer;
@@ -96,11 +96,11 @@ const void *LibEventTransport::getPostData(int &size) {
 }
 
 bool LibEventTransport::hasMorePostData() {
-#ifdef EVHTTP_READ_LIMITING
+#ifdef EVHTTP_PORTABLE_READ_LIMITING
   if (m_request->ntoread <= 0) {
-    if (m_epollfd != -1) {
-      close(m_epollfd);
-      m_epollfd = -1;
+    if (m_eventBasePostData != NULL) {
+      event_base_free(m_eventBasePostData);
+      m_eventBasePostData = NULL;
     }
     return false;
   }
@@ -111,8 +111,12 @@ bool LibEventTransport::hasMorePostData() {
 }
 
 const void *LibEventTransport::getMorePostData(int &size) {
-#ifdef EVHTTP_READ_LIMITING
+#ifdef EVHTTP_PORTABLE_READ_LIMITING
   if (m_request->ntoread == 0) {
+    if (m_eventBasePostData != NULL) {
+      event_base_free(m_eventBasePostData);
+      m_eventBasePostData = NULL;
+    }
     size = 0;
     return NULL;
   }
@@ -121,7 +125,7 @@ const void *LibEventTransport::getMorePostData(int &size) {
   ASSERT(buf);
   evbuffer_drain(buf, EVBUFFER_LENGTH(buf));
 
-  if (evhttp_get_more_post_data(m_request, &m_epollfd, &m_epollevent)) {
+  if (evhttp_get_more_post_data(m_request, &m_eventBasePostData)) {
     buf = m_request->input_buffer;
     ASSERT(buf);
     size = EVBUFFER_LENGTH(buf);
@@ -129,13 +133,17 @@ const void *LibEventTransport::getMorePostData(int &size) {
     // EVBUFFER_DATA(buf) might change after evbuffer_expand
     ((char*)EVBUFFER_DATA(buf))[size] = '\0';
     if (m_request->ntoread == 0) {
+      if (m_eventBasePostData != NULL) {
+        event_base_free(m_eventBasePostData);
+        m_eventBasePostData = NULL;
+      }
       evhttp_get_post_data_done(m_request);
     }
     return EVBUFFER_DATA(buf);
   }
-  if (m_epollfd != -1) {
-    close(m_epollfd);
-    m_epollfd = -1;
+  if (m_eventBasePostData != NULL) {
+    event_base_free(m_eventBasePostData);
+    m_eventBasePostData = NULL;
   }
   evhttp_get_post_data_done(m_request);
   size = 0;

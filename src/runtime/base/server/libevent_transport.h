@@ -19,7 +19,6 @@
 
 #include <runtime/base/server/transport.h>
 #include <evhttp.h>
-#include <sys/epoll.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,8 +53,7 @@ public:
 private:
   LibEventServer *m_server;
   evhttp_request *m_request;
-  int m_epollfd;
-  struct epoll_event m_epollevent;
+  struct event_base *m_eventBasePostData;
   int m_workerId;
   std::string m_url;
   std::string m_remote_host;

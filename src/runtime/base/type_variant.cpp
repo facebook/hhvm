@@ -1509,6 +1509,15 @@ MutableArrayIterPtr Variant::begin(Variant *key, Variant &val) {
       throw FatalErrorException("An iterator cannot be used with "
                                 "foreach by reference");
     }
+    while (obj->o_instanceof("iteratoraggregate")) {
+      Variant iterator = obj->o_invoke("getiterator", Array(), -1);
+      if (!iterator.isObject()) break;
+      if (iterator.instanceof("iterator")) {
+        throw FatalErrorException("An iterator cannot be used with "
+                                  "foreach by reference");
+      }
+      obj = iterator.getObjectData();
+    }
     Array properties = obj->o_toIterArray(null_string, true);
     properties.escalate(true);
     ArrayData *arr = properties.getArrayData();

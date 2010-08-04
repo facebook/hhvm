@@ -14,44 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __INSIDE_HPHP_COMPLEX_TYPES_H__
-#error Directly including 'hphp_value.h' is prohibited. \
-       Include 'complex_types.h' instead.
-#endif
+#undef __HPHP_TV_MACROS__
+#undef TV_INCREF
+#undef TV_UNBOX
+#undef TV_READ_CELL
+#undef TV_DUP_CELL
+#undef TV_DUP_VAR
+#undef TV_DUP
+#undef TV_WRITE_NULL
+#undef TV_WRITE_UNINIT
 
-#ifndef __HPHP_HPHPVALUE_H__
-#define __HPHP_HPHPVALUE_H__
-
-#include <runtime/base/types.h>
-
-namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-
-struct TypedValue;
-
-struct Value {
-  mutable union {
-    int64        num;
-    double       dbl;
-    litstr       str;
-    StringData  *pstr;
-    ArrayData   *parr;
-    ObjectData  *pobj;
-    Variant     *pvar;
-    TypedValue  *ptv;
-  } m_data;
-};
-
-struct TypedValue : public Value {
-  /**
-   * The order of the data members is significant. The _count field must
-   * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.
-   */
-  mutable int _count;
-  mutable DataType m_type;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-}
-
-#endif // __HPHP_HPHPVALUE_H__

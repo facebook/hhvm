@@ -19,10 +19,12 @@
 
 #define __INSIDE_HPHP_COMPLEX_TYPES_H__
 
+#include <runtime/base/hphp_value.h>
 #include <runtime/base/type_string.h>
 #include <runtime/base/type_array.h>
 #include <runtime/base/type_object.h>
 #include <runtime/base/type_variant.h>
+#include <runtime/base/tv_helpers.h>
 
 #undef __INSIDE_HPHP_COMPLEX_TYPES_H__
 

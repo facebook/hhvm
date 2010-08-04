@@ -188,8 +188,7 @@ FunctionScopePtr MethodStatement::onParseImpl(AnalysisResultPtr ar) {
           magic = false;
         }
       }
-      if (paramCount >= 0 &&
-          (paramCount != minParam || paramCount != maxParam)) {
+      if (paramCount >= 0 && paramCount != maxParam) {
         ar->getCodeError()->record(self, CodeError::InvalidMagicMethod,
                                    self);
         magic = false;

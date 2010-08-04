@@ -72,6 +72,7 @@ public:
 
   ClassStatement(STATEMENT_ARGS, const std::string &name,
                  const std::string &parent, const std::string &doc);
+  virtual ~ClassStatement();
   void finish();
   CStrRef nameString() const { return m_nameString; }
   const std::string &name() const { return m_name; }

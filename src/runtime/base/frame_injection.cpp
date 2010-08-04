@@ -41,12 +41,12 @@ CStrRef FrameInjection::GetClassName(bool skip /* = false */) {
   // If we have included a file inside a class method or called a builtin
   // function, we should walk up to find that class
   if (t) {
-    while (t->m_prev && !*t->m_class &&
+    while (t->m_prev && t->m_class.empty() &&
            t->m_flags & (PseudoMain | BuiltinFunction)) {
       t = t->m_prev;
     }
   }
-  if (t && *t->m_class) {
+  if (t && !t->m_class.empty()) {
     return t->m_class;
   }
   return empty_string;
@@ -128,7 +128,7 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
       const char *c = strstr(t->m_name, "::");
       if (c) {
         frame.set(s_function, String(c + 2), -1, true);
-        frame.set(s_class, String(t->m_class), -1, true);
+        frame.set(s_class, t->m_class->copy(), -1, true);
         if (!t->m_object.isNull()) {
           if (withThis) {
             frame.set(s_object, t->m_object, -1, true);

@@ -28,6 +28,7 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
   ASSERT(transport);
 
   Hdf hdf;
+  hdf["thread"] = (int64)pthread_self();
   hdf["get"] = (transport->getMethod() == GET);
   hdf["url"] = transport->getUrl();
   hdf["remote_host"] = transport->getRemoteHost();

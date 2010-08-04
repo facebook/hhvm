@@ -717,10 +717,12 @@ static int execute_program_impl(int argc, char **argv) {
     HttpServer server; // so we initialize runtime properly
     HttpRequestHandler handler;
     for (int i = 0; i < po.count; i++) {
-      ReplayTransport rt;
-      rt.replayInput(po.args[0].c_str());
-      handler.handleRequest(&rt);
-      printf("%s\n", rt.getResponse().c_str());
+      for (unsigned int j = 0; j < po.args.size(); j++) {
+        ReplayTransport rt;
+        rt.replayInput(po.args[j].c_str());
+        handler.handleRequest(&rt);
+        printf("%s\n", rt.getResponse().c_str());
+      }
     }
     return 0;
   }

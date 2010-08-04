@@ -8,9 +8,17 @@ where crash happens. Sometimes, a crash can happen badly without giving crash
 log a chance to generate a readable stack. Then use ResourceLimit.CoreFileSize
 to turn on coredumps to capture a crash.
 
-Another way is to use RecordInput option to capture bad HTTP requests. Then
-replay with "-m replay" option from the compiled program at command line. This
-way, one can run it under valgrind to detect memory problems.
+Another way is to use Debug.RecordInput option to capture bad HTTP requests.
+
+  Debug.RecordInput = true
+  Debug.ClearInputOnSuccess = false
+
+Then replay with "-m replay" option from the compiled program at command line.
+This way, one can run it under valgrind to detect memory problems.
+
+  ./program -m replay -c config.hdf --count=3 /tmp/hphp_request_captured
+  ./program -m replay -c config.hdf captured_request1 captured_request2
+  ./program -m replay -c config.hdf --count=2 req1 req2
 
 2. Server hanging and other status problems
 

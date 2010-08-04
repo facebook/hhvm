@@ -2540,6 +2540,9 @@ void AnalysisResult::outputCPPGlobalStateBegin(CodeGenerator &cg,
 
 void AnalysisResult::outputCPPGlobalStateEnd(CodeGenerator &cg,
                                              const char *section) {
+  if (Option::EnableEval >= Option::LimitedEval) {
+    cg_printf("eval_get_%s(%s);\n", section, section);
+  }
   cg_printf("String s = f_json_encode(%s);\n", section);
   cg_printf("s = StringUtil::CEncode(s, \"\\\\\\\'\");\n");
   cg_printf("print(fp, s);\n");
@@ -2570,6 +2573,9 @@ void AnalysisResult::outputCPPGlobalState() {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
+  if (Option::EnableEval >= Option::LimitedEval) {
+    cg_printInclude("<runtime/eval/eval.h>");
+  }
   cg_printf("\n");
   cg_printf("using namespace std;\n");
   cg.namespaceBegin();

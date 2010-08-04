@@ -46,6 +46,17 @@ bool eval_constant_hook(Variant &res, CStrRef name);
 bool eval_invoke_file_hook(Variant &res, CStrRef path, bool once,
                            LVariableTable* variables, const char *currentDir);
 
+// Global state getters
+inline void eval_get_static_global_variables(Array &arr) {}
+inline void eval_get_dynamic_global_variables(Array &arr) {}
+void eval_get_method_static_variables(Array &arr);
+inline void eval_get_method_static_inited(Array &arr) {}
+void eval_get_class_static_variables(Array &arr);
+void eval_get_dynamic_constants(Array &arr);
+inline void eval_get_pseudomain_variables(Array &arr) {}
+inline void eval_get_redeclared_functions(Array &arr) {}
+inline void eval_get_redeclared_classes(Array &arr) {}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

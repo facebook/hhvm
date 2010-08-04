@@ -441,6 +441,73 @@ void RequestEvalState::deregisterObject(EvalObjectData *obj) {
   self->m_livingObjects.erase(obj);
 }
 
+void RequestEvalState::GetMethodStaticVariables(Array &arr) {
+  RequestEvalState *self = s_res.get();
+  String prefix("sv_");
+  for (map<const FunctionStatement*, LVariableTable>::iterator it =
+      self->m_functionStatics.begin(); it != self->m_functionStatics.end();
+      ++it) {
+    String fprefix = prefix;
+    fprefix += it->first->name().c_str();
+    fprefix += "$$";
+    Array vars(it->second.getDefinedVars());
+    for (ArrayIter vit(vars); !vit.end(); vit.next()) {
+      String key(fprefix);
+      key += vit.first();
+      arr.set(key, vit.second());
+    }
+  }
+
+  for (map<const MethodStatement*, map<string, LVariableTable> >::
+      iterator it = self->m_methodStatics.begin();
+      it != self->m_methodStatics.end(); ++it) {
+    String mprefix(prefix);
+    mprefix += it->first->getClass()->name().c_str();
+    mprefix += "$$";
+    mprefix += it->first->name().c_str();
+    mprefix += "$$";
+    Variant val;
+    if (it->second.size() > 1) {
+      for (map<string, LVariableTable>::iterator cit =
+          it->second.begin(); cit != it->second.end(); ++cit) {
+        Array vars(cit->second.getDefinedVars());
+        for (ArrayIter vit(vars); !vit.end(); vit.next()) {
+          arr.lvalAt(mprefix + vit.first()).set(cit->first.c_str(),
+              vit.second());
+        }
+      }
+    } else {
+      Array vars(it->second.begin()->second.getDefinedVars());
+      for (ArrayIter vit(vars); !vit.end(); vit.next()) {
+        arr.set(mprefix + vit.first(), vit.second());
+      }
+    }
+  }
+}
+
+void RequestEvalState::GetClassStaticVariables(Array &arr) {
+  RequestEvalState *self = s_res.get();
+  String prefix("s_");
+  for (hphp_const_char_imap<ClassEvalState>::iterator it =
+      self->m_classes.begin(); it != self->m_classes.end(); ++it) {
+    String cprefix(prefix);
+    cprefix += it->first;
+    cprefix += "$$";
+    Array vars(it->second.getStatics().getDefinedVars());
+    for (ArrayIter vit(vars); !vit.end(); vit.next()) {
+      arr.set(cprefix + vit.first(), vit.second());
+    }
+  }
+}
+
+void RequestEvalState::GetDynamicConstants(Array &arr) {
+  RequestEvalState *self = s_res.get();
+  String prefix("k_");
+  for (ArrayIter vit(self->m_constants); !vit.end(); vit.next()) {
+    arr.set(prefix + vit.first(), vit.second());
+  }
+}
+
 class EvalClassInfoHook : public ClassInfoHook {
 public:
   EvalClassInfoHook() {

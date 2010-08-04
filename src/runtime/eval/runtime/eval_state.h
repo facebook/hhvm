@@ -142,6 +142,11 @@ public:
   static const ClassInfo *findInterfaceInfo(const char *name);
   static const ClassInfo::ConstantInfo *findConstantInfo(const char *name);
 
+  // Global state getters
+  static void GetMethodStaticVariables(Array &arr);
+  static void GetClassStaticVariables(Array &arr);
+  static void GetDynamicConstants(Array &arr);
+
   // Misc
   static int64 unique();
   static void info();

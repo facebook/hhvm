@@ -146,5 +146,16 @@ bool eval_invoke_file_hook(Variant &res, CStrRef path, bool once,
                            LVariableTable* variables, const char *currentDir) {
   return RequestEvalState::includeFile(res, path, once, variables, currentDir);
 }
+
+void eval_get_method_static_variables(Array &arr) {
+  Eval::RequestEvalState::GetMethodStaticVariables(arr);
+}
+void eval_get_class_static_variables(Array &arr) {
+  Eval::RequestEvalState::GetClassStaticVariables(arr);
+}
+void eval_get_dynamic_constants(Array &arr) {
+  Eval::RequestEvalState::GetDynamicConstants(arr);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

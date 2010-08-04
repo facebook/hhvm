@@ -1,8 +1,8 @@
 #if EXT_TYPE == 0
 "get_defined_functions", T(Array), S(0), NULL, S(0), 
 "function_exists", T(Boolean), S(0), "function_name", T(String), NULL, S(0), NULL, S(0), 
-"is_callable", T(Boolean), S(0), "v", T(Some), NULL, S(0), "syntax", T(Boolean), "false", S(0), "name", T(Variant), "null", S(1), NULL, S(0), 
-"call_user_func_array", T(Variant), S(0), "function", T(Variant), NULL, S(0), "params", T(Array), NULL, S(0), NULL, S(0), 
+"is_callable", T(Boolean), S(0), "v", T(Some), NULL, S(0), "syntax", T(Boolean), "false", S(0), "name", T(Variant), "null", S(1), NULL, S(4294967296), (const char*)(int64)hphp_opt_is_callable, 
+"call_user_func_array", T(Variant), S(0), "function", T(Variant), NULL, S(0), "params", T(Array), NULL, S(0), NULL, S(4294967296), (const char*)(int64)hphp_opt_call_user_func, 
 "call_user_func", T(Variant), S(0), "function", T(Variant), NULL, S(0), NULL, S(4294967312), (const char*)(int64)hphp_opt_call_user_func, 
 "call_user_func_array_async", T(Object), S(0), "function", T(Variant), NULL, S(0), "params", T(Array), NULL, S(0), NULL, S(64), 
 "call_user_func_async", T(Object), S(0), "function", T(Variant), NULL, S(0), NULL, S(80), 
@@ -23,6 +23,7 @@
 #elif EXT_TYPE == 3
 
 #elif EXT_TYPE == 4
+extern ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg, AnalysisResultPtr ar, SimpleFunctionCallPtr call, int mode);
 extern ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg, AnalysisResultPtr ar, SimpleFunctionCallPtr call, int mode);
 
 #endif

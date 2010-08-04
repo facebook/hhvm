@@ -99,7 +99,7 @@ void FunctionContainer::outputCPPJumpTableSupport
         vector<const char *> &bucket = ar->getFuncTableBucket(func);
         if (bucket.size() == 1) {
           // no conflict in the function table
-          cg_indentBegin("Variant %s%s(const char *s, CArrRef params, "
+          cg_indentBegin("Variant d%s%s(const char *s, CArrRef params, "
                          "int64 hash, bool fatal) {\n",
                          Option::InvokePrefix, cg.formatLabel(name).c_str());
           cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
@@ -110,7 +110,9 @@ void FunctionContainer::outputCPPJumpTableSupport
           cg_indentEnd("}\n");
           cg_printf("return invoke_builtin(s, params, hash, fatal);\n");
           cg_indentEnd("}\n");
-          continue;
+          if (!func->hasDirectInvoke()) {
+            continue;
+          }
         }
       }
       cg_indentBegin("Variant %s%s(CArrRef params) {\n",

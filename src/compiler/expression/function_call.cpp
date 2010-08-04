@@ -168,7 +168,8 @@ ExpressionPtr FunctionCall::postOptimize(AnalysisResultPtr ar) {
 
 TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
                                            TypePtr type, bool coerce,
-                                           FunctionScopePtr func) {
+                                           FunctionScopePtr func,
+                                           bool arrayParams) {
   ConstructPtr self = shared_from_this();
   ar->getDependencyGraph()->add(DependencyGraph::KindOfFunctionCall,
                                 ar->getName(), getText(),
@@ -188,7 +189,12 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
     m_voidWrapper = false;
     type = checkTypesImpl(ar, type, frt, coerce);
   }
-  m_extraArg = func->inferParamTypes(ar, self, m_params, m_valid);
+  if (arrayParams) {
+    m_extraArg = 0;
+    (*m_params)[0]->inferAndCheck(ar, Type::Array, false);
+  } else {
+    m_extraArg = func->inferParamTypes(ar, self, m_params, m_valid);
+  }
   m_variableArgument = func->isVariableArgument();
   if (m_valid) {
     m_implementedType.reset();

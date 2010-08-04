@@ -86,6 +86,9 @@ public:
     m_attributeClassInfo |= flag;
   }
 
+  void setDirectInvoke() { m_directInvoke = true; }
+  bool hasDirectInvoke() const { return m_directInvoke; }
+
   void setInlineAsExpr(bool f) { m_inlineAsExpr = f; }
   bool getInlineAsExpr() const { return m_inlineAsExpr; }
   int nextInlineIndex() { return ++m_inlineIndex; }
@@ -416,6 +419,7 @@ private:
   bool m_nrvoFix;
   bool m_inlineAsExpr;
   int m_inlineIndex;
+  bool m_directInvoke;
   FunctionOptPtr m_optFunction;
   bool outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
       bool ret, bool constructor);

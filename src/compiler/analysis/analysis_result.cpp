@@ -1593,7 +1593,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
           ASSERT(!system);
           FunctionScopePtr func = sepiter->second[0];
           if (it->second.size() == 1) {
-            cg_indentBegin("Variant %s%s(const char *s, CArrRef params, "
+            cg_indentBegin("Variant d%s%s(const char *s, CArrRef params, "
                            "int64 hash, bool fatal) {\n",
                            Option::InvokePrefix, cg.formatLabel(name).c_str());
             cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
@@ -1618,7 +1618,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
       if (it->second.size() == 1 &&
           !findFunction(it->second[0])->isRedeclaring()) {
         // no conflict
-        cg_printf("Variant %s%s(const char *s, CArrRef params, int64 hash, "
+        cg_printf("Variant d%s%s(const char *s, CArrRef params, int64 hash, "
                   "bool fatal);\n",
                   Option::InvokePrefix,
                   cg.formatLabel(it->second.front()).c_str());
@@ -1658,7 +1658,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
                m_funcTable.begin(); it != m_funcTable.end(); it++) {
           if (it->second.size() == 1 &&
               !findFunction(it->second[0])->isRedeclaring()) {
-            cg_printf("funcTable[%d] = &%s%s;\n", it->first,
+            cg_printf("funcTable[%d] = &d%s%s;\n", it->first,
                       Option::InvokePrefix,
                       cg.formatLabel(it->second.front()).c_str());
           } else {

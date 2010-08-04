@@ -89,7 +89,8 @@ protected:
   void reset();
 
   TypePtr checkParamsAndReturn(AnalysisResultPtr ar, TypePtr type,
-                               bool coerce, FunctionScopePtr func);
+                               bool coerce, FunctionScopePtr func,
+                               bool arrayParams);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

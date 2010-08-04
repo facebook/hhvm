@@ -13,11 +13,11 @@ f('is_callable', Boolean,
   array('v' => Any,
         'syntax' => array(Boolean, 'false'),
         'name' => array(String | Reference, 'null')),
-  DefaultFlags);
+  DefaultFlags, 'hphp_opt_is_callable');
 
 f('call_user_func_array', Variant,
   array('function' => Variant,
-        'params' => VariantVec), DefaultFlags);
+        'params' => VariantVec), DefaultFlags, 'hphp_opt_call_user_func');
 
 f('call_user_func', Variant,
   array('function' => Variant),

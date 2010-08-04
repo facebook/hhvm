@@ -37,6 +37,7 @@ public:
   bool isDefineWithoutImpl(AnalysisResultPtr ar);
   void setValid() { m_valid = true; }
   void setNoPrefix() { m_noPrefix = true; }
+  void setArrayParams() { m_arrayParams = true; }
 
   virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                 bool coerce);
@@ -63,8 +64,8 @@ public:
   virtual ConstructPtr getNthKid(int n) const;
   virtual void setNthKid(int n, ConstructPtr cp);
   static SimpleFunctionCallPtr getFunctionCallForCallUserFunc(
-    AnalysisResultPtr ar, SimpleFunctionCallPtr call, int firstParam,
-    bool &error);
+    AnalysisResultPtr ar, SimpleFunctionCallPtr call, bool testOnly,
+    int firstParam, bool &error);
 
 private:
   enum FunctionType {
@@ -104,6 +105,7 @@ private:
   bool m_dynamicInvoke;
   int m_safe;
   ExpressionPtr m_safeDef;
+  bool m_arrayParams;
 
   ExpressionPtr optimize(AnalysisResultPtr ar);
   // hook

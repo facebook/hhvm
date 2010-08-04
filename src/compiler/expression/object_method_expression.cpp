@@ -270,7 +270,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
     return m_actualType;
   }
 
-  return checkParamsAndReturn(ar, type, coerce, func);
+  return checkParamsAndReturn(ar, type, coerce, func, false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

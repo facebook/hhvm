@@ -47,7 +47,7 @@ f('fb_call_user_func_safe_return', Variant,
 
 f('fb_call_user_func_array_safe', VariantVec,
   array('function' => Variant,
-        'params' => VariantVec), DefaultFlags);
+        'params' => VariantVec), DefaultFlags, 'hphp_opt_fb_call_user_func');
 
 f('fb_get_code_coverage', Variant);
 

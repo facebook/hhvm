@@ -220,6 +220,10 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
   case CodeGenerator::CppForwardDeclaration:
     funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
     cg_printf(");\n");
+    if (funcScope->hasDirectInvoke()) {
+      cg_printf("Variant %s%s(CArrRef params);\n",
+                Option::InvokePrefix, fname.c_str());
+    }
     break;
   case CodeGenerator::CppDeclaration:
   case CodeGenerator::CppImplementation:

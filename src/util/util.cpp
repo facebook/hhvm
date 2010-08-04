@@ -358,7 +358,12 @@ int Util::ssystem(const char* command) {
 
 std::string Util::safe_strerror(int errnum) {
   char buf[1024];
+#ifdef __GLIBC__
   return strerror_r(errnum, buf, sizeof(buf));
+#else
+  strerror_r(errnum, buf, sizeof(buf));
+  return buf;
+#endif
 }
 
 bool Util::isPowerOfTwo(int value) {

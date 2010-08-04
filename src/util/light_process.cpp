@@ -501,9 +501,10 @@ int LightProcess::pclose(FILE *f) {
     return ::pclose(f);
   }
 
+  int64 f2 = it->second;
   g_procs[id].m_popenMap.erase((int64)f);
   fclose(f);
-  fprintf(g_procs[id].m_fout, "pclose\n%lld\n", it->second);
+  fprintf(g_procs[id].m_fout, "pclose\n%lld\n", f2);
   fflush(g_procs[id].m_fout);
 
   char buf[BUFFER_SIZE];

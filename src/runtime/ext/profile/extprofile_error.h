@@ -25,9 +25,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline Array x_debug_backtrace() {
+inline Array x_debug_backtrace(bool provide_object = true) {
   FUNCTION_INJECTION_BUILTIN(debug_backtrace);
-  return f_debug_backtrace();
+  return f_debug_backtrace(provide_object);
 }
 
 inline void x_debug_print_backtrace() {

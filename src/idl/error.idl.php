@@ -4,7 +4,8 @@ include_once 'base.php';
 
 ///////////////////////////////////////////////////////////////////////////////
 
-f('debug_backtrace', StringVec, array());
+f('debug_backtrace', StringVec,
+    array('provide_object' => array(Boolean, 'true')));
 
 f('debug_print_backtrace', null, array());
 

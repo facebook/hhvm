@@ -7996,8 +7996,9 @@ Variant i_use_soap_error_handler(CArrRef params) {
 Variant i_debug_backtrace(CArrRef params) {
   FUNCTION_INJECTION(debug_backtrace);
   int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("debug_backtrace", 0, 1);
-  return (f_debug_backtrace());
+  if (count > 1) return throw_toomany_arguments("debug_backtrace", 1, 1);
+  if (count <= 0) return (f_debug_backtrace());
+  return (f_debug_backtrace(params[0]));
 }
 Variant i_drawpathcurvetosmoothrelative(CArrRef params) {
   FUNCTION_INJECTION(drawpathcurvetosmoothrelative);
@@ -43449,16 +43450,21 @@ Variant ei_use_soap_error_handler(Eval::VariableEnvironment &env, const Eval::Fu
   else return (x_use_soap_error_handler(a0));
 }
 Variant ei_debug_backtrace(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("debug_backtrace", 0, 1);
+  if (count > 1) return throw_toomany_arguments("debug_backtrace", 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
   } while(false);
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  return (x_debug_backtrace());
+  if (count <= 0) return (x_debug_backtrace());
+  else return (x_debug_backtrace(a0));
 }
 Variant ei_drawpathcurvetosmoothrelative(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;

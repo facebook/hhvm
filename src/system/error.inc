@@ -1,5 +1,5 @@
 #if EXT_TYPE == 0
-"debug_backtrace", T(Array), S(0), NULL, S(0), 
+"debug_backtrace", T(Array), S(0), "provide_object", T(Boolean), "true", S(0), NULL, S(0), 
 "debug_print_backtrace", T(Void), S(0), NULL, S(0), 
 "error_get_last", T(Array), S(0), NULL, S(0), 
 "error_log", T(Boolean), S(0), "message", T(String), NULL, S(0), "message_type", T(Int32), "0", S(0), "destination", T(String), "null_string", S(0), "extra_headers", T(String), "null_string", S(0), NULL, S(0), 

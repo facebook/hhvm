@@ -27,9 +27,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Array f_debug_backtrace() {
+Array f_debug_backtrace(bool provide_object /* = true */) {
   if (RuntimeOption::InjectedStackTrace) {
-    return FrameInjection::GetBacktrace(true);
+    return FrameInjection::GetBacktrace(true, false, provide_object);
   }
   StackTrace st;
   return stackTraceToBackTrace(st);

@@ -30,6 +30,12 @@
 #include <runtime/base/tainting.h>
 #endif
 
+#ifdef __APPLE__
+# ifdef isset
+#  undef isset
+# endif
+#endif
+
 /**
  * This file contains a list of functions that HPHP generates to wrap around
  * different expressions to maintain semantics. If we read through all types of

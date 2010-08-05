@@ -39,7 +39,11 @@ public:
   evhttp_request *request;
 
 private:
+#if defined(__APPLE__)
+  timeval start;
+#else
   timespec start;
+#endif
 };
 
 /**

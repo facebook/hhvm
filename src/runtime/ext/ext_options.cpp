@@ -591,27 +591,39 @@ Array f_getrusage(int who /* = 0 */) {
 }
 
 bool f_clock_getres(int clk_id, Variant sec, Variant nsec) {
+#if defined(__APPLE__)
+  throw NotSupportedException(__func__, "feature not supported on OSX");
+#else
   struct timespec ts;
   int ret = clock_getres(clk_id, &ts);
   sec = (int64)ts.tv_sec;
   nsec = (int64)ts.tv_nsec;
   return ret == 0;
+#endif
 }
 
 bool f_clock_gettime(int clk_id, Variant sec, Variant nsec) {
+#if defined(__APPLE__)
+  throw NotSupportedException(__func__, "feature not supported on OSX");
+#else
   struct timespec ts;
   int ret = clock_gettime(clk_id, &ts);
   sec = (int64)ts.tv_sec;
   nsec = (int64)ts.tv_nsec;
   return ret == 0;
+#endif
 }
 
 bool f_clock_settime(int clk_id, int64 sec, int64 nsec) {
+#if defined(__APPLE__)
+  throw NotSupportedException(__func__, "feature not supported on OSX");
+#else
   struct timespec ts;
   ts.tv_sec = sec;
   ts.tv_nsec = nsec;
   int ret = clock_settime(clk_id, &ts);
   return ret == 0;
+#endif
 }
 
 String f_ini_alter(CStrRef varname, CStrRef newvalue) {

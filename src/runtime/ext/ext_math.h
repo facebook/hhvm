@@ -23,6 +23,22 @@
 #include <runtime/base/zend/zend_math.h>
 #include <math.h>
 
+#if defined(__APPLE__)
+#ifndef isnan
+#define isnan(x)  \
+  ( sizeof (x) == sizeof(float )  ? __inline_isnanf((float)(x)) \
+  : sizeof (x) == sizeof(double)  ? __inline_isnand((double)(x))  \
+  : __inline_isnan ((long double)(x)))
+#endif
+
+#ifndef isinf
+#define isinf(x)  \
+  ( sizeof (x) == sizeof(float )  ? __inline_isinff((float)(x)) \
+  : sizeof (x) == sizeof(double)  ? __inline_isinfd((double)(x))  \
+  : __inline_isinf ((long double)(x)))
+#endif
+#endif
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

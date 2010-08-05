@@ -44,9 +44,7 @@ bool TestExtError::test_debug_backtrace() {
   bool oldValue = RuntimeOption::InjectedStackTrace;
   RuntimeOption::InjectedStackTrace = false;
   Array ret = f_debug_backtrace();
-#ifndef MAC_OS_X
   VERIFY(ret.size() > 0);
-#endif
   RuntimeOption::InjectedStackTrace = oldValue;
   return Count(true);
 }
@@ -59,9 +57,7 @@ bool TestExtError::test_debug_print_backtrace() {
   f_debug_print_backtrace();
   String output = g_context->obCopyContents();
   g_context->obEnd();
-#ifndef MAC_OS_X
   VERIFY(strstr((const char *)output, "test_debug_print_backtrace"));
-#endif
   RuntimeOption::InjectedStackTrace = oldValue;
   return Count(true);
 }

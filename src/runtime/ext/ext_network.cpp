@@ -29,6 +29,10 @@
 #include <resolv.h>
 #include <util/network.h>
 
+#if defined(__APPLE__)
+# include <arpa/nameser_compat.h>
+#endif
+
 #define MAXPACKET  8192 /* max packet size used internally by BIND */
 #define DNS_T_A		1
 #define DNS_T_NS	2

@@ -559,9 +559,7 @@ bool TestExtString::test_localeconv() {
 }
 
 bool TestExtString::test_nl_langinfo() {
-#ifndef MAC_OS_X
   VS(f_nl_langinfo(k_AM_STR), "AM");
-#endif
   return Count(true);
 }
 

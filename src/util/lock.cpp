@@ -28,12 +28,25 @@ LockProfiler::LockProfiler(bool profile) : m_profiling(false) {
   if (s_profile && s_pfunc_profile && profile &&
       s_profile_sampling && (rand() % s_profile_sampling) == 0) {
     m_profiling = true;
+#if defined(__APPLE__)
+    gettimeofday(&m_lockTime, NULL);
+#else
     clock_gettime(CLOCK_MONOTONIC, &m_lockTime);
+#endif
   }
 }
 
 LockProfiler::~LockProfiler() {
   if (m_profiling) {
+#if defined(__APPLE__)
+    timeval unlockTime;
+    unlockTime.tv_sec = 0;
+    unlockTime.tv_usec = 0;
+    gettimeofday(&unlockTime, NULL);
+    time_t dsec = unlockTime.tv_sec - m_lockTime.tv_sec;
+    long dnsec = unlockTime.tv_usec - m_lockTime.tv_usec;
+    int64 dusec = dsec * 1000000 + dnsec;
+#else
     timespec unlockTime;
     unlockTime.tv_sec = 0;
     unlockTime.tv_nsec = 0;
@@ -41,6 +54,7 @@ LockProfiler::~LockProfiler() {
     time_t dsec = unlockTime.tv_sec - m_lockTime.tv_sec;
     long dnsec = unlockTime.tv_nsec - m_lockTime.tv_nsec;
     int64 dusec = dsec * 1000000 + dnsec / 1000;
+#endif
 
     StackTrace st;
     s_pfunc_profile(st.hexEncode(3, 9), dusec);

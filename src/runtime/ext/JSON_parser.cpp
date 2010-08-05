@@ -39,6 +39,14 @@ static const char long_min_digits[] = "9223372036854775808";
 
 using namespace HPHP;
 
+#ifdef true
+# undef true
+#endif
+
+#ifdef false
+# undef false
+#endif
+
 #define true  1
 #define false 0
 

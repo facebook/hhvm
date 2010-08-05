@@ -210,11 +210,7 @@ Variant f_setlocale(int _argc, int category, CVarRef locale, CArrRef _argv = nul
 Array f_localeconv();
 
 inline String f_nl_langinfo(int item) {
-#ifdef MAC_OS_X
-  return String();
-#else
   return nl_langinfo(item);
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

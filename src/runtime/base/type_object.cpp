@@ -58,16 +58,18 @@ bool Object::more(CObjRef v2) const {
 }
 
 Variant Object::o_get(CStrRef propName, int64 hash /* = -1 */,
-                      bool error /* = true */) const {
+                      bool error /* = true */,
+                      CStrRef context /* = null_string */) const {
   if (!m_px) throw NullPointerException();
-  return m_px->o_get(propName, hash, error);
+  return m_px->o_get(propName, hash, error, context);
 }
 
-ObjectOffset Object::o_lval(CStrRef propName, int64 hash /* = -1 */) {
+ObjectOffset Object::o_lval(CStrRef propName, int64 hash /* = -1 */,
+                            CStrRef context /* = null_string */) {
   if (!m_px) {
     operator=(NEW(c_stdclass)());
   }
-  return ObjectOffset(m_px, propName, hash);
+  return ObjectOffset(m_px, propName, hash, context);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

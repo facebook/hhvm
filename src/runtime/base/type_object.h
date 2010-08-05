@@ -134,8 +134,10 @@ class Object : public SmartPtr<ObjectData> {
    * Unresolved objects will go through these two functions than the ones
    * on SmartObject<T>.
    */
-  Variant o_get(CStrRef propName, int64 hash = -1, bool error = true) const;
-  ObjectOffset o_lval(CStrRef propName, int64 hash = -1);
+  Variant o_get(CStrRef propName, int64 hash = -1, bool error = true,
+                CStrRef context = null_string) const;
+  ObjectOffset o_lval(CStrRef propName, int64 hash = -1,
+                      CStrRef context = null_string);
 
   /**
    * Input/Output

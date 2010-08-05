@@ -333,9 +333,9 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
                                                     bool directVariant) {
   bool bThis = m_object->isThis();
   bool useGetThis = false;
+  FunctionScopePtr funcScope = ar->getFunctionScope();
   if (bThis) {
-    FunctionScopePtr func = ar->getFunctionScope();
-    if (func && func->isStatic()) {
+    if (funcScope && funcScope->isStatic()) {
       cg_printf("GET_THIS_ARROW()");
     } else {
       // in order for __set() and __get() to be called
@@ -349,15 +349,26 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
   if (m_context & ExistContext) {
     error = ", false"; // suppress non-object property error
   }
-  if (bThis && ar->getFunctionScope()->isStatic()) {
+  ClassScopePtr cls = ar->getClassScope();
+  const char *context = "";
+  if (cg.getOutput() != CodeGenerator::SystemCPP) {
+    if (cls) {
+      context = ", s_class_name";
+    } else if (funcScope && !funcScope->inPseudoMain()) {
+      context = ", empty_string";
+    }
+  }
+  if (bThis && funcScope && funcScope->isStatic()) {
     func = Option::ObjectStaticPrefix;
     error = "";
+    context = "";
   }
   if (m_context & (LValue | RefValue | UnsetContext)) {
     func += "lval";
     error = "";
   } else {
     func += "get";
+    if (!bThis || !funcScope || !funcScope->isStatic()) error = ", true";
   }
 
   if (m_property->getKindOf() == Expression::KindOfScalarExpression) {
@@ -379,7 +390,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
           if (useGetThis) cg_printf("GET_THIS_DOT()");
           cg_printf("%s(", func.c_str());
           cg_printString(propName, ar);
-          cg_printf(", 0x%016llXLL)", hash);
+          cg_printf(", 0x%016llXLL%s%s)", hash, error, context);
         }
       } else {
         if (!bThis) {
@@ -408,7 +419,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       uint64 hash = hash_string(propName);
       cg_printf("%s(", func.c_str());
       cg_printString(propName, ar);
-      cg_printf(", 0x%016llXLL%s)", hash, error);
+      cg_printf(", 0x%016llXLL%s%s)", hash, error, context);
     }
   } else {
     if (!bThis) {
@@ -428,7 +439,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
     }
     cg_printf("%s(", func.c_str());
     m_property->outputCPP(cg, ar);
-    cg_printf(", -1LL%s)", error);
+    cg_printf(", -1LL%s%s)", error, context);
   }
 }
 

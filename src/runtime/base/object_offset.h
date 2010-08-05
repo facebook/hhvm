@@ -34,8 +34,9 @@ class ObjectOffset {
    * Constructing an object offset object. "hash" is optional and can be -1
    * when property was not a literal string during code generation time.
    */
-  ObjectOffset(ObjectData *data, CStrRef property, int64 hash)
-    : m_data(data), m_property(property), m_hash(hash) {
+  ObjectOffset(ObjectData *data, CStrRef property, int64 hash,
+               CStrRef context = null_string)
+    : m_data(data), m_property(property), m_hash(hash), m_context(context) {
   }
 
   /**
@@ -43,7 +44,7 @@ class ObjectOffset {
    */
   operator Variant() const {
     if (m_data) {
-      return m_data->o_get(m_property, m_hash);
+      return m_data->o_get(m_property, m_hash, true, m_context);
     }
     return null;
   }
@@ -55,7 +56,7 @@ class ObjectOffset {
     if (!m_data) {
       throw NullPointerException();
     }
-    return m_data->o_lval(m_property, m_hash);
+    return m_data->o_lval(m_property, m_hash, m_context);
   }
 
   /**
@@ -74,7 +75,7 @@ class ObjectOffset {
    */
   CVarRef operator=(CVarRef v) {
     if (m_data) {
-      m_data->o_set(m_property, m_hash, v, false);
+      m_data->o_set(m_property, m_hash, v, false, m_context);
     }
     return v;
   }
@@ -86,70 +87,72 @@ class ObjectOffset {
   Variant &operator>>=(CVarRef v) {
     Variant &lv = lval();
     if (m_data) {
-      m_data->o_set(m_property, m_hash, lv.toInt64() >> v.toInt64());
+      m_data->o_set(m_property, m_hash, lv.toInt64() >> v.toInt64(), false,
+                    m_context);
     }
     return lv;
   }
   Variant &operator<<=(CVarRef v) {
     Variant &lv = lval();
     if (m_data) {
-      m_data->o_set(m_property, m_hash, lv.toInt64() << v.toInt64());
+      m_data->o_set(m_property, m_hash, lv.toInt64() << v.toInt64(), false,
+                    m_context);
     }
     return lv;
   }
   Variant &operator^=(CVarRef v) {
     Variant &lv = lval();
     if (m_data) {
-      m_data->o_set(m_property, m_hash, lv ^ v);
+      m_data->o_set(m_property, m_hash, lv ^ v, false, m_context);
     }
     return lv;
   }
   Variant &operator|=(CVarRef v) {
     Variant &lv = lval();
     if (m_data) {
-      m_data->o_set(m_property, m_hash, lv | v);
+      m_data->o_set(m_property, m_hash, lv | v, false, m_context);
     }
     return lv;
   }
   Variant &operator&=(CVarRef v) {
     Variant &lv = lval();
     if (m_data) {
-      m_data->o_set(m_property, m_hash, lv & v);
+      m_data->o_set(m_property, m_hash, lv & v, false, m_context);
     }
     return lv;
   }
   Variant &operator+=(CVarRef v) {
     Variant &lv = lval();
     if (m_data) {
-      m_data->o_set(m_property, m_hash, lv + v);
+      m_data->o_set(m_property, m_hash, lv + v, false, m_context);
     }
     return lv;
   }
   Variant &operator-=(CVarRef v) {
     Variant &lv = lval();
     if (m_data) {
-      m_data->o_set(m_property, m_hash, lv - v);
+      m_data->o_set(m_property, m_hash, lv - v, false, m_context);
     }
     return lv;
   }
   Variant &operator*=(CVarRef v) {
     Variant &lv = lval();
     if (m_data) {
-      m_data->o_set(m_property, m_hash, lv * v);
+      m_data->o_set(m_property, m_hash, lv * v, false, m_context);
     }
     return lv;
   }
   Variant &operator/=(CVarRef v) {
     Variant &lv = lval();
     if (m_data) {
-      m_data->o_set(m_property, m_hash, lv / v);
+      m_data->o_set(m_property, m_hash, lv / v, false, m_context);
     }
     return lv;
   }
   Variant &operator%=(CVarRef v) {
     Variant &lv = lval();
     if (m_data) {
-      m_data->o_set(m_property, m_hash, lv % v);
+      m_data->o_set(m_property, m_hash, lv % v, false, m_context);
     }
     return lv;
   }
@@ -165,6 +168,7 @@ class ObjectOffset {
   ObjectData *m_data;
   String m_property;
   int64 m_hash;
+  CStrRef m_context;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

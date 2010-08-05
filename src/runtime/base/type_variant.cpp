@@ -2335,11 +2335,12 @@ Variant Variant::refvalAtImpl(CStrRef key, int64 prehash /* = -1 */,
 }
 
 Variant Variant::o_get(CStrRef propName, int64 prehash /* = -1 */,
-                       bool error /* = true */) const {
+                       bool error /* = true */,
+                       CStrRef context /* = null_string */) const {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_get(propName, prehash, error);
+    return m_data.pobj->o_get(propName, prehash, error, context);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_get(propName, prehash, error);
+    return m_data.pvar->o_get(propName, prehash, error, context);
   } else if (error) {
     raise_notice("Trying to get property of non-object");
   }
@@ -2461,21 +2462,22 @@ Variant Variant::o_root_invoke_few_args(CStrRef s, int64 hash, int count,
   }
 }
 
-ObjectOffset Variant::o_lval(CStrRef propName, int64 prehash /*= -1 */) {
+ObjectOffset Variant::o_lval(CStrRef propName, int64 prehash /* = -1 */,
+                             CStrRef context /* = null_string */) {
   if (m_type == KindOfObject) {
-    return Object(m_data.pobj).o_lval(propName, prehash);
+    return Object(m_data.pobj).o_lval(propName, prehash, context);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_lval(propName, prehash);
+    return m_data.pvar->o_lval(propName, prehash, context);
   } else if (m_type == KindOfNull) {
     set(Object(NEW(c_stdclass)()));
-    return Object(m_data.pobj).o_lval(propName, prehash);
+    return Object(m_data.pobj).o_lval(propName, prehash, context);
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
     // Return an ObjectOffset blackhole
     Variant ret;
     ret.set(Object(NEW(c_stdclass)()));
-    return Object(ret.m_data.pobj).o_lval(propName, prehash);
+    return Object(ret.m_data.pobj).o_lval(propName, prehash, context);
   }
 }
 

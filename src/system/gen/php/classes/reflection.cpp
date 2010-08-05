@@ -4553,7 +4553,7 @@ Variant c_reflectionclass::t_getstaticproperties() {
         if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args("isStatic", 0x7A15DC56E8CC0B19LL, 0))) {
           {
             {
-              Variant tmp4((v_prop.o_get("name", 0x5655B4FF77E35232LL)));
+              Variant tmp4((v_prop.o_get("name", 0x5655B4FF77E35232LL, true)));
               Variant tmp5((v_prop));
               v_ret.set(tmp4, (tmp5));
             }
@@ -4597,7 +4597,7 @@ Variant c_reflectionclass::t_getdefaultproperties() {
         if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args("isDefault", 0x384A52597AB11F15LL, 0))) {
           {
             {
-              Variant tmp4((v_prop.o_get("name", 0x5655B4FF77E35232LL)));
+              Variant tmp4((v_prop.o_get("name", 0x5655B4FF77E35232LL, true)));
               Variant tmp5((v_prop));
               v_ret.set(tmp4, (tmp5));
             }
@@ -6466,15 +6466,15 @@ void c_reflectionmethod::t___construct(Variant v_cls, Variant v_name) {
       if (toBoolean(v_method)) {
         {
           {
-            Variant tmp3((v_method.o_get("info", 0x0F2EF58F157D479FLL)));
+            Variant tmp3((v_method.o_get("info", 0x0F2EF58F157D479FLL, true)));
             m_info = tmp3;
           }
           {
-            Variant tmp4((v_method.o_get("name", 0x5655B4FF77E35232LL)));
+            Variant tmp4((v_method.o_get("name", 0x5655B4FF77E35232LL, true)));
             m_name = tmp4;
           }
           {
-            Variant tmp5((v_method.o_get("class", 0x2E3A246D1F74C210LL)));
+            Variant tmp5((v_method.o_get("class", 0x2E3A246D1F74C210LL, true)));
             m_class = tmp5;
           }
         }
@@ -7383,15 +7383,15 @@ void c_reflectionproperty::t___construct(Variant v_cls, Variant v_name) {
       if (toBoolean(v_prop)) {
         {
           {
-            Variant tmp3((v_prop.o_get("info", 0x0F2EF58F157D479FLL)));
+            Variant tmp3((v_prop.o_get("info", 0x0F2EF58F157D479FLL, true)));
             m_info = tmp3;
           }
           {
-            Variant tmp4((v_prop.o_get("name", 0x5655B4FF77E35232LL)));
+            Variant tmp4((v_prop.o_get("name", 0x5655B4FF77E35232LL, true)));
             m_name = tmp4;
           }
           {
-            Variant tmp5((v_prop.o_get("class", 0x2E3A246D1F74C210LL)));
+            Variant tmp5((v_prop.o_get("class", 0x2E3A246D1F74C210LL, true)));
             m_class = tmp5;
           }
         }
@@ -8941,7 +8941,7 @@ void c_reflectionparameter::t___construct(Variant v_func, Variant v_param) {
         v_params = tmp1;
       }
       {
-        Variant tmp2((v_params.rvalAt(v_param, -1, true).o_get("info", 0x0F2EF58F157D479FLL)));
+        Variant tmp2((v_params.rvalAt(v_param, -1, true).o_get("info", 0x0F2EF58F157D479FLL, true)));
         m_info = tmp2;
       }
     }
@@ -9045,7 +9045,7 @@ Variant c_reflectionparameter::t_getdefaultvalue() {
   }
   if (instanceOf(v_defaultValue, "stdclass")) {
     {
-      x_hphp_throw_fatal_error(toString(v_defaultValue.o_get("msg", 0x071C713DEF270D72LL)));
+      x_hphp_throw_fatal_error(toString(v_defaultValue.o_get("msg", 0x071C713DEF270D72LL, true)));
     }
   }
   return v_defaultValue;

@@ -333,7 +333,6 @@ bool TestCodeError::TestTooManyArgument() {
 
 bool TestCodeError::TestBadTypeConversion() {
   VE(BadTypeConversion, "<?php clone(1);");
-  VE(BadTypeConversion, "<?php class T { const a = 'test'; } T::a + 1;");
 
   // negative cases
   VEN(BadTypeConversion,

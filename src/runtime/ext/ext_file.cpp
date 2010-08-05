@@ -35,7 +35,11 @@
 #include <glob.h>
 #include <sys/types.h>
 #include <sys/file.h>
-#include <sys/vfs.h>
+#if defined(__FreeBSD__)
+# include <sys/mount.h>
+#else
+# include <sys/vfs.h>
+#endif
 #include <utime.h>
 #include <grp.h>
 #include <pwd.h>
@@ -68,6 +72,14 @@
 #define PHP_FILE_SKIP_EMPTY_LINES   4
 #define PHP_FILE_APPEND             8
 #define PHP_FILE_NO_DEFAULT_CONTEXT 16
+
+#ifndef GLOB_ONLYDIR
+# define GLOB_ONLYDIR (1<<30)
+# define GLOB_EMULATE_ONLYDIR
+# define GLOB_FLAGMASK (~GLOB_ONLYDIR)
+#else
+# define GLOB_FLAGMASK (~0)
+#endif
 
 using namespace std;
 
@@ -1053,8 +1065,8 @@ Variant f_glob(CStrRef pattern, int flags /* = 0 */) {
       cwd_skip = cwd.length() + 1;
     }
   }
-  int nret = glob(work_pattern.data(), flags, NULL, &globbuf);
-  if (nret == GLOB_NOMATCH) {
+  int nret = glob(work_pattern.data(), flags & GLOB_FLAGMASK, NULL, &globbuf);
+  if (nret == GLOB_NOMATCH || !globbuf.gl_pathc || !globbuf.gl_pathv) {
     if (!f_is_dir(work_pattern)) {
       return false;
     }

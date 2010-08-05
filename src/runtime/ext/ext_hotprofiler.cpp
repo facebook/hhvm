@@ -20,7 +20,32 @@
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/zend/zend_math.h>
 
-#include <sched.h>
+#ifdef __FreeBSD__
+# include <sys/resource.h>
+# include <sys/cpuset.h>
+# define cpu_set_t cpuset_t
+# define SET_AFFINITY(pid, size, mask) \
+           cpuset_setaffinity(CPU_LEVEL_WHICH, CPU_WHICH_TID, -1, size, mask)
+# define GET_AFFINITY(pid, size, mask) \
+           cpuset_getaffinity(CPU_LEVEL_WHICH, CPU_WHICH_TID, -1, size, mask)
+#elif __APPLE__
+# include <mach/mach_init.h>
+# include <mach/thread_policy.h>
+# define cpu_set_t thread_affinity_policy_data_t
+# define CPU_SET(cpu_id, new_mask) \
+        (*(new_mask)).affinity_tag = (cpu_id + 1)
+# define CPU_ZERO(new_mask)                 \
+        (*(new_mask)).affinity_tag = THREAD_AFFINITY_TAG_NULL
+# define SET_AFFINITY(pid, size, mask)       \
+        thread_policy_set(mach_thread_self(), THREAD_AFFINITY_POLICY, mask, \
+                          THREAD_AFFINITY_POLICY_COUNT)
+#else
+# include <sched.h>
+# define SET_AFFINITY(pid, size, mask) sched_setaffinity(0, size, mask)
+# define GET_AFFINITY(pid, size, mask) sched_getaffinity(0, size, mask)
+#endif
+
+
 #include <iostream>
 #include <fstream>
 
@@ -227,7 +252,7 @@ public:
     cpu_set_t new_mask;
     CPU_ZERO(&new_mask);
     CPU_SET(cpu_id, &new_mask);
-    sched_setaffinity(0, sizeof(cpu_set_t), &new_mask);
+    SET_AFFINITY(0, sizeof(cpu_set_t), &new_mask);
   }
 
 public:
@@ -242,16 +267,17 @@ public:
 
     if (m_cpu_frequencies)
       return;
+
     m_cpu_frequencies = new int64[m_cpu_num];
     for (int i = 0; i < m_cpu_num; i++) {
       cpu_set_t prev_mask;
-      sched_getaffinity(0, sizeof(cpu_set_t), &prev_mask);
+      GET_AFFINITY(0, sizeof(cpu_set_t), &prev_mask);
       BindToCPU(i);
       // Make sure the current process gets scheduled to the target cpu. This
       // might not be necessary though.
       usleep(0);
       m_cpu_frequencies[i] = get_cpu_frequency();
-      sched_setaffinity(0, sizeof(cpu_set_t), &prev_mask);
+      SET_AFFINITY(0, sizeof(cpu_set_t), &prev_mask);
     }
   }
 
@@ -380,14 +406,14 @@ public:
 
     // bind to a random cpu so that we can use rdtsc instruction.
     m_cur_cpu_id = rand() % s_machine.m_cpu_num;
-    sched_getaffinity(0, sizeof(cpu_set_t), &m_prev_mask);
+    GET_AFFINITY(0, sizeof(cpu_set_t), &m_prev_mask);
     MachineInfo::BindToCPU(m_cur_cpu_id);
 
     memset(m_func_hash_counters, 0, sizeof(m_func_hash_counters));
   }
 
   virtual ~Profiler() {
-    sched_setaffinity(0, sizeof(cpu_set_t), &m_prev_mask);
+    SET_AFFINITY(0, sizeof(cpu_set_t), &m_prev_mask);
 
     endAllFrames();
     for (Frame *p = m_frame_free_list; p;) {

@@ -451,8 +451,6 @@ void MethodStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   FunctionScopePtr funcScope = m_funcScope.lock();
   ClassScopePtr scope = ar->getClassScope();
-  string origFuncName;
-  string funcSection;
   ar->pushScope(funcScope);
 
   if (outputFFI(cg, ar)) return;
@@ -519,9 +517,9 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       } else {
         cg_printf("void");
       }
-      origFuncName = std::string(scope->getOriginalName()) +
-                     "::" + m_originalName;
-      funcSection = Option::FunctionSections[origFuncName];
+      string origFuncName = std::string(scope->getOriginalName()) +
+                            "::" + m_originalName;
+      string funcSection = Option::FunctionSections[origFuncName];
       if (!funcSection.empty()) {
         cg_printf(" __attribute__ ((section (\".text.%s\")))",
                   funcSection.c_str());

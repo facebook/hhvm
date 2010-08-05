@@ -516,8 +516,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         }
       }
 
-      cg_printf("void init();\n",
-                Option::ClassPrefix, clsName);
+      cg_printf("void init();\n");
 
       if (classScope->needLazyStaticInitializer()) {
         cg_printf("static GlobalVariables *lazy_initializer"

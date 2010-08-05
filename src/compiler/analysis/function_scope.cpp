@@ -988,7 +988,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           if (i < Option::InvokeFewArgsCount) {
             cg_printf("ref(a%d), ", i);
           } else {
-            cg_printf("null_variant");
+            cg_printf("null_variant, ");
           }
         } else {
           cg_printf("ref(arg%d), ", i);
@@ -998,7 +998,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           if (i < Option::InvokeFewArgsCount) {
             cg_printf("a%d, ", i);
           } else {
-            cg_printf("null_variant");
+            cg_printf("null_variant, ");
           }
         } else {
           cg_printf("arg%d, ", i);

@@ -277,15 +277,15 @@ Variant f_stream_socket_client(CStrRef remote_socket,
 }
 
 Variant f_stream_socket_get_name(CObjRef handle, bool want_peer) {
-  Variant address;
+  Variant address, port;
   bool ret;
   if (want_peer) {
-    ret = f_socket_getpeername(handle, ref(address));
+    ret = f_socket_getpeername(handle, ref(address), ref(port));
   } else {
-    ret = f_socket_getsockname(handle, ref(address));
+    ret = f_socket_getsockname(handle, ref(address), ref(port));
   }
   if (ret) {
-    return address.toString();
+    return address.toString() + ":" + port.toString();
   }
   return false;
 }

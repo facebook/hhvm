@@ -87,14 +87,11 @@ public:
    * Find the intersection between two sets of types.
    */
   static TypePtr Intersection(AnalysisResultPtr ar, TypePtr from, TypePtr to);
-  static TypePtr Cast(AnalysisResultPtr ar, TypePtr from, TypePtr to);
 
   /**
    * Whether or not a cast is needed during code generation.
    */
   static bool IsCastNeeded(AnalysisResultPtr ar, TypePtr from, TypePtr to);
-  static bool OldIsCastNeeded(AnalysisResultPtr ar, TypePtr from, TypePtr to);
-  static bool NewIsCastNeeded(AnalysisResultPtr ar, TypePtr from, TypePtr to);
 
   /**
    * When a variable's type is t1, and it's used as t2, do we need to

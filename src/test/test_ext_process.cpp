@@ -122,7 +122,7 @@ bool TestExtProcess::test_pcntl_setpriority() {
 }
 
 bool TestExtProcess::test_pcntl_signal() {
-  f_pcntl_signal(SIGALRM, "test", true);
+  f_pcntl_signal(k_SIGALRM, "test", true);
   return Count(true);
 }
 

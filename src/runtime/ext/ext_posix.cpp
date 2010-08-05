@@ -139,7 +139,6 @@ static struct limitlist {
   { RLIMIT_CPU,     "cpu" },
   { RLIMIT_FSIZE,   "filesize" },
   { RLIMIT_NOFILE,  "openfiles" },
-  { RLIMIT_OFILE,   "openfiles" },
   { 0, NULL }
 };
 

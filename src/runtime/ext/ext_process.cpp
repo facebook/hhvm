@@ -22,10 +22,15 @@
 #include <runtime/base/zend/zend_string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <util/lock.h>
 #include <runtime/base/file/plain_file.h>
 #include <util/light_process.h>
 #include <runtime/base/util/request_local.h>
+
+#if !defined(NSIG) && defined(_NSIG)
+# define NSIG _NSIG
+#endif
 
 using namespace std;
 

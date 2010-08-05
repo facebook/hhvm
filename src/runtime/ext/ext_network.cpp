@@ -283,7 +283,14 @@ typedef union {
   u_char qb2[65536];
 } querybuf;
 
+/* just a hack to free resources allocated by glibc in __res_nsend()
+ * See also:
+ *   res_thread_freeres() in glibc/resolv/res_init.c
+ *   __libc_res_nsend()   in resolv/res_send.c
+ * */
+
 static void php_dns_free_res(struct __res_state res) {
+#if defined(__GLIBC__)
   int ns;
   for (ns = 0; ns < MAXNS; ns++) {
     if (res._u._ext.nsaddrs[ns] != NULL) {
@@ -291,6 +298,7 @@ static void php_dns_free_res(struct __res_state res) {
       res._u._ext.nsaddrs[ns] = NULL;
     }
   }
+#endif
 }
 
 static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,

@@ -554,6 +554,7 @@ static Variant php_mysql_do_connect(String server, String username,
     ret = mySQL;
     if (!mySQL->connect(host, port, socket, username, password,
                         database, client_flags, connect_timeout_ms)) {
+      MySQL::SetDefaultConn(mySQL); // so we can report errno by mysql_errno()
       mySQL->setLastError("mysql_connect");
       return false;
     }
@@ -561,6 +562,7 @@ static Variant php_mysql_do_connect(String server, String username,
     ret = mySQL;
     if (!mySQL->reconnect(host, port, socket, username, password,
                           database, client_flags, connect_timeout_ms)) {
+      MySQL::SetDefaultConn(mySQL); // so we can report errno by mysql_errno()
       mySQL->setLastError("mysql_connect");
       return false;
     }

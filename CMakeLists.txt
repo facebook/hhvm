@@ -11,6 +11,10 @@ IF(NOT IS_DIRECTORY ${HPHP_HOME})
 	message(FATAL_ERROR "The value of HPHP_HOME does not exist")
 ENDIF()
 
+IF(NOT EXISTS "${HPHP_HOME}/LICENSE.PHP")
+	message(FATAL_ERROR "The value of HPHP_HOME in incorrect")
+ENDIF()
+
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/HPHPFunctions.cmake")
@@ -19,5 +23,7 @@ include(CheckFunctionExists)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
-	message(STATUS "32-bit support is experimental, things may be broke")
+	message(STATUS "------------")
+	message(STATUS "32-bit support is experimental, things may be broken")
+	message(STATUS "------------")
 ENDIF()

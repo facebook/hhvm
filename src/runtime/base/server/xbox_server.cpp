@@ -147,6 +147,7 @@ public:
     m_maxDuration = RuntimeOption::XboxServerInfoDuration;
     m_warmupDoc   = RuntimeOption::XboxServerInfoWarmupDoc;
     m_reqInitFunc = RuntimeOption::XboxServerInfoReqInitFunc;
+    m_reqInitDoc  = RuntimeOption::XboxServerInfoReqInitDoc;
   }
 };
 

@@ -819,13 +819,16 @@ static bool hphp_warmup(ExecutionContext *context,
   if (!s_warmup_state->done) {
     MemoryManager *mm = MemoryManager::TheMemoryManager().get();
     if (mm->beforeCheckpoint()) {
-      if (!s_warmup_state->failed && !warmupDoc.empty()) {
-        try {
-          s_warmup_state->enabled = true;
-          ServerStatsHelper ssh("warmup");
-          invoke_file(warmupDoc, true, get_variable_table());
-        } catch (...) {
-          ret = handle_exception(context, errorMsg, WarmupDocException, error);
+      if (!s_warmup_state->failed) {
+        s_warmup_state->enabled = true;
+        if (!warmupDoc.empty()) {
+          try {
+            ServerStatsHelper ssh("warmup");
+            invoke_file(warmupDoc, true, get_variable_table());
+          } catch (...) {
+            ret = handle_exception(context, errorMsg, WarmupDocException,
+                                   error);
+          }
         }
       }
       if (!ret) {

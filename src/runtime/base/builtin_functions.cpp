@@ -130,28 +130,15 @@ String getUndefinedConstant(CStrRef name) {
 }
 
 Variant f_call_user_func_array(CVarRef function, CArrRef params) {
-  Array param_arr;
-  if (!params.isNull()) {
-    if (params->isVectorData()) {
-      param_arr = params;
-    } else {
-      Array escalated = params;
-      escalated.escalate();
-      for (ArrayIter iter(escalated); iter; ++iter) {
-        param_arr.append(ref(iter.secondRef()));
-      }
-    }
-  }
-
   if (function.isString()) {
     String sfunction = function.toString();
     int c = sfunction.find("::");
     if (c != 0 && c != String::npos && c+2 < sfunction.size()) {
       return invoke_static_method(sfunction.substr(0, c).c_str(),
-                                  sfunction.substr(c+2).c_str(), param_arr,
+                                  sfunction.substr(c+2).c_str(), params,
                                   false);
     }
-    return invoke(sfunction, param_arr, -1, true, false);
+    return invoke(sfunction, params, -1, true, false);
   } else if (function.is(KindOfArray)) {
     Array arr = function.toArray();
     if (!(arr.size() == 2 && arr.exists(0LL) && arr.exists(1LL))) {
@@ -175,9 +162,9 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
           cls = FrameInjection::GetParentClassName(true);
         }
         return classname.toObject()->o_invoke_ex
-          (cls.c_str(), method.substr(c+2).c_str(), param_arr, -1, false);
+          (cls.c_str(), method.substr(c+2).c_str(), params, -1, false);
       }
-      return classname.toObject()->o_invoke(method, param_arr, -1, false);
+      return classname.toObject()->o_invoke(method, params, -1, false);
     } else {
       if (!classname.isString()) {
         throw_invalid_argument("function: classname not string");
@@ -191,11 +178,11 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
       }
       Object obj = FrameInjection::GetThis(true);
       if (obj.instanceof(sclass.c_str())) {
-        return obj->o_invoke_ex(sclass.c_str(), method.c_str(), param_arr, -1,
+        return obj->o_invoke_ex(sclass.c_str(), method.c_str(), params, -1,
                                 false);
       }
       return invoke_static_method(sclass.c_str(), method.c_str(),
-                                  param_arr, false);
+                                  params, false);
     }
   }
   throw_invalid_argument("function: not string or array");

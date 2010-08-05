@@ -194,14 +194,24 @@ ObjectData *c_directory::dynCreate(CArrRef params, bool construct /* = true */) 
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 1) throw_wrong_arguments("directory::__construct", count, 1, 1, 2);
-    (t___construct(params[0]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      (t___construct(arg0));
+    }
   }
   return this;
 }
 void c_directory::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("directory::__construct", count, 1, 1, 2);
-  (t___construct(params[0]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  }
 }
 void c_directory::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -253,7 +263,12 @@ Variant c_directory::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 7:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 1) return throw_wrong_arguments("directory::__construct", count, 1, 1, 2);
-        return (t___construct(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___construct(arg0), null);
+        }
       }
       break;
     default:

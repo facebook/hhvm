@@ -411,7 +411,7 @@ private:
   bool m_inlineAsExpr;
   int m_inlineIndex;
   FunctionOptPtr m_optFunction;
-  void outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
+  bool outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
       bool ret, bool constructor);
 };
 

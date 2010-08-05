@@ -783,7 +783,7 @@ void FunctionScope::OutputCPPDynamicInvokeCount(CodeGenerator &cg) {
   cg_printf("int count __attribute__((__unused__)) = params.size();\n");
 }
 
-void FunctionScope::outputCPPInvokeArgCountCheck(CodeGenerator &cg,
+bool FunctionScope::outputCPPInvokeArgCountCheck(CodeGenerator &cg,
     AnalysisResultPtr ar, bool ret, bool constructor) {
   bool variable = isVariableArgument();
   // system function has different handling of argument counts
@@ -800,6 +800,7 @@ void FunctionScope::outputCPPInvokeArgCountCheck(CodeGenerator &cg,
                                      RuntimeOption::ThrowTooManyArguments));
   const char *sysret = (system && ret) ? "return " : "";
   const char *level = (system ? (constructor ? ", 2" : ", 1") : "");
+  bool guarded = system && (ret || constructor);
   string fullname = getFullName();
   if (checkMissing && checkTooMany) {
     if (!variable && m_minParam == m_maxParam) {
@@ -822,6 +823,7 @@ void FunctionScope::outputCPPInvokeArgCountCheck(CodeGenerator &cg,
               " %sthrow_toomany_arguments(\"%s\", %d%s);\n",
               m_maxParam, sysret, fullname.c_str(), m_maxParam, level);
   }
+  return guarded;
 }
 
 void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
@@ -835,20 +837,45 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
                                            bool constructor /* = false */) {
   const char *voidWrapper = (m_returnType || voidWrapperOff) ? "" : ", null";
   const char *retrn = ret ? "return " : "";
-  int maxParam = fewArgs ? (m_maxParam > Option::InvokeFewArgsCount ?
-                            Option::InvokeFewArgsCount : m_maxParam)
-    : m_maxParam;
+  int maxParam = fewArgs && m_maxParam > Option::InvokeFewArgsCount ?
+    Option::InvokeFewArgsCount : m_maxParam;
+
   bool variable = isVariableArgument();
 
   ASSERT(m_minParam >= 0);
 
-  outputCPPInvokeArgCountCheck(cg, ar, ret, constructor);
+  bool guarded = outputCPPInvokeArgCountCheck(cg, ar, ret, constructor);
+  bool do_while = !ret && !fewArgs && maxParam > m_minParam;
+
+  if (!fewArgs && maxParam) {
+    for (int i = 0; i < maxParam; i++) {
+      if (isRefParam(i)) {
+        cg_printf("const_cast<Array&>(params).escalate(true);\n");
+        break;
+      }
+    }
+    if (do_while) cg_printf("do ");
+    cg_indentBegin("{\n");
+    cg_printf("ArrayData *ad(params.get());\n");
+    cg_printf("ssize_t pos = ad ? ad->iter_begin() : "
+              "ArrayData::invalid_index;\n");
+    for (int i = 0; i < m_minParam; i++) {
+      cg_printf("CVarRef arg%d(", i);
+      if (!guarded) cg_printf("count <= %d ? null_variant : ", i);
+      cg_printf("(%sad->getValue%s(pos)));\n",
+                i ? "pos = ad->iter_advance(pos)," : "",
+                isRefParam(i) ? "Ref" : "");
+    }
+  }
 
   if (variable || getOptionalParamCount()) {
     if (!fewArgs || m_minParam < Option::InvokeFewArgsCount) {
       cg_printf("if (count <= %d) ", m_minParam);
+      if (do_while) cg_indentBegin("{\n");
     }
   }
+
+
 
   stringstream callss;
   callss << retrn << (m_refReturn ? "ref(" : "(");
@@ -877,10 +904,10 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
         if (i < Option::InvokeFewArgsCount) {
           cg_printf("ref(a%d)", i);
         } else {
-          cg_printf("null");
+          cg_printf("null_variant");
         }
       } else {
-        cg_printf("ref(const_cast<Array&>(params).lvalAt(%d))", i);
+        cg_printf("ref(arg%d)", i);
       }
     } else {
       if (fewArgs) {
@@ -890,16 +917,29 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           cg_printf("null");
         }
       } else {
-        cg_printf("params[%d]", i);
+        cg_printf("arg%d", i);
       }
     }
   }
   cg_printf(")%s);\n", voidWrapper);
 
-  for (int iMax = m_minParam + 1; iMax <= maxParam; iMax++) {
-    if (!ret) cg_printf("else ");
-    if (iMax < maxParam || variable) {
+  for (int iMax = m_minParam; iMax < maxParam; ) {
+    if (!ret) {
+      if (do_while) {
+        cg_printf("break;\n");
+        cg_indentEnd("}\n");
+      } else {
+        cg_printf("else ");
+      }
+    }
+    if (!fewArgs) {
+      cg_printf("CVarRef arg%d((%sad->getValue%s(pos)));\n",
+                iMax, iMax ? "pos = ad->iter_advance(pos)," : "",
+                isRefParam(iMax) ? "Ref" : "");
+    }
+    if (++iMax < maxParam || variable) {
       cg_printf("if (count == %d) ", iMax);
+      if (do_while) cg_indentBegin("{\n");
     }
     cg_printf("%s", call.c_str());
     for (int i = 0; i < iMax; i++) {
@@ -909,20 +949,20 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           if (i < Option::InvokeFewArgsCount) {
             cg_printf("ref(a%d)", i);
           } else {
-            cg_printf("null");
+            cg_printf("null_variant");
           }
         } else {
-          cg_printf("ref(const_cast<Array&>(params).lvalAt(%d))", i);
+          cg_printf("ref(arg%d)", i);
         }
       } else {
         if (fewArgs) {
           if (i < Option::InvokeFewArgsCount) {
             cg_printf("a%d", i);
           } else {
-            cg_printf("null");
+            cg_printf("null_variant");
           }
         } else {
-          cg_printf("params[%d]", i);
+          cg_printf("arg%d", i);
         }
       }
     }
@@ -930,6 +970,10 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
   }
 
   if (variable) {
+    if (do_while) {
+      cg_printf("break;\n");
+      cg_indentEnd("}\n");
+    }
     if (fewArgs) {
       if (maxParam == Option::InvokeFewArgsCount) return;
       cg_printf("Array params;\n");
@@ -944,20 +988,20 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           if (i < Option::InvokeFewArgsCount) {
             cg_printf("ref(a%d), ", i);
           } else {
-            cg_printf("null");
+            cg_printf("null_variant");
           }
         } else {
-          cg_printf("ref(const_cast<Array&>(params).lvalAt(%d)), ", i);
+          cg_printf("ref(arg%d), ", i);
         }
       } else {
         if (fewArgs) {
           if (i < Option::InvokeFewArgsCount) {
             cg_printf("a%d, ", i);
           } else {
-            cg_printf("null");
+            cg_printf("null_variant");
           }
         } else {
-          cg_printf("params[%d], ", i);
+          cg_printf("arg%d, ", i);
         }
       }
     }
@@ -967,6 +1011,14 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
     else {
       cg_printf("params.slice(%d, count - %d, false))%s);\n",
                 maxParam, maxParam, voidWrapper);
+    }
+  }
+
+  if (!fewArgs && maxParam) {
+    if (do_while) {
+      cg_indentEnd("} while (false);\n");
+    } else {
+      cg_indentEnd("}\n");
     }
   }
 }

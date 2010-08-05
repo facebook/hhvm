@@ -663,40 +663,75 @@ Variant c_domdocumentfragment::o_invoke(const char *s, CArrRef params, int64 has
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
-        if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params[0]));
-        if (count == 2) return (t_c14n(params[0], params[1]));
-        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
-        return (t_c14n(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_c14n());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_c14n(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14n(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14n(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14n(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
-        return (t_replacechild(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacechild(arg0, arg1));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
-        return (t_appendchild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appendchild(arg0));
+        }
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
-        if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_clonenode());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_clonenode(arg0));
+        }
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 24:
@@ -714,11 +749,21 @@ Variant c_domdocumentfragment::o_invoke(const char *s, CArrRef params, int64 has
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
-        return (t_lookupnamespaceuri(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupnamespaceuri(arg0));
+        }
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
-        return (t_removechild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removechild(arg0));
+        }
       }
       break;
     case 31:
@@ -730,19 +775,34 @@ Variant c_domdocumentfragment::o_invoke(const char *s, CArrRef params, int64 has
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
-        return (t_lookupprefix(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupprefix(arg0));
+        }
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
-        return (t_isdefaultnamespace(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isdefaultnamespace(arg0));
+        }
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
-        return (t_issamenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issamenode(arg0));
+        }
       }
       break;
     case 49:
@@ -752,14 +812,25 @@ Variant c_domdocumentfragment::o_invoke(const char *s, CArrRef params, int64 has
       }
       HASH_GUARD(0x1E44C8E8C1920931LL, appendxml) {
         if (count != 1) return throw_wrong_arguments("appendxml", count, 1, 1, 1);
-        return (t_appendxml(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appendxml(arg0));
+        }
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
-        if (count <= 1) return (t_insertbefore(params[0]));
-        return (t_insertbefore(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_insertbefore(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertbefore(arg0, arg1));
+        }
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -769,17 +840,32 @@ Variant c_domdocumentfragment::o_invoke(const char *s, CArrRef params, int64 has
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
-        if (count <= 1) return (t_c14nfile(params[0]));
-        if (count == 2) return (t_c14nfile(params[0], params[1]));
-        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
-        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
-        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_c14nfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14nfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
-        return (t_issupported(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_issupported(arg0, arg1));
+        }
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -1476,16 +1562,32 @@ ObjectData *c_domtext::dynCreate(CArrRef params, bool construct /* = true */) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count > 1) throw_toomany_arguments("__construct", 1, 2);
-    if (count <= 0) (t___construct());
-    else (t___construct(params[0]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      if (count <= 0) {
+        (t___construct());
+        break;
+      }
+      CVarRef arg0((ad->getValue(pos)));
+      (t___construct(arg0));
+    } while (false);
   }
   return this;
 }
 void c_domtext::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 1) throw_toomany_arguments("__construct", 1, 2);
-  if (count <= 0) (t___construct());
-  else (t___construct(params[0]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) {
+      (t___construct());
+      break;
+    }
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  } while (false);
 }
 void c_domtext::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -1537,40 +1639,75 @@ Variant c_domtext::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
-        if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params[0]));
-        if (count == 2) return (t_c14n(params[0], params[1]));
-        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
-        return (t_c14n(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_c14n());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_c14n(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14n(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14n(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14n(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
-        return (t_replacechild(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacechild(arg0, arg1));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
-        return (t_appendchild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appendchild(arg0));
+        }
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
-        if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_clonenode());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_clonenode(arg0));
+        }
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 24:
@@ -1580,7 +1717,13 @@ Variant c_domtext::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
       }
       HASH_GUARD(0x7543EC746714D118LL, deletedata) {
         if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
-        return (t_deletedata(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_deletedata(arg0, arg1));
+        }
       }
       break;
     case 26:
@@ -1592,11 +1735,21 @@ Variant c_domtext::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
-        return (t_lookupnamespaceuri(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupnamespaceuri(arg0));
+        }
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
-        return (t_removechild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removechild(arg0));
+        }
       }
       HASH_GUARD(0x28FBAB4F0F6C02DDLL, iswhitespaceinelementcontent) {
         if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
@@ -1606,32 +1759,57 @@ Variant c_domtext::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
-        if (count <= 0) return (t___construct(), null);
-        return (t___construct(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___construct(arg0), null);
+        }
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
-        return (t_lookupprefix(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupprefix(arg0));
+        }
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
-        return (t_isdefaultnamespace(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isdefaultnamespace(arg0));
+        }
       }
       break;
     case 45:
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
         if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
-        return (t_appenddata(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appenddata(arg0));
+        }
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
-        return (t_issamenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issamenode(arg0));
+        }
       }
       break;
     case 49:
@@ -1643,14 +1821,26 @@ Variant c_domtext::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 50:
       HASH_GUARD(0x2D8D2253C2149972LL, substringdata) {
         if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
-        return (t_substringdata(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_substringdata(arg0, arg1));
+        }
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
-        if (count <= 1) return (t_insertbefore(params[0]));
-        return (t_insertbefore(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_insertbefore(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertbefore(arg0, arg1));
+        }
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -1660,29 +1850,56 @@ Variant c_domtext::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 52:
       HASH_GUARD(0x470F2F0EA1F3D4B4LL, replacedata) {
         if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
-        return (t_replacedata(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacedata(arg0, arg1, arg2));
+        }
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
-        if (count <= 1) return (t_c14nfile(params[0]));
-        if (count == 2) return (t_c14nfile(params[0], params[1]));
-        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
-        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
-        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_c14nfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14nfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
+        }
       }
       break;
     case 55:
       HASH_GUARD(0x714D38308D8212B7LL, splittext) {
         if (count != 1) return throw_wrong_arguments("splittext", count, 1, 1, 1);
-        return (t_splittext(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_splittext(arg0));
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
-        return (t_issupported(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_issupported(arg0, arg1));
+        }
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -1692,7 +1909,13 @@ Variant c_domtext::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 61:
       HASH_GUARD(0x0E19CE7886BCEF3DLL, insertdata) {
         if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
-        return (t_insertdata(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertdata(arg0, arg1));
+        }
       }
       break;
     default:
@@ -2610,14 +2833,24 @@ Variant c_debuggerclient::o_invoke(const char *s, CArrRef params, int64 hash, bo
     case 0:
       HASH_GUARD(0x07768FF90B181780LL, addcompletion) {
         if (count != 1) return throw_wrong_arguments("addcompletion", count, 1, 1, 1);
-        return (t_addcompletion(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_addcompletion(arg0), null);
+        }
       }
       break;
     case 2:
       HASH_GUARD(0x20F2EA2BBFF5AA42LL, ask) {
         if (count < 1) return throw_missing_arguments("ask", count+1, 1);
-        if (count <= 1) return (t_ask(count, params[0]));
-        return (t_ask(count,params[0], params.slice(1, count - 1, false)));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_ask(count, arg0));
+          return (t_ask(count,arg0, params.slice(1, count - 1, false)));
+        }
       }
       break;
     case 4:
@@ -2629,20 +2862,35 @@ Variant c_debuggerclient::o_invoke(const char *s, CArrRef params, int64 hash, bo
     case 5:
       HASH_GUARD(0x1D033DFD1DCAEA85LL, printframe) {
         if (count != 1) return throw_wrong_arguments("printframe", count, 1, 1, 1);
-        return (t_printframe(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_printframe(arg0), null);
+        }
       }
       break;
     case 8:
       HASH_GUARD(0x3E0170A7802E3888LL, send) {
         if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
-        return (t_send(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_send(arg0));
+        }
       }
       break;
     case 13:
       HASH_GUARD(0x16AD79F9AF3ECC0DLL, comment) {
         if (count < 1) return throw_missing_arguments("comment", count+1, 1);
-        if (count <= 1) return (t_comment(count, params[0]), null);
-        return (t_comment(count,params[0], params.slice(1, count - 1, false)), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_comment(count, arg0), null);
+          return (t_comment(count,arg0, params.slice(1, count - 1, false)), null);
+        }
       }
       break;
     case 14:
@@ -2658,14 +2906,24 @@ Variant c_debuggerclient::o_invoke(const char *s, CArrRef params, int64 hash, bo
       }
       HASH_GUARD(0x6B3BF595A55159CFLL, helpbody) {
         if (count != 1) return throw_wrong_arguments("helpbody", count, 1, 1, 1);
-        return (t_helpbody(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_helpbody(arg0), null);
+        }
       }
       break;
     case 17:
       HASH_GUARD(0x1015EB3F52B098D1LL, print) {
         if (count < 1) return throw_missing_arguments("print", count+1, 1);
-        if (count <= 1) return (t_print(count, params[0]), null);
-        return (t_print(count,params[0], params.slice(1, count - 1, false)), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_print(count, arg0), null);
+          return (t_print(count,arg0, params.slice(1, count - 1, false)), null);
+        }
       }
       break;
     case 23:
@@ -2675,14 +2933,24 @@ Variant c_debuggerclient::o_invoke(const char *s, CArrRef params, int64 hash, bo
       }
       HASH_GUARD(0x67A7ABCB74D168D7LL, argrest) {
         if (count != 1) return throw_wrong_arguments("argrest", count, 1, 1, 1);
-        return (t_argrest(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_argrest(arg0));
+        }
       }
       break;
     case 31:
       HASH_GUARD(0x016509DCA13DB6DFLL, error) {
         if (count < 1) return throw_missing_arguments("error", count+1, 1);
-        if (count <= 1) return (t_error(count, params[0]), null);
-        return (t_error(count,params[0], params.slice(1, count - 1, false)), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_error(count, arg0), null);
+          return (t_error(count,arg0, params.slice(1, count - 1, false)), null);
+        }
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -2690,14 +2958,24 @@ Variant c_debuggerclient::o_invoke(const char *s, CArrRef params, int64 hash, bo
       }
       HASH_GUARD(0x0F2EF58F157D479FLL, info) {
         if (count < 1) return throw_missing_arguments("info", count+1, 1);
-        if (count <= 1) return (t_info(count, params[0]), null);
-        return (t_info(count,params[0], params.slice(1, count - 1, false)), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_info(count, arg0), null);
+          return (t_info(count,arg0, params.slice(1, count - 1, false)), null);
+        }
       }
       break;
     case 35:
       HASH_GUARD(0x5F8B4ACA3731C423LL, helptitle) {
         if (count != 1) return throw_wrong_arguments("helptitle", count, 1, 1, 1);
-        return (t_helptitle(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_helptitle(arg0), null);
+        }
       }
       break;
     case 38:
@@ -2709,13 +2987,23 @@ Variant c_debuggerclient::o_invoke(const char *s, CArrRef params, int64 hash, bo
     case 40:
       HASH_GUARD(0x620C55BAC770E928LL, argvalue) {
         if (count != 1) return throw_wrong_arguments("argvalue", count, 1, 1, 1);
-        return (t_argvalue(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_argvalue(arg0));
+        }
       }
       break;
     case 44:
       HASH_GUARD(0x6CB0A07E0516B6ACLL, tutorial) {
         if (count != 1) return throw_wrong_arguments("tutorial", count, 1, 1, 1);
-        return (t_tutorial(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_tutorial(arg0), null);
+        }
       }
       break;
     case 47:
@@ -2725,7 +3013,12 @@ Variant c_debuggerclient::o_invoke(const char *s, CArrRef params, int64 hash, bo
       }
       HASH_GUARD(0x5CE665973E2B4C6FLL, helpsection) {
         if (count != 1) return throw_wrong_arguments("helpsection", count, 1, 1, 1);
-        return (t_helpsection(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_helpsection(arg0), null);
+        }
       }
       break;
     case 51:
@@ -2737,18 +3030,34 @@ Variant c_debuggerclient::o_invoke(const char *s, CArrRef params, int64 hash, bo
     case 52:
       HASH_GUARD(0x64C0B4BCDA99F6F4LL, arg) {
         if (count != 2) return throw_wrong_arguments("arg", count, 2, 2, 1);
-        return (t_arg(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_arg(arg0, arg1));
+        }
       }
       HASH_GUARD(0x665AFB5CDFD23534LL, help) {
         if (count < 1) return throw_missing_arguments("help", count+1, 1);
-        if (count <= 1) return (t_help(count, params[0]), null);
-        return (t_help(count,params[0], params.slice(1, count - 1, false)), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_help(count, arg0), null);
+          return (t_help(count,arg0, params.slice(1, count - 1, false)), null);
+        }
       }
       break;
     case 54:
       HASH_GUARD(0x04A108469024B7B6LL, xend) {
         if (count != 1) return throw_wrong_arguments("xend", count, 1, 1, 1);
-        return (t_xend(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_xend(arg0));
+        }
       }
       break;
     case 55:
@@ -2758,14 +3067,24 @@ Variant c_debuggerclient::o_invoke(const char *s, CArrRef params, int64 hash, bo
       }
       HASH_GUARD(0x6C5E35754AA2B277LL, wrap) {
         if (count != 1) return throw_wrong_arguments("wrap", count, 1, 1, 1);
-        return (t_wrap(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_wrap(arg0));
+        }
       }
       break;
     case 57:
       HASH_GUARD(0x58C72230857ACDB9LL, code) {
         if (count < 1) return throw_missing_arguments("code", count+1, 1);
-        if (count <= 1) return (t_code(count, params[0]), null);
-        return (t_code(count,params[0], params.slice(1, count - 1, false)), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_code(count, arg0), null);
+          return (t_code(count,arg0, params.slice(1, count - 1, false)), null);
+        }
       }
       break;
     case 58:
@@ -2777,8 +3096,13 @@ Variant c_debuggerclient::o_invoke(const char *s, CArrRef params, int64 hash, bo
     case 63:
       HASH_GUARD(0x07B89E83B77C677FLL, output) {
         if (count < 1) return throw_missing_arguments("output", count+1, 1);
-        if (count <= 1) return (t_output(count, params[0]), null);
-        return (t_output(count,params[0], params.slice(1, count - 1, false)), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_output(count, arg0), null);
+          return (t_output(count,arg0, params.slice(1, count - 1, false)), null);
+        }
       }
       break;
     default:
@@ -3655,14 +3979,24 @@ ObjectData *c_domcdatasection::dynCreate(CArrRef params, bool construct /* = tru
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-    (t___construct(params[0]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      (t___construct(arg0));
+    }
   }
   return this;
 }
 void c_domcdatasection::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-  (t___construct(params[0]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  }
 }
 void c_domcdatasection::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -3710,40 +4044,75 @@ Variant c_domcdatasection::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
-        if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params[0]));
-        if (count == 2) return (t_c14n(params[0], params[1]));
-        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
-        return (t_c14n(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_c14n());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_c14n(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14n(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14n(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14n(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
-        return (t_replacechild(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacechild(arg0, arg1));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
-        return (t_appendchild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appendchild(arg0));
+        }
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
-        if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_clonenode());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_clonenode(arg0));
+        }
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 24:
@@ -3753,7 +4122,13 @@ Variant c_domcdatasection::o_invoke(const char *s, CArrRef params, int64 hash, b
       }
       HASH_GUARD(0x7543EC746714D118LL, deletedata) {
         if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
-        return (t_deletedata(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_deletedata(arg0, arg1));
+        }
       }
       break;
     case 26:
@@ -3765,11 +4140,21 @@ Variant c_domcdatasection::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
-        return (t_lookupnamespaceuri(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupnamespaceuri(arg0));
+        }
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
-        return (t_removechild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removechild(arg0));
+        }
       }
       HASH_GUARD(0x28FBAB4F0F6C02DDLL, iswhitespaceinelementcontent) {
         if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
@@ -3779,31 +4164,56 @@ Variant c_domcdatasection::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
-        return (t___construct(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___construct(arg0), null);
+        }
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
-        return (t_lookupprefix(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupprefix(arg0));
+        }
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
-        return (t_isdefaultnamespace(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isdefaultnamespace(arg0));
+        }
       }
       break;
     case 45:
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
         if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
-        return (t_appenddata(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appenddata(arg0));
+        }
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
-        return (t_issamenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issamenode(arg0));
+        }
       }
       break;
     case 49:
@@ -3815,14 +4225,26 @@ Variant c_domcdatasection::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 50:
       HASH_GUARD(0x2D8D2253C2149972LL, substringdata) {
         if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
-        return (t_substringdata(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_substringdata(arg0, arg1));
+        }
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
-        if (count <= 1) return (t_insertbefore(params[0]));
-        return (t_insertbefore(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_insertbefore(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertbefore(arg0, arg1));
+        }
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -3832,29 +4254,56 @@ Variant c_domcdatasection::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 52:
       HASH_GUARD(0x470F2F0EA1F3D4B4LL, replacedata) {
         if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
-        return (t_replacedata(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacedata(arg0, arg1, arg2));
+        }
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
-        if (count <= 1) return (t_c14nfile(params[0]));
-        if (count == 2) return (t_c14nfile(params[0], params[1]));
-        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
-        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
-        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_c14nfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14nfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
+        }
       }
       break;
     case 55:
       HASH_GUARD(0x714D38308D8212B7LL, splittext) {
         if (count != 1) return throw_wrong_arguments("splittext", count, 1, 1, 1);
-        return (t_splittext(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_splittext(arg0));
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
-        return (t_issupported(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_issupported(arg0, arg1));
+        }
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -3864,7 +4313,13 @@ Variant c_domcdatasection::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 61:
       HASH_GUARD(0x0E19CE7886BCEF3DLL, insertdata) {
         if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
-        return (t_insertdata(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertdata(arg0, arg1));
+        }
       }
       break;
     default:
@@ -5014,40 +5469,75 @@ Variant c_domdocumenttype::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
-        if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params[0]));
-        if (count == 2) return (t_c14n(params[0], params[1]));
-        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
-        return (t_c14n(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_c14n());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_c14n(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14n(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14n(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14n(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
-        return (t_replacechild(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacechild(arg0, arg1));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
-        return (t_appendchild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appendchild(arg0));
+        }
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
-        if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_clonenode());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_clonenode(arg0));
+        }
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 24:
@@ -5065,11 +5555,21 @@ Variant c_domdocumenttype::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
-        return (t_lookupnamespaceuri(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupnamespaceuri(arg0));
+        }
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
-        return (t_removechild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removechild(arg0));
+        }
       }
       break;
     case 31:
@@ -5081,19 +5581,34 @@ Variant c_domdocumenttype::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
-        return (t_lookupprefix(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupprefix(arg0));
+        }
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
-        return (t_isdefaultnamespace(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isdefaultnamespace(arg0));
+        }
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
-        return (t_issamenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issamenode(arg0));
+        }
       }
       break;
     case 49:
@@ -5105,8 +5620,14 @@ Variant c_domdocumenttype::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
-        if (count <= 1) return (t_insertbefore(params[0]));
-        return (t_insertbefore(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_insertbefore(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertbefore(arg0, arg1));
+        }
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -5116,17 +5637,32 @@ Variant c_domdocumenttype::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
-        if (count <= 1) return (t_c14nfile(params[0]));
-        if (count == 2) return (t_c14nfile(params[0], params[1]));
-        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
-        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
-        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_c14nfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14nfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
-        return (t_issupported(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_issupported(arg0, arg1));
+        }
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -5803,14 +6339,26 @@ ObjectData *c_sqlite3stmt::dynCreate(CArrRef params, bool construct /* = true */
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 2) throw_wrong_arguments("__construct", count, 2, 2, 2);
-    (t___construct(params[0], params[1]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1));
+    }
   }
   return this;
 }
 void c_sqlite3stmt::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) throw_wrong_arguments("__construct", count, 2, 2, 2);
-  (t___construct(params[0], params[1]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1));
+  }
 }
 void c_sqlite3stmt::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -5868,8 +6416,15 @@ Variant c_sqlite3stmt::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 3:
       HASH_GUARD(0x436E6AFC3628E403LL, bindvalue) {
         if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
-        if (count <= 2) return (t_bindvalue(params[0], params[1]));
-        return (t_bindvalue(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t_bindvalue(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_bindvalue(arg0, arg1, arg2));
+        }
       }
       break;
     case 7:
@@ -5893,8 +6448,16 @@ Variant c_sqlite3stmt::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 22:
       HASH_GUARD(0x77B13FCF1BA41696LL, bindparam) {
         if (count < 2 || count > 3) return throw_wrong_arguments("bindparam", count, 2, 3, 1);
-        if (count <= 2) return (t_bindparam(params[0], ref(const_cast<Array&>(params).lvalAt(1))));
-        return (t_bindparam(params[0], ref(const_cast<Array&>(params).lvalAt(1)), params[2]));
+        const_cast<Array&>(params).escalate(true);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
+          if (count <= 2) return (t_bindparam(arg0, ref(arg1)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_bindparam(arg0, ref(arg1), arg2));
+        }
       }
       break;
     case 23:
@@ -5906,7 +6469,13 @@ Variant c_sqlite3stmt::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -6329,13 +6898,24 @@ Variant c_domnodelist::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 5:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 6:
       HASH_GUARD(0x0A41DBE0830902C6LL, item) {
         if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
-        return (t_item(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_item(arg0));
+        }
       }
       break;
     case 15:
@@ -6345,7 +6925,12 @@ Variant c_domnodelist::o_invoke(const char *s, CArrRef params, int64 hash, bool 
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     default:
@@ -6693,8 +7278,14 @@ Variant c_normalizer::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 2:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
-        if (count <= 1) return (ti_normalize(o_getClassName(), params[0]));
-        return (ti_normalize(o_getClassName(), params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (ti_normalize(o_getClassName(), arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_normalize(o_getClassName(), arg0, arg1));
+        }
       }
       break;
     case 3:
@@ -6706,8 +7297,14 @@ Variant c_normalizer::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 5:
       HASH_GUARD(0x58CF37E15F66ED1DLL, isnormalized) {
         if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
-        if (count <= 1) return (ti_isnormalized(o_getClassName(), params[0]));
-        return (ti_isnormalized(o_getClassName(), params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (ti_isnormalized(o_getClassName(), arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_isnormalized(o_getClassName(), arg0, arg1));
+        }
       }
       break;
     case 7:
@@ -6766,15 +7363,27 @@ Variant c_normalizer::os_invoke(const char *c, const char *s, CArrRef params, in
     case 1:
       HASH_GUARD(0x58CF37E15F66ED1DLL, isnormalized) {
         if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
-        if (count <= 1) return (ti_isnormalized(c, params[0]));
-        return (ti_isnormalized(c, params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (ti_isnormalized(c, arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_isnormalized(c, arg0, arg1));
+        }
       }
       break;
     case 2:
       HASH_GUARD(0x11A2D4B742CB6C5ALL, normalize) {
         if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
-        if (count <= 1) return (ti_normalize(c, params[0]));
-        return (ti_normalize(c, params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (ti_normalize(c, arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_normalize(c, arg0, arg1));
+        }
       }
       break;
     default:
@@ -7086,40 +7695,75 @@ Variant c_domcharacterdata::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
-        if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params[0]));
-        if (count == 2) return (t_c14n(params[0], params[1]));
-        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
-        return (t_c14n(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_c14n());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_c14n(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14n(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14n(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14n(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
-        return (t_replacechild(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacechild(arg0, arg1));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
-        return (t_appendchild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appendchild(arg0));
+        }
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
-        if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_clonenode());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_clonenode(arg0));
+        }
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 24:
@@ -7129,7 +7773,13 @@ Variant c_domcharacterdata::o_invoke(const char *s, CArrRef params, int64 hash, 
       }
       HASH_GUARD(0x7543EC746714D118LL, deletedata) {
         if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
-        return (t_deletedata(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_deletedata(arg0, arg1));
+        }
       }
       break;
     case 26:
@@ -7141,11 +7791,21 @@ Variant c_domcharacterdata::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
-        return (t_lookupnamespaceuri(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupnamespaceuri(arg0));
+        }
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
-        return (t_removechild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removechild(arg0));
+        }
       }
       break;
     case 31:
@@ -7157,25 +7817,45 @@ Variant c_domcharacterdata::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
-        return (t_lookupprefix(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupprefix(arg0));
+        }
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
-        return (t_isdefaultnamespace(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isdefaultnamespace(arg0));
+        }
       }
       break;
     case 45:
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
         if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
-        return (t_appenddata(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appenddata(arg0));
+        }
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
-        return (t_issamenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issamenode(arg0));
+        }
       }
       break;
     case 49:
@@ -7187,14 +7867,26 @@ Variant c_domcharacterdata::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 50:
       HASH_GUARD(0x2D8D2253C2149972LL, substringdata) {
         if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
-        return (t_substringdata(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_substringdata(arg0, arg1));
+        }
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
-        if (count <= 1) return (t_insertbefore(params[0]));
-        return (t_insertbefore(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_insertbefore(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertbefore(arg0, arg1));
+        }
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -7204,23 +7896,45 @@ Variant c_domcharacterdata::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 52:
       HASH_GUARD(0x470F2F0EA1F3D4B4LL, replacedata) {
         if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
-        return (t_replacedata(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacedata(arg0, arg1, arg2));
+        }
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
-        if (count <= 1) return (t_c14nfile(params[0]));
-        if (count == 2) return (t_c14nfile(params[0], params[1]));
-        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
-        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
-        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_c14nfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14nfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
-        return (t_issupported(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_issupported(arg0, arg1));
+        }
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -7230,7 +7944,13 @@ Variant c_domcharacterdata::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 61:
       HASH_GUARD(0x0E19CE7886BCEF3DLL, insertdata) {
         if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
-        return (t_insertdata(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertdata(arg0, arg1));
+        }
       }
       break;
     default:
@@ -8039,14 +8759,24 @@ ObjectData *c_domentityreference::dynCreate(CArrRef params, bool construct /* = 
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-    (t___construct(params[0]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      (t___construct(arg0));
+    }
   }
   return this;
 }
 void c_domentityreference::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-  (t___construct(params[0]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  }
 }
 void c_domentityreference::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -8094,40 +8824,75 @@ Variant c_domentityreference::o_invoke(const char *s, CArrRef params, int64 hash
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
-        if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params[0]));
-        if (count == 2) return (t_c14n(params[0], params[1]));
-        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
-        return (t_c14n(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_c14n());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_c14n(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14n(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14n(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14n(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
-        return (t_replacechild(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacechild(arg0, arg1));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
-        return (t_appendchild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appendchild(arg0));
+        }
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
-        if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_clonenode());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_clonenode(arg0));
+        }
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 24:
@@ -8145,35 +8910,65 @@ Variant c_domentityreference::o_invoke(const char *s, CArrRef params, int64 hash
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
-        return (t_lookupnamespaceuri(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupnamespaceuri(arg0));
+        }
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
-        return (t_removechild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removechild(arg0));
+        }
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
-        return (t___construct(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___construct(arg0), null);
+        }
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
-        return (t_lookupprefix(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupprefix(arg0));
+        }
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
-        return (t_isdefaultnamespace(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isdefaultnamespace(arg0));
+        }
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
-        return (t_issamenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issamenode(arg0));
+        }
       }
       break;
     case 49:
@@ -8185,8 +8980,14 @@ Variant c_domentityreference::o_invoke(const char *s, CArrRef params, int64 hash
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
-        if (count <= 1) return (t_insertbefore(params[0]));
-        return (t_insertbefore(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_insertbefore(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertbefore(arg0, arg1));
+        }
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -8196,17 +8997,32 @@ Variant c_domentityreference::o_invoke(const char *s, CArrRef params, int64 hash
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
-        if (count <= 1) return (t_c14nfile(params[0]));
-        if (count == 2) return (t_c14nfile(params[0], params[1]));
-        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
-        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
-        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_c14nfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14nfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
-        return (t_issupported(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_issupported(arg0, arg1));
+        }
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -9300,14 +10116,24 @@ ObjectData *c_datetimezone::dynCreate(CArrRef params, bool construct /* = true *
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-    (t___construct(params[0]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      (t___construct(arg0));
+    }
   }
   return this;
 }
 void c_datetimezone::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-  (t___construct(params[0]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  }
 }
 void c_datetimezone::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -9377,13 +10203,23 @@ Variant c_datetimezone::o_invoke(const char *s, CArrRef params, int64 hash, bool
     case 11:
       HASH_GUARD(0x68DB66F60B55BD0BLL, getoffset) {
         if (count != 1) return throw_wrong_arguments("getoffset", count, 1, 1, 1);
-        return (t_getoffset(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getoffset(arg0));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
-        return (t___construct(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___construct(arg0), null);
+        }
       }
       break;
     default:
@@ -10141,10 +10977,17 @@ Variant c_domimplementation::o_invoke(const char *s, CArrRef params, int64 hash,
     case 3:
       HASH_GUARD(0x3CB56A796F3DBAC3LL, createdocumenttype) {
         if (count > 3) return throw_toomany_arguments("createdocumenttype", 3, 1);
-        if (count <= 0) return (t_createdocumenttype());
-        if (count == 1) return (t_createdocumenttype(params[0]));
-        if (count == 2) return (t_createdocumenttype(params[0], params[1]));
-        return (t_createdocumenttype(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_createdocumenttype());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_createdocumenttype(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_createdocumenttype(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_createdocumenttype(arg0, arg1, arg2));
+        }
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -10152,16 +10995,29 @@ Variant c_domimplementation::o_invoke(const char *s, CArrRef params, int64 hash,
       }
       HASH_GUARD(0x280878EAC306A6A3LL, hasfeature) {
         if (count != 2) return throw_wrong_arguments("hasfeature", count, 2, 2, 1);
-        return (t_hasfeature(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_hasfeature(arg0, arg1));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x30855E95B37D1B4ELL, createdocument) {
         if (count > 3) return throw_toomany_arguments("createdocument", 3, 1);
-        if (count <= 0) return (t_createdocument());
-        if (count == 1) return (t_createdocument(params[0]));
-        if (count == 2) return (t_createdocument(params[0], params[1]));
-        return (t_createdocument(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_createdocument());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_createdocument(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_createdocument(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_createdocument(arg0, arg1, arg2));
+        }
       }
       break;
     case 15:
@@ -10452,20 +11308,56 @@ ObjectData *c_soapheader::dynCreate(CArrRef params, bool construct /* = true */)
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count < 2 || count > 5) throw_wrong_arguments("__construct", count, 2, 5, 2);
-    if (count <= 2) (t___construct(params[0], params[1]));
-    else if (count == 3) (t___construct(params[0], params[1], params[2]));
-    else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
-    else (t___construct(params[0], params[1], params[2], params[3], params[4]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count <= 2) {
+        (t___construct(arg0, arg1));
+        break;
+      }
+      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 3) {
+        (t___construct(arg0, arg1, arg2));
+        break;
+      }
+      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 4) {
+        (t___construct(arg0, arg1, arg2, arg3));
+        break;
+      }
+      CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1, arg2, arg3, arg4));
+    } while (false);
   }
   return this;
 }
 void c_soapheader::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 2 || count > 5) throw_wrong_arguments("__construct", count, 2, 5, 2);
-  if (count <= 2) (t___construct(params[0], params[1]));
-  else if (count == 3) (t___construct(params[0], params[1], params[2]));
-  else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
-  else (t___construct(params[0], params[1], params[2], params[3], params[4]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count <= 2) {
+      (t___construct(arg0, arg1));
+      break;
+    }
+    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 3) {
+      (t___construct(arg0, arg1, arg2));
+      break;
+    }
+    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 4) {
+      (t___construct(arg0, arg1, arg2, arg3));
+      break;
+    }
+    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1, arg2, arg3, arg4));
+  } while (false);
 }
 void c_soapheader::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -10530,10 +11422,19 @@ Variant c_soapheader::o_invoke(const char *s, CArrRef params, int64 hash, bool f
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count < 2 || count > 5) return throw_wrong_arguments("__construct", count, 2, 5, 1);
-        if (count <= 2) return (t___construct(params[0], params[1]), null);
-        if (count == 3) return (t___construct(params[0], params[1], params[2]), null);
-        if (count == 4) return (t___construct(params[0], params[1], params[2], params[3]), null);
-        return (t___construct(params[0], params[1], params[2], params[3], params[4]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t___construct(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t___construct(arg0, arg1, arg2), null);
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
+        }
       }
       break;
     default:
@@ -10798,40 +11699,75 @@ Variant c_domnotation::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
-        if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params[0]));
-        if (count == 2) return (t_c14n(params[0], params[1]));
-        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
-        return (t_c14n(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_c14n());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_c14n(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14n(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14n(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14n(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
-        return (t_replacechild(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacechild(arg0, arg1));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
-        return (t_appendchild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appendchild(arg0));
+        }
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
-        if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_clonenode());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_clonenode(arg0));
+        }
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 24:
@@ -10849,11 +11785,21 @@ Variant c_domnotation::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
-        return (t_lookupnamespaceuri(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupnamespaceuri(arg0));
+        }
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
-        return (t_removechild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removechild(arg0));
+        }
       }
       break;
     case 31:
@@ -10865,19 +11811,34 @@ Variant c_domnotation::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
-        return (t_lookupprefix(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupprefix(arg0));
+        }
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
-        return (t_isdefaultnamespace(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isdefaultnamespace(arg0));
+        }
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
-        return (t_issamenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issamenode(arg0));
+        }
       }
       break;
     case 49:
@@ -10889,8 +11850,14 @@ Variant c_domnotation::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
-        if (count <= 1) return (t_insertbefore(params[0]));
-        return (t_insertbefore(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_insertbefore(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertbefore(arg0, arg1));
+        }
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -10900,17 +11867,32 @@ Variant c_domnotation::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
-        if (count <= 1) return (t_c14nfile(params[0]));
-        if (count == 2) return (t_c14nfile(params[0], params[1]));
-        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
-        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
-        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_c14nfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14nfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
-        return (t_issupported(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_issupported(arg0, arg1));
+        }
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -11632,7 +12614,12 @@ Variant c_debuggerproxy::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 0:
       HASH_GUARD(0x3E0170A7802E3888LL, send) {
         if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
-        return (t_send(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_send(arg0));
+        }
       }
       break;
     case 3:
@@ -11883,16 +12870,32 @@ ObjectData *c_domcomment::dynCreate(CArrRef params, bool construct /* = true */)
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count > 1) throw_toomany_arguments("__construct", 1, 2);
-    if (count <= 0) (t___construct());
-    else (t___construct(params[0]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      if (count <= 0) {
+        (t___construct());
+        break;
+      }
+      CVarRef arg0((ad->getValue(pos)));
+      (t___construct(arg0));
+    } while (false);
   }
   return this;
 }
 void c_domcomment::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 1) throw_toomany_arguments("__construct", 1, 2);
-  if (count <= 0) (t___construct());
-  else (t___construct(params[0]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) {
+      (t___construct());
+      break;
+    }
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  } while (false);
 }
 void c_domcomment::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -11941,40 +12944,75 @@ Variant c_domcomment::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
-        if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params[0]));
-        if (count == 2) return (t_c14n(params[0], params[1]));
-        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
-        return (t_c14n(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_c14n());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_c14n(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14n(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14n(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14n(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
-        return (t_replacechild(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacechild(arg0, arg1));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
-        return (t_appendchild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appendchild(arg0));
+        }
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
-        if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_clonenode());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_clonenode(arg0));
+        }
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 24:
@@ -11984,7 +13022,13 @@ Variant c_domcomment::o_invoke(const char *s, CArrRef params, int64 hash, bool f
       }
       HASH_GUARD(0x7543EC746714D118LL, deletedata) {
         if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
-        return (t_deletedata(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_deletedata(arg0, arg1));
+        }
       }
       break;
     case 26:
@@ -11996,42 +13040,77 @@ Variant c_domcomment::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
-        return (t_lookupnamespaceuri(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupnamespaceuri(arg0));
+        }
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
-        return (t_removechild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removechild(arg0));
+        }
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
-        if (count <= 0) return (t___construct(), null);
-        return (t___construct(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___construct(arg0), null);
+        }
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
-        return (t_lookupprefix(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupprefix(arg0));
+        }
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
-        return (t_isdefaultnamespace(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isdefaultnamespace(arg0));
+        }
       }
       break;
     case 45:
       HASH_GUARD(0x3DAC04A51FD2D92DLL, appenddata) {
         if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
-        return (t_appenddata(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appenddata(arg0));
+        }
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
-        return (t_issamenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issamenode(arg0));
+        }
       }
       break;
     case 49:
@@ -12043,14 +13122,26 @@ Variant c_domcomment::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 50:
       HASH_GUARD(0x2D8D2253C2149972LL, substringdata) {
         if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
-        return (t_substringdata(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_substringdata(arg0, arg1));
+        }
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
-        if (count <= 1) return (t_insertbefore(params[0]));
-        return (t_insertbefore(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_insertbefore(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertbefore(arg0, arg1));
+        }
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -12060,23 +13151,45 @@ Variant c_domcomment::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 52:
       HASH_GUARD(0x470F2F0EA1F3D4B4LL, replacedata) {
         if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
-        return (t_replacedata(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacedata(arg0, arg1, arg2));
+        }
       }
       break;
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
-        if (count <= 1) return (t_c14nfile(params[0]));
-        if (count == 2) return (t_c14nfile(params[0], params[1]));
-        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
-        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
-        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_c14nfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14nfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
-        return (t_issupported(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_issupported(arg0, arg1));
+        }
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -12086,7 +13199,13 @@ Variant c_domcomment::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 61:
       HASH_GUARD(0x0E19CE7886BCEF3DLL, insertdata) {
         if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
-        return (t_insertdata(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertdata(arg0, arg1));
+        }
       }
       break;
     default:
@@ -12956,23 +14075,46 @@ Variant c_sqlite3::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
       }
       HASH_GUARD(0x65BD6700742BF3C2LL, openblob) {
         if (count < 3 || count > 4) return throw_wrong_arguments("openblob", count, 3, 4, 1);
-        if (count <= 3) return (t_openblob(params[0], params[1], params[2]));
-        return (t_openblob(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 3) return (t_openblob(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_openblob(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 3:
       HASH_GUARD(0x3AA4CCEC6BD68143LL, createaggregate) {
         if (count < 3 || count > 4) return throw_wrong_arguments("createaggregate", count, 3, 4, 1);
-        if (count <= 3) return (t_createaggregate(params[0], params[1], params[2]));
-        return (t_createaggregate(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 3) return (t_createaggregate(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_createaggregate(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 4:
       HASH_GUARD(0x21F68C010C124BC4LL, open) {
         if (count < 1 || count > 3) return throw_wrong_arguments("open", count, 1, 3, 1);
-        if (count <= 1) return (t_open(params[0]), null);
-        if (count == 2) return (t_open(params[0], params[1]), null);
-        return (t_open(params[0], params[1], params[2]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_open(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_open(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_open(arg0, arg1, arg2), null);
+        }
       }
       break;
     case 10:
@@ -12984,14 +14126,26 @@ Variant c_sqlite3::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 12:
       HASH_GUARD(0x4F1D1ED7B087208CLL, exec) {
         if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
-        return (t_exec(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_exec(arg0));
+        }
       }
       break;
     case 13:
       HASH_GUARD(0x7CECF508291057CDLL, createfunction) {
         if (count < 2 || count > 3) return throw_wrong_arguments("createfunction", count, 2, 3, 1);
-        if (count <= 2) return (t_createfunction(params[0], params[1]));
-        return (t_createfunction(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t_createfunction(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_createfunction(arg0, arg1, arg2));
+        }
       }
       break;
     case 25:
@@ -13009,7 +14163,12 @@ Variant c_sqlite3::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 36:
       HASH_GUARD(0x1B3CDE890A487664LL, loadextension) {
         if (count != 1) return throw_wrong_arguments("loadextension", count, 1, 1, 1);
-        return (t_loadextension(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_loadextension(arg0));
+        }
       }
       break;
     case 38:
@@ -13027,14 +14186,25 @@ Variant c_sqlite3::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 46:
       HASH_GUARD(0x156B1FAE4132ABEELL, querysingle) {
         if (count < 1 || count > 2) return throw_wrong_arguments("querysingle", count, 1, 2, 1);
-        if (count <= 1) return (t_querysingle(params[0]));
-        return (t_querysingle(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_querysingle(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_querysingle(arg0, arg1));
+        }
       }
       break;
     case 47:
       HASH_GUARD(0x540020AE4BA591AFLL, prepare) {
         if (count != 1) return throw_wrong_arguments("prepare", count, 1, 1, 1);
-        return (t_prepare(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_prepare(arg0));
+        }
       }
       break;
     case 51:
@@ -13046,13 +14216,23 @@ Variant c_sqlite3::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 53:
       HASH_GUARD(0x607C4C73BB251635LL, escapestring) {
         if (count != 1) return throw_wrong_arguments("escapestring", count, 1, 1, 1);
-        return (t_escapestring(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_escapestring(arg0));
+        }
       }
       break;
     case 55:
       HASH_GUARD(0x356758D4414DA377LL, query) {
         if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
-        return (t_query(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_query(arg0));
+        }
       }
       break;
     default:
@@ -13653,16 +14833,34 @@ ObjectData *c_domattr::dynCreate(CArrRef params, bool construct /* = true */) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-    if (count <= 1) (t___construct(params[0]));
-    else (t___construct(params[0], params[1]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      if (count <= 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1));
+    } while (false);
   }
   return this;
 }
 void c_domattr::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-  if (count <= 1) (t___construct(params[0]));
-  else (t___construct(params[0], params[1]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1));
+  } while (false);
 }
 void c_domattr::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -13718,40 +14916,75 @@ Variant c_domattr::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
-        if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params[0]));
-        if (count == 2) return (t_c14n(params[0], params[1]));
-        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
-        return (t_c14n(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_c14n());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_c14n(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14n(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14n(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14n(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
-        return (t_replacechild(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacechild(arg0, arg1));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
-        return (t_appendchild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appendchild(arg0));
+        }
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
-        if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_clonenode());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_clonenode(arg0));
+        }
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 24:
@@ -13769,30 +15002,56 @@ Variant c_domattr::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
-        return (t_lookupnamespaceuri(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupnamespaceuri(arg0));
+        }
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
-        return (t_removechild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removechild(arg0));
+        }
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
-        if (count <= 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
-        return (t_lookupprefix(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupprefix(arg0));
+        }
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
-        return (t_isdefaultnamespace(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isdefaultnamespace(arg0));
+        }
       }
       HASH_GUARD(0x30A9329415D17F24LL, isid) {
         if (count > 0) return throw_toomany_arguments("isid", 0, 1);
@@ -13802,7 +15061,12 @@ Variant c_domattr::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
-        return (t_issamenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issamenode(arg0));
+        }
       }
       break;
     case 49:
@@ -13814,8 +15078,14 @@ Variant c_domattr::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
-        if (count <= 1) return (t_insertbefore(params[0]));
-        return (t_insertbefore(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_insertbefore(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertbefore(arg0, arg1));
+        }
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -13825,17 +15095,32 @@ Variant c_domattr::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
-        if (count <= 1) return (t_c14nfile(params[0]));
-        if (count == 2) return (t_c14nfile(params[0], params[1]));
-        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
-        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
-        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_c14nfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14nfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
-        return (t_issupported(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_issupported(arg0, arg1));
+        }
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -14538,22 +15823,66 @@ ObjectData *c_soapvar::dynCreate(CArrRef params, bool construct /* = true */) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count < 2 || count > 6) throw_wrong_arguments("__construct", count, 2, 6, 2);
-    if (count <= 2) (t___construct(params[0], params[1]));
-    else if (count == 3) (t___construct(params[0], params[1], params[2]));
-    else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
-    else if (count == 5) (t___construct(params[0], params[1], params[2], params[3], params[4]));
-    else (t___construct(params[0], params[1], params[2], params[3], params[4], params[5]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count <= 2) {
+        (t___construct(arg0, arg1));
+        break;
+      }
+      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 3) {
+        (t___construct(arg0, arg1, arg2));
+        break;
+      }
+      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 4) {
+        (t___construct(arg0, arg1, arg2, arg3));
+        break;
+      }
+      CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 5) {
+        (t___construct(arg0, arg1, arg2, arg3, arg4));
+        break;
+      }
+      CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
+    } while (false);
   }
   return this;
 }
 void c_soapvar::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 2 || count > 6) throw_wrong_arguments("__construct", count, 2, 6, 2);
-  if (count <= 2) (t___construct(params[0], params[1]));
-  else if (count == 3) (t___construct(params[0], params[1], params[2]));
-  else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
-  else if (count == 5) (t___construct(params[0], params[1], params[2], params[3], params[4]));
-  else (t___construct(params[0], params[1], params[2], params[3], params[4], params[5]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count <= 2) {
+      (t___construct(arg0, arg1));
+      break;
+    }
+    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 3) {
+      (t___construct(arg0, arg1, arg2));
+      break;
+    }
+    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 4) {
+      (t___construct(arg0, arg1, arg2, arg3));
+      break;
+    }
+    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 5) {
+      (t___construct(arg0, arg1, arg2, arg3, arg4));
+      break;
+    }
+    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
+  } while (false);
 }
 void c_soapvar::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -14623,11 +15952,21 @@ Variant c_soapvar::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
-        if (count <= 2) return (t___construct(params[0], params[1]), null);
-        if (count == 3) return (t___construct(params[0], params[1], params[2]), null);
-        if (count == 4) return (t___construct(params[0], params[1], params[2], params[3]), null);
-        if (count == 5) return (t___construct(params[0], params[1], params[2], params[3], params[4]), null);
-        return (t___construct(params[0], params[1], params[2], params[3], params[4], params[5]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t___construct(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t___construct(arg0, arg1, arg2), null);
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 5) return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
+          CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
+        }
       }
       break;
     default:
@@ -14902,25 +16241,47 @@ Variant c_domnamednodemap::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 5:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 6:
       HASH_GUARD(0x0A41DBE0830902C6LL, item) {
         if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
-        return (t_item(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_item(arg0));
+        }
       }
       break;
     case 10:
       HASH_GUARD(0x5D3CEC627F9ADC3ALL, getnameditem) {
         if (count != 1) return throw_wrong_arguments("getnameditem", count, 1, 1, 1);
-        return (t_getnameditem(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getnameditem(arg0));
+        }
       }
       break;
     case 11:
       HASH_GUARD(0x53B4D840FF4F0F1BLL, getnameditemns) {
         if (count != 2) return throw_wrong_arguments("getnameditemns", count, 2, 2, 1);
-        return (t_getnameditemns(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_getnameditemns(arg0, arg1));
+        }
       }
       break;
     case 15:
@@ -14930,7 +16291,12 @@ Variant c_domnamednodemap::o_invoke(const char *s, CArrRef params, int64 hash, b
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     default:
@@ -15322,14 +16688,24 @@ Variant c_sqlite3result::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 8:
       HASH_GUARD(0x696EFC04EE7E47F8LL, columnname) {
         if (count != 1) return throw_wrong_arguments("columnname", count, 1, 1, 1);
-        return (t_columnname(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_columnname(arg0));
+        }
       }
       break;
     case 11:
       HASH_GUARD(0x59F73C4DEF1C3A6BLL, fetcharray) {
         if (count > 1) return throw_toomany_arguments("fetcharray", 1, 1);
-        if (count <= 0) return (t_fetcharray());
-        return (t_fetcharray(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_fetcharray());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_fetcharray(arg0));
+        }
       }
       break;
     case 12:
@@ -15341,7 +16717,12 @@ Variant c_sqlite3result::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 13:
       HASH_GUARD(0x42EDB5CA009D8C6DLL, columntype) {
         if (count != 1) return throw_wrong_arguments("columntype", count, 1, 1, 1);
-        return (t_columntype(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_columntype(arg0));
+        }
       }
       break;
     case 15:
@@ -15670,22 +17051,64 @@ ObjectData *c_simplexmlelement::dynCreate(CArrRef params, bool construct /* = tr
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count < 1 || count > 5) throw_wrong_arguments("__construct", count, 1, 5, 2);
-    if (count <= 1) (t___construct(params[0]));
-    else if (count == 2) (t___construct(params[0], params[1]));
-    else if (count == 3) (t___construct(params[0], params[1], params[2]));
-    else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
-    else (t___construct(params[0], params[1], params[2], params[3], params[4]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      if (count <= 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 2) {
+        (t___construct(arg0, arg1));
+        break;
+      }
+      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 3) {
+        (t___construct(arg0, arg1, arg2));
+        break;
+      }
+      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 4) {
+        (t___construct(arg0, arg1, arg2, arg3));
+        break;
+      }
+      CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1, arg2, arg3, arg4));
+    } while (false);
   }
   return this;
 }
 void c_simplexmlelement::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 5) throw_wrong_arguments("__construct", count, 1, 5, 2);
-  if (count <= 1) (t___construct(params[0]));
-  else if (count == 2) (t___construct(params[0], params[1]));
-  else if (count == 3) (t___construct(params[0], params[1], params[2]));
-  else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
-  else (t___construct(params[0], params[1], params[2], params[3], params[4]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 2) {
+      (t___construct(arg0, arg1));
+      break;
+    }
+    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 3) {
+      (t___construct(arg0, arg1, arg2));
+      break;
+    }
+    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 4) {
+      (t___construct(arg0, arg1, arg2, arg3));
+      break;
+    }
+    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1, arg2, arg3, arg4));
+  } while (false);
 }
 void c_simplexmlelement::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -15750,7 +17173,12 @@ Variant c_simplexmlelement::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 0:
       HASH_GUARD(0x3E6BCFB9742FC700LL, offsetexists) {
         if (count != 1) return throw_wrong_arguments("offsetexists", count, 1, 1, 1);
-        return (t_offsetexists(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_offsetexists(arg0));
+        }
       }
       break;
     case 3:
@@ -15762,7 +17190,12 @@ Variant c_simplexmlelement::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 15:
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     case 16:
@@ -15780,57 +17213,107 @@ Variant c_simplexmlelement::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 20:
       HASH_GUARD(0x2DDE12A9866FC794LL, addchild) {
         if (count < 1 || count > 3) return throw_wrong_arguments("addchild", count, 1, 3, 1);
-        if (count <= 1) return (t_addchild(params[0]));
-        if (count == 2) return (t_addchild(params[0], params[1]));
-        return (t_addchild(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_addchild(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_addchild(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_addchild(arg0, arg1, arg2));
+        }
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 22:
       HASH_GUARD(0x52F7AA6C19BEEAD6LL, addattribute) {
         if (count < 1 || count > 3) return throw_wrong_arguments("addattribute", count, 1, 3, 1);
-        if (count <= 1) return (t_addattribute(params[0]), null);
-        if (count == 2) return (t_addattribute(params[0], params[1]), null);
-        return (t_addattribute(params[0], params[1], params[2]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_addattribute(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_addattribute(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_addattribute(arg0, arg1, arg2), null);
+        }
       }
       break;
     case 24:
       HASH_GUARD(0x61D11ECEF4404498LL, offsetget) {
         if (count != 1) return throw_wrong_arguments("offsetget", count, 1, 1, 1);
-        return (t_offsetget(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_offsetget(arg0));
+        }
       }
       break;
     case 27:
       HASH_GUARD(0x0817454F196A9A1BLL, xpath) {
         if (count != 1) return throw_wrong_arguments("xpath", count, 1, 1, 1);
-        return (t_xpath(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_xpath(arg0));
+        }
       }
       HASH_GUARD(0x04FB7028C9A2079BLL, __unset) {
         if (count != 1) return throw_wrong_arguments("__unset", count, 1, 1, 1);
-        return (t___unset(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___unset(arg0));
+        }
       }
       break;
     case 29:
       HASH_GUARD(0x4B65E1A09A33F21DLL, attributes) {
         if (count > 2) return throw_toomany_arguments("attributes", 2, 1);
-        if (count <= 0) return (t_attributes());
-        if (count == 1) return (t_attributes(params[0]));
-        return (t_attributes(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_attributes());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_attributes(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_attributes(arg0, arg1));
+        }
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count < 1 || count > 5) return throw_wrong_arguments("__construct", count, 1, 5, 1);
-        if (count <= 1) return (t___construct(params[0]), null);
-        if (count == 2) return (t___construct(params[0], params[1]), null);
-        if (count == 3) return (t___construct(params[0], params[1], params[2]), null);
-        if (count == 4) return (t___construct(params[0], params[1], params[2], params[3]), null);
-        return (t___construct(params[0], params[1], params[2], params[3], params[4]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t___construct(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t___construct(arg0, arg1, arg2), null);
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
+        }
       }
       break;
     case 37:
@@ -15842,34 +17325,60 @@ Variant c_simplexmlelement::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 38:
       HASH_GUARD(0x6D9D75B7E3B40FA6LL, getnamespaces) {
         if (count > 1) return throw_toomany_arguments("getnamespaces", 1, 1);
-        if (count <= 0) return (t_getnamespaces());
-        return (t_getnamespaces(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getnamespaces());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getnamespaces(arg0));
+        }
       }
       HASH_GUARD(0x5C09D9345FD864A6LL, asxml) {
         if (count > 1) return throw_toomany_arguments("asxml", 1, 1);
-        if (count <= 0) return (t_asxml());
-        return (t_asxml(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_asxml());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_asxml(arg0));
+        }
       }
       break;
     case 45:
       HASH_GUARD(0x2B299E949E2E82ADLL, children) {
         if (count > 2) return throw_toomany_arguments("children", 2, 1);
-        if (count <= 0) return (t_children());
-        if (count == 1) return (t_children(params[0]));
-        return (t_children(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_children());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_children(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_children(arg0, arg1));
+        }
       }
       break;
     case 46:
       HASH_GUARD(0x4FE08FDDAE2178EELL, __isset) {
         if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
-        return (t___isset(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___isset(arg0));
+        }
       }
       break;
     case 49:
       HASH_GUARD(0x0D08AA5F0B2F34F1LL, getdocnamespaces) {
         if (count > 1) return throw_toomany_arguments("getdocnamespaces", 1, 1);
-        if (count <= 0) return (t_getdocnamespaces());
-        return (t_getdocnamespaces(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getdocnamespaces());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getdocnamespaces(arg0));
+        }
       }
       break;
     case 51:
@@ -15881,19 +17390,36 @@ Variant c_simplexmlelement::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 56:
       HASH_GUARD(0x0957F693A48AF738LL, offsetset) {
         if (count != 2) return throw_wrong_arguments("offsetset", count, 2, 2, 1);
-        return (t_offsetset(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_offsetset(arg0, arg1), null);
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x08329980E6369ABALL, offsetunset) {
         if (count != 1) return throw_wrong_arguments("offsetunset", count, 1, 1, 1);
-        return (t_offsetunset(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_offsetunset(arg0), null);
+        }
       }
       break;
     case 61:
       HASH_GUARD(0x3FE8F6937854F83DLL, registerxpathnamespace) {
         if (count != 2) return throw_wrong_arguments("registerxpathnamespace", count, 2, 2, 1);
-        return (t_registerxpathnamespace(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_registerxpathnamespace(arg0, arg1));
+        }
       }
       break;
     default:
@@ -16699,49 +18225,94 @@ Variant c_memcache::o_invoke(const char *s, CArrRef params, int64 hash, bool fat
     case 6:
       HASH_GUARD(0x42FAC655280A6146LL, replace) {
         if (count < 2 || count > 4) return throw_wrong_arguments("replace", count, 2, 4, 1);
-        if (count <= 2) return (t_replace(params[0], params[1]));
-        if (count == 3) return (t_replace(params[0], params[1], params[2]));
-        return (t_replace(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t_replace(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_replace(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replace(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 7:
       HASH_GUARD(0x39099707DF7945C7LL, increment) {
         if (count < 1 || count > 2) return throw_wrong_arguments("increment", count, 1, 2, 1);
-        if (count <= 1) return (t_increment(params[0]));
-        return (t_increment(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_increment(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_increment(arg0, arg1));
+        }
       }
       break;
     case 11:
       HASH_GUARD(0x3BF3710A1661DE0BLL, setoptimeout) {
         if (count != 1) return throw_wrong_arguments("setoptimeout", count, 1, 1, 1);
-        return (t_setoptimeout(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setoptimeout(arg0));
+        }
       }
       HASH_GUARD(0x15D34462FC79458BLL, add) {
         if (count < 2 || count > 4) return throw_wrong_arguments("add", count, 2, 4, 1);
-        if (count <= 2) return (t_add(params[0], params[1]));
-        if (count == 3) return (t_add(params[0], params[1], params[2]));
-        return (t_add(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t_add(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_add(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_add(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x710DE893BB376C4FLL, getserverstatus) {
         if (count < 1 || count > 2) return throw_wrong_arguments("getserverstatus", count, 1, 2, 1);
-        if (count <= 1) return (t_getserverstatus(params[0]));
-        return (t_getserverstatus(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_getserverstatus(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_getserverstatus(arg0, arg1));
+        }
       }
       break;
     case 18:
       HASH_GUARD(0x030429D528A8EA92LL, setcompressthreshold) {
         if (count < 1 || count > 2) return throw_wrong_arguments("setcompressthreshold", count, 1, 2, 1);
-        if (count <= 1) return (t_setcompressthreshold(params[0]));
-        return (t_setcompressthreshold(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_setcompressthreshold(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setcompressthreshold(arg0, arg1));
+        }
       }
       break;
     case 19:
       HASH_GUARD(0x1C660E5BFA6F55D3LL, delete) {
         if (count < 1 || count > 2) return throw_wrong_arguments("delete", count, 1, 2, 1);
-        if (count <= 1) return (t_delete(params[0]));
-        return (t_delete(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_delete(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_delete(arg0, arg1));
+        }
       }
       break;
     case 22:
@@ -16753,17 +18324,30 @@ Variant c_memcache::o_invoke(const char *s, CArrRef params, int64 hash, bool fat
     case 25:
       HASH_GUARD(0x1CCDC4317CE59BD9LL, getstats) {
         if (count > 3) return throw_toomany_arguments("getstats", 3, 1);
-        if (count <= 0) return (t_getstats());
-        if (count == 1) return (t_getstats(params[0]));
-        if (count == 2) return (t_getstats(params[0], params[1]));
-        return (t_getstats(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getstats());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_getstats(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_getstats(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_getstats(arg0, arg1, arg2));
+        }
       }
       break;
     case 26:
       HASH_GUARD(0x2A733FC12BA4C1DALL, decrement) {
         if (count < 1 || count > 2) return throw_wrong_arguments("decrement", count, 1, 2, 1);
-        if (count <= 1) return (t_decrement(params[0]));
-        return (t_decrement(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_decrement(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_decrement(arg0, arg1));
+        }
       }
       break;
     case 31:
@@ -16775,39 +18359,74 @@ Variant c_memcache::o_invoke(const char *s, CArrRef params, int64 hash, bool fat
     case 33:
       HASH_GUARD(0x399A6427C2185621LL, set) {
         if (count < 2 || count > 4) return throw_wrong_arguments("set", count, 2, 4, 1);
-        if (count <= 2) return (t_set(params[0], params[1]));
-        if (count == 3) return (t_set(params[0], params[1], params[2]));
-        return (t_set(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t_set(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_set(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_set(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 37:
       HASH_GUARD(0x4770E54B86BF7765LL, getextendedstats) {
         if (count > 3) return throw_toomany_arguments("getextendedstats", 3, 1);
-        if (count <= 0) return (t_getextendedstats());
-        if (count == 1) return (t_getextendedstats(params[0]));
-        if (count == 2) return (t_getextendedstats(params[0], params[1]));
-        return (t_getextendedstats(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getextendedstats());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_getextendedstats(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_getextendedstats(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_getextendedstats(arg0, arg1, arg2));
+        }
       }
       break;
     case 38:
       HASH_GUARD(0x56CD24186237AAE6LL, addserver) {
         if (count < 1 || count > 9) return throw_wrong_arguments("addserver", count, 1, 9, 1);
-        if (count <= 1) return (t_addserver(params[0]));
-        if (count == 2) return (t_addserver(params[0], params[1]));
-        if (count == 3) return (t_addserver(params[0], params[1], params[2]));
-        if (count == 4) return (t_addserver(params[0], params[1], params[2], params[3]));
-        if (count == 5) return (t_addserver(params[0], params[1], params[2], params[3], params[4]));
-        if (count == 6) return (t_addserver(params[0], params[1], params[2], params[3], params[4], params[5]));
-        if (count == 7) return (t_addserver(params[0], params[1], params[2], params[3], params[4], params[5], params[6]));
-        if (count == 8) return (t_addserver(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]));
-        return (t_addserver(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7], params[8]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_addserver(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_addserver(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_addserver(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_addserver(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 5) return (t_addserver(arg0, arg1, arg2, arg3, arg4));
+          CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 6) return (t_addserver(arg0, arg1, arg2, arg3, arg4, arg5));
+          CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 7) return (t_addserver(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
+          CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 8) return (t_addserver(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+          CVarRef arg8((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_addserver(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
+        }
       }
       break;
     case 40:
       HASH_GUARD(0x25DCCC35D69AD828LL, get) {
         if (count < 1 || count > 2) return throw_wrong_arguments("get", count, 1, 2, 1);
-        if (count <= 1) return (t_get(params[0]));
-        return (t_get(params[0], ref(const_cast<Array&>(params).lvalAt(1))));
+        const_cast<Array&>(params).escalate(true);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_get(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
+          return (t_get(arg0, ref(arg1)));
+        }
       }
       break;
     case 51:
@@ -16819,37 +18438,68 @@ Variant c_memcache::o_invoke(const char *s, CArrRef params, int64 hash, bool fat
     case 57:
       HASH_GUARD(0x742B441E13CD7279LL, pconnect) {
         if (count < 1 || count > 4) return throw_wrong_arguments("pconnect", count, 1, 4, 1);
-        if (count <= 1) return (t_pconnect(params[0]), null);
-        if (count == 2) return (t_pconnect(params[0], params[1]), null);
-        if (count == 3) return (t_pconnect(params[0], params[1], params[2]), null);
-        return (t_pconnect(params[0], params[1], params[2], params[3]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_pconnect(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_pconnect(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_pconnect(arg0, arg1, arg2), null);
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_pconnect(arg0, arg1, arg2, arg3), null);
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x6A3D9F8EDB005E7ALL, flush) {
         if (count > 1) return throw_toomany_arguments("flush", 1, 1);
-        if (count <= 0) return (t_flush());
-        return (t_flush(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_flush());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_flush(arg0));
+        }
       }
       break;
     case 61:
       HASH_GUARD(0x1780351E8EFF92BDLL, setserverparams) {
         if (count < 1 || count > 6) return throw_wrong_arguments("setserverparams", count, 1, 6, 1);
-        if (count <= 1) return (t_setserverparams(params[0]));
-        if (count == 2) return (t_setserverparams(params[0], params[1]));
-        if (count == 3) return (t_setserverparams(params[0], params[1], params[2]));
-        if (count == 4) return (t_setserverparams(params[0], params[1], params[2], params[3]));
-        if (count == 5) return (t_setserverparams(params[0], params[1], params[2], params[3], params[4]));
-        return (t_setserverparams(params[0], params[1], params[2], params[3], params[4], params[5]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_setserverparams(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_setserverparams(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_setserverparams(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_setserverparams(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 5) return (t_setserverparams(arg0, arg1, arg2, arg3, arg4));
+          CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setserverparams(arg0, arg1, arg2, arg3, arg4, arg5));
+        }
       }
       break;
     case 62:
       HASH_GUARD(0x7032C660AD16D7FELL, connect) {
         if (count < 1 || count > 4) return throw_wrong_arguments("connect", count, 1, 4, 1);
-        if (count <= 1) return (t_connect(params[0]), null);
-        if (count == 2) return (t_connect(params[0], params[1]), null);
-        if (count == 3) return (t_connect(params[0], params[1], params[2]), null);
-        return (t_connect(params[0], params[1], params[2], params[3]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_connect(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_connect(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_connect(arg0, arg1, arg2), null);
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_connect(arg0, arg1, arg2, arg3), null);
+        }
       }
       break;
     default:
@@ -17707,16 +19357,34 @@ ObjectData *c_domprocessinginstruction::dynCreate(CArrRef params, bool construct
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-    if (count <= 1) (t___construct(params[0]));
-    else (t___construct(params[0], params[1]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      if (count <= 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1));
+    } while (false);
   }
   return this;
 }
 void c_domprocessinginstruction::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-  if (count <= 1) (t___construct(params[0]));
-  else (t___construct(params[0], params[1]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1));
+  } while (false);
 }
 void c_domprocessinginstruction::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -17772,40 +19440,75 @@ Variant c_domprocessinginstruction::o_invoke(const char *s, CArrRef params, int6
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
-        if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params[0]));
-        if (count == 2) return (t_c14n(params[0], params[1]));
-        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
-        return (t_c14n(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_c14n());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_c14n(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14n(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14n(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14n(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
-        return (t_replacechild(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacechild(arg0, arg1));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
-        return (t_appendchild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appendchild(arg0));
+        }
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
-        if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_clonenode());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_clonenode(arg0));
+        }
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 24:
@@ -17823,36 +19526,67 @@ Variant c_domprocessinginstruction::o_invoke(const char *s, CArrRef params, int6
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
-        return (t_lookupnamespaceuri(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupnamespaceuri(arg0));
+        }
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
-        return (t_removechild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removechild(arg0));
+        }
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
-        if (count <= 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
-        return (t_lookupprefix(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupprefix(arg0));
+        }
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
-        return (t_isdefaultnamespace(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isdefaultnamespace(arg0));
+        }
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
-        return (t_issamenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issamenode(arg0));
+        }
       }
       break;
     case 49:
@@ -17864,8 +19598,14 @@ Variant c_domprocessinginstruction::o_invoke(const char *s, CArrRef params, int6
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
-        if (count <= 1) return (t_insertbefore(params[0]));
-        return (t_insertbefore(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_insertbefore(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertbefore(arg0, arg1));
+        }
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -17875,17 +19615,32 @@ Variant c_domprocessinginstruction::o_invoke(const char *s, CArrRef params, int6
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
-        if (count <= 1) return (t_c14nfile(params[0]));
-        if (count == 2) return (t_c14nfile(params[0], params[1]));
-        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
-        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
-        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_c14nfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14nfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
-        return (t_issupported(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_issupported(arg0, arg1));
+        }
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -18617,17 +20372,31 @@ Variant c_pdostatement::o_invoke(const char *s, CArrRef params, int64 hash, bool
     case 1:
       HASH_GUARD(0x5740729B65EB8E41LL, fetchall) {
         if (count > 3) return throw_toomany_arguments("fetchall", 3, 1);
-        if (count <= 0) return (t_fetchall());
-        if (count == 1) return (t_fetchall(params[0]));
-        if (count == 2) return (t_fetchall(params[0], params[1]));
-        return (t_fetchall(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_fetchall());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_fetchall(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_fetchall(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_fetchall(arg0, arg1, arg2));
+        }
       }
       break;
     case 3:
       HASH_GUARD(0x436E6AFC3628E403LL, bindvalue) {
         if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
-        if (count <= 2) return (t_bindvalue(params[0], params[1]));
-        return (t_bindvalue(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t_bindvalue(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_bindvalue(arg0, arg1, arg2));
+        }
       }
       break;
     case 5:
@@ -18645,14 +20414,25 @@ Variant c_pdostatement::o_invoke(const char *s, CArrRef params, int64 hash, bool
     case 10:
       HASH_GUARD(0x1D5B8B8144F4AB8ALL, setattribute) {
         if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
-        return (t_setattribute(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setattribute(arg0, arg1));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x187C7F43EB57714ELL, execute) {
         if (count > 1) return throw_toomany_arguments("execute", 1, 1);
-        if (count <= 0) return (t_execute());
-        return (t_execute(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_execute());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_execute(arg0));
+        }
       }
       break;
     case 15:
@@ -18670,17 +20450,32 @@ Variant c_pdostatement::o_invoke(const char *s, CArrRef params, int64 hash, bool
     case 22:
       HASH_GUARD(0x77B13FCF1BA41696LL, bindparam) {
         if (count < 2 || count > 5) return throw_wrong_arguments("bindparam", count, 2, 5, 1);
-        if (count <= 2) return (t_bindparam(params[0], ref(const_cast<Array&>(params).lvalAt(1))));
-        if (count == 3) return (t_bindparam(params[0], ref(const_cast<Array&>(params).lvalAt(1)), params[2]));
-        if (count == 4) return (t_bindparam(params[0], ref(const_cast<Array&>(params).lvalAt(1)), params[2], params[3]));
-        return (t_bindparam(params[0], ref(const_cast<Array&>(params).lvalAt(1)), params[2], params[3], params[4]));
+        const_cast<Array&>(params).escalate(true);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
+          if (count <= 2) return (t_bindparam(arg0, ref(arg1)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_bindparam(arg0, ref(arg1), arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_bindparam(arg0, ref(arg1), arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_bindparam(arg0, ref(arg1), arg2, arg3, arg4));
+        }
       }
       break;
     case 25:
       HASH_GUARD(0x5C38814410C5FFD9LL, fetchcolumn) {
         if (count > 1) return throw_toomany_arguments("fetchcolumn", 1, 1);
-        if (count <= 0) return (t_fetchcolumn());
-        return (t_fetchcolumn(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_fetchcolumn());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_fetchcolumn(arg0));
+        }
       }
       break;
     case 26:
@@ -18698,16 +20493,32 @@ Variant c_pdostatement::o_invoke(const char *s, CArrRef params, int64 hash, bool
     case 29:
       HASH_GUARD(0x1C87AD14A095219DLL, bindcolumn) {
         if (count < 2 || count > 5) return throw_wrong_arguments("bindcolumn", count, 2, 5, 1);
-        if (count <= 2) return (t_bindcolumn(params[0], ref(const_cast<Array&>(params).lvalAt(1))));
-        if (count == 3) return (t_bindcolumn(params[0], ref(const_cast<Array&>(params).lvalAt(1)), params[2]));
-        if (count == 4) return (t_bindcolumn(params[0], ref(const_cast<Array&>(params).lvalAt(1)), params[2], params[3]));
-        return (t_bindcolumn(params[0], ref(const_cast<Array&>(params).lvalAt(1)), params[2], params[3], params[4]));
+        const_cast<Array&>(params).escalate(true);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
+          if (count <= 2) return (t_bindcolumn(arg0, ref(arg1)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_bindcolumn(arg0, ref(arg1), arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_bindcolumn(arg0, ref(arg1), arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_bindcolumn(arg0, ref(arg1), arg2, arg3, arg4));
+        }
       }
       HASH_GUARD(0x0E1814AA3327229DLL, fetchobject) {
         if (count > 2) return throw_toomany_arguments("fetchobject", 2, 1);
-        if (count <= 0) return (t_fetchobject());
-        if (count == 1) return (t_fetchobject(params[0]));
-        return (t_fetchobject(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_fetchobject());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_fetchobject(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_fetchobject(arg0, arg1));
+        }
       }
       break;
     case 30:
@@ -18725,8 +20536,13 @@ Variant c_pdostatement::o_invoke(const char *s, CArrRef params, int64 hash, bool
     case 33:
       HASH_GUARD(0x78C9BF8620136861LL, setfetchmode) {
         if (count < 1) return throw_missing_arguments("setfetchmode", count+1, 1);
-        if (count <= 1) return (t_setfetchmode(count, params[0]));
-        return (t_setfetchmode(count,params[0], params.slice(1, count - 1, false)));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_setfetchmode(count, arg0));
+          return (t_setfetchmode(count,arg0, params.slice(1, count - 1, false)));
+        }
       }
       break;
     case 34:
@@ -18738,7 +20554,12 @@ Variant c_pdostatement::o_invoke(const char *s, CArrRef params, int64 hash, bool
     case 40:
       HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
         if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
-        return (t_getattribute(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getattribute(arg0));
+        }
       }
       break;
     case 45:
@@ -18756,14 +20577,26 @@ Variant c_pdostatement::o_invoke(const char *s, CArrRef params, int64 hash, bool
     case 59:
       HASH_GUARD(0x5B6B980006E717FBLL, getcolumnmeta) {
         if (count != 1) return throw_wrong_arguments("getcolumnmeta", count, 1, 1, 1);
-        return (t_getcolumnmeta(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getcolumnmeta(arg0));
+        }
       }
       HASH_GUARD(0x5E82B850BB90B0FBLL, fetch) {
         if (count > 3) return throw_toomany_arguments("fetch", 3, 1);
-        if (count <= 0) return (t_fetch());
-        if (count == 1) return (t_fetch(params[0]));
-        if (count == 2) return (t_fetch(params[0], params[1]));
-        return (t_fetch(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_fetch());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_fetch(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_fetch(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_fetch(arg0, arg1, arg2));
+        }
       }
       break;
     default:
@@ -19519,16 +21352,34 @@ ObjectData *c_soapclient::dynCreate(CArrRef params, bool construct /* = true */)
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-    if (count <= 1) (t___construct(params[0]));
-    else (t___construct(params[0], params[1]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      if (count <= 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1));
+    } while (false);
   }
   return this;
 }
 void c_soapclient::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-  if (count <= 1) (t___construct(params[0]));
-  else (t___construct(params[0], params[1]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1));
+  } while (false);
 }
 void c_soapclient::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -19588,7 +21439,13 @@ Variant c_soapclient::o_invoke(const char *s, CArrRef params, int64 hash, bool f
       }
       HASH_GUARD(0x5D73364F53CEEB6CLL, __call) {
         if (count != 2) return throw_wrong_arguments("__call", count, 2, 2, 1);
-        return (t___call(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___call(arg0, arg1));
+        }
       }
       break;
     case 17:
@@ -19612,13 +21469,28 @@ Variant c_soapclient::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 21:
       HASH_GUARD(0x19A26CEC7E8AAEF5LL, __dorequest) {
         if (count < 4 || count > 5) return throw_wrong_arguments("__dorequest", count, 4, 5, 1);
-        if (count <= 4) return (t___dorequest(params[0], params[1], params[2], params[3]));
-        return (t___dorequest(params[0], params[1], params[2], params[3], params[4]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 4) return (t___dorequest(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___dorequest(arg0, arg1, arg2, arg3, arg4));
+        }
       }
       HASH_GUARD(0x52C6ABACCBFD0C75LL, __setcookie) {
         if (count < 1 || count > 2) return throw_wrong_arguments("__setcookie", count, 1, 2, 1);
-        if (count <= 1) return (t___setcookie(params[0]));
-        return (t___setcookie(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t___setcookie(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___setcookie(arg0, arg1));
+        }
       }
       HASH_GUARD(0x628D398E7604B9D5LL, __gettypes) {
         if (count > 0) return throw_toomany_arguments("__gettypes", 0, 1);
@@ -19628,10 +21500,20 @@ Variant c_soapclient::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 25:
       HASH_GUARD(0x4A2F89F662050D99LL, __soapcall) {
         if (count < 2 || count > 5) return throw_wrong_arguments("__soapcall", count, 2, 5, 1);
-        if (count <= 2) return (t___soapcall(params[0], params[1]));
-        if (count == 3) return (t___soapcall(params[0], params[1], params[2]));
-        if (count == 4) return (t___soapcall(params[0], params[1], params[2], params[3]));
-        return (t___soapcall(params[0], params[1], params[2], params[3], ref(const_cast<Array&>(params).lvalAt(4))));
+        const_cast<Array&>(params).escalate(true);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t___soapcall(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t___soapcall(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t___soapcall(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
+          return (t___soapcall(arg0, arg1, arg2, arg3, ref(arg4)));
+        }
       }
       break;
     case 26:
@@ -19643,20 +21525,36 @@ Variant c_soapclient::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 27:
       HASH_GUARD(0x14842228D5E335BBLL, __setsoapheaders) {
         if (count > 1) return throw_toomany_arguments("__setsoapheaders", 1, 1);
-        if (count <= 0) return (t___setsoapheaders());
-        return (t___setsoapheaders(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___setsoapheaders());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___setsoapheaders(arg0));
+        }
       }
       break;
     case 31:
       HASH_GUARD(0x232D13904DBC36FFLL, __setlocation) {
         if (count > 1) return throw_toomany_arguments("__setlocation", 1, 1);
-        if (count <= 0) return (t___setlocation());
-        return (t___setlocation(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___setlocation());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___setlocation(arg0));
+        }
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
-        if (count <= 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -20157,14 +22055,26 @@ ObjectData *c_soapparam::dynCreate(CArrRef params, bool construct /* = true */) 
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 2) throw_wrong_arguments("__construct", count, 2, 2, 2);
-    (t___construct(params[0], params[1]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1));
+    }
   }
   return this;
 }
 void c_soapparam::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) throw_wrong_arguments("__construct", count, 2, 2, 2);
-  (t___construct(params[0], params[1]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1));
+  }
 }
 void c_soapparam::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -20214,7 +22124,13 @@ Variant c_soapparam::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -20439,18 +22355,42 @@ ObjectData *c_datetime::dynCreate(CArrRef params, bool construct /* = true */) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count > 2) throw_toomany_arguments("__construct", 2, 2);
-    if (count <= 0) (t___construct());
-    else if (count == 1) (t___construct(params[0]));
-    else (t___construct(params[0], params[1]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      if (count <= 0) {
+        (t___construct());
+        break;
+      }
+      CVarRef arg0((ad->getValue(pos)));
+      if (count == 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1));
+    } while (false);
   }
   return this;
 }
 void c_datetime::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 2) throw_toomany_arguments("__construct", 2, 2);
-  if (count <= 0) (t___construct());
-  else if (count == 1) (t___construct(params[0]));
-  else (t___construct(params[0], params[1]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) {
+      (t___construct());
+      break;
+    }
+    CVarRef arg0((ad->getValue(pos)));
+    if (count == 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1));
+  } while (false);
 }
 void c_datetime::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -20498,13 +22438,25 @@ Variant c_datetime::o_invoke(const char *s, CArrRef params, int64 hash, bool fat
     case 7:
       HASH_GUARD(0x65A9B2950F080587LL, modify) {
         if (count != 1) return throw_wrong_arguments("modify", count, 1, 1, 1);
-        return (t_modify(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_modify(arg0));
+        }
       }
       break;
     case 11:
       HASH_GUARD(0x67314943DC9D120BLL, setdate) {
         if (count != 3) return throw_wrong_arguments("setdate", count, 3, 3, 1);
-        return (t_setdate(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setdate(arg0, arg1, arg2));
+        }
       }
       HASH_GUARD(0x68DB66F60B55BD0BLL, getoffset) {
         if (count > 0) return throw_toomany_arguments("getoffset", 0, 1);
@@ -20526,33 +22478,63 @@ Variant c_datetime::o_invoke(const char *s, CArrRef params, int64 hash, bool fat
     case 20:
       HASH_GUARD(0x16D6DBFD6EE55A74LL, setisodate) {
         if (count < 2 || count > 3) return throw_wrong_arguments("setisodate", count, 2, 3, 1);
-        if (count <= 2) return (t_setisodate(params[0], params[1]));
-        return (t_setisodate(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t_setisodate(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setisodate(arg0, arg1, arg2));
+        }
       }
       break;
     case 24:
       HASH_GUARD(0x07CB96AB34F4C258LL, settime) {
         if (count < 2 || count > 3) return throw_wrong_arguments("settime", count, 2, 3, 1);
-        if (count <= 2) return (t_settime(params[0], params[1]));
-        return (t_settime(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t_settime(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_settime(arg0, arg1, arg2));
+        }
       }
       HASH_GUARD(0x3B576E558B957CB8LL, settimezone) {
         if (count != 1) return throw_wrong_arguments("settimezone", count, 1, 1, 1);
-        return (t_settimezone(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_settimezone(arg0));
+        }
       }
       break;
     case 27:
       HASH_GUARD(0x1B6DDAF6AAF8CA9BLL, format) {
         if (count != 1) return throw_wrong_arguments("format", count, 1, 1, 1);
-        return (t_format(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_format(arg0));
+        }
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -21022,14 +23004,24 @@ ObjectData *c_collator::dynCreate(CArrRef params, bool construct /* = true */) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-    (t___construct(params[0]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      (t___construct(arg0));
+    }
   }
   return this;
 }
 void c_collator::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-  (t___construct(params[0]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  }
 }
 void c_collator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -21077,38 +23069,74 @@ Variant c_collator::o_invoke(const char *s, CArrRef params, int64 hash, bool fat
     case 2:
       HASH_GUARD(0x2C7E06EB2965CE02LL, getlocale) {
         if (count > 1) return throw_toomany_arguments("getlocale", 1, 1);
-        if (count <= 0) return (t_getlocale());
-        return (t_getlocale(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getlocale());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getlocale(arg0));
+        }
       }
       break;
     case 8:
       HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
         if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
-        return (t_getattribute(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getattribute(arg0));
+        }
       }
       break;
     case 10:
       HASH_GUARD(0x1F4984938E1DBB2ALL, sort) {
         if (count < 1 || count > 2) return throw_wrong_arguments("sort", count, 1, 2, 1);
-        if (count <= 1) return (t_sort(ref(const_cast<Array&>(params).lvalAt(0))));
-        return (t_sort(ref(const_cast<Array&>(params).lvalAt(0)), params[1]));
+        const_cast<Array&>(params).escalate(true);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValueRef(pos)));
+          if (count <= 1) return (t_sort(ref(arg0)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_sort(ref(arg0), arg1));
+        }
       }
       HASH_GUARD(0x1D5B8B8144F4AB8ALL, setattribute) {
         if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
-        return (t_setattribute(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setattribute(arg0, arg1));
+        }
       }
       break;
     case 11:
       HASH_GUARD(0x365C573D887803EBLL, sortwithsortkeys) {
         if (count != 1) return throw_wrong_arguments("sortwithsortkeys", count, 1, 1, 1);
-        return (t_sortwithsortkeys(ref(const_cast<Array&>(params).lvalAt(0))));
+        const_cast<Array&>(params).escalate(true);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValueRef(pos)));
+          return (t_sortwithsortkeys(ref(arg0)));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x790B7C44A3442BEELL, asort) {
         if (count < 1 || count > 2) return throw_wrong_arguments("asort", count, 1, 2, 1);
-        if (count <= 1) return (t_asort(ref(const_cast<Array&>(params).lvalAt(0))));
-        return (t_asort(ref(const_cast<Array&>(params).lvalAt(0)), params[1]));
+        const_cast<Array&>(params).escalate(true);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValueRef(pos)));
+          if (count <= 1) return (t_asort(ref(arg0)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_asort(ref(arg0), arg1));
+        }
       }
       break;
     case 17:
@@ -21120,7 +23148,13 @@ Variant c_collator::o_invoke(const char *s, CArrRef params, int64 hash, bool fat
     case 18:
       HASH_GUARD(0x1BF74792BDECF352LL, compare) {
         if (count != 2) return throw_wrong_arguments("compare", count, 2, 2, 1);
-        return (t_compare(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_compare(arg0, arg1));
+        }
       }
       break;
     case 19:
@@ -21132,13 +23166,23 @@ Variant c_collator::o_invoke(const char *s, CArrRef params, int64 hash, bool fat
     case 22:
       HASH_GUARD(0x3A0A2C5D90518456LL, create) {
         if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
-        return (ti_create(o_getClassName(), params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (ti_create(o_getClassName(), arg0));
+        }
       }
       break;
     case 23:
       HASH_GUARD(0x0B7AA0ED4CBF9ED7LL, setstrength) {
         if (count != 1) return throw_wrong_arguments("setstrength", count, 1, 1, 1);
-        return (t_setstrength(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setstrength(arg0));
+        }
       }
       break;
     case 30:
@@ -21150,7 +23194,12 @@ Variant c_collator::o_invoke(const char *s, CArrRef params, int64 hash, bool fat
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
-        return (t___construct(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___construct(arg0), null);
+        }
       }
       break;
     default:
@@ -21262,7 +23311,12 @@ Variant c_collator::os_invoke(const char *c, const char *s, CArrRef params, int6
     case 0:
       HASH_GUARD(0x3A0A2C5D90518456LL, create) {
         if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
-        return (ti_create(c, params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (ti_create(c, arg0));
+        }
       }
       break;
     default:
@@ -21903,20 +23957,54 @@ ObjectData *c_pdo::dynCreate(CArrRef params, bool construct /* = true */) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count < 1 || count > 4) throw_wrong_arguments("__construct", count, 1, 4, 2);
-    if (count <= 1) (t___construct(params[0]));
-    else if (count == 2) (t___construct(params[0], params[1]));
-    else if (count == 3) (t___construct(params[0], params[1], params[2]));
-    else (t___construct(params[0], params[1], params[2], params[3]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      if (count <= 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 2) {
+        (t___construct(arg0, arg1));
+        break;
+      }
+      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 3) {
+        (t___construct(arg0, arg1, arg2));
+        break;
+      }
+      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1, arg2, arg3));
+    } while (false);
   }
   return this;
 }
 void c_pdo::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 4) throw_wrong_arguments("__construct", count, 1, 4, 2);
-  if (count <= 1) (t___construct(params[0]));
-  else if (count == 2) (t___construct(params[0], params[1]));
-  else if (count == 3) (t___construct(params[0], params[1], params[2]));
-  else (t___construct(params[0], params[1], params[2], params[3]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 2) {
+      (t___construct(arg0, arg1));
+      break;
+    }
+    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 3) {
+      (t___construct(arg0, arg1, arg2));
+      break;
+    }
+    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1, arg2, arg3));
+  } while (false);
 }
 void c_pdo::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -21979,13 +24067,24 @@ Variant c_pdo::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 10:
       HASH_GUARD(0x1D5B8B8144F4AB8ALL, setattribute) {
         if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
-        return (t_setattribute(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setattribute(arg0, arg1));
+        }
       }
       break;
     case 12:
       HASH_GUARD(0x4F1D1ED7B087208CLL, exec) {
         if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
-        return (t_exec(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_exec(arg0));
+        }
       }
       break;
     case 14:
@@ -21997,8 +24096,13 @@ Variant c_pdo::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 18:
       HASH_GUARD(0x25466EABBA2D7C12LL, lastinsertid) {
         if (count > 1) return throw_toomany_arguments("lastinsertid", 1, 1);
-        if (count <= 0) return (t_lastinsertid());
-        return (t_lastinsertid(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_lastinsertid());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lastinsertid(arg0));
+        }
       }
       break;
     case 28:
@@ -22016,10 +24120,18 @@ Variant c_pdo::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count < 1 || count > 4) return throw_wrong_arguments("__construct", count, 1, 4, 1);
-        if (count <= 1) return (t___construct(params[0]), null);
-        if (count == 2) return (t___construct(params[0], params[1]), null);
-        if (count == 3) return (t___construct(params[0], params[1], params[2]), null);
-        return (t___construct(params[0], params[1], params[2], params[3]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t___construct(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t___construct(arg0, arg1, arg2), null);
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1, arg2, arg3), null);
+        }
       }
       break;
     case 36:
@@ -22031,7 +24143,12 @@ Variant c_pdo::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 40:
       HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
         if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
-        return (t_getattribute(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getattribute(arg0));
+        }
       }
       break;
     case 45:
@@ -22043,15 +24160,27 @@ Variant c_pdo::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 46:
       HASH_GUARD(0x1740B14E849464EELL, quote) {
         if (count < 1 || count > 2) return throw_wrong_arguments("quote", count, 1, 2, 1);
-        if (count <= 1) return (t_quote(params[0]));
-        return (t_quote(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_quote(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_quote(arg0, arg1));
+        }
       }
       break;
     case 47:
       HASH_GUARD(0x540020AE4BA591AFLL, prepare) {
         if (count < 1 || count > 2) return throw_wrong_arguments("prepare", count, 1, 2, 1);
-        if (count <= 1) return (t_prepare(params[0]));
-        return (t_prepare(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_prepare(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_prepare(arg0, arg1));
+        }
       }
       break;
     case 51:
@@ -22069,7 +24198,12 @@ Variant c_pdo::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 55:
       HASH_GUARD(0x356758D4414DA377LL, query) {
         if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
-        return (t_query(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_query(arg0));
+        }
       }
       break;
     case 59:
@@ -22716,40 +24850,75 @@ Variant c_domentity::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
-        if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params[0]));
-        if (count == 2) return (t_c14n(params[0], params[1]));
-        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
-        return (t_c14n(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_c14n());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_c14n(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14n(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14n(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14n(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
-        return (t_replacechild(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacechild(arg0, arg1));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
-        return (t_appendchild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appendchild(arg0));
+        }
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
-        if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_clonenode());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_clonenode(arg0));
+        }
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 24:
@@ -22767,11 +24936,21 @@ Variant c_domentity::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
-        return (t_lookupnamespaceuri(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupnamespaceuri(arg0));
+        }
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
-        return (t_removechild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removechild(arg0));
+        }
       }
       break;
     case 31:
@@ -22783,19 +24962,34 @@ Variant c_domentity::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
-        return (t_lookupprefix(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupprefix(arg0));
+        }
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
-        return (t_isdefaultnamespace(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isdefaultnamespace(arg0));
+        }
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
-        return (t_issamenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issamenode(arg0));
+        }
       }
       break;
     case 49:
@@ -22807,8 +25001,14 @@ Variant c_domentity::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
-        if (count <= 1) return (t_insertbefore(params[0]));
-        return (t_insertbefore(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_insertbefore(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertbefore(arg0, arg1));
+        }
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -22818,17 +25018,32 @@ Variant c_domentity::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
-        if (count <= 1) return (t_c14nfile(params[0]));
-        if (count == 2) return (t_c14nfile(params[0], params[1]));
-        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
-        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
-        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_c14nfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14nfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
-        return (t_issupported(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_issupported(arg0, arg1));
+        }
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -23550,24 +25765,44 @@ Variant c_xmlwriter::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 2:
       HASH_GUARD(0x1EBCBEA66B6B0982LL, writecdata) {
         if (count != 1) return throw_wrong_arguments("writecdata", count, 1, 1, 1);
-        return (t_writecdata(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_writecdata(arg0));
+        }
       }
       break;
     case 3:
       HASH_GUARD(0x55E29E84E96ACF83LL, startdtd) {
         if (count < 1 || count > 3) return throw_wrong_arguments("startdtd", count, 1, 3, 1);
-        if (count <= 1) return (t_startdtd(params[0]));
-        if (count == 2) return (t_startdtd(params[0], params[1]));
-        return (t_startdtd(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_startdtd(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_startdtd(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_startdtd(arg0, arg1, arg2));
+        }
       }
       break;
     case 8:
       HASH_GUARD(0x7C1FF8A79BAB3608LL, writedtd) {
         if (count < 1 || count > 4) return throw_wrong_arguments("writedtd", count, 1, 4, 1);
-        if (count <= 1) return (t_writedtd(params[0]));
-        if (count == 2) return (t_writedtd(params[0], params[1]));
-        if (count == 3) return (t_writedtd(params[0], params[1], params[2]));
-        return (t_writedtd(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_writedtd(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_writedtd(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_writedtd(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_writedtd(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 14:
@@ -23585,24 +25820,45 @@ Variant c_xmlwriter::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 19:
       HASH_GUARD(0x75F8C992981A4093LL, writecomment) {
         if (count != 1) return throw_wrong_arguments("writecomment", count, 1, 1, 1);
-        return (t_writecomment(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_writecomment(arg0));
+        }
       }
       HASH_GUARD(0x5A7AE5A26994FF13LL, startattribute) {
         if (count != 1) return throw_wrong_arguments("startattribute", count, 1, 1, 1);
-        return (t_startattribute(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_startattribute(arg0));
+        }
       }
       break;
     case 28:
       HASH_GUARD(0x337EFFF3783B919CLL, writeelement) {
         if (count < 1 || count > 2) return throw_wrong_arguments("writeelement", count, 1, 2, 1);
-        if (count <= 1) return (t_writeelement(params[0]));
-        return (t_writeelement(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_writeelement(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_writeelement(arg0, arg1));
+        }
       }
       break;
     case 29:
       HASH_GUARD(0x4D26D167066BB11DLL, text) {
         if (count != 1) return throw_wrong_arguments("text", count, 1, 1, 1);
-        return (t_text(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_text(arg0));
+        }
       }
       break;
     case 32:
@@ -23620,13 +25876,24 @@ Variant c_xmlwriter::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 41:
       HASH_GUARD(0x1D81ABDC9890C5A9LL, writedtdattlist) {
         if (count != 2) return throw_wrong_arguments("writedtdattlist", count, 2, 2, 1);
-        return (t_writedtdattlist(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_writedtdattlist(arg0, arg1));
+        }
       }
       break;
     case 43:
       HASH_GUARD(0x0DEAF425F1AD73ABLL, setindentstring) {
         if (count != 1) return throw_wrong_arguments("setindentstring", count, 1, 1, 1);
-        return (t_setindentstring(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setindentstring(arg0));
+        }
       }
       break;
     case 47:
@@ -23644,29 +25911,51 @@ Variant c_xmlwriter::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 55:
       HASH_GUARD(0x4B0F1F6361A59C37LL, writeraw) {
         if (count != 1) return throw_wrong_arguments("writeraw", count, 1, 1, 1);
-        return (t_writeraw(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_writeraw(arg0));
+        }
       }
       break;
     case 56:
       HASH_GUARD(0x7FC89CF1AFFB1E38LL, startdocument) {
         if (count > 3) return throw_toomany_arguments("startdocument", 3, 1);
-        if (count <= 0) return (t_startdocument());
-        if (count == 1) return (t_startdocument(params[0]));
-        if (count == 2) return (t_startdocument(params[0], params[1]));
-        return (t_startdocument(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_startdocument());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_startdocument(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_startdocument(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_startdocument(arg0, arg1, arg2));
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x0D155D1E5C6641BALL, outputmemory) {
         if (count > 1) return throw_toomany_arguments("outputmemory", 1, 1);
-        if (count <= 0) return (t_outputmemory());
-        return (t_outputmemory(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_outputmemory());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_outputmemory(arg0));
+        }
       }
       break;
     case 62:
       HASH_GUARD(0x1FBE635680ADB7BELL, openuri) {
         if (count != 1) return throw_wrong_arguments("openuri", count, 1, 1, 1);
-        return (t_openuri(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_openuri(arg0));
+        }
       }
       break;
     case 68:
@@ -23678,11 +25967,21 @@ Variant c_xmlwriter::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 70:
       HASH_GUARD(0x5D4650E5C0DAEE46LL, writedtdentity) {
         if (count < 2 || count > 6) return throw_wrong_arguments("writedtdentity", count, 2, 6, 1);
-        if (count <= 2) return (t_writedtdentity(params[0], params[1]));
-        if (count == 3) return (t_writedtdentity(params[0], params[1], params[2]));
-        if (count == 4) return (t_writedtdentity(params[0], params[1], params[2], params[3]));
-        if (count == 5) return (t_writedtdentity(params[0], params[1], params[2], params[3], params[4]));
-        return (t_writedtdentity(params[0], params[1], params[2], params[3], params[4], params[5]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t_writedtdentity(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_writedtdentity(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_writedtdentity(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 5) return (t_writedtdentity(arg0, arg1, arg2, arg3, arg4));
+          CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_writedtdentity(arg0, arg1, arg2, arg3, arg4, arg5));
+        }
       }
       break;
     case 71:
@@ -23694,7 +25993,13 @@ Variant c_xmlwriter::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 75:
       HASH_GUARD(0x3954A2C0306CCCCBLL, writeattribute) {
         if (count != 2) return throw_wrong_arguments("writeattribute", count, 2, 2, 1);
-        return (t_writeattribute(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_writeattribute(arg0, arg1));
+        }
       }
       HASH_GUARD(0x7C43ECE80FF886CBLL, endattribute) {
         if (count > 0) return throw_toomany_arguments("endattribute", 0, 1);
@@ -23704,19 +26009,40 @@ Variant c_xmlwriter::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 77:
       HASH_GUARD(0x4F1D890D5B36D24DLL, startattributens) {
         if (count != 3) return throw_wrong_arguments("startattributens", count, 3, 3, 1);
-        return (t_startattributens(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_startattributens(arg0, arg1, arg2));
+        }
       }
       break;
     case 82:
       HASH_GUARD(0x1357CA1E92397452LL, writedtdelement) {
         if (count != 2) return throw_wrong_arguments("writedtdelement", count, 2, 2, 1);
-        return (t_writedtdelement(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_writedtdelement(arg0, arg1));
+        }
       }
       break;
     case 84:
       HASH_GUARD(0x154AE94AEFAC7C54LL, writeattributens) {
         if (count != 4) return throw_wrong_arguments("writeattributens", count, 4, 4, 1);
-        return (t_writeattributens(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_writeattributens(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 86:
@@ -23726,20 +26052,39 @@ Variant c_xmlwriter::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
       }
       HASH_GUARD(0x37D51A94C6EE8F56LL, writepi) {
         if (count != 2) return throw_wrong_arguments("writepi", count, 2, 2, 1);
-        return (t_writepi(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_writepi(arg0, arg1));
+        }
       }
       break;
     case 88:
       HASH_GUARD(0x24A376E9310BF058LL, writeelementns) {
         if (count < 3 || count > 4) return throw_wrong_arguments("writeelementns", count, 3, 4, 1);
-        if (count <= 3) return (t_writeelementns(params[0], params[1], params[2]));
-        return (t_writeelementns(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 3) return (t_writeelementns(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_writeelementns(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 89:
       HASH_GUARD(0x390B6C01AE7C4159LL, startpi) {
         if (count != 1) return throw_wrong_arguments("startpi", count, 1, 1, 1);
-        return (t_startpi(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_startpi(arg0));
+        }
       }
       break;
     case 92:
@@ -23751,7 +26096,13 @@ Variant c_xmlwriter::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 93:
       HASH_GUARD(0x75A033B824EA1ADDLL, startdtdentity) {
         if (count != 2) return throw_wrong_arguments("startdtdentity", count, 2, 2, 1);
-        return (t_startdtdentity(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_startdtdentity(arg0, arg1));
+        }
       }
       break;
     case 95:
@@ -23763,25 +26114,47 @@ Variant c_xmlwriter::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 98:
       HASH_GUARD(0x55BFFBE5717EFD62LL, startelement) {
         if (count != 1) return throw_wrong_arguments("startelement", count, 1, 1, 1);
-        return (t_startelement(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_startelement(arg0));
+        }
       }
       break;
     case 101:
       HASH_GUARD(0x349B7446B5EE65E5LL, setindent) {
         if (count != 1) return throw_wrong_arguments("setindent", count, 1, 1, 1);
-        return (t_setindent(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setindent(arg0));
+        }
       }
       break;
     case 105:
       HASH_GUARD(0x608A2D39DE12E169LL, startelementns) {
         if (count != 3) return throw_wrong_arguments("startelementns", count, 3, 3, 1);
-        return (t_startelementns(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_startelementns(arg0, arg1, arg2));
+        }
       }
       break;
     case 112:
       HASH_GUARD(0x0CBB10FA542B7D70LL, startdtdattlist) {
         if (count != 1) return throw_wrong_arguments("startdtdattlist", count, 1, 1, 1);
-        return (t_startdtdattlist(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_startdtdattlist(arg0));
+        }
       }
       break;
     case 113:
@@ -23799,14 +26172,24 @@ Variant c_xmlwriter::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 120:
       HASH_GUARD(0x451436438EBA2AF8LL, startdtdelement) {
         if (count != 1) return throw_wrong_arguments("startdtdelement", count, 1, 1, 1);
-        return (t_startdtdelement(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_startdtdelement(arg0));
+        }
       }
       break;
     case 122:
       HASH_GUARD(0x6A3D9F8EDB005E7ALL, flush) {
         if (count > 1) return throw_toomany_arguments("flush", 1, 1);
-        if (count <= 0) return (t_flush());
-        return (t_flush(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_flush());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_flush(arg0));
+        }
       }
       break;
     case 126:
@@ -25091,18 +27474,42 @@ ObjectData *c_domexception::dynCreate(CArrRef params, bool construct /* = true *
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count > 2) throw_toomany_arguments("__construct", 2, 2);
-    if (count <= 0) (t___construct());
-    else if (count == 1) (t___construct(params[0]));
-    else (t___construct(params[0], params[1]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      if (count <= 0) {
+        (t___construct());
+        break;
+      }
+      CVarRef arg0((ad->getValue(pos)));
+      if (count == 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1));
+    } while (false);
   }
   return this;
 }
 void c_domexception::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 2) throw_toomany_arguments("__construct", 2, 2);
-  if (count <= 0) (t___construct());
-  else if (count == 1) (t___construct(params[0]));
-  else (t___construct(params[0], params[1]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) {
+      (t___construct());
+      break;
+    }
+    CVarRef arg0((ad->getValue(pos)));
+    if (count == 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1));
+  } while (false);
 }
 void c_domexception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -25202,9 +27609,15 @@ Variant c_domexception::o_invoke(const char *s, CArrRef params, int64 hash, bool
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -25561,14 +27974,24 @@ ObjectData *c_domxpath::dynCreate(CArrRef params, bool construct /* = true */) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-    (t___construct(params[0]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      (t___construct(arg0));
+    }
   }
   return this;
 }
 void c_domxpath::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-  (t___construct(params[0]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  }
 }
 void c_domxpath::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -25613,8 +28036,13 @@ Variant c_domxpath::o_invoke(const char *s, CArrRef params, int64 hash, bool fat
     case 2:
       HASH_GUARD(0x144FADF6B374AB82LL, registerphpfunctions) {
         if (count > 1) return throw_toomany_arguments("registerphpfunctions", 1, 1);
-        if (count <= 0) return (t_registerphpfunctions());
-        return (t_registerphpfunctions(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_registerphpfunctions());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_registerphpfunctions(arg0));
+        }
       }
       break;
     case 3:
@@ -25626,35 +28054,69 @@ Variant c_domxpath::o_invoke(const char *s, CArrRef params, int64 hash, bool fat
     case 5:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 7:
       HASH_GUARD(0x356758D4414DA377LL, query) {
         if (count < 1 || count > 2) return throw_wrong_arguments("query", count, 1, 2, 1);
-        if (count <= 1) return (t_query(params[0]));
-        return (t_query(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_query(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_query(arg0, arg1));
+        }
       }
       break;
     case 8:
       HASH_GUARD(0x47ACFB6D8681B0E8LL, registernamespace) {
         if (count != 2) return throw_wrong_arguments("registernamespace", count, 2, 2, 1);
-        return (t_registernamespace(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_registernamespace(arg0, arg1));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
-        return (t___construct(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___construct(arg0), null);
+        }
       }
       HASH_GUARD(0x2443593B6F3C912FLL, evaluate) {
         if (count < 1 || count > 2) return throw_wrong_arguments("evaluate", count, 1, 2, 1);
-        if (count <= 1) return (t_evaluate(params[0]));
-        return (t_evaluate(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_evaluate(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_evaluate(arg0, arg1));
+        }
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     default:
@@ -26005,16 +28467,34 @@ ObjectData *c_soapserver::dynCreate(CArrRef params, bool construct /* = true */)
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-    if (count <= 1) (t___construct(params[0]));
-    else (t___construct(params[0], params[1]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      if (count <= 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1));
+    } while (false);
   }
   return this;
 }
 void c_soapserver::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-  if (count <= 1) (t___construct(params[0]));
-  else (t___construct(params[0], params[1]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1));
+  } while (false);
 }
 void c_soapserver::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -26061,16 +28541,30 @@ Variant c_soapserver::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 3:
       HASH_GUARD(0x758A4E04590FE203LL, fault) {
         if (count < 2 || count > 5) return throw_wrong_arguments("fault", count, 2, 5, 1);
-        if (count <= 2) return (t_fault(params[0], params[1]), null);
-        if (count == 3) return (t_fault(params[0], params[1], params[2]), null);
-        if (count == 4) return (t_fault(params[0], params[1], params[2], params[3]), null);
-        return (t_fault(params[0], params[1], params[2], params[3], params[4]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t_fault(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_fault(arg0, arg1, arg2), null);
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_fault(arg0, arg1, arg2, arg3), null);
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_fault(arg0, arg1, arg2, arg3, arg4), null);
+        }
       }
       break;
     case 8:
       HASH_GUARD(0x5E77DD94E0A69328LL, setpersistence) {
         if (count != 1) return throw_wrong_arguments("setpersistence", count, 1, 1, 1);
-        return (t_setpersistence(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setpersistence(arg0), null);
+        }
       }
       break;
     case 15:
@@ -26082,8 +28576,13 @@ Variant c_soapserver::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 18:
       HASH_GUARD(0x5C4CA333F4541532LL, handle) {
         if (count > 1) return throw_toomany_arguments("handle", 1, 1);
-        if (count <= 0) return (t_handle(), null);
-        return (t_handle(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_handle(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_handle(arg0), null);
+        }
       }
       break;
     case 19:
@@ -26095,31 +28594,57 @@ Variant c_soapserver::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 20:
       HASH_GUARD(0x597B151CC4F70834LL, setclass) {
         if (count < 1) return throw_missing_arguments("setclass", count+1, 1);
-        if (count <= 1) return (t_setclass(count, params[0]), null);
-        return (t_setclass(count,params[0], params.slice(1, count - 1, false)), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_setclass(count, arg0), null);
+          return (t_setclass(count,arg0, params.slice(1, count - 1, false)), null);
+        }
       }
       break;
     case 25:
       HASH_GUARD(0x559622F84FE626B9LL, setobject) {
         if (count != 1) return throw_wrong_arguments("setobject", count, 1, 1, 1);
-        return (t_setobject(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setobject(arg0), null);
+        }
       }
       break;
     case 30:
       HASH_GUARD(0x278B0E6CCA74963ELL, addsoapheader) {
         if (count != 1) return throw_wrong_arguments("addsoapheader", count, 1, 1, 1);
-        return (t_addsoapheader(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_addsoapheader(arg0), null);
+        }
       }
       break;
     case 31:
       HASH_GUARD(0x48B5852A397D2D9FLL, addfunction) {
         if (count != 1) return throw_wrong_arguments("addfunction", count, 1, 1, 1);
-        return (t_addfunction(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_addfunction(arg0), null);
+        }
       }
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
-        if (count <= 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -26589,40 +29114,75 @@ Variant c_domnode::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
-        if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params[0]));
-        if (count == 2) return (t_c14n(params[0], params[1]));
-        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
-        return (t_c14n(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_c14n());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_c14n(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14n(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14n(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14n(arg0, arg1, arg2, arg3));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
-        return (t_replacechild(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacechild(arg0, arg1));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
-        return (t_appendchild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appendchild(arg0));
+        }
       }
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
-        if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_clonenode());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_clonenode(arg0));
+        }
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 24:
@@ -26640,11 +29200,21 @@ Variant c_domnode::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 29:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
-        return (t_lookupnamespaceuri(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupnamespaceuri(arg0));
+        }
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
-        return (t_removechild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removechild(arg0));
+        }
       }
       break;
     case 31:
@@ -26656,19 +29226,34 @@ Variant c_domnode::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 33:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
-        return (t_lookupprefix(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupprefix(arg0));
+        }
       }
       break;
     case 36:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
-        return (t_isdefaultnamespace(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isdefaultnamespace(arg0));
+        }
       }
       break;
     case 47:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
-        return (t_issamenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issamenode(arg0));
+        }
       }
       break;
     case 49:
@@ -26680,8 +29265,14 @@ Variant c_domnode::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
-        if (count <= 1) return (t_insertbefore(params[0]));
-        return (t_insertbefore(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_insertbefore(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertbefore(arg0, arg1));
+        }
       }
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -26691,17 +29282,32 @@ Variant c_domnode::o_invoke(const char *s, CArrRef params, int64 hash, bool fata
     case 53:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
-        if (count <= 1) return (t_c14nfile(params[0]));
-        if (count == 2) return (t_c14nfile(params[0], params[1]));
-        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
-        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
-        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_c14nfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14nfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
-        return (t_issupported(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_issupported(arg0, arg1));
+        }
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -27378,18 +29984,42 @@ ObjectData *c_domdocument::dynCreate(CArrRef params, bool construct /* = true */
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count > 2) throw_toomany_arguments("__construct", 2, 2);
-    if (count <= 0) (t___construct());
-    else if (count == 1) (t___construct(params[0]));
-    else (t___construct(params[0], params[1]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      if (count <= 0) {
+        (t___construct());
+        break;
+      }
+      CVarRef arg0((ad->getValue(pos)));
+      if (count == 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1));
+    } while (false);
   }
   return this;
 }
 void c_domdocument::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 2) throw_toomany_arguments("__construct", 2, 2);
-  if (count <= 0) (t___construct());
-  else if (count == 1) (t___construct(params[0]));
-  else (t___construct(params[0], params[1]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) {
+      (t___construct());
+      break;
+    }
+    CVarRef arg0((ad->getValue(pos)));
+    if (count == 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1));
+  } while (false);
 }
 void c_domdocument::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -27440,70 +30070,132 @@ Variant c_domdocument::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 5:
       HASH_GUARD(0x515FE7746601E385LL, getelementbyid) {
         if (count != 1) return throw_wrong_arguments("getelementbyid", count, 1, 1, 1);
-        return (t_getelementbyid(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getelementbyid(arg0));
+        }
       }
       break;
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
-        if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params[0]));
-        if (count == 2) return (t_c14n(params[0], params[1]));
-        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
-        return (t_c14n(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_c14n());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_c14n(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14n(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14n(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14n(arg0, arg1, arg2, arg3));
+        }
       }
       HASH_GUARD(0x142A28F8CE4A4E8ALL, xinclude) {
         if (count > 1) return throw_toomany_arguments("xinclude", 1, 1);
-        if (count <= 0) return (t_xinclude());
-        return (t_xinclude(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_xinclude());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_xinclude(arg0));
+        }
       }
       break;
     case 13:
       HASH_GUARD(0x0D128C363EBF7F0DLL, createcdatasection) {
         if (count != 1) return throw_wrong_arguments("createcdatasection", count, 1, 1, 1);
-        return (t_createcdatasection(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_createcdatasection(arg0));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
-        return (t_replacechild(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacechild(arg0, arg1));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     case 17:
       HASH_GUARD(0x69C6F7D584EC5011LL, schemavalidatesource) {
         if (count != 1) return throw_wrong_arguments("schemavalidatesource", count, 1, 1, 1);
-        return (t_schemavalidatesource(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_schemavalidatesource(arg0));
+        }
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
-        if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_clonenode());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_clonenode(arg0));
+        }
       }
       break;
     case 20:
       HASH_GUARD(0x04F8F7CEA46D0514LL, save) {
         if (count < 1 || count > 2) return throw_wrong_arguments("save", count, 1, 2, 1);
-        if (count <= 1) return (t_save(params[0]));
-        return (t_save(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_save(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_save(arg0, arg1));
+        }
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       HASH_GUARD(0x2FC58024A75AEB15LL, createattributens) {
         if (count != 2) return throw_wrong_arguments("createattributens", count, 2, 2, 1);
-        return (t_createattributens(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_createattributens(arg0, arg1));
+        }
       }
       break;
     case 24:
@@ -27515,39 +30207,76 @@ Variant c_domdocument::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 28:
       HASH_GUARD(0x1A78385D7CD10A1CLL, relaxngvalidate) {
         if (count != 1) return throw_wrong_arguments("relaxngvalidate", count, 1, 1, 1);
-        return (t_relaxngvalidate(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_relaxngvalidate(arg0));
+        }
       }
       break;
     case 34:
       HASH_GUARD(0x1B0F4D437C8404A2LL, loadhtml) {
         if (count != 1) return throw_wrong_arguments("loadhtml", count, 1, 1, 1);
-        return (t_loadhtml(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_loadhtml(arg0));
+        }
       }
       HASH_GUARD(0x4C40B0F935B39FA2LL, createelement) {
         if (count < 1 || count > 2) return throw_wrong_arguments("createelement", count, 1, 2, 1);
-        if (count <= 1) return (t_createelement(params[0]));
-        return (t_createelement(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_createelement(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_createelement(arg0, arg1));
+        }
       }
       break;
     case 44:
       HASH_GUARD(0x1304C35F6E006FACLL, relaxngvalidatesource) {
         if (count != 1) return throw_wrong_arguments("relaxngvalidatesource", count, 1, 1, 1);
-        return (t_relaxngvalidatesource(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_relaxngvalidatesource(arg0));
+        }
       }
       HASH_GUARD(0x2BFDE9CF0FE9A82CLL, createattribute) {
         if (count != 1) return throw_wrong_arguments("createattribute", count, 1, 1, 1);
-        return (t_createattribute(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_createattribute(arg0));
+        }
       }
       break;
     case 47:
       HASH_GUARD(0x4A6C6D9AB88CD42FLL, importnode) {
         if (count < 1 || count > 2) return throw_wrong_arguments("importnode", count, 1, 2, 1);
-        if (count <= 1) return (t_importnode(params[0]));
-        return (t_importnode(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_importnode(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_importnode(arg0, arg1));
+        }
       }
       HASH_GUARD(0x5FE94CA513F14AAFLL, loadhtmlfile) {
         if (count != 1) return throw_wrong_arguments("loadhtmlfile", count, 1, 1, 1);
-        return (t_loadhtmlfile(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_loadhtmlfile(arg0));
+        }
       }
       break;
     case 49:
@@ -27557,21 +30286,38 @@ Variant c_domdocument::o_invoke(const char *s, CArrRef params, int64 hash, bool 
       }
       HASH_GUARD(0x20E2B2FD2B7AE431LL, loadxml) {
         if (count < 1 || count > 2) return throw_wrong_arguments("loadxml", count, 1, 2, 1);
-        if (count <= 1) return (t_loadxml(params[0]));
-        return (t_loadxml(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_loadxml(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_loadxml(arg0, arg1));
+        }
       }
       break;
     case 50:
       HASH_GUARD(0x7A9C4709CAD09832LL, createentityreference) {
         if (count != 1) return throw_wrong_arguments("createentityreference", count, 1, 1, 1);
-        return (t_createentityreference(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_createentityreference(arg0));
+        }
       }
       break;
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
-        if (count <= 1) return (t_insertbefore(params[0]));
-        return (t_insertbefore(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_insertbefore(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertbefore(arg0, arg1));
+        }
       }
       break;
     case 55:
@@ -27589,35 +30335,66 @@ Variant c_domdocument::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 71:
       HASH_GUARD(0x29C79E90C6FCC0C7LL, createcomment) {
         if (count != 1) return throw_wrong_arguments("createcomment", count, 1, 1, 1);
-        return (t_createcomment(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_createcomment(arg0));
+        }
       }
       break;
     case 72:
       HASH_GUARD(0x7EB8C68BABDC5648LL, schemavalidate) {
         if (count != 1) return throw_wrong_arguments("schemavalidate", count, 1, 1, 1);
-        return (t_schemavalidate(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_schemavalidate(arg0));
+        }
       }
       break;
     case 74:
       HASH_GUARD(0x3FFA3F55ECAB93CALL, getelementsbytagname) {
         if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
-        return (t_getelementsbytagname(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getelementsbytagname(arg0));
+        }
       }
       HASH_GUARD(0x1A9CC561CA4817CALL, getelementsbytagnamens) {
         if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
-        return (t_getelementsbytagnamens(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_getelementsbytagnamens(arg0, arg1));
+        }
       }
       break;
     case 77:
       HASH_GUARD(0x35C0FF513ED3054DLL, savehtmlfile) {
         if (count != 1) return throw_wrong_arguments("savehtmlfile", count, 1, 1, 1);
-        return (t_savehtmlfile(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_savehtmlfile(arg0));
+        }
       }
       break;
     case 79:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
-        return (t_appendchild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appendchild(arg0));
+        }
       }
       break;
     case 83:
@@ -27635,44 +30412,82 @@ Variant c_domdocument::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 93:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
-        return (t_lookupnamespaceuri(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupnamespaceuri(arg0));
+        }
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
-        return (t_removechild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removechild(arg0));
+        }
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       HASH_GUARD(0x79B7A5774A0943DFLL, load) {
         if (count < 1 || count > 2) return throw_wrong_arguments("load", count, 1, 2, 1);
-        if (count <= 1) return (t_load(params[0]));
-        return (t_load(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_load(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_load(arg0, arg1));
+        }
       }
       break;
     case 97:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
-        return (t_lookupprefix(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupprefix(arg0));
+        }
       }
       break;
     case 100:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
-        return (t_isdefaultnamespace(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isdefaultnamespace(arg0));
+        }
       }
       break;
     case 101:
       HASH_GUARD(0x26D66F56DDDC32E5LL, savexml) {
         if (count > 2) return throw_toomany_arguments("savexml", 2, 1);
-        if (count <= 0) return (t_savexml());
-        if (count == 1) return (t_savexml(params[0]));
-        return (t_savexml(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_savexml());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_savexml(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_savexml(arg0, arg1));
+        }
       }
       break;
     case 106:
@@ -27684,21 +30499,39 @@ Variant c_domdocument::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 107:
       HASH_GUARD(0x05EA36F416B7EBEBLL, createelementns) {
         if (count < 2 || count > 3) return throw_wrong_arguments("createelementns", count, 2, 3, 1);
-        if (count <= 2) return (t_createelementns(params[0], params[1]));
-        return (t_createelementns(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t_createelementns(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_createelementns(arg0, arg1, arg2));
+        }
       }
       break;
     case 109:
       HASH_GUARD(0x2A99431FC6E7BA6DLL, createprocessinginstruction) {
         if (count < 1 || count > 2) return throw_wrong_arguments("createprocessinginstruction", count, 1, 2, 1);
-        if (count <= 1) return (t_createprocessinginstruction(params[0]));
-        return (t_createprocessinginstruction(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_createprocessinginstruction(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_createprocessinginstruction(arg0, arg1));
+        }
       }
       break;
     case 111:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
-        return (t_issamenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issamenode(arg0));
+        }
       }
       break;
     case 115:
@@ -27710,15 +30543,30 @@ Variant c_domdocument::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 117:
       HASH_GUARD(0x615771958E1EB375LL, registernodeclass) {
         if (count != 2) return throw_wrong_arguments("registernodeclass", count, 2, 2, 1);
-        return (t_registernodeclass(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_registernodeclass(arg0, arg1));
+        }
       }
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
-        if (count <= 1) return (t_c14nfile(params[0]));
-        if (count == 2) return (t_c14nfile(params[0], params[1]));
-        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
-        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
-        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_c14nfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14nfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
+        }
       }
       break;
     case 120:
@@ -27730,7 +30578,13 @@ Variant c_domdocument::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 122:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
-        return (t_issupported(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_issupported(arg0, arg1));
+        }
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -27740,7 +30594,12 @@ Variant c_domdocument::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 123:
       HASH_GUARD(0x6056A5BB9855D7FBLL, createtextnode) {
         if (count != 1) return throw_wrong_arguments("createtextnode", count, 1, 1, 1);
-        return (t_createtextnode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_createtextnode(arg0));
+        }
       }
       break;
     default:
@@ -29403,22 +32262,66 @@ ObjectData *c_soapfault::dynCreate(CArrRef params, bool construct /* = true */) 
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count < 2 || count > 6) throw_wrong_arguments("__construct", count, 2, 6, 2);
-    if (count <= 2) (t___construct(params[0], params[1]));
-    else if (count == 3) (t___construct(params[0], params[1], params[2]));
-    else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
-    else if (count == 5) (t___construct(params[0], params[1], params[2], params[3], params[4]));
-    else (t___construct(params[0], params[1], params[2], params[3], params[4], params[5]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count <= 2) {
+        (t___construct(arg0, arg1));
+        break;
+      }
+      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 3) {
+        (t___construct(arg0, arg1, arg2));
+        break;
+      }
+      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 4) {
+        (t___construct(arg0, arg1, arg2, arg3));
+        break;
+      }
+      CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 5) {
+        (t___construct(arg0, arg1, arg2, arg3, arg4));
+        break;
+      }
+      CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
+    } while (false);
   }
   return this;
 }
 void c_soapfault::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 2 || count > 6) throw_wrong_arguments("__construct", count, 2, 6, 2);
-  if (count <= 2) (t___construct(params[0], params[1]));
-  else if (count == 3) (t___construct(params[0], params[1], params[2]));
-  else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
-  else if (count == 5) (t___construct(params[0], params[1], params[2], params[3], params[4]));
-  else (t___construct(params[0], params[1], params[2], params[3], params[4], params[5]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count <= 2) {
+      (t___construct(arg0, arg1));
+      break;
+    }
+    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 3) {
+      (t___construct(arg0, arg1, arg2));
+      break;
+    }
+    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 4) {
+      (t___construct(arg0, arg1, arg2, arg3));
+      break;
+    }
+    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 5) {
+      (t___construct(arg0, arg1, arg2, arg3, arg4));
+      break;
+    }
+    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
+  } while (false);
 }
 void c_soapfault::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -29536,11 +32439,21 @@ Variant c_soapfault::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
-        if (count <= 2) return (t___construct(params[0], params[1]), null);
-        if (count == 3) return (t___construct(params[0], params[1], params[2]), null);
-        if (count == 4) return (t___construct(params[0], params[1], params[2], params[3]), null);
-        if (count == 5) return (t___construct(params[0], params[1], params[2], params[3], params[4]), null);
-        return (t___construct(params[0], params[1], params[2], params[3], params[4], params[5]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count <= 2) return (t___construct(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t___construct(arg0, arg1, arg2), null);
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 5) return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
+          CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
+        }
       }
       break;
     default:
@@ -29917,18 +32830,44 @@ ObjectData *c_domelement::dynCreate(CArrRef params, bool construct /* = true */)
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count < 1 || count > 3) throw_wrong_arguments("__construct", count, 1, 3, 2);
-    if (count <= 1) (t___construct(params[0]));
-    else if (count == 2) (t___construct(params[0], params[1]));
-    else (t___construct(params[0], params[1], params[2]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      if (count <= 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 2) {
+        (t___construct(arg0, arg1));
+        break;
+      }
+      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1, arg2));
+    } while (false);
   }
   return this;
 }
 void c_domelement::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 3) throw_wrong_arguments("__construct", count, 1, 3, 2);
-  if (count <= 1) (t___construct(params[0]));
-  else if (count == 2) (t___construct(params[0], params[1]));
-  else (t___construct(params[0], params[1], params[2]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 2) {
+      (t___construct(arg0, arg1));
+      break;
+    }
+    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1, arg2));
+  } while (false);
 }
 void c_domelement::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -29983,58 +32922,113 @@ Variant c_domelement::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 10:
       HASH_GUARD(0x77570221C582ED8ALL, c14n) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
-        if (count <= 0) return (t_c14n());
-        if (count == 1) return (t_c14n(params[0]));
-        if (count == 2) return (t_c14n(params[0], params[1]));
-        if (count == 3) return (t_c14n(params[0], params[1], params[2]));
-        return (t_c14n(params[0], params[1], params[2], params[3]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_c14n());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_c14n(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14n(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14n(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14n(arg0, arg1, arg2, arg3));
+        }
       }
       HASH_GUARD(0x1D5B8B8144F4AB8ALL, setattribute) {
         if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
-        return (t_setattribute(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setattribute(arg0, arg1));
+        }
       }
       break;
     case 14:
       HASH_GUARD(0x1C51CE3C2356D08ELL, replacechild) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
-        return (t_replacechild(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_replacechild(arg0, arg1));
+        }
       }
       break;
     case 15:
       HASH_GUARD(0x26B6E00C74FA338FLL, __get) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___get(arg0));
+        }
       }
       break;
     case 16:
       HASH_GUARD(0x710986B01E1A0890LL, removeattributens) {
         if (count != 2) return throw_wrong_arguments("removeattributens", count, 2, 2, 1);
-        return (t_removeattributens(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_removeattributens(arg0, arg1));
+        }
       }
       break;
     case 17:
       HASH_GUARD(0x31426AC6A851EE11LL, setidattributens) {
         if (count != 3) return throw_wrong_arguments("setidattributens", count, 3, 3, 1);
-        return (t_setidattributens(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setidattributens(arg0, arg1, arg2));
+        }
       }
       break;
     case 18:
       HASH_GUARD(0x4F615934A04E3092LL, clonenode) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
-        if (count <= 0) return (t_clonenode());
-        return (t_clonenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_clonenode());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_clonenode(arg0));
+        }
       }
       break;
     case 21:
       HASH_GUARD(0x52F3DAD783340395LL, __set) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___set(arg0, arg1));
+        }
       }
       break;
     case 22:
       HASH_GUARD(0x6F83EC29E110D616LL, setidattribute) {
         if (count != 2) return throw_wrong_arguments("setidattribute", count, 2, 2, 1);
-        return (t_setidattribute(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setidattribute(arg0, arg1));
+        }
       }
       break;
     case 24:
@@ -30044,25 +33038,47 @@ Variant c_domelement::o_invoke(const char *s, CArrRef params, int64 hash, bool f
       }
       HASH_GUARD(0x640FA60DDC80EC18LL, getattributenodens) {
         if (count != 2) return throw_wrong_arguments("getattributenodens", count, 2, 2, 1);
-        return (t_getattributenodens(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_getattributenodens(arg0, arg1));
+        }
       }
       break;
     case 25:
       HASH_GUARD(0x34E103E06D3F0899LL, getattributens) {
         if (count != 2) return throw_wrong_arguments("getattributens", count, 2, 2, 1);
-        return (t_getattributens(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_getattributens(arg0, arg1));
+        }
       }
       break;
     case 40:
       HASH_GUARD(0x49F89C466612FC28LL, getattribute) {
         if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
-        return (t_getattribute(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getattribute(arg0));
+        }
       }
       break;
     case 47:
       HASH_GUARD(0x47B96C0FC62E1E2FLL, removeattribute) {
         if (count != 1) return throw_wrong_arguments("removeattribute", count, 1, 1, 1);
-        return (t_removeattribute(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removeattribute(arg0));
+        }
       }
       break;
     case 49:
@@ -30074,8 +33090,14 @@ Variant c_domelement::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 51:
       HASH_GUARD(0x076FF0CF9185C433LL, insertbefore) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
-        if (count <= 1) return (t_insertbefore(params[0]));
-        return (t_insertbefore(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_insertbefore(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_insertbefore(arg0, arg1));
+        }
       }
       break;
     case 67:
@@ -30087,39 +33109,79 @@ Variant c_domelement::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 74:
       HASH_GUARD(0x3FFA3F55ECAB93CALL, getelementsbytagname) {
         if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
-        return (t_getelementsbytagname(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getelementsbytagname(arg0));
+        }
       }
       HASH_GUARD(0x1A9CC561CA4817CALL, getelementsbytagnamens) {
         if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
-        return (t_getelementsbytagnamens(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_getelementsbytagnamens(arg0, arg1));
+        }
       }
       HASH_GUARD(0x29D272CBBC0CDA4ALL, setidattributenode) {
         if (count != 2) return throw_wrong_arguments("setidattributenode", count, 2, 2, 1);
-        return (t_setidattributenode(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setidattributenode(arg0, arg1));
+        }
       }
       break;
     case 79:
       HASH_GUARD(0x0B44A59A023E75CFLL, appendchild) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
-        return (t_appendchild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_appendchild(arg0));
+        }
       }
       break;
     case 81:
       HASH_GUARD(0x482E3873306253D1LL, setattributenodens) {
         if (count != 1) return throw_wrong_arguments("setattributenodens", count, 1, 1, 1);
-        return (t_setattributenodens(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setattributenodens(arg0));
+        }
       }
       break;
     case 85:
       HASH_GUARD(0x5EF7C3A45311D955LL, hasattributens) {
         if (count != 2) return throw_wrong_arguments("hasattributens", count, 2, 2, 1);
-        return (t_hasattributens(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_hasattributens(arg0, arg1));
+        }
       }
       break;
     case 87:
       HASH_GUARD(0x62A40E71FAF19157LL, setattributens) {
         if (count != 3) return throw_wrong_arguments("setattributens", count, 3, 3, 1);
-        return (t_setattributens(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setattributens(arg0, arg1, arg2));
+        }
       }
       break;
     case 90:
@@ -30131,55 +33193,102 @@ Variant c_domelement::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 92:
       HASH_GUARD(0x606827EF5CF34C5CLL, setattributenode) {
         if (count != 1) return throw_wrong_arguments("setattributenode", count, 1, 1, 1);
-        return (t_setattributenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setattributenode(arg0));
+        }
       }
       break;
     case 93:
       HASH_GUARD(0x28D1E151A83B8F5DLL, lookupnamespaceuri) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
-        return (t_lookupnamespaceuri(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupnamespaceuri(arg0));
+        }
       }
       HASH_GUARD(0x72044C28B65364DDLL, removechild) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
-        return (t_removechild(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removechild(arg0));
+        }
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count < 1 || count > 3) return throw_wrong_arguments("__construct", count, 1, 3, 1);
-        if (count <= 1) return (t___construct(params[0]), null);
-        if (count == 2) return (t___construct(params[0], params[1]), null);
-        return (t___construct(params[0], params[1], params[2]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t___construct(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1, arg2), null);
+        }
       }
       break;
     case 97:
       HASH_GUARD(0x599DE23996CB7D61LL, lookupprefix) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
-        return (t_lookupprefix(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_lookupprefix(arg0));
+        }
       }
       break;
     case 100:
       HASH_GUARD(0x643EFC8E9378F664LL, isdefaultnamespace) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
-        return (t_isdefaultnamespace(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isdefaultnamespace(arg0));
+        }
       }
       break;
     case 106:
       HASH_GUARD(0x1BFDB4272EA150EALL, removeattributenode) {
         if (count != 1) return throw_wrong_arguments("removeattributenode", count, 1, 1, 1);
-        return (t_removeattributenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_removeattributenode(arg0));
+        }
       }
       break;
     case 108:
       HASH_GUARD(0x6471DF8BB944FFECLL, hasattribute) {
         if (count != 1) return throw_wrong_arguments("hasattribute", count, 1, 1, 1);
-        return (t_hasattribute(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_hasattribute(arg0));
+        }
       }
       break;
     case 111:
       HASH_GUARD(0x102549E9CA2EC6EFLL, issamenode) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
-        return (t_issamenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issamenode(arg0));
+        }
       }
       break;
     case 115:
@@ -30191,17 +33300,32 @@ Variant c_domelement::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 117:
       HASH_GUARD(0x1D1768A6CF365A75LL, c14nfile) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
-        if (count <= 1) return (t_c14nfile(params[0]));
-        if (count == 2) return (t_c14nfile(params[0], params[1]));
-        if (count == 3) return (t_c14nfile(params[0], params[1], params[2]));
-        if (count == 4) return (t_c14nfile(params[0], params[1], params[2], params[3]));
-        return (t_c14nfile(params[0], params[1], params[2], params[3], params[4]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_c14nfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_c14nfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
+        }
       }
       break;
     case 122:
       HASH_GUARD(0x279AA1B214B7677ALL, issupported) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
-        return (t_issupported(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_issupported(arg0, arg1));
+        }
       }
       HASH_GUARD(0x5F63574EA50595FALL, haschildnodes) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -30211,7 +33335,12 @@ Variant c_domelement::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 126:
       HASH_GUARD(0x343DF562BB5AB1FELL, getattributenode) {
         if (count != 1) return throw_wrong_arguments("getattributenode", count, 1, 1, 1);
-        return (t_getattributenode(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getattributenode(arg0));
+        }
       }
       break;
     default:

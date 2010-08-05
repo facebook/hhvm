@@ -808,7 +808,12 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 15:
       HASH_GUARD(0x40C7B30DCB439C8FLL, hasproperty) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
-        return (t_hasproperty(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_hasproperty(arg0));
+        }
       }
       break;
     case 19:
@@ -826,7 +831,12 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 24:
       HASH_GUARD(0x21820E7AA4733998LL, hasmethod) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
-        return (t_hasmethod(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_hasmethod(arg0));
+        }
       }
       break;
     case 27:
@@ -850,7 +860,12 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 41:
       HASH_GUARD(0x030CE1D6142F8C29LL, isinstance) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
-        return (t_isinstance(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isinstance(arg0));
+        }
       }
       HASH_GUARD(0x1D6B8CA358B49929LL, getextensionname) {
         if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
@@ -860,8 +875,13 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 42:
       HASH_GUARD(0x16BA16CE6488AAAALL, getmethods) {
         if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
-        if (count <= 0) return (t_getmethods());
-        return (t_getmethods(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getmethods());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getmethods(arg0));
+        }
       }
       HASH_GUARD(0x226F6E80CECD3CAALL, getconstructor) {
         if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
@@ -875,8 +895,14 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 46:
       HASH_GUARD(0x3C882D4A895F612ELL, getstaticpropertyvalue) {
         if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
-        if (count <= 1) return (t_getstaticpropertyvalue(params[0]));
-        return (t_getstaticpropertyvalue(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_getstaticpropertyvalue(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_getstaticpropertyvalue(arg0, arg1));
+        }
       }
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
         if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
@@ -892,13 +918,23 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 52:
       HASH_GUARD(0x3DB53E1FBD3C0734LL, getconstant) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
-        return (t_getconstant(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getconstant(arg0));
+        }
       }
       break;
     case 54:
       HASH_GUARD(0x0D81ECE253A3B5B6LL, getmethod) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
-        return (t_getmethod(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getmethod(arg0));
+        }
       }
       break;
     case 55:
@@ -922,7 +958,12 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 63:
       HASH_GUARD(0x54C2DC04C4A62B3FLL, hasconstant) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
-        return (t_hasconstant(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_hasconstant(arg0));
+        }
       }
       break;
     case 67:
@@ -940,7 +981,12 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 71:
       HASH_GUARD(0x0FD73627FB023047LL, getproperty) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
-        return (t_getproperty(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getproperty(arg0));
+        }
       }
       break;
     case 77:
@@ -970,7 +1016,12 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
-        return (t___construct(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___construct(arg0), null);
+        }
       }
       break;
     case 100:
@@ -988,13 +1039,24 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 102:
       HASH_GUARD(0x2735DCC254EE5C66LL, newinstanceargs) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
-        return (t_newinstanceargs(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_newinstanceargs(arg0));
+        }
       }
       break;
     case 104:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
         if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
-        return (ti_export(o_getClassName(), params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_export(o_getClassName(), arg0, arg1));
+        }
       }
       break;
     case 112:
@@ -1006,7 +1068,13 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 113:
       HASH_GUARD(0x07ECA928E37717F1LL, setstaticpropertyvalue) {
         if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
-        return (t_setstaticpropertyvalue(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setstaticpropertyvalue(arg0, arg1), null);
+        }
       }
       break;
     case 114:
@@ -1024,13 +1092,23 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 123:
       HASH_GUARD(0x28DC702215C7D6FBLL, implementsinterface) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
-        return (t_implementsinterface(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_implementsinterface(arg0));
+        }
       }
       break;
     case 126:
       HASH_GUARD(0x373333991926C97ELL, issubclassof) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
-        return (t_issubclassof(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issubclassof(arg0));
+        }
       }
       break;
     default:
@@ -1298,7 +1376,13 @@ Variant c_reflectionobject::os_invoke(const char *c, const char *s, CArrRef para
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
         if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
-        return (ti_export(c, params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_export(c, arg0, arg1));
+        }
       }
       break;
     default:
@@ -2157,9 +2241,15 @@ Variant c_reflectionexception::o_invoke(const char *s, CArrRef params, int64 has
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -2639,14 +2729,24 @@ ObjectData *c_reflectionclass::dynCreate(CArrRef params, bool construct /* = tru
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 1) throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
-    (t___construct(params[0]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      (t___construct(arg0));
+    }
   }
   return this;
 }
 void c_reflectionclass::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
-  (t___construct(params[0]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  }
 }
 void c_reflectionclass::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -2688,7 +2788,12 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 15:
       HASH_GUARD(0x40C7B30DCB439C8FLL, hasproperty) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
-        return (t_hasproperty(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_hasproperty(arg0));
+        }
       }
       break;
     case 19:
@@ -2706,7 +2811,12 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 24:
       HASH_GUARD(0x21820E7AA4733998LL, hasmethod) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
-        return (t_hasmethod(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_hasmethod(arg0));
+        }
       }
       break;
     case 27:
@@ -2730,7 +2840,12 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 41:
       HASH_GUARD(0x030CE1D6142F8C29LL, isinstance) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
-        return (t_isinstance(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_isinstance(arg0));
+        }
       }
       HASH_GUARD(0x1D6B8CA358B49929LL, getextensionname) {
         if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
@@ -2740,8 +2855,13 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 42:
       HASH_GUARD(0x16BA16CE6488AAAALL, getmethods) {
         if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
-        if (count <= 0) return (t_getmethods());
-        return (t_getmethods(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getmethods());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getmethods(arg0));
+        }
       }
       HASH_GUARD(0x226F6E80CECD3CAALL, getconstructor) {
         if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
@@ -2755,8 +2875,14 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 46:
       HASH_GUARD(0x3C882D4A895F612ELL, getstaticpropertyvalue) {
         if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
-        if (count <= 1) return (t_getstaticpropertyvalue(params[0]));
-        return (t_getstaticpropertyvalue(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_getstaticpropertyvalue(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_getstaticpropertyvalue(arg0, arg1));
+        }
       }
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
         if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
@@ -2772,13 +2898,23 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 52:
       HASH_GUARD(0x3DB53E1FBD3C0734LL, getconstant) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
-        return (t_getconstant(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getconstant(arg0));
+        }
       }
       break;
     case 54:
       HASH_GUARD(0x0D81ECE253A3B5B6LL, getmethod) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
-        return (t_getmethod(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getmethod(arg0));
+        }
       }
       break;
     case 55:
@@ -2802,7 +2938,12 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 63:
       HASH_GUARD(0x54C2DC04C4A62B3FLL, hasconstant) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
-        return (t_hasconstant(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_hasconstant(arg0));
+        }
       }
       break;
     case 67:
@@ -2820,7 +2961,12 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 71:
       HASH_GUARD(0x0FD73627FB023047LL, getproperty) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
-        return (t_getproperty(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getproperty(arg0));
+        }
       }
       break;
     case 77:
@@ -2850,7 +2996,12 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
-        return (t___construct(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___construct(arg0), null);
+        }
       }
       break;
     case 100:
@@ -2868,19 +3019,36 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 102:
       HASH_GUARD(0x2735DCC254EE5C66LL, newinstanceargs) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
-        return (t_newinstanceargs(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_newinstanceargs(arg0));
+        }
       }
       break;
     case 103:
       HASH_GUARD(0x37349B25A0ED29E7LL, test) {
         if (count != 2) return throw_wrong_arguments("reflectionclass::test", count, 2, 2, 1);
-        return (t_test(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_test(arg0, arg1));
+        }
       }
       break;
     case 104:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
         if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
-        return (ti_export(o_getClassName(), params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_export(o_getClassName(), arg0, arg1));
+        }
       }
       break;
     case 112:
@@ -2892,7 +3060,13 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 113:
       HASH_GUARD(0x07ECA928E37717F1LL, setstaticpropertyvalue) {
         if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
-        return (t_setstaticpropertyvalue(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setstaticpropertyvalue(arg0, arg1), null);
+        }
       }
       break;
     case 114:
@@ -2910,17 +3084,32 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 123:
       HASH_GUARD(0x28DC702215C7D6FBLL, implementsinterface) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
-        return (t_implementsinterface(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_implementsinterface(arg0));
+        }
       }
       HASH_GUARD(0x5E82B850BB90B0FBLL, fetch) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::fetch", count, 1, 1, 1);
-        return (t_fetch(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_fetch(arg0));
+        }
       }
       break;
     case 126:
       HASH_GUARD(0x373333991926C97ELL, issubclassof) {
         if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
-        return (t_issubclassof(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_issubclassof(arg0));
+        }
       }
       break;
     default:
@@ -3198,7 +3387,13 @@ Variant c_reflectionclass::os_invoke(const char *c, const char *s, CArrRef param
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
         if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
-        return (ti_export(c, params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_export(c, arg0, arg1));
+        }
       }
       break;
     default:
@@ -4863,14 +5058,24 @@ ObjectData *c_reflectionextension::dynCreate(CArrRef params, bool construct /* =
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 1) throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
-    (t___construct(params[0]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      (t___construct(arg0));
+    }
   }
   return this;
 }
 void c_reflectionextension::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
-  (t___construct(params[0]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  }
 }
 void c_reflectionextension::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -4918,7 +5123,13 @@ Variant c_reflectionextension::o_invoke(const char *s, CArrRef params, int64 has
     case 8:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
         if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
-        return (ti_export(o_getClassName(), params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_export(o_getClassName(), arg0, arg1));
+        }
       }
       break;
     case 15:
@@ -4958,7 +5169,12 @@ Variant c_reflectionextension::o_invoke(const char *s, CArrRef params, int64 has
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 1) return throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
-        return (t___construct(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___construct(arg0), null);
+        }
       }
       HASH_GUARD(0x0F2EF58F157D479FLL, info) {
         if (count > 0) return throw_toomany_arguments("reflectionextension::info", 0, 1);
@@ -5051,7 +5267,13 @@ Variant c_reflectionextension::os_invoke(const char *c, const char *s, CArrRef p
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
         if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
-        return (ti_export(c, params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_export(c, arg0, arg1));
+        }
       }
       break;
     default:
@@ -5561,14 +5783,26 @@ ObjectData *c_reflectionmethod::dynCreate(CArrRef params, bool construct /* = tr
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 2) throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
-    (t___construct(params[0], params[1]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1));
+    }
   }
   return this;
 }
 void c_reflectionmethod::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
-  (t___construct(params[0], params[1]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1));
+  }
 }
 void c_reflectionmethod::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -5608,14 +5842,25 @@ Variant c_reflectionmethod::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 2:
       HASH_GUARD(0x3FCE192CF6199942LL, invoke) {
         if (count < 1) return throw_missing_arguments("reflectionmethod::invoke", count+1, 1);
-        if (count <= 1) return (t_invoke(count, params[0]));
-        return (t_invoke(count,params[0], params.slice(1, count - 1, false)));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t_invoke(count, arg0));
+          return (t_invoke(count,arg0, params.slice(1, count - 1, false)));
+        }
       }
       break;
     case 4:
       HASH_GUARD(0x3235AF57F23103C4LL, invokeargs) {
         if (count != 2) return throw_wrong_arguments("reflectionmethod::invokeargs", count, 2, 2, 1);
-        return (t_invokeargs(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_invokeargs(arg0, arg1));
+        }
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
         if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
@@ -5661,7 +5906,13 @@ Variant c_reflectionmethod::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 2) return throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 32:
@@ -5711,7 +5962,14 @@ Variant c_reflectionmethod::o_invoke(const char *s, CArrRef params, int64 hash, 
       }
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
         if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
-        return (ti_export(o_getClassName(), params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_export(o_getClassName(), arg0, arg1, arg2));
+        }
       }
       break;
     case 42:
@@ -5961,7 +6219,14 @@ Variant c_reflectionmethod::os_invoke(const char *c, const char *s, CArrRef para
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
         if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
-        return (ti_export(c, params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_export(c, arg0, arg1, arg2));
+        }
       }
       break;
     default:
@@ -6816,14 +7081,26 @@ ObjectData *c_reflectionproperty::dynCreate(CArrRef params, bool construct /* = 
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 2) throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
-    (t___construct(params[0], params[1]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1));
+    }
   }
   return this;
 }
 void c_reflectionproperty::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
-  (t___construct(params[0], params[1]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1));
+  }
 }
 void c_reflectionproperty::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -6870,8 +7147,13 @@ Variant c_reflectionproperty::o_invoke(const char *s, CArrRef params, int64 hash
     case 3:
       HASH_GUARD(0x56879BCEB40997E3LL, getvalue) {
         if (count > 1) return throw_toomany_arguments("reflectionproperty::getvalue", 1, 1);
-        if (count <= 0) return (t_getvalue());
-        return (t_getvalue(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getvalue());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getvalue(arg0));
+        }
       }
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
         if (count > 0) return throw_toomany_arguments("reflectionproperty::getdeclaringclass", 0, 1);
@@ -6887,7 +7169,14 @@ Variant c_reflectionproperty::o_invoke(const char *s, CArrRef params, int64 hash
     case 8:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
         if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
-        return (ti_export(o_getClassName(), params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_export(o_getClassName(), arg0, arg1, arg2));
+        }
       }
       break;
     case 10:
@@ -6921,7 +7210,13 @@ Variant c_reflectionproperty::o_invoke(const char *s, CArrRef params, int64 hash
       }
       HASH_GUARD(0x36FBED35008C8DB5LL, setvalue) {
         if (count != 2) return throw_wrong_arguments("reflectionproperty::setvalue", count, 2, 2, 1);
-        return (t_setvalue(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setvalue(arg0, arg1));
+        }
       }
       break;
     case 24:
@@ -6945,7 +7240,13 @@ Variant c_reflectionproperty::o_invoke(const char *s, CArrRef params, int64 hash
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 2) return throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -7059,7 +7360,14 @@ Variant c_reflectionproperty::os_invoke(const char *c, const char *s, CArrRef pa
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
         if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
-        return (ti_export(c, params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_export(c, arg0, arg1, arg2));
+        }
       }
       break;
     default:
@@ -7645,14 +7953,24 @@ ObjectData *c_reflectionfunction::dynCreate(CArrRef params, bool construct /* = 
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 1) throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
-    (t___construct(params[0]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      (t___construct(arg0));
+    }
   }
   return this;
 }
 void c_reflectionfunction::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
-  (t___construct(params[0]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  }
 }
 void c_reflectionfunction::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -7692,7 +8010,12 @@ Variant c_reflectionfunction::o_invoke(const char *s, CArrRef params, int64 hash
     case 4:
       HASH_GUARD(0x3235AF57F23103C4LL, invokeargs) {
         if (count != 1) return throw_wrong_arguments("reflectionfunction::invokeargs", count, 1, 1, 1);
-        return (t_invokeargs(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_invokeargs(arg0));
+        }
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
         if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
@@ -7720,7 +8043,12 @@ Variant c_reflectionfunction::o_invoke(const char *s, CArrRef params, int64 hash
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 1) return throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
-        return (t___construct(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___construct(arg0), null);
+        }
       }
       break;
     case 32:
@@ -7764,7 +8092,13 @@ Variant c_reflectionfunction::o_invoke(const char *s, CArrRef params, int64 hash
       }
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
         if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
-        return (ti_export(o_getClassName(), params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_export(o_getClassName(), arg0, arg1));
+        }
       }
       break;
     case 45:
@@ -7918,7 +8252,13 @@ Variant c_reflectionfunction::os_invoke(const char *c, const char *s, CArrRef pa
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
         if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
-        return (ti_export(c, params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_export(c, arg0, arg1));
+        }
       }
       break;
     default:
@@ -8454,14 +8794,26 @@ ObjectData *c_reflectionparameter::dynCreate(CArrRef params, bool construct /* =
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 2) throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
-    (t___construct(params[0], params[1]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1));
+    }
   }
   return this;
 }
 void c_reflectionparameter::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
-  (t___construct(params[0], params[1]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1));
+  }
 }
 void c_reflectionparameter::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -8512,7 +8864,14 @@ Variant c_reflectionparameter::o_invoke(const char *s, CArrRef params, int64 has
     case 8:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
         if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
-        return (ti_export(o_getClassName(), params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_export(o_getClassName(), arg0, arg1, arg2));
+        }
       }
       HASH_GUARD(0x4044F1EEBF3BB8C8LL, getposition) {
         if (count > 0) return throw_toomany_arguments("reflectionparameter::getposition", 0, 1);
@@ -8568,7 +8927,13 @@ Variant c_reflectionparameter::o_invoke(const char *s, CArrRef params, int64 has
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 2) return throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -8669,7 +9034,14 @@ Variant c_reflectionparameter::os_invoke(const char *c, const char *s, CArrRef p
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
         if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
-        return (ti_export(c, params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (ti_export(c, arg0, arg1, arg2));
+        }
       }
       break;
     default:

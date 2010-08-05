@@ -133,24 +133,72 @@ ObjectData *c_pear_error::dynCreate(CArrRef params, bool construct /* = true */)
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count > 5) throw_toomany_arguments("pear_error::pear_error", 5, 2);
-    if (count <= 0) (t_pear_error());
-    else if (count == 1) (t_pear_error(params[0]));
-    else if (count == 2) (t_pear_error(params[0], params[1]));
-    else if (count == 3) (t_pear_error(params[0], params[1], params[2]));
-    else if (count == 4) (t_pear_error(params[0], params[1], params[2], params[3]));
-    else (t_pear_error(params[0], params[1], params[2], params[3], params[4]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      if (count <= 0) {
+        (t_pear_error());
+        break;
+      }
+      CVarRef arg0((ad->getValue(pos)));
+      if (count == 1) {
+        (t_pear_error(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 2) {
+        (t_pear_error(arg0, arg1));
+        break;
+      }
+      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 3) {
+        (t_pear_error(arg0, arg1, arg2));
+        break;
+      }
+      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 4) {
+        (t_pear_error(arg0, arg1, arg2, arg3));
+        break;
+      }
+      CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t_pear_error(arg0, arg1, arg2, arg3, arg4));
+    } while (false);
   }
   return this;
 }
 void c_pear_error::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 5) throw_toomany_arguments("pear_error::pear_error", 5, 2);
-  if (count <= 0) (t_pear_error());
-  else if (count == 1) (t_pear_error(params[0]));
-  else if (count == 2) (t_pear_error(params[0], params[1]));
-  else if (count == 3) (t_pear_error(params[0], params[1], params[2]));
-  else if (count == 4) (t_pear_error(params[0], params[1], params[2], params[3]));
-  else (t_pear_error(params[0], params[1], params[2], params[3], params[4]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) {
+      (t_pear_error());
+      break;
+    }
+    CVarRef arg0((ad->getValue(pos)));
+    if (count == 1) {
+      (t_pear_error(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 2) {
+      (t_pear_error(arg0, arg1));
+      break;
+    }
+    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 3) {
+      (t_pear_error(arg0, arg1, arg2));
+      break;
+    }
+    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 4) {
+      (t_pear_error(arg0, arg1, arg2, arg3));
+      break;
+    }
+    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t_pear_error(arg0, arg1, arg2, arg3, arg4));
+  } while (false);
 }
 void c_pear_error::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -205,14 +253,24 @@ Variant c_pear_error::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 1:
       HASH_GUARD(0x488B59A7AC1AD281LL, getbacktrace) {
         if (count > 1) return throw_toomany_arguments("pear_error::getbacktrace", 1, 1);
-        if (count <= 0) return (t_getbacktrace(), null);
-        return (t_getbacktrace(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getbacktrace(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getbacktrace(arg0), null);
+        }
       }
       break;
     case 4:
       HASH_GUARD(0x4394241AA92AEB44LL, adduserinfo) {
         if (count != 1) return throw_wrong_arguments("pear_error::adduserinfo", count, 1, 1, 1);
-        return (t_adduserinfo(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_adduserinfo(arg0), null);
+        }
       }
       break;
     case 6:
@@ -258,12 +316,21 @@ Variant c_pear_error::o_invoke(const char *s, CArrRef params, int64 hash, bool f
     case 24:
       HASH_GUARD(0x3CEBA108A1BAB998LL, pear_error) {
         if (count > 5) return throw_toomany_arguments("pear_error::pear_error", 5, 2);
-        if (count <= 0) return (t_pear_error(), null);
-        if (count == 1) return (t_pear_error(params[0]), null);
-        if (count == 2) return (t_pear_error(params[0], params[1]), null);
-        if (count == 3) return (t_pear_error(params[0], params[1], params[2]), null);
-        if (count == 4) return (t_pear_error(params[0], params[1], params[2], params[3]), null);
-        return (t_pear_error(params[0], params[1], params[2], params[3], params[4]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_pear_error(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_pear_error(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_pear_error(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_pear_error(arg0, arg1, arg2), null);
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_pear_error(arg0, arg1, arg2, arg3), null);
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_pear_error(arg0, arg1, arg2, arg3, arg4), null);
+        }
       }
       break;
     case 27:

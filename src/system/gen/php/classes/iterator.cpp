@@ -237,16 +237,34 @@ ObjectData *c_arrayiterator::dynCreate(CArrRef params, bool construct /* = true 
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count < 1 || count > 2) throw_wrong_arguments("arrayiterator::__construct", count, 1, 2, 2);
-    if (count <= 1) (t___construct(params[0]));
-    else (t___construct(params[0], params[1]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      if (count <= 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1));
+    } while (false);
   }
   return this;
 }
 void c_arrayiterator::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) throw_wrong_arguments("arrayiterator::__construct", count, 1, 2, 2);
-  if (count <= 1) (t___construct(params[0]));
-  else (t___construct(params[0], params[1]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1));
+  } while (false);
 }
 void c_arrayiterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -287,13 +305,23 @@ Variant c_arrayiterator::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 0:
       HASH_GUARD(0x3E6BCFB9742FC700LL, offsetexists) {
         if (count != 1) return throw_wrong_arguments("arrayiterator::offsetexists", count, 1, 1, 1);
-        return (t_offsetexists(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_offsetexists(arg0));
+        }
       }
       break;
     case 2:
       HASH_GUARD(0x4DEE4A472DC69EC2LL, append) {
         if (count != 1) return throw_wrong_arguments("arrayiterator::append", count, 1, 1, 1);
-        return (t_append(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_append(arg0), null);
+        }
       }
       break;
     case 4:
@@ -303,7 +331,12 @@ Variant c_arrayiterator::o_invoke(const char *s, CArrRef params, int64 hash, boo
       }
       HASH_GUARD(0x4842AF70A71BE6C4LL, uksort) {
         if (count != 1) return throw_wrong_arguments("arrayiterator::uksort", count, 1, 1, 1);
-        return (t_uksort(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_uksort(arg0));
+        }
       }
       break;
     case 6:
@@ -315,7 +348,12 @@ Variant c_arrayiterator::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 10:
       HASH_GUARD(0x2FC3A6941D522E0ALL, setflags) {
         if (count != 1) return throw_wrong_arguments("arrayiterator::setflags", count, 1, 1, 1);
-        return (t_setflags(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setflags(arg0), null);
+        }
       }
       break;
     case 16:
@@ -333,7 +371,12 @@ Variant c_arrayiterator::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 24:
       HASH_GUARD(0x61D11ECEF4404498LL, offsetget) {
         if (count != 1) return throw_wrong_arguments("arrayiterator::offsetget", count, 1, 1, 1);
-        return (t_offsetget(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_offsetget(arg0));
+        }
       }
       HASH_GUARD(0x70448A629A74FB18LL, ksort) {
         if (count > 0) return throw_toomany_arguments("arrayiterator::ksort", 0, 1);
@@ -349,14 +392,25 @@ Variant c_arrayiterator::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count < 1 || count > 2) return throw_wrong_arguments("arrayiterator::__construct", count, 1, 2, 2);
-        if (count <= 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 32:
       HASH_GUARD(0x6FACBD7F02B6FD60LL, uasort) {
         if (count != 1) return throw_wrong_arguments("arrayiterator::uasort", count, 1, 1, 1);
-        return (t_uasort(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_uasort(arg0));
+        }
       }
       break;
     case 33:
@@ -372,7 +426,12 @@ Variant c_arrayiterator::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 39:
       HASH_GUARD(0x7EF5445C77054C67LL, seek) {
         if (count != 1) return throw_wrong_arguments("arrayiterator::seek", count, 1, 1, 1);
-        return (t_seek(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_seek(arg0), null);
+        }
       }
       break;
     case 42:
@@ -400,13 +459,24 @@ Variant c_arrayiterator::o_invoke(const char *s, CArrRef params, int64 hash, boo
       }
       HASH_GUARD(0x0957F693A48AF738LL, offsetset) {
         if (count != 2) return throw_wrong_arguments("arrayiterator::offsetset", count, 2, 2, 1);
-        return (t_offsetset(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_offsetset(arg0, arg1));
+        }
       }
       break;
     case 58:
       HASH_GUARD(0x08329980E6369ABALL, offsetunset) {
         if (count != 1) return throw_wrong_arguments("arrayiterator::offsetunset", count, 1, 1, 1);
-        return (t_offsetunset(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_offsetunset(arg0));
+        }
       }
       break;
     default:
@@ -1312,7 +1382,12 @@ Variant c_appenditerator::o_invoke(const char *s, CArrRef params, int64 hash, bo
     case 2:
       HASH_GUARD(0x4DEE4A472DC69EC2LL, append) {
         if (count != 1) return throw_wrong_arguments("appenditerator::append", count, 1, 1, 1);
-        return (t_append(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_append(arg0), null);
+        }
       }
       break;
     case 4:
@@ -1334,7 +1409,13 @@ Variant c_appenditerator::o_invoke(const char *s, CArrRef params, int64 hash, bo
     case 12:
       HASH_GUARD(0x5D73364F53CEEB6CLL, __call) {
         if (count != 2) return throw_wrong_arguments("appenditerator::__call", count, 2, 2, 1);
-        return (t___call(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___call(arg0, arg1));
+        }
       }
       break;
     case 17:
@@ -1815,16 +1896,34 @@ ObjectData *c_recursivedirectoryiterator::dynCreate(CArrRef params, bool constru
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count < 1 || count > 2) throw_wrong_arguments("recursivedirectoryiterator::__construct", count, 1, 2, 2);
-    if (count <= 1) (t___construct(params[0]));
-    else (t___construct(params[0], params[1]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      if (count <= 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1));
+    } while (false);
   }
   return this;
 }
 void c_recursivedirectoryiterator::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) throw_wrong_arguments("recursivedirectoryiterator::__construct", count, 1, 2, 2);
-  if (count <= 1) (t___construct(params[0]));
-  else (t___construct(params[0], params[1]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1));
+  } while (false);
 }
 void c_recursivedirectoryiterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -1909,8 +2008,13 @@ Variant c_recursivedirectoryiterator::o_invoke(const char *s, CArrRef params, in
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
-        if (count <= 0) return (t_getbasename());
-        return (t_getbasename(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getbasename());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getbasename(arg0));
+        }
       }
       break;
     case 29:
@@ -1928,8 +2032,13 @@ Variant c_recursivedirectoryiterator::o_invoke(const char *s, CArrRef params, in
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
-        if (count <= 0) return (t_setfileclass());
-        return (t_setfileclass(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_setfileclass());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setfileclass(arg0));
+        }
       }
       break;
     case 43:
@@ -1947,10 +2056,17 @@ Variant c_recursivedirectoryiterator::o_invoke(const char *s, CArrRef params, in
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
         if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
-        if (count <= 0) return (t_openfile());
-        if (count == 1) return (t_openfile(params[0]));
-        if (count == 2) return (t_openfile(params[0], params[1]));
-        return (t_openfile(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_openfile());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_openfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_openfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_openfile(arg0, arg1, arg2));
+        }
       }
       break;
     case 56:
@@ -1966,8 +2082,13 @@ Variant c_recursivedirectoryiterator::o_invoke(const char *s, CArrRef params, in
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
-        if (count <= 0) return (t_getfileinfo());
-        return (t_getfileinfo(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getfileinfo());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getfileinfo(arg0));
+        }
       }
       break;
     case 68:
@@ -1979,8 +2100,13 @@ Variant c_recursivedirectoryiterator::o_invoke(const char *s, CArrRef params, in
     case 69:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
-        if (count <= 0) return (t_setinfoclass());
-        return (t_setinfoclass(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_setinfoclass());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setinfoclass(arg0));
+        }
       }
       break;
     case 74:
@@ -2022,8 +2148,14 @@ Variant c_recursivedirectoryiterator::o_invoke(const char *s, CArrRef params, in
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count < 1 || count > 2) return throw_wrong_arguments("recursivedirectoryiterator::__construct", count, 1, 2, 2);
-        if (count <= 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 99:
@@ -2035,12 +2167,22 @@ Variant c_recursivedirectoryiterator::o_invoke(const char *s, CArrRef params, in
     case 103:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
-        if (count <= 0) return (t_getpathinfo());
-        return (t_getpathinfo(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getpathinfo());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getpathinfo(arg0));
+        }
       }
       HASH_GUARD(0x7EF5445C77054C67LL, seek) {
         if (count != 1) return throw_wrong_arguments("recursivedirectoryiterator::seek", count, 1, 1, 1);
-        return (t_seek(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_seek(arg0));
+        }
       }
       break;
     case 106:
@@ -3126,14 +3268,24 @@ ObjectData *c_directoryiterator::dynCreate(CArrRef params, bool construct /* = t
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 1) throw_wrong_arguments("directoryiterator::__construct", count, 1, 1, 2);
-    (t___construct(params[0]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      (t___construct(arg0));
+    }
   }
   return this;
 }
 void c_directoryiterator::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("directoryiterator::__construct", count, 1, 1, 2);
-  (t___construct(params[0]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  }
 }
 void c_directoryiterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -3195,8 +3347,13 @@ Variant c_directoryiterator::o_invoke(const char *s, CArrRef params, int64 hash,
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
-        if (count <= 0) return (t_getbasename());
-        return (t_getbasename(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getbasename());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getbasename(arg0));
+        }
       }
       break;
     case 29:
@@ -3214,8 +3371,13 @@ Variant c_directoryiterator::o_invoke(const char *s, CArrRef params, int64 hash,
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
-        if (count <= 0) return (t_setfileclass());
-        return (t_setfileclass(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_setfileclass());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setfileclass(arg0));
+        }
       }
       break;
     case 43:
@@ -3233,10 +3395,17 @@ Variant c_directoryiterator::o_invoke(const char *s, CArrRef params, int64 hash,
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
         if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
-        if (count <= 0) return (t_openfile());
-        if (count == 1) return (t_openfile(params[0]));
-        if (count == 2) return (t_openfile(params[0], params[1]));
-        return (t_openfile(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_openfile());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_openfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_openfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_openfile(arg0, arg1, arg2));
+        }
       }
       break;
     case 56:
@@ -3252,8 +3421,13 @@ Variant c_directoryiterator::o_invoke(const char *s, CArrRef params, int64 hash,
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
-        if (count <= 0) return (t_getfileinfo());
-        return (t_getfileinfo(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getfileinfo());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getfileinfo(arg0));
+        }
       }
       break;
     case 68:
@@ -3265,8 +3439,13 @@ Variant c_directoryiterator::o_invoke(const char *s, CArrRef params, int64 hash,
     case 69:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
-        if (count <= 0) return (t_setinfoclass());
-        return (t_setinfoclass(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_setinfoclass());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setinfoclass(arg0));
+        }
       }
       break;
     case 74:
@@ -3308,7 +3487,12 @@ Variant c_directoryiterator::o_invoke(const char *s, CArrRef params, int64 hash,
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 1) return throw_wrong_arguments("directoryiterator::__construct", count, 1, 1, 2);
-        return (t___construct(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___construct(arg0), null);
+        }
       }
       break;
     case 99:
@@ -3320,12 +3504,22 @@ Variant c_directoryiterator::o_invoke(const char *s, CArrRef params, int64 hash,
     case 103:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
-        if (count <= 0) return (t_getpathinfo());
-        return (t_getpathinfo(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getpathinfo());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getpathinfo(arg0));
+        }
       }
       HASH_GUARD(0x7EF5445C77054C67LL, seek) {
         if (count != 1) return throw_wrong_arguments("directoryiterator::seek", count, 1, 1, 1);
-        return (t_seek(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_seek(arg0));
+        }
       }
       break;
     case 106:
@@ -4324,18 +4518,44 @@ ObjectData *c_recursiveiteratoriterator::dynCreate(CArrRef params, bool construc
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count < 1 || count > 3) throw_wrong_arguments("recursiveiteratoriterator::__construct", count, 1, 3, 2);
-    if (count <= 1) (t___construct(params[0]));
-    else if (count == 2) (t___construct(params[0], params[1]));
-    else (t___construct(params[0], params[1], params[2]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      if (count <= 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 2) {
+        (t___construct(arg0, arg1));
+        break;
+      }
+      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1, arg2));
+    } while (false);
   }
   return this;
 }
 void c_recursiveiteratoriterator::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 3) throw_wrong_arguments("recursiveiteratoriterator::__construct", count, 1, 3, 2);
-  if (count <= 1) (t___construct(params[0]));
-  else if (count == 2) (t___construct(params[0], params[1]));
-  else (t___construct(params[0], params[1], params[2]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 2) {
+      (t___construct(arg0, arg1));
+      break;
+    }
+    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1, arg2));
+  } while (false);
 }
 void c_recursiveiteratoriterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -4413,9 +4633,16 @@ Variant c_recursiveiteratoriterator::o_invoke(const char *s, CArrRef params, int
     case 15:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count < 1 || count > 3) return throw_wrong_arguments("recursiveiteratoriterator::__construct", count, 1, 3, 2);
-        if (count <= 1) return (t___construct(params[0]), null);
-        if (count == 2) return (t___construct(params[0], params[1]), null);
-        return (t___construct(params[0], params[1], params[2]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t___construct(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1, arg2), null);
+        }
       }
       break;
     default:

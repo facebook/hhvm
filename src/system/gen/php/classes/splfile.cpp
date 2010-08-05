@@ -153,20 +153,54 @@ ObjectData *c_splfileobject::dynCreate(CArrRef params, bool construct /* = true 
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count < 1 || count > 4) throw_wrong_arguments("splfileobject::__construct", count, 1, 4, 2);
-    if (count <= 1) (t___construct(params[0]));
-    else if (count == 2) (t___construct(params[0], params[1]));
-    else if (count == 3) (t___construct(params[0], params[1], params[2]));
-    else (t___construct(params[0], params[1], params[2], params[3]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      if (count <= 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 2) {
+        (t___construct(arg0, arg1));
+        break;
+      }
+      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 3) {
+        (t___construct(arg0, arg1, arg2));
+        break;
+      }
+      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1, arg2, arg3));
+    } while (false);
   }
   return this;
 }
 void c_splfileobject::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 4) throw_wrong_arguments("splfileobject::__construct", count, 1, 4, 2);
-  if (count <= 1) (t___construct(params[0]));
-  else if (count == 2) (t___construct(params[0], params[1]));
-  else if (count == 3) (t___construct(params[0], params[1], params[2]));
-  else (t___construct(params[0], params[1], params[2], params[3]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 2) {
+      (t___construct(arg0, arg1));
+      break;
+    }
+    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 3) {
+      (t___construct(arg0, arg1, arg2));
+      break;
+    }
+    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1, arg2, arg3));
+  } while (false);
 }
 void c_splfileobject::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -225,7 +259,14 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       }
       HASH_GUARD(0x44CE4DB1CE7E9F86LL, flock) {
         if (count != 2) return throw_wrong_arguments("splfileobject::flock", count, 2, 2, 1);
-        return (t_flock(params[0], ref(const_cast<Array&>(params).lvalAt(1))));
+        const_cast<Array&>(params).escalate(true);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
+          return (t_flock(arg0, ref(arg1)));
+        }
       }
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
         if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
@@ -241,7 +282,12 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 10:
       HASH_GUARD(0x2FC3A6941D522E0ALL, setflags) {
         if (count != 1) return throw_wrong_arguments("splfileobject::setflags", count, 1, 1, 1);
-        return (t_setflags(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setflags(arg0));
+        }
       }
       break;
     case 14:
@@ -283,8 +329,13 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
-        if (count <= 0) return (t_getbasename());
-        return (t_getbasename(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getbasename());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getbasename(arg0));
+        }
       }
       break;
     case 29:
@@ -296,7 +347,12 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 30:
       HASH_GUARD(0x3E4E7C561D3A541ELL, fgetss) {
         if (count != 1) return throw_wrong_arguments("splfileobject::fgetss", count, 1, 1, 1);
-        return (t_fgetss(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_fgetss(arg0));
+        }
       }
       break;
     case 31:
@@ -308,14 +364,24 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 35:
       HASH_GUARD(0x044B276686B77923LL, fscanf) {
         if (count != 1) return throw_wrong_arguments("splfileobject::fscanf", count, 1, 1, 1);
-        return (t_fscanf(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_fscanf(arg0));
+        }
       }
       break;
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
-        if (count <= 0) return (t_setfileclass());
-        return (t_setfileclass(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_setfileclass());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setfileclass(arg0));
+        }
       }
       break;
     case 43:
@@ -339,16 +405,28 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
         if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
-        if (count <= 0) return (t_openfile());
-        if (count == 1) return (t_openfile(params[0]));
-        if (count == 2) return (t_openfile(params[0], params[1]));
-        return (t_openfile(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_openfile());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_openfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_openfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_openfile(arg0, arg1, arg2));
+        }
       }
       break;
     case 55:
       HASH_GUARD(0x4CEC6AA30E43D437LL, setmaxlinelen) {
         if (count != 1) return throw_wrong_arguments("splfileobject::setmaxlinelen", count, 1, 1, 1);
-        return (t_setmaxlinelen(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setmaxlinelen(arg0));
+        }
       }
       break;
     case 56:
@@ -368,14 +446,24 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
-        if (count <= 0) return (t_getfileinfo());
-        return (t_getfileinfo(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getfileinfo());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getfileinfo(arg0));
+        }
       }
       break;
     case 67:
       HASH_GUARD(0x5ACCF9166CD9D043LL, ftruncate) {
         if (count != 1) return throw_wrong_arguments("splfileobject::ftruncate", count, 1, 1, 1);
-        return (t_ftruncate(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_ftruncate(arg0));
+        }
       }
       HASH_GUARD(0x794FAFD4412AEFC3LL, eof) {
         if (count > 0) return throw_toomany_arguments("splfileobject::eof", 0, 1);
@@ -391,14 +479,25 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 69:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
-        if (count <= 0) return (t_setinfoclass());
-        return (t_setinfoclass(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_setinfoclass());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setinfoclass(arg0));
+        }
       }
       break;
     case 73:
       HASH_GUARD(0x4282E0231F600049LL, fseek) {
         if (count != 2) return throw_wrong_arguments("splfileobject::fseek", count, 2, 2, 1);
-        return (t_fseek(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_fseek(arg0, arg1));
+        }
       }
       break;
     case 74:
@@ -416,10 +515,17 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 78:
       HASH_GUARD(0x7E978C38D741664ELL, fgetcsv) {
         if (count > 3) return throw_toomany_arguments("splfileobject::fgetcsv", 3, 1);
-        if (count <= 0) return (t_fgetcsv());
-        if (count == 1) return (t_fgetcsv(params[0]));
-        if (count == 2) return (t_fgetcsv(params[0], params[1]));
-        return (t_fgetcsv(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_fgetcsv());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_fgetcsv(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_fgetcsv(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_fgetcsv(arg0, arg1, arg2));
+        }
       }
       break;
     case 79:
@@ -431,10 +537,17 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 80:
       HASH_GUARD(0x3A335010F905ACD0LL, setcsvcontrol) {
         if (count > 3) return throw_toomany_arguments("splfileobject::setcsvcontrol", 3, 1);
-        if (count <= 0) return (t_setcsvcontrol());
-        if (count == 1) return (t_setcsvcontrol(params[0]));
-        if (count == 2) return (t_setcsvcontrol(params[0], params[1]));
-        return (t_setcsvcontrol(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_setcsvcontrol());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_setcsvcontrol(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_setcsvcontrol(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_setcsvcontrol(arg0, arg1, arg2));
+        }
       }
       break;
     case 81:
@@ -464,10 +577,18 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count < 1 || count > 4) return throw_wrong_arguments("splfileobject::__construct", count, 1, 4, 2);
-        if (count <= 1) return (t___construct(params[0]), null);
-        if (count == 2) return (t___construct(params[0], params[1]), null);
-        if (count == 3) return (t___construct(params[0], params[1], params[2]), null);
-        return (t___construct(params[0], params[1], params[2], params[3]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t___construct(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t___construct(arg0, arg1, arg2), null);
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1, arg2, arg3), null);
+        }
       }
       break;
     case 97:
@@ -491,18 +612,34 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
     case 101:
       HASH_GUARD(0x05D72365192CE465LL, fwrite) {
         if (count != 2) return throw_wrong_arguments("splfileobject::fwrite", count, 2, 2, 1);
-        return (t_fwrite(params[0], params[1]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_fwrite(arg0, arg1));
+        }
       }
       break;
     case 103:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
-        if (count <= 0) return (t_getpathinfo());
-        return (t_getpathinfo(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getpathinfo());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getpathinfo(arg0));
+        }
       }
       HASH_GUARD(0x7EF5445C77054C67LL, seek) {
         if (count != 1) return throw_wrong_arguments("splfileobject::seek", count, 1, 1, 1);
-        return (t_seek(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_seek(arg0));
+        }
       }
       break;
     case 106:
@@ -2096,14 +2233,24 @@ ObjectData *c_splfileinfo::dynCreate(CArrRef params, bool construct /* = true */
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count != 1) throw_wrong_arguments("splfileinfo::__construct", count, 1, 1, 2);
-    (t___construct(params[0]));
+    {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0((ad->getValue(pos)));
+      (t___construct(arg0));
+    }
   }
   return this;
 }
 void c_splfileinfo::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("splfileinfo::__construct", count, 1, 1, 2);
-  (t___construct(params[0]));
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  }
 }
 void c_splfileinfo::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -2137,8 +2284,13 @@ Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 5:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
-        if (count <= 0) return (t_setinfoclass());
-        return (t_setinfoclass(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_setinfoclass());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setinfoclass(arg0));
+        }
       }
       break;
     case 6:
@@ -2196,8 +2348,13 @@ Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
-        if (count <= 0) return (t_getbasename());
-        return (t_getbasename(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getbasename());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getbasename(arg0));
+        }
       }
       break;
     case 29:
@@ -2209,7 +2366,12 @@ Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count != 1) return throw_wrong_arguments("splfileinfo::__construct", count, 1, 1, 2);
-        return (t___construct(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___construct(arg0), null);
+        }
       }
       HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
         if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
@@ -2225,15 +2387,25 @@ Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
-        if (count <= 0) return (t_setfileclass());
-        return (t_setfileclass(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_setfileclass());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setfileclass(arg0));
+        }
       }
       break;
     case 39:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
-        if (count <= 0) return (t_getpathinfo());
-        return (t_getpathinfo(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getpathinfo());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getpathinfo(arg0));
+        }
       }
       break;
     case 42:
@@ -2267,10 +2439,17 @@ Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool 
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
         if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
-        if (count <= 0) return (t_openfile());
-        if (count == 1) return (t_openfile(params[0]));
-        if (count == 2) return (t_openfile(params[0], params[1]));
-        return (t_openfile(params[0], params[1], params[2]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_openfile());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_openfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_openfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_openfile(arg0, arg1, arg2));
+        }
       }
       break;
     case 56:
@@ -2298,8 +2477,13 @@ Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool 
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
         if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
-        if (count <= 0) return (t_getfileinfo());
-        return (t_getfileinfo(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getfileinfo());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getfileinfo(arg0));
+        }
       }
       break;
     default:

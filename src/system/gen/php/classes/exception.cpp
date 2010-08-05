@@ -180,9 +180,15 @@ Variant c_unexpectedvalueexception::o_invoke(const char *s, CArrRef params, int6
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -576,9 +582,15 @@ Variant c_overflowexception::o_invoke(const char *s, CArrRef params, int64 hash,
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -972,9 +984,15 @@ Variant c_outofboundsexception::o_invoke(const char *s, CArrRef params, int64 ha
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -1368,9 +1386,15 @@ Variant c_logicexception::o_invoke(const char *s, CArrRef params, int64 hash, bo
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -1764,9 +1788,15 @@ Variant c_rangeexception::o_invoke(const char *s, CArrRef params, int64 hash, bo
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -2160,9 +2190,15 @@ Variant c_invalidargumentexception::o_invoke(const char *s, CArrRef params, int6
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -2556,9 +2592,15 @@ Variant c_underflowexception::o_invoke(const char *s, CArrRef params, int64 hash
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -2952,9 +2994,15 @@ Variant c_outofrangeexception::o_invoke(const char *s, CArrRef params, int64 has
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -3348,9 +3396,15 @@ Variant c_badmethodcallexception::o_invoke(const char *s, CArrRef params, int64 
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -3744,9 +3798,15 @@ Variant c_runtimeexception::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -4216,18 +4276,42 @@ ObjectData *c_exception::dynCreate(CArrRef params, bool construct /* = true */) 
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count > 2) throw_toomany_arguments("exception::__construct", 2, 2);
-    if (count <= 0) (t___construct());
-    else if (count == 1) (t___construct(params[0]));
-    else (t___construct(params[0], params[1]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      if (count <= 0) {
+        (t___construct());
+        break;
+      }
+      CVarRef arg0((ad->getValue(pos)));
+      if (count == 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1));
+    } while (false);
   }
   return this;
 }
 void c_exception::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 2) throw_toomany_arguments("exception::__construct", 2, 2);
-  if (count <= 0) (t___construct());
-  else if (count == 1) (t___construct(params[0]));
-  else (t___construct(params[0], params[1]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) {
+      (t___construct());
+      break;
+    }
+    CVarRef arg0((ad->getValue(pos)));
+    if (count == 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1));
+  } while (false);
 }
 void c_exception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -4320,9 +4404,15 @@ Variant c_exception::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -4873,24 +4963,72 @@ ObjectData *c_errorexception::dynCreate(CArrRef params, bool construct /* = true
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
     if (count > 5) throw_toomany_arguments("errorexception::__construct", 5, 2);
-    if (count <= 0) (t___construct());
-    else if (count == 1) (t___construct(params[0]));
-    else if (count == 2) (t___construct(params[0], params[1]));
-    else if (count == 3) (t___construct(params[0], params[1], params[2]));
-    else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
-    else (t___construct(params[0], params[1], params[2], params[3], params[4]));
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      if (count <= 0) {
+        (t___construct());
+        break;
+      }
+      CVarRef arg0((ad->getValue(pos)));
+      if (count == 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 2) {
+        (t___construct(arg0, arg1));
+        break;
+      }
+      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 3) {
+        (t___construct(arg0, arg1, arg2));
+        break;
+      }
+      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      if (count == 4) {
+        (t___construct(arg0, arg1, arg2, arg3));
+        break;
+      }
+      CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      (t___construct(arg0, arg1, arg2, arg3, arg4));
+    } while (false);
   }
   return this;
 }
 void c_errorexception::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 5) throw_toomany_arguments("errorexception::__construct", 5, 2);
-  if (count <= 0) (t___construct());
-  else if (count == 1) (t___construct(params[0]));
-  else if (count == 2) (t___construct(params[0], params[1]));
-  else if (count == 3) (t___construct(params[0], params[1], params[2]));
-  else if (count == 4) (t___construct(params[0], params[1], params[2], params[3]));
-  else (t___construct(params[0], params[1], params[2], params[3], params[4]));
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) {
+      (t___construct());
+      break;
+    }
+    CVarRef arg0((ad->getValue(pos)));
+    if (count == 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 2) {
+      (t___construct(arg0, arg1));
+      break;
+    }
+    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 3) {
+      (t___construct(arg0, arg1, arg2));
+      break;
+    }
+    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count == 4) {
+      (t___construct(arg0, arg1, arg2, arg3));
+      break;
+    }
+    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    (t___construct(arg0, arg1, arg2, arg3, arg4));
+  } while (false);
 }
 void c_errorexception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -4994,12 +5132,21 @@ Variant c_errorexception::o_invoke(const char *s, CArrRef params, int64 hash, bo
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 5) return throw_toomany_arguments("errorexception::__construct", 5, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        if (count == 2) return (t___construct(params[0], params[1]), null);
-        if (count == 3) return (t___construct(params[0], params[1], params[2]), null);
-        if (count == 4) return (t___construct(params[0], params[1], params[2], params[3]), null);
-        return (t___construct(params[0], params[1], params[2], params[3], params[4]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t___construct(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t___construct(arg0, arg1, arg2), null);
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
+        }
       }
       HASH_GUARD(0x4B378D0258AF461FLL, getseverity) {
         if (count > 0) return throw_toomany_arguments("errorexception::getseverity", 0, 1);
@@ -5460,9 +5607,15 @@ Variant c_badfunctioncallexception::o_invoke(const char *s, CArrRef params, int6
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -5856,9 +6009,15 @@ Variant c_lengthexception::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:
@@ -6252,9 +6411,15 @@ Variant c_domainexception::o_invoke(const char *s, CArrRef params, int64 hash, b
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
         if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     default:

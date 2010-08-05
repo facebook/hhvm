@@ -247,7 +247,12 @@ Variant c_splobjectstorage::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 12:
       HASH_GUARD(0x62DD82BFEB88A4ACLL, attach) {
         if (count != 1) return throw_wrong_arguments("splobjectstorage::attach", count, 1, 1, 1);
-        return (t_attach(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_attach(arg0), null);
+        }
       }
       break;
     case 16:
@@ -257,7 +262,12 @@ Variant c_splobjectstorage::o_invoke(const char *s, CArrRef params, int64 hash, 
       }
       HASH_GUARD(0x61B94551FA22D290LL, contains) {
         if (count != 1) return throw_wrong_arguments("splobjectstorage::contains", count, 1, 1, 1);
-        return (t_contains(params[0]));
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_contains(arg0));
+        }
       }
       break;
     case 17:
@@ -269,7 +279,12 @@ Variant c_splobjectstorage::o_invoke(const char *s, CArrRef params, int64 hash, 
     case 21:
       HASH_GUARD(0x3C7D0AC0EBA9A695LL, detach) {
         if (count != 1) return throw_wrong_arguments("splobjectstorage::detach", count, 1, 1, 1);
-        return (t_detach(params[0]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_detach(arg0), null);
+        }
       }
       break;
     case 24:

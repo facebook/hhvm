@@ -16,3 +16,12 @@ VirtualHost {
   default {
   }
 }
+
+Satellites {
+  rpc {
+    Type = RPCServer
+    Port = 8083
+    Password = test
+    WarmupDocument = string
+  }
+}

@@ -44,7 +44,8 @@ bool TestServer::VerifyServerResponse(const char *input, const char *output,
                                       const char *header, const char *postdata,
                                       bool responseHeader,
                                       const char *file /* = "" */,
-                                      int line /* = 0 */) {
+                                      int line /* = 0 */,
+                                      int port /* = 8080 */) {
   ASSERT(input);
 
   if (!CleanUp()) return false;
@@ -70,7 +71,7 @@ bool TestServer::VerifyServerResponse(const char *input, const char *output,
 
   String server = "http://";
   server += f_php_uname("n");
-  server += ":8080/";
+  server += ":" + lexical_cast<string>(port) + "/";
   server += url;
   string actual, err;
   for (int i = 0; i < 10; i++) {
@@ -166,6 +167,7 @@ bool TestServer::RunTests(const std::string &which) {
   //RUN_TEST(TestRequestHandling);
   //RUN_TEST(TestLibeventServer);
   RUN_TEST(TestHttpClient);
+  RUN_TEST(TestRPCServer);
 
   return ret;
 }
@@ -504,4 +506,36 @@ bool TestServer::TestHttpClient() {
   server->stop();
   server->waitForEnd();
   return Count(true);
+}
+
+bool TestServer::TestRPCServer() {
+  // the simplest case
+  VSGETP("<?php\n"
+         "function f() { return 100; }\n",
+         "100",
+         "f?auth=test",
+         8083);
+
+  // array output
+  VSGETP("<?php\n"
+         "function f($a) { return array(1, 2, 3, $a); }\n",
+         "[1,2,3,\"hello\"]",
+         "f?auth=test&p=\"hello\"",
+         8083);
+
+  // associate arrays
+  VSGETP("<?php\n"
+         "function f($a, $b) { return array_merge($a, $b); }\n",
+         "{\"a\":1,\"0\":2,\"1\":1,\"2\":2}",
+         "f?auth=test&p={\"a\":1,\"1\":2}&p=[1,2]",
+         8083);
+
+  // builtin function and static method
+  VSGETP("<?php\n"
+         "class A { static function f($a) { return $a; } }\n",
+         "100",
+         "call_user_func?auth=test&p=\"A::f\"&p=100",
+         8083);
+
+  return true;
 }

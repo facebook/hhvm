@@ -51,6 +51,9 @@ public:
   // test HttpClient class that proxy server uses
   bool TestHttpClient();
 
+  // test RPCServer
+  bool TestRPCServer();
+
 protected:
   void RunServer();
   void StopServer();
@@ -58,7 +61,8 @@ protected:
                             const char *url, const char *method,
                             const char *header, const char *postdata,
                             bool responseHeader,
-                            const char *file = "", int line = 0);
+                            const char *file = "", int line = 0,
+                            int port = 8080);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,6 +81,12 @@ protected:
 #define VSGET(input, output, url)                                       \
   if (!Count(VerifyServerResponse(input, output, url, "GET", NULL,      \
                                   NULL, false, __FILE__,__LINE__)))     \
+    return false;
+
+#define VSGETP(input, output, url, port)                                \
+  if (!Count(VerifyServerResponse(input, output, url, "GET", NULL,      \
+                                  NULL, false, __FILE__,__LINE__,       \
+                                  port)))                               \
     return false;
 
 #define VSPOST(input, output, url, postdata)                            \

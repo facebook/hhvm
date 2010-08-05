@@ -933,6 +933,7 @@ bool TestCppBase::TestMemoryManager() {
     VS(globals->m_array["c"], "banana");
 
     globals->m_conn = null;
+    MemoryManager::TheMemoryManager()->sweepAll();
     MemoryManager::TheMemoryManager()->rollback();
     VS(globals->m_array2["0"], "value");
     VS(globals->m_array2["1"], "s");

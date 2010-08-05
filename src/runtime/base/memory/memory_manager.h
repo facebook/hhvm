@@ -93,6 +93,7 @@ public:
    * Mark current allocator's position as ending point of a generation and
    * sweep all memory that has allocated since the previous check point.
    */
+  void sweepAll();
   void rollback();
 
   /**

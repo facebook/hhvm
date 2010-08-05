@@ -950,6 +950,16 @@ void hphp_session_exit() {
 
   if (mm->afterCheckpoint()) {
     ServerStatsHelper ssh("rollback");
+    mm->sweepAll();
+
+    /**
+     * We have to do it again, because sweep() may call g_context-> or
+     * RequestLocal<T>, which also calls g_context->, to create a new
+     * ExecutionContext object that has SmartAllocated data members. These
+     * members cannot survive over rollback(), so we need to delete g_context.
+     */
+    g_context.reset();
+
     mm->rollback();
     s_warmup_state->atCheckpoint = true;
   } else {

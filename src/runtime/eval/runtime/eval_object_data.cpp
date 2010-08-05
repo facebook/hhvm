@@ -204,7 +204,12 @@ void EvalObjectData::o_setPrivate(const char *cls, const char *s, int64 hash,
 }
 
 CStrRef EvalObjectData::o_getClassName() const {
-  return m_cls.getClass()->nameString();
+  if (m_class_name.isNull()) {
+    // an object can never live longer than its class
+    const std::string &clsName = m_cls.getClass()->name();
+    m_class_name.assign(clsName.c_str(), clsName.size(), AttachLiteral);
+  }
+  return m_class_name;
 }
 
 const MethodStatement

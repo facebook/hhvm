@@ -90,17 +90,7 @@ ClassStatement::ClassStatement(STATEMENT_ARGS, const string &name,
     m_lname(Util::toLower(m_name)),
     m_modifiers(0), m_parent(parent), m_docComment(doc),
     m_marker(new ClassStatementMarker(STATEMENT_PASS, this)),
-    m_delayDeclaration(false) {
-  StringData *sd = new StringData(m_name.c_str());
-  sd->incRefCount();
-  m_nameString = sd;
-}
-
-ClassStatement::~ClassStatement() {
-  StringData *sd = m_nameString.get();
-  m_nameString.reset();
-  delete sd;
-}
+    m_delayDeclaration(false) { }
 
 void ClassStatement::finish() {
 }

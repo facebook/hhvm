@@ -226,7 +226,7 @@ Variant f_posix_uname() {
   ret.set("release",    String(u.release,    CopyString));
   ret.set("version",    String(u.version,    CopyString));
   ret.set("machine",    String(u.machine,    CopyString));
-#if defined(_GNU_SOURCE) && !defined(DARWIN)
+#if defined(_GNU_SOURCE) && !defined(__APPLE__) && !defined(__FREEBSD__)
   ret.set("domainname", String(u.domainname, CopyString));
 #endif
   return ret;

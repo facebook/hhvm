@@ -21,11 +21,20 @@
 #include <runtime/base/complex_types.h>
 
 #include <arpa/inet.h>
-#include <byteswap.h>
+#if defined(__APPLE__) || defined(__FREEBSD__)
+# include <sys/endian.h>
+#else
+# include <byteswap.h>
+#endif
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-#define htonll(x) bswap_64(x)
-#define ntohll(x) bswap_64(x)
+# if defined(__APPLE__) || defined(__FREEBSD__)
+#  define htonll(x) bswap64(x)
+#  define ntohll(x) bswap64(x)
+# else
+#  define htonll(x) bswap_64(x)
+#  define ntohll(x) bswap_64(x)
+# endif
 #else
 #define htonll(x) (x)
 #define ntohll(x) (x)

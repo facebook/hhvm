@@ -2464,7 +2464,9 @@ int string_crc32(const char *p, int len) {
 // crypt
 
 #include <unistd.h>
-#include <crypt.h>
+#if !defined(__APPLE__) && !defined(__FREEBSD__)
+# include <crypt.h>
+#endif
 
 static unsigned char itoa64[] =
   "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";

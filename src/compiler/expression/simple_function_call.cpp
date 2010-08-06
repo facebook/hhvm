@@ -102,10 +102,10 @@ SimpleFunctionCall::SimpleFunctionCall
     m_dynamicInvoke(false), m_safe(0),
     m_hookData(NULL) {
 
-  m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
-    Option::DynamicInvokeFunctions.end();
-
   if (!m_class && m_className.empty()) {
+    m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
+      Option::DynamicInvokeFunctions.end();
+
     if (FunctionTypeMap.empty()) InitFunctionTypeMap();
     map<string, int>::const_iterator iter =
       FunctionTypeMap.find(m_name);
@@ -825,7 +825,9 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
   bool errorFlagged = false;
 
   if (!m_class && m_className.empty()) {
-    func = ar->findFunction(m_name);
+    if (!m_dynamicInvoke) {
+      func = ar->findFunction(m_name);
+    }
   } else {
     ClassScopePtr cls = ar->resolveClass(m_className);
     if (cls && cls->isVolatile()) {

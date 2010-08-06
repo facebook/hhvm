@@ -35,7 +35,7 @@
 #include <glob.h>
 #include <sys/types.h>
 #include <sys/file.h>
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__APPLE__)
 # include <sys/mount.h>
 #else
 # include <sys/vfs.h>

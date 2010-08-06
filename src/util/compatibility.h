@@ -17,12 +17,16 @@
 #ifndef __COMPATIBILITY_H__
 #define __COMPATIBILITY_H__
 
-namespace HPHP { namespace Compatibility {
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define PHP_DIR_SEPARATOR '/'
 
+#if defined(__APPLE__)
+char *strndup(const char* str, size_t len);
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
 #endif // __COMPATIBILITY_H__

@@ -19,5 +19,21 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__APPLE__)
+char *strndup(const char* str, size_t len) {
+  size_t str_len = strlen(str);
+  if (len < str_len) {
+    str_len = len;
+  }
+  char* result = malloc(str_len + 1);
+  if (result == NULL) {
+    return NULL;
+  }
+  memcpy(result, str, str_len);
+  result[str_len] = '\0';
+  return result;
+}
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 }

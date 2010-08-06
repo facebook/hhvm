@@ -37,7 +37,7 @@ void f_hphp_thread_set_warmup_enabled() {
 }
 
 int64 f_hphp_get_thread_id() {
-  return Process::GetThreadId();
+  return  (unsigned long)Process::GetThreadId();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

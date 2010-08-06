@@ -28,9 +28,10 @@
 #include <util/light_process.h>
 #include <runtime/base/util/request_local.h>
 
-#if !defined(NSIG) && defined(_NSIG)
-# define NSIG _NSIG
+#if !defined(_NSIG) && defined(NSIG)
+# define _NSIG NSIG
 #endif
+
 
 using namespace std;
 

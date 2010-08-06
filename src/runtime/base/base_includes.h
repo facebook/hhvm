@@ -25,6 +25,7 @@
 #include <system/gen/php/globals/constants.h>
 #include <runtime/base/global_array_wrapper.h>
 #include <runtime/ext/extension.h>
+#include <util/compatibility.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 

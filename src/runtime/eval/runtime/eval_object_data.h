@@ -64,13 +64,22 @@ public:
 
   virtual bool o_instanceof(const char *s) const;
 
-  virtual Variant o_invoke(const char *s, CArrRef params, int64 hash,
-                           bool fatal = true);
-  virtual Variant o_invoke_ex(const char *clsname, const char *s,
+   virtual Variant o_invoke(MethodIndex, const char *s, CArrRef params,
+                            int64 hash, bool fatal = true);
+   virtual Variant o_invoke_mil(const char *s, CArrRef params,
+                                int64 hash, bool fatal = true);
+  virtual Variant o_invoke_ex(const char *clsname, MethodIndex, const char *s,
                               CArrRef params, int64 hash,
-                              bool fatal /* = false */);
-  virtual Variant o_invoke_few_args(const char *s, int64 hash, int count,
-                                    INVOKE_FEW_ARGS_DECL_ARGS);
+                               bool fatal /* = false */);
+  virtual Variant o_invoke_ex_mil(const char *clsname, const char *s,
+                                  CArrRef params, int64 hash,
+                                  bool fatal /* = false */);
+  virtual Variant o_invoke_few_args(MethodIndex, const char *s, int64 hash,
+                                    int count, INVOKE_FEW_ARGS_DECL_ARGS);
+  virtual Variant o_invoke_few_args_mil(const char *s, int64 hash,
+                                        int count, INVOKE_FEW_ARGS_DECL_ARGS);
+
+
   virtual Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   virtual Variant doGet(Variant v_name, bool error);
 

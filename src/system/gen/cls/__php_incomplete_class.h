@@ -31,10 +31,10 @@ class c___php_incomplete_class : public ExtObjectData {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT___php_incomplete_class 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET___php_incomplete_class 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL___php_incomplete_class 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT___php_incomplete_class 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT___php_incomplete_class 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_GET___php_incomplete_class 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL___php_incomplete_class 1
+#define OMIT_JUMP_TABLE_CLASS_CONSTANT___php_incomplete_class 1
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
@@ -51,14 +51,14 @@ class c___php_incomplete_class : public ExtObjectData {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC___php_incomplete_class 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC___php_incomplete_class 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC___php_incomplete_class 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC___php_incomplete_class 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC___php_incomplete_class 1
+#define OMIT_JUMP_TABLE_CLASS_get_PUBLIC___php_incomplete_class 1
+#define OMIT_JUMP_TABLE_CLASS_set_PUBLIC___php_incomplete_class 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC___php_incomplete_class 1
 
   // DECLARE_COMMON_INVOKE
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE___php_incomplete_class 1
-  #define OMIT_JUMP_TABLE_CLASS_INVOKE___php_incomplete_class 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE___php_incomplete_class 1
+#define OMIT_JUMP_TABLE_CLASS_INVOKE___php_incomplete_class 1
 
   public:
   DECLARE_INVOKES_FROM_EVAL

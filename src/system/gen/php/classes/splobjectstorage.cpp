@@ -228,8 +228,68 @@ void c_splobjectstorage::cloneSet(c_splobjectstorage *clone) {
   ObjectData::cloneSet(clone);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splobjectstorage
-Variant c_splobjectstorage::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_splobjectstorage::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x1:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::next", 0, 1);
+        return (t_next(), null);
+      }
+      break;
+    case 0xa5:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("splobjectstorage::detach", count, 1, 1, 1);
+        return (t_detach(params[0]), null);
+      }
+      break;
+    case 0xa4:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("splobjectstorage::attach", count, 1, 1, 1);
+        return (t_attach(params[0]), null);
+      }
+      break;
+    case 0xf:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::count", 0, 1);
+        return (t_count());
+      }
+      break;
+    case 0x2:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::key", 0, 1);
+        return (t_key());
+      }
+      break;
+    case 0x3:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::valid", 0, 1);
+        return (t_valid());
+      }
+      break;
+    case 0xa6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("splobjectstorage::contains", count, 1, 1, 1);
+        return (t_contains(params[0]));
+      }
+      break;
+    case 0x7:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::current", 0, 1);
+        return (t_current());
+      }
+      break;
+    case 0x9:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::rewind", 0, 1);
+        return (t_rewind(), null);
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 4:
@@ -302,11 +362,72 @@ Variant c_splobjectstorage::o_invoke(const char *s, CArrRef params, int64 hash, 
     default:
       break;
   }
-  return c_ObjectData::o_invoke(s, params, hash, fatal);
+#endif
+  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splobjectstorage
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splobjectstorage
-Variant c_splobjectstorage::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+Variant c_splobjectstorage::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x1:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::next", 0, 1);
+        return (t_next(), null);
+      }
+      break;
+    case 0xa5:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("splobjectstorage::detach", count, 1, 1, 1);
+        return (t_detach(a0), null);
+      }
+      break;
+    case 0xa4:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("splobjectstorage::attach", count, 1, 1, 1);
+        return (t_attach(a0), null);
+      }
+      break;
+    case 0xf:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::count", 0, 1);
+        return (t_count());
+      }
+      break;
+    case 0x2:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::key", 0, 1);
+        return (t_key());
+      }
+      break;
+    case 0x3:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::valid", 0, 1);
+        return (t_valid());
+      }
+      break;
+    case 0xa6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("splobjectstorage::contains", count, 1, 1, 1);
+        return (t_contains(a0));
+      }
+      break;
+    case 0x7:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::current", 0, 1);
+        return (t_current());
+      }
+      break;
+    case 0x9:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::rewind", 0, 1);
+        return (t_rewind(), null);
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 4:
@@ -364,16 +485,165 @@ Variant c_splobjectstorage::o_invoke_few_args(const char *s, int64 hash, int cou
     default:
       break;
   }
-  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+#endif
+  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splobjectstorage
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splobjectstorage
-Variant c_splobjectstorage::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_splobjectstorage::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
+#ifdef FMCGEN
+#else
+#endif
+  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splobjectstorage
 Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x1:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::next", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_next(), null);
+      }
+      break;
+    case 0xa5:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("splobjectstorage::detach", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_detach(a0), null);
+      }
+      break;
+    case 0xa4:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("splobjectstorage::attach", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_attach(a0), null);
+      }
+      break;
+    case 0xf:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::count", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_count());
+      }
+      break;
+    case 0x2:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::key", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_key());
+      }
+      break;
+    case 0x3:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::valid", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_valid());
+      }
+      break;
+    case 0xa6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("splobjectstorage::contains", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_contains(a0));
+      }
+      break;
+    case 0x7:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::current", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_current());
+      }
+      break;
+    case 0x9:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("splobjectstorage::rewind", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_rewind(), null);
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 4:
@@ -515,9 +785,14 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     default:
       break;
   }
+#endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_splobjectstorage::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+#else
+#endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 struct ObjectStaticCallbacks cw_splobjectstorage = {
@@ -620,7 +895,7 @@ void c_splobjectstorage::t_detach(CVarRef v_obj) {
             if (same(v_object, v_obj)) {
               {
                 lval(m_storage).weakRemove(v_idx);
-                o_root_invoke_few_args("rewind", 0x1670096FDE27AF6ALL, 0);
+                o_root_invoke_few_args(/* rewind */ MethodIndex(9, 1) /* rewind */ ,  "rewind", 0x1670096FDE27AF6ALL, 0);
                 return;
               }
             }

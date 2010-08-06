@@ -642,6 +642,7 @@ static int execute_program_impl(int argc, char **argv) {
     }
   }
 
+  methodIndexMap.initialize();
   if (argc <= 1 || po.mode == "run" || po.mode == "debug") {
     RuntimeOption::ExecutionMode = "cli";
 

@@ -161,7 +161,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
   }
 
   public function valid() {
-    return key($this->arr) !== null;
+    return current($this->arr) !== false;
   }
 }
 

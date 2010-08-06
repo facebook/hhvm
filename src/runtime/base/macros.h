@@ -163,23 +163,27 @@ namespace HPHP {
   virtual Variant &o_lvalPublic(CStrRef s, int64 hash);                 \
 
 #define DECLARE_COMMON_INVOKES                                          \
-  static Variant os_invoke(const char *c, const char *s,                \
+  static Variant os_invoke(const char *c, MethodIndex methodIndex,      \
+                           const char *s,                               \
                            CArrRef ps, int64 h, bool f = true);         \
-  virtual Variant o_invoke(const char *s, CArrRef ps, int64 h,          \
+  virtual Variant o_invoke(MethodIndex methodIndex, const char *s,      \
+                           CArrRef ps, int64 h,                         \
                            bool f = true);                              \
-  virtual Variant o_invoke_few_args(const char *s, int64 h, int count,  \
+  virtual Variant o_invoke_few_args(MethodIndex methodIndex,            \
+                                    const char *s, int64 h, int count,  \
                                     INVOKE_FEW_ARGS_DECL_ARGS);         \
 
 #define DECLARE_INVOKE_EX(cls, originalName, parent)                    \
-  virtual Variant o_invoke_ex(const char *clsname, const char *s,       \
+  virtual Variant o_invoke_ex(const char *clsname,                      \
+                              MethodIndex methodIndex, const char *s,   \
                               CArrRef ps, int64 h, bool f = true) {     \
     if (clsname && strcasecmp(clsname, #originalName) == 0) {           \
-      return c_##cls::o_invoke(s, ps, h, f);                            \
+      return c_##cls::o_invoke(methodIndex, s, ps, h, f);               \
     }                                                                   \
-    return c_##parent::o_invoke_ex(clsname, s, ps, h, f);               \
+    return c_##parent::o_invoke_ex(clsname, methodIndex, s, ps, h, f);  \
   }                                                                     \
 
-#define DECLARE_CLASS_COMMON(cls, originalName) \
+#define DECLARE_CLASS_COMMON(cls, originalName)                         \
   DECLARE_OBJECT_ALLOCATION(c_##cls)                                    \
   protected:                                                            \
   ObjectData *cloneImpl();                                              \
@@ -206,6 +210,7 @@ namespace HPHP {
   DECLARE_INVOKE_EX(cls, originalName, parent)                          \
   public:                                                               \
 
+
 #define DECLARE_INVOKES_FROM_EVAL                                       \
   static Variant os_invoke_from_eval(const char *c, const char *s,      \
                                      Eval::VariableEnvironment &env,    \
@@ -219,13 +224,14 @@ namespace HPHP {
                              bool fatal /* = true */);
 
 #define DECLARE_ROOT                                                    \
-  Variant o_root_invoke(const char *s, CArrRef ps, int64 h,             \
-                        bool f = true) {                                \
-    return root->o_invoke(s, ps, h, f);                                 \
+  Variant o_root_invoke(MethodIndex methodIndex, const char *s,         \
+                        CArrRef ps, int64 h, bool f = true) {           \
+    return root->o_invoke(methodIndex, s, ps, h, f);                    \
   }                                                                     \
-  Variant o_root_invoke_few_args(const char *s, int64 h, int count,     \
+  Variant o_root_invoke_few_args(MethodIndex methodIndex, const char *s,\
+                                 int64 h, int count,                    \
                                  INVOKE_FEW_ARGS_DECL_ARGS) {           \
-    return root->o_invoke_few_args(s, h, count,                         \
+    return root->o_invoke_few_args(methodIndex, s, h, count,            \
                                    INVOKE_FEW_ARGS_PASS_ARGS);          \
   }
 
@@ -276,15 +282,17 @@ do { \
   if (hash == code && !strcasecmp(s, #f)) return o_i_ ## f(params)
 #define HASH_INVOKE_CONSTRUCTOR(code, f, id)                            \
   if (hash == code && !strcasecmp(s, #f)) return o_i_ ## id(params)
-#define HASH_INVOKE_STATIC_METHOD(code, f)                              \
+#define HASH_INVOKE_STATIC_METHOD(code, f, methodIndex)                 \
   if (hash == code && !strcasecmp(s, #f))                               \
-    return cw_ ## f.os_invoke(#f, method, params, -1, fatal)
-#define HASH_INVOKE_STATIC_METHOD_VOLATILE(code, f)                     \
+     return cw_ ## f.os_invoke(#f, methodIndex, method, params, -1, fatal)
+#define HASH_INVOKE_STATIC_METHOD_VOLATILE(code, f, methodIndex)        \
   if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(cw_ ## f.os_invoke(#f, method, params, -1, fatal))
-#define HASH_INVOKE_STATIC_METHOD_REDECLARED(code, f)                   \
+    return CLASS_CHECK(cw_ ## f.os_invoke(#f, methodIndex,              \
+                       method, params, -1, fatal))
+#define HASH_INVOKE_STATIC_METHOD_REDECLARED(code, f, methodIndex)      \
   if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(g->cso_ ## f->os_invoke(#f, method, params, -1, fatal))
+    return CLASS_CHECK(g->cso_ ## f->os_invoke(#f, methodIndex,         \
+                       method, params, -1, fatal))
 #define HASH_GET_OBJECT_STATIC_CALLBACKS(code, f)                       \
   if (hash == code && !strcasecmp(s, #f)) return &cw_ ## f
 #define HASH_GET_OBJECT_STATIC_CALLBACKS_VOLATILE(code, f)              \
@@ -458,6 +466,7 @@ do { \
 #define BIND_CLASS_DOT  bindClass(info).
 #define BIND_CLASS_ARROW(T) bindClass<c_##T>(info)->
 #define INVOKE_STATIC_METHOD invoke_static_method_bind
+#define INVOKE_STATIC_METHOD_MIL invoke_static_method_bind_mil
 
 #else
 
@@ -465,6 +474,7 @@ do { \
 #define BIND_CLASS_DOT
 #define BIND_CLASS_ARROW(T)
 #define INVOKE_STATIC_METHOD invoke_static_method
+#define INVOKE_STATIC_METHOD_MIL invoke_static_method_mil
 
 #endif
 

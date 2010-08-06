@@ -652,26 +652,24 @@ void ClassScope::outputCPPDynamicClassImpl(CodeGenerator &cg,
   cg_indentEnd("}\n");
 }
 
+// e.g build invoke_builtin_static_method
 void ClassScope::outputCPPClassJumpTable
 (CodeGenerator &cg,
  const StringToClassScopePtrVecMap &classScopes,
- const vector<const char*> &classes, const char* macro) {
+ const vector<const char*> &classes, const char* macro,
+ const char* methodIndex = NULL) {
   cg.printDeclareGlobals();
   for (JumpTable jt(cg, classes, true, false, false); jt.ready(); jt.next()) {
     const char *clsName = jt.key();
     StringToClassScopePtrVecMap::const_iterator iterClasses =
       classScopes.find(clsName);
     if (iterClasses != classScopes.end()) {
-      if (iterClasses->second[0]->isRedeclaring()) {
-        cg_printf("%s_REDECLARED(0x%016llXLL, %s);\n", macro,
-                  hash_string_i(clsName), cg.formatLabel(clsName).c_str());
-      } else if (iterClasses->second[0]->isVolatile()) {
-        cg_printf("%s_VOLATILE(0x%016llXLL, %s);\n", macro,
-                  hash_string_i(clsName), cg.formatLabel(clsName).c_str());
-      } else {
-        cg_printf("%s(0x%016llXLL, %s);\n", macro,
-                  hash_string_i(clsName), cg.formatLabel(clsName).c_str());
-      }
+      cg_printf("%s%s", macro,
+                (iterClasses->second[0]->isRedeclaring()) ? "_REDECLARED" :
+                (iterClasses->second[0]->isVolatile()) ? "_VOLATILE" : "");
+      cg_printf("(0x%016llXLL, %s%s);\n",
+                hash_string_i(clsName), cg.formatLabel(clsName).c_str(),
+                methodIndex ? ", methodIndex" : "");
     }
   }
 }
@@ -692,7 +690,8 @@ void ClassScope::outputCPPClassVarInitImpl
               "return r;\n");
     cg_indentEnd("}\n");
   }
-  outputCPPClassJumpTable(cg, classScopes, classes, "HASH_GET_CLASS_VAR_INIT");
+  outputCPPClassJumpTable(cg, classScopes, classes,
+                          "HASH_GET_CLASS_VAR_INIT");
   if (!system) {
     cg_printf("return get_builtin_class_var_init(s, var);\n");
   } else {
@@ -732,38 +731,73 @@ void ClassScope::outputCPPInvokeStaticMethodImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
+  // e.g. G::$f()
   cg_indentBegin("Variant invoke%s_static_method(const char *s, "
-                 "const char *method, CArrRef params, bool fatal) {\n",
-                 system ? "_builtin" : "");
+                 "MethodIndex methodIndex, const char *method, CArrRef params, "
+                 "bool fatal) {\n", system ? "_builtin" : "");
+
   if (!system && Option::EnableEval == Option::FullEval) {
     // See if there's an eval'd version
     cg_printf("bool foundClass = false;\n");
     cg_indentBegin("{\n");
     cg_printf("Variant r;\n");
+
+    cg_printf(FMC);
+    cg_printf("method = methodIndexLookupReverse(methodIndex);\n");
+    cg_printf("#endif\n");
     cg_printf("if (eval_invoke_static_method_hook(r, s, method, params, "
-              "foundClass)) return r;\n");
+        "foundClass)) return r; \n");
     cg_indentBegin("else if (foundClass) {\n");
     cg_printf("return o_invoke_failed(s, method, fatal);\n");
+
     cg_indentEnd("}\n");
     cg_indentEnd("}\n");
   }
   outputCPPClassJumpTable(cg, classScopes, classes,
-                          "HASH_INVOKE_STATIC_METHOD");
+                          "HASH_INVOKE_STATIC_METHOD", "methodIndex");
 
   // There should be invoke_failed for static methods...
   if (!system) {
-    cg_printf("return invoke_builtin_static_method(s, method, params, fatal);"
-              "\n");
+    cg_printf("return invoke_builtin_static_method(s, methodIndex, method, "
+              "params, fatal);\n");
   } else {
     cg_indentBegin("if (fatal) {\n");
     cg_printf("return throw_missing_class(s);\n");
     cg_indentEnd("");
     cg_indentBegin("} else {\n");
+    cg_printf(FMC);
+    cg_printf("method = methodIndexLookupReverse(methodIndex);\n");
+    cg_printf("#endif\n");
     cg_printf("raise_warning(\"call_user_func to non-existent class's method"
-              " %%s::%%s\", s, method);\n");
+        " %%s::%%s\", s, method);\n");
     cg_printf("return false;\n");
     cg_indentEnd("}\n");
   }
+  cg_indentEnd("}\n");
+
+  cg_indentBegin("Variant invoke%s_static_method_mil(const char *s, "
+                 "const char *method, CArrRef params, "
+                 "bool fatal) {\n", system ? "_builtin" : "");
+  {
+    // When running in the interpreter the full methodIndexMap is not
+    // available, thus this must be checked first and can succeed
+    // when methodIndexExists would fail.
+    cg_printf("bool foundClass = false;\n");
+    cg_printf("Variant r;\n");
+    cg_printf("if (eval_invoke_static_method_hook(r, s, method, params, "
+              "foundClass)) return r; \n");
+    cg_printf("if (foundClass) return o_invoke_failed(s, method, fatal);\n");
+  }
+  cg_printf("MethodIndex methodIndex(MethodIndex::fail());\n");
+  // test this here, so that methodIndexLookupReverse above must succeed
+  cg_indentBegin("if (RuntimeOption::FastMethodCall) {\n");
+  cg_printf("methodIndex = methodIndexExists(method);\n");
+  cg_indentBegin("if (methodIndex.isFail()) {\n");
+  cg_printf("return o_invoke_failed(s, method, fatal);\n");
+  cg_indentEnd("}\n");
+  cg_indentEnd("}\n");
+  cg_printf("return invoke%s_static_method(s, methodIndex,"
+            "method, params, fatal);\n", system ? "_builtin" : "");
   cg_indentEnd("}\n");
 }
 
@@ -1171,15 +1205,22 @@ void ClassScope::findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 }
 
+
+// o_invoke_from_eval guts
 void ClassScope::
 outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
                            const vector <const char*> &keys,
                            const StringToFunctionScopePtrVecMap &funcScopes,
-                           bool fewArgs, bool staticOnly, bool forEval) {
+                           bool fewArgs, bool staticOnly, bool forEval,
+                           bool useFastMethodCall) {
   ClassScopePtr self = dynamic_pointer_cast<ClassScope>(shared_from_this());
 
-  for (JumpTable jt(cg, keys, true, true, false); jt.ready(); jt.next()) {
-    const char *name = jt.key();
+  shared_ptr<JumpTableBase> jt (useFastMethodCall ?
+    (JumpTableBase*) new JumpTableMethodIndex (cg, ar, keys) :
+    (JumpTableBase*) new JumpTable (cg, keys, true, true, false) ) ;
+
+  for (; jt->ready(); jt->next()) {
+    const char *name = jt->key();
     StringToFunctionScopePtrVecMap::const_iterator iterFuncs;
     iterFuncs = funcScopes.find(name);
     ASSERT(iterFuncs != funcScopes.end());
@@ -1188,13 +1229,19 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
         func->getMinParamCount() > Option::InvokeFewArgsCount)
       continue;
     string origName = func->getOriginalName();
-    if (cg.checkLiteralString(origName, ar) >= 0) {
-      cg_indentBegin("HASH_GUARD_LITSTR(0x%016llXLL, ", hash_string_i(name));
-      cg_printString(origName, ar);
-      cg_printf(") {\n");
-    } else {
-      cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
-                     hash_string_i(name), name);
+    if (useFastMethodCall) {
+      const MethodSlot* ms = ar->getMethodSlot(name);
+      cg_indentBegin("if (methodIndex.m_overloadIndex == 0x%x) { \n",
+                     ms->getOverloadIndex());
+    } else  {
+      if (cg.checkLiteralString(origName, ar) >= 0) {
+        cg_indentBegin("HASH_GUARD_LITSTR(0x%016llXLL, ", hash_string_i(name));
+        cg_printString(origName, ar);
+        cg_printf(") {\n");
+      } else {
+        cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
+                       hash_string_i(name), name);
+      }
     }
     const char *extra = NULL;
     const char *prefix = Option::MethodPrefix;
@@ -1296,6 +1343,7 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
                      "int64 hash, bool fatal) {\n", scope.c_str(),
                      invokeName.c_str());
     }
+    // forEval doesn't used methodIndex, so no need to look it up
   } else {
     // output invoke()
     if (staticOnly) { // os_invoke
@@ -1304,25 +1352,32 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
       }
       cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_%s", clsName);
       cg_indentBegin("Variant %s%s"
-                     "(const char *c, const char *s, CArrRef params,"
-                     " int64 hash, bool fatal) {\n", scope.c_str(),
-                     invokeName.c_str());
+          "(const char *c, MethodIndex methodIndex, const char *s, "
+          " CArrRef params, int64 hash, bool fatal) {\n", scope.c_str(),
+          invokeName.c_str());
     } else {
       if (funcs.empty()) {
         m_emptyJumpTables.insert(JumpTableInvoke);
       }
       cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
       cg_indentBegin("Variant %s%s"
-                     "(const char *s, CArrRef params,"
-                     " int64 hash, bool fatal) {\n", scope.c_str(),
-                     invokeName.c_str());
+          "(MethodIndex methodIndex, const char *s, CArrRef params,"
+          " int64 hash, bool fatal) {\n", scope.c_str(),
+          invokeName.c_str());
     }
     FunctionScope::OutputCPPDynamicInvokeCount(cg);
   }
-  if (needGlobals) cg.printDeclareGlobals();
+  cg_printf(FMC);
+  if (forEval) {
+    cg_printf ("MethodIndex methodIndex = methodIndexExists(s);\n");
+  }
+  outputCPPMethodInvokeTable(cg, ar, funcs, funcScopes, false,
+      staticOnly, forEval, true /* Method Index*/);
+  cg_printf("#else\n");
   outputCPPMethodInvokeTable(cg, ar, funcs, funcScopes, false, staticOnly,
-                             forEval);
-
+      forEval, false /* hash */);
+  cg_printf("#endif\n");
+  if (needGlobals) cg.printDeclareGlobals();
   string base = parent;
   if (Option::FlattenInvoke && !needsInvokeParent(ar, false)) {
     base = m_derivesFromRedeclaring ? "c_DynamicObjectData" : "c_ObjectData";
@@ -1339,11 +1394,13 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
     cg_indentEnd("}\n");
   } else {
     if (staticOnly) {
-      cg_printf("return %s(c, s, params, hash, fatal);\n", base.c_str());
+      cg_printf("return %s(c, methodIndex, s, params, hash, fatal);\n",
+                base.c_str());
       cg_indentEnd("}\n");
       cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_%s", clsName);
     } else {
-      cg_printf("return %s(s, params, hash, fatal);\n", base.c_str());
+      cg_printf("return %s(methodIndex, s, params, hash, fatal);\n",
+                base.c_str());
       cg_indentEnd("}\n");
       cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
     }
@@ -1351,16 +1408,22 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
 
   if (!staticOnly && !forEval) {
     cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
-    cg_indentBegin("Variant %s%s_few_args(const char *s, int64 hash, "
+    cg_indentBegin("Variant %s%s_few_args(MethodIndex methodIndex, "
+                   "const char *s, int64 hash, "
                    "int count", scope.c_str(), invokeName.c_str());
     for (int i = 0; i < Option::InvokeFewArgsCount; i++) {
       cg_printf(", CVarRef a%d", i);
     }
     cg_printf(") {\n");
     if (needGlobals) cg.printDeclareGlobals();
+    cg_printf(FMC);
+    outputCPPMethodInvokeTable(cg, ar, funcs, funcScopes, true,
+                                     staticOnly, false, true /* MethodIndex*/ );
+    cg_printf("#else\n");
     outputCPPMethodInvokeTable(cg, ar, funcs, funcScopes, true, staticOnly,
-                               false);
-    cg_printf("return %s_few_args(s, hash, count", base.c_str());
+                               false, false /* hash */);
+    cg_printf("#endif\n");
+    cg_printf("return %s_few_args(methodIndex, s, hash, count", base.c_str());
     for (int i = 0; i < Option::InvokeFewArgsCount; i++) {
       cg_printf(", a%d", i);
     }

@@ -21,8 +21,15 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+class JumpTableBase {
+  public:
+  virtual bool ready() const = 0;
+  virtual void next() = 0;
+  virtual const char *key() const = 0;
+  virtual ~JumpTableBase() {}
+};
 
-class JumpTable {
+class JumpTable : public JumpTableBase {
 public:
   JumpTable(CodeGenerator &cg, const std::vector<const char*> &keys,
             bool caseInsensitive, bool hasPrehash, bool useString);
@@ -37,6 +44,20 @@ protected:
 
 };
 
+class JumpTableMethodIndex : public JumpTableBase {
+public:
+  JumpTableMethodIndex(CodeGenerator &cg,
+                       AnalysisResultPtr ar,
+                       const std::vector<const char*> &keys);
+  bool ready() const;
+  void next();
+  const char *key() const;
+private:
+  CodeGenerator &m_cg;
+  AnalysisResultPtr m_ar;
+  const std::vector<const char*> &m_keys;
+  std::vector<const char*>::const_iterator m_iter;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

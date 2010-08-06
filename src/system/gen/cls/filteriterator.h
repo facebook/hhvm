@@ -35,10 +35,10 @@ class c_filteriterator : public ExtObjectData {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_GET_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_CONSTANT_filteriterator 1
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
@@ -55,14 +55,14 @@ class c_filteriterator : public ExtObjectData {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_filteriterator 1
 
   // DECLARE_COMMON_INVOKE
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_INVOKE_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_INVOKE_filteriterator 1
 
   public:
   DECLARE_INVOKES_FROM_EVAL

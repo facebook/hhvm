@@ -70,14 +70,16 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
     if (ms) {
       return ref(ms->invokeInstanceDirect(co, env, this));
     }
-    return ref(co->o_invoke_ex(cname.data(), name.data(), getParams(env),
-                               m_name->hashLwr()));
+    return ref(co->o_invoke_ex_mil(cname.data(),
+                                   name.data(), getParams(env),
+                                   m_name->hashLwr() ));
 
   }
   if (ms) {
     return ref(ms->invokeStaticDirect(cname.data(), env, this));
   }
-  return ref(invoke_static_method(cname.data(), name.data(), getParams(env)));
+  return ref(invoke_static_method_mil(cname.data(),
+                                  name.data(), getParams(env), -1));
 }
 
 void StaticMethodExpression::dump() const {

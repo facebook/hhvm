@@ -23,6 +23,7 @@
 #include <compiler/analysis/block_scope.h>
 #include <compiler/analysis/function_container.h>
 #include <compiler/package.h>
+#include <compiler/analysis/method_slot.h>
 #include <boost/graph/adjacency_list.hpp>
 
 namespace HPHP {
@@ -543,6 +544,14 @@ private:
     return boost::static_pointer_cast<AnalysisResult>
       (BlockScope::shared_from_this());
   }
+
+  StringToMethodSlotMap stringToMethodSlotMap;
+  friend class MethodSlot;
+  public:
+  const MethodSlot* getMethodSlot(const std::string & mname) const ;
+  const MethodSlot* getOrAddMethodSlot(const std::string & mname) ;
+  private:
+  MethodSlot* getMethodSlotUpdate(const std::string & mname) ;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -432,6 +432,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     BuiltinSymbols::NoSuperGlobals = true; // so to generate super globals
     Option::AnalyzePerfectVirtuals = false;
   }
+  Option::SystemGen = (po.target == "cpp" && po.format == "sys") ;
 
   Option::ProgramName = po.program;
 
@@ -786,6 +787,7 @@ int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
     ar->postOptimize();
   }
   ar->analyzeProgramFinal();
+  MethodSlot::genMethodSlot(ar);
 
   {
     Timer timer(Timer::WallTime, "creating CPP files");

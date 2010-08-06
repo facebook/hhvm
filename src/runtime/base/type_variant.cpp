@@ -1489,7 +1489,8 @@ ArrayIterPtr Variant::begin(CStrRef context /* = null_string */) const {
       return new ObjectArrayIter(obj);
     }
     while (obj->o_instanceof("iteratoraggregate")) {
-      Variant iterator = obj->o_invoke("getiterator", Array(), -1);
+      Variant iterator = obj->o_invoke_mil(
+                                       "getiterator", Array(), -1);
       if (!iterator.isObject()) break;
       if (iterator.instanceof("iterator")) {
         return new ObjectArrayIter(iterator.getObjectData(), &iterator);
@@ -2347,12 +2348,12 @@ Variant Variant::o_get(CStrRef propName, int64 prehash /* = -1 */,
   return null_variant;
 }
 
-Variant Variant::o_invoke(const char *s, CArrRef params,
-                          int64 hash /* = -1 */) {
+Variant Variant::o_invoke(MethodIndex methodIndex, const char *s,
+                          CArrRef params, int64 hash) {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_invoke(s, params, hash);
+    return m_data.pobj->o_invoke(methodIndex, s, params, hash);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_invoke(s, params, hash);
+    return m_data.pvar->o_invoke(methodIndex, s, params, hash);
   } else {
     throw InvalidOperandException(
         "Call to a member function on a non-object");
@@ -2361,21 +2362,37 @@ Variant Variant::o_invoke(const char *s, CArrRef params,
 
 Variant Variant::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */) {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_invoke(s, params, hash);
+    return m_data.pobj->o_invoke_mil(s, params, hash);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_invoke(s, params, hash);
+    return m_data.pvar->o_invoke_mil(s, params, hash);
   } else {
     throw InvalidOperandException(
         "Call to a member function on a non-object");
   }
 }
 
-Variant Variant::o_root_invoke(const char *s, CArrRef params,
-                               int64 hash /* = -1 */) {
+Variant Variant::o_invoke_mil(const char *s,
+                              CArrRef params, int64 hash) {
+  MethodIndex methodIndex(MethodIndex::fail());
+  if (RuntimeOption::FastMethodCall) {
+    methodIndex = methodIndexExists(s);
+    if (methodIndex.isFail()) {
+      if (m_type == KindOfObject) {
+        return m_data.pobj->o_invoke_mil(s, params, hash);
+      } else if (m_type == KindOfVariant) {
+        return m_data.pvar->o_invoke_mil(s, params, hash);
+      }
+    }
+  }
+  return o_invoke(methodIndex, s, params, hash);
+}
+
+Variant Variant::o_root_invoke(MethodIndex methodIndex, const char *s,
+                               CArrRef params, int64 hash) {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_root_invoke(s, params, hash);
+    return m_data.pobj->o_root_invoke(methodIndex, s, params, hash);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_root_invoke(s, params, hash);
+    return m_data.pvar->o_root_invoke(methodIndex, s, params, hash);
   } else {
     throw InvalidOperandException(
         "Call to a member function on a non-object");
@@ -2385,48 +2402,67 @@ Variant Variant::o_root_invoke(const char *s, CArrRef params,
 Variant Variant::o_root_invoke(CStrRef s, CArrRef params,
                                int64 hash /* = -1 */) {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_root_invoke(s, params, hash);
+    return m_data.pobj->o_root_invoke_mil(s, params, hash);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_root_invoke(s, params, hash);
+    return m_data.pvar->o_root_invoke_mil(s, params, hash);
   } else {
     throw InvalidOperandException(
         "Call to a member function on a non-object");
   }
 }
 
-Variant Variant::o_invoke_ex(const char *clsname, const char *s,
-                              CArrRef params, int64 hash) {
+Variant Variant::o_root_invoke_mil(const char *s,
+                                   CArrRef params, int64 hash) {
+  MethodIndex methodIndex(MethodIndex::fail());
+  if (RuntimeOption::FastMethodCall) {
+    methodIndex = methodIndexExists(s);
+    if (methodIndex.isFail()) {
+      if (m_type == KindOfObject) {
+        return m_data.pobj->doRootCall(s, params, true);
+      } else if (m_type == KindOfVariant) {
+        return m_data.pvar->o_root_invoke_mil(s, params, hash);
+      }
+    }
+  }
+  return o_root_invoke( methodIndex, s, params, hash);
+}
+
+Variant Variant::o_invoke_ex(const char *clsname, MethodIndex methodIndex,
+                             const char *s,
+                             CArrRef params, int64 hash) {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_invoke_ex(clsname, s, params, hash);
+    return m_data.pobj->o_invoke_ex(clsname, methodIndex, s, params, hash);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_invoke_ex(clsname, s, params, hash);
+    return m_data.pvar->o_invoke_ex(clsname, methodIndex, s, params, hash);
   } else {
     throw InvalidOperandException(
         "Call to a member function on a non-object");
   }
 }
 
-Variant Variant::o_invoke_few_args(const char *s, int64 hash, int count,
-                                   INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (m_type == KindOfObject) {
-    return m_data.pobj->o_invoke_few_args(s, hash, count,
-                                          INVOKE_FEW_ARGS_PASS_ARGS);
-  } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_invoke_few_args(s, hash, count,
-                                          INVOKE_FEW_ARGS_PASS_ARGS);
-  } else {
-    throw InvalidOperandException(
-        "Call to a member function on a non-object");
+Variant Variant::o_invoke_ex_mil(const char *clsname, const char *s,
+                                 CArrRef params, int64 hash) {
+  MethodIndex methodIndex(MethodIndex::fail());
+  if (RuntimeOption::FastMethodCall) {
+    methodIndex = methodIndexExists(s);
+    if (methodIndex.isFail()) {
+      if (m_type == KindOfObject) {
+        return m_data.pobj->doRootCall(s, params, true);
+      } else if (m_type == KindOfVariant) {
+        return m_data.pvar->o_invoke_ex_mil(clsname, s, params, hash);
+      }
+    }
   }
+  return o_invoke_ex(clsname, methodIndex, s, params, hash);
 }
 
 Variant Variant::o_invoke_few_args(CStrRef s, int64 hash, int count,
                                    INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_invoke_few_args(s, hash, count,
+    return m_data.pobj->o_invoke_few_args_mil(s, hash, count,
                                           INVOKE_FEW_ARGS_PASS_ARGS);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_invoke_few_args(s, hash, count,
+    return m_data.pvar->o_invoke_few_args_mil(s, hash, count,
                                           INVOKE_FEW_ARGS_PASS_ARGS);
   } else {
     throw InvalidOperandException(
@@ -2434,13 +2470,52 @@ Variant Variant::o_invoke_few_args(CStrRef s, int64 hash, int count,
   }
 }
 
-Variant Variant::o_root_invoke_few_args(const char *s, int64 hash, int count,
+Variant Variant::o_invoke_few_args(MethodIndex methodIndex, const char *s,
+                                   int64 hash, int count,
+                                   INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (m_type == KindOfObject) {
+    return m_data.pobj->o_invoke_few_args(methodIndex, s, hash, count,
+                                          INVOKE_FEW_ARGS_PASS_ARGS);
+  } else if (m_type == KindOfVariant) {
+    return m_data.pvar->o_invoke_few_args(methodIndex, s, hash, count,
+                                          INVOKE_FEW_ARGS_PASS_ARGS);
+  } else {
+    throw InvalidOperandException(
+        "Call to a member function on a non-object");
+  }
+}
+
+Variant Variant::o_invoke_few_args_mil(const char *s,
+                                   int64 hash, int count,
+                                   INVOKE_FEW_ARGS_IMPL_ARGS) {
+  MethodIndex methodIndex(MethodIndex::fail());
+  if (RuntimeOption::FastMethodCall) {
+    methodIndex = methodIndexExists(s);
+    if (methodIndex.isFail()) {
+      if (m_type == KindOfObject) {
+        return m_data.pobj->o_invoke_few_args_mil(s, hash, count,
+                                                  INVOKE_FEW_ARGS_PASS_ARGS);
+      } else if (m_type == KindOfVariant) {
+        return m_data.pvar->o_invoke_few_args_mil(s, hash, count,
+                                                  INVOKE_FEW_ARGS_PASS_ARGS);
+  } else {
+    throw InvalidOperandException(
+        "Call to a member function on a non-object");
+      }
+    }
+  }
+  return o_invoke_few_args(methodIndex, s, hash, count,
+                           INVOKE_FEW_ARGS_PASS_ARGS);
+}
+
+Variant Variant::o_root_invoke_few_args(MethodIndex methodIndex,
+                                        const char *s, int64 hash, int count,
                                         INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_root_invoke_few_args(s, hash, count,
+    return m_data.pobj->o_root_invoke_few_args(methodIndex, s, hash, count,
                                                INVOKE_FEW_ARGS_PASS_ARGS);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_root_invoke_few_args(s, hash, count,
+    return m_data.pvar->o_root_invoke_few_args(methodIndex, s, hash, count,
                                                INVOKE_FEW_ARGS_PASS_ARGS);
   } else {
     throw InvalidOperandException(
@@ -2451,18 +2526,44 @@ Variant Variant::o_root_invoke_few_args(const char *s, int64 hash, int count,
 Variant Variant::o_root_invoke_few_args(CStrRef s, int64 hash, int count,
                                         INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_root_invoke_few_args(s, hash, count,
-                                               INVOKE_FEW_ARGS_PASS_ARGS);
+    return m_data.pobj->o_root_invoke_few_args_mil(s, hash, count,
+                                                   INVOKE_FEW_ARGS_PASS_ARGS);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_root_invoke_few_args(s, hash, count,
-                                               INVOKE_FEW_ARGS_PASS_ARGS);
+    return m_data.pvar->o_root_invoke_few_args_mil(s, hash, count,
+                                                   INVOKE_FEW_ARGS_PASS_ARGS);
   } else {
     throw InvalidOperandException(
         "Call to a member function on a non-object");
   }
 }
 
-ObjectOffset Variant::o_lval(CStrRef propName, int64 prehash /* = -1 */,
+Variant Variant::o_root_invoke_few_args_mil(const char *s, int64 hash,
+                                            int count,
+                                            INVOKE_FEW_ARGS_IMPL_ARGS) {
+  MethodIndex methodIndex(MethodIndex::fail());
+  if (RuntimeOption::FastMethodCall) {
+    methodIndex = methodIndexExists(s);
+    if (methodIndex.isFail()) {
+      if (m_type == KindOfObject) {
+        return m_data.pobj->
+          o_root_invoke_few_args_mil(s, hash, count,
+                                     INVOKE_FEW_ARGS_PASS_ARGS);
+      } else if (m_type == KindOfVariant) {
+        return m_data.pvar->
+          o_root_invoke_few_args_mil(s, hash, count,
+                                     INVOKE_FEW_ARGS_PASS_ARGS);
+  } else {
+    throw InvalidOperandException(
+        "Call to a member function on a non-object");
+      }
+    }
+  }
+  return o_root_invoke_few_args(methodIndex, s, hash, count,
+                                INVOKE_FEW_ARGS_PASS_ARGS);
+}
+
+
+ObjectOffset Variant::o_lval(CStrRef propName, int64 prehash /*= -1 */,
                              CStrRef context /* = null_string */) {
   if (m_type == KindOfObject) {
     return Object(m_data.pobj).o_lval(propName, prehash, context);
@@ -3110,7 +3211,8 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
 
       String serialized;
       serialized.unserialize(in, '{', '}');
-      obj->o_invoke("unserialize", CREATE_VECTOR1(serialized), -1);
+      obj->o_invoke_mil("unserialize",
+                    CREATE_VECTOR1(serialized), -1);
 
       return; // object has '}' terminating
     }

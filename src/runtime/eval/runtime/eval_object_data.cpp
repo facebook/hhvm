@@ -229,8 +229,19 @@ bool EvalObjectData::o_instanceof(const char *s) const {
     (!parent.isNull() && parent->o_instanceof(s));
 }
 
-Variant EvalObjectData::o_invoke(const char *s, CArrRef params, int64 hash,
+Variant EvalObjectData::o_invoke(MethodIndex methodIndex,
+                                 const char *s,
+                                 CArrRef params, int64 hash,
                                  bool fatal /* = true */) {
+  // should only come here through EvalObjectData::o_invoke_mil,
+  // which already handled meths.find(s), 's' is going away here
+  // so avoid using it
+  return DynamicObjectData::o_invoke(methodIndex, s, params, hash, fatal);
+}
+
+Variant EvalObjectData::o_invoke_mil( const char *s,
+                                      CArrRef params, int64 hash,
+                                      bool fatal /* = true */) {
   const hphp_const_char_imap<const MethodStatement*> &meths =
     m_cls.getMethodTable();
   hphp_const_char_imap<const MethodStatement*>::const_iterator it =
@@ -239,16 +250,30 @@ Variant EvalObjectData::o_invoke(const char *s, CArrRef params, int64 hash,
     if (it->second) {
       return it->second->invokeInstance(Object(root), params);
     } else {
-      return DynamicObjectData::o_invoke(s, params, hash, fatal);
+      return DynamicObjectData::o_invoke_mil(s, params, hash, fatal);
     }
   } else {
     return doCall(s, params, fatal);
   }
 }
 
-Variant EvalObjectData::o_invoke_ex(const char *clsname, const char *s,
+
+Variant EvalObjectData::o_invoke_ex(const char *clsname,
+                                    MethodIndex methodIndex,
+                                    const char *s,
                                        CArrRef params, int64 hash,
                                        bool fatal /* = false */) {
+  // we should come here only thru o_invoke_ex_mil
+  // and it already handled this case
+  ASSERT( !(m_cls.getClass()->subclassOf(clsname)) );
+  return DynamicObjectData::o_invoke_ex(clsname, methodIndex, s, params, hash,
+                                        fatal);
+}
+
+Variant EvalObjectData::o_invoke_ex_mil(const char *clsname,
+                                        const char *s,
+                                        CArrRef params, int64 hash,
+                                        bool fatal /* = false */) {
   if (m_cls.getClass()->subclassOf(clsname)) {
     bool foundClass;
     const MethodStatement *ms = RequestEvalState::findMethod(clsname, s,
@@ -264,45 +289,57 @@ Variant EvalObjectData::o_invoke_ex(const char *clsname, const char *s,
         return doCall(s, params, fatal);
       }
     }
-    // Know it's a builtin parent so no need for _ex
-    return DynamicObjectData::o_invoke(s, params, hash, fatal);
+    return DynamicObjectData::o_invoke_mil(s, params, hash, fatal);
   }
-  return DynamicObjectData::o_invoke_ex(clsname, s, params, hash, fatal);
+  return DynamicObjectData::o_invoke_ex_mil(clsname, s, params,
+                                        hash, fatal);
 }
 
-Variant EvalObjectData::o_invoke_few_args(const char *s, int64 hash, int count,
-    INVOKE_FEW_ARGS_IMPL_ARGS) {
+Variant EvalObjectData::o_invoke_few_args(MethodIndex methodIndex,
+                                          const char *s,
+                                          int64 hash, int count,
+                                          INVOKE_FEW_ARGS_IMPL_ARGS) {
+  // o_invoke_few_args needs to pass 's' (the method name)
+  // to o_invoke for eval processing.  Thus, there is not a usable
+  // methodIndex version of EvalObjectData::o_invoke_few_args.
+  ASSERT(0);
+  return "";
+}
+
+Variant EvalObjectData::o_invoke_few_args_mil(const char *s,
+                                              int64 hash, int count,
+                                              INVOKE_FEW_ARGS_IMPL_ARGS) {
   switch (count) {
   case 0: {
-    return o_invoke(s, Array(), hash);
+    return o_invoke_mil(s, Array(), hash);
   }
   case 1: {
     Array params(ArrayInit(1, true).set(0, a0).create());
-    return o_invoke(s, params, hash);
+    return o_invoke_mil(s, params, hash);
   }
   case 2: {
     Array params(ArrayInit(2, true).set(0, a0).set(1, a1).create());
-    return o_invoke(s, params, hash);
+    return o_invoke_mil(s, params, hash);
   }
   case 3: {
     Array params(ArrayInit(3, true).set(0, a0).set(1, a1).set(2, a2).create());
-    return o_invoke(s, params, hash);
+    return o_invoke_mil(s, params, hash);
   }
 #if INVOKE_FEW_ARGS_COUNT > 3
   case 4: {
     Array params(ArrayInit(4, true).set(0, a0).set(1, a1).set(2, a2).
                                     set(3, a3).create());
-    return o_invoke(s, params, hash);
+    return o_invoke_mil(s, params, hash);
   }
   case 5: {
     Array params(ArrayInit(5, true).set(0, a0).set(1, a1).set(2, a2).
                                     set(3, a3).set(4, a4).create());
-    return o_invoke(s, params, hash);
+    return o_invoke_mil(s, params, hash);
   }
   case 6: {
     Array params(ArrayInit(6, true).set(0, a0).set(1, a1).set(2, a2).
                                     set(3, a3).set(4, a4).set(5, a5).create());
-    return o_invoke(s, params, hash);
+    return o_invoke_mil(s, params, hash);
   }
 #endif
 #if INVOKE_FEW_ARGS_COUNT > 6
@@ -310,26 +347,26 @@ Variant EvalObjectData::o_invoke_few_args(const char *s, int64 hash, int count,
     Array params(ArrayInit(7, true).set(0, a0).set(1, a1).set(2, a2).
                                     set(3, a3).set(4, a4).set(5, a5).
                                     set(6, a6).create());
-    return o_invoke(s, params, hash);
+    return o_invoke_mil(s, params, hash);
   }
   case 8: {
     Array params(ArrayInit(8, true).set(0, a0).set(1, a1).set(2, a2).
                                     set(3, a3).set(4, a4).set(5, a5).
                                     set(6, a6).set(7, a7).create());
-    return o_invoke(s, params, hash);
+    return o_invoke_mil(s, params, hash);
   }
   case 9: {
     Array params(ArrayInit(9, true).set(0, a0).set(1, a1).set(2, a2).
                                     set(3, a3).set(4, a4).set(5, a5).
                                     set(6, a6).set(7, a7).set(8, a8).create());
-    return o_invoke(s, params, hash);
+    return o_invoke_mil(s, params, hash);
   }
   case 10: {
     Array params(ArrayInit(10, true).set(0, a0).set(1, a1).set(2, a2).
                                      set(3, a3).set(4, a4).set(5, a5).
                                      set(6, a6).set(7, a7).set(8, a8).
                                      set(9, a9).create());
-    return o_invoke(s, params, hash);
+    return o_invoke_mil(s, params, hash);
   }
 #endif
   default:

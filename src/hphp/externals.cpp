@@ -20,7 +20,7 @@ using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
+//
 const char *g_source_root = "";
 const char *g_class_map[] = { NULL};
 const char *g_source_info[] = { NULL};
@@ -33,13 +33,21 @@ Object create_object(const char *s, const Array &params, bool init,
   return Object();
 }
 
-Variant invoke(const char *function, CArrRef params, int64 hash,
+Variant invoke(const char* function,
+               CArrRef params, int64 hash,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   return true;
 }
 
-Variant invoke_static_method(const char* cls, const char *function,
+Variant invoke_static_method(const char* cls, MethodIndex methodIndex,
+                             const char *function,
                              CArrRef params, bool fatal /* = true */) {
+  return null;
+}
+
+Variant invoke_static_method_mil(const char* cls,
+                                 const char *function,
+                                 CArrRef params, bool fatal /* = true */) {
   return null;
 }
 
@@ -89,7 +97,18 @@ Variant invoke_from_eval(const char *function, VariableEnvironment &env,
                          int64 hash /* = -1 */, bool fatal /* = true */) {
   return Variant();
 }
+
+Variant invoke_from_eval(const char *function, VariableEnvironment &env,
+                         const FunctionCallExpression *caller,
+                         bool fatal /* = true */) {
+  return Variant();
 }
+}
+
+// Class Invoke Tables dummies
+extern const MethodIndex methodIndexMapInit[];
+const MethodIndex methodIndexMapInit[] = {MethodIndex(0,0)};
+const char * methodIndexMapInitName[] = {NULL};
 
 const ObjectStaticCallbacks * get_object_static_callbacks(const char *s) {
   return NULL;

@@ -18,6 +18,7 @@
 #include <compiler/analysis/code_error.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/scalar_expression.h>
+#include <compiler/expression/simple_variable.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/class_scope.h>
 #include <util/util.h>
@@ -142,7 +143,8 @@ void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
   bool linemap = outputLineMap(cg, ar, true);
   if (m_class || !m_className.empty()) {
     if (m_class) {
-      cg_printf("INVOKE_STATIC_METHOD(get_static_class_name(");
+      // e.g. $cls::$func(...)
+      cg_printf("INVOKE_STATIC_METHOD_MIL(get_static_class_name(");
       if (m_class->is(KindOfScalarExpression)) {
         ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
                           getString().c_str(), "static") == 0);
@@ -152,11 +154,13 @@ void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
       }
       cg_printf("), ");
     } else if (m_validClass) {
-      cg_printf("%s%s::%sinvoke(\"%s\", ", Option::ClassPrefix,
+      // e.g. A::$b(); must lookup "b" even if simple, so _mil
+      cg_printf("%s%s::%sinvoke_mil(\"%s\", ", Option::ClassPrefix,
                 m_className.c_str(), Option::ObjectStaticPrefix,
                 m_className.c_str());
     } else if (m_redeclared) {
-      cg_printf("g->%s%s->%sinvoke(\"%s\", ", Option::ClassStaticsObjectPrefix,
+      cg_printf("g->%s%s->%sinvoke_mil(\"%s\", ",
+                Option::ClassStaticsObjectPrefix,
                 m_className.c_str(), Option::ObjectStaticPrefix,
                 m_className.c_str());
     } else {

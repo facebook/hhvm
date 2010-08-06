@@ -318,8 +318,11 @@ void CodeGenerator::print(const std::string &msg) {
 
   if (m_indentPending[m_curStream]) {
     m_indentPending[m_curStream] = false;
-    for (int i = 0; i < m_indentation[m_curStream]; i++) {
-      *m_out << Option::Tab;
+    if (msg[0]!='#') {
+      // Preprocessor statements must not be indented
+      for (int i = 0; i < m_indentation[m_curStream]; i++) {
+        *m_out << Option::Tab;
+      }
     }
   }
   for (unsigned int i = 0; i < msg.length(); i++) {

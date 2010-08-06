@@ -187,6 +187,7 @@ bool Option::StringLoopOpts = true;
 bool Option::AutoInline = false;
 
 bool Option::FlAnnotate = false;
+bool Option::SystemGen = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 // load from a PHP file

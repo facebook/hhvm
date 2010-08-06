@@ -35,10 +35,10 @@ class c_badmethodcallexception : public c_badfunctioncallexception {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_badmethodcallexception 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_badmethodcallexception 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_badmethodcallexception 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_badmethodcallexception 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_badmethodcallexception 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_GET_badmethodcallexception 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_badmethodcallexception 1
+#define OMIT_JUMP_TABLE_CLASS_CONSTANT_badmethodcallexception 1
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
@@ -55,16 +55,16 @@ class c_badmethodcallexception : public c_badfunctioncallexception {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_badmethodcallexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_badmethodcallexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_badmethodcallexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_badmethodcallexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_badmethodcallexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_badmethodcallexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_badmethodcallexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_badmethodcallexception 1
 
   // DECLARE_COMMON_INVOKE
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badmethodcallexception 1
-  virtual Variant o_invoke(const char *s, CArrRef ps, int64 h,
+#define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badmethodcallexception 1
+  virtual Variant o_invoke(MethodIndex methodIndex, const char *s,CArrRef ps, int64 h,
                            bool f = true);
-  virtual Variant o_invoke_few_args(const char *s, int64 h,
+  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 h,
                                     int count,
                                     INVOKE_FEW_ARGS_DECL_ARGS);
 

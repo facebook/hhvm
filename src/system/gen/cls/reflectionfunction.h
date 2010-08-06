@@ -35,9 +35,9 @@ class c_reflectionfunction : public c_reflectionfunctionabstract {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_reflectionfunction 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_reflectionfunction 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionfunction 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_reflectionfunction 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_GET_reflectionfunction 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionfunction 1
   static Variant os_constant(const char *s);
 
   // DECLARE_INSTANCE_PROP_OPS
@@ -55,17 +55,17 @@ class c_reflectionfunction : public c_reflectionfunctionabstract {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionfunction 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionfunction 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionfunction 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionfunction 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionfunction 1
+#define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionfunction 1
+#define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionfunction 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionfunction 1
 
   // DECLARE_COMMON_INVOKE
-  static Variant os_invoke(const char *c, const char *s,
-                           CArrRef ps, int64 h, bool f = true);
-  virtual Variant o_invoke(const char *s, CArrRef ps, int64 h,
+  static Variant os_invoke(const char *c, MethodIndex methodIndex, 
+                           const char *s, CArrRef ps, int64 h, bool f = true);
+  virtual Variant o_invoke(MethodIndex methodIndex, const char *s,CArrRef ps, int64 h,
                            bool f = true);
-  virtual Variant o_invoke_few_args(const char *s, int64 h,
+  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 h,
                                     int count,
                                     INVOKE_FEW_ARGS_DECL_ARGS);
 

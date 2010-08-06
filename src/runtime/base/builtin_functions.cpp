@@ -134,9 +134,9 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
     String sfunction = function.toString();
     int c = sfunction.find("::");
     if (c != 0 && c != String::npos && c+2 < sfunction.size()) {
-      return invoke_static_method(sfunction.substr(0, c).c_str(),
-                                  sfunction.substr(c+2).c_str(), params,
-                                  false);
+      return invoke_static_method_mil(sfunction.substr(0, c).c_str(),
+                                      sfunction.substr(c+2).c_str(), params,
+                                      false);
     }
     return invoke(sfunction, params, -1, true, false);
   } else if (function.is(KindOfArray)) {
@@ -155,16 +155,18 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
     if (classname.is(KindOfObject)) {
       int c = method.find("::");
       if (c != 0 && c != String::npos && c+2 < method.size()) {
+        // e.g. call_user_func_array(array($g,'G::f'),array(2));
         String cls = method.substr(0, c);
         if (cls == "self") {
           cls = FrameInjection::GetClassName(true);
         } else if (cls == "parent") {
           cls = FrameInjection::GetParentClassName(true);
         }
-        return classname.toObject()->o_invoke_ex
+        return classname.toObject()->o_invoke_ex_mil
           (cls.c_str(), method.substr(c+2).c_str(), params, -1, false);
       }
-      return classname.toObject()->o_invoke(method, params, -1, false);
+      return classname.toObject()->o_invoke_mil(method.c_str(), params,
+                                                -1, false);
     } else {
       if (!classname.isString()) {
         throw_invalid_argument("function: classname not string");
@@ -178,11 +180,11 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
       }
       Object obj = FrameInjection::GetThis(true);
       if (obj.instanceof(sclass.c_str())) {
-        return obj->o_invoke_ex(sclass.c_str(), method.c_str(), params, -1,
-                                false);
+        return obj->o_invoke_ex_mil(sclass.c_str(), method.c_str(), params,
+                                    -1, false);
       }
-      return invoke_static_method(sclass.c_str(), method.c_str(),
-                                  params, false);
+      return invoke_static_method_mil(sclass.c_str(), method.c_str(),
+                                      params, false);
     }
   }
   throw_invalid_argument("function: not string or array");
@@ -751,7 +753,8 @@ Variant &get_static_property_lval(const char *s, const char *prop) {
   return Variant::lvalBlackHole();
 }
 
-Variant invoke_static_method_bind(CStrRef s, const char *method,
+Variant invoke_static_method_bind(CStrRef s, MethodIndex methodIndex,
+                                  const char *method,
                                   const Array &params,
                                   bool fatal /* = true */) {
   ThreadInfo *info = ThreadInfo::s_threadInfo.get();
@@ -763,11 +766,35 @@ Variant invoke_static_method_bind(CStrRef s, const char *method,
   } else {
     FrameInjection::SetStaticClassName(info, cls);
   }
-  Variant ret = invoke_static_method(cls.data(), method, params, fatal);
+  Variant ret = invoke_static_method(cls.data(), methodIndex,
+                                     method, params, fatal);
   if (!isStatic) {
     FrameInjection::ResetStaticClassName(info);
   }
   return ref(ret);
+}
+
+Variant invoke_static_method_bind_mil(CStrRef s,
+                                      const char *method,
+                                      const Array &params,
+                                      bool fatal /* = true */) {
+  MethodIndex methodIndex(MethodIndex::fail());
+  if (RuntimeOption::FastMethodCall) {
+    methodIndex = methodIndexExists(method);
+    if (methodIndex.isFail()) {
+      // do this here, where we still have the method name,
+      // instead of invoke_builtin_static_method.
+      if (fatal) {
+        return throw_missing_class(s);
+      } else {
+        raise_warning("call_user_func to non-existent class's method %s::%s",
+                      s.c_str(), method);
+        return false;
+      }
+    }
+  }
+  return invoke_static_method_bind(s, methodIndex, method, params, fatal);
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

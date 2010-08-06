@@ -42,8 +42,13 @@ public:
   virtual Variant os_getInit(const char *s, int64 hash = -1);
   virtual Variant os_get(const char *s, int64 hash = -1);
   virtual Variant &os_lval(const char *s, int64 hash = -1);
-  virtual Variant os_invoke(const char *c, const char *s,
+  virtual Variant os_invoke(const char *c, MethodIndex methodIndex,
+                            const char *s,
                             CArrRef params, int64 hash = -1, bool fatal = true);
+  virtual Variant os_invoke_mil(const char *c,
+                                const char *s,
+                                CArrRef params, int64 hash = -1,
+                                bool fatal = true);
   virtual Object create(CArrRef params, bool init = true,
                         ObjectData* root = NULL);
   virtual Variant os_constant(const char *s);

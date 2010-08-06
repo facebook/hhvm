@@ -20,6 +20,7 @@
 #include <util/base.h>
 #include <util/thread_local.h>
 #include <util/mutex.h>
+#include <util/case_insensitive.h>
 #include <vector>
 
 namespace HPHP {
@@ -247,6 +248,55 @@ public:
 private:
   ThreadInfo *m_info;
 };
+
+struct MethodIndex {
+  unsigned int m_callIndex:32;
+  unsigned int m_overloadIndex:32;
+  MethodIndex (unsigned int callIndex, unsigned int overloadIndex) :
+    m_callIndex(callIndex), m_overloadIndex(overloadIndex) {}
+  uint64 val() const { return ((uint64)m_callIndex)<<32|m_overloadIndex; }
+  bool operator== (const MethodIndex& mi) const { return val()==mi.val(); }
+
+  static MethodIndex fail() { return MethodIndex(0,0); }
+  bool isFail() { return val()==0; }
+  private:
+  MethodIndex() {}
+};
+
+struct MethodIndexHash {
+  size_t operator()(MethodIndex mi) const { return (size_t) mi.val(); }
+};
+
+class MethodIndexMap : public hphp_const_char_imap<MethodIndex> {
+  public:
+  void initialize();
+  typedef hphp_hash_map<const MethodIndex, const char *, MethodIndexHash >
+    MethodIndexReverseMap;
+  MethodIndexReverseMap methodIndexReverseMap;
+  private:
+  void addEntry(const char * methodName, MethodIndex mi) ;
+};
+extern MethodIndexMap methodIndexMap;
+
+inline MethodIndex methodIndexExists(const char * methodName) {
+  MethodIndexMap::const_iterator i = methodIndexMap.find(methodName);
+  if (i == methodIndexMap.end()) return MethodIndex::fail();
+  return (*i).second;
+}
+
+inline MethodIndex methodIndexLookup(const char * methodName) {
+  MethodIndex ret = methodIndexExists(methodName);
+  MethodIndexMap::const_iterator i = methodIndexMap.find(methodName);
+  ASSERT(i != methodIndexMap.end()); // only for testing
+  return (*i).second;
+}
+
+inline const char * methodIndexLookupReverse(MethodIndex methodIndex) {
+  MethodIndexMap::MethodIndexReverseMap::const_iterator i =
+     methodIndexMap.methodIndexReverseMap.find(methodIndex);
+  ASSERT(i != methodIndexMap.methodIndexReverseMap.end());
+  return (*i).second;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

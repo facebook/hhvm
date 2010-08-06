@@ -40,9 +40,9 @@ class c_splfileobject : public c_splfileinfo {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_splfileobject 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_splfileobject 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splfileobject 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_splfileobject 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_GET_splfileobject 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splfileobject 1
   static Variant os_constant(const char *s);
 
   // DECLARE_INSTANCE_PROP_OPS
@@ -60,16 +60,16 @@ class c_splfileobject : public c_splfileinfo {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splfileobject 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileobject 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileobject 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splfileobject 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splfileobject 1
+#define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileobject 1
+#define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileobject 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splfileobject 1
 
   // DECLARE_COMMON_INVOKE
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileobject 1
-  virtual Variant o_invoke(const char *s, CArrRef ps, int64 h,
+#define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileobject 1
+  virtual Variant o_invoke(MethodIndex methodIndex, const char *s,CArrRef ps, int64 h,
                            bool f = true);
-  virtual Variant o_invoke_few_args(const char *s, int64 h,
+  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 h,
                                     int count,
                                     INVOKE_FEW_ARGS_DECL_ARGS);
 

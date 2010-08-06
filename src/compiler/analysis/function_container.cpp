@@ -86,7 +86,8 @@ void FunctionContainer::outputCPPJumpTableSupport
   bool systemcpp = cg.getOutput() == CodeGenerator::SystemCPP;
   bool profile = systemcpp;
   const char *funcPrefix = Option::FunctionPrefix;
-  // output invoke support methods
+  // output invoke support methods,
+  // e.g. i_foo(...) { HASH_GUARD(...) ... f_foo(...) };
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
          m_functions.begin(); iter != m_functions.end(); ++iter) {
     if (!iter->second[0]->isRedeclaring()) {
@@ -231,6 +232,7 @@ void FunctionContainer::outputCPPJumpTable(CodeGenerator &cg,
   cg_indentEnd("}\n");
 }
 
+// Eval::invoke_from_eval_builtin(
 void FunctionContainer::outputCPPEvalInvokeTable(CodeGenerator &cg,
                                                  AnalysisResultPtr ar) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
@@ -244,6 +246,7 @@ void FunctionContainer::outputCPPEvalInvokeTable(CodeGenerator &cg,
                  "const Eval::FunctionCallExpression *caller, int64 hash, "
                  "bool fatal) {\n",
                  system ? "_builtin" : "");
+    // FMC verify this case
   if (generate) {
     if (needGlobals) cg.printDeclareGlobals();
 

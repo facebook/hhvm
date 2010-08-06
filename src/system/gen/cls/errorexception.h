@@ -34,9 +34,9 @@ class c_errorexception : public c_exception {
   // DECLARE_STATIC_PROP_OPS
   public:
   static Variant os_getInit(const char *s, int64 hash);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_errorexception 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_errorexception 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_errorexception 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_GET_errorexception 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_errorexception 1
+#define OMIT_JUMP_TABLE_CLASS_CONSTANT_errorexception 1
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
@@ -61,10 +61,10 @@ class c_errorexception : public c_exception {
   virtual Variant &o_lvalPublic(CStrRef s, int64 hash);
 
   // DECLARE_COMMON_INVOKE
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_errorexception 1
-  virtual Variant o_invoke(const char *s, CArrRef ps, int64 h,
+#define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_errorexception 1
+  virtual Variant o_invoke(MethodIndex methodIndex, const char *s,CArrRef ps, int64 h,
                            bool f = true);
-  virtual Variant o_invoke_few_args(const char *s, int64 h,
+  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 h,
                                     int count,
                                     INVOKE_FEW_ARGS_DECL_ARGS);
 

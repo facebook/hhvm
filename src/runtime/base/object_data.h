@@ -33,6 +33,7 @@ class FunctionCallExpression;
 class VariableEnvironment;
 }
 
+
 /**
  * Base class of all user-defined classes. All data members and methods in
  * this class should start with "o_" or "os_" to avoid name conflicts.
@@ -129,8 +130,10 @@ class ObjectData : public Countable {
   // static methods and properties
   static Variant os_get(const char *s, int64 hash);
   static Variant &os_lval(const char *s, int64 hash);
-  static Variant os_invoke(const char *c, const char *s,
+  static Variant os_invoke(const char *c, MethodIndex, const char *s,
                            CArrRef params, int64 hash, bool fatal = true);
+  static Variant os_invoke_mil(const char *c, const char *s,
+                               CArrRef params, int64 hash, bool fatal = true);
   static Variant os_constant(const char *s);
 
   static Variant os_invoke_from_eval(const char *c, const char *s,
@@ -138,6 +141,7 @@ class ObjectData : public Countable {
                                      const Eval::FunctionCallExpression *call,
                                      int64 hash,
                                      bool fatal /* = true */);
+
 
   // properties
   virtual Array o_toArray() const;
@@ -181,18 +185,35 @@ class ObjectData : public Countable {
   CVarRef set(CStrRef s, CVarRef v);
 
   // methods
-  virtual Variant o_invoke(const char *s, CArrRef params, int64 hash,
-                           bool fatal = true);
-  virtual Variant o_root_invoke(const char *s, CArrRef params, int64 hash,
-                                bool fatal = false);
-  virtual Variant o_invoke_ex(const char *clsname, const char *s,
+  virtual Variant o_invoke(MethodIndex, const char *s,
+                           CArrRef params, int64 hash, bool fatal = true);
+  virtual Variant o_invoke_mil(const char *s,
+                               CArrRef params, int64 hash, bool fatal = true);
+  virtual Variant o_root_invoke(MethodIndex, const char *s,
+                                CArrRef params, int64 hash, bool fatal = false);
+  virtual Variant o_root_invoke_mil(const char *s,
+                                    CArrRef params, int64 hash,
+                                    bool fatal = false);
+  virtual Variant o_invoke_ex(const char *clsname, MethodIndex,
+                              const char *s,
                               CArrRef params, int64 hash, bool fatal = true);
+  virtual Variant o_invoke_ex_mil(const char *clsname, const char *s,
+                                  CArrRef params, int64 hash,
+                                  bool fatal = true);
 
-  virtual Variant o_invoke_few_args(const char *s, int64 hash, int count,
+  virtual Variant o_invoke_few_args(MethodIndex, const char *s,
+                                    int64 hash, int count,
                                     INVOKE_FEW_ARGS_DECL_ARGS);
+  virtual Variant o_invoke_few_args_mil(const char *s,
+                                        int64 hash, int count,
+                                        INVOKE_FEW_ARGS_DECL_ARGS);
 
-  virtual Variant o_root_invoke_few_args(const char *s, int64 hash, int count,
+  virtual Variant o_root_invoke_few_args(MethodIndex, const char *s,
+                                         int64 hash, int count,
                                          INVOKE_FEW_ARGS_DECL_ARGS);
+  virtual Variant o_root_invoke_few_args_mil(const char *s,
+                                             int64 hash, int count,
+                                             INVOKE_FEW_ARGS_DECL_ARGS);
   virtual Variant o_invoke_from_eval(const char *s,
                                      Eval::VariableEnvironment &env,
                                      const Eval::FunctionCallExpression *call,
@@ -251,6 +272,7 @@ class ObjectData : public Countable {
   virtual ObjectData* cloneImpl() = 0;
   void cloneSet(ObjectData *clone);
   virtual bool php_sleep(Variant &ret);
+  static Array collectArgs(int count, INVOKE_FEW_ARGS_IMPL_ARGS) ;
 
  private:
   ObjectData(const ObjectData &) { ASSERT(false);}
@@ -269,13 +291,15 @@ class ObjectData : public Countable {
 #endif
 };
 
+
 typedef ObjectData c_ObjectData; // purely for easier code generation
 
 class ExtObjectData : public ObjectData {
 public:
   ExtObjectData() : root(this) {}
-  Variant o_root_invoke(const char *s, CArrRef ps, int64 h, bool f = true);
-  Variant o_root_invoke_few_args(const char *s, int64 h, int count,
+  Variant o_root_invoke(MethodIndex, const char *s, CArrRef ps, int64 h,
+                        bool f = true);
+  Variant o_root_invoke_few_args(MethodIndex, const char *s, int64 h, int count,
                           INVOKE_FEW_ARGS_DECL_ARGS);
   virtual void setRoot(ObjectData *r) { root = r; }
   virtual ObjectData *getRoot() { return root; }
@@ -288,7 +312,7 @@ struct ObjectStaticCallbacks {
   Variant (*os_getInit)(const char *s, int64 hash);
   Variant (*os_get)(const char *s, int64 hash);
   Variant &(*os_lval)(const char *s, int64 hash);
-  Variant (*os_invoke)(const char *c, const char *s,
+  Variant (*os_invoke)(const char *c, MethodIndex, const char *s,
                            CArrRef params, int64 hash, bool fatal);
   Variant (*os_constant)(const char *s);
 };

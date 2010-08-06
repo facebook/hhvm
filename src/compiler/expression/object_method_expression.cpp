@@ -375,11 +375,14 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
                                         m_variableArgument, m_argArrayId);
       cg_printf(")");
     } else {
+      // FMC: test fail case , both of them
+      const MethodSlot *ms = ar->getOrAddMethodSlot(m_name);
       if (fewParams) {
+        cg_printf("%s%sinvoke_few_args%s(%s \"%s\"",
+                  Option::ObjectPrefix, isThis ? "root_" : "",
+                  (ms->isError() ? "_mil" : ""),
+                  ms->runObjParam().c_str(), m_origName.c_str());
         uint64 hash = hash_string_i(m_name.data(), m_name.size());
-        cg_printf("%s%sinvoke_few_args(", Option::ObjectPrefix,
-                  isThis ? "root_" : "");
-        cg_printString(m_origName, ar);
         cg_printf(", 0x%016llXLL, ", hash);
 
         if (m_params && m_params->getCount()) {
@@ -390,9 +393,10 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
         }
         cg_printf(")");
       } else {
-        cg_printf("%s%sinvoke(", Option::ObjectPrefix,
-                  isThis ? "root_" : "");
-        cg_printString(m_origName, ar);
+        cg_printf("%s%sinvoke%s(%s \"%s\"",
+                  Option::ObjectPrefix, isThis ? "root_" : "",
+                  (ms->isError() ? "_mil(" : ""),
+                  ms->runObjParam().c_str(), m_origName.c_str());
         cg_printf(", ");
         if (m_params && m_params->getCount()) {
           FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
@@ -405,8 +409,9 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
     }
   } else {
     if (fewParams) {
-      cg_printf("%s%sinvoke_few_args(", Option::ObjectPrefix,
-                isThis ? "root_" : "");
+      // FMC must verify the fail case
+      cg_printf("%s%sinvoke_few_args_mil(",
+                Option::ObjectPrefix, isThis ? "root_" : "");
       m_nameExp->outputCPP(cg, ar);
       cg_printf(", -1LL, ");
       if (m_params && m_params->getCount()) {
@@ -417,9 +422,10 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       }
       cg_printf(")");
     } else {
-      cg_printf("%s%sinvoke((", Option::ObjectPrefix, isThis ? "root_" : "");
+      // FMC must verify the fail case
+      cg_printf("%s%sinvoke_mil(",
+          Option::ObjectPrefix, isThis ? "root_" : "");
       m_nameExp->outputCPP(cg, ar);
-      cg_printf(")");
       cg_printf(", ");
       if (m_params && m_params->getCount()) {
         FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);

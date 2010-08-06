@@ -14,12 +14,50 @@
    +----------------------------------------------------------------------+
 */
 #include <compiler/util/jump_table.h>
+#include <compiler/analysis/method_slot.h>
+#include <compiler/analysis/analysis_result.h>
 #include <compiler/option.h>
 #include <util/util.h>
 
 namespace HPHP {
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
+
+JumpTableMethodIndex::JumpTableMethodIndex(CodeGenerator &cg,
+                                           AnalysisResultPtr ar,
+                                           const vector<const char*> &keys)
+  : m_cg(cg), m_ar(ar), m_keys(keys), m_iter(m_keys.begin()) {
+  if (keys.empty()) return;
+  // FMC does dynamic case come through here and methodIndexLookupReverse?
+  m_cg.indentBegin("switch (methodIndex.m_callIndex) {\n");
+  if (ready()) {
+    const MethodSlot* ms = m_ar->getMethodSlot(*m_iter);
+    cg_indentBegin("case 0x%x:\n", ms->getCallIndex());
+  }
+}
+
+void JumpTableMethodIndex::next() {
+  ASSERT(ready());
+  m_cg_indentEnd("  break;\n");
+  ++m_iter;
+  if (m_iter == m_keys.end()) {
+    m_cg_printf("default:\n");
+    m_cg_printf("  break;\n");
+    m_cg_indentEnd("}\n");
+  } else {
+    const MethodSlot* ms = m_ar->getMethodSlot(*m_iter);
+    assert(ms != errorMethodSlot);
+    m_cg_indentBegin("case 0x%x:\n", ms->getCallIndex());
+  }
+}
+
+bool JumpTableMethodIndex::ready() const {
+  return m_iter != m_keys.end();
+}
+
+const char *JumpTableMethodIndex::key() const {
+  return *m_iter;
+}
 
 JumpTable::JumpTable(CodeGenerator &cg,
                      const vector<const char*> &keys, bool caseInsensitive,

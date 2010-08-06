@@ -593,11 +593,10 @@ Variant invoke(CStrRef function, CArrRef params, int64 hash = -1,
  * matching the name.  If no handlers are able to
  * invoke the function, throw an InvalidFunctionCallException.
  */
-Variant invoke_failed(const char *func, CArrRef params, int64 hash,
-                      bool fatal = true);
+Variant invoke_failed(const char *s, CArrRef params,
+                      int64 hash, bool fatal = true);
 
-Variant o_invoke_failed(const char *cls, const char *meth,
-                        bool fatal = true);
+Variant o_invoke_failed(const char *cls, const char *meth, bool fatal = true);
 
 /**
  * When fatal coding errors are transformed to this function call.

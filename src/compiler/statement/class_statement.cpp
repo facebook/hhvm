@@ -407,17 +407,19 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
 
   cg.printSection("DECLARE_COMMON_INVOKE");
   if (classScope->hasJumpTable(ClassScope::JumpTableStaticInvoke)) {
-    cg_printf("static Variant os_invoke(const char *c, const char *s,\n");
-    cg_printf("                         CArrRef ps, int64 h, "
+    cg_printf("static Variant os_invoke(const char *c, "
+              "MethodIndex methodIndex, \n");
+    cg_printf("                         const char *s, CArrRef ps, int64 h, "
               "bool f = true);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_%s 1\n", clsName);
   }
   if (classScope->hasJumpTable(ClassScope::JumpTableInvoke)) {
-    cg_printf("virtual Variant o_invoke(const char *s, CArrRef ps, "
-              "int64 h,\n");
+    cg_printf("virtual Variant o_invoke(MethodIndex methodIndex, const char *s,"
+              "CArrRef ps, int64 h,\n");
     cg_printf("                         bool f = true);\n");
-    cg_printf("virtual Variant o_invoke_few_args(const char *s, int64 h,\n");
+    cg_printf("virtual Variant o_invoke_few_args(MethodIndex methodIndex, "
+              "const char *s, int64 h,\n");
     cg_printf("                                  int count,\n");
     cg_printf("                                  "
               "INVOKE_FEW_ARGS_DECL_ARGS);\n");
@@ -667,11 +669,14 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("return %s%s::%slval(s, hash);\n", Option::ClassPrefix,
                   clsName, Option::ObjectStaticPrefix);
         cg_indentEnd("}\n");
-        cg_indentBegin("Variant %sinvoke(const char *c, const char *s, "
+        cg_indentBegin("Variant %sinvoke(const char *c, "
+                       "MethodIndex methodIndex,"
+                       "const char *s, "
                        "CArrRef params, int64 hash = -1, bool fatal = true) "
                        "{\n",
-                  Option::ObjectStaticPrefix);
-        cg_printf("return %s%s::%sinvoke(c, s, params, hash, fatal);\n",
+                       Option::ObjectStaticPrefix);
+        cg_printf("return %s%s::%sinvoke(c, methodIndex, s, params, hash, "
+                  "fatal);\n",
                   Option::ClassPrefix, clsName,
                   Option::ObjectStaticPrefix);
         cg_indentEnd("}\n");

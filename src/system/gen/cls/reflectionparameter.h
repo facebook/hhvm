@@ -34,9 +34,9 @@ class c_reflectionparameter : public ExtObjectData {
   // DECLARE_STATIC_PROP_OPS
   public:
   static Variant os_getInit(const char *s, int64 hash);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_reflectionparameter 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionparameter 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_reflectionparameter 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_GET_reflectionparameter 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionparameter 1
+#define OMIT_JUMP_TABLE_CLASS_CONSTANT_reflectionparameter 1
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
@@ -61,11 +61,11 @@ class c_reflectionparameter : public ExtObjectData {
   virtual Variant &o_lvalPublic(CStrRef s, int64 hash);
 
   // DECLARE_COMMON_INVOKE
-  static Variant os_invoke(const char *c, const char *s,
-                           CArrRef ps, int64 h, bool f = true);
-  virtual Variant o_invoke(const char *s, CArrRef ps, int64 h,
+  static Variant os_invoke(const char *c, MethodIndex methodIndex, 
+                           const char *s, CArrRef ps, int64 h, bool f = true);
+  virtual Variant o_invoke(MethodIndex methodIndex, const char *s,CArrRef ps, int64 h,
                            bool f = true);
-  virtual Variant o_invoke_few_args(const char *s, int64 h,
+  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 h,
                                     int count,
                                     INVOKE_FEW_ARGS_DECL_ARGS);
 

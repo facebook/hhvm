@@ -14,7 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include <boost/static_assert.hpp>
 #include <runtime/base/execution_context.h>
+#include <runtime/base/runtime_option.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/comparisons.h>
@@ -817,6 +819,31 @@ void Silencer::disable() {
 Variant Silencer::disable(CVarRef v) {
   disable();
   return v;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Fast Method Call
+MethodIndexMap methodIndexMap;
+extern const MethodIndex methodIndexMapInit[] ;
+extern const char * methodIndexMapInitName[] ;
+static unsigned int maxCallIndex = 0;
+
+void MethodIndexMap::addEntry(const char * methodName, MethodIndex mi) {
+  insert(
+    std::pair<const char*,const MethodIndex>(methodName, mi));
+  methodIndexReverseMap.insert(
+    std::pair<const MethodIndex, const char *>(mi, methodName));
+}
+
+void MethodIndexMap::initialize()  {
+  const MethodIndex *mip=methodIndexMapInit;
+  for (const char **name=methodIndexMapInitName; *name; name++, mip++) {
+    maxCallIndex = std::max(maxCallIndex, mip->m_callIndex);
+    addEntry(*name, *mip);
+  }
+  methodIndexReverseMap.insert(
+    std::pair<const MethodIndex, const char *>(
+      MethodIndex::fail(),"<Nonexistant method>"));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

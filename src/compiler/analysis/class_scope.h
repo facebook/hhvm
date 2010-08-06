@@ -375,12 +375,13 @@ private:
 
   static void outputCPPClassJumpTable
   (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
-   const std::vector<const char*> &classes, const char* macro);
+   const std::vector<const char*> &classes, const char* macro,
+   const char* methodIndex);
   void outputCPPMethodInvokeTable
     (CodeGenerator &cg, AnalysisResultPtr ar,
      const std::vector <const char*> &keys,
      const StringToFunctionScopePtrVecMap &funcScopes, bool fewArgs,
-     bool staticOnly, bool forEval);
+     bool staticOnly, bool forEval, bool useMethodIndex);
   hphp_const_char_imap<int> m_implemented;
 };
 

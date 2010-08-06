@@ -14,6 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include <iomanip>
+#include <algorithm>
+#include <boost/format.hpp>
+#include <boost/bind.hpp>
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/class_scope.h>
@@ -1162,6 +1166,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
   vector <string> filenames;
 
   AnalysisResultPtr ar = shared_from_this();
+  MethodSlot::genMethodSlot(ar);
   string root = getOutputPath() + "/";
   for (StringToFileScopePtrVecMap::const_iterator iter = clusters.begin();
        iter != clusters.end(); ++iter) {
@@ -1508,12 +1513,14 @@ void AnalysisResult::outputCPPDynamicTablesHeader
   if (system) {
     cg_printf("\n");
     cg_printInclude("<runtime/base/hphp_system.h>");
+    cg_printInclude("<runtime/base/runtime_option.h>");
     cg_printInclude("<runtime/ext/ext.h>");
     cg_printInclude("<runtime/eval/eval.h>");
     cg_printf("\n");
   } else {
     cg_printf("\n");
     cg_printInclude("<runtime/base/hphp.h>");
+    cg_printInclude("<runtime/base/runtime_option.h>");
     if (includeGlobalVars) {
       cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
     }
@@ -1643,7 +1650,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
 
     cg.printSection("Function Invoke Table");
     if (system) {
-      outputCPPJumpTable(cg, ar);
+      outputCPPJumpTable(cg, ar); // ::invoke[_builtin]
       outputCPPEvalInvokeTable(cg, ar);
     } else {
       if (m_funcTableSize > 0) {
@@ -1719,6 +1726,15 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
 
     outputCPPDynamicTablesHeader(cg, true, false);
     cg.printSection("Class Invoke Tables");
+    if (!system) MethodSlot::emitMethodSlot(cg, ar); // FMC broken for IDL tests
+    else {
+      // make available to user apps and tests, temporary
+      cg_printf(FMC);
+      cg_printf("bool RuntimeOption::FastMethodCall = true;\n");
+      cg_printf("#else\n");
+      cg_printf("bool RuntimeOption::FastMethodCall = false;\n");
+      cg_printf("#endif\n");
+    }
     vector<const char*> classes;
     ClassScopePtr cls;
     StringToClassScopePtrVecMap classScopes;
@@ -1741,6 +1757,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
       }
     }
     if (system) {
+
       BOOST_FOREACH(tie(n, cls), m_systemClasses) {
         if (!cls->isInterface() && !cls->isSepExtension()) {
           classes.push_back(cls->getName().c_str());
@@ -2331,8 +2348,7 @@ void AnalysisResult::outputCPPGlobalImplementations(CodeGenerator &cg) {
          m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
     if (iter->second[0]->isRedeclaring()) {
       const char *name = iter->first.c_str();
-      cg_indentBegin("Variant invoke_failed_%s(CArrRef params) {\n",
-                     name);
+      cg_indentBegin("Variant invoke_failed_%s(CArrRef params) {\n", name);
       cg_printf("return invoke_failed(\"%s\", params, -1);\n", name);
       cg_indentEnd("}\n");
     }
@@ -3463,6 +3479,7 @@ void AnalysisResult::outputCPPSepExtensionIncludes(CodeGenerator &cg) {
 
 void AnalysisResult::outputCPPSepExtensionImpl(const std::string &filename) {
   AnalysisResultPtr ar = shared_from_this();
+  MethodSlot::genMethodSlot(ar);
 
   ofstream fTable(filename.c_str());
   CodeGenerator cg(&fTable, CodeGenerator::SystemCPP);
@@ -3491,4 +3508,349 @@ void AnalysisResult::outputCPPSepExtensionImpl(const std::string &filename) {
 
   cg.namespaceEnd();
   fTable.close();
+}
+
+//
+// Map every method to a (callIndex, class_id) pair
+#define DEBUG_GMS 0
+
+namespace HPHP {
+
+ostream & operator<< (ostream &cout, const MethodSet& s){
+  cout << '{' ;
+  BOOST_FOREACH (int i, s)  cout << i << ',';
+  return cout << '}';
+}
+
+ostream& MethodSlot::operator<<(ostream& cout) const {
+  return cout << "MethodSlot{" << setw(20) << m_name
+    << setw(5) << m_serialNum << ','
+    << setw(4) << m_callIndex << ':' <<  m_overloadIndex
+    << " (" << m_coalesces << ") "
+    << conflictingMethods << "}";
+}
+
+std::string MethodSlot::runObj() const {
+  if (isError()) {
+    // statically named method does not exist,
+    // caller must detect for cgenerating correct call
+    return "MethodIndex.fail()" ;
+  }
+  boost::format ret ("MethodIndex(%d, %d) /* %s */ ") ;
+  ret % m_callIndex % m_overloadIndex % m_name;
+  return ret.str();
+}
+
+std::string MethodSlot::runObjParam() const {
+  if (isError()) return "";
+  return std::string("/* ")+m_name+" */ " + runObj() + ", ";
+}
+
+// Used for internal generation that mus succeed
+const MethodSlot*
+AnalysisResult::getMethodSlot(const std::string & mname) const {
+  StringToMethodSlotMap::const_iterator method =
+    stringToMethodSlotMap.find(mname);
+  assert (method != stringToMethodSlotMap.end()) ;
+  return &((*method).second);
+}
+
+// Used for a user-provided method name that might not exist,
+// MethodSlot::runObj will return a call that creates this at runtime.
+const MethodSlot*
+AnalysisResult::getOrAddMethodSlot(const std::string & mname) {
+  StringToMethodSlotMap::const_iterator method =
+    stringToMethodSlotMap.find(mname);
+  if (method == stringToMethodSlotMap.end()) {
+    //Logger::Warning ("Method %s referenced but not defined.", mname.c_str());
+    getCodeError()->record(CodeError::UndefinedMethod, ConstructPtr(),
+                           ConstructPtr(), mname.c_str());
+    pair<StringToMethodSlotMap::iterator, bool> ret =
+      stringToMethodSlotMap.insert(
+          (pair<string, MethodSlot>(mname, MethodSlot(mname, 0))));
+    method = ret.first;
+  };
+  return &((*method).second);
+}
+
+// Used only during table gen
+MethodSlot*
+AnalysisResult::getMethodSlotUpdate(const std::string & mname) {
+  StringToMethodSlotMap::iterator method = stringToMethodSlotMap.find(mname);
+  assert (method != stringToMethodSlotMap.end()) ;
+  return &((*method).second);
+}
+
+ostream& operator << (ostream &cout, const MethodSlot& m) {
+  return m.operator<<(cout);
+}
+
+ostream& operator<<(ostream & cout, const StringToMethodSlotMap & map) {
+  cout << "StringToMethodSlotMap = {" << endl;
+  BOOST_FOREACH(StringToMethodSlotMap::value_type slot,  map) {
+    cout << slot.second << endl;
+  }
+  return cout << '}' << endl ;
+}
+
+ostream& operator<<(ostream & cout, const CallIndexVectSet & civs) {
+  for(unsigned int i = 0; i < civs.size(); ++i) {
+    cout << i << ':' << civs[i] << endl;
+  }
+  return cout;
+}
+
+struct CoalesceOrder {
+  bool operator()(const MethodSlot *x, const MethodSlot *y) const {
+    return *x > y;
+  }
+};
+
+const MethodSlot* errorMethodSlot(NULL);
+
+void MethodSlot::genMethodSlot(AnalysisResultPtr ar) {
+
+struct Nested {
+static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
+                                        ClassScopePtrVec & cspv) {
+  ClassScopePtr cls;
+  BOOST_FOREACH(cls, cspv) {
+    // const StringToFunctionScopePtrVecMap & funcs = cls->getFunctions();
+    StringToFunctionScopePtrMap funcs;
+    cls->collectMethods(ar, funcs);
+    vector<MethodSlot *> methodsProcessed;
+    methodsProcessed.reserve(funcs.size());
+    string mname;
+    BOOST_FOREACH(tie(mname, tuples::ignore), funcs) {
+#     if DEBUG_GMS
+      printf ("process %s::%s\n", cls->getName().c_str(), mname.c_str());
+#     endif
+      StringToMethodSlotMap::iterator name_it
+        (ar->stringToMethodSlotMap.find(mname));
+      if (name_it == ar->stringToMethodSlotMap.end() ) {
+        unsigned int serialNum = ar->stringToMethodSlotMap.size() + 1;
+        pair <StringToMethodSlotMap::iterator, bool> ret =
+          ar->stringToMethodSlotMap.insert(
+              (pair<string, MethodSlot>(mname, MethodSlot(mname, serialNum))));
+        name_it = ret.first;
+      }
+      (*name_it).second.m_coalesces++;
+
+      // build the interference graph
+      MethodSlot* currentMethodSlot(ar->getMethodSlotUpdate(mname));
+      BOOST_FOREACH(MethodSlot * prevMethodSlot, methodsProcessed) {
+        currentMethodSlot->conflictingMethods.insert(
+          prevMethodSlot->m_serialNum);
+        prevMethodSlot->conflictingMethods.insert
+          (currentMethodSlot->m_serialNum);
+      }
+      methodsProcessed.push_back(currentMethodSlot);
+    }
+  }
+}
+};
+
+  errorMethodSlot = new MethodSlot("**ERROR**", 0);
+  // consider: class Foo { fun1; } class Bar { fun2; fun4; }
+  // class Baz { fun1; fun2; }  class Qux { fun1; fun3; }
+  // need a conflict graph to be sure fun1 and fun2 have different m_callIndex
+  // callIndex 1: fun1, fun4
+  // callIndex 2: fun2, fun3
+
+  // build a global index of all methods declared anywhere
+  // and an interference graph of methods names that must have a different
+  // callIndex
+
+  CallIndexVectSet callIndexVectSet; // set of methods at this callIndex
+
+  ar->stringToMethodSlotMap.clear();
+  string cname;
+  ClassScopePtr cls;
+
+  ClassScopePtrVec clsuser, clssystem;
+  {
+    unsigned int size = 0;
+    ClassScopePtrVec cspv;
+    BOOST_FOREACH(tie(cname, cspv), ar->m_classDecs) size += cspv.size();
+    clsuser.reserve(size);
+    BOOST_FOREACH(tie(cname, cspv), ar->m_classDecs) {
+      BOOST_FOREACH(cls, cspv) {
+        if (Option::SystemGen) {
+          // on a system gen, some classes, e.g. serializable
+          // look like user user classes
+          clssystem.push_back(cls);
+        } else {
+          clsuser.push_back(cls);
+        }
+      }
+    }
+    clssystem.reserve(ar->m_systemClasses.size());
+    BOOST_FOREACH(tie(cname, cls), ar->m_systemClasses) {
+      clssystem.push_back(cls);
+    }
+  }
+
+  // must have the same order when generating system files
+  // as when compiling user code, to get the same methodIndex's
+  sort(clssystem.begin(), clssystem.end(), bind(std::less<std::string>(),
+                             bind(&ClassScope::getOriginalName, _1),
+                             bind(&ClassScope::getOriginalName, _2) ));
+
+  Nested::buildMethodSlotsAndConflict(ar, clssystem);
+  Nested::buildMethodSlotsAndConflict(ar, clsuser);
+
+  // assign m_callIndex & m_overloadIndex IDs for system classes.
+  // The system classes are generated before the user program
+  // into system/gen/*. When the user method invoke is generated later, it
+  // must agree with that previously generated system class conflict graph.
+  // There is no way to know ahead of time what user methods might
+  // induce conflicts in the system classes.  Therefore, the system
+  // methods must be laid out without any coalescing, and must be done
+  // independent of user methods.
+  // This is suboptimal because system class o_invoke's are no longer
+  // compacted and no longer have jump-table switch statements.
+  // Perhaps the MethodIndex range for system classes and user classes
+  // could be split (e.g < 1000 for system), then the parent invoke
+  // from a user class that derives from a system class would need a
+  // separate methodIndexLookup to go the system::foo instead of
+  // userclass::foo.  Direct invokes of system methods could start
+  // with the right methodIndexLookup
+  BOOST_FOREACH(cls, clssystem) {
+    StringToFunctionScopePtrMap funcs;
+    cls->collectMethods(ar, funcs);
+    string mname;
+
+    // assign the unassigned ones
+    BOOST_FOREACH(tie(mname, tuples::ignore), funcs) {
+      MethodSlot * methodSlot = ar->getMethodSlotUpdate(mname);
+      // already assigned from a different class
+      if (methodSlot->m_callIndex) continue;
+
+      unsigned int callIndex = callIndexVectSet.size() + 1;
+      callIndexVectSet.resize(callIndex);
+      MethodSet& methodsAtCallIndex = callIndexVectSet.back();
+      methodsAtCallIndex.insert(methodSlot->m_serialNum);
+      methodSlot->m_overloadIndex = 1;
+      methodSlot->m_callIndex = callIndex;
+      ++callIndex;
+    }
+  }
+
+  unsigned int maxSystemMethodCallIndex = callIndexVectSet.size();
+
+  // assign m_callIndex & m_overloadIndex IDs for user classes
+  map<string, unsigned int> classMax, classMin;
+  BOOST_FOREACH(cls, clsuser) {
+    StringToFunctionScopePtrMap funcs;
+    cls->collectMethods(ar, funcs);
+    vector<MethodSlot*> classMethods;
+    classMethods.reserve(funcs.size());
+    string mname;
+    BOOST_FOREACH(tie(mname, tuples::ignore), funcs) {
+      classMethods.push_back(ar->getMethodSlotUpdate(mname));
+    }
+
+    // number most conflicted first
+    sort(classMethods.begin(), classMethods.end(), CoalesceOrder());
+
+    // min previously assigned callIndex;
+    unsigned int callIndex = maxSystemMethodCallIndex + 1;
+    // FMC: callIndex could still start at 1, mixing user methods
+    // with pre-assigned system method call indices, need to
+    // experiment with this.
+    BOOST_FOREACH (MethodSlot* method, classMethods) {
+      if (method->m_callIndex && method->m_callIndex>maxSystemMethodCallIndex) {
+        callIndex = std::min(callIndex, method->m_callIndex);
+      }
+    }
+    // assign the unassigned ones
+    BOOST_FOREACH (MethodSlot* methodSlot, classMethods) {
+      // already assigned from a different class
+      if (methodSlot->m_callIndex) continue;
+
+      MethodSet& conflictingMethods (methodSlot->conflictingMethods);
+      // start scanning up for a unconflicted callIndex
+      MethodSet* methodsAtCallIndex;
+      for (;callIndex <= callIndexVectSet.size(); ++callIndex) {
+        methodsAtCallIndex = &callIndexVectSet[callIndex-1];
+        bool conflict = false;
+        // intersect methods used at this index with conflicting methods
+        for (MethodSet::iterator i = methodsAtCallIndex->begin(),
+            j = conflictingMethods.begin();
+            !conflict && i != methodsAtCallIndex->end()
+            && j != conflictingMethods.end(); ) {
+          if (*i == *j) conflict = true;
+          else if (*i < *j) ++i;
+          else ++j;
+        }
+        if (!conflict) break;
+        // e.g. "Qux::fun3"->conflictingMethods = {"fun1"}
+        // callIndex==1 is {"fun1", "fun4"},
+        // so fun3 can't have callIndex==1
+      }
+      if (callIndex >= callIndexVectSet.size()) {
+        callIndexVectSet.resize(callIndex);
+        methodsAtCallIndex = &callIndexVectSet[callIndex-1];
+      }
+      methodsAtCallIndex->insert(methodSlot->m_serialNum);
+      methodSlot->m_overloadIndex = methodsAtCallIndex->size();
+      methodSlot->m_callIndex = callIndex;
+      ++callIndex;
+
+#     if DEBUG_GMS
+      unsigned int & t (classMax[cls->getOriginalName()]) ;
+      if (t < methodSlot->m_callIndex) t = methodSlot->m_callIndex;
+      unsigned int & t2 (classMin[cls->getOriginalName()]) ;
+      if (t2 == 0 || t2 > methodSlot->m_callIndex) t2 = methodSlot->m_callIndex;
+#     endif
+    }
+  }
+# if DEBUG_GMS
+  cout << "stringToMethodSlotMap" << endl;
+  cout << ar->stringToMethodSlotMap;
+  cout << "callIndexVectSet" << endl;
+  cout << callIndexVectSet;
+
+  cout << "max indices : number of functions" << endl;
+  ClassScopePtrVec clsvec;
+  clsvec.resize(clsuser.size()+clssystem.size());
+  set_union(clsuser.begin(), clsuser.end(),
+            clssystem.begin(), clssystem.end(),
+            clsvec.begin());
+  BOOST_FOREACH(cls, clsvec) {
+    cout << setw(3) << classMax[cls->getOriginalName()]
+         - classMin[cls->getOriginalName()]+1
+      << ' ' << cls->getFunctions().size() << ' ' <<  cls->getOriginalName()
+      << " {" ;
+    string name;
+    BOOST_FOREACH(tie(name, tuples::ignore), cls->getFunctions()) {
+      cout << name << ", ";
+    }
+    cout << "}" << endl;
+  }
+# endif
+}
+void MethodSlot::emitMethodSlot(CodeGenerator &cg, AnalysisResultPtr ar) {
+  cg_printf("extern MethodIndexMap methodIndexMap;\n");
+  cg_printf("#define M(x, y) MethodIndex(x, y)\n");
+  cg_printf("extern const MethodIndex methodIndexMapInit[];\n");
+  cg_printf("const MethodIndex methodIndexMapInit[]= {");
+  int linebreak = 0;
+  BOOST_FOREACH(StringToMethodSlotMap::value_type slot,
+                ar->stringToMethodSlotMap) {
+    cg_printf("M(%d,%d),%s", slot.second.getCallIndex(),
+              slot.second.getOverloadIndex(),
+              ( (++linebreak & 3) == 0)?"\n":"");
+  }
+  cg_printf("MethodIndex(0, 0)};\n");
+  cg_printf("#undef M\n");
+  cg_printf("const char * methodIndexMapInitName[]= {");
+  linebreak = 0;
+  BOOST_FOREACH(StringToMethodSlotMap::value_type slot,
+                ar->stringToMethodSlotMap) {
+    cg_printf("\"%s\",%s", slot.first.c_str(),
+        ( (++linebreak & 3) == 0)?"\n":"");
+  }
+  cg_printf("NULL};\n");
+}
 }

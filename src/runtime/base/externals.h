@@ -34,30 +34,41 @@ namespace HPHP {
 /**
  * Invoking an arbitrary user-defined function.
  */
-extern Variant invoke(const char *function, CArrRef params, int64 hash = -1,
+extern Variant invoke(const char *function, CArrRef params,
+                      int64 hash = -1,
                       bool tryInterp = true, bool fatal = true);
 
 /**
  * Invoking an arbitrary system function. This is the fallback for invoke.
  */
-extern Variant invoke_builtin(const char *s, const Array &params, int64 hash,
-                              bool fatal);
+extern Variant invoke_builtin(const char* s, const Array &params,
+                              int64 hash, bool fatal);
 
 /**
  * Invoking an arbitrary static method.
  */
-extern Variant invoke_static_method(const char *s, const char *method,
+extern Variant invoke_static_method(const char* s, MethodIndex,
+                                    const char* method,
                                     const Array &params, bool fatal = true);
+extern Variant invoke_static_method_mil(const char* s,
+                                        const char* method,
+                                        const Array &params, bool fatal = true);
 /**
  * defined in builtin_functions.cpp, used for "static::" resolution
  */
-Variant invoke_static_method_bind(CStrRef s, const char *method,
+Variant invoke_static_method_bind(CStrRef s, MethodIndex,
+                                  const char* method,
                                   const Array &params, bool fatal = true);
+Variant invoke_static_method_bind_mil(CStrRef s,
+                                      const char* method,
+                                      const Array &params, bool fatal = true);
 
 /**
  * Invoking an arbitrary system static method.
  */
-extern Variant invoke_builtin_static_method(const char *s, const char *method,
+extern Variant invoke_builtin_static_method(const char *s,
+                                            MethodIndex methodIndex,
+                                            const char* method,
                                             const Array &params, bool fatal);
 
 /**

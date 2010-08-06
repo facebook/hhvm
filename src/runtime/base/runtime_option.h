@@ -302,6 +302,8 @@ public:
   // preg stack depth options
   static int PregBacktraceLimit;
   static int PregRecursionLimit;
+
+  static bool FastMethodCall;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

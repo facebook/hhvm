@@ -307,6 +307,7 @@ public:
   static bool AutoInline;
 
   static bool FlAnnotate; // annotate emitted code withe compiler file-line info
+  static bool SystemGen; // -t cpp -f sys
 private:
   /**
    * Directory that has system HPHP files for loading builtin classes, etc.

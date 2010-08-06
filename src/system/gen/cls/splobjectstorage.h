@@ -37,9 +37,9 @@ class c_splobjectstorage : public ExtObjectData {
   // DECLARE_STATIC_PROP_OPS
   public:
   static Variant os_getInit(const char *s, int64 hash);
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_splobjectstorage 1
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splobjectstorage 1
-  #define OMIT_JUMP_TABLE_CLASS_CONSTANT_splobjectstorage 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_GET_splobjectstorage 1
+#define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splobjectstorage 1
+#define OMIT_JUMP_TABLE_CLASS_CONSTANT_splobjectstorage 1
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
@@ -64,16 +64,16 @@ class c_splobjectstorage : public ExtObjectData {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splobjectstorage 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splobjectstorage 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splobjectstorage 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splobjectstorage 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splobjectstorage 1
+#define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splobjectstorage 1
+#define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splobjectstorage 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splobjectstorage 1
 
   // DECLARE_COMMON_INVOKE
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splobjectstorage 1
-  virtual Variant o_invoke(const char *s, CArrRef ps, int64 h,
+#define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splobjectstorage 1
+  virtual Variant o_invoke(MethodIndex methodIndex, const char *s,CArrRef ps, int64 h,
                            bool f = true);
-  virtual Variant o_invoke_few_args(const char *s, int64 h,
+  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 h,
                                     int count,
                                     INVOKE_FEW_ARGS_DECL_ARGS);
 

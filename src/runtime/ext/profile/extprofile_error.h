@@ -60,7 +60,8 @@ inline bool x_restore_exception_handler() {
   return f_restore_exception_handler();
 }
 
-inline Variant x_set_error_handler(CVarRef error_handler, int error_types = k_E_ALL) {
+inline Variant x_set_error_handler(CVarRef error_handler,
+                                   int error_types = k_E_ALL) {
   FUNCTION_INJECTION_BUILTIN(set_error_handler);
   return f_set_error_handler(error_handler, error_types);
 }

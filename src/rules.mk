@@ -263,6 +263,10 @@ ifndef NO_WERROR
 CXXFLAGS += -Werror
 endif
 
+ifdef FMCGEN
+CXXFLAGS += -DFMCGEN
+endif
+
 ifndef NO_DEBUG_SYMBOL
 DEBUG_SYMBOL = -g
 else

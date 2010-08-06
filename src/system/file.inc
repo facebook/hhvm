@@ -81,7 +81,7 @@
 "disk_free_space", T(Variant), S(0), "directory", T(String), NULL, S(0), NULL, S(0), 
 "diskfreespace", T(Variant), S(0), "directory", T(String), NULL, S(0), NULL, S(0), 
 "disk_total_space", T(Variant), S(0), "directory", T(String), NULL, S(0), NULL, S(0), 
-"mkdir", T(Boolean), S(0), "pathname", T(String), NULL, S(0), "mode", T(Int64), "0777", S(0), "recursive", T(Boolean), "false", S(0), "context", T(Object), "null_object", S(0), NULL, S(0), 
+"mkdir", T(Boolean), S(0), "pathname", T(String), NULL, S(0), "mode", T(Int64), "0", S(0), "recursive", T(Boolean), "false", S(0), "context", T(Object), "null_object", S(0), NULL, S(0), 
 "rmdir", T(Boolean), S(0), "dirname", T(String), NULL, S(0), "context", T(Object), "null_object", S(0), NULL, S(0), 
 "dirname", T(String), S(0), "path", T(String), NULL, S(0), NULL, S(0), 
 "getcwd", T(Variant), S(0), NULL, S(0), 

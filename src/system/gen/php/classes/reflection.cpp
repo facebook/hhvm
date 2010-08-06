@@ -174,8 +174,92 @@ void c_reflectionfunctionabstract::cloneSet(c_reflectionfunctionabstract *clone)
   ObjectData::cloneSet(clone);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunctionabstract
-Variant c_reflectionfunctionabstract::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionfunctionabstract::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x75:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        return (t_getnumberofrequiredparameters());
+      }
+      break;
+    case 0x4b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        return (t_isuserdefined());
+      }
+      break;
+    case 0x76:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        return (t_getnumberofparameters());
+      }
+      break;
+    case 0x50:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        return (t_getendline());
+      }
+      break;
+    case 0x77:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        return (t_getstaticvariables());
+      }
+      break;
+    case 0x78:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        return (t_getparameters());
+      }
+      break;
+    case 0x7a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        return (t_returnsreference());
+      }
+      break;
+    case 0x37:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        return (t_getfilename());
+      }
+      break;
+    case 0x5d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        return (t_getstartline());
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x7c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
+        return (t_getclosure());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    case 0x6d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        return (t_isinternal());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
@@ -253,11 +337,96 @@ Variant c_reflectionfunctionabstract::o_invoke(const char *s, CArrRef params, in
     default:
       break;
   }
-  return c_ObjectData::o_invoke(s, params, hash, fatal);
+#endif
+  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunctionabstract
-Variant c_reflectionfunctionabstract::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+Variant c_reflectionfunctionabstract::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x75:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        return (t_getnumberofrequiredparameters());
+      }
+      break;
+    case 0x4b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        return (t_isuserdefined());
+      }
+      break;
+    case 0x76:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        return (t_getnumberofparameters());
+      }
+      break;
+    case 0x50:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        return (t_getendline());
+      }
+      break;
+    case 0x77:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        return (t_getstaticvariables());
+      }
+      break;
+    case 0x78:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        return (t_getparameters());
+      }
+      break;
+    case 0x7a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        return (t_returnsreference());
+      }
+      break;
+    case 0x37:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        return (t_getfilename());
+      }
+      break;
+    case 0x5d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        return (t_getstartline());
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x7c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
+        return (t_getclosure());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    case 0x6d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        return (t_isinternal());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
@@ -335,16 +504,209 @@ Variant c_reflectionfunctionabstract::o_invoke_few_args(const char *s, int64 has
     default:
       break;
   }
-  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+#endif
+  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionfunctionabstract
-Variant c_reflectionfunctionabstract::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionfunctionabstract::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
+#ifdef FMCGEN
+#else
+#endif
+  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionfunctionabstract
 Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x75:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getnumberofrequiredparameters());
+      }
+      break;
+    case 0x4b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isuserdefined());
+      }
+      break;
+    case 0x76:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getnumberofparameters());
+      }
+      break;
+    case 0x50:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getendline());
+      }
+      break;
+    case 0x77:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getstaticvariables());
+      }
+      break;
+    case 0x78:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getparameters());
+      }
+      break;
+    case 0x7a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_returnsreference());
+      }
+      break;
+    case 0x37:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getfilename());
+      }
+      break;
+    case 0x5d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getstartline());
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x7c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getclosure());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getname());
+      }
+      break;
+    case 0x6d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isinternal());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
@@ -526,9 +888,14 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
     default:
       break;
   }
+#endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionfunctionabstract::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+#else
+#endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 struct ObjectStaticCallbacks cw_reflectionfunctionabstract = {
@@ -647,7 +1014,7 @@ int64 c_reflectionfunctionabstract::t_getnumberofrequiredparameters() {
       iter4.second(v_param);
       v_name = iter4.first();
       {
-        if (toBoolean(v_param. BIND_CLASS_DOT o_invoke_few_args("isOptional", 0x2D6EF48BBAB22735LL, 0))) {
+        if (toBoolean(v_param. BIND_CLASS_DOT o_invoke_few_args(/* isoptional */ MethodIndex(137, 1) /* isoptional */ ,  "isOptional", 0x2D6EF48BBAB22735LL, 0))) {
           {
             break;
           }
@@ -795,8 +1162,256 @@ void c_reflectionobject::cloneSet(c_reflectionobject *clone) {
   c_reflectionclass::cloneSet(clone);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionobject
-Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x48:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
+        if (count <= 0) return (t_getmethods());
+        return (t_getmethods(params[0]));
+      }
+      break;
+    case 0x49:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
+        return (t_isiterateable());
+      }
+      break;
+    case 0x4a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
+        if (count <= 1) return (t_getstaticpropertyvalue(params[0]));
+        return (t_getstaticpropertyvalue(params[0], params[1]));
+      }
+      break;
+    case 0x4b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
+        return (t_isuserdefined());
+      }
+      break;
+    case 0x4c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count <= 0) return (t_newinstance(count));
+        return (t_newinstance(count,params.slice(0, count - 0, false)));
+      }
+      break;
+    case 0x4d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
+        return (t_getextension());
+      }
+      break;
+    case 0x4e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
+        return (t_getconstructor());
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x4f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
+        return (t_newinstanceargs(params[0]));
+      }
+      break;
+    case 0x50:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
+        return (t_getendline());
+      }
+      break;
+    case 0x52:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
+        return (t_isinstance(params[0]));
+      }
+      break;
+    case 0x51:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
+        return (t_hasmethod(params[0]));
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+        return (t___construct(params[0]), null);
+      }
+      break;
+    case 0x53:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
+        return (t_isfinal());
+      }
+      break;
+    case 0x54:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
+        return (t_getmodifiers());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
+        return (ti_export(o_getClassName(), params[0], params[1]));
+      }
+      break;
+    case 0x56:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
+        return (t_getproperties());
+      }
+      break;
+    case 0x57:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
+        return (t_hasconstant(params[0]));
+      }
+      break;
+    case 0x58:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
+        return (t_getmethod(params[0]));
+      }
+      break;
+    case 0x59:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
+        return (t_getextensionname());
+      }
+      break;
+    case 0x5a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
+        return (t_getparentclass());
+      }
+      break;
+    case 0x37:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
+        return (t_getfilename());
+      }
+      break;
+    case 0x5b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
+        return (t_implementsinterface(params[0]));
+      }
+      break;
+    case 0x5c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
+        return (t_getinterfacenames());
+      }
+      break;
+    case 0x5e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
+        return (t_getconstant(params[0]));
+      }
+      break;
+    case 0x5d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
+        return (t_getstartline());
+      }
+      break;
+    case 0x5f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
+        return (t_getconstants());
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x61:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
+        return (t_isinterface());
+      }
+      break;
+    case 0x62:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
+        return (t_issubclassof(params[0]));
+      }
+      break;
+    case 0x63:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
+        return (t_hasproperty(params[0]));
+      }
+      break;
+    case 0x65:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
+        return (t_getstaticproperties());
+      }
+      break;
+    case 0x66:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
+        return (t_getdefaultproperties());
+      }
+      break;
+    case 0x67:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
+        return (t_setstaticpropertyvalue(params[0], params[1]), null);
+      }
+      break;
+    case 0x68:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
+        return (t_isinstantiable());
+      }
+      break;
+    case 0x69:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
+        return (t_getinterfaces());
+      }
+      break;
+    case 0x6b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
+        return (t_isabstract());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    case 0x6e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
+        return (t_getproperty(params[0]));
+      }
+      break;
+    case 0x6d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
+        return (t_isinternal());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 4:
@@ -1114,11 +1729,267 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
     default:
       break;
   }
-  return c_reflectionclass::o_invoke(s, params, hash, fatal);
+#endif
+  return c_reflectionclass::o_invoke(methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionobject
-Variant c_reflectionobject::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+Variant c_reflectionobject::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x48:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
+        if (count <= 0) return (t_getmethods());
+        return (t_getmethods(a0));
+      }
+      break;
+    case 0x49:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
+        return (t_isiterateable());
+      }
+      break;
+    case 0x4a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
+        if (count <= 1) return (t_getstaticpropertyvalue(a0));
+        return (t_getstaticpropertyvalue(a0, a1));
+      }
+      break;
+    case 0x4b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
+        return (t_isuserdefined());
+      }
+      break;
+    case 0x4c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count <= 0) return (t_newinstance(count));
+        Array params;
+        if (count >= 1) params.append(a0);
+        if (count >= 2) params.append(a1);
+        if (count >= 3) params.append(a2);
+        if (count >= 4) params.append(a3);
+        if (count >= 5) params.append(a4);
+        if (count >= 6) params.append(a5);
+        return (t_newinstance(count,params));
+      }
+      break;
+    case 0x4d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
+        return (t_getextension());
+      }
+      break;
+    case 0x4e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
+        return (t_getconstructor());
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x4f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
+        return (t_newinstanceargs(a0));
+      }
+      break;
+    case 0x50:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
+        return (t_getendline());
+      }
+      break;
+    case 0x52:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
+        return (t_isinstance(a0));
+      }
+      break;
+    case 0x51:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
+        return (t_hasmethod(a0));
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+        return (t___construct(a0), null);
+      }
+      break;
+    case 0x53:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
+        return (t_isfinal());
+      }
+      break;
+    case 0x54:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
+        return (t_getmodifiers());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
+        return (ti_export(o_getClassName(), a0, a1));
+      }
+      break;
+    case 0x56:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
+        return (t_getproperties());
+      }
+      break;
+    case 0x57:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
+        return (t_hasconstant(a0));
+      }
+      break;
+    case 0x58:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
+        return (t_getmethod(a0));
+      }
+      break;
+    case 0x59:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
+        return (t_getextensionname());
+      }
+      break;
+    case 0x5a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
+        return (t_getparentclass());
+      }
+      break;
+    case 0x37:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
+        return (t_getfilename());
+      }
+      break;
+    case 0x5b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
+        return (t_implementsinterface(a0));
+      }
+      break;
+    case 0x5c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
+        return (t_getinterfacenames());
+      }
+      break;
+    case 0x5e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
+        return (t_getconstant(a0));
+      }
+      break;
+    case 0x5d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
+        return (t_getstartline());
+      }
+      break;
+    case 0x5f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
+        return (t_getconstants());
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x61:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
+        return (t_isinterface());
+      }
+      break;
+    case 0x62:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
+        return (t_issubclassof(a0));
+      }
+      break;
+    case 0x63:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
+        return (t_hasproperty(a0));
+      }
+      break;
+    case 0x65:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
+        return (t_getstaticproperties());
+      }
+      break;
+    case 0x66:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
+        return (t_getdefaultproperties());
+      }
+      break;
+    case 0x67:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
+        return (t_setstaticpropertyvalue(a0, a1), null);
+      }
+      break;
+    case 0x68:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
+        return (t_isinstantiable());
+      }
+      break;
+    case 0x69:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
+        return (t_getinterfaces());
+      }
+      break;
+    case 0x6b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
+        return (t_isabstract());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    case 0x6e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
+        return (t_getproperty(a0));
+      }
+      break;
+    case 0x6d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
+        return (t_isinternal());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 4:
@@ -1365,12 +2236,25 @@ Variant c_reflectionobject::o_invoke_few_args(const char *s, int64 hash, int cou
     default:
       break;
   }
-  return c_reflectionclass::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+#endif
+  return c_reflectionclass::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionobject
-Variant c_reflectionobject::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionobject::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
+        return (ti_export(c, params[0], params[1]));
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
@@ -1388,10 +2272,653 @@ Variant c_reflectionobject::os_invoke(const char *c, const char *s, CArrRef para
     default:
       break;
   }
-  return c_reflectionclass::os_invoke(c, s, params, hash, fatal);
+#endif
+  return c_reflectionclass::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionobject
 Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x48:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 0) return (t_getmethods());
+        else return (t_getmethods(a0));
+      }
+      break;
+    case 0x49:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isiterateable());
+      }
+      break;
+    case 0x4a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 1) return (t_getstaticpropertyvalue(a0));
+        else return (t_getstaticpropertyvalue(a0, a1));
+      }
+      break;
+    case 0x4b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isuserdefined());
+      }
+      break;
+    case 0x4c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 0) return (t_newinstance(count));
+        return (t_newinstance(count,vargs));
+      }
+      break;
+    case 0x4d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getextension());
+      }
+      break;
+    case 0x4e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getconstructor());
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 0x4f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_newinstanceargs(a0));
+      }
+      break;
+    case 0x50:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getendline());
+      }
+      break;
+    case 0x52:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isinstance(a0));
+      }
+      break;
+    case 0x51:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_hasmethod(a0));
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(a0), null);
+      }
+      break;
+    case 0x53:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isfinal());
+      }
+      break;
+    case 0x54:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmodifiers());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(o_getClassName(), a0, a1));
+      }
+      break;
+    case 0x56:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getproperties());
+      }
+      break;
+    case 0x57:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_hasconstant(a0));
+      }
+      break;
+    case 0x58:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmethod(a0));
+      }
+      break;
+    case 0x59:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getextensionname());
+      }
+      break;
+    case 0x5a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getparentclass());
+      }
+      break;
+    case 0x37:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getfilename());
+      }
+      break;
+    case 0x5b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_implementsinterface(a0));
+      }
+      break;
+    case 0x5c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getinterfacenames());
+      }
+      break;
+    case 0x5e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getconstant(a0));
+      }
+      break;
+    case 0x5d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getstartline());
+      }
+      break;
+    case 0x5f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getconstants());
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x61:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isinterface());
+      }
+      break;
+    case 0x62:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_issubclassof(a0));
+      }
+      break;
+    case 0x63:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_hasproperty(a0));
+      }
+      break;
+    case 0x65:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getstaticproperties());
+      }
+      break;
+    case 0x66:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdefaultproperties());
+      }
+      break;
+    case 0x67:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_setstaticpropertyvalue(a0, a1), null);
+      }
+      break;
+    case 0x68:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isinstantiable());
+      }
+      break;
+    case 0x69:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getinterfaces());
+      }
+      break;
+    case 0x6b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isabstract());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getname());
+      }
+      break;
+    case 0x6e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getproperty(a0));
+      }
+      break;
+    case 0x6d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isinternal());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 4:
@@ -2024,9 +3551,39 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     default:
       break;
   }
+#endif
   return c_reflectionclass::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionobject::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(c, a0, a1));
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
@@ -2054,6 +3611,7 @@ Variant c_reflectionobject::os_invoke_from_eval(const char *c, const char *s, Ev
     default:
       break;
   }
+#endif
   return c_reflectionclass::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 struct ObjectStaticCallbacks cw_reflectionobject = {
@@ -2186,8 +3744,70 @@ void c_reflectionexception::cloneSet(c_reflectionexception *clone) {
   c_exception::cloneSet(clone);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionexception
-Variant c_reflectionexception::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x19:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count <= 0) return (t___construct(), null);
+        if (count == 1) return (t___construct(params[0]), null);
+        return (t___construct(params[0], params[1]), null);
+      }
+      break;
+    case 0x1b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 0x1c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        return (t_getline());
+      }
+      break;
+    case 0x1d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
+      }
+      break;
+    case 0x1e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        return (t_getfile());
+      }
+      break;
+    case 0x1f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        return (t_gettraceasstring());
+      }
+      break;
+    case 0x20:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        return (t_gettrace());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
@@ -2255,11 +3875,74 @@ Variant c_reflectionexception::o_invoke(const char *s, CArrRef params, int64 has
     default:
       break;
   }
-  return c_ObjectData::o_invoke(s, params, hash, fatal);
+#endif
+  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionexception
-Variant c_reflectionexception::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+Variant c_reflectionexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x19:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        return (t_getmessage());
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count <= 0) return (t___construct(), null);
+        if (count == 1) return (t___construct(a0), null);
+        return (t___construct(a0, a1), null);
+      }
+      break;
+    case 0x1b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        return (t_getcode());
+      }
+      break;
+    case 0x1c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        return (t_getline());
+      }
+      break;
+    case 0x1d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        return (t___init__(), null);
+      }
+      break;
+    case 0x1e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        return (t_getfile());
+      }
+      break;
+    case 0x1f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        return (t_gettraceasstring());
+      }
+      break;
+    case 0x20:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        return (t_gettrace());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
@@ -2321,16 +4004,163 @@ Variant c_reflectionexception::o_invoke_few_args(const char *s, int64 hash, int 
     default:
       break;
   }
-  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+#endif
+  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionexception
-Variant c_reflectionexception::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
+#ifdef FMCGEN
+#else
+#endif
+  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionexception
 Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x19:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 0) return (t___construct(), null);
+        else if (count == 1) return (t___construct(a0), null);
+        else return (t___construct(a0, a1), null);
+      }
+      break;
+    case 0x1b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 0x1c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getline());
+      }
+      break;
+    case 0x1d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___init__(), null);
+      }
+      break;
+    case 0x1e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getfile());
+      }
+      break;
+    case 0x1f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_gettraceasstring());
+      }
+      break;
+    case 0x20:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_gettrace());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
@@ -2472,9 +4302,14 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
     default:
       break;
   }
+#endif
   return c_exception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+#else
+#endif
   return c_exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 struct ObjectStaticCallbacks cw_reflectionexception = {
@@ -2775,8 +4610,268 @@ void c_reflectionclass::cloneSet(c_reflectionclass *clone) {
   ObjectData::cloneSet(clone);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionclass
-Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionclass::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x48:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
+        if (count <= 0) return (t_getmethods());
+        return (t_getmethods(params[0]));
+      }
+      break;
+    case 0x49:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
+        return (t_isiterateable());
+      }
+      break;
+    case 0x4a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
+        if (count <= 1) return (t_getstaticpropertyvalue(params[0]));
+        return (t_getstaticpropertyvalue(params[0], params[1]));
+      }
+      break;
+    case 0x4b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
+        return (t_isuserdefined());
+      }
+      break;
+    case 0x4c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count <= 0) return (t_newinstance(count));
+        return (t_newinstance(count,params.slice(0, count - 0, false)));
+      }
+      break;
+    case 0x4d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
+        return (t_getextension());
+      }
+      break;
+    case 0x4e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
+        return (t_getconstructor());
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x4f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
+        return (t_newinstanceargs(params[0]));
+      }
+      break;
+    case 0x50:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
+        return (t_getendline());
+      }
+      break;
+    case 0x52:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
+        return (t_isinstance(params[0]));
+      }
+      break;
+    case 0x51:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
+        return (t_hasmethod(params[0]));
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+        return (t___construct(params[0]), null);
+      }
+      break;
+    case 0x53:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
+        return (t_isfinal());
+      }
+      break;
+    case 0x54:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
+        return (t_getmodifiers());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
+        return (ti_export(o_getClassName(), params[0], params[1]));
+      }
+      break;
+    case 0x56:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
+        return (t_getproperties());
+      }
+      break;
+    case 0x57:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
+        return (t_hasconstant(params[0]));
+      }
+      break;
+    case 0x58:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
+        return (t_getmethod(params[0]));
+      }
+      break;
+    case 0x59:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
+        return (t_getextensionname());
+      }
+      break;
+    case 0x5a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
+        return (t_getparentclass());
+      }
+      break;
+    case 0x37:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
+        return (t_getfilename());
+      }
+      break;
+    case 0x5b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
+        return (t_implementsinterface(params[0]));
+      }
+      break;
+    case 0x5c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
+        return (t_getinterfacenames());
+      }
+      break;
+    case 0x5e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
+        return (t_getconstant(params[0]));
+      }
+      break;
+    case 0x5d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
+        return (t_getstartline());
+      }
+      break;
+    case 0x5f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
+        return (t_getconstants());
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x61:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
+        return (t_isinterface());
+      }
+      break;
+    case 0x62:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
+        return (t_issubclassof(params[0]));
+      }
+      break;
+    case 0x63:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
+        return (t_hasproperty(params[0]));
+      }
+      break;
+    case 0x65:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
+        return (t_getstaticproperties());
+      }
+      break;
+    case 0x64:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionclass::test", count, 2, 2, 1);
+        return (t_test(params[0], params[1]));
+      }
+      break;
+    case 0x66:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
+        return (t_getdefaultproperties());
+      }
+      break;
+    case 0x67:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
+        return (t_setstaticpropertyvalue(params[0], params[1]), null);
+      }
+      break;
+    case 0x68:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
+        return (t_isinstantiable());
+      }
+      break;
+    case 0x69:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
+        return (t_getinterfaces());
+      }
+      break;
+    case 0x6a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::fetch", count, 1, 1, 1);
+        return (t_fetch(params[0]));
+      }
+      break;
+    case 0x6b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
+        return (t_isabstract());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    case 0x6e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
+        return (t_getproperty(params[0]));
+      }
+      break;
+    case 0x6d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
+        return (t_isinternal());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 4:
@@ -3115,11 +5210,279 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
     default:
       break;
   }
-  return c_ObjectData::o_invoke(s, params, hash, fatal);
+#endif
+  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionclass
-Variant c_reflectionclass::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+Variant c_reflectionclass::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x48:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
+        if (count <= 0) return (t_getmethods());
+        return (t_getmethods(a0));
+      }
+      break;
+    case 0x49:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
+        return (t_isiterateable());
+      }
+      break;
+    case 0x4a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
+        if (count <= 1) return (t_getstaticpropertyvalue(a0));
+        return (t_getstaticpropertyvalue(a0, a1));
+      }
+      break;
+    case 0x4b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
+        return (t_isuserdefined());
+      }
+      break;
+    case 0x4c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count <= 0) return (t_newinstance(count));
+        Array params;
+        if (count >= 1) params.append(a0);
+        if (count >= 2) params.append(a1);
+        if (count >= 3) params.append(a2);
+        if (count >= 4) params.append(a3);
+        if (count >= 5) params.append(a4);
+        if (count >= 6) params.append(a5);
+        return (t_newinstance(count,params));
+      }
+      break;
+    case 0x4d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
+        return (t_getextension());
+      }
+      break;
+    case 0x4e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
+        return (t_getconstructor());
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x4f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
+        return (t_newinstanceargs(a0));
+      }
+      break;
+    case 0x50:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
+        return (t_getendline());
+      }
+      break;
+    case 0x52:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
+        return (t_isinstance(a0));
+      }
+      break;
+    case 0x51:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
+        return (t_hasmethod(a0));
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+        return (t___construct(a0), null);
+      }
+      break;
+    case 0x53:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
+        return (t_isfinal());
+      }
+      break;
+    case 0x54:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
+        return (t_getmodifiers());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
+        return (ti_export(o_getClassName(), a0, a1));
+      }
+      break;
+    case 0x56:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
+        return (t_getproperties());
+      }
+      break;
+    case 0x57:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
+        return (t_hasconstant(a0));
+      }
+      break;
+    case 0x58:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
+        return (t_getmethod(a0));
+      }
+      break;
+    case 0x59:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
+        return (t_getextensionname());
+      }
+      break;
+    case 0x5a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
+        return (t_getparentclass());
+      }
+      break;
+    case 0x37:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
+        return (t_getfilename());
+      }
+      break;
+    case 0x5b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
+        return (t_implementsinterface(a0));
+      }
+      break;
+    case 0x5c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
+        return (t_getinterfacenames());
+      }
+      break;
+    case 0x5e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
+        return (t_getconstant(a0));
+      }
+      break;
+    case 0x5d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
+        return (t_getstartline());
+      }
+      break;
+    case 0x5f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
+        return (t_getconstants());
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x61:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
+        return (t_isinterface());
+      }
+      break;
+    case 0x62:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
+        return (t_issubclassof(a0));
+      }
+      break;
+    case 0x63:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
+        return (t_hasproperty(a0));
+      }
+      break;
+    case 0x65:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
+        return (t_getstaticproperties());
+      }
+      break;
+    case 0x64:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionclass::test", count, 2, 2, 1);
+        return (t_test(a0, a1));
+      }
+      break;
+    case 0x66:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
+        return (t_getdefaultproperties());
+      }
+      break;
+    case 0x67:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
+        return (t_setstaticpropertyvalue(a0, a1), null);
+      }
+      break;
+    case 0x68:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
+        return (t_isinstantiable());
+      }
+      break;
+    case 0x69:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
+        return (t_getinterfaces());
+      }
+      break;
+    case 0x6a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::fetch", count, 1, 1, 1);
+        return (t_fetch(a0));
+      }
+      break;
+    case 0x6b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
+        return (t_isabstract());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    case 0x6e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
+        return (t_getproperty(a0));
+      }
+      break;
+    case 0x6d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
+        return (t_isinternal());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 4:
@@ -3376,12 +5739,25 @@ Variant c_reflectionclass::o_invoke_few_args(const char *s, int64 hash, int coun
     default:
       break;
   }
-  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+#endif
+  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionclass
-Variant c_reflectionclass::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionclass::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
+        return (ti_export(c, params[0], params[1]));
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
@@ -3399,10 +5775,693 @@ Variant c_reflectionclass::os_invoke(const char *c, const char *s, CArrRef param
     default:
       break;
   }
-  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
+#endif
+  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionclass
 Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x48:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 0) return (t_getmethods());
+        else return (t_getmethods(a0));
+      }
+      break;
+    case 0x49:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isiterateable());
+      }
+      break;
+    case 0x4a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 1) return (t_getstaticpropertyvalue(a0));
+        else return (t_getstaticpropertyvalue(a0, a1));
+      }
+      break;
+    case 0x4b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isuserdefined());
+      }
+      break;
+    case 0x4c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 0) return (t_newinstance(count));
+        return (t_newinstance(count,vargs));
+      }
+      break;
+    case 0x4d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getextension());
+      }
+      break;
+    case 0x4e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getconstructor());
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 0x4f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_newinstanceargs(a0));
+      }
+      break;
+    case 0x50:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getendline());
+      }
+      break;
+    case 0x52:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isinstance(a0));
+      }
+      break;
+    case 0x51:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_hasmethod(a0));
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(a0), null);
+      }
+      break;
+    case 0x53:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isfinal());
+      }
+      break;
+    case 0x54:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmodifiers());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(o_getClassName(), a0, a1));
+      }
+      break;
+    case 0x56:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getproperties());
+      }
+      break;
+    case 0x57:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_hasconstant(a0));
+      }
+      break;
+    case 0x58:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmethod(a0));
+      }
+      break;
+    case 0x59:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getextensionname());
+      }
+      break;
+    case 0x5a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getparentclass());
+      }
+      break;
+    case 0x37:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getfilename());
+      }
+      break;
+    case 0x5b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_implementsinterface(a0));
+      }
+      break;
+    case 0x5c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getinterfacenames());
+      }
+      break;
+    case 0x5e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getconstant(a0));
+      }
+      break;
+    case 0x5d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getstartline());
+      }
+      break;
+    case 0x5f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getconstants());
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x61:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isinterface());
+      }
+      break;
+    case 0x62:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_issubclassof(a0));
+      }
+      break;
+    case 0x63:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_hasproperty(a0));
+      }
+      break;
+    case 0x65:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getstaticproperties());
+      }
+      break;
+    case 0x64:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionclass::test", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_test(a0, a1));
+      }
+      break;
+    case 0x66:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdefaultproperties());
+      }
+      break;
+    case 0x67:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_setstaticpropertyvalue(a0, a1), null);
+      }
+      break;
+    case 0x68:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isinstantiable());
+      }
+      break;
+    case 0x69:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getinterfaces());
+      }
+      break;
+    case 0x6a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::fetch", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_fetch(a0));
+      }
+      break;
+    case 0x6b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isabstract());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getname());
+      }
+      break;
+    case 0x6e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getproperty(a0));
+      }
+      break;
+    case 0x6d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isinternal());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 4:
@@ -4073,9 +7132,39 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     default:
       break;
   }
+#endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionclass::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(c, a0, a1));
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
@@ -4103,6 +7192,7 @@ Variant c_reflectionclass::os_invoke_from_eval(const char *c, const char *s, Eva
     default:
       break;
   }
+#endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 struct ObjectStaticCallbacks cw_reflectionclass = {
@@ -4690,7 +7780,7 @@ Variant c_reflectionclass::t_issubclassof(Variant v_cls) {
   if (instanceOf(v_cls, "ReflectionClass")) {
     {
       {
-        Variant tmp1((v_cls. BIND_CLASS_DOT o_invoke_few_args("fetch", 0x5E82B850BB90B0FBLL, 1, "name")));
+        Variant tmp1((v_cls. BIND_CLASS_DOT o_invoke_few_args(/* fetch */ MethodIndex(106, 1) /* fetch */ ,  "fetch", 0x5E82B850BB90B0FBLL, 1, "name")));
         v_cls = tmp1;
       }
     }
@@ -4731,7 +7821,7 @@ Variant c_reflectionclass::t_issubclassof(Variant v_cls) {
   }
   {
     const Object &tmp8((toObject(t_getparentclass())));
-    return wrap_variant(tmp8-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args("isSubclassOf", 0x373333991926C97ELL, 1, v_cls));
+    return wrap_variant(tmp8-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args(/* issubclassof */ MethodIndex(98, 1) /* issubclassof */ ,  "isSubclassOf", 0x373333991926C97ELL, 1, v_cls));
   }
 } /* function */
 /* SRC: classes/reflection.php line 480 */
@@ -4748,7 +7838,7 @@ Variant c_reflectionclass::t_getstaticproperties() {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_prop);
       {
-        if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args("isStatic", 0x7A15DC56E8CC0B19LL, 0))) {
+        if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args(/* isstatic */ MethodIndex(127, 1) /* isstatic */ ,  "isStatic", 0x7A15DC56E8CC0B19LL, 0))) {
           {
             {
               Variant tmp4((v_prop.o_get("name", 0x5655B4FF77E35232LL, true)));
@@ -4792,7 +7882,7 @@ Variant c_reflectionclass::t_getdefaultproperties() {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_prop);
       {
-        if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args("isDefault", 0x384A52597AB11F15LL, 0))) {
+        if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args(/* isdefault */ MethodIndex(141, 1) /* isdefault */ ,  "isDefault", 0x384A52597AB11F15LL, 0))) {
           {
             {
               Variant tmp4((v_prop.o_get("name", 0x5655B4FF77E35232LL, true)));
@@ -4820,7 +7910,7 @@ bool c_reflectionclass::t_implementsinterface(Variant v_cls) {
   if (instanceOf(v_cls, "ReflectionClass")) {
     {
       {
-        Variant tmp1((v_cls. BIND_CLASS_DOT o_invoke_few_args("fetch", 0x5E82B850BB90B0FBLL, 1, "name")));
+        Variant tmp1((v_cls. BIND_CLASS_DOT o_invoke_few_args(/* fetch */ MethodIndex(106, 1) /* fetch */ ,  "fetch", 0x5E82B850BB90B0FBLL, 1, "name")));
         v_cls = tmp1;
       }
     }
@@ -4851,7 +7941,7 @@ Variant c_reflectionclass::t_getextension() {
 /* SRC: classes/reflection.php line 532 */
 Variant c_reflectionclass::t_getextensionname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtensionName);
-  return wrap_variant(t_fetch("extension"). BIND_CLASS_DOT o_invoke_few_args("getName", 0x23F51CDECC198965LL, 0));
+  return wrap_variant(t_fetch("extension"). BIND_CLASS_DOT o_invoke_few_args(/* getname */ MethodIndex(108, 1) /* getname */ ,  "getName", 0x23F51CDECC198965LL, 0));
 } /* function */
 /* SRC: classes/reflection.php line 756 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_reflectionextension
@@ -5107,8 +8197,80 @@ void c_reflectionextension::cloneSet(c_reflectionextension *clone) {
   ObjectData::cloneSet(clone);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionextension
-Variant c_reflectionextension::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionextension::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
+        return (t___construct(params[0]), null);
+      }
+      break;
+    case 0x6f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getfunctions", 0, 1);
+        return (t_getfunctions());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
+        return (ti_export(o_getClassName(), params[0], params[1]));
+      }
+      break;
+    case 0x70:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::info", 0, 1);
+        return (t_info());
+      }
+      break;
+    case 0x71:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getinientries", 0, 1);
+        return (t_getinientries());
+      }
+      break;
+    case 0x5f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getconstants", 0, 1);
+        return (t_getconstants());
+      }
+      break;
+    case 0x72:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getclassnames", 0, 1);
+        return (t_getclassnames());
+      }
+      break;
+    case 0x73:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getversion", 0, 1);
+        return (t_getversion());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    case 0x74:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getclasses", 0, 1);
+        return (t_getclasses());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
@@ -5187,11 +8349,84 @@ Variant c_reflectionextension::o_invoke(const char *s, CArrRef params, int64 has
     default:
       break;
   }
-  return c_ObjectData::o_invoke(s, params, hash, fatal);
+#endif
+  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionextension
-Variant c_reflectionextension::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+Variant c_reflectionextension::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
+        return (t___construct(a0), null);
+      }
+      break;
+    case 0x6f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getfunctions", 0, 1);
+        return (t_getfunctions());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
+        return (ti_export(o_getClassName(), a0, a1));
+      }
+      break;
+    case 0x70:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::info", 0, 1);
+        return (t_info());
+      }
+      break;
+    case 0x71:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getinientries", 0, 1);
+        return (t_getinientries());
+      }
+      break;
+    case 0x5f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getconstants", 0, 1);
+        return (t_getconstants());
+      }
+      break;
+    case 0x72:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getclassnames", 0, 1);
+        return (t_getclassnames());
+      }
+      break;
+    case 0x73:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getversion", 0, 1);
+        return (t_getversion());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    case 0x74:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getclasses", 0, 1);
+        return (t_getclasses());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
@@ -5259,12 +8494,25 @@ Variant c_reflectionextension::o_invoke_few_args(const char *s, int64 hash, int 
     default:
       break;
   }
-  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+#endif
+  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionextension
-Variant c_reflectionextension::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionextension::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
+        return (ti_export(c, params[0], params[1]));
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
@@ -5282,10 +8530,184 @@ Variant c_reflectionextension::os_invoke(const char *c, const char *s, CArrRef p
     default:
       break;
   }
-  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
+#endif
+  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionextension
 Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(a0), null);
+      }
+      break;
+    case 0x6f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getfunctions", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getfunctions());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(o_getClassName(), a0, a1));
+      }
+      break;
+    case 0x70:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::info", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_info());
+      }
+      break;
+    case 0x71:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getinientries", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getinientries());
+      }
+      break;
+    case 0x5f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getconstants", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getconstants());
+      }
+      break;
+    case 0x72:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getclassnames", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getclassnames());
+      }
+      break;
+    case 0x73:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getversion", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getversion());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getname", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getname());
+      }
+      break;
+    case 0x74:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionextension::getclasses", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getclasses());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
@@ -5453,9 +8875,39 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
     default:
       break;
   }
+#endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionextension::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(c, a0, a1));
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
@@ -5483,6 +8935,7 @@ Variant c_reflectionextension::os_invoke_from_eval(const char *c, const char *s,
     default:
       break;
   }
+#endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 struct ObjectStaticCallbacks cw_reflectionextension = {
@@ -5576,7 +9029,7 @@ Array c_reflectionextension::t_getclassnames() {
       iter3->second(v_cls);
       {
         {
-          Variant tmp4((v_cls. BIND_CLASS_DOT o_invoke_few_args("getName", 0x23F51CDECC198965LL, 0)));
+          Variant tmp4((v_cls. BIND_CLASS_DOT o_invoke_few_args(/* getname */ MethodIndex(108, 1) /* getname */ ,  "getName", 0x23F51CDECC198965LL, 0)));
           v_ret.append((tmp4));
         }
       }
@@ -5838,8 +9291,183 @@ void c_reflectionmethod::cloneSet(c_reflectionmethod *clone) {
   c_reflectionfunctionabstract::cloneSet(clone);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionmethod
-Variant c_reflectionmethod::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionmethod::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x75:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        return (t_getnumberofrequiredparameters());
+      }
+      break;
+    case 0x7d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprivate", 0, 1);
+        return (t_isprivate());
+      }
+      break;
+    case 0x4b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        return (t_isuserdefined());
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x76:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        return (t_getnumberofparameters());
+      }
+      break;
+    case 0x7e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprotected", 0, 1);
+        return (t_isprotected());
+      }
+      break;
+    case 0x7f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isstatic", 0, 1);
+        return (t_isstatic());
+      }
+      break;
+    case 0x80:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getdeclaringclass", 0, 1);
+        return (t_getdeclaringclass());
+      }
+      break;
+    case 0x81:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isconstructor", 0, 1);
+        return (t_isconstructor());
+      }
+      break;
+    case 0x50:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        return (t_getendline());
+      }
+      break;
+    case 0x77:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        return (t_getstaticvariables());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
+        return (t___construct(params[0], params[1]), null);
+      }
+      break;
+    case 0x78:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        return (t_getparameters());
+      }
+      break;
+    case 0x53:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isfinal", 0, 1);
+        return (t_isfinal());
+      }
+      break;
+    case 0x79:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionmethod::invokeargs", count, 2, 2, 1);
+        return (t_invokeargs(params[0], params[1]));
+      }
+      break;
+    case 0x7a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        return (t_returnsreference());
+      }
+      break;
+    case 0x54:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getmodifiers", 0, 1);
+        return (t_getmodifiers());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
+        return (ti_export(o_getClassName(), params[0], params[1], params[2]));
+      }
+      break;
+    case 0x7b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count < 1) return throw_missing_arguments("reflectionmethod::invoke", count+1, 1);
+        if (count <= 1) return (t_invoke(count, params[0]));
+        return (t_invoke(count,params[0], params.slice(1, count - 1, false)));
+      }
+      break;
+    case 0x82:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::ispublic", 0, 1);
+        return (t_ispublic());
+      }
+      break;
+    case 0x37:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        return (t_getfilename());
+      }
+      break;
+    case 0x83:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isdestructor", 0, 1);
+        return (t_isdestructor());
+      }
+      break;
+    case 0x5d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        return (t_getstartline());
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x7c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getclosure", 0, 1);
+        return (t_getclosure());
+      }
+      break;
+    case 0x6b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isabstract", 0, 1);
+        return (t_isabstract());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    case 0x6d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        return (t_isinternal());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 2:
@@ -6032,11 +9660,193 @@ Variant c_reflectionmethod::o_invoke(const char *s, CArrRef params, int64 hash, 
     default:
       break;
   }
-  return c_ObjectData::o_invoke(s, params, hash, fatal);
+#endif
+  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionmethod
-Variant c_reflectionmethod::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+Variant c_reflectionmethod::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x75:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        return (t_getnumberofrequiredparameters());
+      }
+      break;
+    case 0x7d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprivate", 0, 1);
+        return (t_isprivate());
+      }
+      break;
+    case 0x4b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        return (t_isuserdefined());
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x76:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        return (t_getnumberofparameters());
+      }
+      break;
+    case 0x7e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprotected", 0, 1);
+        return (t_isprotected());
+      }
+      break;
+    case 0x7f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isstatic", 0, 1);
+        return (t_isstatic());
+      }
+      break;
+    case 0x80:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getdeclaringclass", 0, 1);
+        return (t_getdeclaringclass());
+      }
+      break;
+    case 0x81:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isconstructor", 0, 1);
+        return (t_isconstructor());
+      }
+      break;
+    case 0x50:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        return (t_getendline());
+      }
+      break;
+    case 0x77:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        return (t_getstaticvariables());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
+        return (t___construct(a0, a1), null);
+      }
+      break;
+    case 0x78:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        return (t_getparameters());
+      }
+      break;
+    case 0x53:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isfinal", 0, 1);
+        return (t_isfinal());
+      }
+      break;
+    case 0x79:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionmethod::invokeargs", count, 2, 2, 1);
+        return (t_invokeargs(a0, a1));
+      }
+      break;
+    case 0x7a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        return (t_returnsreference());
+      }
+      break;
+    case 0x54:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getmodifiers", 0, 1);
+        return (t_getmodifiers());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
+        return (ti_export(o_getClassName(), a0, a1, a2));
+      }
+      break;
+    case 0x7b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count < 1) return throw_missing_arguments("reflectionmethod::invoke", count+1, 1);
+        if (count <= 1) return (t_invoke(count, a0));
+        Array params;
+        if (count >= 2) params.append(a1);
+        if (count >= 3) params.append(a2);
+        if (count >= 4) params.append(a3);
+        if (count >= 5) params.append(a4);
+        if (count >= 6) params.append(a5);
+        return (t_invoke(count,a0, params));
+      }
+      break;
+    case 0x82:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::ispublic", 0, 1);
+        return (t_ispublic());
+      }
+      break;
+    case 0x37:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        return (t_getfilename());
+      }
+      break;
+    case 0x83:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isdestructor", 0, 1);
+        return (t_isdestructor());
+      }
+      break;
+    case 0x5d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        return (t_getstartline());
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x7c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getclosure", 0, 1);
+        return (t_getclosure());
+      }
+      break;
+    case 0x6b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isabstract", 0, 1);
+        return (t_isabstract());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    case 0x6d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        return (t_isinternal());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 2:
@@ -6211,12 +10021,25 @@ Variant c_reflectionmethod::o_invoke_few_args(const char *s, int64 hash, int cou
     default:
       break;
   }
-  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+#endif
+  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionmethod
-Variant c_reflectionmethod::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionmethod::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
+        return (ti_export(c, params[0], params[1], params[2]));
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
@@ -6235,10 +10058,444 @@ Variant c_reflectionmethod::os_invoke(const char *c, const char *s, CArrRef para
     default:
       break;
   }
-  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
+#endif
+  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionmethod
 Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x75:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getnumberofrequiredparameters());
+      }
+      break;
+    case 0x7d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprivate", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isprivate());
+      }
+      break;
+    case 0x4b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isuserdefined());
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 0x76:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getnumberofparameters());
+      }
+      break;
+    case 0x7e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprotected", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isprotected());
+      }
+      break;
+    case 0x7f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isstatic", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isstatic());
+      }
+      break;
+    case 0x80:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getdeclaringclass", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdeclaringclass());
+      }
+      break;
+    case 0x81:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isconstructor", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isconstructor());
+      }
+      break;
+    case 0x50:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getendline());
+      }
+      break;
+    case 0x77:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getstaticvariables());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(a0, a1), null);
+      }
+      break;
+    case 0x78:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getparameters());
+      }
+      break;
+    case 0x53:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isfinal", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isfinal());
+      }
+      break;
+    case 0x79:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionmethod::invokeargs", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_invokeargs(a0, a1));
+      }
+      break;
+    case 0x7a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_returnsreference());
+      }
+      break;
+    case 0x54:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getmodifiers", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmodifiers());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(o_getClassName(), a0, a1, a2));
+      }
+      break;
+    case 0x7b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1) return throw_missing_arguments("reflectionmethod::invoke", count+1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 1) return (t_invoke(count, a0));
+        return (t_invoke(count, a0,vargs));
+      }
+      break;
+    case 0x82:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::ispublic", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_ispublic());
+      }
+      break;
+    case 0x37:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getfilename());
+      }
+      break;
+    case 0x83:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isdestructor", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isdestructor());
+      }
+      break;
+    case 0x5d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getstartline());
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x7c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::getclosure", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getclosure());
+      }
+      break;
+    case 0x6b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionmethod::isabstract", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isabstract());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getname());
+      }
+      break;
+    case 0x6d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isinternal());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 2:
@@ -6664,9 +10921,43 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     default:
       break;
   }
+#endif
   return c_reflectionfunctionabstract::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionmethod::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(c, a0, a1, a2));
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
@@ -6698,6 +10989,7 @@ Variant c_reflectionmethod::os_invoke_from_eval(const char *c, const char *s, Ev
     default:
       break;
   }
+#endif
   return c_reflectionfunctionabstract::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 struct ObjectStaticCallbacks cw_reflectionmethod = {
@@ -6728,7 +11020,7 @@ void c_reflectionmethod::t___construct(Variant v_cls, Variant v_name) {
         }
       }
       {
-        Variant tmp2((v_cls. BIND_CLASS_DOT o_invoke_few_args("getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
+        Variant tmp2((v_cls. BIND_CLASS_DOT o_invoke_few_args(/* getmethod */ MethodIndex(88, 1) /* getmethod */ ,  "getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
         v_method = tmp2;
       }
       if (toBoolean(v_method)) {
@@ -6770,7 +11062,7 @@ Variant c_reflectionmethod::ti_export(const char* cls, Variant v_cls, CVarRef v_
     }
   }
   {
-    const Variant &tmp2((v_cls.o_invoke_few_args("getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
+    const Variant &tmp2((v_cls.o_invoke_few_args(/* getmethod */ MethodIndex(88, 1) /* getmethod */ ,  "getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
     v_obj = tmp2;
   }
   v_str = (toString(v_obj));
@@ -7137,8 +11429,105 @@ void c_reflectionproperty::cloneSet(c_reflectionproperty *clone) {
   ObjectData::cloneSet(clone);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionproperty
-Variant c_reflectionproperty::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionproperty::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x7d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprivate", 0, 1);
+        return (t_isprivate());
+      }
+      break;
+    case 0x8c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 1) return throw_toomany_arguments("reflectionproperty::getvalue", 1, 1);
+        if (count <= 0) return (t_getvalue());
+        return (t_getvalue(params[0]));
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x7e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprotected", 0, 1);
+        return (t_isprotected());
+      }
+      break;
+    case 0x7f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isstatic", 0, 1);
+        return (t_isstatic());
+      }
+      break;
+    case 0x80:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdeclaringclass", 0, 1);
+        return (t_getdeclaringclass());
+      }
+      break;
+    case 0x8d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isdefault", 0, 1);
+        return (t_isdefault());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
+        return (t___construct(params[0], params[1]), null);
+      }
+      break;
+    case 0x54:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getmodifiers", 0, 1);
+        return (t_getmodifiers());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
+        return (ti_export(o_getClassName(), params[0], params[1], params[2]));
+      }
+      break;
+    case 0x82:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::ispublic", 0, 1);
+        return (t_ispublic());
+      }
+      break;
+    case 0x8e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::setaccessible", 0, 1);
+        return (t_setaccessible(), null);
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdoccomment", 0, 1);
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x8f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionproperty::setvalue", count, 2, 2, 1);
+        return (t_setvalue(params[0], params[1]));
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
@@ -7255,11 +11644,109 @@ Variant c_reflectionproperty::o_invoke(const char *s, CArrRef params, int64 hash
     default:
       break;
   }
-  return c_ObjectData::o_invoke(s, params, hash, fatal);
+#endif
+  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionproperty
-Variant c_reflectionproperty::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+Variant c_reflectionproperty::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x7d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprivate", 0, 1);
+        return (t_isprivate());
+      }
+      break;
+    case 0x8c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 1) return throw_toomany_arguments("reflectionproperty::getvalue", 1, 1);
+        if (count <= 0) return (t_getvalue());
+        return (t_getvalue(a0));
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x7e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprotected", 0, 1);
+        return (t_isprotected());
+      }
+      break;
+    case 0x7f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isstatic", 0, 1);
+        return (t_isstatic());
+      }
+      break;
+    case 0x80:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdeclaringclass", 0, 1);
+        return (t_getdeclaringclass());
+      }
+      break;
+    case 0x8d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isdefault", 0, 1);
+        return (t_isdefault());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
+        return (t___construct(a0, a1), null);
+      }
+      break;
+    case 0x54:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getmodifiers", 0, 1);
+        return (t_getmodifiers());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
+        return (ti_export(o_getClassName(), a0, a1, a2));
+      }
+      break;
+    case 0x82:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::ispublic", 0, 1);
+        return (t_ispublic());
+      }
+      break;
+    case 0x8e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::setaccessible", 0, 1);
+        return (t_setaccessible(), null);
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdoccomment", 0, 1);
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x8f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionproperty::setvalue", count, 2, 2, 1);
+        return (t_setvalue(a0, a1));
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
@@ -7352,12 +11839,25 @@ Variant c_reflectionproperty::o_invoke_few_args(const char *s, int64 hash, int c
     default:
       break;
   }
-  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+#endif
+  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionproperty
-Variant c_reflectionproperty::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionproperty::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
+        return (ti_export(c, params[0], params[1], params[2]));
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
@@ -7376,10 +11876,261 @@ Variant c_reflectionproperty::os_invoke(const char *c, const char *s, CArrRef pa
     default:
       break;
   }
-  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
+#endif
+  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionproperty
 Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x7d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprivate", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isprivate());
+      }
+      break;
+    case 0x8c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("reflectionproperty::getvalue", 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 0) return (t_getvalue());
+        else return (t_getvalue(a0));
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 0x7e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprotected", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isprotected());
+      }
+      break;
+    case 0x7f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isstatic", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isstatic());
+      }
+      break;
+    case 0x80:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdeclaringclass", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdeclaringclass());
+      }
+      break;
+    case 0x8d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::isdefault", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isdefault());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(a0, a1), null);
+      }
+      break;
+    case 0x54:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getmodifiers", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmodifiers());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(o_getClassName(), a0, a1, a2));
+      }
+      break;
+    case 0x82:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::ispublic", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_ispublic());
+      }
+      break;
+    case 0x8e:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::setaccessible", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_setaccessible(), null);
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdoccomment", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x8f:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionproperty::setvalue", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_setvalue(a0, a1));
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionproperty::getname", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getname());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
@@ -7624,9 +12375,43 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     default:
       break;
   }
+#endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionproperty::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(c, a0, a1, a2));
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
@@ -7658,6 +12443,7 @@ Variant c_reflectionproperty::os_invoke_from_eval(const char *c, const char *s, 
     default:
       break;
   }
+#endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 struct ObjectStaticCallbacks cw_reflectionproperty = {
@@ -7688,7 +12474,7 @@ void c_reflectionproperty::t___construct(Variant v_cls, Variant v_name) {
         }
       }
       {
-        Variant tmp2((v_cls. BIND_CLASS_DOT o_invoke_few_args("getProperty", 0x0FD73627FB023047LL, 1, v_name)));
+        Variant tmp2((v_cls. BIND_CLASS_DOT o_invoke_few_args(/* getproperty */ MethodIndex(110, 1) /* getproperty */ ,  "getProperty", 0x0FD73627FB023047LL, 1, v_name)));
         v_prop = tmp2;
       }
       if (toBoolean(v_prop)) {
@@ -7730,7 +12516,7 @@ Variant c_reflectionproperty::ti_export(const char* cls, Variant v_cls, CVarRef 
     }
   }
   {
-    const Variant &tmp2((v_cls.o_invoke_few_args("getProperty", 0x0FD73627FB023047LL, 1, v_name)));
+    const Variant &tmp2((v_cls.o_invoke_few_args(/* getproperty */ MethodIndex(110, 1) /* getproperty */ ,  "getProperty", 0x0FD73627FB023047LL, 1, v_name)));
     v_obj = tmp2;
   }
   v_str = (toString(v_obj));
@@ -8000,8 +12786,122 @@ void c_reflectionfunction::cloneSet(c_reflectionfunction *clone) {
   c_reflectionfunctionabstract::cloneSet(clone);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunction
-Variant c_reflectionfunction::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionfunction::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x75:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        return (t_getnumberofrequiredparameters());
+      }
+      break;
+    case 0x4b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        return (t_isuserdefined());
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunction::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x76:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        return (t_getnumberofparameters());
+      }
+      break;
+    case 0x50:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        return (t_getendline());
+      }
+      break;
+    case 0x77:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        return (t_getstaticvariables());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
+        return (t___construct(params[0]), null);
+      }
+      break;
+    case 0x78:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        return (t_getparameters());
+      }
+      break;
+    case 0x79:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionfunction::invokeargs", count, 1, 1, 1);
+        return (t_invokeargs(params[0]));
+      }
+      break;
+    case 0x7a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        return (t_returnsreference());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
+        return (ti_export(o_getClassName(), params[0], params[1]));
+      }
+      break;
+    case 0x7b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count <= 0) return (t_invoke(count));
+        return (t_invoke(count,params.slice(0, count - 0, false)));
+      }
+      break;
+    case 0x37:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        return (t_getfilename());
+      }
+      break;
+    case 0x5d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        return (t_getstartline());
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x7c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
+        return (t_getclosure());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    case 0x6d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        return (t_isinternal());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 2:
@@ -8125,11 +13025,133 @@ Variant c_reflectionfunction::o_invoke(const char *s, CArrRef params, int64 hash
     default:
       break;
   }
-  return c_ObjectData::o_invoke(s, params, hash, fatal);
+#endif
+  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunction
-Variant c_reflectionfunction::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+Variant c_reflectionfunction::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x75:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        return (t_getnumberofrequiredparameters());
+      }
+      break;
+    case 0x4b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        return (t_isuserdefined());
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunction::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x76:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        return (t_getnumberofparameters());
+      }
+      break;
+    case 0x50:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        return (t_getendline());
+      }
+      break;
+    case 0x77:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        return (t_getstaticvariables());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
+        return (t___construct(a0), null);
+      }
+      break;
+    case 0x78:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        return (t_getparameters());
+      }
+      break;
+    case 0x79:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 1) return throw_wrong_arguments("reflectionfunction::invokeargs", count, 1, 1, 1);
+        return (t_invokeargs(a0));
+      }
+      break;
+    case 0x7a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        return (t_returnsreference());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
+        return (ti_export(o_getClassName(), a0, a1));
+      }
+      break;
+    case 0x7b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count <= 0) return (t_invoke(count));
+        Array params;
+        if (count >= 1) params.append(a0);
+        if (count >= 2) params.append(a1);
+        if (count >= 3) params.append(a2);
+        if (count >= 4) params.append(a3);
+        if (count >= 5) params.append(a4);
+        if (count >= 6) params.append(a5);
+        return (t_invoke(count,params));
+      }
+      break;
+    case 0x37:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        return (t_getfilename());
+      }
+      break;
+    case 0x5d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        return (t_getstartline());
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x7c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
+        return (t_getclosure());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    case 0x6d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        return (t_isinternal());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 2:
@@ -8244,12 +13266,25 @@ Variant c_reflectionfunction::o_invoke_few_args(const char *s, int64 hash, int c
     default:
       break;
   }
-  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+#endif
+  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionfunction
-Variant c_reflectionfunction::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionfunction::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
+        return (ti_export(c, params[0], params[1]));
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
@@ -8267,10 +13302,287 @@ Variant c_reflectionfunction::os_invoke(const char *c, const char *s, CArrRef pa
     default:
       break;
   }
-  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
+#endif
+  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionfunction
 Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x75:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getnumberofrequiredparameters());
+      }
+      break;
+    case 0x4b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isuserdefined());
+      }
+      break;
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunction::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 0x76:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getnumberofparameters());
+      }
+      break;
+    case 0x50:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getendline());
+      }
+      break;
+    case 0x77:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getstaticvariables());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(a0), null);
+      }
+      break;
+    case 0x78:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getparameters());
+      }
+      break;
+    case 0x79:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("reflectionfunction::invokeargs", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_invokeargs(a0));
+      }
+      break;
+    case 0x7a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_returnsreference());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(o_getClassName(), a0, a1));
+      }
+      break;
+    case 0x7b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 0) return (t_invoke(count));
+        return (t_invoke(count,vargs));
+      }
+      break;
+    case 0x37:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getfilename());
+      }
+      break;
+    case 0x5d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getstartline());
+      }
+      break;
+    case 0x60:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdoccomment());
+      }
+      break;
+    case 0x7c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getclosure());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getname());
+      }
+      break;
+    case 0x6d:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isinternal());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 2:
@@ -8539,9 +13851,39 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     default:
       break;
   }
+#endif
   return c_reflectionfunctionabstract::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionfunction::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(c, a0, a1));
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
@@ -8569,6 +13911,7 @@ Variant c_reflectionfunction::os_invoke_from_eval(const char *c, const char *s, 
     default:
       break;
   }
+#endif
   return c_reflectionfunctionabstract::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 struct ObjectStaticCallbacks cw_reflectionfunction = {
@@ -8848,8 +14191,92 @@ void c_reflectionparameter::cloneSet(c_reflectionparameter *clone) {
   ObjectData::cloneSet(clone);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionparameter
-Variant c_reflectionparameter::o_invoke(const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionparameter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x80:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdeclaringclass", 0, 1);
+        return (t_getdeclaringclass());
+      }
+      break;
+    case 0x84:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isdefaultvalueavailable", 0, 1);
+        return (t_isdefaultvalueavailable());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
+        return (t___construct(params[0], params[1]), null);
+      }
+      break;
+    case 0x85:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getclass", 0, 1);
+        return (t_getclass());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
+        return (ti_export(o_getClassName(), params[0], params[1], params[2]));
+      }
+      break;
+    case 0x86:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::allowsnull", 0, 1);
+        return (t_allowsnull());
+      }
+      break;
+    case 0x87:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getposition", 0, 1);
+        return (t_getposition());
+      }
+      break;
+    case 0x88:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isarray", 0, 1);
+        return (t_isarray());
+      }
+      break;
+    case 0x89:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isoptional", 0, 1);
+        return (t_isoptional());
+      }
+      break;
+    case 0x8a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdefaultvalue", 0, 1);
+        return (t_getdefaultvalue());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    case 0x8b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::ispassedbyreference", 0, 1);
+        return (t_ispassedbyreference());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 3:
@@ -8942,11 +14369,96 @@ Variant c_reflectionparameter::o_invoke(const char *s, CArrRef params, int64 has
     default:
       break;
   }
-  return c_ObjectData::o_invoke(s, params, hash, fatal);
+#endif
+  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionparameter
-Variant c_reflectionparameter::o_invoke_few_args(const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+Variant c_reflectionparameter::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::__tostring", 0, 1);
+        return (t___tostring());
+      }
+      break;
+    case 0x80:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdeclaringclass", 0, 1);
+        return (t_getdeclaringclass());
+      }
+      break;
+    case 0x84:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isdefaultvalueavailable", 0, 1);
+        return (t_isdefaultvalueavailable());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 2) return throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
+        return (t___construct(a0, a1), null);
+      }
+      break;
+    case 0x85:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getclass", 0, 1);
+        return (t_getclass());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
+        return (ti_export(o_getClassName(), a0, a1, a2));
+      }
+      break;
+    case 0x86:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::allowsnull", 0, 1);
+        return (t_allowsnull());
+      }
+      break;
+    case 0x87:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getposition", 0, 1);
+        return (t_getposition());
+      }
+      break;
+    case 0x88:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isarray", 0, 1);
+        return (t_isarray());
+      }
+      break;
+    case 0x89:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isoptional", 0, 1);
+        return (t_isoptional());
+      }
+      break;
+    case 0x8a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdefaultvalue", 0, 1);
+        return (t_getdefaultvalue());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getname", 0, 1);
+        return (t_getname());
+      }
+      break;
+    case 0x8b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::ispassedbyreference", 0, 1);
+        return (t_ispassedbyreference());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 3:
@@ -9026,12 +14538,25 @@ Variant c_reflectionparameter::o_invoke_few_args(const char *s, int64 hash, int 
     default:
       break;
   }
-  return c_ObjectData::o_invoke_few_args(s, hash, count, a0, a1, a2, a3, a4, a5);
+#endif
+  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionparameter
-Variant c_reflectionparameter::os_invoke(const char *c, const char *s, CArrRef params, int64 hash, bool fatal) {
+Variant c_reflectionparameter::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
+#ifdef FMCGEN
+  switch (methodIndex.m_callIndex) {
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
+        return (ti_export(c, params[0], params[1], params[2]));
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
@@ -9050,10 +14575,220 @@ Variant c_reflectionparameter::os_invoke(const char *c, const char *s, CArrRef p
     default:
       break;
   }
-  return c_ObjectData::os_invoke(c, s, params, hash, fatal);
+#endif
+  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionparameter
 Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x1a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::__tostring", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 0x80:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdeclaringclass", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdeclaringclass());
+      }
+      break;
+    case 0x84:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isdefaultvalueavailable", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isdefaultvalueavailable());
+      }
+      break;
+    case 0x6:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(a0, a1), null);
+      }
+      break;
+    case 0x85:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getclass", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getclass());
+      }
+      break;
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(o_getClassName(), a0, a1, a2));
+      }
+      break;
+    case 0x86:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::allowsnull", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_allowsnull());
+      }
+      break;
+    case 0x87:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getposition", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getposition());
+      }
+      break;
+    case 0x88:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isarray", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isarray());
+      }
+      break;
+    case 0x89:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::isoptional", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isoptional());
+      }
+      break;
+    case 0x8a:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdefaultvalue", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdefaultvalue());
+      }
+      break;
+    case 0x6c:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::getname", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getname());
+      }
+      break;
+    case 0x8b:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("reflectionparameter::ispassedbyreference", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_ispassedbyreference());
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 3:
@@ -9257,9 +14992,43 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
     default:
       break;
   }
+#endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionparameter::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+#ifdef FMCGEN
+  MethodIndex methodIndex = methodIndexExists(s);
+  switch (methodIndex.m_callIndex) {
+    case 0x55:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(c, a0, a1, a2));
+      }
+      break;
+    default:
+      break;
+  }
+#else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
@@ -9291,6 +15060,7 @@ Variant c_reflectionparameter::os_invoke_from_eval(const char *c, const char *s,
     default:
       break;
   }
+#endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 struct ObjectStaticCallbacks cw_reflectionparameter = {
@@ -9312,7 +15082,7 @@ void c_reflectionparameter::t___construct(Variant v_func, Variant v_param) {
   if ((toBoolean(v_func) && toBoolean(v_param))) {
     {
       {
-        Variant tmp1((v_func. BIND_CLASS_DOT o_invoke_few_args("getParameters", 0x3E62225132C2A32DLL, 0)));
+        Variant tmp1((v_func. BIND_CLASS_DOT o_invoke_few_args(/* getparameters */ MethodIndex(120, 1) /* getparameters */ ,  "getParameters", 0x3E62225132C2A32DLL, 0)));
         v_params = tmp1;
       }
       {

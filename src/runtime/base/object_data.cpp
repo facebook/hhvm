@@ -89,8 +89,8 @@ Variant &ObjectData::os_lval(const char *s, int64 hash) {
   throw FatalErrorException("unknown static property %s", s);
 }
 
-Variant ObjectData::os_invoke(const char *c, const char *s,
-                              CArrRef params, int64 hash,
+Variant ObjectData::os_invoke(const char *c, MethodIndex methodIndex,
+                              const char *s, CArrRef params, int64 hash,
                               bool fatal /* = true */) {
   Object obj = FrameInjection::GetThis();
   if (obj.isNull() || !obj->o_instanceof(c)) {
@@ -100,7 +100,22 @@ Variant ObjectData::os_invoke(const char *c, const char *s,
     if (id == *pmax) --(*pmax);
     id = 0; // for isset($this) to tell whether this is a fake obj
   }
-  return obj->o_invoke_ex(c, s, params, hash, fatal);
+  return obj->o_invoke_ex(c, methodIndex, s, params, hash, fatal);
+}
+
+Variant ObjectData::os_invoke_mil(const char *c,
+                                  const char *s, CArrRef params, int64 hash,
+                                  bool fatal /* = true */) {
+  MethodIndex methodIndex(MethodIndex::fail());
+  if (RuntimeOption::FastMethodCall) {
+    methodIndex = methodIndexExists(s);
+    // no __call for static calls, give up now
+    if (methodIndex.isFail()) {
+      return o_invoke_failed(c, s, fatal);
+    }
+  }
+  // redispatch, not necessarily call the above method
+  return os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 
 Variant ObjectData::os_constant(const char *s) {
@@ -109,12 +124,13 @@ Variant ObjectData::os_constant(const char *s) {
   throw FatalErrorException(msg.str().c_str());
 }
 
+// FMC need test
 Variant
 ObjectData::os_invoke_from_eval(const char *c, const char *s,
                                 Eval::VariableEnvironment &env,
                                 const Eval::FunctionCallExpression *call,
                                 int64 hash, bool fatal /* = true */) {
-  return os_invoke(c, s, call->getParams(env), hash, fatal);
+  return os_invoke_mil(c, s, call->getParams(env), hash, fatal);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -410,8 +426,9 @@ Variant ObjectData::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */,
                              bool fatal /* = true */) {
   StringData *sd = s.get();
   ASSERT(sd && sd->data());
-  return o_invoke(sd->data(), params, hash < 0 ? StringData::Hash(sd) : hash,
-                  fatal);
+  return o_invoke_mil(sd->data(), params,
+                      hash < 0 ? StringData::Hash(sd) : hash,
+                      fatal);
 }
 
 Variant ObjectData::o_root_invoke(CStrRef s, CArrRef params,
@@ -419,39 +436,74 @@ Variant ObjectData::o_root_invoke(CStrRef s, CArrRef params,
                                   bool fatal /* = true */) {
   StringData *sd = s.get();
   ASSERT(sd && sd->data());
-  return o_root_invoke(sd->data(), params,
-                       hash < 0 ? StringData::Hash(sd) : hash, fatal);
+  return o_root_invoke_mil(sd->data(), params,
+                           hash < 0 ? StringData::Hash(sd) : hash, fatal);
 }
 
 Variant ObjectData::o_invoke_few_args(CStrRef s, int64 hash, int count,
                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
   StringData *sd = s.get();
   ASSERT(sd && sd->data());
-  return o_invoke_few_args(sd->data(), hash < 0 ? StringData::Hash(sd) : hash,
-                           count, INVOKE_FEW_ARGS_PASS_ARGS);
+  return o_invoke_few_args_mil(sd->data(),
+                               hash < 0 ? StringData::Hash(sd) : hash,
+                               count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
 Variant ObjectData::o_root_invoke_few_args(CStrRef s, int64 hash, int count,
                                            INVOKE_FEW_ARGS_IMPL_ARGS) {
   StringData *sd = s.get();
   ASSERT(sd && sd->data());
-  return o_root_invoke_few_args(sd->data(),
-                                hash < 0 ? StringData::Hash(sd) : hash,
-                                count, INVOKE_FEW_ARGS_PASS_ARGS);
+  return o_root_invoke_few_args_mil(sd->data(),
+                                    hash < 0 ? StringData::Hash(sd) : hash,
+                                    count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
-Variant ObjectData::o_invoke(const char *s, CArrRef params, int64 hash,
+Variant ObjectData::o_invoke(MethodIndex methodIndex, const char *s,
+                             CArrRef params, int64 hash,
                              bool fatal /* = true */) {
+  if (RuntimeOption::FastMethodCall) {
+    // can only be called with a valid methodIndex
+    s = methodIndexLookupReverse(methodIndex);
+  }
   return doRootCall(s, params, fatal);
 }
 
-Variant ObjectData::o_root_invoke(const char *s, CArrRef params, int64 hash,
-                                  bool fatal /* = true */) {
-  return o_invoke(s, params, hash, fatal);
+// This is not the base o_invoke, it's a redispatch
+// to handle a dynamic method name.
+Variant ObjectData::o_invoke_mil(const char *s,
+                                 CArrRef params, int64 hash,
+                                 bool fatal /* = true */) {
+  MethodIndex methodIndex (MethodIndex::fail());
+  if (RuntimeOption::FastMethodCall) {
+    methodIndex = methodIndexExists(s);
+    // if the method doesn't exist anywhere, __call is the only
+    // choice no matter where we are in the hierarchy
+    if (methodIndex.isFail()) return doRootCall(s, params, fatal);
+  }
+  // redispatch, not necessarily ObjectData::o_invoke
+  return o_invoke(methodIndex, s, params, hash, fatal);
 }
 
-Variant ObjectData::o_invoke_ex(const char *clsname, const char *s,
-                                CArrRef params, int64 hash,
+Variant ObjectData::o_root_invoke(MethodIndex methodIndex,
+                                  const char *s, CArrRef params, int64 hash,
+                                  bool fatal /* = true */) {
+  return o_invoke(methodIndex, s, params, hash, fatal);
+}
+
+Variant ObjectData::o_root_invoke_mil(const char *s, CArrRef params, int64 hash,
+                                      bool fatal /* = true */) {
+  MethodIndex methodIndex(MethodIndex::fail());
+  if (RuntimeOption::FastMethodCall) {
+    methodIndex = methodIndexExists(s);
+    if (methodIndex.isFail()) {
+      return doRootCall(s, params, fatal);
+    }
+  }
+  return o_root_invoke(methodIndex, s, params, hash, fatal);
+}
+
+Variant ObjectData::o_invoke_ex(const char *clsname, MethodIndex methodIndex ,
+                                const char *s, CArrRef params, int64 hash,
                                 bool fatal /* = true */) {
   if (fatal) {
     throw InvalidClassException(clsname);
@@ -460,39 +512,58 @@ Variant ObjectData::o_invoke_ex(const char *clsname, const char *s,
   }
 }
 
-Variant ObjectData::o_invoke_few_args(const char *s, int64 hash, int count,
+Variant ObjectData::o_invoke_ex_mil(const char *clsname,
+                                    const char *s, CArrRef params, int64 hash,
+                                    bool fatal /* = true */) {
+  MethodIndex methodIndex(MethodIndex::fail());
+  if (RuntimeOption::FastMethodCall) {
+    methodIndex = methodIndexExists(s);
+    if (methodIndex.isFail()) {
+      if (fatal) {
+        throw InvalidClassException(clsname);
+      } else {
+        return false;
+      }
+    }
+  }
+  return o_invoke_ex(clsname, methodIndex, s, params, hash,
+                     fatal);
+}
+
+Variant ObjectData::o_invoke_few_args(MethodIndex methodIndex, const char *s,
+                                      int64 hash, int count,
                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
   switch (count) {
   case 0: {
-    return ObjectData::o_invoke(s, Array(), hash);
+    return ObjectData::o_invoke(methodIndex, s, Array(), hash);
   }
   case 1: {
     Array params(ArrayInit(1, true).set(0, a0).create());
-    return ObjectData::o_invoke(s, params, hash);
+    return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
   case 2: {
     Array params(ArrayInit(2, true).set(0, a0).set(1, a1).create());
-    return ObjectData::o_invoke(s, params, hash);
+    return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
   case 3: {
     Array params(ArrayInit(3, true).set(0, a0).set(1, a1).set(2, a2).create());
-    return ObjectData::o_invoke(s, params, hash);
+    return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
 #if INVOKE_FEW_ARGS_COUNT > 3
   case 4: {
     Array params(ArrayInit(4, true).set(0, a0).set(1, a1).set(2, a2).
                                     set(3, a3).create());
-    return ObjectData::o_invoke(s, params, hash);
+    return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
   case 5: {
     Array params(ArrayInit(5, true).set(0, a0).set(1, a1).set(2, a2).
                                     set(3, a3).set(4, a4).create());
-    return ObjectData::o_invoke(s, params, hash);
+    return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
   case 6: {
     Array params(ArrayInit(6, true).set(0, a0).set(1, a1).set(2, a2).
                                     set(3, a3).set(4, a4).set(5, a5).create());
-    return ObjectData::o_invoke(s, params, hash);
+    return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
 #endif
 #if INVOKE_FEW_ARGS_COUNT > 6
@@ -500,26 +571,26 @@ Variant ObjectData::o_invoke_few_args(const char *s, int64 hash, int count,
     Array params(ArrayInit(7, true).set(0, a0).set(1, a1).set(2, a2).
                                     set(3, a3).set(4, a4).set(5, a5).
                                     set(6, a6).create());
-    return ObjectData::o_invoke(s, params, hash);
+    return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
   case 8: {
     Array params(ArrayInit(8, true).set(0, a0).set(1, a1).set(2, a2).
                                     set(3, a3).set(4, a4).set(5, a5).
                                     set(6, a6).set(7, a7).create());
-    return ObjectData::o_invoke(s, params, hash);
+    return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
   case 9: {
     Array params(ArrayInit(9, true).set(0, a0).set(1, a1).set(2, a2).
                                     set(3, a3).set(4, a4).set(5, a5).
                                     set(6, a6).set(7, a7).set(8, a8).create());
-    return ObjectData::o_invoke(s, params, hash);
+    return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
   case 10: {
     Array params(ArrayInit(10, true).set(0, a0).set(1, a1).set(2, a2).
                                      set(3, a3).set(4, a4).set(5, a5).
                                      set(6, a6).set(7, a7).set(8, a8).
                                      set(9, a9).create());
-    return ObjectData::o_invoke(s, params, hash);
+    return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
 #endif
   default:
@@ -528,9 +599,103 @@ Variant ObjectData::o_invoke_few_args(const char *s, int64 hash, int count,
   return null;
 }
 
-Variant ObjectData::o_root_invoke_few_args(const char *s, int64 hash, int count,
+Array ObjectData::collectArgs(int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  switch (count) {
+  case 0: {
+    return Array();
+  }
+  case 1: {
+    return Array (ArrayInit(1, true).set(0, a0).create());
+  }
+  case 2: {
+    return Array (ArrayInit(2, true).set(0, a0).set(1, a1).create());
+  }
+  case 3: {
+    return Array (ArrayInit(3, true).set(0, a0).set(1, a1).set(2, a2).create());
+  }
+#if INVOKE_FEW_ARGS_COUNT > 3
+  case 4: {
+    return Array (ArrayInit(4, true).set(0, a0).set(1, a1).set(2, a2).
+                                    set(3, a3).create());
+  }
+  case 5: {
+    return Array(ArrayInit(5, true).set(0, a0).set(1, a1).set(2, a2).
+                                    set(3, a3).set(4, a4).create());
+  }
+  case 6: {
+    return Array (ArrayInit(6, true).set(0, a0).set(1, a1).set(2, a2).
+                                    set(3, a3).set(4, a4).set(5, a5).create());
+  }
+#endif
+#if INVOKE_FEW_ARGS_COUNT > 6
+  case 7: {
+    return Array (ArrayInit(7, true).set(0, a0).set(1, a1).set(2, a2).
+                                    set(3, a3).set(4, a4).set(5, a5).
+                                    set(6, a6).create());
+  }
+  case 8: {
+    return Array (ArrayInit(8, true).set(0, a0).set(1, a1).set(2, a2).
+                                    set(3, a3).set(4, a4).set(5, a5).
+                                    set(6, a6).set(7, a7).create());
+  }
+  case 9: {
+    return Array (ArrayInit(9, true).set(0, a0).set(1, a1).set(2, a2).
+                                    set(3, a3).set(4, a4).set(5, a5).
+                                    set(6, a6).set(7, a7).set(8, a8).create());
+  }
+  case 10: {
+    return Array (ArrayInit(10, true).set(0, a0).set(1, a1).set(2, a2).
+                                     set(3, a3).set(4, a4).set(5, a5).
+                                     set(6, a6).set(7, a7).set(8, a8).
+                                     set(9, a9).create());
+  }
+#endif
+  default:
+    ASSERT(false);
+  }
+  return null;
+}
+
+Variant ObjectData::o_invoke_few_args_mil(const char *s,
+                                          int64 hash, int count,
+                                          INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (RuntimeOption::FastMethodCall) {
+    MethodIndex methodIndex = methodIndexExists(s);
+    if (methodIndex.isFail()) {
+      // FMC: must test this
+      return doRootCall(s, collectArgs(count, INVOKE_FEW_ARGS_PASS_ARGS),
+                        true);
+    }
+    return o_invoke_few_args(methodIndex, s, hash, count,
+                             INVOKE_FEW_ARGS_PASS_ARGS);
+  }
+  else
+    return o_invoke_few_args(MethodIndex::fail(), s, hash, count,
+                             INVOKE_FEW_ARGS_PASS_ARGS);
+}
+
+Variant ObjectData::o_root_invoke_few_args(MethodIndex methodIndex,
+                                           const char *s,
+                                           int64 hash, int count,
                                            INVOKE_FEW_ARGS_IMPL_ARGS) {
-  return o_invoke_few_args(s, hash, count, INVOKE_FEW_ARGS_PASS_ARGS);
+  return o_invoke_few_args(methodIndex, s, hash, count,
+                           INVOKE_FEW_ARGS_PASS_ARGS);
+}
+Variant ObjectData::o_root_invoke_few_args_mil(const char *s,
+                                               int64 hash, int count,
+                                               INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (RuntimeOption::FastMethodCall) {
+    MethodIndex methodIndex = methodIndexExists(s);
+    if (methodIndex.isFail()) {
+      // FMC: broken, don't know what happens here.
+      return doRootCall(s, collectArgs(count, INVOKE_FEW_ARGS_PASS_ARGS),
+                        true);
+    }
+    return o_root_invoke_few_args(methodIndex, s, hash, count,
+                                  INVOKE_FEW_ARGS_PASS_ARGS);
+  }
+  return o_root_invoke_few_args(MethodIndex::fail(), s, hash, count,
+                                INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
 Variant ObjectData::o_invoke_from_eval(const char *s,
@@ -538,8 +703,17 @@ Variant ObjectData::o_invoke_from_eval(const char *s,
                                        const Eval::FunctionCallExpression *call,
                                        int64 hash,
                                        bool fatal /* = true */) {
-  return o_invoke(s, call->getParams(env), hash, fatal);
+  MethodIndex methodIndex(MethodIndex::fail());
+  if (RuntimeOption::FastMethodCall) {
+    methodIndex = methodIndexExists(s);
+    if (methodIndex.isFail()) {
+      return doRootCall(s, call->getParams(env), fatal);
+    }
+  }
+  return o_invoke(methodIndex, s, call->getParams(env), hash,
+                  fatal);
 }
+
 
 Variant ObjectData::o_throw_fatal(const char *msg) {
   throw_fatal(msg);
@@ -561,7 +735,8 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
               serializer->getType() == VariableSerializer::APCSerialize) &&
              o_instanceof("serializable")) {
     Variant ret =
-      const_cast<ObjectData*>(this)->o_invoke("serialize", Array(), -1);
+      const_cast<ObjectData*>(this)->o_invoke_mil(
+                                              "serialize", Array(), -1);
     if (ret.isString()) {
       serializer->writeSerializableObject(o_getClassName(), ret.toString());
     } else if (ret.isNull()) {
@@ -737,13 +912,17 @@ Variant ObjectData::t___clone() {
   return null;
 }
 
-Variant ExtObjectData::o_root_invoke(const char *s, CArrRef ps, int64 h,
+Variant ExtObjectData::o_root_invoke(MethodIndex methodIndex, const char *s,
+                                     CArrRef ps, int64 h,
     bool f /* = true */) {
-  return root->o_invoke(s, ps, h, f);
+  return root->o_invoke(methodIndex, s, ps, h, f);
 }
-Variant ExtObjectData::o_root_invoke_few_args(const char *s, int64 h, int count,
+
+Variant ExtObjectData::o_root_invoke_few_args(MethodIndex methodIndex,
+                          const char *s, int64 h, int count,
                           INVOKE_FEW_ARGS_IMPL_ARGS) {
-  return root->o_invoke_few_args(s, h, count, INVOKE_FEW_ARGS_PASS_ARGS);
+  return root->o_invoke_few_args(methodIndex, s, h, count,
+                                 INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
 Object ObjectData::fiberMarshal(FiberReferenceMap &refMap) const {

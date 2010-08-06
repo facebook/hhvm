@@ -607,3 +607,19 @@ bool TestCodeError::TestBadArgumentType() {
 
   return true;
 }
+
+bool TestCodeError::TestUndefinedMethod() {
+  return true;
+  // compiler only test, so can't use here
+#if 0
+  VE(UndefinedMethod,
+     "<?php "
+     "class Foo {"
+     "}"
+     "$f = new Foo();"
+     "$f->undefinedMethod();");
+
+  return true;
+#endif
+}
+

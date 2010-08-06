@@ -31,6 +31,11 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+bool fastMethodCall = true;
+extern const MethodIndex methodIndexMapInit[];
+const MethodIndex methodIndexMapInit[] = {MethodIndex(0,0)};
+const char * methodIndexMapInitName[] = {NULL};
+
 // Used by test_ext_preg
 static String test_preg_rep(CStrRef a, CStrRef b, CStrRef c) {
   return concat(f_strtoupper(c), a);
@@ -276,7 +281,12 @@ Variant invoke(const char *function, CArrRef params, int64 hash,
   return true;
 }
 
-Variant invoke_static_method(const char* cls, const char *function,
+Variant invoke_static_method(const char* cls, MethodIndex, const char *function,
+                             CArrRef params, bool fatal) {
+  return null;
+}
+
+Variant invoke_static_method_mil(const char* cls, const char *function,
                              CArrRef params, bool fatal) {
   return null;
 }

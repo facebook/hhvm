@@ -161,14 +161,15 @@ Variant f_iterator_apply(CVarRef obj, CVarRef func,
     return false;
   }
   Object pobj = obj.toObject();
-  pobj->o_invoke("rewind", null_array, -1);
+  pobj->o_invoke_mil("rewind", null_array, -1);
   int64 count = 0;
-  while (same(pobj->o_invoke("valid", null_array, -1), true)) {
+  while (same(pobj->o_invoke_mil("valid",
+                             null_array, -1), true)) {
     if (!same(f_call_user_func_array(func, params), true)) {
       break;
     }
     ++count;
-    pobj->o_invoke("next", null_array, -1);
+    pobj->o_invoke_mil("next", null_array, -1);
   }
   return count;
 }
@@ -178,11 +179,12 @@ Variant f_iterator_count(CVarRef obj) {
     return false;
   }
   Object pobj = obj.toObject();
-  pobj->o_invoke("rewind", null_array, -1);
+  pobj->o_invoke_mil("rewind", null_array, -1);
   int64 count = 0;
-  while (same(pobj->o_invoke("valid", null_array, -1), true)) {
+  while (same(pobj->o_invoke_mil("valid",
+                             null_array, -1), true)) {
     ++count;
-    pobj->o_invoke("next", null_array, -1);
+    pobj->o_invoke_mil("next", null_array, -1);
   }
   return count;
 }
@@ -193,16 +195,19 @@ Variant f_iterator_to_array(CVarRef obj, bool use_keys /* = true */) {
   }
   Array ret(Array::Create());
   Object pobj = obj.toObject();
-  pobj->o_invoke("rewind", null_array, -1);
-  while (same(pobj->o_invoke("valid", null_array, -1), true)) {
-    Variant val = pobj->o_invoke("current", null_array, -1);
+  pobj->o_invoke_mil("rewind", null_array, -1);
+  while (same(pobj->o_invoke_mil("valid",
+                             null_array, -1), true)) {
+    Variant val = pobj->o_invoke_mil("current",
+                                 null_array, -1);
     if (use_keys) {
-      Variant key = pobj->o_invoke("key", null_array, -1);
+      Variant key = pobj->o_invoke_mil("key",
+                                   null_array, -1);
       ret.set(key, val);
     } else {
       ret.append(val);
     }
-    pobj->o_invoke("next", null_array, -1);
+    pobj->o_invoke_mil( "next", null_array, -1);
   }
   return ret;
 }

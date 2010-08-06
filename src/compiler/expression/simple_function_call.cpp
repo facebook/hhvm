@@ -1153,6 +1153,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
     if (!m_class && m_className.empty()) {
       if (!m_dynamicInvoke && m_redeclared) {
         if (canInvokeFewArgs()) {
+          // FMC unaddressed, need test case
           cg_printf("%s->%s%s_few_args(", cg.getGlobals(ar),
                     Option::InvokePrefix, cg.formatLabel(m_name).c_str());
           int left = Option::InvokeFewArgsCount;
@@ -1183,37 +1184,45 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
           cg_printf("invoke_builtin(\"%s\", ", cg.escapeLabel(m_name).c_str());
         }
       } else {
+        // ordinary function call, by name
         cg_printf("invoke(\"%s\", ", cg.escapeLabel(m_name).c_str());
       }
     } else {
+      // FMC: test fail case
+      const MethodSlot *ms = ar->getOrAddMethodSlot(m_name);
       bool inObj = m_parentClass && ar->getClassScope() &&
         !ar->getFunctionScope()->isStatic();
       if (m_redeclaredClass) {
         if (inObj) {  // parent is redeclared
-          cg_printf("parent->%sinvoke(", Option::ObjectPrefix);
+          cg_printf("parent->%sinvoke%s(", Option::ObjectPrefix,
+                    (ms->isError() ? "_mil" : ""));
         } else {
-          cg_printf("%s->%s%s->%sinvoke(",
+          cg_printf("%s->%s%s->%sinvoke%s(",
                     cg.getGlobals(ar),
                     Option::ClassStaticsObjectPrefix,
                     cg.formatLabel(m_className).c_str(),
-                    Option::ObjectStaticPrefix);
+                    Option::ObjectStaticPrefix,
+                    (ms->isError() ? "_mil" : ""));
         }
       } else if (m_validClass) {
         assert(cls);
         if (inObj) {
-          cg_printf("%s%s::%sinvoke(",
+          cg_printf("%s%s::%sinvoke%s(",
                     Option::ClassPrefix, cls->getId(cg).c_str(),
-                    Option::ObjectPrefix);
+                    Option::ObjectPrefix,
+                    (ms->isError() ? "_mil" : ""));
         } else {
-          cg_printf("%s%s::%sinvoke(",
+          cg_printf("%s%s::%sinvoke%s(",
                     Option::ClassPrefix, cls->getId(cg).c_str(),
-                    Option::ObjectStaticPrefix);
+                    Option::ObjectStaticPrefix,
+                    (ms->isError() ? "_mil" : ""));
 
         }
       } else {
         if (m_class) {
           assert(!m_safe);
-          cg_printf("INVOKE_STATIC_METHOD(get_static_class_name(");
+          cg_printf("INVOKE_STATIC_METHOD%s(get_static_class_name(",
+                    (ms->isError() ? "_mil" : ""));
           if (m_class->is(KindOfScalarExpression)) {
             ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
                               getString().c_str(), "static") == 0);
@@ -1223,14 +1232,17 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
           }
           cg_printf("), ");
         } else {
-          cg_printf("invoke_static_method(");
+          // FMC test this
+          cg_printf("invoke_static_method%s(",
+                  (ms->isError() ? "_mil" : ""));
         }
       }
       if ((m_redeclaredClass || m_validClass) ? !inObj : !m_class) {
         cg_printf("\"%s\", ", cg.escapeLabel(m_className).c_str());
       }
 
-      cg_printf("\"%s\",", cg.escapeLabel(m_name).c_str());
+      cg_printf("%s \"%s\",",  ms->runObjParam().c_str(),
+                cg.escapeLabel(m_name).c_str());
     }
     if (!skipParams) {
       if ((!m_params) || (m_params->getCount() == 0)) {
@@ -1241,6 +1253,12 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       }
       if (needHash) {
         if (!m_class && m_className.empty()) {
+      // FMC need to test m_redeclared, might not be valid here any more
+      // need to assert that eval style invoke was generated at least
+      // original clause had two checks, verify !m_className.empty() case.
+      // Merge lost my change, need to figure this out all over again.
+      // Maybe just this: needHash = !(m_redeclared && !dynamicInvoke);
+
           needHash = !(m_redeclared && !m_dynamicInvoke);
         } else {
           needHash = m_validClass || m_redeclaredClass;

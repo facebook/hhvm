@@ -636,16 +636,16 @@ ELSE (_boost_IN_CACHE)
     endif()
   endif(Boost_COMPILER)
 
-  IF(Boost_MINOR_VERSION AND NOT WIN32)
-    IF(${Boost_MINOR_VERSION} GREATER 41)
+
+  if(${Boost_MINOR_VERSION} GREATER 41 AND NOT WIN32)
       set (_boost_MULTITHREADED "")
-    ENDIF()
   else()
     SET (_boost_MULTITHREADED "-mt")
     if( NOT Boost_USE_MULTITHREADED )
       set (_boost_MULTITHREADED "")
     endif()
   endif()
+
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
       "_boost_MULTITHREADED = ${_boost_MULTITHREADED}")

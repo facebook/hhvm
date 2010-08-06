@@ -849,7 +849,7 @@ walkTrace(TraceIt begin, TraceIt end, Stats& stats, Tracer& tracer)
 class TraceProfiler : public Profiler {
 public:
   struct TraceEnt {
-    const char *symbol;	// null on function return
+    const char *symbol; // null on function return
     int64 wall_time;
     int64 cpu;
     int64 memory;

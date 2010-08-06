@@ -20,6 +20,14 @@ int main() { return 0; }" HAVE_GCC_43)
 
 endif()
 
+LIST(APPEND CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
+
+if(APPLE)
+	if(EXISTS "/opt/local/var/macports/")
+		LIST (APPEND CMAKE_PREFIX_PATH "/opt/local")
+	endif()
+endif()
+
 include(HPHPFunctions)
 include(HPHPFindLibs)
 

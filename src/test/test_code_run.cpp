@@ -289,6 +289,13 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
       return true;
     }
 
+    if (err.find("symbol lookup error:") != string::npos &&
+        err.find("undefined symbol: _ZN4HPHP14Synchronizable4waitEv") !=
+        string::npos) {
+      printf("%s: Ignoring loader error: %s\n", fullPath.c_str(), err.c_str());
+      err = "";
+    }
+
     if (actual != expected || !err.empty()) {
       printf("======================================\n"
              "%s:\n"

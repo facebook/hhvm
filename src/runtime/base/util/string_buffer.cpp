@@ -24,6 +24,7 @@
 #include <runtime/base/zend/zend_functions.h>
 #ifdef TAINTED
 #include <runtime/base/tainting.h>
+#include <runtime/base/propagate_tainting.h>
 #include <runtime/base/tainted_metadata.h>
 #endif
 
@@ -35,7 +36,7 @@ StringBuffer::StringBuffer(int initialSize /* = 1024 */)
   ASSERT(initialSize > 0);
   m_buffer = (char *)Util::safe_malloc(initialSize + 1);
   #ifdef TAINTED
-  m_tainted = false;
+  m_tainting = default_tainting;
   m_tainted_metadata = NULL;
   #endif
 }
@@ -60,7 +61,7 @@ StringBuffer::StringBuffer(const char *filename)
     }
   }
   #ifdef TAINTED
-  m_tainted = false;
+  m_tainting = default_tainting;
   m_tainted_metadata = NULL;
   #endif
 }
@@ -68,7 +69,7 @@ StringBuffer::StringBuffer(const char *filename)
 StringBuffer::StringBuffer(char *data, int len)
   : m_buffer(data), m_size(len), m_pos(len) {
   #ifdef TAINTED
-  m_tainted = false;
+  m_tainting = default_tainting;
   m_tainted_metadata = NULL;
   #endif
 }
@@ -151,7 +152,7 @@ void StringBuffer::absorb(StringBuffer &buf) {
 void StringBuffer::reset() {
   m_pos = 0;
 #ifdef TAINTED
-  m_tainted = false;
+  m_tainting = default_tainting;
   m_tainted_metadata = NULL;
 #endif
 }
@@ -295,16 +296,25 @@ void StringBuffer::read(File* in, int page_size /* = 1024 */) {
 }
 
 #ifdef TAINTED
-void StringBuffer::taint() {
-  untaint(); // we erase all information, in particular metadata
-  m_tainted = true;
-  m_tainted_metadata = new TaintedMetadata();
+void StringBuffer::setTaint(bitstring b){
+  m_tainting = m_tainting | b;
+  if(is_tainting_metadata(b)){
+    // resetting the metadata
+    if(m_tainted_metadata != NULL){
+      delete m_tainted_metadata;
+      m_tainted_metadata = NULL;
+    }
+    m_tainted_metadata = new TaintedMetadata();
+  }
 }
-void StringBuffer::untaint() {
-  m_tainted = false;
-  if(m_tainted_metadata != NULL) {
-    delete m_tainted_metadata;
-    m_tainted_metadata = NULL;
+void StringBuffer::unsetTaint(bitstring b){
+  m_tainting = m_tainting & (~b);
+  if(is_tainting_metadata(b)){
+    // erasing the metadata
+    if(m_tainted_metadata != NULL){
+      delete m_tainted_metadata;
+      m_tainted_metadata = NULL;
+    }
   }
 }
 TaintedMetadata* StringBuffer::getTaintedMetadata() const {

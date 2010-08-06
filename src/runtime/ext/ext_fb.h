@@ -43,13 +43,18 @@ Variant f_xhprof_sample_disable();
 void f_fb_load_local_databases(CArrRef servers);
 Array f_fb_parallel_query(CArrRef sql_map, int max_thread = 50, bool combine_result = true, bool retry_query_on_fail = true, int connect_timeout = -1, int read_timeout = -1, bool timeout_in_ms = false);
 Array f_fb_crossall_query(CStrRef sql, int max_thread = 50, bool retry_query_on_fail = true, int connect_timeout = -1, int read_timeout = -1, bool timeout_in_ms = false);
-void f_fb_taint(CStrRef str);
-void f_fb_untaint(CStrRef str);
-bool f_fb_is_tainted(CStrRef str);
+void f_fb_set_taint(Variant str, int taint);
+void f_fb_unset_taint(Variant str, int taint);
+int f_fb_get_taint(CStrRef str);
+Variant f_fb_const_fetch(CVarRef key);
 extern const int64 k_FB_UNSERIALIZE_NONSTRING_VALUE;
 extern const int64 k_FB_UNSERIALIZE_UNEXPECTED_END;
 extern const int64 k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;
 extern const int64 k_FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
+extern const int64 k_XHPROF_FLAGS_NO_BUILTINS;
+extern const int64 k_XHPROF_FLAGS_CPU;
+extern const int64 k_XHPROF_FLAGS_MEMORY;
+extern const int64 k_XHPROF_FLAGS_VTSC;
 
 ///////////////////////////////////////////////////////////////////////////////
 

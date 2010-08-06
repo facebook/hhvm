@@ -27,7 +27,7 @@
 #include <runtime/base/runtime_option.h>
 #include <util/case_insensitive.h>
 #ifdef TAINTED
-#include <runtime/base/tainting.h>
+#include <runtime/base/propagate_tainting.h>
 #endif
 
 #ifdef __APPLE__

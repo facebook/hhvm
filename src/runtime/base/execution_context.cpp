@@ -182,7 +182,7 @@ void ExecutionContext::write(CStrRef s) {
   /* called by the PHP function echo()
    * main check point for the tainting analysis
    */
-  if(s.isTainted()) {
+  if(is_tainted_html(s.getTaint())) {
     std::string meta = s.getTaintedMetadata()->stringOfTaintedMetadata();
     meta = meta + "  the echoed string is : '" + s.data()
            + "'\n\n[end of the echoed string]\n";

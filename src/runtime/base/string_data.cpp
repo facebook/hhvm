@@ -37,7 +37,7 @@ StringData::StringData(const char *data,
                        StringDataMode mode /* = AttachLiteral */)
   : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
   #ifdef TAINTED
-  m_tainted = false;
+  m_tainting = default_tainting;
   m_tainted_metadata = NULL;
   #endif
   assign(data, mode);
@@ -46,7 +46,7 @@ StringData::StringData(const char *data,
 StringData::StringData(SharedVariant *shared)
   : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
   #ifdef TAINTED
-  m_tainted = false;
+  m_tainting = default_tainting;
   m_tainted_metadata = NULL;
   #endif
   ASSERT(shared);
@@ -60,7 +60,7 @@ StringData::StringData(SharedVariant *shared)
 StringData::StringData(const char *data, int len, StringDataMode mode)
   : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
   #ifdef TAINTED
-  m_tainted = false;
+  m_tainting = default_tainting;
   m_tainted_metadata = NULL;
   #endif
   assign(data, len, mode);
@@ -349,16 +349,25 @@ bool StringData::isValidVariableName() const {
 }
 
 #ifdef TAINTED
-void StringData::taint() {
-  untaint(); // we erase all information, in particular metadata
-  m_tainted = true;
-  m_tainted_metadata = new TaintedMetadata();
+void StringData::setTaint(bitstring b){
+  m_tainting = m_tainting | b;
+  if(is_tainting_metadata(b)){
+    // resetting the metadata
+    if(m_tainted_metadata != NULL){
+      delete m_tainted_metadata;
+      m_tainted_metadata = NULL;
+    }
+    m_tainted_metadata = new TaintedMetadata();
+  }
 }
-void StringData::untaint() {
-  m_tainted = false;
-  if(m_tainted_metadata != NULL) {
-    delete m_tainted_metadata;
-    m_tainted_metadata = NULL;
+void StringData::unsetTaint(bitstring b){
+  m_tainting = m_tainting & (~b);
+  if(is_tainting_metadata(b)){
+    // erasing the metadata
+    if(m_tainted_metadata != NULL){
+      delete m_tainted_metadata;
+      m_tainted_metadata = NULL;
+    }
   }
 }
 TaintedMetadata* StringData::getTaintedMetadata() const {

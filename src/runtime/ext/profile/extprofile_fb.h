@@ -115,19 +115,19 @@ inline Array x_fb_crossall_query(CStrRef sql, int max_thread = 50, bool retry_qu
   return f_fb_crossall_query(sql, max_thread, retry_query_on_fail, connect_timeout, read_timeout, timeout_in_ms);
 }
 
-inline void x_fb_taint(CStrRef str) {
-  FUNCTION_INJECTION_BUILTIN(fb_taint);
-  f_fb_taint(str);
+inline void x_fb_set_taint(Variant str, int taint) {
+  FUNCTION_INJECTION_BUILTIN(fb_set_taint);
+  f_fb_set_taint(ref(str), taint);
 }
 
-inline void x_fb_untaint(CStrRef str) {
-  FUNCTION_INJECTION_BUILTIN(fb_untaint);
-  f_fb_untaint(str);
+inline void x_fb_unset_taint(Variant str, int taint) {
+  FUNCTION_INJECTION_BUILTIN(fb_unset_taint);
+  f_fb_unset_taint(ref(str), taint);
 }
 
-inline bool x_fb_is_tainted(CStrRef str) {
-  FUNCTION_INJECTION_BUILTIN(fb_is_tainted);
-  return f_fb_is_tainted(str);
+inline int x_fb_get_taint(CStrRef str) {
+  FUNCTION_INJECTION_BUILTIN(fb_get_taint);
+  return f_fb_get_taint(str);
 }
 
 inline Variant x_fb_const_fetch(CVarRef key) {

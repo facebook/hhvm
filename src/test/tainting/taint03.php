@@ -1,5 +1,5 @@
 <?php
   $a="bad";
-  fb_taint($a);
+  fb_set_taint($a, 0x1);
   $c=$a . "good";
   echo $c; // tainted

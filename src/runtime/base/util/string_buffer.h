@@ -107,10 +107,9 @@ public:
   /**
    * Tainting dynamic analysis
    */
-  bool isTainted() const { return m_tainted; }
-  void taint();
-  void untaint();
-
+  bitstring getTaint() const { return m_tainting; }
+  void setTaint(bitstring b);
+  void unsetTaint(bitstring b);
   TaintedMetadata* getTaintedMetadata() const;
   #endif
 
@@ -124,7 +123,7 @@ private:
   int m_size;
   int m_pos;
   #ifdef TAINTED
-  bool m_tainted;
+  bitstring m_tainting;
   TaintedMetadata* m_tainted_metadata;
   #endif
 

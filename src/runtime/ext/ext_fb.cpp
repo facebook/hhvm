@@ -830,23 +830,39 @@ Variant f_fb_get_code_coverage() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// TODOjjeannin
 void f_fb_taint(CStrRef str){
-  #ifdef TAINTED
-  str.taint();
-  #endif
+  printf("Warning: fb_taint is deprecated\n");
 }
-
 void f_fb_untaint(CStrRef str){
+  printf("Warning: fb_untaint is deprecated\n");
+}
+bool f_fb_is_tainted(CStrRef str){
+  printf("Warning: fb_is_tainted is deprecated\n");
+  return false;
+}
+
+void f_fb_set_taint(Variant str, int taint){
   #ifdef TAINTED
-  str.untaint();
+  String s=str.toString();
+  s.setTaint(taint);
+  str=s;
   #endif
 }
 
-bool f_fb_is_tainted(CStrRef str){
+void f_fb_unset_taint(Variant str, int taint){
   #ifdef TAINTED
-  return str.isTainted();
+  String s=str.toString();
+  s.unsetTaint(taint);
+  str=s;
+  #endif
+}
+
+int f_fb_get_taint(CStrRef str){
+  #ifdef TAINTED
+  return str.getTaint();
   #else
-  return false;
+  return 0x0;
   #endif
 }
 
@@ -860,13 +876,13 @@ Variant f_fb_const_fetch(CVarRef key) {
   return const_data.fetch(k);
 }
 
+void const_load_set(Variant key, Variant value) {
+  const_data.set(key, value, false);
+}
+
 void const_load() {
   // after all loading
   const_load_set("zend_array_size", const_data.size());
-}
-
-void const_load_set(Variant key, Variant value) {
-  const_data.set(key, value, false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

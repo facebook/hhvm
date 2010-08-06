@@ -1,6 +1,6 @@
 <?php
   $a = "good\n";
-  if(fb_is_tainted($a)){
+  if(fb_get_taint($a) & 0x1){
     echo "a is tainted\n";
   } else {
     echo "a is not tainted\n";

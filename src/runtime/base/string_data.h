@@ -22,6 +22,9 @@
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/macros.h>
 #include <util/hash.h>
+#ifdef TAINTED
+#include <runtime/base/tainting.h>
+#endif
 
 namespace HPHP {
 
@@ -88,7 +91,7 @@ class StringData {
 
   StringData() : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
     #ifdef TAINTED
-    m_tainted = false;
+    m_tainting = default_tainting;
     m_tainted_metadata = NULL;
     #endif
   }
@@ -134,9 +137,9 @@ class StringData {
    */
   // These functions are directly called from the functions in type_string.h
   // The real work is done here.
-  bool isTainted() const { return m_tainted; }
-  void taint();
-  void untaint();
+  bitstring getTaint() const { return m_tainting; }
+  void setTaint(bitstring b);
+  void unsetTaint(bitstring b);
   TaintedMetadata* getTaintedMetadata() const;
   #endif
 
@@ -213,8 +216,8 @@ class StringData {
     mutable int64  m_hash;   // precompute hash codes for static strings
   };
   #ifdef TAINTED
-  bool m_tainted;
-  TaintedMetadata* m_tainted_metadata; // NULL iff m_tainted = false
+  bitstring m_tainting;
+  TaintedMetadata* m_tainted_metadata;
   #endif
 
   void releaseData();

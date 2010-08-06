@@ -29,39 +29,22 @@
  *   metadata.
  */
 
-#include <runtime/base/types.h>
-#include <runtime/base/complex_types.h>
-#include <runtime/base/util/string_buffer.h>
+typedef int bitstring;
 
-namespace HPHP {
-bool propagate_tainting_aux(CStrRef orig, String& dest);
-/* 6 variants to avoid repetition:
- * propagate_tainting<i> propagates the tainting to dest whenever one of the
- * orig<j> is tainted; only the metadata and the tainting from the first
- * one which was tainted is kept
- */
-void propagate_tainting1(CStrRef orig, String& dest);
-void propagate_tainting2(CStrRef orig1, CStrRef orig2,
-                           String& dest);
-void propagate_tainting3(CStrRef orig1, CStrRef orig2,
-                           CStrRef orig3,
-                           String& dest);
-void propagate_tainting4(CStrRef orig1, CStrRef orig2,
-                           CStrRef orig3, CStrRef orig4,
-                           String& dest);
-void propagate_tainting5(CStrRef orig1, CStrRef orig2,
-                           CStrRef orig3, CStrRef orig4,
-                           CStrRef orig5,
-                           String& dest);
-void propagate_tainting6(CStrRef orig1, CStrRef orig2,
-                           CStrRef orig3, CStrRef orig4,
-                           CStrRef orig5, CStrRef orig6,
-                           String& dest);
+const bitstring default_tainting = 0x00; // 0000 TODOjjeannin
+const bitstring tainting_bit_metadata = 0x01;
+inline bool is_tainting_metadata(bitstring b){
+  if(b & tainting_bit_metadata){ return true; }
+  else { return false; }
+}
 
-void propagate_tainting2_buf(CStrRef orig1, StringBuffer const &orig2,
-                                            StringBuffer& dest);
-void propagate_tainting1_buf(StringBuffer const &orig, String& dest);
-void propagate_tainting1_bufbuf(StringBuffer const &orig, StringBuffer& dest);
+// TODOjjeannin: for now this has to be the same as tainting_bit_metadata
+// otherwise need to change ExecutionContext::write(CStrRef s) in
+// src/runtime/base/execution_context.cpp
+const bitstring tainting_bit_html = 0x01;
+inline bool is_tainted_html(bitstring b){
+  if(b & tainting_bit_html){ return true; }
+  else { return false; }
 }
 
 #endif

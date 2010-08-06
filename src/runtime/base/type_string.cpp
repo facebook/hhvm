@@ -667,26 +667,30 @@ void String::dump() {
   /**
    * Tainting dynamic analysis
    */
-  bool String::isTainted() const {
-    return m_px ? m_px->isTainted() : false;
+  bitstring String::getTaint() const {
+    return m_px ? m_px->getTaint() : default_tainting;
     // a null pointer should be considered untainted
   }
-  void String::taint() const {
+  void String::setTaint(bitstring b) const {
     if(m_px) {
-      m_px->taint();
-      getTaintedMetadata()->setTaintedOriginal(this);
-      getTaintedMetadata()->setTaintedPlace();
+      m_px->setTaint(b);
+      if(is_tainting_metadata(b)){
+        getTaintedMetadata()->setTaintedOriginal(this);
+        getTaintedMetadata()->setTaintedPlace();
+      }
     }
   }
-  void String::taint(CStrRef msg) const {
+  void String::setTaint(bitstring b, CStrRef msg) const {
     if(m_px) {
-      m_px->taint();
-      getTaintedMetadata()->setTaintedOriginal(this);
-      getTaintedMetadata()->setTaintedPlace(msg.toKey());
+      m_px->setTaint(b);
+      if(is_tainting_metadata(b)){
+        getTaintedMetadata()->setTaintedOriginal(this);
+        getTaintedMetadata()->setTaintedPlace(msg.toKey());
+      }
     }
   }
-  void String::untaint() const {
-    if(m_px) { m_px->untaint(); }
+  void String::unsetTaint(bitstring b) const {
+    if(m_px) { m_px->unsetTaint(b); }
   }
   TaintedMetadata* String::getTaintedMetadata() const {
     if(m_px) {

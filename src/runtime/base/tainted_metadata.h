@@ -72,7 +72,7 @@ class TaintedMetadata {
   // sets the current stacktrace as the tainted place
   void setTaintedPlace();
   void setTaintedPlace(const Variant place);
-  const Variant*  getTaintedPlace() const;
+  const Variant* getTaintedPlace() const;
 
   void addTaintedChanged();
   void addTaintedChanged(Array* st);

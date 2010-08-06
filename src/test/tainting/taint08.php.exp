@@ -2,7 +2,7 @@
 HipHop Warning:  Echoing a tainted string:
   the originally tainted string was : 'great'
   it was tainted at :
-    #0 fb_taint(), called at [/data/users/jjeannin/hphp/src/test/tainting/taint08.php:4]
+    #0 fb_set_taint(), called at [/data/users/jjeannin/hphp/src/test/tainting/taint08.php:4]
   it was successively modified at:
     #0 at [/data/users/jjeannin/hphp/src/test/tainting/taint08.php:5]
     ---
@@ -18,7 +18,7 @@ HipHop Warning:  Echoing a tainted string:
 worse great really greatHipHop Warning:  Echoing a tainted string:
   the originally tainted string was : 'great'
   it was tainted at :
-    #0 fb_taint(), called at [/data/users/jjeannin/hphp/src/test/tainting/taint08.php:4]
+    #0 fb_set_taint(), called at [/data/users/jjeannin/hphp/src/test/tainting/taint08.php:4]
   it was successively modified at:
     #0 at [/data/users/jjeannin/hphp/src/test/tainting/taint08.php:5]
     ---

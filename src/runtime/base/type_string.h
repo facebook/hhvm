@@ -302,18 +302,19 @@ public:
    * Tainting dynamic analysis
    */
  public:
+  // TODOjjeannin: comments
   // These isTainted, taint and untain functions are directly called by the
   // fb_is_tainted, fb_taint and fb_untaint functions of php.
   // See src/runtime/ext/ext_fb.cpp, functions f_fb_taint,
   // f_fb_untaint and f_fb_is_tainted for more details.
-  bool isTainted() const;
+  bitstring getTaint() const;
   // a call to taint() sets up the tainted metadata
   // taint() without argument is for a call to fb_taint in the PHP code
-  void taint() const;
+  void setTaint(bitstring b) const;
   // taint(msg) is for a tainting in the HPHP code with an error message
   // e.g., when creating the _GET and _POST arrays
-  void taint(CStrRef msg) const;
-  void untaint() const;
+  void setTaint(bitstring b, CStrRef msg) const;
+  void unsetTaint(bitstring b) const;
   TaintedMetadata* getTaintedMetadata() const;
   #endif
 };

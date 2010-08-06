@@ -103,11 +103,11 @@ f('fb_crossall_query', VariantMap,
 /////////////
 // tainting
 
-f('fb_taint', null, array('str' => String));
+f('fb_set_taint', null, array('str' => Variant | Reference, 'taint' => Int32));
 
-f('fb_untaint', null, array('str' => String));
+f('fb_unset_taint', null, array('str' => Variant | Reference, 'taint' => Int32));
 
-f('fb_is_tainted', Boolean, array('str' => String));
+f('fb_get_taint', Int32, array('str' => String));
 
 ///////////////////////////////////////////////////////////////////////////////
 // const index functions

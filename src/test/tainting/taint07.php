@@ -1,7 +1,7 @@
 <?php
   $d="worse ";
   $e="great";
-  fb_taint($e);
+  fb_set_taint($e, 0x1);
   $f=$d . $e;
   $f .= " really great";
   echo($f); // tainted

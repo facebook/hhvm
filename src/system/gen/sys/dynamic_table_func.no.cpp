@@ -566,6 +566,19 @@ Variant i_mb_convert_case(CArrRef params) {
     return (f_mb_convert_case(arg0, arg1, arg2));
   }
 }
+Variant i_fb_set_taint(CArrRef params) {
+  FUNCTION_INJECTION(fb_set_taint);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("fb_set_taint", count, 2, 2, 1);
+  const_cast<Array&>(params).escalate(true);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValueRef(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    return (f_fb_set_taint(ref(arg0), arg1), null);
+  }
+}
 Variant i_dir(CArrRef params) {
   FUNCTION_INJECTION(dir);
   int count __attribute__((__unused__)) = params.size();
@@ -2024,6 +2037,19 @@ Variant i_mysql_set_charset(CArrRef params) {
     if (count <= 1) return (f_mysql_set_charset(arg0));
     CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
     return (f_mysql_set_charset(arg0, arg1));
+  }
+}
+Variant i_fb_unset_taint(CArrRef params) {
+  FUNCTION_INJECTION(fb_unset_taint);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("fb_unset_taint", count, 2, 2, 1);
+  const_cast<Array&>(params).escalate(true);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValueRef(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    return (f_fb_unset_taint(ref(arg0), arg1), null);
   }
 }
 Variant i_dom_document_xinclude(CArrRef params) {
@@ -5075,17 +5101,6 @@ Variant i_memcache_get(CArrRef params) {
     if (count <= 2) return (f_memcache_get(arg0, arg1));
     CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
     return (f_memcache_get(arg0, arg1, ref(arg2)));
-  }
-}
-Variant i_fb_is_tainted(CArrRef params) {
-  FUNCTION_INJECTION(fb_is_tainted);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("fb_is_tainted", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_fb_is_tainted(arg0));
   }
 }
 Variant i_array_chunk(CArrRef params) {
@@ -9763,17 +9778,6 @@ Variant i_imagesy(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     return (f_imagesy(arg0));
-  }
-}
-Variant i_fb_taint(CArrRef params) {
-  FUNCTION_INJECTION(fb_taint);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("fb_taint", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_fb_taint(arg0), null);
   }
 }
 Variant i_mysql_get_client_info(CArrRef params) {
@@ -15143,6 +15147,17 @@ Variant i_mysql_select_db(CArrRef params) {
     if (count <= 1) return (f_mysql_select_db(arg0));
     CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
     return (f_mysql_select_db(arg0, arg1));
+  }
+}
+Variant i_fb_get_taint(CArrRef params) {
+  FUNCTION_INJECTION(fb_get_taint);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("fb_get_taint", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_fb_get_taint(arg0));
   }
 }
 Variant i_use_soap_error_handler(CArrRef params) {
@@ -20727,17 +20742,6 @@ Variant i_magickgetfilename(CArrRef params) {
     return (f_magickgetfilename(arg0));
   }
 }
-Variant i_fb_untaint(CArrRef params) {
-  FUNCTION_INJECTION(fb_untaint);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("fb_untaint", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_fb_untaint(arg0), null);
-  }
-}
 Variant i_magicksetimagegamma(CArrRef params) {
   FUNCTION_INJECTION(magicksetimagegamma);
   int count __attribute__((__unused__)) = params.size();
@@ -25452,6 +25456,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x5998E61D600D634DLL, drawaffine);
       break;
     case 847:
+      HASH_INVOKE(0x4F2D0EFF0D4B534FLL, fb_get_taint);
       HASH_INVOKE(0x5C8B3B9FA833934FLL, ldap_first_attribute);
       break;
     case 849:
@@ -26284,6 +26289,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 1508:
       HASH_INVOKE(0x3A9643992AC805E4LL, magickdrawimage);
       break;
+    case 1509:
+      HASH_INVOKE(0x470F990B218315E5LL, fb_unset_taint);
+      break;
     case 1510:
       HASH_INVOKE(0x6FE2E44FBC44E5E6LL, magickaddnoiseimage);
       HASH_INVOKE(0x08069ECE0EA3C5E6LL, imagecopymergegray);
@@ -26522,9 +26530,6 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 1714:
       HASH_INVOKE(0x0D669C546C0EC6B2LL, proc_terminate);
-      break;
-    case 1715:
-      HASH_INVOKE(0x3CEAA3516FE5D6B3LL, fb_untaint);
       break;
     case 1717:
       HASH_INVOKE(0x798B4197212456B5LL, bcpowmod);
@@ -28296,9 +28301,6 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3128:
       HASH_INVOKE(0x21564F9315F3FC38LL, drawsettextdecoration);
       break;
-    case 3129:
-      HASH_INVOKE(0x564BAAB63FE45C39LL, fb_taint);
-      break;
     case 3132:
       HASH_INVOKE(0x69488CC69B897C3CLL, hphp_recursiveiteratoriterator_getinneriterator);
       break;
@@ -28336,7 +28338,6 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3159:
       HASH_INVOKE(0x793259E03C37CC57LL, memcache_decrement);
       HASH_INVOKE(0x313E8EB28A111C57LL, hphp_splfileinfo_setinfoclass);
-      HASH_INVOKE(0x6E0ECBA9F415AC57LL, fb_is_tainted);
       break;
     case 3160:
       HASH_INVOKE(0x1B8C3DA27170DC58LL, dirname);
@@ -29151,6 +29152,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3763:
       HASH_INVOKE(0x7DB9D839ACE0DEB3LL, natsort);
       HASH_INVOKE(0x7379B5B97EC2EEB3LL, hypot);
+      break;
+    case 3764:
+      HASH_INVOKE(0x1F936B3C5406DEB4LL, fb_set_taint);
       break;
     case 3767:
       HASH_INVOKE(0x58B9EFA0FB35FEB7LL, stream_filter_prepend);
@@ -30468,6 +30472,26 @@ Variant ei_mb_convert_case(Eval::VariableEnvironment &env, const Eval::FunctionC
   }
   if (count <= 2) return (x_mb_convert_case(a0, a1));
   else return (x_mb_convert_case(a0, a1, a2));
+}
+Variant ei_fb_set_taint(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("fb_set_taint", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = ref((*it)->refval(env));
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_fb_set_taint(ref(a0), a1), null);
 }
 Variant ei_dir(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -32920,6 +32944,26 @@ Variant ei_mysql_set_charset(Eval::VariableEnvironment &env, const Eval::Functio
   }
   if (count <= 1) return (x_mysql_set_charset(a0));
   else return (x_mysql_set_charset(a0, a1));
+}
+Variant ei_fb_unset_taint(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("fb_unset_taint", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = ref((*it)->refval(env));
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_fb_unset_taint(ref(a0), a1), null);
 }
 Variant ei_dom_document_xinclude(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -38008,22 +38052,6 @@ Variant ei_memcache_get(Eval::VariableEnvironment &env, const Eval::FunctionCall
   }
   if (count <= 2) return (x_memcache_get(a0, a1));
   else return (x_memcache_get(a0, a1, ref(a2)));
-}
-Variant ei_fb_is_tainted(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("fb_is_tainted", count, 1, 1, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_fb_is_tainted(a0));
 }
 Variant ei_array_chunk(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -45858,22 +45886,6 @@ Variant ei_imagesy(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
     (*it)->eval(env);
   }
   return (x_imagesy(a0));
-}
-Variant ei_fb_taint(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("fb_taint", count, 1, 1, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_fb_taint(a0), null);
 }
 Variant ei_mysql_get_client_info(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -54976,6 +54988,22 @@ Variant ei_mysql_select_db(Eval::VariableEnvironment &env, const Eval::FunctionC
   }
   if (count <= 1) return (x_mysql_select_db(a0));
   else return (x_mysql_select_db(a0, a1));
+}
+Variant ei_fb_get_taint(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("fb_get_taint", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_fb_get_taint(a0));
 }
 Variant ei_use_soap_error_handler(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -64417,22 +64445,6 @@ Variant ei_magickgetfilename(Eval::VariableEnvironment &env, const Eval::Functio
   }
   return (x_magickgetfilename(a0));
 }
-Variant ei_fb_untaint(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("fb_untaint", count, 1, 1, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_fb_untaint(a0), null);
-}
 Variant ei_magicksetimagegamma(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -71690,6 +71702,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x5998E61D600D634DLL, drawaffine);
       break;
     case 847:
+      HASH_INVOKE_FROM_EVAL(0x4F2D0EFF0D4B534FLL, fb_get_taint);
       HASH_INVOKE_FROM_EVAL(0x5C8B3B9FA833934FLL, ldap_first_attribute);
       break;
     case 849:
@@ -72522,6 +72535,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1508:
       HASH_INVOKE_FROM_EVAL(0x3A9643992AC805E4LL, magickdrawimage);
       break;
+    case 1509:
+      HASH_INVOKE_FROM_EVAL(0x470F990B218315E5LL, fb_unset_taint);
+      break;
     case 1510:
       HASH_INVOKE_FROM_EVAL(0x6FE2E44FBC44E5E6LL, magickaddnoiseimage);
       HASH_INVOKE_FROM_EVAL(0x08069ECE0EA3C5E6LL, imagecopymergegray);
@@ -72760,9 +72776,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1714:
       HASH_INVOKE_FROM_EVAL(0x0D669C546C0EC6B2LL, proc_terminate);
-      break;
-    case 1715:
-      HASH_INVOKE_FROM_EVAL(0x3CEAA3516FE5D6B3LL, fb_untaint);
       break;
     case 1717:
       HASH_INVOKE_FROM_EVAL(0x798B4197212456B5LL, bcpowmod);
@@ -74534,9 +74547,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3128:
       HASH_INVOKE_FROM_EVAL(0x21564F9315F3FC38LL, drawsettextdecoration);
       break;
-    case 3129:
-      HASH_INVOKE_FROM_EVAL(0x564BAAB63FE45C39LL, fb_taint);
-      break;
     case 3132:
       HASH_INVOKE_FROM_EVAL(0x69488CC69B897C3CLL, hphp_recursiveiteratoriterator_getinneriterator);
       break;
@@ -74574,7 +74584,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3159:
       HASH_INVOKE_FROM_EVAL(0x793259E03C37CC57LL, memcache_decrement);
       HASH_INVOKE_FROM_EVAL(0x313E8EB28A111C57LL, hphp_splfileinfo_setinfoclass);
-      HASH_INVOKE_FROM_EVAL(0x6E0ECBA9F415AC57LL, fb_is_tainted);
       break;
     case 3160:
       HASH_INVOKE_FROM_EVAL(0x1B8C3DA27170DC58LL, dirname);
@@ -75389,6 +75398,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3763:
       HASH_INVOKE_FROM_EVAL(0x7DB9D839ACE0DEB3LL, natsort);
       HASH_INVOKE_FROM_EVAL(0x7379B5B97EC2EEB3LL, hypot);
+      break;
+    case 3764:
+      HASH_INVOKE_FROM_EVAL(0x1F936B3C5406DEB4LL, fb_set_taint);
       break;
     case 3767:
       HASH_INVOKE_FROM_EVAL(0x58B9EFA0FB35FEB7LL, stream_filter_prepend);

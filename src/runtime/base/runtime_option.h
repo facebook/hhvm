@@ -284,6 +284,7 @@ public:
   static bool SandboxMode;
   static std::string SandboxPattern;
   static std::string SandboxHome;
+  static std::string SandboxFallback;
   static std::string SandboxConfFile;
   static std::map<std::string, std::string> SandboxServerVariables;
 

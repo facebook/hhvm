@@ -42,8 +42,13 @@ SourceRootInfo::SourceRootInfo(const char *host)
   {
     struct stat hstat;
     if (stat(homePath.c_str(), &hstat) != 0) {
-      m_sandboxCond = SandboxOff;
-      return;
+      if (!RuntimeOption::SandboxFallback.empty()) {
+        homePath = String(RuntimeOption::SandboxFallback) + "/" + m_user + "/";
+        if (stat(homePath.c_str(), &hstat) != 0) {
+          m_sandboxCond = SandboxOff;
+          return;
+        }
+      }
     }
   }
   bool defaultSb = pair.size() == 1;
@@ -56,9 +61,10 @@ SourceRootInfo::SourceRootInfo(const char *host)
   string confpath = string(homePath.c_str()) +
     RuntimeOption::SandboxConfFile;
   Hdf config;
-  String sp, lp, alp;
+  String sp, lp, alp, userOverride;
   try {
     config.open(confpath);
+    userOverride = config["user_override"].get();
     Hdf sboxConf = config[m_sandbox.c_str()];
     if (sboxConf.exists()) {
       sp = sboxConf["path"].get();
@@ -66,6 +72,9 @@ SourceRootInfo::SourceRootInfo(const char *host)
       alp = sboxConf["accesslog"].get();
     }
   } catch (HdfException &e) {
+  }
+  if (!userOverride.empty()) {
+    m_user = userOverride;
   }
   if (defaultSb) {
     if (sp.isNull()) {

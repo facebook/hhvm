@@ -272,6 +272,7 @@ std::string RuntimeOption::CodeCoverageOutputFile;
 bool RuntimeOption::SandboxMode = false;
 std::string RuntimeOption::SandboxPattern;
 std::string RuntimeOption::SandboxHome;
+std::string RuntimeOption::SandboxFallback;
 std::string RuntimeOption::SandboxConfFile;
 std::map<std::string, std::string> RuntimeOption::SandboxServerVariables;
 
@@ -830,6 +831,7 @@ void RuntimeOption::Load(Hdf &config) {
     SandboxMode = sandbox["SandboxMode"].getBool();
     SandboxPattern = format_pattern(sandbox["Pattern"].getString());
     SandboxHome = sandbox["Home"].getString();
+    SandboxFallback = sandbox["Fallback"].getString();
     SandboxConfFile = sandbox["ConfFile"].getString();
     sandbox["ServerVariables"].get(SandboxServerVariables);
   }

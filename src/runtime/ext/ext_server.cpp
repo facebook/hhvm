@@ -70,6 +70,11 @@ bool f_dangling_server_proxy_old_request() {
 }
 
 bool f_dangling_server_proxy_new_request(CStrRef host) {
+  if (host.empty()) {
+    raise_warning("proxy new request needs host name");
+    return false;
+  }
+
   Transport *transport = g_context->getTransport();
   if (transport == NULL) {
     return false;

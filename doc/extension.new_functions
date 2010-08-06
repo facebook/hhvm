@@ -17,6 +17,9 @@ testing and some alternative PHP implementation.
 - hphp_thread_set_warmup_enabled
 - hphp_get_thread_id
 
+- register_postsend_function
+- register_cleanup_function
+
 - clock_getres
 - clock_gettime
 - clock_settime

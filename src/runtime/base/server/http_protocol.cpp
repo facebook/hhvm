@@ -518,6 +518,12 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
                                 int &code, std::string &error,
                                 StringBuffer &response,
                                 HeaderMap *extraHeaders /* = NULL */) {
+  ASSERT(transport);
+  if (transport->headersSent()) {
+    raise_warning("Cannot proxy request - headers already sent");
+    return false;
+  }
+
   HeaderMap requestHeaders;
   transport->getHeaders(requestHeaders);
   if (extraHeaders) {

@@ -487,7 +487,7 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       ASSERT(buf);
       cg_printf("%s", buf);
       if (round(dval) == dval && !strchr(buf, '.') && !strchr(buf, 'E')) {
-        cg_printf(".0"); // for integer value
+        cg.printf(".0"); // for integer value, cg_printf would break 0.0 token
       }
       free(buf);
     } else if (isnan(dval)) {

@@ -33,7 +33,7 @@ public:
     LogError,
     LogWarning,
     LogInfo,
-    LogVerbose,
+    LogVerbose
   };
 
   static bool UseLogAggregator;

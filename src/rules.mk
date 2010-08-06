@@ -562,6 +562,7 @@ ALL_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \
 	$(LDAP_LIBS) $(READLINE_LIBS) $(LIBMEMCACHED_LIBS) $(ORACLE_LIBS)
 
 LIB_PATHS = $(HPHP_LIB) \
+  $(HPHP_TEST_LIB_PATH) \
   $(EXT_DIR)/libcurl/lib \
   $(EXT_DIR)/mysql/lib/mysql \
   $(EXT_DIR)/boost/lib \

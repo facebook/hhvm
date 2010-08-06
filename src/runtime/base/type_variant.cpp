@@ -1298,7 +1298,7 @@ Variant &Variant::operator%=(int64 n) {
 }
 
 Variant &Variant::operator%=(double n) {
-  if ((int64)n == 0.0) {
+  if ((int64)n == 0) {
     raise_warning("Division by zero");
     set(false);
     return *this;

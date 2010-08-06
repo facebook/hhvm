@@ -24,7 +24,7 @@ namespace Eval {
 
 ArrayPair::ArrayPair(CONSTRUCT_ARGS) : Construct(CONSTRUCT_PASS) {}
 ArrayPair::ArrayPair(CONSTRUCT_ARGS, ExpressionPtr key)
-  : Construct(CONSTRUCT_PASS), m_key(key) {};
+  : Construct(CONSTRUCT_PASS), m_key(key) {}
 
 
 Variant ArrayPair::key(VariableEnvironment &env) const {

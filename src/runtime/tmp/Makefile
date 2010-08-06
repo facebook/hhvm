@@ -10,8 +10,13 @@ all : $(TEST_DIRS) run run.sh
 $(TEST_DIRS):
 	@$(MAKE) -C $@
 
+ifndef CXX
+CXX = g++
+CC = gcc
+endif
+
 run : run.cpp
-	@g++ $@.cpp -ldl -g -o $@
+	@$(CXX) $@.cpp -ldl -g -o $@
 
 run.sh : $(HPHP_HOME)/src/rules.mk
 	@$(MAKE) -f script.mk

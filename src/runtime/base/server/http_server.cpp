@@ -20,6 +20,7 @@
 #include <runtime/base/server/http_request_handler.h>
 #include <runtime/base/server/admin_request_handler.h>
 #include <runtime/base/server/server_stats.h>
+#include <runtime/base/server/xbox_server.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/static_content_cache.h>
 #include <runtime/base/class_info.h>
@@ -96,6 +97,14 @@ HttpServer::HttpServer()
       } else {
         m_satellites.push_back(satellite);
       }
+    }
+  }
+
+  if (RuntimeOption::XboxServerPort != 0) {
+    SatelliteServerInfoPtr xboxInfo(new XboxServerInfo());
+    SatelliteServerPtr satellite = SatelliteServer::Create(xboxInfo);
+    if (satellite) {
+      m_satellites.push_back(satellite);
     }
   }
 

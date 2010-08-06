@@ -208,6 +208,9 @@ SatelliteServerPtr SatelliteServer::Create(SatelliteServerInfoPtr info) {
   case KindOfRPCServer:
     satellite = SatelliteServerPtr(new RPCServer(info));
     break;
+  case KindOfXboxServer:
+    satellite = SatelliteServerPtr(new RPCServer(info));
+    break;
   default:
     ASSERT(false);
   }

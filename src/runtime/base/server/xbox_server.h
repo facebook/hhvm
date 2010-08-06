@@ -18,9 +18,13 @@
 #define __HPHP_XBOX_SERVER_H__
 
 #include <runtime/base/complex_types.h>
+#include <runtime/base/runtime_option.h>
+#include <runtime/base/server/satellite_server.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+DECLARE_BOOST_TYPES(XboxServerInfo);
 
 class XboxServer {
 public:
@@ -43,6 +47,27 @@ public:
   static Object TaskStart(CStrRef message);
   static bool TaskStatus(CObjRef task);
   static int TaskResult(CObjRef task, int timeout_ms, Variant &ret);
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class XboxServerInfo : public SatelliteServerInfo {
+  public:
+    XboxServerInfo() : SatelliteServerInfo(Hdf()) {
+      m_type = SatelliteServer::KindOfXboxServer;
+      m_name = "xbox";
+      reload();
+    }
+
+    void reload() {
+      m_threadCount = RuntimeOption::XboxServerThreadCount;
+      m_port        = RuntimeOption::XboxServerPort;
+      m_maxRequest  = RuntimeOption::XboxServerInfoMaxRequest;
+      m_maxDuration = RuntimeOption::XboxServerInfoDuration;
+      m_warmupDoc   = RuntimeOption::XboxServerInfoWarmupDoc;
+      m_reqInitFunc = RuntimeOption::XboxServerInfoReqInitFunc;
+      m_reqInitDoc  = RuntimeOption::XboxServerInfoReqInitDoc;
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

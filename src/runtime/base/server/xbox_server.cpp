@@ -135,22 +135,6 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(XboxServerInfo);
-class XboxServerInfo : public SatelliteServerInfo {
-public:
-  XboxServerInfo() : SatelliteServerInfo(Hdf()) {
-    m_type = SatelliteServer::KindOfXboxServer;
-  }
-
-  void reload() {
-    m_maxRequest  = RuntimeOption::XboxServerInfoMaxRequest;
-    m_maxDuration = RuntimeOption::XboxServerInfoDuration;
-    m_warmupDoc   = RuntimeOption::XboxServerInfoWarmupDoc;
-    m_reqInitFunc = RuntimeOption::XboxServerInfoReqInitFunc;
-    m_reqInitDoc  = RuntimeOption::XboxServerInfoReqInitDoc;
-  }
-};
-
 static XboxServerInfoPtr s_xbox_server_info;
 static IMPLEMENT_THREAD_LOCAL(RPCRequestHandler, s_rpc_request_handler);
 ///////////////////////////////////////////////////////////////////////////////
@@ -251,9 +235,10 @@ bool XboxServer::SendMessage(CStrRef message, Variant &ret, int timeout_ms,
       timeoutSeconds = RuntimeOption::XboxDefaultRemoteTimeoutSeconds;
     }
 
+    string hostStr(host.data());
     vector<string> headers;
     LibEventHttpClientPtr http =
-      LibEventHttpClient::Get(url, RuntimeOption::XboxServerPort);
+      LibEventHttpClient::Get(hostStr, RuntimeOption::XboxServerPort);
     if (http->send(url, headers, timeoutSeconds, false,
                    message.data(), message.size())) {
       int code = http->getCode();
@@ -269,7 +254,9 @@ bool XboxServer::SendMessage(CStrRef message, Variant &ret, int timeout_ms,
         }
         return true;
       }
-      ASSERT(false); // code wasn't correctly set by http client
+      // code wasn't correctly set by http client, treat it as not found
+      ret.set("code", 404);
+      ret.set("error", "http client failed");
     }
   }
 
@@ -297,8 +284,9 @@ bool XboxServer::PostMessage(CStrRef message,
     url += "/xbox_post_message";
 
     vector<string> headers;
+    string hostStr(host.data());
     LibEventHttpClientPtr http =
-      LibEventHttpClient::Get(url, RuntimeOption::XboxServerPort);
+      LibEventHttpClient::Get(hostStr, RuntimeOption::XboxServerPort);
     if (http->send(url, headers, 0, false, message.data(), message.size())) {
       int code = http->getCode();
       if (code > 0) {

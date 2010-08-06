@@ -33,6 +33,23 @@ char *strndup(const char* str, size_t len) {
   result[str_len] = '\0';
   return result;
 }
+
+int dprintf(int fd, const char *format, ...) {
+  va_list ap;
+  char *ptr = NULL;
+  int ret = 0;
+
+  va_start(ap, format);
+  vasprintf(&ptr, format, ap);
+  va_end(ap);
+
+   if (ptr) {
+     ret = write(fd, ptr, strlen(ptr));
+     free(ptr);
+   }
+
+   return ret;
+}
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////

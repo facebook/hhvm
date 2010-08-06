@@ -11,7 +11,7 @@ $(TEST_DIRS):
 	@$(MAKE) -C $@
 
 run : run.cpp
-	@g++ $@.cpp -ldl -o $@
+	@g++ $@.cpp -ldl -g -o $@
 
 run.sh : $(HPHP_HOME)/src/rules.mk
 	@$(MAKE) -f script.mk

@@ -30,7 +30,7 @@ static bool report_dlerror() {
 }
 
 int main(int argc, char **argv) {
-  void *handle = dlopen(argv[argc - 1], RTLD_LAZY);
+  void *handle = dlopen(argv[argc - 1], RTLD_LAZY | RTLD_GLOBAL);
   if (report_dlerror()) return -1;
 
   int(*php_main)(int, char **) = (int(*)(int, char **))dlsym(handle, "main");

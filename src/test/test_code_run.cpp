@@ -10395,6 +10395,15 @@ bool TestCodeRun::TestAssignment() {
 bool TestCodeRun::TestSimpleXML() {
   MVCR("<?php\n"
        "$node = new SimpleXMLElement('<foo><bar>whoops</bar></foo>');\n"
+       "var_dump((array)$node->bar);");
+
+  MVCR("<?php\n"
+       "$node = new SimpleXMLElement('<foo><bar name=\"value\">"
+       "whoops</bar></foo>');\n"
+       "var_dump((array)$node->bar);");
+
+  MVCR("<?php\n"
+       "$node = new SimpleXMLElement('<foo><bar>whoops</bar></foo>');\n"
        "var_dump((string)$node[0]);");
 
   MVCR("<?php\n"

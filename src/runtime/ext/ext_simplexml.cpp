@@ -802,7 +802,13 @@ Variant c_simplexmlelement::t___set(Variant name, Variant value) {
 }
 
 Array c_simplexmlelement::o_toArray() const {
-  return m_children;
+  if (m_attributes.toArray().empty()) {
+    return m_children;
+  }
+  Array ret;
+  ret.set("@attributes", m_attributes);
+  ret += m_children;
+  return ret;
 }
 
 int64 c_simplexmlelement::o_toInt64() const {

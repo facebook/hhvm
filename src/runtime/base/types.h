@@ -202,7 +202,7 @@ public:
   // This is the amount of "slack" in stack usage checks - if the
   // stack pointer gets within this distance from the end (minus
   // overhead), throw an infinite recursion exception.
-  static const int StackSlack = 32768;
+  static const int StackSlack = 1024 * 1024;
 
   RecursionInjection(ThreadInfo *info) : m_info(info) {
     char marker;

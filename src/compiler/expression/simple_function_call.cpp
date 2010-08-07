@@ -1574,7 +1574,7 @@ ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg,
                                       AnalysisResultPtr ar,
                                       SimpleFunctionCallPtr call, int mode) {
   bool error = false;
-  if (!cg && !mode) {
+  if (!cg && !mode && !ar->isSystem()) {
     const std::string &name = call->getName();
     if (name == "call_user_func") {
       SimpleFunctionCallPtr rep(
@@ -1595,7 +1595,7 @@ ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
                                          AnalysisResultPtr ar,
                                          SimpleFunctionCallPtr call, int mode) {
   bool error = false;
-  if (!cg && !mode) {
+  if (!cg && !mode && !ar->isSystem()) {
     const std::string &name = call->getName();
     bool safe_ret = name == "fb_call_user_func_safe_return";
     if (safe_ret || name == "fb_call_user_func_safe") {

@@ -366,6 +366,8 @@ public:
 
   std::set<std::string> m_variableTableFunctions;
 
+  void setSystem() { m_system = true; }
+  bool isSystem() const { return m_system; }
 private:
   Package *m_package;
   bool m_parseOnDemand;
@@ -447,6 +449,7 @@ private:
 
   int m_funcTableSize;
   CodeGenerator::MapIntToStringVec m_funcTable;
+  bool m_system;
 
   /**
    * Checks circular class derivations that can cause stack overflows for

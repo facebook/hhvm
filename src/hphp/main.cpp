@@ -739,6 +739,7 @@ int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
   } else if (po.format == "sys" && allowSys) {
     clusterCount = 0;
     format = CodeGenerator::SystemCPP;
+    ar->setSystem();
   } else if (po.format == "exe" || po.format == "lib") {
     format = CodeGenerator::ClusterCPP;
   }

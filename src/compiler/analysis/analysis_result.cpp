@@ -56,7 +56,8 @@ AnalysisResult::AnalysisResult()
     m_insideScalarArray(false), m_inExpression(false),
     m_wrappedExpression(false),
     m_scalarArraySortedAvgLen(0), m_scalarArraySortedIndex(0),
-    m_scalarArraySortedSumLen(0), m_scalarArrayCompressedTextSize(0) {
+    m_scalarArraySortedSumLen(0), m_scalarArrayCompressedTextSize(0),
+    m_system(false) {
   m_dependencyGraph = DependencyGraphPtr(new DependencyGraph());
 }
 
@@ -578,6 +579,7 @@ void AnalysisResult::checkClassDerivations() {
 void AnalysisResult::analyzeProgram(bool system /* = false */) {
   AnalysisResultPtr ar = shared_from_this();
 
+  if (system) m_system = true;
   getVariables()->forceVariants(ar);
   getVariables()->setAttribute(VariableTable::ContainsLDynamicVariable);
   getVariables()->setAttribute(VariableTable::ContainsExtract);

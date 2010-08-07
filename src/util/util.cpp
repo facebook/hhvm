@@ -249,6 +249,17 @@ void Util::syncdir(const std::string &dest_, const std::string &src_,
 }
 
 int Util::copy(const char *srcfile, const char *dstfile) {
+#if defined(__FreeBSD__) || defined(__APPLE__)
+  boost::filesystem::path src(srcfile);
+  boost::filesystem::path dst(dstfile);
+  try {
+    boost::filesystem::copy_file(src, dst,
+      boost::filesystem::copy_option::overwrite_if_exists);
+  } catch (const boost::filesystem::filesystem_error& ex) {
+    return -1;
+  }
+  return 0;
+#else
   int srcFd = open(srcfile, O_RDONLY);
   if (srcFd == -1) return -1;
   int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
@@ -277,6 +288,7 @@ int Util::copy(const char *srcfile, const char *dstfile) {
   close(srcFd);
   close(dstFd);
   return 0;
+#endif
 }
 
 int Util::directCopy(const char *srcfile, const char *dstfile) {

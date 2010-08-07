@@ -17,6 +17,8 @@
 #ifndef __CAPABILITY_H__
 #define __CAPABILITY_H__
 
+#if !defined(SKIP_USER_CHANGE)
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <string>
@@ -36,5 +38,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif
 
 #endif // __CAPABILITY_H__

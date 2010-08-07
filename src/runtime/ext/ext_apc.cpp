@@ -187,7 +187,7 @@ static PFUNC_APC_LOAD apc_load_func(void *handle, const char *name) {
   Lock lock(dl_mutex);
   dlerror(); // clear errors
   PFUNC_APC_LOAD p = (PFUNC_APC_LOAD)dlsym(handle, name);
-  char *error = dlerror();
+  const char *error = dlerror();
   if (error || p == NULL) {
     throw Exception("Unable to find %s in %s: %s", name,
                     RuntimeOption::ApcPrimeLibrary.c_str(),

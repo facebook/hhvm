@@ -25,7 +25,7 @@ char *strndup(const char* str, size_t len) {
   if (len < str_len) {
     str_len = len;
   }
-  char* result = malloc(str_len + 1);
+  char *result = (char*)malloc(str_len + 1);
   if (result == NULL) {
     return NULL;
   }

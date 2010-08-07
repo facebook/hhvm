@@ -17,6 +17,8 @@
 #ifndef __COMPATIBILITY_H__
 #define __COMPATIBILITY_H__
 
+#include "base.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -68,7 +68,7 @@ void c_directory::o_setArray(CArrRef props) {
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_get_directory
 Variant c_directory::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return c_directory::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_directory
@@ -96,7 +96,7 @@ Variant c_directory::o_getPrivate(CStrRef s, int64 hash, bool error) {
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_directory
 bool c_directory::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return c_directory::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_directory
@@ -122,7 +122,7 @@ bool c_directory::o_existsPrivate(CStrRef s, int64 hash) const {
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_set_directory
 Variant c_directory::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return c_directory::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_directory
@@ -150,7 +150,7 @@ Variant c_directory::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_directory
 Variant& c_directory::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return c_directory::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_directory
@@ -193,7 +193,7 @@ ObjectData *c_directory::dynCreate(CArrRef params, bool construct /* = true */) 
   if (construct) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("directory::__construct", count, 1, 1, 2);
+    if (count != 1) throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
     {
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -205,7 +205,7 @@ ObjectData *c_directory::dynCreate(CArrRef params, bool construct /* = true */) 
 }
 void c_directory::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("directory::__construct", count, 1, 1, 2);
+  if (count != 1) throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -217,7 +217,7 @@ void c_directory::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("directory::__construct", count, 1, 1, 1);
+  if (count != 1) throw_wrong_arguments("Directory::__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -246,23 +246,23 @@ Variant c_directory::o_invoke(const char *s, CArrRef params, int64 hash, bool fa
   switch (hash & 7) {
     case 1:
       HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
-        if (count > 0) return throw_toomany_arguments("directory::close", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
         return (t_close());
       }
       HASH_GUARD(0x1F479267E49EF301LL, read) {
-        if (count > 0) return throw_toomany_arguments("directory::read", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
         return (t_read());
       }
       break;
     case 2:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
-        if (count > 0) return throw_toomany_arguments("directory::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 7:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 1) return throw_wrong_arguments("directory::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -283,23 +283,23 @@ Variant c_directory::o_invoke_few_args(const char *s, int64 hash, int count, CVa
   switch (hash & 7) {
     case 1:
       HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
-        if (count > 0) return throw_toomany_arguments("directory::close", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
         return (t_close());
       }
       HASH_GUARD(0x1F479267E49EF301LL, read) {
-        if (count > 0) return throw_toomany_arguments("directory::read", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
         return (t_read());
       }
       break;
     case 2:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
-        if (count > 0) return throw_toomany_arguments("directory::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 7:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 1) return throw_wrong_arguments("directory::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       break;
@@ -322,7 +322,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("directory::close", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -334,7 +334,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x1F479267E49EF301LL, read) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("directory::read", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -348,7 +348,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("directory::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -363,7 +363,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("directory::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;

@@ -39,7 +39,17 @@ class c_reflectionproperty : public ExtObjectData {
   static Variant os_constant(const char *s);
 
   // DECLARE_INSTANCE_PROP_OPS
-  DECLARE_INSTANCE_PROP_OPS
+  public:
+  virtual void o_getArray(Array &props) const;
+  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionproperty 1
+  #define OMIT_JUMP_TABLE_CLASS_exists_reflectionproperty 1
+  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionproperty 1
+  #define OMIT_JUMP_TABLE_CLASS_get_reflectionproperty 1
+  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionproperty 1
+  #define OMIT_JUMP_TABLE_CLASS_set_reflectionproperty 1
+  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionproperty 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_reflectionproperty 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_reflectionproperty 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

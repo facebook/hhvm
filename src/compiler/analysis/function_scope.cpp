@@ -274,7 +274,7 @@ bool FunctionScope::isConstructor(ClassScopePtr cls) const {
      || cls->classNameCtor() && getName() == cls->getName());
 }
 
-std::string FunctionScope::getOriginalName() const {
+string FunctionScope::getOriginalName() const {
   if (m_pseudoMain) return "";
   if (m_stmt) {
     MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
@@ -283,10 +283,18 @@ std::string FunctionScope::getOriginalName() const {
   return m_name;
 }
 
-std::string FunctionScope::getFullName() const {
+string FunctionScope::getFullName() const {
   if (m_stmt) {
     MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
     return stmt->getFullName();
+  }
+  return m_name;
+}
+
+string FunctionScope::getOriginalFullName() const {
+  if (m_stmt) {
+    MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
+    return stmt->getOriginalFullName();
   }
   return m_name;
 }
@@ -801,7 +809,7 @@ bool FunctionScope::outputCPPInvokeArgCountCheck(CodeGenerator &cg,
   const char *sysret = (system && ret) ? "return " : "";
   const char *level = (system ? (constructor ? ", 2" : ", 1") : "");
   bool guarded = system && (ret || constructor);
-  string fullname = getFullName();
+  string fullname = getOriginalFullName();
   if (checkMissing && checkTooMany) {
     if (!variable && m_minParam == m_maxParam) {
       cg_printf("if (count != %d)"

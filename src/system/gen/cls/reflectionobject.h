@@ -40,7 +40,25 @@ class c_reflectionobject : public c_reflectionclass {
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_reflectionobject 1
 
   // DECLARE_INSTANCE_PROP_OPS
-  DECLARE_INSTANCE_PROP_OPS
+  public:
+  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionobject 1
+  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionobject 1
+  bool o_exists(CStrRef s, int64 hash, CStrRef context = null_string) const
+{ return ObjectData::o_exists(s, hash, context); }
+    virtual bool o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const;
+  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionobject 1
+  Variant o_get(CStrRef s, int64 hash, bool error = true, CStrRef context = null_string)
+{ return ObjectData::o_get(s, hash, error, context); }
+    virtual Variant o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash);
+  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionobject 1
+  Variant o_set(CStrRef s, int64 hash, CVarRef v, bool forInit = false, CStrRef context = null_string)
+{ return ObjectData::o_set(s, hash, v, forInit, context); }
+    virtual Variant o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash);
+  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionobject 1
+  Variant &o_lval(CStrRef s, int64 hash, CStrRef context = null_string)
+{ return ObjectData::o_lval(s, hash, context); }
+    virtual Variant &o_lval(CStrRef prop, int64 phash, const char *context, int64 hash);
+  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_reflectionobject 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

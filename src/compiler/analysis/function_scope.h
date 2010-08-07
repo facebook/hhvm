@@ -120,6 +120,7 @@ public:
    * If class method, returns class::name, otherwise just name.
    */
   std::string getFullName() const;
+  std::string getOriginalFullName() const;
 
   /**
    * Whether this function can take variable number of arguments.

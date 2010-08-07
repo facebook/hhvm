@@ -52,7 +52,7 @@ void c_pear_error::o_setArray(CArrRef props) {
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_get_pear_error
 Variant c_pear_error::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return c_pear_error::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_pear_error
@@ -67,7 +67,7 @@ Variant c_pear_error::o_getPrivate(CStrRef s, int64 hash, bool error) {
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_pear_error
 bool c_pear_error::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return c_pear_error::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_pear_error
@@ -82,7 +82,7 @@ bool c_pear_error::o_existsPrivate(CStrRef s, int64 hash) const {
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_set_pear_error
 Variant c_pear_error::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return c_pear_error::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_pear_error
@@ -97,7 +97,7 @@ Variant c_pear_error::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forIni
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_pear_error
 Variant& c_pear_error::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return c_pear_error::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_pear_error
@@ -252,7 +252,7 @@ Variant c_pear_error::o_invoke(const char *s, CArrRef params, int64 hash, bool f
   switch (hash & 31) {
     case 1:
       HASH_GUARD(0x488B59A7AC1AD281LL, getbacktrace) {
-        if (count > 1) return throw_toomany_arguments("pear_error::getbacktrace", 1, 1);
+        if (count > 1) return throw_toomany_arguments("pear_error::getBacktrace", 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -264,7 +264,7 @@ Variant c_pear_error::o_invoke(const char *s, CArrRef params, int64 hash, bool f
       break;
     case 4:
       HASH_GUARD(0x4394241AA92AEB44LL, adduserinfo) {
-        if (count != 1) return throw_wrong_arguments("pear_error::adduserinfo", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("pear_error::addUserInfo", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -275,41 +275,41 @@ Variant c_pear_error::o_invoke(const char *s, CArrRef params, int64 hash, bool f
       break;
     case 6:
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
-        if (count > 0) return throw_toomany_arguments("pear_error::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getType", 0, 1);
         return (t_gettype(), null);
       }
       break;
     case 12:
       HASH_GUARD(0x337CF323F97137ACLL, getmode) {
-        if (count > 0) return throw_toomany_arguments("pear_error::getmode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getMode", 0, 1);
         return (t_getmode(), null);
       }
       break;
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("pear_error::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getCode", 0, 1);
         return (t_getcode(), null);
       }
       break;
     case 17:
       HASH_GUARD(0x2E87870339147BF1LL, getcallback) {
-        if (count > 0) return throw_toomany_arguments("pear_error::getcallback", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getCallback", 0, 1);
         return (t_getcallback(), null);
       }
       break;
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("pear_error::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getMessage", 0, 1);
         return (t_getmessage(), null);
       }
       break;
     case 19:
       HASH_GUARD(0x05CF5B3C831C4053LL, getuserinfo) {
-        if (count > 0) return throw_toomany_arguments("pear_error::getuserinfo", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getUserInfo", 0, 1);
         return (t_getuserinfo(), null);
       }
       HASH_GUARD(0x6271FDA592D5EF53LL, tostring) {
-        if (count > 0) return throw_toomany_arguments("pear_error::tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::toString", 0, 1);
         return (t_tostring(), null);
       }
       break;
@@ -335,7 +335,7 @@ Variant c_pear_error::o_invoke(const char *s, CArrRef params, int64 hash, bool f
       break;
     case 27:
       HASH_GUARD(0x74E7C543C0FD73FBLL, getdebuginfo) {
-        if (count > 0) return throw_toomany_arguments("pear_error::getdebuginfo", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getDebugInfo", 0, 1);
         return (t_getdebuginfo(), null);
       }
       break;
@@ -351,54 +351,54 @@ Variant c_pear_error::o_invoke_few_args(const char *s, int64 hash, int count, CV
   switch (hash & 31) {
     case 1:
       HASH_GUARD(0x488B59A7AC1AD281LL, getbacktrace) {
-        if (count > 1) return throw_toomany_arguments("pear_error::getbacktrace", 1, 1);
+        if (count > 1) return throw_toomany_arguments("pear_error::getBacktrace", 1, 1);
         if (count <= 0) return (t_getbacktrace(), null);
         return (t_getbacktrace(a0), null);
       }
       break;
     case 4:
       HASH_GUARD(0x4394241AA92AEB44LL, adduserinfo) {
-        if (count != 1) return throw_wrong_arguments("pear_error::adduserinfo", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("pear_error::addUserInfo", count, 1, 1, 1);
         return (t_adduserinfo(a0), null);
       }
       break;
     case 6:
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
-        if (count > 0) return throw_toomany_arguments("pear_error::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getType", 0, 1);
         return (t_gettype(), null);
       }
       break;
     case 12:
       HASH_GUARD(0x337CF323F97137ACLL, getmode) {
-        if (count > 0) return throw_toomany_arguments("pear_error::getmode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getMode", 0, 1);
         return (t_getmode(), null);
       }
       break;
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("pear_error::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getCode", 0, 1);
         return (t_getcode(), null);
       }
       break;
     case 17:
       HASH_GUARD(0x2E87870339147BF1LL, getcallback) {
-        if (count > 0) return throw_toomany_arguments("pear_error::getcallback", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getCallback", 0, 1);
         return (t_getcallback(), null);
       }
       break;
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("pear_error::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getMessage", 0, 1);
         return (t_getmessage(), null);
       }
       break;
     case 19:
       HASH_GUARD(0x05CF5B3C831C4053LL, getuserinfo) {
-        if (count > 0) return throw_toomany_arguments("pear_error::getuserinfo", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getUserInfo", 0, 1);
         return (t_getuserinfo(), null);
       }
       HASH_GUARD(0x6271FDA592D5EF53LL, tostring) {
-        if (count > 0) return throw_toomany_arguments("pear_error::tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::toString", 0, 1);
         return (t_tostring(), null);
       }
       break;
@@ -415,7 +415,7 @@ Variant c_pear_error::o_invoke_few_args(const char *s, int64 hash, int count, CV
       break;
     case 27:
       HASH_GUARD(0x74E7C543C0FD73FBLL, getdebuginfo) {
-        if (count > 0) return throw_toomany_arguments("pear_error::getdebuginfo", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getDebugInfo", 0, 1);
         return (t_getdebuginfo(), null);
       }
       break;
@@ -439,7 +439,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("pear_error::getbacktrace", 1, 1);
+        if (count > 1) return throw_toomany_arguments("pear_error::getBacktrace", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -458,7 +458,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("pear_error::adduserinfo", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("pear_error::addUserInfo", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -475,7 +475,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getType", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -489,7 +489,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x337CF323F97137ACLL, getmode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::getmode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getMode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -503,7 +503,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -517,7 +517,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x2E87870339147BF1LL, getcallback) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::getcallback", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getCallback", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -531,7 +531,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -545,7 +545,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x05CF5B3C831C4053LL, getuserinfo) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::getuserinfo", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getUserInfo", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -557,7 +557,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x6271FDA592D5EF53LL, tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -610,7 +610,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       HASH_GUARD(0x74E7C543C0FD73FBLL, getdebuginfo) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::getdebuginfo", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getDebugInfo", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);

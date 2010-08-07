@@ -44,7 +44,17 @@ class c_directoryiterator : public c_splfileinfo {
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_directoryiterator 1
 
   // DECLARE_INSTANCE_PROP_OPS
-  DECLARE_INSTANCE_PROP_OPS
+  public:
+  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_directoryiterator 1
+  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_directoryiterator 1
+  #define OMIT_JUMP_TABLE_CLASS_exists_directoryiterator 1
+  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_directoryiterator 1
+  #define OMIT_JUMP_TABLE_CLASS_get_directoryiterator 1
+  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_directoryiterator 1
+  #define OMIT_JUMP_TABLE_CLASS_set_directoryiterator 1
+  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_directoryiterator 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_directoryiterator 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_directoryiterator 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

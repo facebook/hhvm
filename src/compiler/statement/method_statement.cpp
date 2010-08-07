@@ -42,9 +42,9 @@ using namespace boost;
 
 MethodStatement::MethodStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
- ModifierExpressionPtr modifiers, bool ref, const std::string &name,
+ ModifierExpressionPtr modifiers, bool ref, const string &name,
  ExpressionListPtr params, StatementListPtr stmt, int attr,
- const std::string &docComment, bool method /* = true */)
+ const string &docComment, bool method /* = true */)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
     m_method(method), m_modifiers(modifiers), m_ref(ref), m_originalName(name),
     m_params(params), m_stmt(stmt), m_attribute(attr),
@@ -64,9 +64,14 @@ BlockScopePtr MethodStatement::getScope() {
   return m_funcScope.lock();
 }
 
-std::string MethodStatement::getFullName() const {
+string MethodStatement::getFullName() const {
   if (m_className.empty()) return m_name;
   return m_className + "::" + m_name;
+}
+
+string MethodStatement::getOriginalFullName() const {
+  if (m_originalClassName.empty()) return m_originalName;
+  return m_originalClassName + "::" + m_originalName;
 }
 
 bool MethodStatement::isRef(int index /* = -1 */) const {
@@ -230,6 +235,7 @@ void MethodStatement::onParse(AnalysisResultPtr ar) {
   }
 
   m_className = classScope->getName();
+  m_originalClassName = classScope->getOriginalName();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -517,8 +523,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       } else {
         cg_printf("void");
       }
-      string origFuncName = std::string(scope->getOriginalName()) +
-                            "::" + m_originalName;
+      string origFuncName = getOriginalFullName();
       string funcSection = Option::FunctionSections[origFuncName];
       if (!funcSection.empty()) {
         cg_printf(" __attribute__ ((section (\".text.%s\")))",

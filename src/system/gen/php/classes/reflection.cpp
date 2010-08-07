@@ -65,7 +65,7 @@ void c_reflectionfunctionabstract::o_setArray(CArrRef props) {
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionfunctionabstract
 Variant c_reflectionfunctionabstract::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return c_reflectionfunctionabstract::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionfunctionabstract
@@ -89,7 +89,7 @@ Variant c_reflectionfunctionabstract::o_getPrivate(CStrRef s, int64 hash, bool e
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionfunctionabstract
 bool c_reflectionfunctionabstract::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return c_reflectionfunctionabstract::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionfunctionabstract
@@ -112,7 +112,7 @@ bool c_reflectionfunctionabstract::o_existsPrivate(CStrRef s, int64 hash) const 
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionfunctionabstract
 Variant c_reflectionfunctionabstract::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return c_reflectionfunctionabstract::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionfunctionabstract
@@ -136,7 +136,7 @@ Variant c_reflectionfunctionabstract::o_setPrivate(CStrRef s, int64 hash, CVarRe
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_reflectionfunctionabstract
 Variant& c_reflectionfunctionabstract::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return c_reflectionfunctionabstract::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionfunctionabstract
@@ -180,73 +180,73 @@ Variant c_reflectionfunctionabstract::o_invoke(const char *s, CArrRef params, in
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
         return (t_getnumberofparameters());
       }
       break;
     case 1:
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
         return (t_getnumberofrequiredparameters());
       }
       break;
     case 2:
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
         return (t_getclosure());
       }
       break;
     case 4:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
         return (t_isuserdefined());
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
         return (t_getstartline());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
         return (t_getstaticvariables());
       }
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
         return (t_returnsreference());
       }
       break;
     case 13:
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
         return (t_getparameters());
       }
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
         return (t_getfilename());
       }
       break;
     case 15:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 16:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
         return (t_getendline());
       }
       break;
     case 24:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
         return (t_getdoccomment());
       }
       break;
@@ -262,73 +262,73 @@ Variant c_reflectionfunctionabstract::o_invoke_few_args(const char *s, int64 has
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
         return (t_getnumberofparameters());
       }
       break;
     case 1:
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
         return (t_getnumberofrequiredparameters());
       }
       break;
     case 2:
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
         return (t_getclosure());
       }
       break;
     case 4:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
         return (t_isuserdefined());
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
         return (t_getstartline());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
         return (t_getstaticvariables());
       }
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
         return (t_returnsreference());
       }
       break;
     case 13:
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
         return (t_getparameters());
       }
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
         return (t_getfilename());
       }
       break;
     case 15:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 16:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
         return (t_getendline());
       }
       break;
     case 24:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
         return (t_getdoccomment());
       }
       break;
@@ -351,7 +351,7 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -365,7 +365,7 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -379,7 +379,7 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -393,7 +393,7 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -405,7 +405,7 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -419,7 +419,7 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -433,7 +433,7 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -445,7 +445,7 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -459,7 +459,7 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -471,7 +471,7 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -485,7 +485,7 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -499,7 +499,7 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -513,7 +513,7 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -695,7 +695,7 @@ Variant c_reflectionobject::o_get(CStrRef prop, int64 phash, bool error, const c
     default:
       break;
   }
-  return c_reflectionobject::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionobject
@@ -719,7 +719,7 @@ bool c_reflectionobject::o_exists(CStrRef prop, int64 phash, const char *context
     default:
       break;
   }
-  return c_reflectionobject::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionobject
@@ -743,7 +743,7 @@ Variant c_reflectionobject::o_set(CStrRef prop, int64 phash, CVarRef v, bool for
     default:
       break;
   }
-  return c_reflectionobject::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionobject
@@ -767,7 +767,7 @@ Variant& c_reflectionobject::o_lval(CStrRef prop, int64 phash, const char *conte
     default:
       break;
   }
-  return c_reflectionobject::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionobject
@@ -801,13 +801,13 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
   switch (hash & 127) {
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
         return (t_getstartline());
       }
       break;
     case 15:
       HASH_GUARD(0x40C7B30DCB439C8FLL, hasproperty) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -818,19 +818,19 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 24:
       HASH_GUARD(0x21820E7AA4733998LL, hasmethod) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -841,25 +841,25 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 27:
       HASH_GUARD(0x0F1AD0A8EC4C229BLL, getdefaultproperties) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
         return (t_getdefaultproperties());
       }
       break;
     case 30:
       HASH_GUARD(0x1BC5F3D87676509ELL, isinterface) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
         return (t_isinterface());
       }
       break;
     case 34:
       HASH_GUARD(0x323D9BCB05797B22LL, getstaticproperties) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
         return (t_getstaticproperties());
       }
       break;
     case 41:
       HASH_GUARD(0x030CE1D6142F8C29LL, isinstance) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -868,13 +868,13 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
         }
       }
       HASH_GUARD(0x1D6B8CA358B49929LL, getextensionname) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
         return (t_getextensionname());
       }
       break;
     case 42:
       HASH_GUARD(0x16BA16CE6488AAAALL, getmethods) {
-        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
+        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -884,17 +884,17 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
         }
       }
       HASH_GUARD(0x226F6E80CECD3CAALL, getconstructor) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
         return (t_getconstructor());
       }
       HASH_GUARD(0x24596BE6D21F7CAALL, getinterfacenames) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
         return (t_getinterfacenames());
       }
       break;
     case 46:
       HASH_GUARD(0x3C882D4A895F612ELL, getstaticpropertyvalue) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -905,7 +905,7 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
         }
       }
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
         return (t_isfinal());
       }
       break;
@@ -917,7 +917,7 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 52:
       HASH_GUARD(0x3DB53E1FBD3C0734LL, getconstant) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -928,7 +928,7 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 54:
       HASH_GUARD(0x0D81ECE253A3B5B6LL, getmethod) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -939,25 +939,25 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 55:
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
         return (t_isabstract());
       }
       break;
     case 59:
       HASH_GUARD(0x25D24435915E6E3BLL, getextension) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
         return (t_getextension());
       }
       break;
     case 60:
       HASH_GUARD(0x0D8AAD6BA2BBCD3CLL, isinstantiable) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
         return (t_isinstantiable());
       }
       break;
     case 63:
       HASH_GUARD(0x54C2DC04C4A62B3FLL, hasconstant) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -968,19 +968,19 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 67:
       HASH_GUARD(0x67C15E3D98C00B43LL, getinterfaces) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
         return (t_getinterfaces());
       }
       break;
     case 68:
       HASH_GUARD(0x1EB679C3602F4B44LL, getproperties) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
         return (t_getproperties());
       }
       break;
     case 71:
       HASH_GUARD(0x0FD73627FB023047LL, getproperty) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -991,31 +991,31 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
         return (t_getfilename());
       }
       break;
     case 78:
       HASH_GUARD(0x7D5A57B5370B68CELL, isiterateable) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
         return (t_isiterateable());
       }
       break;
     case 79:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 85:
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
         return (t_getconstants());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1026,19 +1026,19 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 100:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 101:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 102:
       HASH_GUARD(0x2735DCC254EE5C66LL, newinstanceargs) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1049,7 +1049,7 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 104:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1061,13 +1061,13 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 112:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
         return (t_getendline());
       }
       break;
     case 113:
       HASH_GUARD(0x07ECA928E37717F1LL, setstaticpropertyvalue) {
-        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1079,19 +1079,19 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 114:
       HASH_GUARD(0x74F7FEDE16957472LL, getparentclass) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
         return (t_getparentclass());
       }
       break;
     case 120:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 123:
       HASH_GUARD(0x28DC702215C7D6FBLL, implementsinterface) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1102,7 +1102,7 @@ Variant c_reflectionobject::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 126:
       HASH_GUARD(0x373333991926C97ELL, issubclassof) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1123,85 +1123,85 @@ Variant c_reflectionobject::o_invoke_few_args(const char *s, int64 hash, int cou
   switch (hash & 127) {
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
         return (t_getstartline());
       }
       break;
     case 15:
       HASH_GUARD(0x40C7B30DCB439C8FLL, hasproperty) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
         return (t_hasproperty(a0));
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 24:
       HASH_GUARD(0x21820E7AA4733998LL, hasmethod) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
         return (t_hasmethod(a0));
       }
       break;
     case 27:
       HASH_GUARD(0x0F1AD0A8EC4C229BLL, getdefaultproperties) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
         return (t_getdefaultproperties());
       }
       break;
     case 30:
       HASH_GUARD(0x1BC5F3D87676509ELL, isinterface) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
         return (t_isinterface());
       }
       break;
     case 34:
       HASH_GUARD(0x323D9BCB05797B22LL, getstaticproperties) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
         return (t_getstaticproperties());
       }
       break;
     case 41:
       HASH_GUARD(0x030CE1D6142F8C29LL, isinstance) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
         return (t_isinstance(a0));
       }
       HASH_GUARD(0x1D6B8CA358B49929LL, getextensionname) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
         return (t_getextensionname());
       }
       break;
     case 42:
       HASH_GUARD(0x16BA16CE6488AAAALL, getmethods) {
-        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
+        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
         if (count <= 0) return (t_getmethods());
         return (t_getmethods(a0));
       }
       HASH_GUARD(0x226F6E80CECD3CAALL, getconstructor) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
         return (t_getconstructor());
       }
       HASH_GUARD(0x24596BE6D21F7CAALL, getinterfacenames) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
         return (t_getinterfacenames());
       }
       break;
     case 46:
       HASH_GUARD(0x3C882D4A895F612ELL, getstaticpropertyvalue) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
         if (count <= 1) return (t_getstaticpropertyvalue(a0));
         return (t_getstaticpropertyvalue(a0, a1));
       }
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
         return (t_isfinal());
       }
       break;
@@ -1220,145 +1220,145 @@ Variant c_reflectionobject::o_invoke_few_args(const char *s, int64 hash, int cou
       break;
     case 52:
       HASH_GUARD(0x3DB53E1FBD3C0734LL, getconstant) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
         return (t_getconstant(a0));
       }
       break;
     case 54:
       HASH_GUARD(0x0D81ECE253A3B5B6LL, getmethod) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
         return (t_getmethod(a0));
       }
       break;
     case 55:
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
         return (t_isabstract());
       }
       break;
     case 59:
       HASH_GUARD(0x25D24435915E6E3BLL, getextension) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
         return (t_getextension());
       }
       break;
     case 60:
       HASH_GUARD(0x0D8AAD6BA2BBCD3CLL, isinstantiable) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
         return (t_isinstantiable());
       }
       break;
     case 63:
       HASH_GUARD(0x54C2DC04C4A62B3FLL, hasconstant) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
         return (t_hasconstant(a0));
       }
       break;
     case 67:
       HASH_GUARD(0x67C15E3D98C00B43LL, getinterfaces) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
         return (t_getinterfaces());
       }
       break;
     case 68:
       HASH_GUARD(0x1EB679C3602F4B44LL, getproperties) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
         return (t_getproperties());
       }
       break;
     case 71:
       HASH_GUARD(0x0FD73627FB023047LL, getproperty) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
         return (t_getproperty(a0));
       }
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
         return (t_getfilename());
       }
       break;
     case 78:
       HASH_GUARD(0x7D5A57B5370B68CELL, isiterateable) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
         return (t_isiterateable());
       }
       break;
     case 79:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 85:
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
         return (t_getconstants());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       break;
     case 100:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 101:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 102:
       HASH_GUARD(0x2735DCC254EE5C66LL, newinstanceargs) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
         return (t_newinstanceargs(a0));
       }
       break;
     case 104:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
         return (ti_export(o_getClassName(), a0, a1));
       }
       break;
     case 112:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
         return (t_getendline());
       }
       break;
     case 113:
       HASH_GUARD(0x07ECA928E37717F1LL, setstaticpropertyvalue) {
-        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
         return (t_setstaticpropertyvalue(a0, a1), null);
       }
       break;
     case 114:
       HASH_GUARD(0x74F7FEDE16957472LL, getparentclass) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
         return (t_getparentclass());
       }
       break;
     case 120:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 123:
       HASH_GUARD(0x28DC702215C7D6FBLL, implementsinterface) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
         return (t_implementsinterface(a0));
       }
       break;
     case 126:
       HASH_GUARD(0x373333991926C97ELL, issubclassof) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
         return (t_issubclassof(a0));
       }
       break;
@@ -1375,7 +1375,7 @@ Variant c_reflectionobject::os_invoke(const char *c, const char *s, CArrRef para
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1398,7 +1398,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1413,7 +1413,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1430,7 +1430,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1444,7 +1444,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1459,7 +1459,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1476,7 +1476,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x0F1AD0A8EC4C229BLL, getdefaultproperties) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1490,7 +1490,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x1BC5F3D87676509ELL, isinterface) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1504,7 +1504,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x323D9BCB05797B22LL, getstaticproperties) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1519,7 +1519,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1534,7 +1534,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x1D6B8CA358B49929LL, getextensionname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1549,7 +1549,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
+        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1565,7 +1565,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x226F6E80CECD3CAALL, getconstructor) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1577,7 +1577,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x24596BE6D21F7CAALL, getinterfacenames) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1593,7 +1593,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1612,7 +1612,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1642,7 +1642,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1660,7 +1660,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1677,7 +1677,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1691,7 +1691,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x25D24435915E6E3BLL, getextension) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1705,7 +1705,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x0D8AAD6BA2BBCD3CLL, isinstantiable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1720,7 +1720,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1737,7 +1737,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x67C15E3D98C00B43LL, getinterfaces) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1751,7 +1751,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x1EB679C3602F4B44LL, getproperties) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1766,7 +1766,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1783,7 +1783,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1797,7 +1797,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x7D5A57B5370B68CELL, isiterateable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1811,7 +1811,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1825,7 +1825,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1840,7 +1840,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1857,7 +1857,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1871,7 +1871,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1886,7 +1886,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1905,7 +1905,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1925,7 +1925,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1941,7 +1941,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1961,7 +1961,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x74F7FEDE16957472LL, getparentclass) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1975,7 +1975,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1990,7 +1990,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2008,7 +2008,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2035,7 +2035,7 @@ Variant c_reflectionobject::os_invoke_from_eval(const char *c, const char *s, Ev
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionobject::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2113,7 +2113,7 @@ void c_reflectionexception::o_setArray(CArrRef props) {
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionexception
 Variant c_reflectionexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return c_reflectionexception::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionexception
@@ -2128,7 +2128,7 @@ Variant c_reflectionexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionexception
 bool c_reflectionexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return c_reflectionexception::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionexception
@@ -2143,7 +2143,7 @@ bool c_reflectionexception::o_existsPrivate(CStrRef s, int64 hash) const {
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionexception
 Variant c_reflectionexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return c_reflectionexception::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionexception
@@ -2158,7 +2158,7 @@ Variant c_reflectionexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bo
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_reflectionexception
 Variant& c_reflectionexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return c_reflectionexception::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionexception
@@ -2192,55 +2192,55 @@ Variant c_reflectionexception::o_invoke(const char *s, CArrRef params, int64 has
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2264,55 +2264,55 @@ Variant c_reflectionexception::o_invoke_few_args(const char *s, int64 hash, int 
   switch (hash & 31) {
     case 0:
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -2337,7 +2337,7 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x625661A755F425C0LL, __init__) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2351,7 +2351,7 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2365,7 +2365,7 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2379,7 +2379,7 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2393,7 +2393,7 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2407,7 +2407,7 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2421,7 +2421,7 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2435,7 +2435,7 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2451,7 +2451,7 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2544,7 +2544,7 @@ Variant c_reflectionclass::o_get(CStrRef prop, int64 phash, bool error, const ch
     default:
       break;
   }
-  return c_reflectionclass::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionclass
@@ -2586,7 +2586,7 @@ bool c_reflectionclass::o_exists(CStrRef prop, int64 phash, const char *context,
     default:
       break;
   }
-  return c_reflectionclass::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionclass
@@ -2626,7 +2626,7 @@ Variant c_reflectionclass::o_set(CStrRef prop, int64 phash, CVarRef v, bool forI
     default:
       break;
   }
-  return c_reflectionclass::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionclass
@@ -2668,7 +2668,7 @@ Variant& c_reflectionclass::o_lval(CStrRef prop, int64 phash, const char *contex
     default:
       break;
   }
-  return c_reflectionclass::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionclass
@@ -2728,7 +2728,7 @@ ObjectData *c_reflectionclass::dynCreate(CArrRef params, bool construct /* = tru
   if (construct) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+    if (count != 1) throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
     {
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2740,7 +2740,7 @@ ObjectData *c_reflectionclass::dynCreate(CArrRef params, bool construct /* = tru
 }
 void c_reflectionclass::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+  if (count != 1) throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2752,7 +2752,7 @@ void c_reflectionclass::dynConstructFromEval(Eval::VariableEnvironment &env, con
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 1);
+  if (count != 1) throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -2781,13 +2781,13 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
   switch (hash & 127) {
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
         return (t_getstartline());
       }
       break;
     case 15:
       HASH_GUARD(0x40C7B30DCB439C8FLL, hasproperty) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2798,19 +2798,19 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 24:
       HASH_GUARD(0x21820E7AA4733998LL, hasmethod) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2821,25 +2821,25 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
       break;
     case 27:
       HASH_GUARD(0x0F1AD0A8EC4C229BLL, getdefaultproperties) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
         return (t_getdefaultproperties());
       }
       break;
     case 30:
       HASH_GUARD(0x1BC5F3D87676509ELL, isinterface) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
         return (t_isinterface());
       }
       break;
     case 34:
       HASH_GUARD(0x323D9BCB05797B22LL, getstaticproperties) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
         return (t_getstaticproperties());
       }
       break;
     case 41:
       HASH_GUARD(0x030CE1D6142F8C29LL, isinstance) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2848,13 +2848,13 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
         }
       }
       HASH_GUARD(0x1D6B8CA358B49929LL, getextensionname) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
         return (t_getextensionname());
       }
       break;
     case 42:
       HASH_GUARD(0x16BA16CE6488AAAALL, getmethods) {
-        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
+        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2864,17 +2864,17 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
         }
       }
       HASH_GUARD(0x226F6E80CECD3CAALL, getconstructor) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
         return (t_getconstructor());
       }
       HASH_GUARD(0x24596BE6D21F7CAALL, getinterfacenames) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
         return (t_getinterfacenames());
       }
       break;
     case 46:
       HASH_GUARD(0x3C882D4A895F612ELL, getstaticpropertyvalue) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2885,7 +2885,7 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
         }
       }
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
         return (t_isfinal());
       }
       break;
@@ -2897,7 +2897,7 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
       break;
     case 52:
       HASH_GUARD(0x3DB53E1FBD3C0734LL, getconstant) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2908,7 +2908,7 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
       break;
     case 54:
       HASH_GUARD(0x0D81ECE253A3B5B6LL, getmethod) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2919,25 +2919,25 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
       break;
     case 55:
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
         return (t_isabstract());
       }
       break;
     case 59:
       HASH_GUARD(0x25D24435915E6E3BLL, getextension) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
         return (t_getextension());
       }
       break;
     case 60:
       HASH_GUARD(0x0D8AAD6BA2BBCD3CLL, isinstantiable) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
         return (t_isinstantiable());
       }
       break;
     case 63:
       HASH_GUARD(0x54C2DC04C4A62B3FLL, hasconstant) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2948,19 +2948,19 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
       break;
     case 67:
       HASH_GUARD(0x67C15E3D98C00B43LL, getinterfaces) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
         return (t_getinterfaces());
       }
       break;
     case 68:
       HASH_GUARD(0x1EB679C3602F4B44LL, getproperties) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
         return (t_getproperties());
       }
       break;
     case 71:
       HASH_GUARD(0x0FD73627FB023047LL, getproperty) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2971,31 +2971,31 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
         return (t_getfilename());
       }
       break;
     case 78:
       HASH_GUARD(0x7D5A57B5370B68CELL, isiterateable) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
         return (t_isiterateable());
       }
       break;
     case 79:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 85:
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
         return (t_getconstants());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -3006,19 +3006,19 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
       break;
     case 100:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 101:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 102:
       HASH_GUARD(0x2735DCC254EE5C66LL, newinstanceargs) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -3029,7 +3029,7 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
       break;
     case 103:
       HASH_GUARD(0x37349B25A0ED29E7LL, test) {
-        if (count != 2) return throw_wrong_arguments("reflectionclass::test", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -3041,7 +3041,7 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
       break;
     case 104:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -3053,13 +3053,13 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
       break;
     case 112:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
         return (t_getendline());
       }
       break;
     case 113:
       HASH_GUARD(0x07ECA928E37717F1LL, setstaticpropertyvalue) {
-        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -3071,19 +3071,19 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
       break;
     case 114:
       HASH_GUARD(0x74F7FEDE16957472LL, getparentclass) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
         return (t_getparentclass());
       }
       break;
     case 120:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 123:
       HASH_GUARD(0x28DC702215C7D6FBLL, implementsinterface) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -3092,7 +3092,7 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
         }
       }
       HASH_GUARD(0x5E82B850BB90B0FBLL, fetch) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::fetch", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -3103,7 +3103,7 @@ Variant c_reflectionclass::o_invoke(const char *s, CArrRef params, int64 hash, b
       break;
     case 126:
       HASH_GUARD(0x373333991926C97ELL, issubclassof) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -3124,85 +3124,85 @@ Variant c_reflectionclass::o_invoke_few_args(const char *s, int64 hash, int coun
   switch (hash & 127) {
     case 4:
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
         return (t_getstartline());
       }
       break;
     case 15:
       HASH_GUARD(0x40C7B30DCB439C8FLL, hasproperty) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
         return (t_hasproperty(a0));
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 24:
       HASH_GUARD(0x21820E7AA4733998LL, hasmethod) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
         return (t_hasmethod(a0));
       }
       break;
     case 27:
       HASH_GUARD(0x0F1AD0A8EC4C229BLL, getdefaultproperties) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
         return (t_getdefaultproperties());
       }
       break;
     case 30:
       HASH_GUARD(0x1BC5F3D87676509ELL, isinterface) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
         return (t_isinterface());
       }
       break;
     case 34:
       HASH_GUARD(0x323D9BCB05797B22LL, getstaticproperties) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
         return (t_getstaticproperties());
       }
       break;
     case 41:
       HASH_GUARD(0x030CE1D6142F8C29LL, isinstance) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
         return (t_isinstance(a0));
       }
       HASH_GUARD(0x1D6B8CA358B49929LL, getextensionname) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
         return (t_getextensionname());
       }
       break;
     case 42:
       HASH_GUARD(0x16BA16CE6488AAAALL, getmethods) {
-        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
+        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
         if (count <= 0) return (t_getmethods());
         return (t_getmethods(a0));
       }
       HASH_GUARD(0x226F6E80CECD3CAALL, getconstructor) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
         return (t_getconstructor());
       }
       HASH_GUARD(0x24596BE6D21F7CAALL, getinterfacenames) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
         return (t_getinterfacenames());
       }
       break;
     case 46:
       HASH_GUARD(0x3C882D4A895F612ELL, getstaticpropertyvalue) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
         if (count <= 1) return (t_getstaticpropertyvalue(a0));
         return (t_getstaticpropertyvalue(a0, a1));
       }
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
         return (t_isfinal());
       }
       break;
@@ -3221,155 +3221,155 @@ Variant c_reflectionclass::o_invoke_few_args(const char *s, int64 hash, int coun
       break;
     case 52:
       HASH_GUARD(0x3DB53E1FBD3C0734LL, getconstant) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
         return (t_getconstant(a0));
       }
       break;
     case 54:
       HASH_GUARD(0x0D81ECE253A3B5B6LL, getmethod) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
         return (t_getmethod(a0));
       }
       break;
     case 55:
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
         return (t_isabstract());
       }
       break;
     case 59:
       HASH_GUARD(0x25D24435915E6E3BLL, getextension) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
         return (t_getextension());
       }
       break;
     case 60:
       HASH_GUARD(0x0D8AAD6BA2BBCD3CLL, isinstantiable) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
         return (t_isinstantiable());
       }
       break;
     case 63:
       HASH_GUARD(0x54C2DC04C4A62B3FLL, hasconstant) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
         return (t_hasconstant(a0));
       }
       break;
     case 67:
       HASH_GUARD(0x67C15E3D98C00B43LL, getinterfaces) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
         return (t_getinterfaces());
       }
       break;
     case 68:
       HASH_GUARD(0x1EB679C3602F4B44LL, getproperties) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
         return (t_getproperties());
       }
       break;
     case 71:
       HASH_GUARD(0x0FD73627FB023047LL, getproperty) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
         return (t_getproperty(a0));
       }
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
         return (t_getfilename());
       }
       break;
     case 78:
       HASH_GUARD(0x7D5A57B5370B68CELL, isiterateable) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
         return (t_isiterateable());
       }
       break;
     case 79:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 85:
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
         return (t_getconstants());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       break;
     case 100:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 101:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 102:
       HASH_GUARD(0x2735DCC254EE5C66LL, newinstanceargs) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
         return (t_newinstanceargs(a0));
       }
       break;
     case 103:
       HASH_GUARD(0x37349B25A0ED29E7LL, test) {
-        if (count != 2) return throw_wrong_arguments("reflectionclass::test", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
         return (t_test(a0, a1));
       }
       break;
     case 104:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
         return (ti_export(o_getClassName(), a0, a1));
       }
       break;
     case 112:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
         return (t_getendline());
       }
       break;
     case 113:
       HASH_GUARD(0x07ECA928E37717F1LL, setstaticpropertyvalue) {
-        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
         return (t_setstaticpropertyvalue(a0, a1), null);
       }
       break;
     case 114:
       HASH_GUARD(0x74F7FEDE16957472LL, getparentclass) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
         return (t_getparentclass());
       }
       break;
     case 120:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 123:
       HASH_GUARD(0x28DC702215C7D6FBLL, implementsinterface) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
         return (t_implementsinterface(a0));
       }
       HASH_GUARD(0x5E82B850BB90B0FBLL, fetch) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::fetch", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
         return (t_fetch(a0));
       }
       break;
     case 126:
       HASH_GUARD(0x373333991926C97ELL, issubclassof) {
-        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
         return (t_issubclassof(a0));
       }
       break;
@@ -3386,7 +3386,7 @@ Variant c_reflectionclass::os_invoke(const char *c, const char *s, CArrRef param
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -3409,7 +3409,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getstartline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3424,7 +3424,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasproperty", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3441,7 +3441,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3455,7 +3455,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getmodifiers", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3470,7 +3470,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasmethod", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3487,7 +3487,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x0F1AD0A8EC4C229BLL, getdefaultproperties) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getdefaultproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3501,7 +3501,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x1BC5F3D87676509ELL, isinterface) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinterface", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3515,7 +3515,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x323D9BCB05797B22LL, getstaticproperties) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getstaticproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3530,7 +3530,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::isinstance", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3545,7 +3545,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x1D6B8CA358B49929LL, getextensionname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getextensionname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3560,7 +3560,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("reflectionclass::getmethods", 1, 1);
+        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3576,7 +3576,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x226F6E80CECD3CAALL, getconstructor) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstructor", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3588,7 +3588,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x24596BE6D21F7CAALL, getinterfacenames) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfacenames", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3604,7 +3604,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 2) return throw_wrong_arguments("reflectionclass::getstaticpropertyvalue", count, 1, 2, 1);
+        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3623,7 +3623,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isfinal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3653,7 +3653,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getconstant", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3671,7 +3671,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getmethod", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3688,7 +3688,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isabstract", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3702,7 +3702,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x25D24435915E6E3BLL, getextension) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getextension", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3716,7 +3716,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x0D8AAD6BA2BBCD3CLL, isinstantiable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinstantiable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3731,7 +3731,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::hasconstant", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3748,7 +3748,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x67C15E3D98C00B43LL, getinterfaces) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getinterfaces", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3762,7 +3762,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x1EB679C3602F4B44LL, getproperties) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getproperties", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3777,7 +3777,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::getproperty", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3794,7 +3794,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3808,7 +3808,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x7D5A57B5370B68CELL, isiterateable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isiterateable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3822,7 +3822,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isinternal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3836,7 +3836,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getconstants", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3851,7 +3851,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3868,7 +3868,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::isuserdefined", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3882,7 +3882,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3897,7 +3897,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::newinstanceargs", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3916,7 +3916,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionclass::test", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3938,7 +3938,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3958,7 +3958,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getendline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3974,7 +3974,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionclass::setstaticpropertyvalue", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3994,7 +3994,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x74F7FEDE16957472LL, getparentclass) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getparentclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4008,7 +4008,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionclass::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4023,7 +4023,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::implementsinterface", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4039,7 +4039,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::fetch", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4057,7 +4057,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionclass::issubclassof", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4084,7 +4084,7 @@ Variant c_reflectionclass::os_invoke_from_eval(const char *c, const char *s, Eva
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionclass::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4908,7 +4908,7 @@ Variant c_reflectionextension::o_get(CStrRef prop, int64 phash, bool error, cons
     default:
       break;
   }
-  return c_reflectionextension::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionextension
@@ -4945,7 +4945,7 @@ bool c_reflectionextension::o_exists(CStrRef prop, int64 phash, const char *cont
     default:
       break;
   }
-  return c_reflectionextension::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionextension
@@ -4980,7 +4980,7 @@ Variant c_reflectionextension::o_set(CStrRef prop, int64 phash, CVarRef v, bool 
     default:
       break;
   }
-  return c_reflectionextension::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionextension
@@ -5017,7 +5017,7 @@ Variant& c_reflectionextension::o_lval(CStrRef prop, int64 phash, const char *co
     default:
       break;
   }
-  return c_reflectionextension::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionextension
@@ -5060,7 +5060,7 @@ ObjectData *c_reflectionextension::dynCreate(CArrRef params, bool construct /* =
   if (construct) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
+    if (count != 1) throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
     {
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5072,7 +5072,7 @@ ObjectData *c_reflectionextension::dynCreate(CArrRef params, bool construct /* =
 }
 void c_reflectionextension::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
+  if (count != 1) throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5084,7 +5084,7 @@ void c_reflectionextension::dynConstructFromEval(Eval::VariableEnvironment &env,
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 1);
+  if (count != 1) throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -5113,19 +5113,19 @@ Variant c_reflectionextension::o_invoke(const char *s, CArrRef params, int64 has
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x0113D73FC859EDC2LL, getclasses) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getclasses", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
         return (t_getclasses());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5137,41 +5137,41 @@ Variant c_reflectionextension::o_invoke(const char *s, CArrRef params, int64 has
       break;
     case 15:
       HASH_GUARD(0x652BDFA6E22F17AFLL, getfunctions) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getfunctions", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
         return (t_getfunctions());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x5CE2786E11341594LL, getclassnames) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getclassnames", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
         return (t_getclassnames());
       }
       break;
     case 21:
       HASH_GUARD(0x306B5F4D1D03D335LL, getinientries) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getinientries", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
         return (t_getinientries());
       }
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getconstants", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
         return (t_getconstants());
       }
       break;
     case 22:
       HASH_GUARD(0x7521E8833BE3D316LL, getversion) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getversion", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
         return (t_getversion());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 1) return throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5180,7 +5180,7 @@ Variant c_reflectionextension::o_invoke(const char *s, CArrRef params, int64 has
         }
       }
       HASH_GUARD(0x0F2EF58F157D479FLL, info) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::info", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
         return (t_info());
       }
       break;
@@ -5196,63 +5196,63 @@ Variant c_reflectionextension::o_invoke_few_args(const char *s, int64 hash, int 
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x0113D73FC859EDC2LL, getclasses) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getclasses", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
         return (t_getclasses());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
         return (ti_export(o_getClassName(), a0, a1));
       }
       break;
     case 15:
       HASH_GUARD(0x652BDFA6E22F17AFLL, getfunctions) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getfunctions", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
         return (t_getfunctions());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x5CE2786E11341594LL, getclassnames) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getclassnames", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
         return (t_getclassnames());
       }
       break;
     case 21:
       HASH_GUARD(0x306B5F4D1D03D335LL, getinientries) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getinientries", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
         return (t_getinientries());
       }
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getconstants", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
         return (t_getconstants());
       }
       break;
     case 22:
       HASH_GUARD(0x7521E8833BE3D316LL, getversion) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getversion", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
         return (t_getversion());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 1) return throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       HASH_GUARD(0x0F2EF58F157D479FLL, info) {
-        if (count > 0) return throw_toomany_arguments("reflectionextension::info", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
         return (t_info());
       }
       break;
@@ -5269,7 +5269,7 @@ Variant c_reflectionextension::os_invoke(const char *c, const char *s, CArrRef p
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5292,7 +5292,7 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x0113D73FC859EDC2LL, getclasses) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getclasses", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5306,7 +5306,7 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5322,7 +5322,7 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5342,7 +5342,7 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x652BDFA6E22F17AFLL, getfunctions) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getfunctions", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5356,7 +5356,7 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionextension::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5370,7 +5370,7 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x5CE2786E11341594LL, getclassnames) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getclassnames", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5384,7 +5384,7 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x306B5F4D1D03D335LL, getinientries) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getinientries", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5396,7 +5396,7 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x1CC71CB013143955LL, getconstants) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getconstants", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5410,7 +5410,7 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x7521E8833BE3D316LL, getversion) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionextension::getversion", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5425,7 +5425,7 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionextension::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5440,7 +5440,7 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x0F2EF58F157D479FLL, info) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionextension::info", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5464,7 +5464,7 @@ Variant c_reflectionextension::os_invoke_from_eval(const char *c, const char *s,
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionextension::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5639,7 +5639,7 @@ void c_reflectionmethod::o_setArray(CArrRef props) {
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionmethod
 Variant c_reflectionmethod::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return c_reflectionmethod::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionmethod
@@ -5667,7 +5667,7 @@ Variant c_reflectionmethod::o_getPrivate(CStrRef s, int64 hash, bool error) {
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionmethod
 bool c_reflectionmethod::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return c_reflectionmethod::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionmethod
@@ -5693,7 +5693,7 @@ bool c_reflectionmethod::o_existsPrivate(CStrRef s, int64 hash) const {
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionmethod
 Variant c_reflectionmethod::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return c_reflectionmethod::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionmethod
@@ -5721,7 +5721,7 @@ Variant c_reflectionmethod::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool 
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_reflectionmethod
 Variant& c_reflectionmethod::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return c_reflectionmethod::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionmethod
@@ -5785,7 +5785,7 @@ ObjectData *c_reflectionmethod::dynCreate(CArrRef params, bool construct /* = tr
   if (construct) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
-    if (count != 2) throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
+    if (count != 2) throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
     {
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5798,7 +5798,7 @@ ObjectData *c_reflectionmethod::dynCreate(CArrRef params, bool construct /* = tr
 }
 void c_reflectionmethod::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  if (count != 2) throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
+  if (count != 2) throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5812,7 +5812,7 @@ void c_reflectionmethod::dynConstructFromEval(Eval::VariableEnvironment &env, co
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count != 2) throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 1);
+  if (count != 2) throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -5844,7 +5844,7 @@ Variant c_reflectionmethod::o_invoke(const char *s, CArrRef params, int64 hash, 
   switch (hash & 63) {
     case 2:
       HASH_GUARD(0x3FCE192CF6199942LL, invoke) {
-        if (count < 1) return throw_missing_arguments("reflectionmethod::invoke", count+1, 1);
+        if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5856,7 +5856,7 @@ Variant c_reflectionmethod::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 4:
       HASH_GUARD(0x3235AF57F23103C4LL, invokeargs) {
-        if (count != 2) return throw_wrong_arguments("reflectionmethod::invokeargs", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5866,49 +5866,49 @@ Variant c_reflectionmethod::o_invoke(const char *s, CArrRef params, int64 hash, 
         }
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
         return (t_getstartline());
       }
       break;
     case 7:
       HASH_GUARD(0x51A20EA0E327F607LL, isdestructor) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isdestructor", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
         return (t_isdestructor());
       }
       break;
     case 13:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
         return (t_getfilename());
       }
       break;
     case 15:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::getmodifiers", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 25:
       HASH_GUARD(0x7A15DC56E8CC0B19LL, isstatic) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isstatic", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
         return (t_isstatic());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 2) return throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
+        if (count != 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5920,51 +5920,51 @@ Variant c_reflectionmethod::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 32:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
         return (t_getnumberofparameters());
       }
       break;
     case 33:
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
         return (t_getnumberofrequiredparameters());
       }
       break;
     case 34:
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::getclosure", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
         return (t_getclosure());
       }
       break;
     case 35:
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::getdeclaringclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
         return (t_getdeclaringclass());
       }
       break;
     case 36:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 37:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 40:
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
         return (t_getstaticvariables());
       }
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
         return (t_returnsreference());
       }
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
+        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5977,55 +5977,55 @@ Variant c_reflectionmethod::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 42:
       HASH_GUARD(0x2D7209A590477CEALL, isprotected) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprotected", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
         return (t_isprotected());
       }
       break;
     case 45:
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
         return (t_getparameters());
       }
       break;
     case 46:
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isfinal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
         return (t_isfinal());
       }
       break;
     case 47:
       HASH_GUARD(0x37AAE0845E2F636FLL, isprivate) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprivate", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
         return (t_isprivate());
       }
       break;
     case 48:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
         return (t_getendline());
       }
       break;
     case 55:
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isabstract", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
         return (t_isabstract());
       }
       break;
     case 56:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 58:
       HASH_GUARD(0x654B5F965C5CAC7ALL, isconstructor) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isconstructor", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
         return (t_isconstructor());
       }
       break;
     case 60:
       HASH_GUARD(0x2820F10358723B7CLL, ispublic) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::ispublic", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
         return (t_ispublic());
       }
       break;
@@ -6041,7 +6041,7 @@ Variant c_reflectionmethod::o_invoke_few_args(const char *s, int64 hash, int cou
   switch (hash & 63) {
     case 2:
       HASH_GUARD(0x3FCE192CF6199942LL, invoke) {
-        if (count < 1) return throw_missing_arguments("reflectionmethod::invoke", count+1, 1);
+        if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
         if (count <= 1) return (t_invoke(count, a0));
         Array params;
         if (count >= 2) params.append(a1);
@@ -6054,157 +6054,157 @@ Variant c_reflectionmethod::o_invoke_few_args(const char *s, int64 hash, int cou
       break;
     case 4:
       HASH_GUARD(0x3235AF57F23103C4LL, invokeargs) {
-        if (count != 2) return throw_wrong_arguments("reflectionmethod::invokeargs", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
         return (t_invokeargs(a0, a1));
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
         return (t_getstartline());
       }
       break;
     case 7:
       HASH_GUARD(0x51A20EA0E327F607LL, isdestructor) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isdestructor", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
         return (t_isdestructor());
       }
       break;
     case 13:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
         return (t_getfilename());
       }
       break;
     case 15:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::getmodifiers", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 25:
       HASH_GUARD(0x7A15DC56E8CC0B19LL, isstatic) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isstatic", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
         return (t_isstatic());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 2) return throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
+        if (count != 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
         return (t___construct(a0, a1), null);
       }
       break;
     case 32:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
         return (t_getnumberofparameters());
       }
       break;
     case 33:
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
         return (t_getnumberofrequiredparameters());
       }
       break;
     case 34:
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::getclosure", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
         return (t_getclosure());
       }
       break;
     case 35:
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::getdeclaringclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
         return (t_getdeclaringclass());
       }
       break;
     case 36:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 37:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 40:
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
         return (t_getstaticvariables());
       }
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
         return (t_returnsreference());
       }
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
+        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
         return (ti_export(o_getClassName(), a0, a1, a2));
       }
       break;
     case 42:
       HASH_GUARD(0x2D7209A590477CEALL, isprotected) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprotected", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
         return (t_isprotected());
       }
       break;
     case 45:
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
         return (t_getparameters());
       }
       break;
     case 46:
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isfinal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
         return (t_isfinal());
       }
       break;
     case 47:
       HASH_GUARD(0x37AAE0845E2F636FLL, isprivate) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprivate", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
         return (t_isprivate());
       }
       break;
     case 48:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
         return (t_getendline());
       }
       break;
     case 55:
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isabstract", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
         return (t_isabstract());
       }
       break;
     case 56:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 58:
       HASH_GUARD(0x654B5F965C5CAC7ALL, isconstructor) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isconstructor", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
         return (t_isconstructor());
       }
       break;
     case 60:
       HASH_GUARD(0x2820F10358723B7CLL, ispublic) {
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::ispublic", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
         return (t_ispublic());
       }
       break;
@@ -6221,7 +6221,7 @@ Variant c_reflectionmethod::os_invoke(const char *c, const char *s, CArrRef para
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
+        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -6246,7 +6246,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count < 1) return throw_missing_arguments("reflectionmethod::invoke", count+1, 1);
+        if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6267,7 +6267,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionmethod::invokeargs", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6285,7 +6285,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6299,7 +6299,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x51A20EA0E327F607LL, isdestructor) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isdestructor", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6313,7 +6313,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6327,7 +6327,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6341,7 +6341,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6355,7 +6355,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::getmodifiers", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6369,7 +6369,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x7A15DC56E8CC0B19LL, isstatic) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isstatic", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6385,7 +6385,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionmethod::__construct", count, 2, 2, 2);
+        if (count != 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6405,7 +6405,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6419,7 +6419,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6433,7 +6433,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::getclosure", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6447,7 +6447,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::getdeclaringclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6461,7 +6461,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6475,7 +6475,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6489,7 +6489,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6501,7 +6501,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6516,7 +6516,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
+        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6539,7 +6539,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x2D7209A590477CEALL, isprotected) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprotected", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6553,7 +6553,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6567,7 +6567,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x06FB6A7DC3D795AELL, isfinal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isfinal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6581,7 +6581,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x37AAE0845E2F636FLL, isprivate) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isprivate", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6595,7 +6595,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6609,7 +6609,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x7460D945DA32FDB7LL, isabstract) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isabstract", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6623,7 +6623,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6637,7 +6637,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x654B5F965C5CAC7ALL, isconstructor) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::isconstructor", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6651,7 +6651,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x2820F10358723B7CLL, ispublic) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionmethod::ispublic", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6676,7 +6676,7 @@ Variant c_reflectionmethod::os_invoke_from_eval(const char *c, const char *s, Ev
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("reflectionmethod::export", count, 3, 3, 1);
+        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6926,7 +6926,7 @@ void c_reflectionproperty::o_setArray(CArrRef props) {
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionproperty
 Variant c_reflectionproperty::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return c_reflectionproperty::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionproperty
@@ -6958,7 +6958,7 @@ Variant c_reflectionproperty::o_getPrivate(CStrRef s, int64 hash, bool error) {
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionproperty
 bool c_reflectionproperty::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return c_reflectionproperty::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionproperty
@@ -6987,7 +6987,7 @@ bool c_reflectionproperty::o_existsPrivate(CStrRef s, int64 hash) const {
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionproperty
 Variant c_reflectionproperty::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return c_reflectionproperty::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionproperty
@@ -7019,7 +7019,7 @@ Variant c_reflectionproperty::o_setPrivate(CStrRef s, int64 hash, CVarRef v, boo
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_reflectionproperty
 Variant& c_reflectionproperty::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return c_reflectionproperty::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionproperty
@@ -7083,7 +7083,7 @@ ObjectData *c_reflectionproperty::dynCreate(CArrRef params, bool construct /* = 
   if (construct) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
-    if (count != 2) throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
+    if (count != 2) throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
     {
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -7096,7 +7096,7 @@ ObjectData *c_reflectionproperty::dynCreate(CArrRef params, bool construct /* = 
 }
 void c_reflectionproperty::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  if (count != 2) throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
+  if (count != 2) throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -7110,7 +7110,7 @@ void c_reflectionproperty::dynConstructFromEval(Eval::VariableEnvironment &env, 
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count != 2) throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 1);
+  if (count != 2) throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -7143,13 +7143,13 @@ Variant c_reflectionproperty::o_invoke(const char *s, CArrRef params, int64 hash
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x791E9751F5B8C5A2LL, setaccessible) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::setaccessible", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::setAccessible", 0, 1);
         return (t_setaccessible(), null);
       }
       break;
     case 3:
       HASH_GUARD(0x56879BCEB40997E3LL, getvalue) {
-        if (count > 1) return throw_toomany_arguments("reflectionproperty::getvalue", 1, 1);
+        if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -7159,19 +7159,19 @@ Variant c_reflectionproperty::o_invoke(const char *s, CArrRef params, int64 hash
         }
       }
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdeclaringclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
         return (t_getdeclaringclass());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
+        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -7184,35 +7184,35 @@ Variant c_reflectionproperty::o_invoke(const char *s, CArrRef params, int64 hash
       break;
     case 10:
       HASH_GUARD(0x2D7209A590477CEALL, isprotected) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprotected", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
         return (t_isprotected());
       }
       break;
     case 15:
       HASH_GUARD(0x37AAE0845E2F636FLL, isprivate) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprivate", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
         return (t_isprivate());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::getmodifiers", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 21:
       HASH_GUARD(0x384A52597AB11F15LL, isdefault) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::isdefault", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
         return (t_isdefault());
       }
       HASH_GUARD(0x36FBED35008C8DB5LL, setvalue) {
-        if (count != 2) return throw_wrong_arguments("reflectionproperty::setvalue", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -7224,25 +7224,25 @@ Variant c_reflectionproperty::o_invoke(const char *s, CArrRef params, int64 hash
       break;
     case 24:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 25:
       HASH_GUARD(0x7A15DC56E8CC0B19LL, isstatic) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::isstatic", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
         return (t_isstatic());
       }
       break;
     case 28:
       HASH_GUARD(0x2820F10358723B7CLL, ispublic) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::ispublic", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
         return (t_ispublic());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 2) return throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
+        if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -7264,88 +7264,88 @@ Variant c_reflectionproperty::o_invoke_few_args(const char *s, int64 hash, int c
   switch (hash & 31) {
     case 2:
       HASH_GUARD(0x791E9751F5B8C5A2LL, setaccessible) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::setaccessible", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::setAccessible", 0, 1);
         return (t_setaccessible(), null);
       }
       break;
     case 3:
       HASH_GUARD(0x56879BCEB40997E3LL, getvalue) {
-        if (count > 1) return throw_toomany_arguments("reflectionproperty::getvalue", 1, 1);
+        if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
         if (count <= 0) return (t_getvalue());
         return (t_getvalue(a0));
       }
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdeclaringclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
         return (t_getdeclaringclass());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
+        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
         return (ti_export(o_getClassName(), a0, a1, a2));
       }
       break;
     case 10:
       HASH_GUARD(0x2D7209A590477CEALL, isprotected) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprotected", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
         return (t_isprotected());
       }
       break;
     case 15:
       HASH_GUARD(0x37AAE0845E2F636FLL, isprivate) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprivate", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
         return (t_isprivate());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::getmodifiers", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
         return (t_getmodifiers());
       }
       break;
     case 21:
       HASH_GUARD(0x384A52597AB11F15LL, isdefault) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::isdefault", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
         return (t_isdefault());
       }
       HASH_GUARD(0x36FBED35008C8DB5LL, setvalue) {
-        if (count != 2) return throw_wrong_arguments("reflectionproperty::setvalue", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
         return (t_setvalue(a0, a1));
       }
       break;
     case 24:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
         return (t_getdoccomment());
       }
       break;
     case 25:
       HASH_GUARD(0x7A15DC56E8CC0B19LL, isstatic) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::isstatic", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
         return (t_isstatic());
       }
       break;
     case 28:
       HASH_GUARD(0x2820F10358723B7CLL, ispublic) {
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::ispublic", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
         return (t_ispublic());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 2) return throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
+        if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
         return (t___construct(a0, a1), null);
       }
       break;
@@ -7362,7 +7362,7 @@ Variant c_reflectionproperty::os_invoke(const char *c, const char *s, CArrRef pa
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
+        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -7386,7 +7386,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x791E9751F5B8C5A2LL, setaccessible) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::setaccessible", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::setAccessible", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7401,7 +7401,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("reflectionproperty::getvalue", 1, 1);
+        if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7417,7 +7417,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdeclaringclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7431,7 +7431,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7448,7 +7448,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
+        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7471,7 +7471,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x2D7209A590477CEALL, isprotected) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprotected", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7485,7 +7485,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x37AAE0845E2F636FLL, isprivate) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::isprivate", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7499,7 +7499,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7513,7 +7513,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x24253EBA491D6014LL, getmodifiers) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::getmodifiers", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7527,7 +7527,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x384A52597AB11F15LL, isdefault) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::isdefault", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7541,7 +7541,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionproperty::setvalue", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7561,7 +7561,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7575,7 +7575,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x7A15DC56E8CC0B19LL, isstatic) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::isstatic", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7589,7 +7589,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x2820F10358723B7CLL, ispublic) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionproperty::ispublic", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7605,7 +7605,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionproperty::__construct", count, 2, 2, 2);
+        if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7636,7 +7636,7 @@ Variant c_reflectionproperty::os_invoke_from_eval(const char *c, const char *s, 
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("reflectionproperty::export", count, 3, 3, 1);
+        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7872,7 +7872,7 @@ void c_reflectionfunction::o_setArray(CArrRef props) {
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionfunction
 Variant c_reflectionfunction::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return c_reflectionfunction::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionfunction
@@ -7887,7 +7887,7 @@ Variant c_reflectionfunction::o_getPrivate(CStrRef s, int64 hash, bool error) {
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionfunction
 bool c_reflectionfunction::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return c_reflectionfunction::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionfunction
@@ -7902,7 +7902,7 @@ bool c_reflectionfunction::o_existsPrivate(CStrRef s, int64 hash) const {
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionfunction
 Variant c_reflectionfunction::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return c_reflectionfunction::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionfunction
@@ -7917,7 +7917,7 @@ Variant c_reflectionfunction::o_setPrivate(CStrRef s, int64 hash, CVarRef v, boo
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_reflectionfunction
 Variant& c_reflectionfunction::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return c_reflectionfunction::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionfunction
@@ -7955,7 +7955,7 @@ ObjectData *c_reflectionfunction::dynCreate(CArrRef params, bool construct /* = 
   if (construct) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
+    if (count != 1) throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
     {
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -7967,7 +7967,7 @@ ObjectData *c_reflectionfunction::dynCreate(CArrRef params, bool construct /* = 
 }
 void c_reflectionfunction::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
+  if (count != 1) throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -7979,7 +7979,7 @@ void c_reflectionfunction::dynConstructFromEval(Eval::VariableEnvironment &env, 
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 1);
+  if (count != 1) throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -8012,7 +8012,7 @@ Variant c_reflectionfunction::o_invoke(const char *s, CArrRef params, int64 hash
       break;
     case 4:
       HASH_GUARD(0x3235AF57F23103C4LL, invokeargs) {
-        if (count != 1) return throw_wrong_arguments("reflectionfunction::invokeargs", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -8021,31 +8021,31 @@ Variant c_reflectionfunction::o_invoke(const char *s, CArrRef params, int64 hash
         }
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
         return (t_getstartline());
       }
       break;
     case 13:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
         return (t_getfilename());
       }
       break;
     case 15:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunction::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 1) return throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -8056,45 +8056,45 @@ Variant c_reflectionfunction::o_invoke(const char *s, CArrRef params, int64 hash
       break;
     case 32:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
         return (t_getnumberofparameters());
       }
       break;
     case 33:
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
         return (t_getnumberofrequiredparameters());
       }
       break;
     case 34:
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
         return (t_getclosure());
       }
       break;
     case 36:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 37:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 40:
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
         return (t_getstaticvariables());
       }
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
         return (t_returnsreference());
       }
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -8106,19 +8106,19 @@ Variant c_reflectionfunction::o_invoke(const char *s, CArrRef params, int64 hash
       break;
     case 45:
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
         return (t_getparameters());
       }
       break;
     case 48:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
         return (t_getendline());
       }
       break;
     case 56:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
         return (t_getdoccomment());
       }
       break;
@@ -8147,97 +8147,97 @@ Variant c_reflectionfunction::o_invoke_few_args(const char *s, int64 hash, int c
       break;
     case 4:
       HASH_GUARD(0x3235AF57F23103C4LL, invokeargs) {
-        if (count != 1) return throw_wrong_arguments("reflectionfunction::invokeargs", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
         return (t_invokeargs(a0));
       }
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
         return (t_getstartline());
       }
       break;
     case 13:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
         return (t_getfilename());
       }
       break;
     case 15:
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
         return (t_isinternal());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunction::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 1) return throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       break;
     case 32:
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
         return (t_getnumberofparameters());
       }
       break;
     case 33:
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
         return (t_getnumberofrequiredparameters());
       }
       break;
     case 34:
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
         return (t_getclosure());
       }
       break;
     case 36:
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
         return (t_isuserdefined());
       }
       break;
     case 37:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 40:
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
         return (t_getstaticvariables());
       }
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
         return (t_returnsreference());
       }
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
         return (ti_export(o_getClassName(), a0, a1));
       }
       break;
     case 45:
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
         return (t_getparameters());
       }
       break;
     case 48:
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
         return (t_getendline());
       }
       break;
     case 56:
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
         return (t_getdoccomment());
       }
       break;
@@ -8254,7 +8254,7 @@ Variant c_reflectionfunction::os_invoke(const char *c, const char *s, CArrRef pa
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -8293,7 +8293,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionfunction::invokeargs", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8308,7 +8308,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x39C1BB731CB1CB04LL, getstartline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstartline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8322,7 +8322,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8336,7 +8336,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x48FDF6C5835C64CFLL, isinternal) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isinternal", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8350,7 +8350,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunction::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8365,7 +8365,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("reflectionfunction::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8382,7 +8382,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x57D8DC34C9A03560LL, getnumberofparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8396,7 +8396,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x4D637DECDBFA6221LL, getnumberofrequiredparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getnumberofrequiredparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8410,7 +8410,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x33A6C2CFBDB05EE2LL, getclosure) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getclosure", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8424,7 +8424,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x6A6B8BECAE7D4164LL, isuserdefined) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::isuserdefined", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8438,7 +8438,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8452,7 +8452,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x37FFB8F44A3329A8LL, getstaticvariables) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getstaticvariables", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8464,7 +8464,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x1A3AB3B0276D2668LL, returnsreference) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::returnsreference", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8478,7 +8478,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8498,7 +8498,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x3E62225132C2A32DLL, getparameters) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getparameters", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8512,7 +8512,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x6C19E85007BC4570LL, getendline) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getendline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8526,7 +8526,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD(0x7C4F424FDA56ADF8LL, getdoccomment) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionfunctionabstract::getdoccomment", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8550,7 +8550,7 @@ Variant c_reflectionfunction::os_invoke_from_eval(const char *c, const char *s, 
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionfunction::export", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8686,7 +8686,7 @@ void c_reflectionparameter::o_setArray(CArrRef props) {
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_get_reflectionparameter
 Variant c_reflectionparameter::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return c_reflectionparameter::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionparameter
@@ -8710,7 +8710,7 @@ Variant c_reflectionparameter::o_getPrivate(CStrRef s, int64 hash, bool error) {
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionparameter
 bool c_reflectionparameter::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return c_reflectionparameter::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionparameter
@@ -8733,7 +8733,7 @@ bool c_reflectionparameter::o_existsPrivate(CStrRef s, int64 hash) const {
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionparameter
 Variant c_reflectionparameter::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return c_reflectionparameter::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionparameter
@@ -8757,7 +8757,7 @@ Variant c_reflectionparameter::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bo
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_reflectionparameter
 Variant& c_reflectionparameter::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return c_reflectionparameter::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionparameter
@@ -8796,7 +8796,7 @@ ObjectData *c_reflectionparameter::dynCreate(CArrRef params, bool construct /* =
   if (construct) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
-    if (count != 2) throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
+    if (count != 2) throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
     {
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -8809,7 +8809,7 @@ ObjectData *c_reflectionparameter::dynCreate(CArrRef params, bool construct /* =
 }
 void c_reflectionparameter::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  if (count != 2) throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
+  if (count != 2) throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -8823,7 +8823,7 @@ void c_reflectionparameter::dynConstructFromEval(Eval::VariableEnvironment &env,
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count != 2) throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 1);
+  if (count != 2) throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -8854,19 +8854,19 @@ Variant c_reflectionparameter::o_invoke(const char *s, CArrRef params, int64 has
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdeclaringclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
         return (t_getdeclaringclass());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
+        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -8877,59 +8877,59 @@ Variant c_reflectionparameter::o_invoke(const char *s, CArrRef params, int64 has
         }
       }
       HASH_GUARD(0x4044F1EEBF3BB8C8LL, getposition) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::getposition", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
         return (t_getposition());
       }
       break;
     case 9:
       HASH_GUARD(0x4F51DA0B633E9909LL, getclass) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::getclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
         return (t_getclass());
       }
       HASH_GUARD(0x24ED05F4504C4C09LL, allowsnull) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::allowsnull", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
         return (t_allowsnull());
       }
       break;
     case 12:
       HASH_GUARD(0x27C482A6C7951E0CLL, getdefaultvalue) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdefaultvalue", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
         return (t_getdefaultvalue());
       }
       break;
     case 17:
       HASH_GUARD(0x13E3F304BDD89FB1LL, ispassedbyreference) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::ispassedbyreference", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
         return (t_ispassedbyreference());
       }
       break;
     case 18:
       HASH_GUARD(0x6E34805C91257C92LL, isdefaultvalueavailable) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::isdefaultvalueavailable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
         return (t_isdefaultvalueavailable());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 21:
       HASH_GUARD(0x2D6EF48BBAB22735LL, isoptional) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::isoptional", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
         return (t_isoptional());
       }
       break;
     case 29:
       HASH_GUARD(0x5A9CE40C0F25871DLL, isarray) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::isarray", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
         return (t_isarray());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 2) return throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
+        if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -8951,75 +8951,75 @@ Variant c_reflectionparameter::o_invoke_few_args(const char *s, int64 hash, int 
   switch (hash & 31) {
     case 3:
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdeclaringclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
         return (t_getdeclaringclass());
       }
       break;
     case 5:
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
         return (t_getname());
       }
       break;
     case 8:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
+        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
         return (ti_export(o_getClassName(), a0, a1, a2));
       }
       HASH_GUARD(0x4044F1EEBF3BB8C8LL, getposition) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::getposition", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
         return (t_getposition());
       }
       break;
     case 9:
       HASH_GUARD(0x4F51DA0B633E9909LL, getclass) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::getclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
         return (t_getclass());
       }
       HASH_GUARD(0x24ED05F4504C4C09LL, allowsnull) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::allowsnull", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
         return (t_allowsnull());
       }
       break;
     case 12:
       HASH_GUARD(0x27C482A6C7951E0CLL, getdefaultvalue) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdefaultvalue", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
         return (t_getdefaultvalue());
       }
       break;
     case 17:
       HASH_GUARD(0x13E3F304BDD89FB1LL, ispassedbyreference) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::ispassedbyreference", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
         return (t_ispassedbyreference());
       }
       break;
     case 18:
       HASH_GUARD(0x6E34805C91257C92LL, isdefaultvalueavailable) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::isdefaultvalueavailable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
         return (t_isdefaultvalueavailable());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 21:
       HASH_GUARD(0x2D6EF48BBAB22735LL, isoptional) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::isoptional", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
         return (t_isoptional());
       }
       break;
     case 29:
       HASH_GUARD(0x5A9CE40C0F25871DLL, isarray) {
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::isarray", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
         return (t_isarray());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 2) return throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
+        if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
         return (t___construct(a0, a1), null);
       }
       break;
@@ -9036,7 +9036,7 @@ Variant c_reflectionparameter::os_invoke(const char *c, const char *s, CArrRef p
   switch (hash & 1) {
     case 0:
       HASH_GUARD(0x0B5ABC58C98E70E8LL, export) {
-        if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
+        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -9060,7 +9060,7 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x6ED51288559D6063LL, getdeclaringclass) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdeclaringclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9074,7 +9074,7 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x23F51CDECC198965LL, getname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::getname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9091,7 +9091,7 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
+        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9112,7 +9112,7 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x4044F1EEBF3BB8C8LL, getposition) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::getposition", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9126,7 +9126,7 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x4F51DA0B633E9909LL, getclass) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::getclass", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9138,7 +9138,7 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x24ED05F4504C4C09LL, allowsnull) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::allowsnull", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9152,7 +9152,7 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x27C482A6C7951E0CLL, getdefaultvalue) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::getdefaultvalue", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9166,7 +9166,7 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x13E3F304BDD89FB1LL, ispassedbyreference) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::ispassedbyreference", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9180,7 +9180,7 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x6E34805C91257C92LL, isdefaultvalueavailable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::isdefaultvalueavailable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9194,7 +9194,7 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9208,7 +9208,7 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x2D6EF48BBAB22735LL, isoptional) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::isoptional", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9222,7 +9222,7 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD(0x5A9CE40C0F25871DLL, isarray) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("reflectionparameter::isarray", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9238,7 +9238,7 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("reflectionparameter::__construct", count, 2, 2, 2);
+        if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9269,7 +9269,7 @@ Variant c_reflectionparameter::os_invoke_from_eval(const char *c, const char *s,
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("reflectionparameter::export", count, 3, 3, 1);
+        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;

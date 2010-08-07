@@ -137,6 +137,7 @@ public:
   bool needGlobalPointer() const;
   bool isPseudoMainTable() const;
   bool hasPrivate() const;
+  bool hasNonStaticPrivate() const;
 
   virtual bool isInherited(const std::string &name) const;
 

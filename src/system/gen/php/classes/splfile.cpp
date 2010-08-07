@@ -57,7 +57,7 @@ void c_splfileobject::o_setArray(CArrRef props) {
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_get_splfileobject
 Variant c_splfileobject::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return c_splfileobject::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileobject
@@ -72,7 +72,7 @@ Variant c_splfileobject::o_getPrivate(CStrRef s, int64 hash, bool error) {
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_splfileobject
 bool c_splfileobject::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return c_splfileobject::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splfileobject
@@ -87,7 +87,7 @@ bool c_splfileobject::o_existsPrivate(CStrRef s, int64 hash) const {
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_set_splfileobject
 Variant c_splfileobject::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return c_splfileobject::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileobject
@@ -102,7 +102,7 @@ Variant c_splfileobject::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool for
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_splfileobject
 Variant& c_splfileobject::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return c_splfileobject::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splfileobject
@@ -152,7 +152,7 @@ ObjectData *c_splfileobject::dynCreate(CArrRef params, bool construct /* = true 
   if (construct) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 4) throw_wrong_arguments("splfileobject::__construct", count, 1, 4, 2);
+    if (count < 1 || count > 4) throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
     do {
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -179,7 +179,7 @@ ObjectData *c_splfileobject::dynCreate(CArrRef params, bool construct /* = true 
 }
 void c_splfileobject::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 4) throw_wrong_arguments("splfileobject::__construct", count, 1, 4, 2);
+  if (count < 1 || count > 4) throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
   do {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -209,7 +209,7 @@ void c_splfileobject::dynConstructFromEval(Eval::VariableEnvironment &env, const
   Variant a3;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 4) throw_wrong_arguments("splfileobject::__construct", count, 1, 4, 1);
+  if (count < 1 || count > 4) throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -248,17 +248,17 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
   switch (hash & 127) {
     case 0:
       HASH_GUARD(0x09637D7CA2E33F00LL, fgetc) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::fgetc", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
         return (t_fgetc());
       }
       break;
     case 6:
       HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
       HASH_GUARD(0x44CE4DB1CE7E9F86LL, flock) {
-        if (count != 2) return throw_wrong_arguments("splfileobject::flock", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("SplFileObject::flock", count, 2, 2, 1);
         const_cast<Array&>(params).escalate(true);
         {
           ArrayData *ad(params.get());
@@ -269,19 +269,19 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
         }
       }
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
       HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 10:
       HASH_GUARD(0x2FC3A6941D522E0ALL, setflags) {
-        if (count != 1) return throw_wrong_arguments("splfileobject::setflags", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::setFlags", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -292,43 +292,43 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       break;
     case 14:
       HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 15:
       HASH_GUARD(0x732EC1BDA8EC520FLL, getchildren) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::getchildren", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getChildren", 0, 1);
         return (t_getchildren());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 21:
       HASH_GUARD(0x40044334DA397C15LL, haschildren) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::haschildren", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::hasChildren", 0, 1);
         return (t_haschildren());
       }
       break;
     case 26:
       HASH_GUARD(0x2B7CAC006AF27F9ALL, fflush) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::fflush", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
         return (t_fflush());
       }
       break;
     case 27:
       HASH_GUARD(0x5B33B55D4B7E339BLL, fpassthru) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::fpassthru", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
         return (t_fpassthru());
       }
       break;
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -340,13 +340,13 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       break;
     case 29:
       HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 30:
       HASH_GUARD(0x3E4E7C561D3A541ELL, fgetss) {
-        if (count != 1) return throw_wrong_arguments("splfileobject::fgetss", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::fgetss", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -357,13 +357,13 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       break;
     case 31:
       HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 35:
       HASH_GUARD(0x044B276686B77923LL, fscanf) {
-        if (count != 1) return throw_wrong_arguments("splfileobject::fscanf", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::fscanf", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -374,7 +374,7 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       break;
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -386,25 +386,25 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       break;
     case 43:
       HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 45:
       HASH_GUARD(0x1C1216F2B7C16CADLL, ftell) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::ftell", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
         return (t_ftell());
       }
       break;
     case 47:
       HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
-        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -420,7 +420,7 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       break;
     case 55:
       HASH_GUARD(0x4CEC6AA30E43D437LL, setmaxlinelen) {
-        if (count != 1) return throw_wrong_arguments("splfileobject::setmaxlinelen", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -431,21 +431,21 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       break;
     case 56:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::next", 0, 1);
         return (t_next());
       }
       HASH_GUARD(0x0890F9052322E838LL, fstat) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::fstat", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
         return (t_fstat());
       }
       break;
     case 63:
       HASH_GUARD(0x04C642C6C162243FLL, getpath) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -457,7 +457,7 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       break;
     case 67:
       HASH_GUARD(0x5ACCF9166CD9D043LL, ftruncate) {
-        if (count != 1) return throw_wrong_arguments("splfileobject::ftruncate", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::ftruncate", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -466,19 +466,19 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
         }
       }
       HASH_GUARD(0x794FAFD4412AEFC3LL, eof) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::eof", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
         return (t_eof());
       }
       break;
     case 68:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 69:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -490,7 +490,7 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       break;
     case 73:
       HASH_GUARD(0x4282E0231F600049LL, fseek) {
-        if (count != 2) return throw_wrong_arguments("splfileobject::fseek", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("SplFileObject::fseek", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -502,19 +502,19 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       break;
     case 74:
       HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 78:
       HASH_GUARD(0x7E978C38D741664ELL, fgetcsv) {
-        if (count > 3) return throw_toomany_arguments("splfileobject::fgetcsv", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileObject::fgetcsv", 3, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -530,13 +530,13 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       break;
     case 79:
       HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 80:
       HASH_GUARD(0x3A335010F905ACD0LL, setcsvcontrol) {
-        if (count > 3) return throw_toomany_arguments("splfileobject::setcsvcontrol", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -552,31 +552,31 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       break;
     case 81:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::key", 0, 1);
         return (t_key());
       }
       break;
     case 88:
       HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 90:
       HASH_GUARD(0x25F68E7910FE9CDALL, getmaxlinelen) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::getmaxlinelen", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
         return (t_getmaxlinelen());
       }
       break;
     case 92:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::current", 0, 1);
         return (t_current());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1 || count > 4) return throw_wrong_arguments("splfileobject::__construct", count, 1, 4, 2);
+        if (count < 1 || count > 4) return throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -593,25 +593,25 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       break;
     case 97:
       HASH_GUARD(0x27E7DBA875AD17E1LL, getflags) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::getflags", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getFlags", 0, 1);
         return (t_getflags());
       }
       break;
     case 98:
       HASH_GUARD(0x6FE9F691E4A6D962LL, getcsvcontrol) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::getcsvcontrol", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
         return (t_getcsvcontrol());
       }
       break;
     case 99:
       HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 101:
       HASH_GUARD(0x05D72365192CE465LL, fwrite) {
-        if (count != 2) return throw_wrong_arguments("splfileobject::fwrite", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("SplFileObject::fwrite", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -623,7 +623,7 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       break;
     case 103:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -633,7 +633,7 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
         }
       }
       HASH_GUARD(0x7EF5445C77054C67LL, seek) {
-        if (count != 1) return throw_wrong_arguments("splfileobject::seek", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::seek", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -644,45 +644,45 @@ Variant c_splfileobject::o_invoke(const char *s, CArrRef params, int64 hash, boo
       break;
     case 106:
       HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
       HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 115:
       HASH_GUARD(0x7AE1BE187F18FDF3LL, fgets) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::fgets", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
         return (t_fgets());
       }
       break;
     case 116:
       HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 120:
       HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 122:
       HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 125:
       HASH_GUARD(0x4351578037A06E7DLL, getperms) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
@@ -698,131 +698,131 @@ Variant c_splfileobject::o_invoke_few_args(const char *s, int64 hash, int count,
   switch (hash & 127) {
     case 0:
       HASH_GUARD(0x09637D7CA2E33F00LL, fgetc) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::fgetc", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
         return (t_fgetc());
       }
       break;
     case 6:
       HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
       HASH_GUARD(0x44CE4DB1CE7E9F86LL, flock) {
-        if (count != 2) return throw_wrong_arguments("splfileobject::flock", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("SplFileObject::flock", count, 2, 2, 1);
         return (t_flock(a0, ref(a1)));
       }
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
       HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 10:
       HASH_GUARD(0x2FC3A6941D522E0ALL, setflags) {
-        if (count != 1) return throw_wrong_arguments("splfileobject::setflags", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::setFlags", count, 1, 1, 1);
         return (t_setflags(a0));
       }
       break;
     case 14:
       HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 15:
       HASH_GUARD(0x732EC1BDA8EC520FLL, getchildren) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::getchildren", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getChildren", 0, 1);
         return (t_getchildren());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 21:
       HASH_GUARD(0x40044334DA397C15LL, haschildren) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::haschildren", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::hasChildren", 0, 1);
         return (t_haschildren());
       }
       break;
     case 26:
       HASH_GUARD(0x2B7CAC006AF27F9ALL, fflush) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::fflush", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
         return (t_fflush());
       }
       break;
     case 27:
       HASH_GUARD(0x5B33B55D4B7E339BLL, fpassthru) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::fpassthru", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
         return (t_fpassthru());
       }
       break;
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         if (count <= 0) return (t_getbasename());
         return (t_getbasename(a0));
       }
       break;
     case 29:
       HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 30:
       HASH_GUARD(0x3E4E7C561D3A541ELL, fgetss) {
-        if (count != 1) return throw_wrong_arguments("splfileobject::fgetss", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::fgetss", count, 1, 1, 1);
         return (t_fgetss(a0));
       }
       break;
     case 31:
       HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 35:
       HASH_GUARD(0x044B276686B77923LL, fscanf) {
-        if (count != 1) return throw_wrong_arguments("splfileobject::fscanf", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::fscanf", count, 1, 1, 1);
         return (t_fscanf(a0));
       }
       break;
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         if (count <= 0) return (t_setfileclass());
         return (t_setfileclass(a0));
       }
       break;
     case 43:
       HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 45:
       HASH_GUARD(0x1C1216F2B7C16CADLL, ftell) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::ftell", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
         return (t_ftell());
       }
       break;
     case 47:
       HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
-        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         if (count <= 0) return (t_openfile());
         if (count == 1) return (t_openfile(a0));
         if (count == 2) return (t_openfile(a0, a1));
@@ -831,75 +831,75 @@ Variant c_splfileobject::o_invoke_few_args(const char *s, int64 hash, int count,
       break;
     case 55:
       HASH_GUARD(0x4CEC6AA30E43D437LL, setmaxlinelen) {
-        if (count != 1) return throw_wrong_arguments("splfileobject::setmaxlinelen", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
         return (t_setmaxlinelen(a0));
       }
       break;
     case 56:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::next", 0, 1);
         return (t_next());
       }
       HASH_GUARD(0x0890F9052322E838LL, fstat) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::fstat", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
         return (t_fstat());
       }
       break;
     case 63:
       HASH_GUARD(0x04C642C6C162243FLL, getpath) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
         return (t_getfileinfo(a0));
       }
       break;
     case 67:
       HASH_GUARD(0x5ACCF9166CD9D043LL, ftruncate) {
-        if (count != 1) return throw_wrong_arguments("splfileobject::ftruncate", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::ftruncate", count, 1, 1, 1);
         return (t_ftruncate(a0));
       }
       HASH_GUARD(0x794FAFD4412AEFC3LL, eof) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::eof", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
         return (t_eof());
       }
       break;
     case 68:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 69:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
         return (t_setinfoclass(a0));
       }
       break;
     case 73:
       HASH_GUARD(0x4282E0231F600049LL, fseek) {
-        if (count != 2) return throw_wrong_arguments("splfileobject::fseek", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("SplFileObject::fseek", count, 2, 2, 1);
         return (t_fseek(a0, a1));
       }
       break;
     case 74:
       HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 77:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 78:
       HASH_GUARD(0x7E978C38D741664ELL, fgetcsv) {
-        if (count > 3) return throw_toomany_arguments("splfileobject::fgetcsv", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileObject::fgetcsv", 3, 1);
         if (count <= 0) return (t_fgetcsv());
         if (count == 1) return (t_fgetcsv(a0));
         if (count == 2) return (t_fgetcsv(a0, a1));
@@ -908,13 +908,13 @@ Variant c_splfileobject::o_invoke_few_args(const char *s, int64 hash, int count,
       break;
     case 79:
       HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 80:
       HASH_GUARD(0x3A335010F905ACD0LL, setcsvcontrol) {
-        if (count > 3) return throw_toomany_arguments("splfileobject::setcsvcontrol", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
         if (count <= 0) return (t_setcsvcontrol());
         if (count == 1) return (t_setcsvcontrol(a0));
         if (count == 2) return (t_setcsvcontrol(a0, a1));
@@ -923,31 +923,31 @@ Variant c_splfileobject::o_invoke_few_args(const char *s, int64 hash, int count,
       break;
     case 81:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::key", 0, 1);
         return (t_key());
       }
       break;
     case 88:
       HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 90:
       HASH_GUARD(0x25F68E7910FE9CDALL, getmaxlinelen) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::getmaxlinelen", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
         return (t_getmaxlinelen());
       }
       break;
     case 92:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::current", 0, 1);
         return (t_current());
       }
       break;
     case 95:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count < 1 || count > 4) return throw_wrong_arguments("splfileobject::__construct", count, 1, 4, 2);
+        if (count < 1 || count > 4) return throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
         if (count <= 1) return (t___construct(a0), null);
         if (count == 2) return (t___construct(a0, a1), null);
         if (count == 3) return (t___construct(a0, a1, a2), null);
@@ -956,80 +956,80 @@ Variant c_splfileobject::o_invoke_few_args(const char *s, int64 hash, int count,
       break;
     case 97:
       HASH_GUARD(0x27E7DBA875AD17E1LL, getflags) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::getflags", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getFlags", 0, 1);
         return (t_getflags());
       }
       break;
     case 98:
       HASH_GUARD(0x6FE9F691E4A6D962LL, getcsvcontrol) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::getcsvcontrol", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
         return (t_getcsvcontrol());
       }
       break;
     case 99:
       HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 101:
       HASH_GUARD(0x05D72365192CE465LL, fwrite) {
-        if (count != 2) return throw_wrong_arguments("splfileobject::fwrite", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("SplFileObject::fwrite", count, 2, 2, 1);
         return (t_fwrite(a0, a1));
       }
       break;
     case 103:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
         return (t_getpathinfo(a0));
       }
       HASH_GUARD(0x7EF5445C77054C67LL, seek) {
-        if (count != 1) return throw_wrong_arguments("splfileobject::seek", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::seek", count, 1, 1, 1);
         return (t_seek(a0));
       }
       break;
     case 106:
       HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
       HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 115:
       HASH_GUARD(0x7AE1BE187F18FDF3LL, fgets) {
-        if (count > 0) return throw_toomany_arguments("splfileobject::fgets", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
         return (t_fgets());
       }
       break;
     case 116:
       HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 120:
       HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 122:
       HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 125:
       HASH_GUARD(0x4351578037A06E7DLL, getperms) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
@@ -1052,7 +1052,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x09637D7CA2E33F00LL, fgetc) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::fgetc", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1066,7 +1066,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1080,7 +1080,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("splfileobject::flock", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("SplFileObject::flock", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1098,7 +1098,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1112,7 +1112,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1127,7 +1127,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("splfileobject::setflags", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::setFlags", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1144,7 +1144,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1158,7 +1158,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x732EC1BDA8EC520FLL, getchildren) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::getchildren", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getChildren", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1172,7 +1172,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1186,7 +1186,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x40044334DA397C15LL, haschildren) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::haschildren", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::hasChildren", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1200,7 +1200,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x2B7CAC006AF27F9ALL, fflush) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::fflush", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1214,7 +1214,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x5B33B55D4B7E339BLL, fpassthru) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::fpassthru", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1229,7 +1229,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1247,7 +1247,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1262,7 +1262,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("splfileobject::fgetss", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::fgetss", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1279,7 +1279,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1294,7 +1294,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("splfileobject::fscanf", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::fscanf", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1312,7 +1312,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1330,7 +1330,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1344,7 +1344,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x1C1216F2B7C16CADLL, ftell) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::ftell", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1358,7 +1358,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1375,7 +1375,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1402,7 +1402,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("splfileobject::setmaxlinelen", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1419,7 +1419,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::next", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1431,7 +1431,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x0890F9052322E838LL, fstat) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::fstat", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1445,7 +1445,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x04C642C6C162243FLL, getpath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1458,7 +1458,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1477,7 +1477,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("splfileobject::ftruncate", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::ftruncate", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1492,7 +1492,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x794FAFD4412AEFC3LL, eof) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::eof", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1506,7 +1506,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::valid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1521,7 +1521,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1541,7 +1541,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("splfileobject::fseek", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("SplFileObject::fseek", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1561,7 +1561,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1575,7 +1575,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1592,7 +1592,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 3) return throw_toomany_arguments("splfileobject::fgetcsv", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileObject::fgetcsv", 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1618,7 +1618,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1635,7 +1635,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 3) return throw_toomany_arguments("splfileobject::setcsvcontrol", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1661,7 +1661,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::key", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1675,7 +1675,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1689,7 +1689,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x25F68E7910FE9CDALL, getmaxlinelen) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::getmaxlinelen", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1703,7 +1703,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::current", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1721,7 +1721,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 4) return throw_wrong_arguments("splfileobject::__construct", count, 1, 4, 2);
+        if (count < 1 || count > 4) return throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1750,7 +1750,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x27E7DBA875AD17E1LL, getflags) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::getflags", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getFlags", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1764,7 +1764,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x6FE9F691E4A6D962LL, getcsvcontrol) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::getcsvcontrol", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1778,7 +1778,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1794,7 +1794,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("splfileobject::fwrite", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("SplFileObject::fwrite", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1815,7 +1815,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1832,7 +1832,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("splfileobject::seek", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplFileObject::seek", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1849,7 +1849,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1861,7 +1861,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1873,7 +1873,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1887,7 +1887,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x7AE1BE187F18FDF3LL, fgets) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileobject::fgets", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1901,7 +1901,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1915,7 +1915,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1929,7 +1929,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1943,7 +1943,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD(0x4351578037A06E7DLL, getperms) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2157,7 +2157,7 @@ void c_splfileinfo::o_setArray(CArrRef props) {
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_get_splfileinfo
 Variant c_splfileinfo::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return c_splfileinfo::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileinfo
@@ -2172,7 +2172,7 @@ Variant c_splfileinfo::o_getPrivate(CStrRef s, int64 hash, bool error) {
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_splfileinfo
 bool c_splfileinfo::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return c_splfileinfo::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splfileinfo
@@ -2187,7 +2187,7 @@ bool c_splfileinfo::o_existsPrivate(CStrRef s, int64 hash) const {
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_set_splfileinfo
 Variant c_splfileinfo::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return c_splfileinfo::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileinfo
@@ -2202,7 +2202,7 @@ Variant c_splfileinfo::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forIn
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_splfileinfo
 Variant& c_splfileinfo::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return c_splfileinfo::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splfileinfo
@@ -2232,7 +2232,7 @@ ObjectData *c_splfileinfo::dynCreate(CArrRef params, bool construct /* = true */
   if (construct) {
     CountableHelper h(this);
     int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("splfileinfo::__construct", count, 1, 1, 2);
+    if (count != 1) throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
     {
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2244,7 +2244,7 @@ ObjectData *c_splfileinfo::dynCreate(CArrRef params, bool construct /* = true */
 }
 void c_splfileinfo::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("splfileinfo::__construct", count, 1, 1, 2);
+  if (count != 1) throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2256,7 +2256,7 @@ void c_splfileinfo::dynConstructFromEval(Eval::VariableEnvironment &env, const E
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("splfileinfo::__construct", count, 1, 1, 1);
+  if (count != 1) throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -2283,7 +2283,7 @@ Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool 
   switch (hash & 63) {
     case 5:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2295,59 +2295,59 @@ Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool 
       break;
     case 6:
       HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
       HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 10:
       HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 13:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 14:
       HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 15:
       HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 24:
       HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2359,13 +2359,13 @@ Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool 
       break;
     case 29:
       HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 1) return throw_wrong_arguments("splfileinfo::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2374,19 +2374,19 @@ Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool 
         }
       }
       HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 35:
       HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2398,7 +2398,7 @@ Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool 
       break;
     case 39:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2410,35 +2410,35 @@ Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool 
       break;
     case 42:
       HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
       HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
     case 43:
       HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 47:
       HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 52:
       HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
-        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2454,29 +2454,29 @@ Variant c_splfileinfo::o_invoke(const char *s, CArrRef params, int64 hash, bool 
       break;
     case 56:
       HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 58:
       HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 61:
       HASH_GUARD(0x4351578037A06E7DLL, getperms) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
     case 63:
       HASH_GUARD(0x04C642C6C162243FLL, getpath) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2498,137 +2498,137 @@ Variant c_splfileinfo::o_invoke_few_args(const char *s, int64 hash, int count, C
   switch (hash & 63) {
     case 5:
       HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
         return (t_setinfoclass(a0));
       }
       break;
     case 6:
       HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
       HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 10:
       HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 13:
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 14:
       HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 15:
       HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 19:
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 24:
       HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 28:
       HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         if (count <= 0) return (t_getbasename());
         return (t_getbasename(a0));
       }
       break;
     case 29:
       HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 31:
       HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
-        if (count != 1) return throw_wrong_arguments("splfileinfo::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 35:
       HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 37:
       HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         if (count <= 0) return (t_setfileclass());
         return (t_setfileclass(a0));
       }
       break;
     case 39:
       HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
         return (t_getpathinfo(a0));
       }
       break;
     case 42:
       HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
       HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
     case 43:
       HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 47:
       HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 52:
       HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 53:
       HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
-        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         if (count <= 0) return (t_openfile());
         if (count == 1) return (t_openfile(a0));
         if (count == 2) return (t_openfile(a0, a1));
@@ -2637,29 +2637,29 @@ Variant c_splfileinfo::o_invoke_few_args(const char *s, int64 hash, int count, C
       break;
     case 56:
       HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 58:
       HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 61:
       HASH_GUARD(0x4351578037A06E7DLL, getperms) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
     case 63:
       HASH_GUARD(0x04C642C6C162243FLL, getpath) {
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
         return (t_getfileinfo(a0));
       }
@@ -2684,7 +2684,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2702,7 +2702,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2714,7 +2714,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2728,7 +2728,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2742,7 +2742,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2756,7 +2756,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2770,7 +2770,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2784,7 +2784,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2798,7 +2798,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2812,7 +2812,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2827,7 +2827,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2845,7 +2845,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2860,7 +2860,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("splfileinfo::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2875,7 +2875,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2889,7 +2889,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2904,7 +2904,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2923,7 +2923,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2941,7 +2941,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2953,7 +2953,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2967,7 +2967,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2981,7 +2981,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2995,7 +2995,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3012,7 +3012,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3038,7 +3038,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3052,7 +3052,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3066,7 +3066,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x4351578037A06E7DLL, getperms) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3080,7 +3080,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD(0x04C642C6C162243FLL, getpath) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3093,7 +3093,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;

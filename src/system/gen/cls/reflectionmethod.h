@@ -41,7 +41,17 @@ class c_reflectionmethod : public c_reflectionfunctionabstract {
   static Variant os_constant(const char *s);
 
   // DECLARE_INSTANCE_PROP_OPS
-  DECLARE_INSTANCE_PROP_OPS
+  public:
+  virtual void o_getArray(Array &props) const;
+  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionmethod 1
+  #define OMIT_JUMP_TABLE_CLASS_exists_reflectionmethod 1
+  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionmethod 1
+  #define OMIT_JUMP_TABLE_CLASS_get_reflectionmethod 1
+  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionmethod 1
+  #define OMIT_JUMP_TABLE_CLASS_set_reflectionmethod 1
+  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionmethod 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_reflectionmethod 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_reflectionmethod 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

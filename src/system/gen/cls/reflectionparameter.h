@@ -39,7 +39,17 @@ class c_reflectionparameter : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_reflectionparameter 1
 
   // DECLARE_INSTANCE_PROP_OPS
-  DECLARE_INSTANCE_PROP_OPS
+  public:
+  virtual void o_getArray(Array &props) const;
+  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionparameter 1
+  #define OMIT_JUMP_TABLE_CLASS_exists_reflectionparameter 1
+  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionparameter 1
+  #define OMIT_JUMP_TABLE_CLASS_get_reflectionparameter 1
+  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionparameter 1
+  #define OMIT_JUMP_TABLE_CLASS_set_reflectionparameter 1
+  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_reflectionparameter 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_reflectionparameter 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_reflectionparameter 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

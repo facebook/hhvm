@@ -37,7 +37,17 @@ class c_exception : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_exception 1
 
   // DECLARE_INSTANCE_PROP_OPS
-  DECLARE_INSTANCE_PROP_OPS
+  public:
+  virtual void o_getArray(Array &props) const;
+  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_exception 1
+  #define OMIT_JUMP_TABLE_CLASS_exists_exception 1
+  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_exception 1
+  #define OMIT_JUMP_TABLE_CLASS_get_exception 1
+  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_exception 1
+  #define OMIT_JUMP_TABLE_CLASS_set_exception 1
+  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_exception 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_exception 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_exception 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

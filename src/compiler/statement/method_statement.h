@@ -49,6 +49,7 @@ public:
   std::string getName() const { return m_name;}
   void setName(const std::string name) { m_name = name; }
   std::string getFullName() const;
+  std::string getOriginalFullName() const;
   virtual BlockScopePtr getScope();
   FunctionScopePtr getFunctionScope() { return m_funcScope.lock();}
   ExpressionListPtr getParams() { return m_params;}
@@ -74,6 +75,7 @@ protected:
   std::string m_name;
   std::string m_originalName;
   std::string m_className;
+  std::string m_originalClassName;
   ExpressionListPtr m_params;
   StatementListPtr m_stmt;
   boost::weak_ptr<FunctionScope> m_funcScope;

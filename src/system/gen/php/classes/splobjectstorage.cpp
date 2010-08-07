@@ -80,7 +80,7 @@ Variant c_splobjectstorage::o_get(CStrRef prop, int64 phash, bool error, const c
     default:
       break;
   }
-  return c_splobjectstorage::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_splobjectstorage
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splobjectstorage
@@ -117,7 +117,7 @@ bool c_splobjectstorage::o_exists(CStrRef prop, int64 phash, const char *context
     default:
       break;
   }
-  return c_splobjectstorage::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_splobjectstorage
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splobjectstorage
@@ -152,7 +152,7 @@ Variant c_splobjectstorage::o_set(CStrRef prop, int64 phash, CVarRef v, bool for
     default:
       break;
   }
-  return c_splobjectstorage::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_splobjectstorage
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splobjectstorage
@@ -189,7 +189,7 @@ Variant& c_splobjectstorage::o_lval(CStrRef prop, int64 phash, const char *conte
     default:
       break;
   }
-  return c_splobjectstorage::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_splobjectstorage
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splobjectstorage
@@ -234,19 +234,19 @@ Variant c_splobjectstorage::o_invoke(const char *s, CArrRef params, int64 hash, 
   switch (hash & 31) {
     case 4:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 10:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::rewind", 0, 1);
         return (t_rewind(), null);
       }
       break;
     case 12:
       HASH_GUARD(0x62DD82BFEB88A4ACLL, attach) {
-        if (count != 1) return throw_wrong_arguments("splobjectstorage::attach", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -257,11 +257,11 @@ Variant c_splobjectstorage::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 16:
       HASH_GUARD(0x5CEFA5A265104D10LL, count) {
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::count", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::count", 0, 1);
         return (t_count());
       }
       HASH_GUARD(0x61B94551FA22D290LL, contains) {
-        if (count != 1) return throw_wrong_arguments("splobjectstorage::contains", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplObjectStorage::contains", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -272,13 +272,13 @@ Variant c_splobjectstorage::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 17:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::key", 0, 1);
         return (t_key());
       }
       break;
     case 21:
       HASH_GUARD(0x3C7D0AC0EBA9A695LL, detach) {
-        if (count != 1) return throw_wrong_arguments("splobjectstorage::detach", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplObjectStorage::detach", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -289,13 +289,13 @@ Variant c_splobjectstorage::o_invoke(const char *s, CArrRef params, int64 hash, 
       break;
     case 24:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::next", 0, 1);
         return (t_next(), null);
       }
       break;
     case 28:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::current", 0, 1);
         return (t_current());
       }
       break;
@@ -311,53 +311,53 @@ Variant c_splobjectstorage::o_invoke_few_args(const char *s, int64 hash, int cou
   switch (hash & 31) {
     case 4:
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 10:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::rewind", 0, 1);
         return (t_rewind(), null);
       }
       break;
     case 12:
       HASH_GUARD(0x62DD82BFEB88A4ACLL, attach) {
-        if (count != 1) return throw_wrong_arguments("splobjectstorage::attach", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
         return (t_attach(a0), null);
       }
       break;
     case 16:
       HASH_GUARD(0x5CEFA5A265104D10LL, count) {
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::count", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::count", 0, 1);
         return (t_count());
       }
       HASH_GUARD(0x61B94551FA22D290LL, contains) {
-        if (count != 1) return throw_wrong_arguments("splobjectstorage::contains", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplObjectStorage::contains", count, 1, 1, 1);
         return (t_contains(a0));
       }
       break;
     case 17:
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::key", 0, 1);
         return (t_key());
       }
       break;
     case 21:
       HASH_GUARD(0x3C7D0AC0EBA9A695LL, detach) {
-        if (count != 1) return throw_wrong_arguments("splobjectstorage::detach", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplObjectStorage::detach", count, 1, 1, 1);
         return (t_detach(a0), null);
       }
       break;
     case 24:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::next", 0, 1);
         return (t_next(), null);
       }
       break;
     case 28:
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::current", 0, 1);
         return (t_current());
       }
       break;
@@ -380,7 +380,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x6413CB5154808C44LL, valid) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::valid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -394,7 +394,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -409,7 +409,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("splobjectstorage::attach", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -426,7 +426,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x5CEFA5A265104D10LL, count) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::count", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::count", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -439,7 +439,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("splobjectstorage::contains", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplObjectStorage::contains", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -456,7 +456,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x56EDB60C824E8C51LL, key) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::key", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -471,7 +471,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("splobjectstorage::detach", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("SplObjectStorage::detach", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -488,7 +488,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::next", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -502,7 +502,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splobjectstorage::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::current", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);

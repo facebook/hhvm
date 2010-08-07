@@ -52,7 +52,7 @@ void c_stdclass::o_setArray(CArrRef props) {
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_stdclass
 #ifndef OMIT_JUMP_TABLE_CLASS_get_stdclass
 Variant c_stdclass::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return c_stdclass::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_stdclass
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_stdclass
@@ -67,7 +67,7 @@ Variant c_stdclass::o_getPrivate(CStrRef s, int64 hash, bool error) {
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_stdclass
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_stdclass
 bool c_stdclass::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return c_stdclass::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_stdclass
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_stdclass
@@ -82,7 +82,7 @@ bool c_stdclass::o_existsPrivate(CStrRef s, int64 hash) const {
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_stdclass
 #ifndef OMIT_JUMP_TABLE_CLASS_set_stdclass
 Variant c_stdclass::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return c_stdclass::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_stdclass
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_stdclass
@@ -97,7 +97,7 @@ Variant c_stdclass::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit)
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_stdclass
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_stdclass
 Variant& c_stdclass::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return c_stdclass::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_stdclass
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_stdclass
@@ -184,7 +184,7 @@ void c___php_incomplete_class::o_setArray(CArrRef props) {
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY___php_incomplete_class
 #ifndef OMIT_JUMP_TABLE_CLASS_get___php_incomplete_class
 Variant c___php_incomplete_class::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return c___php_incomplete_class::o_getPublic(prop, phash, error);
+  return o_getPublic(prop, phash, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get___php_incomplete_class
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC___php_incomplete_class
@@ -199,7 +199,7 @@ Variant c___php_incomplete_class::o_getPrivate(CStrRef s, int64 hash, bool error
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE___php_incomplete_class
 #ifndef OMIT_JUMP_TABLE_CLASS_exists___php_incomplete_class
 bool c___php_incomplete_class::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return c___php_incomplete_class::o_existsPublic(prop, phash);
+  return o_existsPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists___php_incomplete_class
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC___php_incomplete_class
@@ -214,7 +214,7 @@ bool c___php_incomplete_class::o_existsPrivate(CStrRef s, int64 hash) const {
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE___php_incomplete_class
 #ifndef OMIT_JUMP_TABLE_CLASS_set___php_incomplete_class
 Variant c___php_incomplete_class::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return c___php_incomplete_class::o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, phash, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set___php_incomplete_class
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC___php_incomplete_class
@@ -229,7 +229,7 @@ Variant c___php_incomplete_class::o_setPrivate(CStrRef s, int64 hash, CVarRef v,
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE___php_incomplete_class
 #ifndef OMIT_JUMP_TABLE_CLASS_lval___php_incomplete_class
 Variant& c___php_incomplete_class::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return c___php_incomplete_class::o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop, phash);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval___php_incomplete_class
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC___php_incomplete_class

@@ -40,7 +40,17 @@ class c_rangeexception : public c_runtimeexception {
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_rangeexception 1
 
   // DECLARE_INSTANCE_PROP_OPS
-  DECLARE_INSTANCE_PROP_OPS
+  public:
+  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_rangeexception 1
+  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_rangeexception 1
+  #define OMIT_JUMP_TABLE_CLASS_exists_rangeexception 1
+  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_rangeexception 1
+  #define OMIT_JUMP_TABLE_CLASS_get_rangeexception 1
+  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_rangeexception 1
+  #define OMIT_JUMP_TABLE_CLASS_set_rangeexception 1
+  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_rangeexception 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_rangeexception 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_rangeexception 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

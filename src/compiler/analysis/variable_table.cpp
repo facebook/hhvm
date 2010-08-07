@@ -600,6 +600,13 @@ bool VariableTable::isPseudoMainTable() const {
 bool VariableTable::hasPrivate() const {
   return !m_private.empty();
 }
+bool VariableTable::hasNonStaticPrivate() const {
+  for (set<string>::iterator it = m_private.begin(); it != m_private.end();
+       ++it) {
+    if (!isStatic(*it)) return true;
+  }
+  return false;
+}
 
 void VariableTable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (Option::GenerateInferredTypes) {
@@ -1561,7 +1568,8 @@ bool VariableTable::outputCPPPrivateSelector(CodeGenerator &cg,
   ClassScopePtr cls = ar->getClassScope();
   vector<const char *> classes;
   do {
-    if (cls->getVariables()->hasPrivate()) {
+    // Note: outputCPPPrivateSelector() is only used for non-static properties.
+    if (cls->getVariables()->hasNonStaticPrivate()) {
       classes.push_back(cls->getOriginalName().c_str());
     }
     cls = cls->getParentScope(ar);
@@ -1599,8 +1607,8 @@ void VariableTable::outputCPPPropertyOp
     m_emptyJumpTables.insert(jtname);
   }
   if (!dynamicObject) {
-    cg_printf("return %s%s::%s%sPublic(prop, phash%s);\n",
-              Option::ClassPrefix, cls, Option::ObjectPrefix, op, args);
+    cg_printf("return %s%sPublic(prop, phash%s);\n",
+              Option::ObjectPrefix, op, args);
   } else {
     cg_printf("return DynamicObjectData::%s%s"
               "(prop, phash%s, context, hash);\n",

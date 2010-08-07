@@ -39,7 +39,17 @@ class c_logicexception : public c_exception {
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_logicexception 1
 
   // DECLARE_INSTANCE_PROP_OPS
-  DECLARE_INSTANCE_PROP_OPS
+  public:
+  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_logicexception 1
+  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_logicexception 1
+  #define OMIT_JUMP_TABLE_CLASS_exists_logicexception 1
+  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_logicexception 1
+  #define OMIT_JUMP_TABLE_CLASS_get_logicexception 1
+  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_logicexception 1
+  #define OMIT_JUMP_TABLE_CLASS_set_logicexception 1
+  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_logicexception 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_logicexception 1
+  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_logicexception 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

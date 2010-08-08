@@ -4140,7 +4140,10 @@ void c_reflectionclass::t___construct(Variant v_name) {
       }
     }
   }
-  m_name = v_name;
+  {
+    const String &tmp3((x_hphp_get_original_class_name(toString(v_name))));
+    m_name = tmp3;
+  }
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/reflection.php line 227 */

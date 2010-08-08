@@ -4730,6 +4730,17 @@ Variant i_openssl_pkey_export_to_file(CArrRef params) {
     return (f_openssl_pkey_export_to_file(arg0, arg1, arg2, arg3));
   }
 }
+Variant i_hphp_get_original_class_name(CArrRef params) {
+  FUNCTION_INJECTION(hphp_get_original_class_name);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("hphp_get_original_class_name", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_hphp_get_original_class_name(arg0));
+  }
+}
 Variant i_imagecolorclosesthwb(CArrRef params) {
   FUNCTION_INJECTION(imagecolorclosesthwb);
   int count __attribute__((__unused__)) = params.size();
@@ -28993,6 +29004,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x7B6BF544EB420E54LL, hphp_recursivedirectoryiterator_haschildren);
       break;
     case 3671:
+      HASH_INVOKE(0x21B07F1F212BDE57LL, hphp_get_original_class_name);
       HASH_INVOKE(0x2DEF52641933CE57LL, magickgetimagemattecolor);
       break;
     case 3675:
@@ -37422,6 +37434,22 @@ Variant ei_openssl_pkey_export_to_file(Eval::VariableEnvironment &env, const Eva
   if (count <= 2) return (x_openssl_pkey_export_to_file(a0, a1));
   else if (count == 3) return (x_openssl_pkey_export_to_file(a0, a1, a2));
   else return (x_openssl_pkey_export_to_file(a0, a1, a2, a3));
+}
+Variant ei_hphp_get_original_class_name(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("hphp_get_original_class_name", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_hphp_get_original_class_name(a0));
 }
 Variant ei_imagecolorclosesthwb(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -75214,6 +75242,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x7B6BF544EB420E54LL, hphp_recursivedirectoryiterator_haschildren);
       break;
     case 3671:
+      HASH_INVOKE_FROM_EVAL(0x21B07F1F212BDE57LL, hphp_get_original_class_name);
       HASH_INVOKE_FROM_EVAL(0x2DEF52641933CE57LL, magickgetimagemattecolor);
       break;
     case 3675:

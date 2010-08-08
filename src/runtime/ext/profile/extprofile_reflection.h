@@ -80,6 +80,11 @@ inline void x_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value)
   f_hphp_set_static_property(cls, prop, value);
 }
 
+inline String x_hphp_get_original_class_name(CStrRef name) {
+  FUNCTION_INJECTION_BUILTIN(hphp_get_original_class_name);
+  return f_hphp_get_original_class_name(name);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

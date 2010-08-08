@@ -36,6 +36,7 @@ Variant f_hphp_get_property(CObjRef obj, CStrRef cls, CStrRef prop);
 void f_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop, CVarRef value);
 Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop);
 void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value);
+String f_hphp_get_original_class_name(CStrRef name);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

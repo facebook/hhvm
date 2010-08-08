@@ -50,3 +50,6 @@ f('hphp_set_static_property', NULL,
   array('cls' => String,
         'prop' => String,
         'value' => Variant));
+
+f('hphp_get_original_class_name', String,
+  array('name' => String));

@@ -327,5 +327,13 @@ void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value) {
   throw NotImplementedException(__func__);
 }
 
+String f_hphp_get_original_class_name(CStrRef name) {
+  const ClassInfo *cls = ClassInfo::FindClass(name.data());
+  if (cls == NULL) {
+    cls = ClassInfo::FindInterface(name.data());
+  }
+  return cls->getName();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -221,7 +221,7 @@ class ReflectionClass implements Reflector {
         throw new ReflectionException("Class $name does not exist");
       }
     }
-    $this->name = $name;
+    $this->name = hphp_get_original_class_name($name);
   }
 
   private function fetch($what) {

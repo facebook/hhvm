@@ -89,7 +89,7 @@ void LibEventWorker::doJob(LibEventJobPtr job) {
   ASSERT(m_opaque);
   LibEventServer *server = (LibEventServer*)m_opaque;
 
-  if (m_handler == NULL) {
+  if (m_handler == NULL || server->supportReset()) {
     m_handler = server->createRequestHandler();
     ASSERT(m_handler);
   }

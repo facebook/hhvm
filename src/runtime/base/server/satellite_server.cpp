@@ -42,6 +42,7 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
   m_reqInitFunc = hdf["RequestInitFunction"].getString("");
   m_reqInitDoc = hdf["RequestInitDocument"].getString("");
   m_password = hdf["Password"].getString("");
+  m_alwaysReset = hdf["AlwaysReset"].getBool(false);
 
   string type = hdf["Type"];
   if (type == "InternalPageServer") {
@@ -154,7 +155,10 @@ public:
   }
 
   virtual RequestHandler *createRequestHandler() {
-    s_rpc_request_handler->setServerInfo(m_serverInfo);
+    if (s_rpc_request_handler.isNull()) {
+      s_rpc_request_handler->setServerInfo(m_serverInfo);
+      return s_rpc_request_handler.get();
+    }
     if (s_rpc_request_handler->needReset() ||
         s_rpc_request_handler->incRequest() > m_serverInfo->getMaxRequest()) {
       s_rpc_request_handler.reset();
@@ -171,6 +175,8 @@ public:
   virtual void onThreadExit(RequestHandler *handler) {
     s_rpc_request_handler.reset();
   }
+
+  virtual bool supportReset() { return true; }
 
 private:
   SatelliteServerInfoPtr m_serverInfo;

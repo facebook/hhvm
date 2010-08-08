@@ -109,6 +109,8 @@ struct ThreadLocal {
 
   void createKey() __attribute__((noinline));
 
+  bool isNull() const { return m_node.m_p == NULL; }
+
   void reset() {
     delete m_node.m_p;
     m_node.m_p = NULL;
@@ -157,6 +159,8 @@ struct ThreadLocalCreate {
   }
 
   void createKey() __attribute__((noinline));
+
+  bool isNull() const { return m_node.m_p == NULL; }
 
   void reset() {
     T::Delete(m_node.m_p);
@@ -213,6 +217,8 @@ public:
   }
 
   void createKey(T *& p) const __attribute__((noinline));
+
+  bool isNull() const { return getSingleton() == NULL; }
 
   void reset() {
     T *& p = getSingleton();
@@ -272,6 +278,8 @@ struct ThreadLocalProxy {
   void set(T* obj) {
     m_p = obj;
   }
+
+  bool isNull() const { return m_p == NULL; }
 
   void reset() {
     m_p = NULL;
@@ -347,6 +355,8 @@ public:
     return obj;
   }
 
+  bool isNull() const { return pthread_getspecific(m_key) == NULL; }
+
   void reset() {
     delete (T*)pthread_getspecific(m_key);
     pthread_setspecific(m_key, NULL);
@@ -394,6 +404,8 @@ public:
     return obj;
   }
 
+  bool isNull() const { return pthread_getspecific(m_key) == NULL; }
+
   void reset() {
     T::Delete((T*)pthread_getspecific(m_key));
     pthread_setspecific(m_key, NULL);
@@ -438,6 +450,8 @@ public:
     }
     return obj;
   }
+
+  bool isNull() const { return pthread_getspecific(m_key) == NULL; }
 
   void reset() {
     T::Delete((T*)pthread_getspecific(m_key));
@@ -495,6 +509,8 @@ public:
   void set(T* obj) {
     pthread_setspecific(m_key, obj);
   }
+
+  bool isNull() const { return pthread_getspecific(m_key) == NULL; }
 
   void reset() {
     pthread_setspecific(m_key, NULL);

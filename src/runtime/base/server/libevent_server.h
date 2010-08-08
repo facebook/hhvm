@@ -163,6 +163,9 @@ public:
   virtual bool enableSSL(const std::string &certFile,
                          const std::string &keyFile, int port);
 
+  // Whether the server may reset the request handler, e.g., the RPC server.
+  virtual bool supportReset() { return false; }
+
 protected:
   virtual int getAcceptSocket();
   virtual int getAcceptSocketSSL();

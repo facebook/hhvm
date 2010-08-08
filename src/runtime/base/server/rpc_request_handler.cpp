@@ -44,7 +44,7 @@ RPCRequestHandler::~RPCRequestHandler() {
 }
 
 bool RPCRequestHandler::needReset() const {
-  if (m_reset) return true;
+  if (m_reset || m_serverInfo->alwaysReset()) return true;
   return (time(0) - m_created) > m_serverInfo->getMaxDuration();
 }
 

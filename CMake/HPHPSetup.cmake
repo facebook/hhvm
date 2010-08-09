@@ -20,11 +20,23 @@ int main() { return 0; }" HAVE_GCC_43)
 
 endif()
 
+set(FREEBSD FALSE)
+set(LINUX FALSE)
+
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
+	set(FREEBSD TRUE)	
+endif()
+	
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+	set(LINUX TRUE)
+endif()
+
 LIST(APPEND CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
 
 if(APPLE)
 	if(EXISTS "/opt/local/var/macports/")
 		LIST (APPEND CMAKE_PREFIX_PATH "/opt/local")
+		LIST (APPEND CMAKE_LIBRARY_PATH "/opt/local/lib/x86_64")
 	endif()
 endif()
 
@@ -35,6 +47,10 @@ add_definitions(-D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1)
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 	add_definitions(-DRELEASE=1)
+endif()
+
+if(APPLE OR FREEBSD)
+	add_definitions(-DSKIP_USER_CHANGE=1)
 endif()
 
 # eable the OSS options if we have any

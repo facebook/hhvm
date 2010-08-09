@@ -637,7 +637,7 @@ ELSE (_boost_IN_CACHE)
   endif(Boost_COMPILER)
 
 
-  if(${Boost_MINOR_VERSION} GREATER 41 AND NOT WIN32)
+  if(${Boost_MINOR_VERSION} GREATER 41 AND NOT WIN32 AND NOT APPLE)
       set (_boost_MULTITHREADED "")
   else()
     SET (_boost_MULTITHREADED "-mt")

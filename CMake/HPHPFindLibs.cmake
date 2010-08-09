@@ -175,29 +175,37 @@ find_package(Ldap REQUIRED)
 include_directories(${LDAP_INCLUDE_DIR})
 
 # ncuses, readline and history
-find_package(Curses REQUIRED)
-include_directories(${CURSES_INCLUDE_PATH})
+#set(CURSES_NEED_NCURSES true)
+find_package(Ncurses REQUIRED)
+include_directories(${NCURSES_INCLUDE_PATH})
 
 find_package(Readline REQUIRED)
 include_directories(${READLINE_INCLUDE_DIR})
 
 
-
-FIND_LIBRARY (CRYPT_LIB crypt)
-FIND_LIBRARY (RESOLV_LIB resolv)
-FIND_LIBRARY (RT_LIB rt)
-
-
-FIND_LIBRARY (CAP_LIB cap)
-
-if (NOT CAP_LIB)
-  message(FATAL_ERROR "You need to install libcap")
+if (LINUX OR FREEBSD)
+	FIND_LIBRARY (CRYPT_LIB crypt)
+	FIND_LIBRARY (RT_LIB rt)
+elseif (APPLE)
+	FIND_LIBRARY (CRYPT_LIB crypto)
+	FIND_LIBRARY (ICONV_LIB iconv)
 endif()
 
-# potentially make it look in a different directory for the google tools
+if (LINUX)
+	FIND_LIBRARY (CAP_LIB cap)
+
+	if (NOT CAP_LIB)
+  		message(FATAL_ERROR "You need to install libcap")
+	endif()
+endif()
+
+if (LINUX OR APPLE)
+	FIND_LIBRARY (DL_LIB dl)
+	FIND_LIBRARY (RESOLV_LIB resolv)
+endif()
+
 FIND_LIBRARY (BFD_LIB bfd)
 FIND_LIBRARY (BINUTIL_LIB iberty)
-FIND_LIBRARY (DL_LIB dl)
 
 if (NOT BFD_LIB)
 	message(FATAL_ERROR "You need to install binutils")
@@ -205,6 +213,10 @@ endif()
 
 if (NOT BINUTIL_LIB)
 	message(FATAL_ERROR "You need to install binutils")
+endif()
+
+if (FREEBSD)
+	FIND_LIBRARY (EXECINFO_LIB execinfo)
 endif()
 
 #find_package(BISON REQUIRED)
@@ -225,10 +237,21 @@ macro(hphp_link target)
 	target_link_libraries(${target} ${LIBEVENT_LIB})
 	target_link_libraries(${target} ${CURL_LIBRARIES})
 
+if (LINUX)
 	target_link_libraries(${target} ${CAP_LIB})
+endif()
+
+if (LINUX OR APPLE)
+	target_link_libraries(${target} ${RESOLV_LIB})
+	target_link_libraries(${target} ${DL_LIB})
+endif()
+
+if (FREEBSD)
+	target_link_libraries(${target} ${EXECINFO_LIB})
+endif()
+
 	target_link_libraries(${target} ${BFD_LIB})
 	target_link_libraries(${target} ${BINUTIL_LIB})
-	target_link_libraries(${target} ${DL_LIB})
 	target_link_libraries(${target} pthread)
 	target_link_libraries(${target} ${TBB_LIBRARIES})
 	target_link_libraries(${target} ${OPENSSL_LIBRARIES})
@@ -245,9 +268,13 @@ macro(hphp_link target)
 
 	target_link_libraries(${target} ${LIBMEMCACHED_LIBRARIES})
 
-	target_link_libraries(${target} ${CRYPT_LIB})
-	target_link_libraries(${target} ${RESOLV_LIB})
-	target_link_libraries(${target} ${RT_LIB})
+	if (LINUX OR FREEBSD)
+		target_link_libraries(${target} ${CRYPT_LIB})
+		target_link_libraries(${target} ${RT_LIB})
+	elseif (APPLE)
+		target_link_libraries(${target} ${CRYPTO_LIB})
+		target_link_libraries(${target} ${ICONV_LIB})	
+	endif()
 
 	if (USE_TCMALLOC AND HAVE_TCMALLOC)
 		target_link_libraries(${target} ${GOOGLE_TCMALLOC_LIB})
@@ -266,6 +293,6 @@ macro(hphp_link target)
 	target_link_libraries(${target} mbfl)
 
 	target_link_libraries(${target} ${READLINE_LIBRARY})
-	target_link_libraries(${target} ${CURSES_LIBRARIES})
+	target_link_libraries(${target} ${NCURSES_LIBRARY})
 
 endmacro()

@@ -57,6 +57,8 @@ private:
 
   bool executePHPFunction(Transport *transport,
                           SourceRootInfo &sourceRootInfo);
+
+  String getSourceFilename(const char *path, SourceRootInfo &sourceRootInfo);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

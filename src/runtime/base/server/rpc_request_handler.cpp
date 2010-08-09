@@ -23,6 +23,7 @@
 #include <runtime/base/server/source_root_info.h>
 #include <runtime/base/server/request_uri.h>
 #include <runtime/ext/ext_json.h>
+#include <util/process.h>
 
 using namespace std;
 
@@ -109,7 +110,6 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     ServerStatsHelper ssh("input");
     RequestURI reqURI(rpcFunc);
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
-    sourceRootInfo.clear();
   }
 
   bool error = false;
@@ -153,7 +153,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   int code;
   if (!error) {
     Variant funcRet;
-    std::string errorMsg = "Internal Server Error";
+    string errorMsg = "Internal Server Error";
     string warmupDoc, reqInitFunc, reqInitDoc;
     if (m_serverInfo) {
       warmupDoc = m_serverInfo->getWarmupDoc();
@@ -161,7 +161,13 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       reqInitDoc = m_serverInfo->getReqInitDoc();
     }
     if (!warmupDoc.empty()) warmupDoc = canonicalize_path(warmupDoc, "", 0);
-    if (!warmupDoc.empty()) warmupDoc = get_source_filename(warmupDoc.c_str());
+    if (!warmupDoc.empty()) {
+      warmupDoc = getSourceFilename(warmupDoc.c_str(), sourceRootInfo);
+    }
+    if (!reqInitDoc.empty()) reqInitDoc = canonicalize_path(reqInitDoc, "", 0);
+    if (!reqInitDoc.empty()) {
+      reqInitDoc = getSourceFilename(reqInitDoc.c_str(), sourceRootInfo);
+    }
     bool ret = hphp_invoke(m_context, rpcFunc, true, params, ref(funcRet),
                            warmupDoc, reqInitFunc, reqInitDoc,
                            error, errorMsg);
@@ -191,6 +197,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     transport->sendString("Bad Request", 400);
   }
   params.reset();
+  sourceRootInfo.clear();
 
   transport->onSendEnd();
   ServerStats::LogPage(rpcFunc, code);
@@ -198,6 +205,18 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   m_context->onShutdownPostSend();
   m_context->restoreSession();
   return !error;
+}
+
+String RPCRequestHandler::getSourceFilename(const char *path,
+                                            SourceRootInfo &sourceRootInfo) {
+  if (path[0] == '/') return path;
+  // If it is not a sandbox, sourceRoot will be the same as
+  // RuntimeOption::SourceRoot.
+  string sourceRoot = sourceRootInfo.path();
+  if (sourceRoot.empty()) {
+    return Process::GetCurrentDirectory() + "/" + path;
+  }
+  return sourceRoot + path;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

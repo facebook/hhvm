@@ -249,17 +249,6 @@ void Util::syncdir(const std::string &dest_, const std::string &src_,
 }
 
 int Util::copy(const char *srcfile, const char *dstfile) {
-#if defined(__FreeBSD__) || defined(__APPLE__)
-  boost::filesystem::path src(srcfile);
-  boost::filesystem::path dst(dstfile);
-  try {
-    boost::filesystem::copy_file(src, dst,
-      boost::filesystem::copy_option::overwrite_if_exists);
-  } catch (const boost::filesystem::filesystem_error& ex) {
-    return -1;
-  }
-  return 0;
-#else
   int srcFd = open(srcfile, O_RDONLY);
   if (srcFd == -1) return -1;
   int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
@@ -288,6 +277,21 @@ int Util::copy(const char *srcfile, const char *dstfile) {
   close(srcFd);
   close(dstFd);
   return 0;
+}
+
+static int force_sync(int fd) {
+#if defined(__FreeBSD__) || defined(__APPLE__)
+  return fsync(fd);
+#else
+  return fdatasync(fd);
+#endif
+}
+
+static int drop_cache(int fd) {
+#if defined(__FreeBSD__) || defined(__APPLE__)
+  return 0;
+#else
+  return posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED);
 #endif
 }
 
@@ -297,34 +301,40 @@ int Util::directCopy(const char *srcfile, const char *dstfile) {
   int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (dstFd == -1) return -1;
 
+#if defined(__APPLE__)
+  fcntl(srcFd, F_NOCACHE, 1);
+  fcntl(dstFd, F_NOCACHE, 1);
+#endif
+
   while (1) {
     char buf[1 << 20];
     bool err = false;
     ssize_t rbytes = read(srcFd, buf, sizeof(buf));
     ssize_t wbytes;
     if (rbytes == 0) break;
+
     if (rbytes == -1) {
       err = true;
       Logger::Error("read failed: %s", safe_strerror(errno).c_str());
-    } else if (fdatasync(srcFd) == -1) {
+    } else if (force_sync(srcFd) == -1) {
       err = true;
-      Logger::Error("read fdatasync failed: %s",
+      Logger::Error("read sync failed: %s",
                     safe_strerror(errno).c_str());
-    } else if (posix_fadvise(srcFd, 0, 0, POSIX_FADV_DONTNEED) == -1) {
+    } else if (drop_cache(srcFd) == -1) {
       err = true;
-      Logger::Error("read posix_fadvise failed: %s",
+      Logger::Error("read cache drop failed: %s",
                     safe_strerror(errno).c_str());
     } else if ((wbytes = write(dstFd, buf, rbytes)) != rbytes) {
       err = true;
       Logger::Error("write failed: %d, %s", wbytes,
                     safe_strerror(errno).c_str());
-    } else if (fdatasync(dstFd) == -1) {
+    } else if (force_sync(dstFd) == -1) {
       err = true;
-      Logger::Error("write fdatasync failed: %s",
+      Logger::Error("write sync failed: %s",
                     safe_strerror(errno).c_str());
-    } else if (posix_fadvise(dstFd, 0, 0, POSIX_FADV_DONTNEED) == -1) {
+    } else if (drop_cache(dstFd) == -1) {
       err = true;
-      Logger::Error("write posix_fadvise failed: %s",
+      Logger::Error("write cache drop failed: %s",
                     safe_strerror(errno).c_str());
     }
     if (err) {

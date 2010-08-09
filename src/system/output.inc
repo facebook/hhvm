@@ -20,7 +20,7 @@
 "hphp_crash_log", T(Void), S(0), "name", T(String), NULL, S(0), "value", T(String), NULL, S(0), NULL, S(0), 
 "hphp_stats", T(Void), S(0), "name", T(String), NULL, S(0), "value", T(Int64), NULL, S(0), NULL, S(0), 
 "hphp_get_stats", T(Int64), S(0), "name", T(String), NULL, S(0), NULL, S(0), 
-"hphp_output_global_state", T(Void), S(0), "filename", T(String), "null_string", S(0), NULL, S(0), 
+"hphp_output_global_state", T(Variant), S(0), "serialize", T(Boolean), "true", S(0), NULL, S(0), 
 #elif EXT_TYPE == 1
 #elif EXT_TYPE == 2
 #elif EXT_TYPE == 3

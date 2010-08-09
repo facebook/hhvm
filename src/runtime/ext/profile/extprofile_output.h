@@ -130,9 +130,9 @@ inline int64 x_hphp_get_stats(CStrRef name) {
   return f_hphp_get_stats(name);
 }
 
-inline void x_hphp_output_global_state(CStrRef filename = null_string) {
+inline Variant x_hphp_output_global_state(bool serialize = true) {
   FUNCTION_INJECTION_BUILTIN(hphp_output_global_state);
-  f_hphp_output_global_state(filename);
+  return f_hphp_output_global_state(serialize);
 }
 
 

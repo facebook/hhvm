@@ -97,17 +97,7 @@ inline void f_hphp_stats(CStrRef name, int64 value) {
 inline int64 f_hphp_get_stats(CStrRef name) {
   return ServerStats::Get(name.data());
 }
-inline void f_hphp_output_global_state(CStrRef filename = null_string) {
-  FILE *fp = NULL;
-  if (!filename.isNull()) {
-    fp = fopen(filename.c_str(), "w");
-    if (!fp) {
-      throw Exception("failed to open %s for writing", filename.c_str());
-    }
-  }
-  output_global_state(fp);
-  if (fp) fclose(fp);
-}
+Variant f_hphp_output_global_state(bool serialize = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

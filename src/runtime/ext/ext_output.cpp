@@ -67,5 +67,14 @@ void f_hphp_crash_log(CStrRef name, CStrRef value) {
   StackTraceNoHeap::AddExtraLogging(name.data(), value.data());
 }
 
+Variant f_hphp_output_global_state(bool serialize /* = true */) {
+  Array r(get_global_state());
+  if (serialize) {
+    return f_serialize(r);
+  } else {
+    return r;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

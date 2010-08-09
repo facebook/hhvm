@@ -141,7 +141,7 @@ extern GlobalVariables *get_global_variables();
 extern void init_global_variables();
 extern void free_global_variables();
 extern Array get_global_array_wrapper();
-extern void output_global_state(FILE *fp);
+extern Array get_global_state();
 
 extern void fiber_marshal_global_state
 (GlobalVariables *g1, GlobalVariables *g2, FiberReferenceMap &refMap);

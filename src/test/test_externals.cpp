@@ -358,7 +358,7 @@ void fiber_unmarshal_global_state(GlobalVariables *g1, GlobalVariables *g2,
                                   const vector<pair<string, char> > &resolver){
 }
 
-void output_global_state(FILE *fp) {}
+Array get_global_state() { return Array(); }
 
 ///////////////////////////////////////////////////////////////////////////////
 }

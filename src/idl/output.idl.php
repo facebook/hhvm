@@ -57,5 +57,5 @@ f('hphp_stats', NULL,
 f('hphp_get_stats', Int64,
   array('name' => String));
 
-f('hphp_output_global_state', NULL,
-   array('filename' => array(String, 'null_string')));
+f('hphp_output_global_state', Variant,
+   array('serialize' => array(Boolean, 'true')));

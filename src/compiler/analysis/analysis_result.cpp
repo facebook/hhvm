@@ -2534,9 +2534,8 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
 
 void AnalysisResult::outputCPPGlobalStateBegin(CodeGenerator &cg,
                                                const char *section) {
-  cg_indentBegin("static void output_%s(FILE *fp) {\n", section);
+  cg_indentBegin("static void get_%s(Array &res) {\n", section);
   cg_printf("DECLARE_GLOBAL_VARIABLES(g);\n");
-  cg_printf("print(fp, \"\\n$%s = json_decode('\");\n", section);
   cg_printf("Array %s;\n", section);
 }
 
@@ -2545,10 +2544,7 @@ void AnalysisResult::outputCPPGlobalStateEnd(CodeGenerator &cg,
   if (Option::EnableEval >= Option::LimitedEval) {
     cg_printf("eval_get_%s(%s);\n", section, section);
   }
-  cg_printf("String s = f_json_encode(%s);\n", section);
-  cg_printf("s = StringUtil::CEncode(s, \"\\\\\\\'\");\n");
-  cg_printf("print(fp, s);\n");
-  cg_printf("print(fp, \"', true);\\n\");\n");
+  cg_printf("res.set(\"%s\", %s);\n", section, section);
   cg_indentEnd("}\n\n");
 }
 
@@ -2582,14 +2578,6 @@ void AnalysisResult::outputCPPGlobalState() {
   cg_printf("using namespace std;\n");
   cg.namespaceBegin();
 
-  cg_indentBegin("static void print(FILE *fp, String s) {\n");
-  cg_indentBegin("if (fp) {\n");
-  cg_printf("fwrite(s.c_str(), 1, s.size(), fp);\n");
-  cg_printf("return;\n");
-  cg_indentEnd("}\n");
-  cg_printf("echo(s);\n");
-  cg_indentEnd("}\n");
-
   StringPairVecVec symbols(GlobalSymbolTypeCount);
   getVariables()->collectCPPGlobalSymbols(symbols, cg, ar);
   collectCPPGlobalSymbols(symbols, cg);
@@ -2618,16 +2606,18 @@ void AnalysisResult::outputCPPGlobalState() {
   outputCPPGlobalStateSection(cg, symbols[KindOfRedeclaredClassId],
                               "redeclared_classes");
 
-  cg_indentBegin("void output_global_state(FILE *fp) {\n");
-  cg_printf("output_static_global_variables(fp);\n");
-  cg_printf("output_dynamic_global_variables(fp);\n");
-  cg_printf("output_dynamic_constants(fp);\n");
-  cg_printf("output_method_static_variables(fp);\n");
-  cg_printf("output_method_static_inited(fp);\n");
-  cg_printf("output_class_static_variables(fp);\n");
-  cg_printf("output_pseudomain_variables(fp);\n");
-  cg_printf("output_redeclared_functions(fp);\n");
-  cg_printf("output_redeclared_classes(fp);\n");
+  cg_indentBegin("Array get_global_state() {\n");
+  cg_printf("Array res(Array::Create());\n");
+  cg_printf("get_static_global_variables(res);\n");
+  cg_printf("get_dynamic_global_variables(res);\n");
+  cg_printf("get_dynamic_constants(res);\n");
+  cg_printf("get_method_static_variables(res);\n");
+  cg_printf("get_method_static_inited(res);\n");
+  cg_printf("get_class_static_variables(res);\n");
+  cg_printf("get_pseudomain_variables(res);\n");
+  cg_printf("get_redeclared_functions(res);\n");
+  cg_printf("get_redeclared_classes(res);\n");
+  cg_printf("return res;\n");
   cg_indentEnd("}\n\n");
 
   cg.namespaceEnd();

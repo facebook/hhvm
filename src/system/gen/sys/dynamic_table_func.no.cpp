@@ -4416,9 +4416,9 @@ Variant i_hphp_output_global_state(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) return (f_hphp_output_global_state(), null);
+    if (count <= 0) return (f_hphp_output_global_state());
     CVarRef arg0((ad->getValue(pos)));
-    return (f_hphp_output_global_state(arg0), null);
+    return (f_hphp_output_global_state(arg0));
   }
 }
 Variant i_imagefontheight(CArrRef params) {
@@ -36927,8 +36927,8 @@ Variant ei_hphp_output_global_state(Eval::VariableEnvironment &env, const Eval::
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  if (count <= 0) return (x_hphp_output_global_state(), null);
-  else return (x_hphp_output_global_state(a0), null);
+  if (count <= 0) return (x_hphp_output_global_state());
+  else return (x_hphp_output_global_state(a0));
 }
 Variant ei_imagefontheight(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;

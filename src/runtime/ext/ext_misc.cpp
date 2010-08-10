@@ -302,7 +302,7 @@ Array f_token_get_all(CStrRef source) {
     if (tokid < 256) {
       res.append(String::FromChar((char)tokid));
     } else {
-      Array p = CREATE_VECTOR3(tokid, String(tok.getText()), loc.last_line());
+      Array p = CREATE_VECTOR3(tokid, String(tok.getText()), loc.first_line());
       res.append(p);
     }
   }

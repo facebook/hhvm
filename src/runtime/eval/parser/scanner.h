@@ -176,7 +176,9 @@ protected:
   bool m_full;
   std::string m_heredocLabel;
   int m_line;   // last token line
+  int m_firstLine;
   int m_column; // last token column
+  int m_firstColumn;
   std::string m_docComment;
   void incLoc(const char *yytext, int yyleng);
 };

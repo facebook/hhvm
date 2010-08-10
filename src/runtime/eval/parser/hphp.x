@@ -611,8 +611,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
                     yytext[len - 1] == '\r' && yytext[len] == '\n') {
                         len--;
                 }
-                yyless(yyleng - 2);
-                yyleng -= heredocLen - 1;
+                yyless(len + 1);
                 std::string strval =
                   _scanner->scanEscapeString(yytext, len, 0);
                 _scanner->setToken(yytext, yyleng,
@@ -629,7 +628,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         }
 }
 
-<ST_END_HEREDOC>{ANY_CHAR} {
+<ST_END_HEREDOC>{LABEL} {
         BEGIN(ST_IN_SCRIPTING);
         STEPPOS;
         return T_END_HEREDOC;

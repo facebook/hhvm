@@ -19,6 +19,7 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/timeout_thread.h>
+#include <runtime/ext/extension.h>
 #include <util/lock.h>
 
 using namespace std;
@@ -177,6 +178,17 @@ struct UpdateCallbackData {
 typedef std::map<std::string, UpdateCallbackData> CallbackMap;
 static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_callbacks);
 
+typedef std::map<std::string, std::string> DefaultMap;
+static DefaultMap s_global_ini;
+
+void IniSetting::SetGlobalDefault(const char *name, const char *value) {
+  ASSERT(name && *name);
+  ASSERT(value);
+  ASSERT(!Extension::ModulesInitialised());
+
+  s_global_ini[name] = value;
+}
+
 void IniSetting::Bind(const char *name, const char *value,
                       PFN_UPDATE_CALLBACK callback, void *p /* = NULL */) {
   ASSERT(name && *name);
@@ -220,7 +232,15 @@ bool IniSetting::Get(CStrRef name, String &value) {
   }
   if (name == "error_log") {
     value = g_context->getErrorLog();
+    return true;
   }
+
+  DefaultMap::iterator iter = s_global_ini.find(name.data());
+  if (iter != s_global_ini.end()) {
+    value = iter->second;
+    return true;
+  }
+
   return false;
 }
 
@@ -251,12 +271,15 @@ bool IniSetting::Set(CStrRef name, CStrRef value) {
     return true;
   } else if (name == "arg_separator.output") {
     g_context->setArgSeparatorOutput(value);
+    return true;
   } else if (name == "log_errors") {
     bool log;
     ini_on_update_bool(value, &log);
     g_context->setLogErrors(log);
+    return true;
   } else if (name == "error_log") {
     g_context->setErrorLog(value);
+    return true;
   }
 
   return false;

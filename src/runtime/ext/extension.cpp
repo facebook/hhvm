@@ -25,6 +25,7 @@ namespace HPHP {
 
 typedef std::map<std::string, Extension*, stdltistr> ExtensionMap;
 static ExtensionMap *s_registered_extensions = NULL;
+static bool s_modules_initialised = false;
 
 Extension::Extension(litstr name, const char *version /* = "" */)
     : m_name(name), m_version(version ? version : "") {
@@ -50,6 +51,11 @@ void Extension::InitModules() {
        iter != s_registered_extensions->end(); ++iter) {
     iter->second->moduleInit();
   }
+  s_modules_initialised = true;
+}
+
+bool Extension::ModulesInitialised() {
+  return s_modules_initialised;
 }
 
 void Extension::ShutdownModules() {

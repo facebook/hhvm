@@ -49,6 +49,9 @@ public:
 
   static void Bind(const char *name, const char *value,
                    PFN_UPDATE_CALLBACK callback, void *p = NULL);
+
+  static void SetGlobalDefault(const char *name, const char *value);
+
 };
 
 bool ini_on_update_bool(CStrRef value, void *p);

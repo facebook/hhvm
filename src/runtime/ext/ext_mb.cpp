@@ -23,6 +23,7 @@
 #include <runtime/ext/ext_process.h>
 #include <runtime/base/zend/zend_url.h>
 #include <runtime/base/zend/zend_string.h>
+#include <runtime/base/ini_setting.h>
 
 extern "C" {
 #include <mbfl/mbfl_convert.h>
@@ -49,7 +50,18 @@ extern void mbfl_memory_device_unput(mbfl_memory_device *device);
 #define PHP_OUTPUT_HANDLER_END                  (1<<2)
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(mbstring);
+
+static class mbstringExtension : public Extension {
+ public:
+  mbstringExtension() : Extension("mbstring") {}
+
+  virtual void moduleInit() {
+    IniSetting::SetGlobalDefault("mbstring.http_input", "pass");
+    IniSetting::SetGlobalDefault("mbstring.http_output", "pass");
+  }
+
+} s_mbstring_extension;
+
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 

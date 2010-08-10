@@ -58,7 +58,7 @@ public:
   // called by hphp_process_init/exit
   static void InitModules();
   static void ShutdownModules();
-
+  static bool ModulesInitialised();
 public:
   Extension(litstr name, const char *version = "");
   virtual ~Extension() {}

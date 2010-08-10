@@ -388,18 +388,14 @@ bool ClassStatement::subclassOf(const char *c) const {
 }
 
 const MethodStatement* ClassStatement::findMethod(const char* name,
-                                                  bool recursive /* = false */)
-  const {
+    bool recursive /* = false */, bool interfaces /* = false */) const {
   hphp_const_char_imap<MethodStatementPtr>::const_iterator it =
     m_methods.find(name);
   if (it != m_methods.end()) {
     return it->second.get();
   } else {
     if (recursive) {
-      const ClassStatement *parent = parentStatement();
-      if (parent) {
-        return parent->findMethod(name, true);
-      }
+      return findParentMethod(name, interfaces);
     }
     return NULL;
   }
@@ -707,17 +703,52 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
     }
 
     // checking against parent methods
-    if (parent) {
-      parentMethodCheck(parent);
-    }
-    for (vector<string>::const_iterator it = m_basesVec.begin();
-        it != m_basesVec.end(); ++it) {
-      const ClassStatement *iface = RequestEvalState::findClass(it->c_str());
-      if (iface) {
-        parentMethodCheck(iface);
+    if (parent || !m_basesVec.empty()) {
+      bool iface = getModifiers() & Interface;
+      for (vector<MethodStatementPtr>::const_iterator it =
+          m_methodsVec.begin(); it != m_methodsVec.end(); ++it) {
+        const MethodStatement *m = findParentMethod((*it)->name().c_str(),
+            true);
+        if (m == NULL) continue;
+        const ClassStatement *mClass = m->getClass();
+        bool ifaceParent = mClass->getModifiers() & Interface;
+
+        int tmod = (*it)->getModifiers();
+        int pmod = m->getModifiers();
+
+        if ((tmod & Static) && !(pmod & Static)) {
+          raise_error("Cannot make non static method %s::%s() static in "
+              "class %s in %s on line %d",
+              mClass->name().c_str(), m->name().c_str(),
+              m_name.c_str(), (*it)->loc()->file, (*it)->loc()->line1);
+        }
+
+        if (!(tmod & Static) && (pmod & Static)) {
+          raise_error("Cannot make static method %s::%s() non static in "
+              "class %s in %s on line %d",
+              mClass->name().c_str(), m->name().c_str(),
+              m_name.c_str(), (*it)->loc()->file, (*it)->loc()->line1);
+        }
+
+        if (tmod & Abstract || iface) {
+          if (!(pmod & Abstract) && (tmod & Abstract)) {
+            raise_error("Cannot make non abstract method %s::%s() abstract in "
+                "class %s in %s on line %d",
+                mClass->name().c_str(), m->name().c_str(),
+                m_name.c_str(), (*it)->loc()->file,
+                (*it)->loc()->line1);
+          }
+
+          if (pmod & Abstract || ifaceParent) {
+            raise_error("Cannot re-declare abstract method %s::%s() abstract "
+                "in class %s in %s on line %d",
+                mClass->name().c_str(), m->name().c_str(),
+                m_name.c_str(), (*it)->loc()->file,
+                (*it)->loc()->line1);
+          }
+        }
       }
     }
-
     cls = this;
   }
   if (getModifiers() & (Interface|Abstract)) return;
@@ -738,50 +769,24 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
   }
 }
 
-void ClassStatement::parentMethodCheck(const ClassStatement *parent) const {
-  bool iface = getModifiers() & Interface;
-  bool ifaceParent = parent->getModifiers() & Interface;
-  for (vector<MethodStatementPtr>::const_iterator it =
-      m_methodsVec.begin(); it != m_methodsVec.end(); ++it) {
-    const MethodStatement *m =
-      parent->findMethod((*it)->name().c_str(), true);
-    if (m == NULL) continue;
-
-    int tmod = (*it)->getModifiers();
-    int pmod = m->getModifiers();
-
-    if ((tmod & Static) && !(pmod & Static)) {
-      raise_error("Cannot make non static method %s::%s() static in "
-          "class %s in %s on line %d",
-          parent->name().c_str(), m->name().c_str(),
-          m_name.c_str(), (*it)->loc()->file, (*it)->loc()->line1);
-    }
-
-    if (!(tmod & Static) && (pmod & Static)) {
-      raise_error("Cannot make static method %s::%s() non static in "
-          "class %s in %s on line %d",
-          parent->name().c_str(), m->name().c_str(),
-          m_name.c_str(), (*it)->loc()->file, (*it)->loc()->line1);
-    }
-
-    if (tmod & Abstract || iface) {
-      if (!(pmod & Abstract) && (tmod & Abstract)) {
-        raise_error("Cannot make non abstract method %s::%s() abstract in "
-            "class %s in %s on line %d",
-            parent->name().c_str(), m->name().c_str(),
-            m_name.c_str(), (*it)->loc()->file,
-            (*it)->loc()->line1);
-      }
-
-      if (pmod & Abstract || ifaceParent) {
-        raise_error("Cannot re-declare abstract method %s::%s() abstract "
-            "in class %s in %s on line %d",
-            parent->name().c_str(), m->name().c_str(),
-            m_name.c_str(), (*it)->loc()->file,
-            (*it)->loc()->line1);
+const MethodStatement* ClassStatement::findParentMethod(const char* name,
+    bool interface) const {
+  const ClassStatement *parent = parentStatement();
+  if (parent) {
+    const MethodStatement *m = parent->findMethod(name, true, interface);
+    if (m) return m;
+  }
+  if (interface) {
+    for (vector<string>::const_iterator it = m_basesVec.begin();
+        it != m_basesVec.end(); ++it) {
+      const ClassStatement *iface = RequestEvalState::findClass(it->c_str());
+      if (iface) {
+        const MethodStatement *m = iface->findMethod(name, true, true);
+        if (m) return m;
       }
     }
   }
+  return NULL;
 }
 
 ClassStatementMarkerPtr ClassStatement::getMarker() const {

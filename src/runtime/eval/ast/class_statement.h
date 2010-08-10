@@ -104,7 +104,8 @@ public:
   void initializeStatics(LVariableTable &statics) const;
 
   const MethodStatement* findMethod(const char* name,
-                                    bool recursive = false) const;
+                                    bool recursive = false,
+                                    bool interfaces = false) const;
   const ClassVariable* findVariable(const char* name,
                                     bool recursive = false) const;
   bool getConstant(Variant &res, const char *c,
@@ -146,7 +147,8 @@ protected:
   bool m_delayDeclaration;
 
   void loadProperties(ClassInfoEvaled &info) const;
-  void parentMethodCheck(const ClassStatement *parent) const;
+  const MethodStatement* findParentMethod(const char* name,
+      bool interface) const;
 
 };
 

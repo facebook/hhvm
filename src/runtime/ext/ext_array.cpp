@@ -907,6 +907,7 @@ public:
   }
   virtual void requestShutdown() {
     m_locale.reset();
+    m_errcode.clear();
     if (m_ucoll) {
       ucol_close(m_ucoll);
       m_ucoll = NULL;

@@ -502,14 +502,22 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 <ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">"){NEWLINE}? {
         STEPPOS;
         BEGIN(ST_IN_HTML);
-        return ';'; //return T_CLOSE_TAG;
+        if (_scanner->full()) {
+          return T_CLOSE_TAG;
+        } else {
+          return ';';
+        }
 }
 
 <ST_IN_SCRIPTING>"%>"{NEWLINE}? {
         if (_scanner->aspTags()) {
                 STEPPOS;
                 BEGIN(ST_IN_HTML);
-                return ';'; //return T_CLOSE_TAG;
+                if (_scanner->full()) {
+                  return T_CLOSE_TAG;
+                } else {
+                  return ';';
+                }
         } else {
                 yyless(1);
                 _scanner->setToken(yytext, 1, yytext, 1);

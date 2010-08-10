@@ -147,6 +147,7 @@ public:
                 const char *yytext, int yyleng, bool save = true);
   bool shortTags() const { return m_shortTags;}
   bool aspTags() const { return m_aspTags;}
+  bool full() const { return m_full; }
   void setHeredocLabel(const char *label, int len);
   int getHeredocLabelLen() const;
   const char *getHeredocLabel() const;

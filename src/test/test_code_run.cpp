@@ -419,6 +419,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestDynamicFunctions);
   RUN_TEST(TestDynamicMethods);
   RUN_TEST(TestVolatile);
+  RUN_TEST(TestHereDoc);
   RUN_TEST(TestProgramFunctions);
   RUN_TEST(TestCompilation);
   RUN_TEST(TestReflection);
@@ -5457,6 +5458,21 @@ bool TestCodeRun::TestVolatile() {
       "new CaT(1);"
       "class_exists('cat', false);");
 
+  return true;
+}
+
+bool TestCodeRun::TestHereDoc() {
+  MVCR("<?php\n"
+       "$nullherequote= <<<fail\n"
+       "fail;\n"
+       "echo \"--$nullherequote--\\n\";"
+       "$x=\"foo\";"
+       "$threestops= <<<pass\n"
+       "passable $x\n"
+       "pass;x\n"
+       "ss;\n"
+       "pass;\n"
+       "echo \"$threestops\\n\";");
   return true;
 }
 

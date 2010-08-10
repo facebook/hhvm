@@ -27,6 +27,7 @@ DNUM    ([0-9]*[\.][0-9]+)|([0-9]+[\.][0-9]*)
 EXPONENT_DNUM   (({LNUM}|{DNUM})[eE][+-]?{LNUM})
 HNUM    "0x"[0-9a-fA-F]+
 LABEL   [a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
+NOTLABEL   [^a-zA-Z_\x7f-\xff]
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
 TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
@@ -551,7 +552,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         }
         _scanner->setHeredocLabel(s, label_len);
         _scanner->setToken(yytext, yyleng, s, label_len);
-        BEGIN(ST_HEREDOC);
+        BEGIN(ST_START_HEREDOC);
         return T_START_HEREDOC;
 }
 
@@ -561,7 +562,8 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         return '`';
 }
 
-<ST_START_HEREDOC>{ANY_CHAR} {
+
+<ST_START_HEREDOC>({NOTLABEL}|{LABEL}(";"[^\n\r]|[^;\n\r])) {
         yyless(0);
         BEGIN(ST_HEREDOC);
 }
@@ -579,8 +581,8 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
                 BEGIN(ST_IN_SCRIPTING);
                 return T_END_HEREDOC;
         } else {
-                yymore();
-                BEGIN(ST_HEREDOC);
+          yyless(0);
+          BEGIN(ST_HEREDOC);
         }
 }
 

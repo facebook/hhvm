@@ -140,6 +140,7 @@ class TestCodeRun : public TestBase {
   bool TestConstructor();
 
   // misc
+  bool TestHereDoc();
   bool TestProgramFunctions();
   bool TestCompilation();
   bool TestReflection();

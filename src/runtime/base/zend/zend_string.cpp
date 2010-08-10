@@ -159,6 +159,9 @@ char *string_concat(const char *s1, int len1, const char *s2, int len2,
                     int &len) {
   len = len1 + len2;
   char *buf = (char *)malloc(len + 1);
+  if (buf == NULL) {
+    throw FatalErrorException("malloc failed: %d", len);
+  }
   memcpy(buf, s1, len1);
   memcpy(buf + len1, s2, len2);
   buf[len] = 0;

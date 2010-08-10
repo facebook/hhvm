@@ -34,6 +34,7 @@
 #include <runtime/base/util/string_buffer.h>
 
 namespace HPHP {
+bool propagate_tainting_aux(CStrRef orig, String& dest);
 /* 6 variants to avoid repetition:
  * propagate_tainting<i> propagates the tainting to dest whenever one of the
  * orig<j> is tainted; only the metadata and the tainting from the first

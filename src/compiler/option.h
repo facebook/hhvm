@@ -127,6 +127,11 @@ public:
   static bool UseRTTIProfileData;
 
   /**
+   * Generate concatN (n > 6) service routines
+   */
+  static bool GenConcat;
+
+  /**
    * Separate compilation
    */
   static bool SeparateCompilation;

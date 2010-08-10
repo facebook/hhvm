@@ -1234,6 +1234,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     outputCPPFiberGlobalState();
     outputCPPSepExtensionMake();
   }
+  outputUtilDecl(output);
   if (Option::GenerateCPPMacros && output != CodeGenerator::SystemCPP) {
     outputCPPClassMapFile();
     outputCPPNameMaps();
@@ -1262,6 +1263,8 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
   if (Option::GenRTTIProfileData) {
     outputRTTIMetaData(Option::RTTIOutputFile.c_str());
   }
+
+  outputUtilImpl(output);
 }
 
 void AnalysisResult::outputAllCPP(CodeGenerator &cg) {
@@ -1273,6 +1276,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator &cg) {
     cg_printf("\n");
     cg_printInclude("<runtime/base/hphp.h>");
     cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
+    cg_printInclude(string(Option::SystemFilePrefix) + "util.h");
     cg_printf("\n");
   }
 
@@ -1371,6 +1375,7 @@ void AnalysisResult::outputCPPClassMapFile() {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
+  cg_printInclude(string(Option::SystemFilePrefix) + "util.h");
   cg_printf("\n");
   cg_printf("using namespace std;\n");
 
@@ -1503,6 +1508,161 @@ void AnalysisResult::outputRTTIMetaData(const char *filename) {
     fprintf(f, "%s\n", iter->c_str());
   }
   fclose(f);
+}
+
+void AnalysisResult::outputUtilDecl(CodeGenerator::Output output) {
+  if (!Option::GenConcat) return;
+
+  string filename = string(Option::SystemFilePrefix) + "util.h";
+  string headerPath = m_outputPath + "/" + filename;
+  Util::mkdir(headerPath);
+  ofstream f(headerPath.c_str());
+  CodeGenerator cg(&f, output);
+  cg_printf("\n");
+  cg_printf("#ifndef __GENERATED_util_h__\n");
+  cg_printf("#define __GENERATED_util_h__\n");
+  cg_printInclude("<runtime/base/hphp.h>");
+  cg_printf("\n");
+  cg.namespaceBegin();
+  if (Option::GenConcat && output != CodeGenerator::SystemCPP) {
+    outputTaintDecl(cg);
+    outputConcatDecl(cg);
+  }
+  cg.namespaceEnd();
+  cg_printf("#endif // __GENERATED_util_h__\n");
+}
+
+void AnalysisResult::outputUtilImpl(CodeGenerator::Output output) {
+  if (!Option::GenConcat) return;
+
+  string filename = string(Option::SystemFilePrefix) + "util.cpp";
+  string headerPath = m_outputPath + "/" + filename;
+  Util::mkdir(headerPath);
+  ofstream f(headerPath.c_str());
+  CodeGenerator cg(&f, output);
+  cg_printf("\n");
+  cg_printInclude("\"util.h\"");
+  cg.namespaceBegin();
+  if (Option::GenConcat && output != CodeGenerator::SystemCPP) {
+    outputTaintImpl(cg);
+    outputConcatImpl(cg);
+  }
+  cg.namespaceEnd();
+}
+
+void AnalysisResult::outputTaintNumDecl(CodeGenerator &cg, int num) {
+  cg_printf("void propagate_tainting%d(", num);
+  for (int i = 1; i <= num; i++) {
+    cg_printf("CStrRef orig%d", i);
+    if (i < num) {
+      cg_printf(", ");
+    } else {
+      cg_printf(", String& dest)");
+    }
+  }
+}
+
+void AnalysisResult::outputTaintDecl(CodeGenerator &cg) {
+  cg_printf("#ifdef TAINTED\n");
+  for (set<int>::const_iterator iter = m_concatLengths.begin();
+       iter != m_concatLengths.end(); ++iter) {
+    int num = *iter;
+    ASSERT(num > MAX_CONCAT_ARGS);
+    outputTaintNumDecl(cg, num);
+    cg_printf(";\n");
+  }
+  cg_printf("#endif // TAINTED\n\n");
+}
+
+void AnalysisResult::outputTaintImpl(CodeGenerator &cg) {
+  cg_printf("#ifdef TAINTED\n");
+  for (set<int>::const_iterator iter = m_concatLengths.begin();
+       iter != m_concatLengths.end(); ++iter) {
+    int num = *iter;
+    ASSERT(num > MAX_CONCAT_ARGS);
+    outputTaintNumDecl(cg, num);
+    cg_indentBegin(" {\n");
+    for (int i = 1; i <= num; i++) {
+      cg_printf("%sif( propagate_tainting_aux(orig%d, dest) ) { }\n",
+                i == 1 ? "" : "else ", i);
+    }
+    cg_printf("else { dest.untaint(); }\n");
+    cg_indentEnd("}\n");
+  }
+  cg_printf("#endif // TAINTED\n\n");
+}
+
+void AnalysisResult::outputConcatNumDecl(CodeGenerator &cg, int num) {
+  cg_printf("String concat%d(", num);
+  for (int i = 1; i <= num; i++) {
+    cg_printf("CStrRef s%d", i);
+    if (i < num) {
+      cg_printf(", ");
+    } else {
+      cg_printf(")");
+    }
+  }
+}
+
+void AnalysisResult::outputConcatDecl(CodeGenerator &cg) {
+  for (set<int>::const_iterator iter = m_concatLengths.begin();
+       iter != m_concatLengths.end(); ++iter) {
+    int num = *iter;
+    ASSERT(num > MAX_CONCAT_ARGS);
+    outputConcatNumDecl(cg, num);
+    cg_printf(";\n");
+  }
+}
+
+void AnalysisResult::outputConcatImpl(CodeGenerator &cg) {
+  for (set<int>::const_iterator iter = m_concatLengths.begin();
+       iter != m_concatLengths.end(); ++iter) {
+    int num = *iter;
+    ASSERT(num > MAX_CONCAT_ARGS);
+    outputConcatNumDecl(cg, num);
+    cg_indentBegin(" {\n");
+    for (int i = 1; i <= num; i++) {
+      cg_printf("int len%d = s%d.size();\n", i, i);
+    }
+    cg_printf("int len =");
+    for (int i = 1; i <= num; i++) {
+      cg_printf(" len%d", i);
+      if (i < num) {
+        cg_printf(" +");
+      } else {
+        cg_printf(";\n");
+      }
+    }
+    cg_printf("char *buf = (char*)malloc(len + 1);\n");
+    cg_printf("if (buf == NULL) {\n");
+    cg_printf("  throw FatalErrorException(\"malloc failed: %%d\", len);\n");
+    cg_printf("}\n");
+    for (int i = 1; i <= num; i++) {
+      cg_printf("memcpy(buf");
+      for (int j = 1; j < i; j++) {
+        cg_printf(" + len%d", j);
+      }
+      cg_printf(", s%d.data(), len%d);\n", i, i);
+    }
+    cg_printf("buf[len] = 0;\n");
+    cg_printf("#ifndef TAINTED\n");
+    cg_printf("return String(buf, len, AttachString);\n");
+    cg_printf("#else\n");
+    cg_printf("String res = String(buf, len, AttachString);\n");
+    cg_printf("propagate_tainting%d(", num);
+    for (int i = 1; i <= num; i++) {
+      cg_printf("s%d", i);
+      if (i < num) {
+        cg_printf(", ");
+      } else {
+        cg_printf(", res)");
+      }
+    }
+    cg_printf(";\n");
+    cg_printf("return res;\n");
+    cg_printf("#endif\n");
+    cg_indentEnd("}\n");
+  }
 }
 
 void AnalysisResult::outputCPPDynamicTablesHeader
@@ -2516,6 +2676,7 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
+  cg_printInclude(string(Option::SystemFilePrefix) + "util.h");
   if (part == 1) {
     getVariables()->outputCPPGlobalVariablesDtorIncludes(cg, ar);
   }
@@ -2587,6 +2748,7 @@ void AnalysisResult::outputCPPGlobalState() {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
+  cg_printInclude(string(Option::SystemFilePrefix) + "util.h");
   if (Option::EnableEval >= Option::LimitedEval) {
     cg_printInclude("<runtime/eval/eval.h>");
   }
@@ -2737,6 +2899,7 @@ void AnalysisResult::outputCPPFiberGlobalState() {
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude("<runtime/base/fiber_reference_map.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
+  cg_printInclude(string(Option::SystemFilePrefix) + "util.h");
   cg_printf("\n");
   cg_printf("using namespace std;\n");
   cg.namespaceBegin();
@@ -2869,6 +3032,7 @@ void AnalysisResult::outputCPPMain() {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
+  cg_printInclude(string(Option::SystemFilePrefix) + "util.h");
   if (Option::PrecomputeLiteralStrings && m_stringLiterals.size() > 0) {
     cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
   }

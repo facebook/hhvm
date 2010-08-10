@@ -850,7 +850,11 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     bool ok = false;
     if (m_op == '.') {
       numConcat = getConcatList(ev, self, hasVoid, hasLitStr);
-      ok = hasVoid || hasLitStr || numConcat > MAX_CONCAT_ARGS;
+      ok = hasVoid ||
+           (hasLitStr && !Option::PrecomputeLiteralStrings) ||
+           (numConcat > MAX_CONCAT_ARGS &&
+            (!Option::GenConcat ||
+             cg.getOutput() == CodeGenerator::SystemCPP));
     } else if (effect2 && m_op == T_CONCAT_EQUAL) {
       prefix = stringBufferPrefix(ar, m_exp1);
       ok = prefix;
@@ -1039,12 +1043,14 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       bool hasVoid = false, hasLitStr = false;
       int num = getConcatList(ev, self, hasVoid, hasLitStr);
       assert(!hasVoid);
-      if (num <= MAX_CONCAT_ARGS &&
-          (!hasLitStr || Option::PrecomputeLiteralStrings)) {
+      if ((num <= MAX_CONCAT_ARGS ||
+           (Option::GenConcat && cg.getOutput() != CodeGenerator::SystemCPP))
+          && (!hasLitStr || Option::PrecomputeLiteralStrings)) {
         assert(num >= 2);
         if (num == 2) {
           cg_printf("concat(");
         } else {
+          if (num > MAX_CONCAT_ARGS) ar->m_concatLengths.insert(num);
           cg_printf("concat%d(", num);
         }
         for (size_t i = 0; i < ev.size(); i++) {

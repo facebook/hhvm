@@ -366,6 +366,7 @@ public:
   int getLiteralStringCount() { return m_stringLiterals.size(); }
 
   std::set<std::string> m_variableTableFunctions;
+  std::set<int> m_concatLengths;
 
   void setSystem() { m_system = true; }
   bool isSystem() const { return m_system; }
@@ -501,6 +502,9 @@ private:
   void outputCPPClusterImpl(CodeGenerator &cg, const FileScopePtrVec &files);
   void outputCPPClassDeclaredFlagsLookup(CodeGenerator &cg);
 
+  void outputUtilDecl(CodeGenerator::Output output);
+  void outputUtilImpl(CodeGenerator::Output output);
+
   void repartitionCPP(const std::string &filename, int64 targetSize,
                       bool insideHPHP);
   void repartitionLargeCPP(const std::vector<std::string> &filenames,
@@ -536,6 +540,13 @@ private:
   void outputCPPLiteralStringPrecomputation();
   void outputCPPSepExtensionMake();
   void outputCPPSepExtensionIncludes(CodeGenerator &cg);
+
+  void outputTaintNumDecl(CodeGenerator &cg, int num);
+  void outputTaintDecl(CodeGenerator &cg);
+  void outputTaintImpl(CodeGenerator &cg);
+  void outputConcatNumDecl(CodeGenerator &cg, int num);
+  void outputConcatDecl(CodeGenerator &cg);
+  void outputConcatImpl(CodeGenerator &cg);
 
   void cloneRTTIFuncs(ClassScopePtr cls,
                       const StringToFunctionScopePtrVecMap &functions);

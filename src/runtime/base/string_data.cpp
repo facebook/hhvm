@@ -91,7 +91,7 @@ void StringData::assign(const char *data, int len, StringDataMode mode) {
   ASSERT(mode >= 0 && mode < StringDataModeCount);
 
   if (len < 0 || (len & IsMask)) {
-    throw_invalid_argument("len: %d", len);
+    throw InvalidArgumentException("len: %d", len);
   }
 
   releaseData();
@@ -134,7 +134,7 @@ void StringData::append(const char *s, int len) {
   if (len == 0) return;
 
   if (len < 0 || (len & IsMask)) {
-    throw_invalid_argument("len: %d", len);
+    throw InvalidArgumentException("len: %d", len);
   }
 
   if (!isMalloced()) {

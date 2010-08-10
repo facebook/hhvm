@@ -169,6 +169,7 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
     const char *cname = *p++;
     // Parse parent
     const char *cparent = *p++;
+    if (!cparent) cparent = "";
     // Parse list of interfaces
     vector<string> ifaces;
     while (*p) ifaces.push_back(*p++);
@@ -180,20 +181,18 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
       if (sep) {
         fs->setSepExtension();
       }
-      bool abstract = (bool)*p++;
-      if (abstract) {
+      int flags = (int)(int64)(*p++);
+      if (flags & ClassInfo::IsAbstract) {
         fs->addModifier(T_ABSTRACT);
       }
-      int visibility = (long)*p++;
       int vismod = 0;
-      if (visibility == 1) {
+      if (flags & ClassInfo::IsProtected) {
         vismod = T_PROTECTED;
-      } else if (visibility == 2) {
+      } else if (flags & ClassInfo::IsPrivate) {
         vismod = T_PRIVATE;
       }
       fs->addModifier(vismod);
-      bool stat = (bool)*p++;
-      if (stat) {
+      if (flags & ClassInfo::IsStatic) {
         fs->addModifier(T_STATIC);
       }
       methods.push_back(fs);
@@ -201,8 +200,7 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
     if (cparent && *cparent && (ifaces.empty() || ifaces[0] != cparent)) {
       ifaces.insert(ifaces.begin(), cparent);
     }
-    ClassScopePtr cl(new ClassScope(ar, string(cname), string(cparent),
-                                    ifaces, methods));
+    ClassScopePtr cl(new ClassScope(ar, cname, cparent, ifaces, methods));
     p++;
     // Parse properties
     while (*p) {
@@ -220,6 +218,13 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
       cl->getConstants()->add(name, type, ExpressionPtr(), ar, ConstructPtr());
     }
     p++;
+
+    int flags = (int)(int64)(*p++);
+    cl->setClassInfoAttribute(flags);
+    if (flags & ClassInfo::HasDocComment) {
+      cl->setDocComment(*p++);
+    }
+
     cl->setSystem();
     if (sep) {
       cl->setSepExtension();
@@ -257,8 +262,7 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   }
   if (minParam < 0) minParam = maxParam;
 
-  string lowered = Util::toLower(name);
-  FunctionScopePtr f(new FunctionScope(false, lowered, reference));
+  FunctionScopePtr f(new FunctionScope(false, name, reference));
   f->setParamCounts(ar, minParam, maxParam);
   if (retType) {
     f->setReturnType(ar, retType);
@@ -278,32 +282,29 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
     index++;
   }
 
-  // Read function flags (these flags are defined in "idl/base.php")
-  int flags = (int)((int64)(*p) & 0x7fffffff);
-  int fields = (int)((int64)(*p++) >> 32);
-  // Flags for variable arguments
-  if (flags & 0x10) {
+  int flags = (int)(int64)(*p++);
+  f->setClassInfoAttribute(flags);
+  if (flags & ClassInfo::HasDocComment) {
+    f->setDocComment(*p++);
+  }
+  if (flags & ClassInfo::HasOptFunction) {
+    f->setOptFunction((FunctionOptPtr)(*p++));
+  }
+
+  // This block of code is not needed, if BlockScope directly takes flags.
+  if (flags & ClassInfo::MixedVariableArguments) {
     f->setVariableArgument(-1);
-  } else if (flags & 0x2) {
+  } else if (flags & ClassInfo::RefVariableArguments) {
     f->setVariableArgument(1);
-  } else if (flags & 0x1) {
+  } else if (flags & ClassInfo::VariableArguments) {
     f->setVariableArgument(0);
   }
-  // Flag for no side effects
-  if (flags & 0x4) {
+  if (flags & ClassInfo::NoEffect) {
     f->setNoEffect();
   }
-  if (flags & 0x20) {
+  if (flags & ClassInfo::FunctionIsFoldable) {
     f->setIsFoldable();
   }
-  if (flags & 0x40) {
-    f->setClassInfoAttribute(ClassInfo::HipHopSpecific);
-  }
-
-  if (fields & 0x1) {
-    f->setOptFunction((FunctionOptPtr)(int64)(*p++));
-  }
-
   return f;
 }
 

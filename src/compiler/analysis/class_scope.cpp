@@ -84,7 +84,7 @@ std::string ClassScope::getOriginalName() const {
     return dynamic_pointer_cast<InterfaceStatement>(m_stmt)->
       getOriginalName();
   }
-  return m_name;
+  return m_originalName;
 }
 
 std::string ClassScope::getId(CodeGenerator &cg) const {
@@ -505,6 +505,9 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_kindOf == KindOfFinalClass) attribute |= ClassInfo::IsFinal;
   if (!m_docComment.empty()) attribute |= ClassInfo::HasDocComment;
   if (needLazyStaticInitializer()) attribute |= ClassInfo::IsLazyInit;
+
+  attribute |= m_attributeClassInfo;
+
   cg_printf("(const char *)0x%04X, \"%s\", \"%s\",\n", attribute,
             getOriginalName().c_str(), m_parent.c_str());
 

@@ -75,6 +75,11 @@ public:
   ModifierExpressionPtr setModifiers(ModifierExpressionPtr modifiers);
   ModifierExpressionPtr getModifiers() { return m_modifiers;}
 
+  void setClassInfoAttribute(int flag) {
+    m_attributeClassInfo |= flag;
+  }
+  void setDocComment(const std::string &doc) { m_docComment = doc;}
+
   /**
    * Movable includes.
    */
@@ -101,7 +106,9 @@ public:
   }
 
 protected:
+  std::string m_originalName;
   std::string m_name;
+  int m_attributeClassInfo;
   std::string m_docComment;
   StatementPtr m_stmt;
   KindOf m_kind;

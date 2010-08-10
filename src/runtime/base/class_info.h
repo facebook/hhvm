@@ -34,30 +34,39 @@ class ClassInfoHook;
  */
 class ClassInfo {
 public:
-  enum Attribute {            //  class  property  function  method  parameter
-    IsSystem     = (1 << 0),  //    x                 x
-    IsRedeclared = (1 << 1),  //    x                 x
-    IsVolatile   = (1 << 2),  //    x                 x
+  enum Attribute {                      //  class   prop   func  method param
+    IsSystem               = (1 <<  0), //    x             x
+    IsRedeclared           = (1 <<  1), //    x             x
+    IsVolatile             = (1 <<  2), //    x             x
 
-    IsInterface  = (1 << 3),  //    x
-    IsAbstract   = (1 << 4),  //    x                          x
-    IsFinal      = (1 << 5),  //    x                          x
+    IsInterface            = (1 <<  3), //    x
+    IsAbstract             = (1 <<  4), //    x                    x
+    IsFinal                = (1 <<  5), //    x                    x
 
-    IsPublic     = (1 << 6),  //            x                  x
-    IsProtected  = (1 << 7),  //            x                  x
-    IsPrivate    = (1 << 8),  //            x                  x
-    IsStatic     = (1 << 9),  //            x                  x
-    IsInherited  = (1 << 10),  //                              x
+    IsPublic               = (1 <<  6), //           x             x
+    IsProtected            = (1 <<  7), //           x             x
+    IsPrivate              = (1 <<  8), //           x             x
+    IsStatic               = (1 <<  9), //           x             x
+    IsInherited            = (1 << 10), //                         x
 
-    IsReference  = (1 << 11), //                      x        x        x
-    IsOptional   = (1 << 12), //                                        x
+    IsReference            = (1 << 11), //                  x      x     x
+    IsOptional             = (1 << 12), //                               x
 
-    IsNothing    = (1 << 13), // need a non-zero number for const char * maps
-    HasDocComment= (1 << 14), //                      x        x
+    // need a non-zero number for const char * maps
+    IsNothing              = (1 << 13),
 
-    IsLazyInit   = (1 << 15), //    x
+    HasDocComment          = (1 << 14), //                  x      x
+    IsLazyInit             = (1 << 15), //    x
+    HipHopSpecific         = (1 << 16), //    x             x
 
-    HipHopSpecific=(1 << 16),
+    VariableArguments      = (1 << 17), //                  x      x
+    RefVariableArguments   = (1 << 18), //                  x      x
+    MixedVariableArguments = (1 << 19), //                  x      x
+
+    FunctionIsFoldable     = (1 << 20), //                  x
+    NoEffect               = (1 << 21), //                  x
+    NoInjection            = (1 << 22), //                  x      x
+    HasOptFunction         = (1 << 23), //                  x
   };
 
   struct ConstantInfo {

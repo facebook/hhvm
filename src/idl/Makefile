@@ -86,3 +86,10 @@ remove:
 
 clean clobber:
 	$(V)rm -f *~ $(patsubst %.idl.php, %, $(IDL_PHPS)) $(patsubst %.idl.php, ext_%.h, $(IDL_PHPS)) $(patsubst %.idl.php, ext_%.cpp, $(IDL_PHPS)) $(patsubst %.idl.php, %.inc, $(IDL_PHPS)) $(patsubst %.idl.php, test_ext_%.h, $(IDL_PHPS)) $(patsubst %.idl.php, test_ext_%.cpp, $(IDL_PHPS))
+
+%.geninc:
+	@php idl.php inc $(patsubst %.geninc, %.idl.php, $@) \
+	  $(patsubst %.geninc, ../system/%.inc, $@)
+
+geninc-all: $(patsubst %.idl.php, %.geninc, $(IDL_PHPS))
+

@@ -1,22 +1,7 @@
 <?php
 
 ///////////////////////////////////////////////////////////////////////////////
-// constants
-
-define('Reference',   0x0100);
-define('Optional',    0x0200);
-define('TypeMask',    0x00FF);
-
-// Defining over public/protected/private/abstract is not only not a good idea, but is also not actually possible.
-define('AbstractMethod',    0x0100);
-define('StaticMethod',      0x0200);
-define('VisibilityMask',    0x00FF);
-define('PublicMethod',      0);
-define('ProtectedMethod',   1);
-define('PrivateMethod',     2);
-define('PublicProperty',    4);
-define('ProtectedProperty', 5);
-define('PrivateProperty',   6);
+// types
 
 define('Boolean',      1);
 define('Int32',        4);
@@ -38,26 +23,48 @@ define('PlusOperand', 19);
 define('Sequence',    20);
 define('Any',         21);
 
+define('TypeMask',    0x00FF);
+define('Reference',   0x0100);
+
 $TYPENAMES = array
-  (Boolean     => array('name' => 'bool',        'enum' => 'Boolean',    ),
-   Int32       => array('name' => 'int',         'enum' => 'Int32',      ),
-   Int64       => array('name' => 'int64',       'enum' => 'Int64',      ),
-   Double      => array('name' => 'double',      'enum' => 'Double',     ),
-   String      => array('name' => 'String',      'enum' => 'String',     ),
-   Int64Vec    => array('name' => 'Array',       'enum' => 'Array',      ),
-   StringVec   => array('name' => 'Array',       'enum' => 'Array',      ),
-   VariantVec  => array('name' => 'Array',       'enum' => 'Array',      ),
-   Int64Map    => array('name' => 'Array',       'enum' => 'Array',      ),
-   StringMap   => array('name' => 'Array',       'enum' => 'Array',      ),
-   VariantMap  => array('name' => 'Array',       'enum' => 'Array',      ),
-   Object      => array('name' => 'Object',      'enum' => 'Object',     ),
-   Resource    => array('name' => 'Object',      'enum' => 'Object',     ),
-   Variant     => array('name' => 'Variant',     'enum' => 'Variant',    ),
-   Numeric     => array('name' => 'Numeric',     'enum' => 'Numeric',    ),
-   Primitive   => array('name' => 'Primitive',   'enum' => 'Primitive',  ),
-   PlusOperand => array('name' => 'PlusOperand', 'enum' => 'PlusOperand',),
-   Sequence    => array('name' => 'Sequence',    'enum' => 'Sequence',   ),
-   Any         => array('name' => 'Variant',     'enum' => 'Some'        ),
+  (Boolean     => array('name' => 'bool',          'enum' => 'Boolean',
+                        'idlname' => 'Boolean',    'phpname' => 'bool'),
+   Int32       => array('name' => 'int',           'enum' => 'Int32',
+                        'idlname' => 'Int32',      'phpname' => 'int'),
+   Int64       => array('name' => 'int64',         'enum' => 'Int64',
+                        'idlname' => 'Int64',      'phpname' => 'int'),
+   Double      => array('name' => 'double',        'enum' => 'Double',
+                        'idlname' => 'Double',     'phpname' => 'float'),
+   String      => array('name' => 'String',        'enum' => 'String',
+                        'idlname' => 'String',     'phpname' => 'string'),
+   Int64Vec    => array('name' => 'Array',         'enum' => 'Array',
+                        'idlname' => 'Int64Vec',   'phpname' => 'vector'),
+   StringVec   => array('name' => 'Array',         'enum' => 'Array',
+                        'idlname' => 'StringVec',  'phpname' => 'vector'),
+   VariantVec  => array('name' => 'Array',         'enum' => 'Array',
+                        'idlname' => 'VariantVec', 'phpname' => 'vector'),
+   Int64Map    => array('name' => 'Array',         'enum' => 'Array',
+                        'idlname' => 'Int64Map',   'phpname' => 'map'),
+   StringMap   => array('name' => 'Array',         'enum' => 'Array',
+                        'idlname' => 'StringMap',  'phpname' => 'map'),
+   VariantMap  => array('name' => 'Array',         'enum' => 'Array',
+                        'idlname' => 'VariantMap', 'phpname' => 'map'),
+   Object      => array('name' => 'Object',        'enum' => 'Object',
+                        'idlname' => 'Object',     'phpname' => 'object'),
+   Resource    => array('name' => 'Object',        'enum' => 'Object',
+                        'idlname' => 'Resource',   'phpname' => 'resource'),
+   Variant     => array('name' => 'Variant',       'enum' => 'Variant',
+                        'idlname' => 'Variant',    'phpname' => 'mixed'),
+   Numeric     => array('name' => 'Numeric',       'enum' => 'Numeric',
+                        'idlname' => 'Numeric',    'phpname' => 'number'),
+   Primitive   => array('name' => 'Primitive',     'enum' => 'Primitive',
+                        'idlname' => 'Primitive',  'phpname' => 'num|string'),
+   PlusOperand => array('name' => 'PlusOperand',   'enum' => 'PlusOperand',
+                        'idlname' => 'PlusOperand','phpname' => 'num|array'),
+   Sequence    => array('name' => 'Sequence',      'enum' => 'Sequence',
+                        'idlname' => 'Sequence',  'phpname' => 'string|array'),
+   Any         => array('name' => 'Variant',       'enum' => 'Some',
+                        'idlname' => 'Any',        'phpname' => 'mixed'),
    );
 
 $REFNAMES = array('String'      => 'CStrRef',
@@ -70,207 +77,225 @@ $REFNAMES = array('String'      => 'CStrRef',
                   'Sequence'    => 'CVarRef',
                   );
 
-// Flags for functions (used in "system/builtin_symbols.cpp")
-define('DefaultFlags',                        0);
-define('VariableArguments',                   1);
-define('ReferenceVariableArguments',          2);
-define('NoEffect',                            4);
-define('NoInjection',                         8);
-define('MixedVariableArguments',           0x10);
-define('FunctionIsFoldable',               0x20);
-define('HipHopSpecific',                   0x40);
-define('HasOptFunction',            0x100000000);
-define('HasDocComment',             0x200000000);
+function get_idl_name($type, $null = '') {
+  global $TYPENAMES;
+  if ($type === null) {
+    return $null;
+  }
+  if (is_string($type)) {
+    return "'$type'";
+  }
+  if ($type & Reference) {
+    return $TYPENAMES[$type & ~Reference]['idlname'] . ' | Reference';
+  }
+  return $TYPENAMES[$type]['idlname'];
+}
+
+function get_php_name($type, $null = 'mixed') {
+  global $TYPENAMES;
+  if ($type === null) {
+    return $null;
+  }
+  if (is_string($type)) {
+    return $type;
+  }
+  if ($type & Reference) {
+    return $TYPENAMES[$type & ~Reference]['phpname'];
+  }
+  return $TYPENAMES[$type]['phpname'];
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// flags
+
+// ClassInfo attributes, and these numbers need to be consistent with them!
+define('IsAbstract',                     1 <<  4);
+define('IsFinal',                        1 <<  5);
+define('IsPublic',                       1 <<  6);
+define('IsProtected',                    1 <<  7);
+define('IsPrivate',                      1 <<  8);
+define('IsStatic',                       1 <<  9);
+define('HasDocComment',                  1 << 14);
+define('HipHopSpecific',                 1 << 16);
+define('VariableArguments',              1 << 17);
+define('RefVariableArguments',           1 << 18);
+define('MixedVariableArguments',         1 << 19);
+define('FunctionIsFoldable',             1 << 20);
+define('NoEffect',                       1 << 21);
+define('NoInjection',                    1 << 22);
+define('HasOptFunction',                 1 << 23);
 
 // Mask for checking the flags related to variable arguments
-define('VarArgsMask', (VariableArguments | ReferenceVariableArguments |
+define('VarArgsMask', (VariableArguments | RefVariableArguments |
                        MixedVariableArguments));
 
-function escape_value($val) {
-  $val = preg_replace("/\\\\/", "\\\\\\\\", $val);
-  $val = preg_replace("/\\\"/", "\\\\\"", $val);
-  return $val;
-}
+function get_flag_names($arr, $name) {
+  $flag = 0;
+  if (!empty($arr[$name])) {
+    $flag |= $arr[$name];
+  }
+  if ($flag == 0) return '';
 
-function idx($arr, $idx, $default=null) {
-  if ($idx === null) {
-    return $default;
+  $ret = '';
+  if ($flag & IsAbstract            ) $ret .= ' | IsAbstract'            ;
+  if ($flag & IsFinal               ) $ret .= ' | IsFinal'               ;
+  if ($flag & IsPublic              ) $ret .= ' | IsPublic'              ;
+  if ($flag & IsProtected           ) $ret .= ' | IsProtected'           ;
+  if ($flag & IsPrivate             ) $ret .= ' | IsPrivate'             ;
+  if ($flag & IsStatic              ) $ret .= ' | IsStatic'              ;
+  if ($flag & HasDocComment         ) $ret .= ' | HasDocComment'         ;
+  if ($flag & HipHopSpecific        ) $ret .= ' | HipHopSpecific'        ;
+  if ($flag & VariableArguments     ) $ret .= ' | VariableArguments'     ;
+  if ($flag & RefVariableArguments  ) $ret .= ' | RefVariableArguments'  ;
+  if ($flag & MixedVariableArguments) $ret .= ' | MixedVariableArguments';
+  if ($flag & FunctionIsFoldable    ) $ret .= ' | FunctionIsFoldable'    ;
+  if ($flag & NoEffect              ) $ret .= ' | NoEffect'              ;
+  if ($flag & NoInjection           ) $ret .= ' | NoInjection'           ;
+  if ($flag & HasOptFunction        ) $ret .= ' | HasOptFunction'        ;
+
+  if ($ret == '') {
+    throw new Exception("invalid flag $flag");
   }
-  if (isset($arr[$idx])) {
-    return $arr[$idx];
-  }
-  return $default;
+  return substr($ret, 2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// CPP header preamble
-function pre($p) {
-  global $preamble;
-  if (!isset($preamble)) $preamble = "";
-  $preamble .= $p . "\n";
-}
+// schema functions that will be used (and only used) by schemas
 
-///////////////////////////////////////////////////////////////////////////////
-// dynamic declarations
-function dyn() {
-  global $dyns;
-  if (!isset($dyns)) $dyns = array();
-  $dyns += func_get_args();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// function definition
-
-function build_function_def($name,
-                            $return,
-                            $args,
-                            $flags = DefaultFlags,
-                            $opt = null) {
-  $fargs = array();
-  $have_first_optional = false;
-  $required_arg_count = 0;
-  foreach ($args as $arg_name => $arg) {
-    $farg = array('name' => strtolower($arg_name));
-    if (is_array($arg)) {
-      $farg['type'] = $arg[0];
-      if (!is_string($arg[1]) || $arg[1] === '') {
-        die('default value needs to be a non-empty string for '.$name.'(..'.
-            $arg_name.'..)');
-      }
-      $default = $arg[1];
-      $farg['default'] = $default;
-      $default = escape_value($default);
-      $farg['default_escaped'] = $default;
-    } else {
-      $farg['type'] = $arg;
-    }
-    if ($farg['type'] & Optional) {
-      $have_first_optional = true;
-    } else {
-      ++$required_arg_count;
-      if ($have_first_optional) {
-        die('Required parameters cannot follow optional parameters (function '.$name.', param '.$arg_name.')');
-      }
-    }
-    if ($farg['type'] & Reference) {
-      $farg['ref'] = true;
-      $farg['type'] = Variant | ($farg['type'] & (~TypeMask));
-    }
-    $fargs[] = $farg;
-  }
-  if ($opt) {
-    $flags |= HasOptFunction;
-  } else {
-    $flags &= ~HasOptFunction;
-  }
-  $func = array('name' => strtolower($name),
-                'return' => $return,
-                'args' => $fargs,
-                'required_args' => $required_arg_count,
-                'flags' => $flags,
-                'opt' => $opt);
-  if ($return & Reference) {
-    $func['ref'] = true;
-    $func['return'] = Variant;
-  }
-  return $func;
-}
-
+$current_class = '';
+$preamble = '';
 $funcs = array();
-function f($name,
-           $return = null,
-           $args = array(),
-           $flags = DefaultFlags,
-           $opt = null) {
-  global $funcs;
-  if (preg_match('/^(hphp_|fb_|fbml_)/', $name)) $flags |= HipHopSpecific;
-  $funcs[] = build_function_def($name, $return, $args, $flags, $opt);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// class definition
-
-function m($flags,
-           $name,
-           $return = null,
-           $args = array(),
-           $func_flags = DefaultFlags) {
-  $ret = build_function_def($name, $return, $args, $func_flags);
-  if ($flags & AbstractMethod) $ret['abstract'] = true;
-  $ret['visibility'] = $flags & VisibilityMask;
-  $ret['static'] = $flags & StaticMethod;
-  return $ret; //build_function_def($name, $return, $args, $func_flags);
-}
-function p($flags, $name, $type) {
-  return array('name' => $name, 'type' => $type, 'flags' => $flags);
-}
-function ck($name, $type) {
-  return array('type' => $type,
-               'name' => $name);
-}
 $classes = array();
-function c($name, $parent = null, $interfaces = array(),
-           $methods = array(), $consts = array(), $footer = "",
-           $properties = array()) {
-  global $classes;
+$constants = array();
+
+function DefinePreamble($p) {
+  global $preamble;
+  $preamble .= $p;
+}
+
+function BeginClass($class) {
+  global $classes, $current_class;
+  $current_class = $class['name'];
+
+  if (!isset($class['parent'])) $class['parent'] = null;
+  if (!isset($class['ifaces'])) $class['ifaces'] = array();
+  if (!isset($class['bases']))  $class['bases'] = array();
+
+  $class['methods'] = array();
+  $class['properties'] = array();
+  $class['consts'] = array();
+
+  if (empty($class['flags'])) {
+    $class['flags'] = 0;
+  }
+  $doc = get_class_doc_comments($class);
+  if (!empty($doc)) {
+    $class['flags'] |= HasDocComment;
+    $class['doc'] = $doc;
+  } else {
+    $class['flags'] &= ~HasDocComment;
+    $class['doc'] = null;
+  }
+
+  $classes[$current_class] = $class;
+}
+
+function EndClass() {
+  global $classes, $current_class;
 
   $have_ctor = false;
   $have_dtor = false;
-  foreach ($methods as $method) {
+  foreach ($classes[$current_class]['methods'] as $method) {
     if ($method['name'] == '__construct') $have_ctor = true;
     if ($method['name'] == '__destruct') $have_dtor = true;
   }
 
   // We don't have the information to autogenerate a ctor def,
   // so make the user do it.
-  if (! $have_ctor) {
-    printf("ERROR: No constructor defined in IDL for class %s.\n", $name);
-    exit(-1);
+  if (!$have_ctor) {
+    throw new Exception("No constructor defined for class $current_class");
   }
   // Generate the appropriate IDL for the dtor, if it doesn't exist.
   if (!$have_dtor) {
-    $methods[] = m(PublicMethod, '__destruct', Variant);
+    DefineFunction(array('name' => '__destruct',
+                         'return' => array('type' => Variant)));
   }
 
-  $internal_bases = array();
-  $interface_bases = array();
-  if ($interfaces) {
-    foreach ($interfaces as $clsname => $attr) {
-      if (!is_string($clsname)) {
-        $interface_bases[] = $attr;
-      } else if ($attr == 'internal') {
-        $internal_bases[] = $clsname;
+  $current_class = '';
+}
+
+function DefineProperty($property) {
+  global $classes, $current_class;
+  $classes[$current_class]['properties'][] = $property;
+}
+
+function DefineConstant($const) {
+  global $constants, $classes, $current_class;
+  if (empty($current_class)) {
+    $constants[] = $const;
+  } else {
+    $classes[$current_class]['consts'][] = $const;
+  }
+}
+
+function DefineFunction($func) {
+  global $classes, $current_class;
+
+  if (empty($func['flags'])) {
+    $func['flags'] = 0;
+  }
+  if ($current_class && $classes[$current_class]['flags'] & HipHopSpecific) {
+    $func['flags'] |= HipHopSpecific;
+  }
+  $func['ret_desc'] = idx($func['return'], 'desc');
+  $func['return'] = idx($func['return'], 'type');
+  if ($func['return'] & Reference) {
+    $func['ref'] = true;
+    $func['return'] = Variant | ($func['return'] & (~TypeMask));
+  }
+  $args = array();
+  if (!empty($func['args'])) {
+    foreach ($func['args'] as $arg) {
+      if (array_key_exists('value', $arg)) {
+        if (!is_string($arg['value']) || $arg['value'] === '') {
+          throw new Exception('default value has to be non-empty string for '.
+                              $func['name'].'(..'.$arg['name'].'..)');
+        }
+        $arg['default'] = $arg['value'];
       }
+      if (idx($arg, 'type') & Reference) {
+        $arg['ref'] = true;
+        $arg['type'] = Variant | ($arg['type'] & (~TypeMask));
+      }
+      $args[] = $arg;
     }
+    $func['args'] = $args;
+  } else {
+    $func['args'] = array();
   }
 
-  $classes[] = array('name'       => $name,
-                     'parent'     => $parent,
-                     'interfaces' => $interface_bases,
-                     'extrabases' => $internal_bases,
-                     'consts'     => $consts,
-                     'methods'    => $methods,
-                     'properties' => $properties,
-                     'footer'     => $footer);
+  $doc = get_function_doc_comments($func, $current_class);
+  if (!empty($doc)) {
+    $func['flags'] |= HasDocComment;
+    $func['doc'] = $doc;
+  } else {
+    $func['flags'] &= ~HasDocComment;
+    $func['doc'] = null;
+  }
 
-}
+  if (!empty($func['opt'])) {
+    $func['flags'] |= HasOptFunction;
+  } else {
+    $func['flags'] &= ~HasOptFunction;
+    $func['opt'] = null;
+  }
 
-///////////////////////////////////////////////////////////////////////////////
-// constant definition
-
-$constants = array();
-function k($name, $type) {
-  global $constants;
-  $constants[] = array('type' => $type,
-                       'name' => $name);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// global variable binding (bridge module only)
-$global_bindings = array();
-function g($name) {
-  global $global_bindings;
-  $global_bindings[] = $name;
+  global $funcs, $classes, $current_class;
+  if (empty($current_class)) {
+    $funcs[] = $func;
+  } else {
+    $classes[$current_class]['methods'][] = $func;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -337,7 +362,7 @@ function generateFuncCPPInclude($func, $f, $newline = true) {
     fprintType($f, $arg['type']);
     fprintf($f, ', ');
     if (isset($arg['default'])) {
-      fprintf($f, '"%s", ', $arg['default_escaped']);
+      fprintf($f, '"%s", ', escape_cpp($arg['default']));
     } else {
       fprintf($f, 'NULL, ');
     }
@@ -345,8 +370,11 @@ function generateFuncCPPInclude($func, $f, $newline = true) {
   }
   fprintf($f, "NULL, ");
   fprintf($f, 'S(%d), ', $func['flags']);
-  if ($func['opt']) {
-    fprintf($f, '(const char*)(int64)%s, ', $func['opt']);
+  if (!empty($func['doc'])) {
+    fprintf($f, '"%s", ', escape_cpp($func['doc']));
+  }
+  if (!empty($func['opt'])) {
+    fprintf($f, 'S(%s), ', $func['opt']);
   }
   if ($newline) fprintf($f, "\n");
 }
@@ -365,9 +393,8 @@ function generateConstCPPInclude($const, $f) {
 }
 
 function generateClassCPPInclude($class, $f) {
-  fprintf($f, '"%s", "%s", ', strtolower($class['name']),
-          strtolower($class['parent']));
-  foreach ($class['interfaces'] as $if) {
+  fprintf($f, '"%s", "%s", ', $class['name'], strtolower($class['parent']));
+  foreach ($class['ifaces'] as $if) {
     fprintf($f, '"%s",', strtolower($if));
   }
   fprintf($f, 'NULL, ');
@@ -385,14 +412,15 @@ function generateClassCPPInclude($class, $f) {
     fprintf($f, '"%s", T(%s),', $k['name'], typeenum($k['type']));
   }
   fprintf($f, "NULL,\n");
+  fprintf($f, 'S(%d), ', $class['flags']);
+  if (!empty($class['doc'])) {
+    fprintf($f, '"%s", ', escape_cpp($class['doc']));
+  }
 }
 
 function generateMethodCPPInclude($method, $f) {
   generateFuncCPPInclude($method, $f, false, 'G');
-  fprintf($f, "S(%d), S(%d), S(%d)",
-          intval(idx($method, 'abstract') == AbstractMethod),
-          intval($method['visibility']),
-          intval($method['static'] == StaticMethod));
+  fprintf($f, "S(%d)", $method['flags']);
 }
 
 function generatePropertyCPPInclude($property, $f) {
@@ -530,7 +558,7 @@ EOT
   } else {
     fprintf($f, " : public ExtObjectData");
   }
-  foreach ($class['extrabases'] as $p) {
+  foreach ($class['bases'] as $p) {
     fprintf($f, ", public $p");
   }
   $parents = array();
@@ -540,10 +568,8 @@ EOT
     $p = $class['parent'];
     fprintf($f, "  RECURSIVE_PARENT_CLASS(%s)\n", strtolower($p));
   }
-  if ($class['interfaces']) {
-    foreach ($class['interfaces'] as $p) {
-      fprintf($f, "  PARENT_CLASS(%s)\n", strtolower($p));
-    }
+  foreach ($class['ifaces'] as $p) {
+    fprintf($f, "  PARENT_CLASS(%s)\n", strtolower($p));
   }
   foreach ($parents as $p) {
     fprintf($f, "  RECURSIVE_PARENT_CLASS(%s)\n", strtolower($p));
@@ -581,21 +607,18 @@ EOT
 }
 
 function generateMethodCPPHeader($method, $class, $f) {
-  switch ($method['visibility']) {
-  case PrivateMethod:
+  if ($method['flags'] & IsPrivate) {
     $vis = "private";
-    break;
-  case ProtectedMethod:
+  } else if ($method['flags'] & IsProtected) {
     $vis = "protected";
-    break;
-  default:
+  } else {
     $vis = "public";
   }
   fprintf($f, "  %s: ", $vis);
   generateFuncCPPHeader($method, $f, true,
                         $method['name'] != "__construct" &&
                         strpos($method['name'], "__") === 0,
-                        $method['static'], $class);
+                        $method['flags'] & IsStatic, $class);
   if ($method['name'] == "__call") {
     fprintf($f, "  public: Variant doCall(Variant v_name, ");
     fprintf($f, "Variant v_arguments, bool fatal);\n");
@@ -605,14 +628,11 @@ function generateMethodCPPHeader($method, $class, $f) {
 }
 
 function generatePropertyCPPHeader($property, $f) {
-  switch ($property['flags']) {
-  case PrivateProperty:
+  if ($property['flags'] & IsPrivate) {
     $vis = "private";
-    break;
-  case ProtectedProperty:
+  } else if ($property['flags'] & IsProtected) {
     $vis = "protected";
-    break;
-  default:
+  } else {
     $vis = "public";
   }
   fprintf($f, "  %s: ", $vis);
@@ -691,37 +711,6 @@ function generateFuncCPPImplementation($func, $f) {
     fprintf($f, ', CArrRef _argv /* = null_array */');
   }
   fprintf($f, ") {\n");
-
-  /** commenting out Crutch code generation
-  if ($schema_no == 0) {
-    fprintf($f, "  Array _schema(ArrayData::Create());\n");
-  } else {
-    fprintf($f, "  Array _schema(ArrayInit(%d, false)%s.create());\n",
-            $schema_no, $schema);
-  }
-  if ($params_no == 0) {
-    fprintf($f, "  Array _params(ArrayData::Create());\n");
-  } else {
-    fprintf($f, "  Array _params(ArrayInit(%d, true)%s.create());\n",
-            $params_no, $params);
-  }
-
-  fprintf($f, "  ");
-  if ($func['return'] !== null || $need_ret) {
-    fprintf($f, "Array _ret = ");
-  }
-  fprintf($f, "Crutch::Invoke(\"%s\", _schema, _params);\n", $func['name']);
-  if ($output) {
-    fprintf($f, $output);
-  }
-  if ($func['return'] !== null) {
-    if ($func['return'] == Object || $func['return'] == Resource) {
-      fprintf($f, "  return OpaqueObject::GetObject((Variant)_ret[0]);\n");
-    } else {
-      fprintf($f, "  return (Variant)_ret[0];\n");
-    }
-  }
-  */
   fprintf($f, "  throw NotImplementedException(__func__);\n");
   fprintf($f, "}\n\n");
 }
@@ -803,4 +792,129 @@ function replaceParams($filename, $header) {
     }
   }
   file_put_contents($filename, $file);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// helpers
+
+function escape_php($val) {
+  $val = preg_replace("/\\\\/", "\\\\\\\\", $val);
+  $val = preg_replace("/\\\"/", "\\\\\"",   $val);
+  $val = preg_replace("/\\$/",  "\\\\$",    $val);
+  $val = preg_replace("/\n/",   "\\\\n",    $val); // optional
+  return $val;
+}
+
+function escape_cpp($val) {
+  $len = strlen($val);
+  $ret = '';
+  for ($i = 0; $i < $len; $i++) {
+    $ch = $val[$i];
+    switch ($ch) {
+      case "\n": $ret .= "\\n";  break;
+      case "\r": $ret .= "\\r";  break;
+      case "\t": $ret .= "\\t";  break;
+      case "\a": $ret .= "\\a";  break;
+      case "\b": $ret .= "\\b";  break;
+      case "\f": $ret .= "\\f";  break;
+      case "\v": $ret .= "\\v";  break;
+      case "\0": $ret .= "\\000";break;
+      case "\"": $ret .= "\\\""; break;
+      case "\\": $ret .= "\\\\"; break;
+      case "?":  $ret .= "\\?";  break; // avoiding trigraph errors
+      default:
+        if (ord($ch) >= 0x20 && ord($ch) <= 0x7F) {
+          $ret .= $ch;
+        } else {
+          $ret .= sprintf("\\%03o", ord($ch));
+        }
+        break;
+    }
+  }
+  return $ret;
+}
+
+function idx($arr, $idx, $default=null) {
+  if ($idx === null) {
+    return $default;
+  }
+  if (isset($arr[$idx])) {
+    return $arr[$idx];
+  }
+  return $default;
+}
+
+function format_doc_desc($arr, $clsname) {
+  if ($arr['flags'] & HipHopSpecific) {
+    $desc = "( HipHop specific )\n";
+  } else {
+    $clsname = preg_replace('#_#', '-', strtolower($clsname));
+    $name = preg_replace('#_#', '-', strtolower($arr['name']));
+    $url = "http://php.net/manual/en/$clsname.$name.php";
+    $desc = "( excerpt from $url )\n";
+  }
+  $details = idx($arr, 'desc', '');
+  if ($details) {
+    $desc .= "\n$details";
+  }
+  return wordwrap($desc, 72)."\n\n";
+}
+
+function format_doc_arg($name, $type, $desc) {
+  $width1 = 12;
+  $width2 = 8;
+
+  if (!$desc) $desc = ' ';
+  $lines = explode("\n", wordwrap($desc, 72 - $width1 - $width2));
+
+  $col = str_pad('@'.$name, $width1 - 1);
+  $ret = $col;
+  if (strlen($col) >= $width1) {
+    $ret .= "\n".str_repeat(' ', $width1 - 1);
+  }
+
+  $col = str_pad(get_php_name($type), $width2 - 1);
+  $ret .= ' '.$col;
+  if (strlen($col) >= $width2) {
+    $ret .= "\n".str_repeat(' ', $width1 + $width2 - 1);
+  }
+
+  $ret .= ' '.$lines[0]."\n";
+  for ($i = 1; $i < count($lines); $i++) {
+    $ret .= rtrim(str_repeat(' ', $width1 + $width2) . $lines[$i])."\n";
+  }
+  return $ret;
+}
+
+function format_doc_comment($text) {
+  $lines = explode("\n", $text);
+  $ret = "/**\n";
+  for ($i = 0; $i < count($lines) - 1; $i++) {
+    $line = $lines[$i];
+    $ret .= rtrim(" * $line")."\n";
+  }
+  $ret .= " */";
+  return $ret;
+}
+
+function get_function_doc_comments($func, $clsname) {
+  $text = format_doc_desc($func, 'function');
+
+  if ($func['args']) {
+    foreach ($func['args'] as $arg) {
+      $desc = idx($arg, 'desc', '');
+      if (idx($func, 'ref')) {
+        $desc = '(output) ' . $desc;
+      }
+      $text .= format_doc_arg($arg['name'], idx($arg, 'type'), $desc);
+    }
+    $text .= "\n";
+  }
+  $text .= format_doc_arg('return', $func['return'], $func['ret_desc']);
+
+  return format_doc_comment($text);
+}
+
+function get_class_doc_comments($class) {
+  return format_doc_comment(format_doc_desc($class, ''));
 }

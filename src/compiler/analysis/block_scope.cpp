@@ -26,8 +26,9 @@ using namespace HPHP;
 
 BlockScope::BlockScope(const std::string &name, const std::string &docComment,
                        StatementPtr stmt, KindOf kind)
-  : m_docComment(docComment), m_stmt(stmt),
+  : m_attributeClassInfo(0), m_docComment(docComment), m_stmt(stmt),
     m_kind(kind), m_loopNestedLevel(0), m_incLevel(0) {
+  m_originalName = name;
   m_name = Util::toLower(name);
   m_variables = VariableTablePtr(new VariableTable(*this));
   m_constants = ConstantTablePtr(new ConstantTable(*this));

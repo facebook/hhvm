@@ -20,14 +20,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant &LVariableTable::getImpl(CStrRef s, int64 hash) {
+Variant &LVariableTable::getImpl(CStrRef s) {
   // LVariableTable may have references to its values leaked, and therefore
   // cannot support escalation from SmallArray.
   if (!m_px) {
     m_px = ArrayInit(0, false, true).create();
     m_px->incRefCount();
   }
-  return lvalAt(s, hash, false, true);
+  return lvalAt(s, -1, false, true);
 }
 
 Array RVariableTable::getDefinedVars() const {

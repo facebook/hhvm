@@ -36,7 +36,7 @@ Variant &VariableExpression::getRef(VariableEnvironment &env,
     var = &env.getIdx(m_idx);
   } else {
     name = m_name->get(env);
-    var =  &env.get(name, m_name->hash());
+    var =  &env.get(name);
   }
   /* note that 'if (!env.exists(str, name->hash()))' does not work
    * as undefined local variables are still in the (function) environment */

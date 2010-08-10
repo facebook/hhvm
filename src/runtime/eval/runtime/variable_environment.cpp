@@ -33,18 +33,18 @@ VariableEnvironment::VariableEnvironment()
 }
 
 void VariableEnvironment::flagGlobal(CStrRef name, int64 hash) {
-  get(name, hash) = ref(get_globals()->get(name, hash));
+  get(name) = ref(get_globals()->get(name));
 }
 
 void VariableEnvironment::unset(CStrRef name, int64 hash) {
-  HPHP::unset(get(name, hash));
+  HPHP::unset(get(name));
 }
 
 void VariableEnvironment::setCurrentObject(CObjRef co) {
   ASSERT(!m_currentClass);
   m_currentObject = co;
   m_currentClass = co->o_getClassName();
-  get("this", -1) = co;
+  get("this") = co;
 }
 void VariableEnvironment::setCurrentClass(const char* cls) {
   ASSERT(m_currentObject.isNull());
@@ -82,11 +82,11 @@ void DummyVariableEnvironment::flagGlobal(CStrRef name, int64 hash) {
 void DummyVariableEnvironment::unset(CStrRef name, int64 hash) {
   ASSERT(false);
 }
-bool DummyVariableEnvironment::exists(const char *s, int64 hash) const {
+bool DummyVariableEnvironment::exists(CStrRef s) const {
   ASSERT(false);
   return false;
 }
-Variant &DummyVariableEnvironment::getImpl(CStrRef s, int64 hash) {
+Variant &DummyVariableEnvironment::getImpl(CStrRef s) {
   ASSERT(false);
   throw FatalErrorException("Tried to get from a dummy environment");
 }
@@ -97,31 +97,26 @@ Array DummyVariableEnvironment::getParams() const {
 
 class SuperGlobalInitializer {
 public:
-  SuperGlobalInitializer() {
-    for (int i = 0; i < s_num; i++) {
-      s_hashes[i] = hash_string(s_names[i].data(), s_names[i].size());
-    }
-  }
+  SuperGlobalInitializer() { }
   void init(VariableEnvironment &env) const {
     for (int i = 0; i < s_num-1; i++) {
-      env.flagGlobal(s_names[i], s_hashes[i]);
+      env.flagGlobal(s_names[i]);
     }
     initGlobals(env);
   }
   void initGlobals(VariableEnvironment &env) const {
-    env.get(s_names[s_num-1], s_hashes[s_num-1]) = get_global_array_wrapper();
+    env.get(s_names[s_num-1]) = get_global_array_wrapper();
   }
   void initAL(AssocList &al) const {
     Globals *g = get_globals();
     for (int i = 0; i < s_num-1; i++) {
-      al.prepend(s_names[i]) = ref(g->get(s_names[i], s_hashes[i]));
+      al.prepend(s_names[i]) = ref(g->get(s_names[i]));
     }
     al.prepend("GLOBALS") = get_global_array_wrapper();
   }
 private:
   static const int s_num;
   static const StaticString s_names[];
-  static int64 s_hashes[];
 };
 const StaticString SuperGlobalInitializer::s_names[] =
   {"_SERVER",
@@ -137,7 +132,6 @@ const StaticString SuperGlobalInitializer::s_names[] =
 const int SuperGlobalInitializer::s_num =
   sizeof(SuperGlobalInitializer::s_names)/
   sizeof(SuperGlobalInitializer::s_names[0]);
-int64 SuperGlobalInitializer::s_hashes[SuperGlobalInitializer::s_num];
 static SuperGlobalInitializer g_sinit;
 
 FuncScopeVariableEnvironment::
@@ -157,7 +151,7 @@ FuncScopeVariableEnvironment(const FunctionStatement *func, int argc)
       // This is safe because superglobals are real members of the globals
       // and do not live in an array
       m_byIdx[v.idx()] = &g->get(String(it->first.c_str(), it->first.size(),
-            AttachLiteral), v.hash());
+            AttachLiteral));
     } else {
       Variant &val = m_alist.prepend(String(it->first.c_str(),
             it->first.size(),
@@ -182,7 +176,7 @@ void FuncScopeVariableEnvironment::flagStatic(CStrRef name, int64 hash) {
   if (!m_staticEnv->exists(name.data())) {
     m_staticEnv->get(name) = m_func->getStaticValue(*this, name.c_str());
   }
-  get(name, hash) = ref(m_staticEnv->get(name, hash));
+  get(name) = ref(m_staticEnv->get(name));
 }
 
 Variant &FuncScopeVariableEnvironment::getIdx(int idx) {
@@ -197,18 +191,18 @@ Array FuncScopeVariableEnvironment::getParams() const {
   return RequestEvalState::argStack().pull(m_argStart, m_argc);
 }
 
-bool FuncScopeVariableEnvironment::exists(const char *name, int64 hash) const {
+bool FuncScopeVariableEnvironment::exists(CStrRef name) const {
   return m_alist.exists(name);
   //return LVariableTable::exists(name, hash);
 }
-Variant &FuncScopeVariableEnvironment::getImpl(CStrRef s, int64 hash) {
+Variant &FuncScopeVariableEnvironment::getImpl(CStrRef s) {
   {
     Variant *v = m_alist.getPtr(s);
     if (v) return *v;
   }
   VariableIndex::SuperGlobal sg = VariableIndex::isSuperGlobal(s);
   if (sg != VariableIndex::Normal && sg != VariableIndex::Globals) {
-    return get_globals()->get(s, hash);
+    return get_globals()->get(s);
   } else {
     Variant &v = m_alist.prepend(s);
     if (sg == VariableIndex::Globals) {
@@ -246,15 +240,15 @@ NestedVariableEnvironment::NestedVariableEnvironment
 void NestedVariableEnvironment::flagStatic(CStrRef name, int64 hash) {
   // Behavior is to set the variable to init
   // .. and do some other stupid stuff that I'm not going to try
-  get(name, hash) = m_block.getStaticValue(*this, name);
+  get(name) = m_block.getStaticValue(*this, name);
 }
 
-bool NestedVariableEnvironment::exists(const char *s, int64 hash) const {
-  return m_ext->exists(s, hash);
+bool NestedVariableEnvironment::exists(CStrRef s) const {
+  return m_ext->exists(s);
 }
 
-Variant &NestedVariableEnvironment::getImpl(CStrRef s, int64 hash) {
-  return m_ext->get(s, hash);
+Variant &NestedVariableEnvironment::getImpl(CStrRef s) {
+  return m_ext->get(s);
 }
 
 Array NestedVariableEnvironment::getParams() const {

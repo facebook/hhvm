@@ -38,27 +38,24 @@ namespace HPHP {
 class RVariableTable : public Array {
  public:
   virtual ~RVariableTable() {}
-  Variant get(CVarRef s) { return get(s.toString());}
-  Variant get(CStrRef s) { return getImpl(s, StringData::Hash(s.get()));}
-  Variant get(litstr  s) { return getImpl(s, -1);}
+  Variant get(CVarRef s) { return getImpl(s.toString());}
+  Variant get(CStrRef s) { return getImpl(s);}
+  Variant get(litstr  s) { return getImpl(s);}
 
-  bool exists(CStrRef s) const {
-    return exists(s, StringData::Hash(s.get()));
-  }
   /**
    * Code-generated sub-class may override this function by generating one
    * entry per variable.
    */
-  virtual bool exists(const char *s, int64 hash) const {
+  virtual bool exists(CStrRef s) const {
     // Integers are never valid variable names.
-    return Array::exists(s, hash, true);
+    return Array::exists(s, -1, true);
   }
 
   /**
    * Code-generated sub-class will implement this function by generating one
    * entry per variable.
    */
-  virtual Variant getImpl(const char *s, int64 hash) = 0;
+  virtual Variant getImpl(CStrRef s) = 0;
 
   virtual Array getDefinedVars() const;
 };
@@ -76,27 +73,23 @@ class RVariableTable : public Array {
 class LVariableTable : public Array {
  public:
   virtual ~LVariableTable() {}
-  Variant &get(CVarRef s, int64 hash = -1) {
-    return get(s.toString(), hash);
-  }
-  Variant &get(CStrRef s, int64 hash = -1) {
-    return getImpl(s, hash < 0 ? StringData::Hash(s.get()) : hash);
-  }
-  Variant &get(litstr  s, int64 hash = -1) { return getImpl(s, hash);}
+  Variant &get(CVarRef s) { return getImpl(s.toString()); }
+  Variant &get(CStrRef s) { return getImpl(s); }
+  Variant &get(litstr  s) { return getImpl(s);}
 
   /**
    * Code-generated sub-class may override this function by generating one
    * entry per variable.
    */
-  virtual bool exists(const char *s, int64 hash = -1) const {
-    return Array::exists(s, hash, true);
+  virtual bool exists(CStrRef s) const {
+    return Array::exists(s, -1, true);
   }
 
   /**
    * Code-generated sub-class will implement this function by generating one
    * entry per variable.
    */
-  virtual Variant &getImpl(CStrRef s, int64 hash);
+  virtual Variant &getImpl(CStrRef s);
 
   virtual Array getDefinedVars();
 };

@@ -34,9 +34,9 @@ public:
   VariableEnvironment();
   void setCurrentObject(CObjRef co);
   void setCurrentClass(const char* cls);
-  virtual void flagStatic(CStrRef name, int64 hash) = 0;
-  virtual void flagGlobal(CStrRef name, int64 hash);
-  virtual void unset(CStrRef name, int64 hash);
+  virtual void flagStatic(CStrRef name, int64 hash = -1) = 0;
+  virtual void flagGlobal(CStrRef name, int64 hash = -1);
+  virtual void unset(CStrRef name, int64 hash = -1);
   virtual Variant &getIdx(int idx);
   Variant &currentObject() { return m_currentObject; }
   virtual const char* currentClass() const;
@@ -89,11 +89,11 @@ protected:
 class DummyVariableEnvironment : public VariableEnvironment {
 public:
   DummyVariableEnvironment();
-  virtual void flagStatic(CStrRef name, int64 hash);
-  virtual void flagGlobal(CStrRef name, int64 hash);
-  virtual void unset(CStrRef name, int64 hash);
-  virtual bool exists(const char *name, int64 hash = -1) const;
-  virtual Variant &getImpl(CStrRef s, int64 hash);
+  virtual void flagStatic(CStrRef name, int64 hash = -1);
+  virtual void flagGlobal(CStrRef name, int64 hash = -1);
+  virtual void unset(CStrRef name, int64 hash = -1);
+  virtual bool exists(CStrRef name) const;
+  virtual Variant &getImpl(CStrRef s);
   virtual Array getParams() const;
 };
 
@@ -104,12 +104,12 @@ class FuncScopeVariableEnvironment : public VariableEnvironment {
 public:
   FuncScopeVariableEnvironment(const FunctionStatement *func, int argc);
   ~FuncScopeVariableEnvironment();
-  virtual void flagStatic(CStrRef name, int64 hash);
+  virtual void flagStatic(CStrRef name, int64 hash = -1);
   virtual Variant &getIdx(int idx);
   virtual bool refReturn() const;
   virtual Array getParams() const;
-  virtual bool exists(const char *name, int64 hash = -1) const;
-  virtual Variant &getImpl(CStrRef s, int64 hash);
+  virtual bool exists(CStrRef name) const;
+  virtual Variant &getImpl(CStrRef s);
   void incArgc() { m_argc++; }
   virtual Array getDefinedVariables() const;
 private:
@@ -140,9 +140,9 @@ public:
                             const Block &blk,
                             CArrRef params = Array(),
                             CObjRef current_object = Object());
-  virtual void flagStatic(CStrRef name, int64 hash);
-  virtual bool exists(const char *s, int64 hash = 1) const;
-  virtual Variant &getImpl(CStrRef s, int64 hash);
+  virtual void flagStatic(CStrRef name, int64 hash = -1);
+  virtual bool exists(CStrRef s) const;
+  virtual Variant &getImpl(CStrRef s);
   virtual Array getParams() const;
   virtual Array getDefinedVariables() const;
 private:

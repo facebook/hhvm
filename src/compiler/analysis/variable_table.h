@@ -71,6 +71,7 @@ public:
     JumpExists,
     JumpSet,
     JumpInitialized,
+    JumpInitializedString,
     JumpIndex,
     JumpReturnString,
     JumpReturnInit
@@ -363,6 +364,9 @@ private:
       const char *args, const char *ret, bool cnst, JumpTableType type,
       bool varOnly, ClassScope::Derivation dynamicObject,
       JumpTableName jtname);
+
+  void outputCPPVariableInit(CodeGenerator &cg, AnalysisResultPtr ar,
+                             bool inPseudoMain, const std::string &name);
 
   // hook
   static void (*m_hookHandler)(AnalysisResultPtr ar,

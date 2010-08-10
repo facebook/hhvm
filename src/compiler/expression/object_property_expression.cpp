@@ -345,7 +345,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
 
   const char *op = ".";
   string func = Option::ObjectPrefix;
-  const char *error = "";
+  const char *error = ", true";
   if (m_context & ExistContext) {
     error = ", false"; // suppress non-object property error
   }
@@ -368,7 +368,6 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
     error = "";
   } else {
     func += "get";
-    if (!bThis || !funcScope || !funcScope->isStatic()) error = ", true";
   }
 
   if (m_property->getKindOf() == Expression::KindOfScalarExpression) {

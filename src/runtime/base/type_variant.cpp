@@ -1598,7 +1598,7 @@ double Variant::toDouble() const {
 
 String Variant::toString() const {
   switch (m_type) {
-  case KindOfNull:    return "";
+  case KindOfNull:    return empty_string;
   case KindOfBoolean: return m_data.num ? "1" : "";
   case KindOfDouble:  return m_data.dbl;
   case LiteralString: return m_data.str;
@@ -1669,7 +1669,7 @@ Variant Variant::toKey() const {
   }
   switch (m_type) {
   case KindOfNull:
-    return "";
+    return empty_string;
   case LiteralString:
     {
       int64 n = 0;
@@ -2084,6 +2084,7 @@ Variant Variant::rvalAt(CStrRef offset, int64 prehash /* = -1 */,
                         bool isString /* = false */) const {
   if (m_type == KindOfArray) {
     if (isString) return m_data.parr->get(offset, prehash, error);
+    if (offset.isNull()) return m_data.parr->get(empty_string, -1, error);
     int64 n;
     if (!offset->isStrictlyInteger(n)) {
       return m_data.parr->get(offset, prehash, error);
@@ -2118,7 +2119,7 @@ Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
     // Fast path for KindOfArray
     switch (offset.m_type) {
     case KindOfNull:
-      return m_data.parr->get("", prehash, error);
+      return m_data.parr->get(empty_string, prehash, error);
     case KindOfBoolean:
     case KindOfByte:
     case KindOfInt16:

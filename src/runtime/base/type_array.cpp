@@ -425,6 +425,7 @@ Variant Array::rvalAt(CStrRef key, int64 prehash /* = -1 */,
                       bool isString /* = false */) const {
   if (m_px) {
     if (isString) return m_px->get(key, prehash, error);
+    if (key.isNull()) return m_px->get(empty_string, -1, error);
     int64 n;
     if (!key->isStrictlyInteger(n)) {
       return m_px->get(key, prehash, error);
@@ -440,7 +441,7 @@ Variant Array::rvalAt(CVarRef key, int64 prehash /* = -1 */,
   if (!m_px) return null_variant;
   switch (key.m_type) {
   case KindOfNull:
-    return m_px->get("", prehash, error);
+    return m_px->get(empty_string, prehash, error);
   case KindOfBoolean:
   case KindOfByte:
   case KindOfInt16:
@@ -605,8 +606,9 @@ bool Array::exists(CVarRef key, int64 prehash /* = -1 */) const {
   default:
     break;
   }
-  if (!key.isNull()) {
-    return existsImpl(key.toKey(), prehash);
+  Variant k(key.toKey());
+  if (!k.isNull()) {
+    return existsImpl(k, prehash);
   }
   return false;
 }

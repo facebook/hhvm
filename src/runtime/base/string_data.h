@@ -160,6 +160,7 @@ class StringData {
   DataType toNumeric(int64 &ival, double &dval) const;
 
   static size_t Hash(const StringData *s) {
+    ASSERT(s);
     if (s->isStatic()) return s->getPrecomputedHash();
     if (s->isShared()) return s->getSharedStringHash();
     if (s->m_hash == 0) {

@@ -97,7 +97,7 @@ bool f_array_key_exists(CVarRef key, CVarRef search) {
     return toArray(search).exists(key.toInt64());
   }
   if (key.isNull()) {
-    return toArray(search).exists("");
+    return toArray(search).exists(empty_string);
   }
   raise_warning("Array key should be either a string or an integer");
   return false;

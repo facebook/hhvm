@@ -824,7 +824,7 @@ static bool hphp_warmup(ExecutionContext *context,
         if (!warmupDoc.empty()) {
           try {
             ServerStatsHelper ssh("warmup");
-            invoke_file(warmupDoc, true, get_variable_table());
+            include_impl_invoke(warmupDoc, true, get_variable_table());
           } catch (...) {
             ret = handle_exception(context, errorMsg, WarmupDocException,
                                    error);
@@ -848,7 +848,7 @@ static bool hphp_warmup(ExecutionContext *context,
     ServerStatsHelper ssh("reqinit");
     try {
       if (!reqInitDoc.empty()) {
-        invoke_file(reqInitDoc, true, get_variable_table());
+        include_impl_invoke(reqInitDoc, true, get_variable_table());
       }
       if (!reqInitFunc.empty()) {
         invoke(reqInitFunc.c_str(), Array());
@@ -909,7 +909,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
       funcRet = invoke(cmd.c_str(), funcParams);
     } else {
       if (isServer) hphp_chdir_file(cmd);
-      invoke_file(cmd.c_str(), true, get_variable_table());
+      include_impl_invoke(cmd.c_str(), true, get_variable_table());
     }
   } catch (...) {
     handle_invoke_exception(ret, context, errorMsg, error);

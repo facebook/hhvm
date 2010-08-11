@@ -203,7 +203,7 @@ void IncludeExpression::outputCPPImpl(CodeGenerator &cg,
   }
 
   // include() and require() need containing file's directory
-  string currentDir = "NULL";
+  string currentDir = "\"\"";
   if (m_loc && m_loc->file && *m_loc->file) {
     string file = m_loc->file;
     size_t pos = file.rfind('/');

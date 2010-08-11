@@ -401,6 +401,75 @@ int Util::roundUpToPowerOfTwo(int value) {
   return (value);
 }
 
+std::string Util::relativePath(const std::string fromDir,
+  const std::string toFile) {
+
+  size_t maxlen = (fromDir.size() + toFile.size()) * 3;
+  char* path = (char*) malloc(maxlen);
+  int path_len = 0;
+
+  // Sanity checks
+  if (fromDir[0] != '/' || toFile[0] != '/' ||
+      fromDir[fromDir.size() - 1] != '/') {
+    return "";
+  }
+
+  // Maybe we're lucky and this is an easy case
+  int from_len = fromDir.size();
+  if (strncmp(toFile.c_str(), fromDir.c_str(), from_len) == 0) {
+    return toFile.substr(from_len);
+  }
+
+  const char* from_dir = fromDir.c_str();
+  const char* to_file = toFile.c_str();
+
+  const char* from_start = from_dir + 1;
+  const char* to_start = to_file + 1;
+
+  while (true) {
+    int seg_len = 0;
+    char cur = from_start[0];
+    while (cur && cur != '/') {
+      ++seg_len;
+      cur = from_start[seg_len];
+    }
+
+    if (memcmp(from_start, to_start, seg_len + 1)) {
+      break;
+    }
+    from_start += seg_len + 1;
+    to_start += seg_len + 1;
+  }
+
+  // Now to build the path
+  char cur = *from_start;
+  char* path_end = path;
+  while (cur) {
+    if (cur == '/') {
+      strcpy(path_end, "../");
+      path_len += 3;
+      maxlen -= 3;
+      path_end += 3;
+    }
+    ++from_start;
+    cur = *from_start;
+  }
+
+  if (from_start[-1] != '/') {
+    strcpy(path_end, "../");
+    path_len += 3;
+    maxlen -= 3;
+    path_end += 3;
+  }
+
+  strncpy(path_end, to_start, maxlen - 1);
+
+  string p(path);
+  free((void*) path);
+
+  return p;
+}
+
 std::string Util::canonicalize(const std::string &path) {
   const char *r = canonicalize(path.c_str(), path.size());
   string res(r);

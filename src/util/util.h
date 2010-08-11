@@ -93,6 +93,11 @@ int directRename(const char *oldname, const char *newname);
 int ssystem(const char *command);
 
 /**
+ * Find the relative path from a directory with trailing slash to the file
+ */
+std::string relativePath(const std::string fromDir, const std::string toFile);
+
+/**
  * Canonicalize path to remove "..", "." and "\/", etc..
  */
 std::string canonicalize(const std::string &path);

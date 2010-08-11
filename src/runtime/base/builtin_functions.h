@@ -681,10 +681,13 @@ Variant f_unserialize(CStrRef str);
 class LVariableTable;
 Variant include(CStrRef file, bool once = false,
                 LVariableTable* variables = NULL,
-                const char *currentDir = NULL);
+                const char *currentDir = "");
 Variant require(CStrRef file, bool once = false,
                 LVariableTable* variables = NULL,
-                const char *currentDir = NULL);
+                const char *currentDir = "");
+Variant include_impl_invoke(CStrRef file, bool once = false,
+                            LVariableTable* variables = NULL,
+                            const char *currentDir = "");
 
 /**
  * For function interception or stubout support.

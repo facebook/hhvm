@@ -157,7 +157,7 @@ int hphp_ffi_string_data(StringData *sd, const char** data) {
 }
 
 void hphp_ffi_include_file(const char* file) {
-  invoke_file(file);
+  include_impl_invoke(file);
 }
 
 int hphp_ffi_invoke_function(void** ret, const char* func, ArrayData* args) {

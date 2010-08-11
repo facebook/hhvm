@@ -125,26 +125,7 @@ PhpFile *FileRepository::checkoutFile(const std::string &rname, const struct sta
 
 bool FileRepository::findFile(std::string &path, struct stat &s,
                               const char *currentDir) {
-  // Check working directory first since that's what php does
-  if (fileStat(path, s)) {
-    return true;
-  }
-  for (vector<string>::const_iterator it =
-         RuntimeOption::IncludeSearchPaths.begin();
-       it != RuntimeOption::IncludeSearchPaths.end(); ++it) {
-    string p;
-    if ((*it)[0] == '.' && currentDir) {
-      p = string(currentDir) + it->substr(1);
-    } else {
-      p = *it;
-    }
-    p += path;
-    if (fileStat(p, s)) {
-      path = p;
-      return true;
-    }
-  }
-  return false;
+  return fileStat(path, s);
 }
 
 PhpFile *FileRepository::readFile(const std::string &name, const struct stat &s) {

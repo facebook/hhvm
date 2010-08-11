@@ -2036,7 +2036,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
       }
 
       cg_printf("\n");
-      cg_indentBegin("Variant invoke_file(CStrRef path, "
+      cg_indentBegin("Variant invoke_file(CStrRef s, "
                      "bool once /* = false */, "
                      "LVariableTable* variables /* = NULL */,"
                      "const char *currentDir /* = NULL */) {\n");
@@ -2044,15 +2044,13 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
         // See if there's an eval'd version
         cg_indentBegin("{\n");
         cg_printf("Variant r;\n");
-        cg_printf("if (eval_invoke_file_hook(r, path, once, variables, "
+        cg_printf("if (eval_invoke_file_hook(r, s, once, variables, "
                   "currentDir)) "
                   "return r;\n");
         cg_indentEnd("}\n");
       }
 
       string root;
-      cg_printf("String s = canonicalize_path(path, \"%s\", %d);\n",
-                root.c_str(), root.size());
 
       for (JumpTable jt(cg, entries, false, false, true); jt.ready();
            jt.next()) {
@@ -2069,8 +2067,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
                   Option::PseudoMainPrefix,
                   Option::MangleFilename(entries[0], true).c_str());
       }
-      cg_printf("raise_notice(\"Tried to invoke %%s but file not found.\", "
-                "s.data());\n");
+
       cg_printf("return throw_missing_file(s.data());\n");
       cg_indentEnd("}\n");
     }

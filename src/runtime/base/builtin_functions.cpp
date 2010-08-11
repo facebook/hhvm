@@ -630,45 +630,99 @@ String get_source_filename(litstr path) {
   return RuntimeOption::SourceRoot + path;
 }
 
+Variant include_impl_invoke(CStrRef file, bool once,
+                                   LVariableTable* variables,
+                                   const char *currentDir) {
+  if (file[0] == '/') {
+    try {
+      return invoke_file(file, once, variables, currentDir);
+    } catch(PhpFileDoesNotExistException &e) {}
+
+    string server_root = RuntimeOption::SourceRoot;
+    if (server_root.empty()) {
+      server_root = string(g_context->getCwd()->data()) + "/";
+    }
+
+    String rel_path(Util::relativePath(server_root, string(file.data())));
+
+    // Don't try/catch - We want the exception to be passed along
+    return invoke_file(rel_path, once, variables, currentDir);
+  } else {
+    // Don't try/catch - We want the exception to be passed along
+    return invoke_file(file, once, variables, currentDir);
+  }
+}
+
 static Variant include_impl(CStrRef file, bool once,
                             LVariableTable* variables,
                             const char *currentDir, bool required) {
-  try {
-    return invoke_file(file, once, variables, currentDir);
-  } catch (PhpFileDoesNotExistException &e) {}
 
-  // resolving relative path
-  if (!file.empty() && file[0] != '/') {
-    // use containing file's location to resolve the file
-    if (currentDir && *currentDir) {
-      String path = String(currentDir) + file;
+  const char* c_file = file->data();
+
+  if (c_file[0] == '/') {
+    String can_path(Util::canonicalize(file.c_str(), file.size()));
+
+    try {
+      return include_impl_invoke(can_path, once, variables, currentDir);
+    } catch (PhpFileDoesNotExistException &e) {}
+
+  } else if ((c_file[0] == '.' && (c_file[1] == '/' || (
+    c_file[1] == '.' && c_file[2] == '/')))) {
+
+    String path(String(g_context->getCwd() + "/" + file));
+    String can_path(Util::canonicalize(path.c_str(), path.size()));
+
+    try {
+      return include_impl_invoke(can_path, once, variables, currentDir);
+    } catch (PhpFileDoesNotExistException &e) {}
+
+
+  } else {
+
+    unsigned int path_count = RuntimeOption::IncludeSearchPaths.size();
+
+    for (unsigned int i = 0; i < path_count; i++) {
+      String path("");
+
+      if (RuntimeOption::IncludeSearchPaths[i][0] != '/') {
+        path += (g_context->getCwd() + "/");
+      }
+
+      if (path[path.size() - 1] != '/') {
+        path += "/";
+      }
+
+      path += file;
+      String can_path(Util::canonicalize(path.c_str(), path.size()));
+
       try {
-        return invoke_file(path, once, variables, currentDir);
+        return include_impl_invoke(can_path, once, variables, currentDir);
       } catch (PhpFileDoesNotExistException &e) {}
     }
 
-    // use current directory to resolve the file
-    String path = g_context->getCwd() + "/" + file;
-    try {
-      return invoke_file(path, once, variables, currentDir);
-    } catch (PhpFileDoesNotExistException &e) {}
-
-    // use include paths to resolve the file
-    unsigned int i0 = 0;
-    if (!RuntimeOption::IncludeSearchPaths.empty() &&
-        RuntimeOption::IncludeSearchPaths[0] == ".") {
-      i0 = 1; // skipping it
-    }
-    for (unsigned int i = i0; i < RuntimeOption::IncludeSearchPaths.size();
-         i++) {
-      String path(RuntimeOption::IncludeSearchPaths[i]);
+    if (currentDir[0] == '/') {
+      // We are in hphpi, which passes an absolute path
+      String path(currentDir);
+      path += "/";
       path += file;
+      String can_path(Util::canonicalize(path.c_str(), path.size()));
+
       try {
-        return invoke_file(path, once, variables, currentDir);
+        return include_impl_invoke(can_path, once, variables, currentDir);
+      } catch (PhpFileDoesNotExistException &e) {}
+    } else {
+      // Regular hphp
+      String path(g_context->getCwd() + "/" + currentDir + file);
+      String can_path(Util::canonicalize(path.c_str(), path.size()));
+
+      try {
+        return include_impl_invoke(can_path, once, variables, currentDir);
       } catch (PhpFileDoesNotExistException &e) {}
     }
   }
 
+  // Failure
+  raise_notice("Tried to invoke %s but file not found.", file->data());
   if (required) {
     String ms = "Required file that does not exist: ";
     ms += file;

@@ -17,6 +17,8 @@
 #ifndef __HPHP_FFI_H__
 #define __HPHP_FFI_H__
 
+#include <runtime/base/builtin_functions.h>
+
 ///////////////////////////////////////////////////////////////////////////////
 namespace HPHP {
   class Variant;

@@ -502,8 +502,8 @@ private:
   void outputCPPClusterImpl(CodeGenerator &cg, const FileScopePtrVec &files);
   void outputCPPClassDeclaredFlagsLookup(CodeGenerator &cg);
 
-  void outputUtilDecl(CodeGenerator::Output output);
-  void outputUtilImpl(CodeGenerator::Output output);
+  void outputCPPUtilDecl(CodeGenerator::Output output);
+  void outputCPPUtilImpl(CodeGenerator::Output output);
 
   void repartitionCPP(const std::string &filename, int64 targetSize,
                       bool insideHPHP);

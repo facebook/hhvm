@@ -1234,7 +1234,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     outputCPPFiberGlobalState();
     outputCPPSepExtensionMake();
   }
-  outputUtilDecl(output);
+  if (!Option::SystemGen) outputCPPUtilDecl(output);
   if (Option::GenerateCPPMacros && output != CodeGenerator::SystemCPP) {
     outputCPPClassMapFile();
     outputCPPNameMaps();
@@ -1264,7 +1264,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     outputRTTIMetaData(Option::RTTIOutputFile.c_str());
   }
 
-  outputUtilImpl(output);
+  if (!Option::SystemGen) outputCPPUtilImpl(output);
 }
 
 void AnalysisResult::outputAllCPP(CodeGenerator &cg) {
@@ -1276,7 +1276,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator &cg) {
     cg_printf("\n");
     cg_printInclude("<runtime/base/hphp.h>");
     cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-    cg_printInclude(string(Option::SystemFilePrefix) + "util.h");
+    cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
     cg_printf("\n");
   }
 
@@ -1375,7 +1375,7 @@ void AnalysisResult::outputCPPClassMapFile() {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-  cg_printInclude(string(Option::SystemFilePrefix) + "util.h");
+  cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   cg_printf("\n");
   cg_printf("using namespace std;\n");
 
@@ -1510,40 +1510,40 @@ void AnalysisResult::outputRTTIMetaData(const char *filename) {
   fclose(f);
 }
 
-void AnalysisResult::outputUtilDecl(CodeGenerator::Output output) {
+void AnalysisResult::outputCPPUtilDecl(CodeGenerator::Output output) {
   if (!Option::GenConcat) return;
 
-  string filename = string(Option::SystemFilePrefix) + "util.h";
+  string filename = string(Option::SystemFilePrefix) + "cpputil.h";
   string headerPath = m_outputPath + "/" + filename;
   Util::mkdir(headerPath);
   ofstream f(headerPath.c_str());
   CodeGenerator cg(&f, output);
   cg_printf("\n");
-  cg_printf("#ifndef __GENERATED_util_h__\n");
-  cg_printf("#define __GENERATED_util_h__\n");
+  cg_printf("#ifndef __GENERATED_cpputil_h__\n");
+  cg_printf("#define __GENERATED_cpputil_h__\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printf("\n");
   cg.namespaceBegin();
-  if (Option::GenConcat && output != CodeGenerator::SystemCPP) {
+  if (Option::GenConcat) {
     outputTaintDecl(cg);
     outputConcatDecl(cg);
   }
   cg.namespaceEnd();
-  cg_printf("#endif // __GENERATED_util_h__\n");
+  cg_printf("#endif // __GENERATED_cpputil_h__\n");
 }
 
-void AnalysisResult::outputUtilImpl(CodeGenerator::Output output) {
+void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
   if (!Option::GenConcat) return;
 
-  string filename = string(Option::SystemFilePrefix) + "util.cpp";
+  string filename = string(Option::SystemFilePrefix) + "cpputil.cpp";
   string headerPath = m_outputPath + "/" + filename;
   Util::mkdir(headerPath);
   ofstream f(headerPath.c_str());
   CodeGenerator cg(&f, output);
   cg_printf("\n");
-  cg_printInclude("\"util.h\"");
+  cg_printInclude("\"cpputil.h\"");
   cg.namespaceBegin();
-  if (Option::GenConcat && output != CodeGenerator::SystemCPP) {
+  if (Option::GenConcat) {
     outputTaintImpl(cg);
     outputConcatImpl(cg);
   }
@@ -2676,7 +2676,7 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-  cg_printInclude(string(Option::SystemFilePrefix) + "util.h");
+  cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   if (part == 1) {
     getVariables()->outputCPPGlobalVariablesDtorIncludes(cg, ar);
   }
@@ -2748,7 +2748,7 @@ void AnalysisResult::outputCPPGlobalState() {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-  cg_printInclude(string(Option::SystemFilePrefix) + "util.h");
+  cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   if (Option::EnableEval >= Option::LimitedEval) {
     cg_printInclude("<runtime/eval/eval.h>");
   }
@@ -2899,7 +2899,7 @@ void AnalysisResult::outputCPPFiberGlobalState() {
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude("<runtime/base/fiber_reference_map.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-  cg_printInclude(string(Option::SystemFilePrefix) + "util.h");
+  cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   cg_printf("\n");
   cg_printf("using namespace std;\n");
   cg.namespaceBegin();
@@ -3032,7 +3032,7 @@ void AnalysisResult::outputCPPMain() {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-  cg_printInclude(string(Option::SystemFilePrefix) + "util.h");
+  cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   if (Option::PrecomputeLiteralStrings && m_stringLiterals.size() > 0) {
     cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
   }

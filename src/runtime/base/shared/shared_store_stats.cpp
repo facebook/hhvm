@@ -273,6 +273,16 @@ string SharedStoreStats::report_basic() {
   return out.str();
 }
 
+string SharedStoreStats::report_basic_fbagent() {
+  ostringstream out;
+  out << "{ " << "\"hphp.apc.size_total\":" << s_totalSize
+      << ", " << "\"hphp.apc.key_count\":" << s_keyCount
+      << ", " << "\"hphp.apc.size_key\":" << s_keySize
+      << ", " << "\"hphp.apc.size_data\":" << s_dataTotalSize
+      << "}";
+  return out.str();
+}
+
 string SharedStoreStats::report_keys() {
   ostringstream out;
   out << "{\n";

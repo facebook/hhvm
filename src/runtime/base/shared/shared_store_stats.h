@@ -79,6 +79,7 @@ public:
   }
 
   static std::string report_basic();
+  static std::string report_basic_fbagent();
   static std::string report_keys();
   static bool snapshot(const char *filename);
 

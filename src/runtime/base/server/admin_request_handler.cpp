@@ -126,6 +126,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "    (same as /stats.xml)\n"
 
         "/apc-ss:          get apc size stats\n"
+        "/apc-ss-fbagent:  get apc size stats in fbagent friendly format\n"
         "/apc-ss-keys:     get apc size break-down on keys\n"
         "/apc-ss-dump:     dump the size info on each key to /tmp/APC_details\n"
         "                  only valid when EnableAPCSizeDetail is true\n"
@@ -689,6 +690,11 @@ bool AdminRequestHandler::handleAPCSizeRequest (const std::string &cmd,
   }
   if (cmd == "apc-ss") {
     std::string result = SharedStoreStats::report_basic();
+    transport->sendString(result);
+    return true;
+  }
+  if (cmd == "apc-ss-fbagent") {
+    std::string result = SharedStoreStats::report_basic_fbagent();
     transport->sendString(result);
     return true;
   }

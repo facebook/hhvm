@@ -30,6 +30,8 @@
 #include <runtime/base/server/replay_transport.h>
 #include <runtime/base/util/http_client.h>
 
+#define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
+
 using namespace std;
 
 namespace HPHP {
@@ -128,7 +130,11 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
         }
       } else {
         needDelete = read_all_post_data(transport, data, size);
-        DecodeParameters(g->gv__POST, (const char*)data, size, true);
+        if (strncasecmp(contentType.c_str(),
+                    DEFAULT_POST_CONTENT_TYPE,
+                    sizeof(DEFAULT_POST_CONTENT_TYPE)-1) == 0) {
+          DecodeParameters(g->gv__POST, (const char*)data, size, true);
+        }
       }
       CopyParams(request, g->gv__POST);
       if (needDelete) {
@@ -421,7 +427,7 @@ bool HttpProtocol::IsRfc1867(const string contentType, string &boundary) {
   char *s;
   char *e;
   for (s = (char*)ctstr; *s && !(*s == ';' || *s == ',' || *s == ' '); s++) ;
-  if (strncmp(ctstr, MULTIPART_CONTENT_TYPE, s - ctstr)) {
+  if (strncasecmp(ctstr, MULTIPART_CONTENT_TYPE, s - ctstr)) {
     return false;
   }
   s = strstr(s, "boundary");

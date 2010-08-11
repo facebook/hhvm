@@ -249,6 +249,7 @@ bool LibEventHttpClient::send(const std::string &url,
       (this, &LibEventHttpClient::sendImpl);
     m_thread->start();
   } else {
+    IOStatusHelper io("libevent_http", m_address.c_str(), m_port);
     sendImpl();
   }
   return true;
@@ -257,7 +258,6 @@ bool LibEventHttpClient::send(const std::string &url,
 void LibEventHttpClient::sendImpl() {
   SlowTimer timer(RuntimeOption::HttpSlowQueryThreshold, "evhttp",
                   m_url.c_str());
-  IOStatusHelper io("libevent_http", m_address.c_str(), m_port);
   event_base_dispatch(m_eventBase);
   event_del(&m_eventTimeout);
 }

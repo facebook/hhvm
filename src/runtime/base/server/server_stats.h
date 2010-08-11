@@ -90,8 +90,7 @@ private:
     PageStatsMap m_pages;
   };
 
-  static void Merge(CounterMap &dest,
-                    const CounterMap &src);
+  static void Merge(CounterMap &dest, const CounterMap &src);
   static void Merge(PageStatsMap &dest, const PageStatsMap &src);
   static void Merge(std::list<TimeSlot*> &dest,
                     const std::list<TimeSlot*> &src);

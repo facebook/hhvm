@@ -35,8 +35,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-void ServerStats::Merge(CounterMap &dest,
-                        const CounterMap &src) {
+void ServerStats::Merge(CounterMap &dest, const CounterMap &src) {
   for (CounterMap::const_iterator iter = src.begin();
        iter != src.end(); ++iter) {
     dest[iter->first] += iter->second;

@@ -48,7 +48,9 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
     if (c != 0 && c != string::npos && c+2 < lowered.size()) {
       string classname = lowered.substr(0, c);
       string methodname = lowered.substr(c+2);
-      return ClassInfo::hasAccess(classname, methodname, true, false);
+      return f_call_user_func(2, "class_exists",
+                              Array::Create(String(classname))) &&
+        ClassInfo::hasAccess(classname, methodname, true, false);
     }
     return f_function_exists(v.toString());
   }
@@ -64,6 +66,10 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
         obj = v0.toObject();
         v0 = obj->o_getClassName();
       } else if (v0.isString()) {
+        if (!f_call_user_func(2, "class_exists",
+                              Array::Create(v0))) {
+          return false;
+        }
         staticCall = true;
       }
       if (v1.isString()) {

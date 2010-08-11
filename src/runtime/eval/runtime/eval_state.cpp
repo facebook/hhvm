@@ -271,8 +271,11 @@ bool RequestEvalState::includeFile(Variant &res, CStrRef path, bool once,
     }
     efile = it->second;
   } else {
-    char *rpath = realpath(spath.c_str(), 0);
-    if (rpath && rpath != spath) {
+    char *rpath = (char *)malloc(PATH_MAX);
+    if (rpath == NULL) {
+      return false;
+    }
+    if (realpath(spath.c_str(), rpath) && rpath != spath) {
       it = self->m_evaledFiles.find(rpath);
       if (it != self->m_evaledFiles.end()) {
         self->m_evaledFiles[spath] = efile = it->second;

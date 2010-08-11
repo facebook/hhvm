@@ -299,10 +299,9 @@ char *FileCache::read(const char *name, int &len, bool &compressed) const {
         ASSERT(len > 0);
         return buf.cdata;
       }
-      if (!compressed && !buf.data) {
+      if (!compressed && !buf.data && buf.cdata) {
         // only compressed data available, the client has to uncompress it
         compressed = true;
-        ASSERT(buf.cdata);
         len = buf.clen;
         ASSERT(len > 0);
         return buf.cdata;

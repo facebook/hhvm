@@ -41,16 +41,16 @@ class c_lengthexception : public c_logicexception {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_lengthexception 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_lengthexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_lengthexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_lengthexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_lengthexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_lengthexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_lengthexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_lengthexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_lengthexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_lengthexception 1
+#define OMIT_JUMP_TABLE_CLASS_GETARRAY_lengthexception 1
+#define OMIT_JUMP_TABLE_CLASS_SETARRAY_lengthexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_lengthexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_lengthexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_lengthexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_lengthexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_lengthexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_lengthexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_lengthexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_lengthexception 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

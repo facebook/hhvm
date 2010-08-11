@@ -41,15 +41,15 @@ class c_errorexception : public c_exception {
   // DECLARE_INSTANCE_PROP_OPS
   public:
   virtual void o_getArray(Array &props) const;
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_errorexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_errorexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_errorexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_errorexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_errorexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_errorexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_errorexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_errorexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_errorexception 1
+#define OMIT_JUMP_TABLE_CLASS_SETARRAY_errorexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_errorexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_errorexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_errorexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_errorexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_errorexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_errorexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_errorexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_errorexception 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

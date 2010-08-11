@@ -38,16 +38,16 @@ class c_stdclass : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_stdclass 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_stdclass 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_stdclass 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_stdclass 1
-  #define OMIT_JUMP_TABLE_CLASS_get_stdclass 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_stdclass 1
-  #define OMIT_JUMP_TABLE_CLASS_set_stdclass 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_stdclass 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_stdclass 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_stdclass 1
+#define OMIT_JUMP_TABLE_CLASS_GETARRAY_stdclass 1
+#define OMIT_JUMP_TABLE_CLASS_SETARRAY_stdclass 1
+#define OMIT_JUMP_TABLE_CLASS_exists_stdclass 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_stdclass 1
+#define OMIT_JUMP_TABLE_CLASS_get_stdclass 1
+#define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_stdclass 1
+#define OMIT_JUMP_TABLE_CLASS_set_stdclass 1
+#define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_stdclass 1
+#define OMIT_JUMP_TABLE_CLASS_lval_stdclass 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_stdclass 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

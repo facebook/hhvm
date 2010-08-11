@@ -46,16 +46,16 @@ class c_recursivedirectoryiterator : public c_directoryiterator {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_recursivedirectoryiterator 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_recursivedirectoryiterator 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_recursivedirectoryiterator 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_recursivedirectoryiterator 1
-  #define OMIT_JUMP_TABLE_CLASS_get_recursivedirectoryiterator 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_recursivedirectoryiterator 1
-  #define OMIT_JUMP_TABLE_CLASS_set_recursivedirectoryiterator 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_recursivedirectoryiterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_recursivedirectoryiterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_recursivedirectoryiterator 1
+#define OMIT_JUMP_TABLE_CLASS_GETARRAY_recursivedirectoryiterator 1
+#define OMIT_JUMP_TABLE_CLASS_SETARRAY_recursivedirectoryiterator 1
+#define OMIT_JUMP_TABLE_CLASS_exists_recursivedirectoryiterator 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_recursivedirectoryiterator 1
+#define OMIT_JUMP_TABLE_CLASS_get_recursivedirectoryiterator 1
+#define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_recursivedirectoryiterator 1
+#define OMIT_JUMP_TABLE_CLASS_set_recursivedirectoryiterator 1
+#define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_recursivedirectoryiterator 1
+#define OMIT_JUMP_TABLE_CLASS_lval_recursivedirectoryiterator 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_recursivedirectoryiterator 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

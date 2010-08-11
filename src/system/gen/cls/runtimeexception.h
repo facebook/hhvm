@@ -40,16 +40,16 @@ class c_runtimeexception : public c_exception {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_runtimeexception 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_runtimeexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_runtimeexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_runtimeexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_runtimeexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_runtimeexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_runtimeexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_runtimeexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_runtimeexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_runtimeexception 1
+#define OMIT_JUMP_TABLE_CLASS_GETARRAY_runtimeexception 1
+#define OMIT_JUMP_TABLE_CLASS_SETARRAY_runtimeexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_runtimeexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_runtimeexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_runtimeexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_runtimeexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_runtimeexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_runtimeexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_runtimeexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_runtimeexception 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

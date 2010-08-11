@@ -41,16 +41,16 @@ class c_outofboundsexception : public c_runtimeexception {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_outofboundsexception 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_outofboundsexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_outofboundsexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_outofboundsexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_outofboundsexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_outofboundsexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_outofboundsexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_outofboundsexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_outofboundsexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_outofboundsexception 1
+#define OMIT_JUMP_TABLE_CLASS_GETARRAY_outofboundsexception 1
+#define OMIT_JUMP_TABLE_CLASS_SETARRAY_outofboundsexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_outofboundsexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_outofboundsexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_outofboundsexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_outofboundsexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_outofboundsexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_outofboundsexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_outofboundsexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_outofboundsexception 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

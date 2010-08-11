@@ -41,16 +41,16 @@ class c_overflowexception : public c_runtimeexception {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_overflowexception 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_overflowexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_overflowexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_overflowexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_overflowexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_overflowexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_overflowexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_overflowexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_overflowexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_overflowexception 1
+#define OMIT_JUMP_TABLE_CLASS_GETARRAY_overflowexception 1
+#define OMIT_JUMP_TABLE_CLASS_SETARRAY_overflowexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_overflowexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_overflowexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_overflowexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_overflowexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_overflowexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_overflowexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_overflowexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_overflowexception 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

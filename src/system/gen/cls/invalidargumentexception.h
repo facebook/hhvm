@@ -41,16 +41,16 @@ class c_invalidargumentexception : public c_logicexception {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_invalidargumentexception 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_invalidargumentexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_invalidargumentexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_invalidargumentexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_invalidargumentexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_invalidargumentexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_invalidargumentexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_invalidargumentexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_invalidargumentexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_invalidargumentexception 1
+#define OMIT_JUMP_TABLE_CLASS_GETARRAY_invalidargumentexception 1
+#define OMIT_JUMP_TABLE_CLASS_SETARRAY_invalidargumentexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_invalidargumentexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_invalidargumentexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_invalidargumentexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_invalidargumentexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_invalidargumentexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_invalidargumentexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_invalidargumentexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_invalidargumentexception 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

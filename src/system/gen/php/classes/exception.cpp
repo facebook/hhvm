@@ -131,57 +131,63 @@ Variant c_unexpectedvalueexception::o_invoke(MethodIndex methodIndex, const char
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -266,19 +272,19 @@ Variant c_unexpectedvalueexception::o_invoke_few_args(MethodIndex methodIndex, c
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -286,37 +292,37 @@ Variant c_unexpectedvalueexception::o_invoke_few_args(MethodIndex methodIndex, c
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -406,7 +412,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -420,7 +426,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -436,7 +442,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -458,7 +464,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -472,7 +478,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -486,7 +492,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -500,7 +506,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -514,7 +520,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -528,7 +534,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -810,57 +816,63 @@ Variant c_overflowexception::o_invoke(MethodIndex methodIndex, const char *s, CA
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -945,19 +957,19 @@ Variant c_overflowexception::o_invoke_few_args(MethodIndex methodIndex, const ch
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -965,37 +977,37 @@ Variant c_overflowexception::o_invoke_few_args(MethodIndex methodIndex, const ch
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -1085,7 +1097,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1099,7 +1111,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1115,7 +1127,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1137,7 +1149,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1151,7 +1163,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1165,7 +1177,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1179,7 +1191,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1193,7 +1205,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1207,7 +1219,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1489,57 +1501,63 @@ Variant c_outofboundsexception::o_invoke(MethodIndex methodIndex, const char *s,
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -1624,19 +1642,19 @@ Variant c_outofboundsexception::o_invoke_few_args(MethodIndex methodIndex, const
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -1644,37 +1662,37 @@ Variant c_outofboundsexception::o_invoke_few_args(MethodIndex methodIndex, const
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -1764,7 +1782,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1778,7 +1796,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1794,7 +1812,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1816,7 +1834,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1830,7 +1848,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1844,7 +1862,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1858,7 +1876,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1872,7 +1890,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1886,7 +1904,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2168,57 +2186,63 @@ Variant c_logicexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -2303,19 +2327,19 @@ Variant c_logicexception::o_invoke_few_args(MethodIndex methodIndex, const char 
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -2323,37 +2347,37 @@ Variant c_logicexception::o_invoke_few_args(MethodIndex methodIndex, const char 
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -2443,7 +2467,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2457,7 +2481,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2473,7 +2497,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2495,7 +2519,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2509,7 +2533,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2523,7 +2547,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2537,7 +2561,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2551,7 +2575,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2565,7 +2589,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2847,57 +2871,63 @@ Variant c_rangeexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -2982,19 +3012,19 @@ Variant c_rangeexception::o_invoke_few_args(MethodIndex methodIndex, const char 
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -3002,37 +3032,37 @@ Variant c_rangeexception::o_invoke_few_args(MethodIndex methodIndex, const char 
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -3122,7 +3152,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3136,7 +3166,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3152,7 +3182,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3174,7 +3204,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3188,7 +3218,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3202,7 +3232,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3216,7 +3246,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3230,7 +3260,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3244,7 +3274,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3526,57 +3556,63 @@ Variant c_invalidargumentexception::o_invoke(MethodIndex methodIndex, const char
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -3661,19 +3697,19 @@ Variant c_invalidargumentexception::o_invoke_few_args(MethodIndex methodIndex, c
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -3681,37 +3717,37 @@ Variant c_invalidargumentexception::o_invoke_few_args(MethodIndex methodIndex, c
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -3801,7 +3837,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3815,7 +3851,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3831,7 +3867,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3853,7 +3889,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3867,7 +3903,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3881,7 +3917,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3895,7 +3931,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3909,7 +3945,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3923,7 +3959,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4205,57 +4241,63 @@ Variant c_underflowexception::o_invoke(MethodIndex methodIndex, const char *s, C
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -4340,19 +4382,19 @@ Variant c_underflowexception::o_invoke_few_args(MethodIndex methodIndex, const c
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -4360,37 +4402,37 @@ Variant c_underflowexception::o_invoke_few_args(MethodIndex methodIndex, const c
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -4480,7 +4522,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4494,7 +4536,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4510,7 +4552,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4532,7 +4574,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4546,7 +4588,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4560,7 +4602,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4574,7 +4616,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4588,7 +4630,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4602,7 +4644,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4884,57 +4926,63 @@ Variant c_outofrangeexception::o_invoke(MethodIndex methodIndex, const char *s, 
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -5019,19 +5067,19 @@ Variant c_outofrangeexception::o_invoke_few_args(MethodIndex methodIndex, const 
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -5039,37 +5087,37 @@ Variant c_outofrangeexception::o_invoke_few_args(MethodIndex methodIndex, const 
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -5159,7 +5207,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5173,7 +5221,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5189,7 +5237,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5211,7 +5259,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5225,7 +5273,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5239,7 +5287,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5253,7 +5301,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5267,7 +5315,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5281,7 +5329,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5563,57 +5611,63 @@ Variant c_badmethodcallexception::o_invoke(MethodIndex methodIndex, const char *
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -5698,19 +5752,19 @@ Variant c_badmethodcallexception::o_invoke_few_args(MethodIndex methodIndex, con
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -5718,37 +5772,37 @@ Variant c_badmethodcallexception::o_invoke_few_args(MethodIndex methodIndex, con
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -5838,7 +5892,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5852,7 +5906,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5868,7 +5922,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -5890,7 +5944,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5904,7 +5958,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5918,7 +5972,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5932,7 +5986,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5946,7 +6000,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5960,7 +6014,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6242,57 +6296,63 @@ Variant c_runtimeexception::o_invoke(MethodIndex methodIndex, const char *s, CAr
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -6377,19 +6437,19 @@ Variant c_runtimeexception::o_invoke_few_args(MethodIndex methodIndex, const cha
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -6397,37 +6457,37 @@ Variant c_runtimeexception::o_invoke_few_args(MethodIndex methodIndex, const cha
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -6517,7 +6577,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6531,7 +6591,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6547,7 +6607,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6569,7 +6629,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6583,7 +6643,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6597,7 +6657,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6611,7 +6671,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6625,7 +6685,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6639,7 +6699,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7125,57 +7185,63 @@ Variant c_exception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -7260,19 +7326,19 @@ Variant c_exception::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -7280,37 +7346,37 @@ Variant c_exception::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -7400,7 +7466,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7414,7 +7480,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7430,7 +7496,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7452,7 +7518,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7466,7 +7532,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7480,7 +7546,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7494,7 +7560,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7508,7 +7574,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7522,7 +7588,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8130,66 +8196,75 @@ Variant c_errorexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 5) return throw_toomany_arguments("errorexception::__construct", 5, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        if (count == 2) return (t___construct(params[0], params[1]), null);
-        if (count == 3) return (t___construct(params[0], params[1], params[2]), null);
-        if (count == 4) return (t___construct(params[0], params[1], params[2], params[3]), null);
-        return (t___construct(params[0], params[1], params[2], params[3], params[4]), null);
+        if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t___construct(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t___construct(arg0, arg1, arg2), null);
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x42:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("errorexception::getseverity", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
         return (t_getseverity());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -8284,19 +8359,19 @@ Variant c_errorexception::o_invoke_few_args(MethodIndex methodIndex, const char 
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 5) return throw_toomany_arguments("errorexception::__construct", 5, 2);
+        if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         if (count == 2) return (t___construct(a0, a1), null);
@@ -8307,43 +8382,43 @@ Variant c_errorexception::o_invoke_few_args(MethodIndex methodIndex, const char 
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x42:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("errorexception::getseverity", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
         return (t_getseverity());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -8440,7 +8515,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8454,7 +8529,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8473,7 +8548,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 5) return throw_toomany_arguments("errorexception::__construct", 5, 2);
+        if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -8507,7 +8582,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8521,7 +8596,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8535,7 +8610,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8549,7 +8624,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8563,7 +8638,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8577,7 +8652,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("errorexception::getseverity", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8591,7 +8666,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -8929,57 +9004,63 @@ Variant c_badfunctioncallexception::o_invoke(MethodIndex methodIndex, const char
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -9064,19 +9145,19 @@ Variant c_badfunctioncallexception::o_invoke_few_args(MethodIndex methodIndex, c
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -9084,37 +9165,37 @@ Variant c_badfunctioncallexception::o_invoke_few_args(MethodIndex methodIndex, c
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -9204,7 +9285,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9218,7 +9299,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9234,7 +9315,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9256,7 +9337,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9270,7 +9351,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9284,7 +9365,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9298,7 +9379,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9312,7 +9393,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9326,7 +9407,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9608,57 +9689,63 @@ Variant c_lengthexception::o_invoke(MethodIndex methodIndex, const char *s, CArr
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -9743,19 +9830,19 @@ Variant c_lengthexception::o_invoke_few_args(MethodIndex methodIndex, const char
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -9763,37 +9850,37 @@ Variant c_lengthexception::o_invoke_few_args(MethodIndex methodIndex, const char
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -9883,7 +9970,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9897,7 +9984,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9913,7 +10000,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -9935,7 +10022,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9949,7 +10036,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9963,7 +10050,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9977,7 +10064,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -9991,7 +10078,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10005,7 +10092,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10287,57 +10374,63 @@ Variant c_domainexception::o_invoke(MethodIndex methodIndex, const char *s, CArr
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t___construct(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -10422,19 +10515,19 @@ Variant c_domainexception::o_invoke_few_args(MethodIndex methodIndex, const char
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
@@ -10442,37 +10535,37 @@ Variant c_domainexception::o_invoke_few_args(MethodIndex methodIndex, const char
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
@@ -10562,7 +10655,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10576,7 +10669,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10592,7 +10685,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("exception::__construct", 2, 2);
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -10614,7 +10707,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10628,7 +10721,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getline", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10642,7 +10735,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::__init__", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10656,7 +10749,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::getfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10670,7 +10763,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettraceasstring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -10684,7 +10777,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("exception::gettrace", 0, 1);
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);

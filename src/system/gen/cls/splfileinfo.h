@@ -38,16 +38,16 @@ class c_splfileinfo : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileinfo 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileinfo 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_splfileinfo 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileinfo 1
-  #define OMIT_JUMP_TABLE_CLASS_get_splfileinfo 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileinfo 1
-  #define OMIT_JUMP_TABLE_CLASS_set_splfileinfo 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileinfo 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_splfileinfo 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_splfileinfo 1
+#define OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileinfo 1
+#define OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileinfo 1
+#define OMIT_JUMP_TABLE_CLASS_exists_splfileinfo 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileinfo 1
+#define OMIT_JUMP_TABLE_CLASS_get_splfileinfo 1
+#define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileinfo 1
+#define OMIT_JUMP_TABLE_CLASS_set_splfileinfo 1
+#define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileinfo 1
+#define OMIT_JUMP_TABLE_CLASS_lval_splfileinfo 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_splfileinfo 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

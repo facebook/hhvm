@@ -43,16 +43,16 @@ class c_recursiveiteratoriterator : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_recursiveiteratoriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_recursiveiteratoriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_recursiveiteratoriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_recursiveiteratoriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_get_recursiveiteratoriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_recursiveiteratoriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_set_recursiveiteratoriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_recursiveiteratoriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_recursiveiteratoriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_recursiveiteratoriterator 1
+#define OMIT_JUMP_TABLE_CLASS_GETARRAY_recursiveiteratoriterator 1
+#define OMIT_JUMP_TABLE_CLASS_SETARRAY_recursiveiteratoriterator 1
+#define OMIT_JUMP_TABLE_CLASS_exists_recursiveiteratoriterator 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_recursiveiteratoriterator 1
+#define OMIT_JUMP_TABLE_CLASS_get_recursiveiteratoriterator 1
+#define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_recursiveiteratoriterator 1
+#define OMIT_JUMP_TABLE_CLASS_set_recursiveiteratoriterator 1
+#define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_recursiveiteratoriterator 1
+#define OMIT_JUMP_TABLE_CLASS_lval_recursiveiteratoriterator 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_recursiveiteratoriterator 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

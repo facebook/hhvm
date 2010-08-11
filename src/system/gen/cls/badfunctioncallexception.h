@@ -41,16 +41,16 @@ class c_badfunctioncallexception : public c_logicexception {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_badfunctioncallexception 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_badfunctioncallexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_badfunctioncallexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_badfunctioncallexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_badfunctioncallexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_badfunctioncallexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_badfunctioncallexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_badfunctioncallexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_badfunctioncallexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_badfunctioncallexception 1
+#define OMIT_JUMP_TABLE_CLASS_GETARRAY_badfunctioncallexception 1
+#define OMIT_JUMP_TABLE_CLASS_SETARRAY_badfunctioncallexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_badfunctioncallexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_badfunctioncallexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_badfunctioncallexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_badfunctioncallexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_badfunctioncallexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_badfunctioncallexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_badfunctioncallexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_badfunctioncallexception 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

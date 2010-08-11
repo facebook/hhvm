@@ -41,16 +41,16 @@ class c_unexpectedvalueexception : public c_runtimeexception {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_unexpectedvalueexception 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_unexpectedvalueexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_unexpectedvalueexception 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_unexpectedvalueexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_unexpectedvalueexception 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_unexpectedvalueexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_unexpectedvalueexception 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_unexpectedvalueexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_unexpectedvalueexception 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_unexpectedvalueexception 1
+#define OMIT_JUMP_TABLE_CLASS_GETARRAY_unexpectedvalueexception 1
+#define OMIT_JUMP_TABLE_CLASS_SETARRAY_unexpectedvalueexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_unexpectedvalueexception 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_unexpectedvalueexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_unexpectedvalueexception 1
+#define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_unexpectedvalueexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_unexpectedvalueexception 1
+#define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_unexpectedvalueexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_unexpectedvalueexception 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_unexpectedvalueexception 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

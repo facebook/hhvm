@@ -304,135 +304,187 @@ Variant c_arrayiterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
   switch (methodIndex.m_callIndex) {
     case 0xe:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::getarraycopy", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::getArrayCopy", 0, 1);
         return (t_getarraycopy());
       }
       break;
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::next", 0, 1);
         return (t_next());
       }
       break;
     case 0xf:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::count", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::count", 0, 1);
         return (t_count());
       }
       break;
     case 0x10:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::natsort", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::natsort", 0, 1);
         return (t_natsort());
       }
       break;
     case 0x2:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 0x3:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x5:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::append", count, 1, 1, 1);
-        return (t_append(params[0]), null);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::append", count, 1, 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_append(arg0), null);
+        }
       }
       break;
     case 0x11:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::setflags", count, 1, 1, 1);
-        return (t_setflags(params[0]), null);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::setFlags", count, 1, 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setflags(arg0), null);
+        }
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count < 1 || count > 2) return throw_wrong_arguments("arrayiterator::__construct", count, 1, 2, 2);
-        if (count <= 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count < 1 || count > 2) return throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0xa:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::offsetexists", count, 1, 1, 1);
-        return (t_offsetexists(params[0]));
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetExists", count, 1, 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_offsetexists(arg0));
+        }
       }
       break;
     case 0x12:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::uksort", count, 1, 1, 1);
-        return (t_uksort(params[0]));
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::uksort", count, 1, 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_uksort(arg0));
+        }
       }
       break;
     case 0xb:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::offsetget", count, 1, 1, 1);
-        return (t_offsetget(params[0]));
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetGet", count, 1, 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_offsetget(arg0));
+        }
       }
       break;
     case 0x13:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::natcasesort", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::natcasesort", 0, 1);
         return (t_natcasesort());
       }
       break;
     case 0x14:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::asort", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::asort", 0, 1);
         return (t_asort());
       }
       break;
     case 0xc:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::offsetunset", count, 1, 1, 1);
-        return (t_offsetunset(params[0]));
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetUnset", count, 1, 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_offsetunset(arg0));
+        }
       }
       break;
     case 0x15:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::seek", count, 1, 1, 1);
-        return (t_seek(params[0]), null);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::seek", count, 1, 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_seek(arg0), null);
+        }
       }
       break;
     case 0x16:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::getflags", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::getFlags", 0, 1);
         return (t_getflags());
       }
       break;
     case 0x7:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 0x17:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::ksort", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::ksort", 0, 1);
         return (t_ksort());
       }
       break;
     case 0x18:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::uasort", count, 1, 1, 1);
-        return (t_uasort(params[0]));
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::uasort", count, 1, 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_uasort(arg0));
+        }
       }
       break;
     case 0x9:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 0xd:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 2) return throw_wrong_arguments("arrayiterator::offsetset", count, 2, 2, 1);
-        return (t_offsetset(params[0], params[1]));
+        if (count != 2) return throw_wrong_arguments("ArrayIterator::offsetSet", count, 2, 2, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_offsetset(arg0, arg1));
+        }
       }
       break;
     default:
@@ -631,134 +683,134 @@ Variant c_arrayiterator::o_invoke_few_args(MethodIndex methodIndex, const char *
   switch (methodIndex.m_callIndex) {
     case 0xe:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::getarraycopy", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::getArrayCopy", 0, 1);
         return (t_getarraycopy());
       }
       break;
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::next", 0, 1);
         return (t_next());
       }
       break;
     case 0xf:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::count", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::count", 0, 1);
         return (t_count());
       }
       break;
     case 0x10:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::natsort", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::natsort", 0, 1);
         return (t_natsort());
       }
       break;
     case 0x2:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 0x3:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x5:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::append", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::append", count, 1, 1, 1);
         return (t_append(a0), null);
       }
       break;
     case 0x11:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::setflags", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::setFlags", count, 1, 1, 1);
         return (t_setflags(a0), null);
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count < 1 || count > 2) return throw_wrong_arguments("arrayiterator::__construct", count, 1, 2, 2);
+        if (count < 1 || count > 2) return throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 2);
         if (count <= 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       break;
     case 0xa:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::offsetexists", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetExists", count, 1, 1, 1);
         return (t_offsetexists(a0));
       }
       break;
     case 0x12:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::uksort", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::uksort", count, 1, 1, 1);
         return (t_uksort(a0));
       }
       break;
     case 0xb:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::offsetget", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetGet", count, 1, 1, 1);
         return (t_offsetget(a0));
       }
       break;
     case 0x13:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::natcasesort", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::natcasesort", 0, 1);
         return (t_natcasesort());
       }
       break;
     case 0x14:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::asort", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::asort", 0, 1);
         return (t_asort());
       }
       break;
     case 0xc:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::offsetunset", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetUnset", count, 1, 1, 1);
         return (t_offsetunset(a0));
       }
       break;
     case 0x15:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::seek", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::seek", count, 1, 1, 1);
         return (t_seek(a0), null);
       }
       break;
     case 0x16:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::getflags", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::getFlags", 0, 1);
         return (t_getflags());
       }
       break;
     case 0x7:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 0x17:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::ksort", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::ksort", 0, 1);
         return (t_ksort());
       }
       break;
     case 0x18:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("arrayiterator::uasort", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::uasort", count, 1, 1, 1);
         return (t_uasort(a0));
       }
       break;
     case 0x9:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("arrayiterator::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 0xd:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 2) return throw_wrong_arguments("arrayiterator::offsetset", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ArrayIterator::offsetSet", count, 2, 2, 1);
         return (t_offsetset(a0, a1));
       }
       break;
@@ -917,7 +969,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("arrayiterator::getarraycopy", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::getArrayCopy", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -931,7 +983,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("arrayiterator::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::next", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -945,7 +997,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("arrayiterator::count", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::count", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -959,7 +1011,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("arrayiterator::natsort", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::natsort", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -973,7 +1025,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("arrayiterator::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::key", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -987,7 +1039,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("arrayiterator::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::valid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1002,7 +1054,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("arrayiterator::append", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::append", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1020,7 +1072,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("arrayiterator::setflags", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::setFlags", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1039,7 +1091,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 2) return throw_wrong_arguments("arrayiterator::__construct", count, 1, 2, 2);
+        if (count < 1 || count > 2) return throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1061,7 +1113,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("arrayiterator::offsetexists", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetExists", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1079,7 +1131,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("arrayiterator::uksort", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::uksort", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1097,7 +1149,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("arrayiterator::offsetget", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetGet", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1114,7 +1166,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("arrayiterator::natcasesort", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::natcasesort", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1128,7 +1180,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("arrayiterator::asort", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::asort", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1143,7 +1195,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("arrayiterator::offsetunset", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetUnset", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1161,7 +1213,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("arrayiterator::seek", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::seek", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1178,7 +1230,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("arrayiterator::getflags", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::getFlags", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1192,7 +1244,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("arrayiterator::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::current", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1206,7 +1258,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("arrayiterator::ksort", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::ksort", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1221,7 +1273,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("arrayiterator::uasort", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::uasort", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1238,7 +1290,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("arrayiterator::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -1254,7 +1306,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("arrayiterator::offsetset", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("ArrayIterator::offsetSet", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2033,55 +2085,66 @@ Variant c_appenditerator::o_invoke(MethodIndex methodIndex, const char *s, CArrR
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("appenditerator::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::next", 0, 1);
         return (t_next(), null);
       }
       break;
     case 0x2:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("appenditerator::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 0x3:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("appenditerator::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x4:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("appenditerator::getinneriterator", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::getInnerIterator", 0, 1);
         return (t_getinneriterator());
       }
       break;
     case 0x5:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("appenditerator::append", count, 1, 1, 1);
-        return (t_append(params[0]), null);
+        if (count != 1) return throw_wrong_arguments("AppendIterator::append", count, 1, 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_append(arg0), null);
+        }
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("appenditerator::__construct", 0, 2);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::__construct", 0, 2);
         return (t___construct(), null);
       }
       break;
     case 0x7:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("appenditerator::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 0x8:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 2) return throw_wrong_arguments("appenditerator::__call", count, 2, 2, 1);
-        return (t___call(params[0], params[1]));
+        if (count != 2) return throw_wrong_arguments("AppendIterator::__call", count, 2, 2, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___call(arg0, arg1));
+        }
       }
       break;
     case 0x9:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("appenditerator::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::rewind", 0, 1);
         return (t_rewind(), null);
       }
       break;
@@ -2167,55 +2230,55 @@ Variant c_appenditerator::o_invoke_few_args(MethodIndex methodIndex, const char 
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("appenditerator::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::next", 0, 1);
         return (t_next(), null);
       }
       break;
     case 0x2:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("appenditerator::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 0x3:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("appenditerator::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x4:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("appenditerator::getinneriterator", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::getInnerIterator", 0, 1);
         return (t_getinneriterator());
       }
       break;
     case 0x5:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("appenditerator::append", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("AppendIterator::append", count, 1, 1, 1);
         return (t_append(a0), null);
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("appenditerator::__construct", 0, 2);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::__construct", 0, 2);
         return (t___construct(), null);
       }
       break;
     case 0x7:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("appenditerator::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 0x8:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 2) return throw_wrong_arguments("appenditerator::__call", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("AppendIterator::__call", count, 2, 2, 1);
         return (t___call(a0, a1));
       }
       break;
     case 0x9:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("appenditerator::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::rewind", 0, 1);
         return (t_rewind(), null);
       }
       break;
@@ -2301,7 +2364,7 @@ Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("appenditerator::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::next", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2315,7 +2378,7 @@ Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("appenditerator::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::key", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2329,7 +2392,7 @@ Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("appenditerator::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::valid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2343,7 +2406,7 @@ Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("appenditerator::getinneriterator", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::getInnerIterator", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2358,7 +2421,7 @@ Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("appenditerator::append", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("AppendIterator::append", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2375,7 +2438,7 @@ Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("appenditerator::__construct", 0, 2);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::__construct", 0, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2389,7 +2452,7 @@ Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("appenditerator::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::current", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2405,7 +2468,7 @@ Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("appenditerator::__call", count, 2, 2, 1);
+        if (count != 2) return throw_wrong_arguments("AppendIterator::__call", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2425,7 +2488,7 @@ Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("appenditerator::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("AppendIterator::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -2888,244 +2951,287 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
   switch (methodIndex.m_callIndex) {
     case 0x27:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
     case 0x28:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 0x29:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
-        if (count <= 0) return (t_getbasename());
-        return (t_getbasename(params[0]));
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getbasename());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getbasename(arg0));
+        }
       }
       break;
     case 0x2a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::next", 0, 1);
         return (t_next());
       }
       break;
     case 0x2b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
       break;
     case 0x2:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 0x2c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
-        if (count <= 0) return (t_setfileclass());
-        return (t_setfileclass(params[0]));
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_setfileclass());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setfileclass(arg0));
+        }
       }
       break;
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
-        if (count <= 0) return (t_setinfoclass());
-        return (t_setinfoclass(params[0]));
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_setinfoclass());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setinfoclass(arg0));
+        }
       }
       break;
     case 0x3:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x2e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 0x2f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 0x30:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
       break;
     case 0x44:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::getsubpathname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPathname", 0, 1);
         return (t_getsubpathname());
       }
       break;
     case 0x45:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::getsubpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPath", 0, 1);
         return (t_getsubpath());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count < 1 || count > 2) return throw_wrong_arguments("recursivedirectoryiterator::__construct", count, 1, 2, 2);
-        if (count <= 1) return (t___construct(params[0]), null);
-        return (t___construct(params[0], params[1]), null);
+        if (count < 1 || count > 2) return throw_wrong_arguments("RecursiveDirectoryIterator::__construct", count, 1, 2, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1), null);
+        }
       }
       break;
     case 0x31:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
-        if (count <= 0) return (t_getpathinfo());
-        return (t_getpathinfo(params[0]));
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getpathinfo());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getpathinfo(arg0));
+        }
       }
       break;
     case 0x32:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 0x33:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       break;
     case 0x34:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 0x35:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 0x36:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
     case 0x38:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 0x37:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 0x39:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 0x46:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::haschildren", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::hasChildren", 0, 1);
         return (t_haschildren());
       }
       break;
     case 0x15:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("recursivedirectoryiterator::seek", count, 1, 1, 1);
-        return (t_seek(params[0]));
+        if (count != 1) return throw_wrong_arguments("RecursiveDirectoryIterator::seek", count, 1, 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_seek(arg0));
+        }
       }
       break;
     case 0x3a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 0x3b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 0x3c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
-        if (count <= 0) return (t_getfileinfo());
-        return (t_getfileinfo(params[0]));
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getfileinfo());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getfileinfo(arg0));
+        }
       }
       break;
     case 0x47:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::getchildren", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getChildren", 0, 1);
         return (t_getchildren());
       }
       break;
     case 0x7:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 0x3e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 0x3d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 0x3f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
-        if (count <= 0) return (t_openfile());
-        if (count == 1) return (t_openfile(params[0]));
-        if (count == 2) return (t_openfile(params[0], params[1]));
-        return (t_openfile(params[0], params[1], params[2]));
+        if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_openfile());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_openfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_openfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_openfile(arg0, arg1, arg2));
+        }
       }
       break;
     case 0x40:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::isdot", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::isDot", 0, 1);
         return (t_isdot());
       }
       break;
     case 0x9:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 0x41:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
       break;
@@ -3422,223 +3528,223 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex,
   switch (methodIndex.m_callIndex) {
     case 0x27:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
     case 0x28:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 0x29:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         if (count <= 0) return (t_getbasename());
         return (t_getbasename(a0));
       }
       break;
     case 0x2a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::next", 0, 1);
         return (t_next());
       }
       break;
     case 0x2b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
       break;
     case 0x2:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 0x2c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         if (count <= 0) return (t_setfileclass());
         return (t_setfileclass(a0));
       }
       break;
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
         return (t_setinfoclass(a0));
       }
       break;
     case 0x3:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x2e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 0x2f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 0x30:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
       break;
     case 0x44:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::getsubpathname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPathname", 0, 1);
         return (t_getsubpathname());
       }
       break;
     case 0x45:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::getsubpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPath", 0, 1);
         return (t_getsubpath());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count < 1 || count > 2) return throw_wrong_arguments("recursivedirectoryiterator::__construct", count, 1, 2, 2);
+        if (count < 1 || count > 2) return throw_wrong_arguments("RecursiveDirectoryIterator::__construct", count, 1, 2, 2);
         if (count <= 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       break;
     case 0x31:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
         return (t_getpathinfo(a0));
       }
       break;
     case 0x32:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 0x33:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       break;
     case 0x34:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 0x35:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 0x36:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
     case 0x38:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 0x37:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 0x39:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 0x46:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::haschildren", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::hasChildren", 0, 1);
         return (t_haschildren());
       }
       break;
     case 0x15:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("recursivedirectoryiterator::seek", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("RecursiveDirectoryIterator::seek", count, 1, 1, 1);
         return (t_seek(a0));
       }
       break;
     case 0x3a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 0x3b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 0x3c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
         return (t_getfileinfo(a0));
       }
       break;
     case 0x47:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::getchildren", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getChildren", 0, 1);
         return (t_getchildren());
       }
       break;
     case 0x7:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 0x3e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 0x3d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 0x3f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         if (count <= 0) return (t_openfile());
         if (count == 1) return (t_openfile(a0));
         if (count == 2) return (t_openfile(a0, a1));
@@ -3647,19 +3753,19 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex,
       break;
     case 0x40:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::isdot", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::isDot", 0, 1);
         return (t_isdot());
       }
       break;
     case 0x9:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 0x41:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
       break;
@@ -3924,7 +4030,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3938,7 +4044,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3953,7 +4059,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3971,7 +4077,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3985,7 +4091,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::next", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -3999,7 +4105,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4013,7 +4119,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::key", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4028,7 +4134,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4047,7 +4153,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4065,7 +4171,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::valid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4079,7 +4185,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4093,7 +4199,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4107,7 +4213,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4121,7 +4227,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4135,7 +4241,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::getsubpathname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPathname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4149,7 +4255,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::getsubpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4165,7 +4271,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 2) return throw_wrong_arguments("recursivedirectoryiterator::__construct", count, 1, 2, 2);
+        if (count < 1 || count > 2) return throw_wrong_arguments("RecursiveDirectoryIterator::__construct", count, 1, 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4187,7 +4293,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4205,7 +4311,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4219,7 +4325,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4233,7 +4339,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4247,7 +4353,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4261,7 +4367,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4275,7 +4381,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4289,7 +4395,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4303,7 +4409,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4317,7 +4423,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::haschildren", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::hasChildren", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4332,7 +4438,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("recursivedirectoryiterator::seek", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("RecursiveDirectoryIterator::seek", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4349,7 +4455,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4363,7 +4469,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4378,7 +4484,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4396,7 +4502,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::getchildren", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getChildren", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4410,7 +4516,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::current", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4424,7 +4530,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4438,7 +4544,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4455,7 +4561,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4481,7 +4587,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("directoryiterator::isdot", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::isDot", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4495,7 +4601,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursivedirectoryiterator::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -4509,7 +4615,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -5359,219 +5465,261 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
   switch (methodIndex.m_callIndex) {
     case 0x27:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
     case 0x28:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 0x29:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
-        if (count <= 0) return (t_getbasename());
-        return (t_getbasename(params[0]));
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getbasename());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getbasename(arg0));
+        }
       }
       break;
     case 0x2a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::next", 0, 1);
         return (t_next());
       }
       break;
     case 0x2b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
       break;
     case 0x2:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 0x2c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
-        if (count <= 0) return (t_setfileclass());
-        return (t_setfileclass(params[0]));
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_setfileclass());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setfileclass(arg0));
+        }
       }
       break;
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
-        if (count <= 0) return (t_setinfoclass());
-        return (t_setinfoclass(params[0]));
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_setinfoclass());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_setinfoclass(arg0));
+        }
       }
       break;
     case 0x3:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x2e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 0x2f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 0x30:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("directoryiterator::__construct", count, 1, 1, 2);
-        return (t___construct(params[0]), null);
+        if (count != 1) return throw_wrong_arguments("DirectoryIterator::__construct", count, 1, 1, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t___construct(arg0), null);
+        }
       }
       break;
     case 0x31:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
-        if (count <= 0) return (t_getpathinfo());
-        return (t_getpathinfo(params[0]));
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getpathinfo());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getpathinfo(arg0));
+        }
       }
       break;
     case 0x32:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 0x33:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       break;
     case 0x34:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 0x35:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 0x36:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
     case 0x38:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 0x37:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 0x39:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 0x15:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("directoryiterator::seek", count, 1, 1, 1);
-        return (t_seek(params[0]));
+        if (count != 1) return throw_wrong_arguments("DirectoryIterator::seek", count, 1, 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_seek(arg0));
+        }
       }
       break;
     case 0x3a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 0x3b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 0x3c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
-        if (count <= 0) return (t_getfileinfo());
-        return (t_getfileinfo(params[0]));
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getfileinfo());
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getfileinfo(arg0));
+        }
       }
       break;
     case 0x7:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 0x3e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 0x3d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 0x3f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
-        if (count <= 0) return (t_openfile());
-        if (count == 1) return (t_openfile(params[0]));
-        if (count == 2) return (t_openfile(params[0], params[1]));
-        return (t_openfile(params[0], params[1], params[2]));
+        if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_openfile());
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_openfile(arg0));
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_openfile(arg0, arg1));
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_openfile(arg0, arg1, arg2));
+        }
       }
       break;
     case 0x40:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::isdot", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::isDot", 0, 1);
         return (t_isdot());
       }
       break;
     case 0x9:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 0x41:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
       break;
@@ -5842,198 +5990,198 @@ Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const ch
   switch (methodIndex.m_callIndex) {
     case 0x27:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
     case 0x28:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 0x29:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         if (count <= 0) return (t_getbasename());
         return (t_getbasename(a0));
       }
       break;
     case 0x2a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::next", 0, 1);
         return (t_next());
       }
       break;
     case 0x2b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
       break;
     case 0x2:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 0x2c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         if (count <= 0) return (t_setfileclass());
         return (t_setfileclass(a0));
       }
       break;
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
         return (t_setinfoclass(a0));
       }
       break;
     case 0x3:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x2e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 0x2f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 0x30:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("directoryiterator::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("DirectoryIterator::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       break;
     case 0x31:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
         return (t_getpathinfo(a0));
       }
       break;
     case 0x32:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 0x33:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       break;
     case 0x34:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 0x35:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 0x36:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
     case 0x38:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 0x37:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 0x39:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 0x15:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("directoryiterator::seek", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("DirectoryIterator::seek", count, 1, 1, 1);
         return (t_seek(a0));
       }
       break;
     case 0x3a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 0x3b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 0x3c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
         return (t_getfileinfo(a0));
       }
       break;
     case 0x7:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 0x3e:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 0x3d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 0x3f:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         if (count <= 0) return (t_openfile());
         if (count == 1) return (t_openfile(a0));
         if (count == 2) return (t_openfile(a0, a1));
@@ -6042,19 +6190,19 @@ Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const ch
       break;
     case 0x40:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::isdot", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::isDot", 0, 1);
         return (t_isdot());
       }
       break;
     case 0x9:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("directoryiterator::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 0x41:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
       break;
@@ -6294,7 +6442,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getperms", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6308,7 +6456,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::iswritable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6323,7 +6471,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getbasename", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6341,7 +6489,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpathname", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6355,7 +6503,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("directoryiterator::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::next", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6369,7 +6517,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getgroup", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6383,7 +6531,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("directoryiterator::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::key", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6398,7 +6546,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setfileclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6417,7 +6565,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::setinfoclass", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6435,7 +6583,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("directoryiterator::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::valid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6449,7 +6597,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("directoryiterator::__tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6463,7 +6611,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getlinktarget", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6477,7 +6625,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isreadable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6491,7 +6639,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getrealpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6506,7 +6654,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("directoryiterator::__construct", count, 1, 1, 2);
+        if (count != 1) return throw_wrong_arguments("DirectoryIterator::__construct", count, 1, 1, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6524,7 +6672,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getpathinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6542,7 +6690,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getctime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6556,7 +6704,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getpath", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6570,7 +6718,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getinode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6584,7 +6732,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::islink", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6598,7 +6746,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getsize", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6612,7 +6760,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isfile", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6626,7 +6774,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getfilename", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6640,7 +6788,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getowner", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6655,7 +6803,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("directoryiterator::seek", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("DirectoryIterator::seek", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6672,7 +6820,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getmtime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6686,7 +6834,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isdir", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6701,7 +6849,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("splfileinfo::getfileinfo", 1, 1);
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6719,7 +6867,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("directoryiterator::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::current", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6733,7 +6881,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::isexecutable", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6747,7 +6895,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::getatime", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6764,7 +6912,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 3) return throw_toomany_arguments("splfileinfo::openfile", 3, 1);
+        if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6790,7 +6938,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("directoryiterator::isdot", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::isDot", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6804,7 +6952,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("directoryiterator::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -6818,7 +6966,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("splfileinfo::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7642,45 +7790,52 @@ Variant c_recursiveiteratoriterator::o_invoke(MethodIndex methodIndex, const cha
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::next", 0, 1);
         return (t_next());
       }
       break;
     case 0x2:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 0x3:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x4:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::getinneriterator", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::getInnerIterator", 0, 1);
         return (t_getinneriterator());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count < 1 || count > 3) return throw_wrong_arguments("recursiveiteratoriterator::__construct", count, 1, 3, 2);
-        if (count <= 1) return (t___construct(params[0]), null);
-        if (count == 2) return (t___construct(params[0], params[1]), null);
-        return (t___construct(params[0], params[1], params[2]), null);
+        if (count < 1 || count > 3) return throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 2);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          if (count <= 1) return (t___construct(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t___construct(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t___construct(arg0, arg1, arg2), null);
+        }
       }
       break;
     case 0x7:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 0x9:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
@@ -7752,31 +7907,31 @@ Variant c_recursiveiteratoriterator::o_invoke_few_args(MethodIndex methodIndex, 
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::next", 0, 1);
         return (t_next());
       }
       break;
     case 0x2:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 0x3:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x4:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::getinneriterator", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::getInnerIterator", 0, 1);
         return (t_getinneriterator());
       }
       break;
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count < 1 || count > 3) return throw_wrong_arguments("recursiveiteratoriterator::__construct", count, 1, 3, 2);
+        if (count < 1 || count > 3) return throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 2);
         if (count <= 1) return (t___construct(a0), null);
         if (count == 2) return (t___construct(a0, a1), null);
         return (t___construct(a0, a1, a2), null);
@@ -7784,13 +7939,13 @@ Variant c_recursiveiteratoriterator::o_invoke_few_args(MethodIndex methodIndex, 
       break;
     case 0x7:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 0x9:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
@@ -7866,7 +8021,7 @@ Variant c_recursiveiteratoriterator::o_invoke_from_eval(const char *s, Eval::Var
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::next", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::next", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7880,7 +8035,7 @@ Variant c_recursiveiteratoriterator::o_invoke_from_eval(const char *s, Eval::Var
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::key", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::key", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7894,7 +8049,7 @@ Variant c_recursiveiteratoriterator::o_invoke_from_eval(const char *s, Eval::Var
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::valid", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::valid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7908,7 +8063,7 @@ Variant c_recursiveiteratoriterator::o_invoke_from_eval(const char *s, Eval::Var
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::getinneriterator", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::getInnerIterator", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7925,7 +8080,7 @@ Variant c_recursiveiteratoriterator::o_invoke_from_eval(const char *s, Eval::Var
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 3) return throw_wrong_arguments("recursiveiteratoriterator::__construct", count, 1, 3, 2);
+        if (count < 1 || count > 3) return throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7950,7 +8105,7 @@ Variant c_recursiveiteratoriterator::o_invoke_from_eval(const char *s, Eval::Var
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::current", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::current", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -7964,7 +8119,7 @@ Variant c_recursiveiteratoriterator::o_invoke_from_eval(const char *s, Eval::Var
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("recursiveiteratoriterator::rewind", 0, 1);
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);

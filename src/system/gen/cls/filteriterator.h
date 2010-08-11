@@ -42,16 +42,16 @@ class c_filteriterator : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_get_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_set_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_filteriterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_GETARRAY_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_SETARRAY_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_exists_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_get_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_set_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_lval_filteriterator 1
+#define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_filteriterator 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:

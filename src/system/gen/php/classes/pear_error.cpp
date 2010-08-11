@@ -252,73 +252,92 @@ Variant c_pear_error::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
   switch (methodIndex.m_callIndex) {
     case 0x156:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::getuserinfo", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getUserInfo", 0, 1);
         return (t_getuserinfo(), null);
       }
       break;
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getMessage", 0, 1);
         return (t_getmessage(), null);
       }
       break;
     case 0x157:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::getcallback", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getCallback", 0, 1);
         return (t_getcallback(), null);
       }
       break;
     case 0x158:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::getdebuginfo", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getDebugInfo", 0, 1);
         return (t_getdebuginfo(), null);
       }
       break;
     case 0x159:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("pear_error::adduserinfo", count, 1, 1, 1);
-        return (t_adduserinfo(params[0]), null);
+        if (count != 1) return throw_wrong_arguments("pear_error::addUserInfo", count, 1, 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_adduserinfo(arg0), null);
+        }
       }
       break;
     case 0x15a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("pear_error::getbacktrace", 1, 1);
-        if (count <= 0) return (t_getbacktrace(), null);
-        return (t_getbacktrace(params[0]), null);
+        if (count > 1) return throw_toomany_arguments("pear_error::getBacktrace", 1, 1);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_getbacktrace(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          return (t_getbacktrace(arg0), null);
+        }
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getCode", 0, 1);
         return (t_getcode(), null);
       }
       break;
     case 0x15b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 5) return throw_toomany_arguments("pear_error::pear_error", 5, 2);
-        if (count <= 0) return (t_pear_error(), null);
-        if (count == 1) return (t_pear_error(params[0]), null);
-        if (count == 2) return (t_pear_error(params[0], params[1]), null);
-        if (count == 3) return (t_pear_error(params[0], params[1], params[2]), null);
-        if (count == 4) return (t_pear_error(params[0], params[1], params[2], params[3]), null);
-        return (t_pear_error(params[0], params[1], params[2], params[3], params[4]), null);
+        {
+          ArrayData *ad(params.get());
+          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+          if (count <= 0) return (t_pear_error(), null);
+          CVarRef arg0((ad->getValue(pos)));
+          if (count == 1) return (t_pear_error(arg0), null);
+          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 2) return (t_pear_error(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_pear_error(arg0, arg1, arg2), null);
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 4) return (t_pear_error(arg0, arg1, arg2, arg3), null);
+          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_pear_error(arg0, arg1, arg2, arg3, arg4), null);
+        }
       }
       break;
     case 0x15c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::getmode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getMode", 0, 1);
         return (t_getmode(), null);
       }
       break;
     case 0x15d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::toString", 0, 1);
         return (t_tostring(), null);
       }
       break;
     case 0x41:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getType", 0, 1);
         return (t_gettype(), null);
       }
       break;
@@ -430,44 +449,44 @@ Variant c_pear_error::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
   switch (methodIndex.m_callIndex) {
     case 0x156:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::getuserinfo", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getUserInfo", 0, 1);
         return (t_getuserinfo(), null);
       }
       break;
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getMessage", 0, 1);
         return (t_getmessage(), null);
       }
       break;
     case 0x157:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::getcallback", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getCallback", 0, 1);
         return (t_getcallback(), null);
       }
       break;
     case 0x158:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::getdebuginfo", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getDebugInfo", 0, 1);
         return (t_getdebuginfo(), null);
       }
       break;
     case 0x159:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count != 1) return throw_wrong_arguments("pear_error::adduserinfo", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("pear_error::addUserInfo", count, 1, 1, 1);
         return (t_adduserinfo(a0), null);
       }
       break;
     case 0x15a:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 1) return throw_toomany_arguments("pear_error::getbacktrace", 1, 1);
+        if (count > 1) return throw_toomany_arguments("pear_error::getBacktrace", 1, 1);
         if (count <= 0) return (t_getbacktrace(), null);
         return (t_getbacktrace(a0), null);
       }
       break;
     case 0x1b:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getCode", 0, 1);
         return (t_getcode(), null);
       }
       break;
@@ -484,19 +503,19 @@ Variant c_pear_error::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
       break;
     case 0x15c:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::getmode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getMode", 0, 1);
         return (t_getmode(), null);
       }
       break;
     case 0x15d:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::toString", 0, 1);
         return (t_tostring(), null);
       }
       break;
     case 0x41:
       if (methodIndex.m_overloadIndex == 0x1) { 
-        if (count > 0) return throw_toomany_arguments("pear_error::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getType", 0, 1);
         return (t_gettype(), null);
       }
       break;
@@ -600,7 +619,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::getuserinfo", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getUserInfo", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -614,7 +633,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::getmessage", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getMessage", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -628,7 +647,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::getcallback", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getCallback", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -642,7 +661,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::getdebuginfo", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getDebugInfo", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -657,7 +676,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("pear_error::adduserinfo", count, 1, 1, 1);
+        if (count != 1) return throw_wrong_arguments("pear_error::addUserInfo", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -675,7 +694,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("pear_error::getbacktrace", 1, 1);
+        if (count > 1) return throw_toomany_arguments("pear_error::getBacktrace", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -693,7 +712,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::getcode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getCode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -746,7 +765,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::getmode", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getMode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -760,7 +779,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::tostring", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
@@ -774,7 +793,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("pear_error::gettype", 0, 1);
+        if (count > 0) return throw_toomany_arguments("pear_error::getType", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);

@@ -456,7 +456,7 @@ public:
 
   template<class phpret, class StatsMap>
   bool extractStats(phpret& ret, StatsMap& m_stats, bool cpu, bool memory)
-  { 
+  {
     for (typename StatsMap::const_iterator iter = m_stats.begin();
          iter != m_stats.end(); ++iter) {
       const typename StatsMap::mapped_type &counts = iter->second;
@@ -754,7 +754,7 @@ public:
     if (len >= arc_buff_len) {
       arc_buff_len *= 2;
       arc_buff = (char *)realloc(arc_buff, arc_buff_len);
-      if (arc_buff) {
+      if (arc_buff == NULL) {
         throw bad_alloc();
       }
     }
@@ -898,7 +898,7 @@ public:
     te.cpu = 0;
     if (m_flags & TrackCPU) {
       te.cpu = vtsc(m_cur_cpu_id);
-    } 
+    }
     if (m_flags & TrackMemory) {
       MemoryManager *mm = MemoryManager::TheMemoryManager().get();
       const MemoryUsageStats &stats = mm->getStats();

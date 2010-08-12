@@ -890,14 +890,26 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool &error, std::string &errorMsg) {
   bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
   error = false;
+
+  if (RuntimeOption::SandboxMode && !warmupDoc.empty()) {
+    // Sandbox mode shouldn't do warmup, because
+    //   (1) The checkpoint after warmup only records smart-allocated
+    //       objects, not things like ClassInfo.
+    //   (2) The php files under sandbox mode is subject to frequent change,
+    //       which might invalidate the warmed-up state.
+    Logger::Warning("WarmupDocument is ignored under the sandbox mode; "
+                    "use RequestInitDocument instead.");
+  }
+
   String oldCwd;
   if (isServer) {
     oldCwd = context->getCwd();
-    if (!warmupDoc.empty()) {
+    if (!warmupDoc.empty() && !RuntimeOption::SandboxMode) {
       hphp_chdir_file(warmupDoc);
     }
   }
-  if (!hphp_warmup(context, warmupDoc, reqInitFunc, reqInitDoc, error)) {
+  if (!hphp_warmup(context, RuntimeOption::SandboxMode ? "" : warmupDoc,
+                   reqInitFunc, reqInitDoc, error)) {
     if (isServer) context->setCwd(oldCwd);
     return false;
   }

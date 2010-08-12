@@ -22,7 +22,8 @@
 
 using namespace std;
 
-#define REQUEST_URI "http://localhost:8080/request"
+#define PORT_MIN 7100
+#define PORT_MAX 7120
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -44,16 +45,23 @@ public:
   }
 };
 
+static int s_server_port = 0;
+
+static std::string get_request_uri() {
+  return "http://localhost:" + boost::lexical_cast<string>(s_server_port) +
+    "/request";
+}
+
 static ServerPtr runServer() {
-  for (int port = 8080; port <= 8088; port++) {
+  for (s_server_port = PORT_MIN; s_server_port <= PORT_MAX; s_server_port++) {
     try {
       ServerPtr server(new TypedServer<LibEventServer, TestRequestHandler>
-                       ("127.0.0.1", port, 4, -1));
+                       ("127.0.0.1", s_server_port, 4, -1));
       server->start();
       return server;
 
     } catch (FailedToListenException e) {
-      if (port == 8088) throw;
+      if (s_server_port == PORT_MAX) throw;
     }
   }
   return ServerPtr();
@@ -108,7 +116,7 @@ bool TestExtCurl::test_curl_init() {
 
 bool TestExtCurl::test_curl_copy_handle() {
   Variant c = f_curl_init();
-  f_curl_setopt(c, k_CURLOPT_URL, REQUEST_URI);
+  f_curl_setopt(c, k_CURLOPT_URL, String(get_request_uri()));
   f_curl_setopt(c, k_CURLOPT_RETURNTRANSFER, true);
   Variant cpy = f_curl_copy_handle(c);
   f_curl_close(c); // to test cpy is still working fine
@@ -125,7 +133,7 @@ bool TestExtCurl::test_curl_version() {
 
 bool TestExtCurl::test_curl_setopt() {
   Variant c = f_curl_init();
-  f_curl_setopt(c, k_CURLOPT_URL, REQUEST_URI);
+  f_curl_setopt(c, k_CURLOPT_URL, String(get_request_uri()));
   f_curl_setopt(c, k_CURLOPT_RETURNTRANSFER, true);
   Variant res = f_curl_exec(c);
   VS(res, "OK");
@@ -136,7 +144,7 @@ bool TestExtCurl::test_curl_setopt_array() {
   Variant c = f_curl_init();
   f_curl_setopt_array
     (c,
-     CREATE_MAP2(k_CURLOPT_URL, REQUEST_URI,
+     CREATE_MAP2(k_CURLOPT_URL, String(get_request_uri()),
                  k_CURLOPT_RETURNTRANSFER, true));
   Variant res = f_curl_exec(c);
   VS(res, "OK");
@@ -145,13 +153,13 @@ bool TestExtCurl::test_curl_setopt_array() {
 
 bool TestExtCurl::test_curl_exec() {
   {
-    Variant c = f_curl_init(REQUEST_URI);
+    Variant c = f_curl_init(String(get_request_uri()));
     f_curl_setopt(c, k_CURLOPT_RETURNTRANSFER, true);
     Variant res = f_curl_exec(c);
     VS(res, "OK");
   }
   {
-    Variant c = f_curl_init(REQUEST_URI);
+    Variant c = f_curl_init(String(get_request_uri()));
     f_curl_setopt(c, k_CURLOPT_WRITEFUNCTION, "curl_write_func");
     f_ob_start();
     f_curl_exec(c);
@@ -163,13 +171,13 @@ bool TestExtCurl::test_curl_exec() {
 }
 
 bool TestExtCurl::test_curl_getinfo() {
-  Variant c = f_curl_init(REQUEST_URI);
+  Variant c = f_curl_init(String(get_request_uri()));
   f_curl_setopt(c, k_CURLOPT_RETURNTRANSFER, true);
   f_curl_exec(c);
   Variant ret = f_curl_getinfo(c);
-  VS(ret["url"], REQUEST_URI);
+  VS(ret["url"], String(get_request_uri()));
   ret = f_curl_getinfo(c, k_CURLINFO_EFFECTIVE_URL);
-  VS(ret, REQUEST_URI);
+  VS(ret, String(get_request_uri()));
   return Count(true);
 }
 
@@ -192,7 +200,7 @@ bool TestExtCurl::test_curl_error() {
 }
 
 bool TestExtCurl::test_curl_close() {
-  Variant c = f_curl_init(REQUEST_URI);
+  Variant c = f_curl_init(String(get_request_uri()));
   f_curl_setopt(c, k_CURLOPT_RETURNTRANSFER, true);
   f_curl_exec(c);
   f_curl_close(c);
@@ -206,8 +214,8 @@ bool TestExtCurl::test_curl_multi_init() {
 
 bool TestExtCurl::test_curl_multi_add_handle() {
   Object mh = f_curl_multi_init();
-  Variant c1 = f_curl_init(REQUEST_URI);
-  Variant c2 = f_curl_init(REQUEST_URI);
+  Variant c1 = f_curl_init(String(get_request_uri()));
+  Variant c2 = f_curl_init(String(get_request_uri()));
   f_curl_multi_add_handle(mh, c1);
   f_curl_multi_add_handle(mh, c2);
   return Count(true);
@@ -215,8 +223,8 @@ bool TestExtCurl::test_curl_multi_add_handle() {
 
 bool TestExtCurl::test_curl_multi_remove_handle() {
   Object mh = f_curl_multi_init();
-  Variant c1 = f_curl_init(REQUEST_URI);
-  Variant c2 = f_curl_init(REQUEST_URI);
+  Variant c1 = f_curl_init(String(get_request_uri()));
+  Variant c2 = f_curl_init(String(get_request_uri()));
   f_curl_multi_add_handle(mh, c1);
   f_curl_multi_add_handle(mh, c2);
   f_curl_multi_remove_handle(mh, c1);
@@ -225,8 +233,8 @@ bool TestExtCurl::test_curl_multi_remove_handle() {
 
 bool TestExtCurl::test_curl_multi_exec() {
   Object mh = f_curl_multi_init();
-  Variant c1 = f_curl_init(REQUEST_URI);
-  Variant c2 = f_curl_init(REQUEST_URI);
+  Variant c1 = f_curl_init(String(get_request_uri()));
+  Variant c2 = f_curl_init(String(get_request_uri()));
   f_curl_setopt(c1, k_CURLOPT_RETURNTRANSFER, true);
   f_curl_setopt(c2, k_CURLOPT_RETURNTRANSFER, true);
   f_curl_multi_add_handle(mh, c1);
@@ -242,8 +250,8 @@ bool TestExtCurl::test_curl_multi_exec() {
 
 bool TestExtCurl::test_curl_multi_select() {
   Object mh = f_curl_multi_init();
-  Variant c1 = f_curl_init(REQUEST_URI);
-  Variant c2 = f_curl_init(REQUEST_URI);
+  Variant c1 = f_curl_init(String(get_request_uri()));
+  Variant c2 = f_curl_init(String(get_request_uri()));
   f_curl_multi_add_handle(mh, c1);
   f_curl_multi_add_handle(mh, c2);
   VS(f_curl_multi_select(mh), 0);
@@ -252,8 +260,8 @@ bool TestExtCurl::test_curl_multi_select() {
 
 bool TestExtCurl::test_curl_multi_getcontent() {
   Object mh = f_curl_multi_init();
-  Variant c1 = f_curl_init(REQUEST_URI);
-  Variant c2 = f_curl_init(REQUEST_URI);
+  Variant c1 = f_curl_init(String(get_request_uri()));
+  Variant c2 = f_curl_init(String(get_request_uri()));
   f_curl_setopt(c1, k_CURLOPT_RETURNTRANSFER, true);
   f_curl_setopt(c2, k_CURLOPT_RETURNTRANSFER, true);
   f_curl_multi_add_handle(mh, c1);
@@ -273,8 +281,8 @@ bool TestExtCurl::test_curl_multi_getcontent() {
 
 bool TestExtCurl::test_curl_multi_info_read() {
   Object mh = f_curl_multi_init();
-  Variant c1 = f_curl_init(REQUEST_URI);
-  Variant c2 = f_curl_init(REQUEST_URI);
+  Variant c1 = f_curl_init(String(get_request_uri()));
+  Variant c2 = f_curl_init(String(get_request_uri()));
   f_curl_setopt(c1, k_CURLOPT_RETURNTRANSFER, true);
   f_curl_setopt(c2, k_CURLOPT_RETURNTRANSFER, true);
   f_curl_multi_add_handle(mh, c1);
@@ -292,8 +300,8 @@ bool TestExtCurl::test_curl_multi_info_read() {
 
 bool TestExtCurl::test_curl_multi_close() {
   Object mh = f_curl_multi_init();
-  Variant c1 = f_curl_init(REQUEST_URI);
-  Variant c2 = f_curl_init(REQUEST_URI);
+  Variant c1 = f_curl_init(String(get_request_uri()));
+  Variant c2 = f_curl_init(String(get_request_uri()));
   f_curl_setopt(c1, k_CURLOPT_RETURNTRANSFER, true);
   f_curl_setopt(c2, k_CURLOPT_RETURNTRANSFER, true);
   f_curl_multi_add_handle(mh, c1);
@@ -309,9 +317,10 @@ bool TestExtCurl::test_curl_multi_close() {
 }
 
 bool TestExtCurl::test_evhttp_set_cache() {
-  f_evhttp_set_cache("localhost", 4, 8080);
+  f_evhttp_set_cache("localhost", 4, s_server_port);
   for (int i = 0; i < 10; i++) {
-    Variant ret = f_evhttp_get(REQUEST_URI, CREATE_VECTOR1("ECHO: foo"));
+    Variant ret = f_evhttp_get(String(get_request_uri()),
+                               CREATE_VECTOR1("ECHO: foo"));
     VS(ret["code"], 200);
     VS(ret["response"], "OK");
     VS(ret["headers"][0], "ECHOED: foo");
@@ -322,7 +331,8 @@ bool TestExtCurl::test_evhttp_set_cache() {
 }
 
 bool TestExtCurl::test_evhttp_get() {
-  Variant ret = f_evhttp_get(REQUEST_URI, CREATE_VECTOR1("ECHO: foo"));
+  Variant ret = f_evhttp_get(String(get_request_uri()),
+                             CREATE_VECTOR1("ECHO: foo"));
   VS(ret["code"], 200);
   VS(ret["response"], "OK");
   VS(ret["headers"][0], "ECHOED: foo");
@@ -331,7 +341,7 @@ bool TestExtCurl::test_evhttp_get() {
 }
 
 bool TestExtCurl::test_evhttp_post() {
-  Variant ret = f_evhttp_post(REQUEST_URI, "echo",
+  Variant ret = f_evhttp_post(String(get_request_uri()), "echo",
                               CREATE_VECTOR1("ECHO: foo"));
   VS(ret["code"], 200);
   VS(ret["response"], "POST: echo");
@@ -348,7 +358,7 @@ bool TestExtCurl::test_evhttp_post_gzip() {
   char* postBody = fullPostBody + 6;
   memset(postBody, 'a', sizeof(fullPostBody) - 7);
   fullPostBody[sizeof(fullPostBody) - 1] = '\0';
-  Variant ret = f_evhttp_post(REQUEST_URI, postBody,
+  Variant ret = f_evhttp_post(String(get_request_uri()), postBody,
                               CREATE_VECTOR2("ECHO: foo",
                                              "Accept-Encoding: gzip"));
   VS(ret["code"], 200);
@@ -359,7 +369,8 @@ bool TestExtCurl::test_evhttp_post_gzip() {
 }
 
 bool TestExtCurl::test_evhttp_async_get() {
-  Variant ret = f_evhttp_async_get(REQUEST_URI, CREATE_VECTOR1("ECHO: foo"));
+  Variant ret = f_evhttp_async_get(String(get_request_uri()),
+                                   CREATE_VECTOR1("ECHO: foo"));
   ret = f_evhttp_recv(ret);
   VS(ret["code"], 200);
   VS(ret["response"], "OK");
@@ -369,7 +380,7 @@ bool TestExtCurl::test_evhttp_async_get() {
 }
 
 bool TestExtCurl::test_evhttp_async_post() {
-  Variant ret = f_evhttp_async_post(REQUEST_URI, "echo",
+  Variant ret = f_evhttp_async_post(String(get_request_uri()), "echo",
                                     CREATE_VECTOR1("ECHO: foo"));
   ret = f_evhttp_recv(ret);
   VS(ret["code"], 200);

@@ -33,11 +33,16 @@ using namespace std;
 using namespace boost;
 using namespace HPHP;
 
+#define PORT_MIN 7300
+#define PORT_MAX 7320
+
 ///////////////////////////////////////////////////////////////////////////////
 
 TestServer::TestServer() {
   TestCodeRun::FastMode = false;
 }
+
+static int s_server_port = 0;
 
 bool TestServer::VerifyServerResponse(const char *input, const char *output,
                                       const char *url, const char *method,
@@ -45,8 +50,9 @@ bool TestServer::VerifyServerResponse(const char *input, const char *output,
                                       bool responseHeader,
                                       const char *file /* = "" */,
                                       int line /* = 0 */,
-                                      int port /* = 8080 */) {
+                                      int port /* = 0 */) {
   ASSERT(input);
+  if (port == 0) port = s_server_port;
 
   if (!CleanUp()) return false;
   if (Option::EnableEval < Option::FullEval) {
@@ -123,14 +129,17 @@ bool TestServer::VerifyServerResponse(const char *input, const char *output,
 
 void TestServer::RunServer() {
   string out, err;
+  string portConfig = "Server.Port=" + lexical_cast<string>(s_server_port);
   if (Option::EnableEval < Option::FullEval) {
     const char *argv[] = {"", "--mode=server",
-                          "--config=test/config-server.hdf", NULL};
+                          "--config=test/config-server.hdf", "-v",
+                          portConfig.c_str(), NULL};
     Process::Exec("runtime/tmp/TestServer/test", argv, NULL, out, &err);
   } else {
     const char *argv[] = {"", "--file=/unittest/rootdoc/string",
-                          "--mode=server",
-                          "--config=test/config-eval.hdf", NULL};
+                          "--mode=server", portConfig.c_str(), "-v",
+                          "--config=test/config-eval.hdf",
+                          portConfig.c_str(), NULL};
     Process::Exec("hphpi/hphpi", argv, NULL, out, &err);
   }
 }
@@ -157,6 +166,9 @@ void TestServer::StopServer() {
 bool TestServer::RunTests(const std::string &which) {
   bool ret = true;
 
+  // This needs to be the 1st, so to find a good server port.
+  RUN_TEST(TestLibeventServer);
+
   RUN_TEST(TestSanity);
   RUN_TEST(TestServerVariables);
   RUN_TEST(TestGet);
@@ -165,7 +177,6 @@ bool TestServer::RunTests(const std::string &which) {
   RUN_TEST(TestResponseHeader);
   RUN_TEST(TestSetCookie);
   //RUN_TEST(TestRequestHandling);
-  //RUN_TEST(TestLibeventServer);
   RUN_TEST(TestHttpClient);
   RUN_TEST(TestRPCServer);
 
@@ -394,10 +405,18 @@ public:
 };
 
 bool TestServer::TestLibeventServer() {
-  ServerPtr server(new TypedServer<LibEventServer, TestRequestHandler>
-                   ("127.0.0.1", 8080, 50, -1));
-  server->start();
-  server->waitForEnd();
+  for (s_server_port = PORT_MIN; s_server_port <= PORT_MAX; s_server_port++) {
+    try {
+      ServerPtr server(new TypedServer<LibEventServer, TestRequestHandler>
+                       ("127.0.0.1", s_server_port, 50, -1));
+      server->start();
+      server->stop();
+      server->waitForEnd();
+      break;
+    } catch (FailedToListenException e) {
+      if (s_server_port == PORT_MAX) throw;
+    }
+  }
   return Count(true);
 }
 
@@ -439,14 +458,23 @@ public:
 };
 
 bool TestServer::TestHttpClient() {
-  ServerPtr server(new TypedServer<LibEventServer, EchoHandler>
-                   ("127.0.0.1", 8080, 50, -1));
-  server->start();
+  ServerPtr server;
+  for (s_server_port = PORT_MIN; s_server_port <= PORT_MAX; s_server_port++) {
+    try {
+      server = ServerPtr(new TypedServer<LibEventServer, EchoHandler>
+                         ("127.0.0.1", s_server_port, 50, -1));
+      server->start();
+      break;
+    } catch (FailedToListenException e) {
+      if (s_server_port == PORT_MAX) throw;
+    }
+  }
 
   HeaderMap headers;
   headers["Cookie"].push_back("c1=v1;c2=v2;");
   headers["Cookie"].push_back("c3=v3;c4=v4;");
-  string url = "http://127.0.0.1:8080/echo?name=value";
+  string url = "http://127.0.0.1:" + lexical_cast<string>(s_server_port) +
+    "/echo?name=value";
 
   for (int i = 0; i < 10; i++) {
     HttpClient http;
@@ -455,14 +483,14 @@ bool TestServer::TestHttpClient() {
     int code = http.get(url.c_str(), response, &headers, &responseHeaders);
     VS(code, 200);
     VS(response.data(),
-       "\nGET param: name = value"
-       "\nHeader: Accept"
-       "\n0: */*"
-       "\nHeader: Cookie"
-       "\n0: c1=v1;c2=v2;"
-       "\n1: c3=v3;c4=v4;"
-       "\nHeader: Host"
-       "\n0: 127.0.0.1:8080");
+       ("\nGET param: name = value"
+        "\nHeader: Accept"
+        "\n0: */*"
+        "\nHeader: Cookie"
+        "\n0: c1=v1;c2=v2;"
+        "\n1: c3=v3;c4=v4;"
+        "\nHeader: Host"
+        "\n0: 127.0.0.1:" + lexical_cast<string>(s_server_port)).c_str());
 
     bool found = false;
     for (unsigned int i = 0; i < responseHeaders.size(); i++) {
@@ -480,19 +508,19 @@ bool TestServer::TestHttpClient() {
                          &responseHeaders);
     VS(code, 200);
     VS(response.data(),
-       "\nGET param: name = value"
-       "\nPOST data: postdata"
-       "\nHeader: Accept"
-       "\n0: */*"
-       "\nHeader: Content-Length"
-       "\n0: 8"
-       "\nHeader: Content-Type"
-       "\n0: application/x-www-form-urlencoded"
-       "\nHeader: Cookie"
-       "\n0: c1=v1;c2=v2;"
-       "\n1: c3=v3;c4=v4;"
-       "\nHeader: Host"
-       "\n0: 127.0.0.1:8080");
+       ("\nGET param: name = value"
+        "\nPOST data: postdata"
+        "\nHeader: Accept"
+        "\n0: */*"
+        "\nHeader: Content-Length"
+        "\n0: 8"
+        "\nHeader: Content-Type"
+        "\n0: application/x-www-form-urlencoded"
+        "\nHeader: Cookie"
+        "\n0: c1=v1;c2=v2;"
+        "\n1: c3=v3;c4=v4;"
+        "\nHeader: Host"
+        "\n0: 127.0.0.1:" + lexical_cast<string>(s_server_port)).c_str());
 
     bool found = false;
     for (unsigned int i = 0; i < responseHeaders.size(); i++) {

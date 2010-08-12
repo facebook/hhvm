@@ -62,7 +62,7 @@ protected:
                             const char *header, const char *postdata,
                             bool responseHeader,
                             const char *file = "", int line = 0,
-                            int port = 8080);
+                            int port = 0);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -90,7 +90,7 @@ bool TestExtServer::test_pagelet_server_task_result() {
   }
 
   for (int i = 0; i < TEST_SIZE; ++i)  {
-    String expected = "pagelet postparam: ";
+    String expected = "pagelet postparam: postparam=";
     expected += String(i);
     expected += "pagelet getparam: ";
     expected += String(i);

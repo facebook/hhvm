@@ -314,7 +314,7 @@ Variant invoke_file(CStrRef path, bool once /* = false */,
     SystemGlobals *g = (SystemGlobals*)get_global_variables();
 
     echo("pagelet postparam: ");
-    echo(g->gv__POST["postparam"]);
+    echo(g->gv_HTTP_RAW_POST_DATA);
     echo("pagelet getparam: ");
     echo(g->gv__GET["getparam"]);
     echo("pagelet header: ");

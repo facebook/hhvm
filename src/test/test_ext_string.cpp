@@ -587,6 +587,13 @@ bool TestExtString::test_printf() {
   String output = g_context->obCopyContents();
   g_context->obEnd();
   VS(output, "AtestB10C");
+
+  g_context->obStart();
+  f_printf(2, "test %2$d %d", CREATE_VECTOR2(1, 10));
+  output = g_context->obCopyContents();
+  g_context->obEnd();
+  VS(output, "test 10 1");
+
   return Count(true);
 }
 

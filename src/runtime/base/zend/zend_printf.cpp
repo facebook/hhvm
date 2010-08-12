@@ -814,7 +814,7 @@ char *string_printf(const char *format, int len, CArrRef args, int *outlen) {
   char *result = (char *)malloc(size);
   int outpos = 0;
 
-  int argnum = 0;
+  int argnum = 0, currarg = 1;
   for (int inpos = 0; inpos < len; ++inpos) {
     char ch = format[inpos];
 
@@ -852,7 +852,7 @@ char *string_printf(const char *format, int len, CArrRef args, int *outlen) {
         }
         inpos++;  /* skip the '$' */
       } else {
-        argnum++;
+        argnum = currarg++;
       }
 
       /* after argnum comes modifiers */
@@ -909,7 +909,7 @@ char *string_printf(const char *format, int len, CArrRef args, int *outlen) {
       }
     } else {
       width = precision = 0;
-      argnum++;
+      argnum = currarg++;
     }
 
     if (argnum > vargs.size()) {

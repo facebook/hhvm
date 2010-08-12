@@ -130,6 +130,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/apc-ss-keys:     get apc size break-down on keys\n"
         "/apc-ss-dump:     dump the size info on each key to /tmp/APC_details\n"
         "                  only valid when EnableAPCSizeDetail is true\n"
+        "    keysample     optional, only dump keys that belongs to the same\n"
+        "                  group as <keysample>\n"
 
 #ifdef GOOGLE_CPU_PROFILER
         "/prof-cpu-on:     turn on CPU profiler\n"
@@ -684,7 +686,8 @@ bool AdminRequestHandler::handleLeakRequest(const std::string &cmd,
 bool AdminRequestHandler::handleAPCSizeRequest (const std::string &cmd,
                                                 Transport *transport) {
   if (!RuntimeOption::EnableAPCSizeStats &&
-      (cmd == "apc-ss" || cmd == "apc-ss-keys" || cmd == "apc-ss-dump")) {
+      (cmd == "apc-ss" || cmd == "apc-ss-keys" || cmd == "apc-ss-dump" ||
+       cmd == "apc-ss-flat")) {
     transport->sendString("Not Enabled\n");
     return true;
   }
@@ -706,8 +709,10 @@ bool AdminRequestHandler::handleAPCSizeRequest (const std::string &cmd,
   if (cmd == "apc-ss-dump") {
     if (!RuntimeOption::EnableAPCSizeDetail) {
       transport->sendString("Not Enabled\n");
+      return true;
     }
-    else if (SharedStoreStats::snapshot("/tmp/APC_details")) {
+    string key_sample = transport->getParam("keysample");
+    if (SharedStoreStats::snapshot("/tmp/APC_details", key_sample)) {
       transport->sendString("Done\n");
     } else {
       transport->sendString("Failed\n");

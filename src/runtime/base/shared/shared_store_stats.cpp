@@ -57,7 +57,10 @@ static const char *prefix[] = {
   "smc:3:t:",
   "smc:3:pv:",
   "smc:3:v:",
+  "XC_",
+  "XBOX_CACHE_",
 };
+
 static const char *prefix_replace[] = {
   "srhash:/{A}",
   "haste:{A}",
@@ -72,8 +75,10 @@ static const char *prefix_replace[] = {
   "smc:3:t:{A}",
   "smc:3:pv:{A}",
   "smc:3:v:{A}",
+  "XC_{A}",
+  "XBOX_CACHE_{A}",
 };
-static const int prefix_count = 13;
+static const int prefix_count = 15;
 
 static const char *mid[] = {
   ":haste:",
@@ -243,6 +248,7 @@ void SharedValueProfile::removeFromGroup(SharedValueProfile *ind) {
 
 //////////////////////////////////////////////////////////////////////////////
 // Definition of static members
+#define MAX_KEY_LEN  120
 
 int32 SharedStoreStats::s_keyCount = 0;
 int32 SharedStoreStats::s_keySize = 0;
@@ -288,10 +294,11 @@ string SharedStoreStats::report_keys() {
   out << "{\n";
   out << "\"APCSizeKeyStats\": {\n";
   StatsMap::iterator iter;
+  bool first = true;
   for (iter = s_statsMap.begin(); iter != s_statsMap.end(); ++iter) {
     ASSERT(iter->second->isGroup);
-    // Tweak to avoid the last comma
-    if (iter != s_statsMap.begin()) out << ",\n";
+    if (first) first = false;
+    else out << ",\n";
     out << "  \"" << iter->first << "\": {\n";
     writeEntryInt(out, "TotalSize", iter->second->totalSize, 2);
     writeEntryInt(out, "Count", iter->second->keyCount, 2);
@@ -305,23 +312,43 @@ string SharedStoreStats::report_keys() {
   return out.str();
 }
 
-bool SharedStoreStats::snapshot(const char *filename) {
+bool SharedStoreStats::snapshot(const char *filename, std::string& keySample) {
   ofstream out(filename);
   if (out.fail()) {
     return false;
+  }
+  char nkeySample[MAX_KEY_LEN + 1];
+  if (keySample != "") {
+    normalizeKey(keySample.c_str(), nkeySample, MAX_KEY_LEN);
+    nkeySample[MAX_KEY_LEN] = '\0';
   }
   lock();
   out << "{\n";
   out << "\"APCSizeDetail\": {\n";
   StatsMap::iterator iter;
-  for (iter = s_detailMap.begin(); iter != s_detailMap.end(); ++iter) {
+  bool first = true;
+  time_t now = time(NULL);
+  for (iter = s_detailMap.begin(); iter != s_detailMap.end();  ++iter) {
     ASSERT(!iter->second->isGroup);
-    if (iter != s_detailMap.begin()) out << ",\n";
+    if (keySample != "") {
+      char nkey[MAX_KEY_LEN + 1];
+      normalizeKey(iter->first, nkey, MAX_KEY_LEN);
+      nkey[MAX_KEY_LEN] = '\0';
+      if (strcmp(nkey, nkeySample) != 0) continue;
+    }
+    if (first) first = false;
+    else out << ",\n";
     out << "  \"" << iter->first << "\": {\n";
     writeEntryInt(out, "TotalSize", iter->second->totalSize, 2);
     writeEntryInt(out, "TTL", iter->second->ttl, 2);
     writeEntryInt(out, "KeySize", iter->second->keySize, 2);
     writeEntryInt(out, "DataSize", iter->second->var.dataTotalSize, 2);
+    if (RuntimeOption::EnableAPCFetchStats) {
+      writeEntryInt(out, "GetCount", iter->second->getCount, 2);
+      if (iter->second->getCount > 0) {
+        writeEntryInt(out, "StaleTime", now - iter->second->lastGetTime, 2);
+      }
+    }
     writeEntryInt(out, "VariantCount", iter->second->var.variantCount, 2);
     writeEntryInt(out, "UserDataSize", iter->second->var.dataSize, 2, true);
     out << "  }";
@@ -374,7 +401,6 @@ void SharedStoreStats::onClear() {
   unlock();
 }
 
-#define MAX_KEY_LEN  120
 void SharedStoreStats::onDelete(StringData *key, SharedVariant *var,
                                 bool replace) {
   char normalizedKey[MAX_KEY_LEN + 1];
@@ -409,6 +435,17 @@ void SharedStoreStats::onDelete(StringData *key, SharedVariant *var,
   // svp is pulled from s_detailMap, delete here.
   if (svp != &svpLocal) delete svp;
 
+  unlock();
+}
+
+void SharedStoreStats::onGet(StringData *key, SharedVariant *var) {
+  lock();
+  StatsMap::iterator iter = s_detailMap.find((char*)key->data());
+  if (iter != s_detailMap.end()) {
+    SharedValueProfile *svpInd = iter->second;
+    svpInd->lastGetTime= time(NULL);
+    svpInd->getCount++;
+  }
   unlock();
 }
 

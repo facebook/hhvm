@@ -573,9 +573,10 @@ next requests.
     SlotDuration = 600  # in seconds
     MaxSlot = 72        # 10 minutes x 72 = 12 hours
 
-    EnableAPCSizeStats = true
+    EnableAPCSizeStats = false
     EnableAPCSizeDetail = false
     APCSizeCountPrime = false
+    EnableAPCFetchStats = false
   }
 
 = Debug Settings
@@ -613,7 +614,8 @@ file's location. ClearInputOnSuccess can automatically delete requests that
 had 200 responses and it's useful to capture 500 errors on production without
 capturing good responses.
 
-- EnableAPCSizeStats, EnableAPCSizeDetail, APCSizeCountPrime
+- EnableAPCSizeStats, EnableAPCSizeDetail, APCSizeCountPrime,
+  EnableAPCFetchStats
 
 There are options for APC size profiling. With EnableAPCSizeStats true,
 APC overall size and APC size for key groups will be updated every time
@@ -621,8 +623,10 @@ a store or delete happens. This allows querying apc stats on admin port using
 "apc-ss" and "apc-ss-keys". The time and space overhead of turning on this
 is negligible since the events are infrequent. With EnableAPCSizeDetail,
 not only the stats will be updated, the detailed stats on individual key is
-remembered, which incurs some space overhead. APCSizeCountPrime controls
-whether Primed keys are counted into stats or not.
+remembered, which incurs some space overhead. EnableAPCFetchStats controls
+whether apc_fetch will be profiled, which works only if EnableAPCSizeDetail is
+true and incurs time overhead.
+APCSizeCountPrime controls whether Primed keys are counted into stats or not.
 
 = Sandbox Environment
 

@@ -852,6 +852,11 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
        expired = true;
      } else {
        value = val->var->toLocal();
+       if (RuntimeOption::EnableAPCSizeStats &&
+           RuntimeOption::EnableAPCSizeDetail &&
+           RuntimeOption::EnableAPCFetchStats) {
+         SharedStoreStats::onGet(key.get(), val->var);
+       }
      }
    }
  }

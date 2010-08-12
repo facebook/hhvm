@@ -221,6 +221,7 @@ int RuntimeOption::StatsMaxSlot = 12 * 6; // 12 hours
 
 bool RuntimeOption::EnableAPCSizeStats = false;
 bool RuntimeOption::EnableAPCSizeDetail = false;
+bool RuntimeOption::EnableAPCFetchStats = false;
 bool RuntimeOption::APCSizeCountPrime = false;
 
 int64 RuntimeOption::MaxRSS = 0;
@@ -817,6 +818,7 @@ void RuntimeOption::Load(Hdf &config) {
 
     EnableAPCSizeStats = stats["EnableAPCSizeStats"].getBool();
     EnableAPCSizeDetail = stats["EnableAPCSizeDetail"].getBool();
+    EnableAPCFetchStats = stats["EnableAPCFetchStats"].getBool();
     APCSizeCountPrime = stats["APCSizeCountPrime"].getBool();
   }
   {

@@ -24,6 +24,18 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class SharedValueProfile {
+private:
+  void init() {
+    key = NULL;
+    isGroup = false;
+    totalSize = 0;
+    keySize = 0;
+    keyCount = 0;
+    ttl = 0;
+    getCount = 0;
+    lastGetTime = 0;
+  }
+
 public:
   char *key;
   SharedVariantStats var;
@@ -34,23 +46,20 @@ public:
   int64 ttl; // valid for both, for group key stats, it's average
   // Also treat no ttl as 48-hrs.
 
+  // getCount and lastGetTime only valid for individual (so that we don't need
+  // normalize the key for every get)
+  int64 getCount;
+  time_t lastGetTime;
+
   SharedValueProfile() {
     // For temporary use only
-    key = NULL;
-    isGroup = false;
-    totalSize = 0;
-    keySize = 0;
-    keyCount = 0;
-    ttl = 0;
+    init();
   }
 
   SharedValueProfile(const char *key) {
+    init();
     this->key = strdup(key);
     isGroup = false;
-    totalSize = 0;
-    keySize = 0;
-    keyCount = 0;
-    ttl = 0;
   }
 
   virtual ~SharedValueProfile() {
@@ -67,6 +76,7 @@ public:
   static void onClear();
   static void onStore(StringData *key, SharedVariant *var, int64 ttl);
   static void onDelete(StringData *key, SharedVariant *var, bool replace);
+  static void onGet(StringData *key, SharedVariant *var);
   static void resetStats() {
     s_keyCount = 0;
     s_keySize = 0;
@@ -81,7 +91,7 @@ public:
   static std::string report_basic();
   static std::string report_basic_flat();
   static std::string report_keys();
-  static bool snapshot(const char *filename);
+  static bool snapshot(const char *filename, std::string& keySample);
 
 protected:
   static Mutex s_lock;
@@ -91,7 +101,7 @@ protected:
   static int32 s_variantCount; // how many variant
   static int64 s_dataSize; // how large is the data
   static int64 s_dataTotalSize; // how much space to hold data
-                                   // including structures
+                                // including structures
   static int64 s_totalSize; // total memory usage
   static int64 s_deleteSize;
   static int64 s_replaceSize;

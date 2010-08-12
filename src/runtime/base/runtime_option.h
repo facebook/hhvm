@@ -219,6 +219,7 @@ public:
 
   static bool EnableAPCSizeStats;
   static bool EnableAPCSizeDetail;
+  static bool EnableAPCFetchStats;
   static bool APCSizeCountPrime;
 
   static int64 MaxRSS;

@@ -250,7 +250,7 @@ Variant c_pear_error::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
   int count __attribute__((__unused__)) = params.size();
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
-    case 0x173:
+    case 0x156:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("pear_error::getUserInfo", 0, 1);
         return (t_getuserinfo(), null);
@@ -262,19 +262,19 @@ Variant c_pear_error::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
         return (t_getmessage(), null);
       }
       break;
-    case 0x174:
+    case 0x157:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("pear_error::getCallback", 0, 1);
         return (t_getcallback(), null);
       }
       break;
-    case 0x175:
+    case 0x158:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("pear_error::getDebugInfo", 0, 1);
         return (t_getdebuginfo(), null);
       }
       break;
-    case 0x176:
+    case 0x159:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count != 1) return throw_wrong_arguments("pear_error::addUserInfo", count, 1, 1, 1);
         {
@@ -285,7 +285,7 @@ Variant c_pear_error::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
         }
       }
       break;
-    case 0x177:
+    case 0x15a:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("pear_error::getBacktrace", 1, 1);
         {
@@ -303,7 +303,7 @@ Variant c_pear_error::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
         return (t_getcode(), null);
       }
       break;
-    case 0x178:
+    case 0x15b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 5) return throw_toomany_arguments("pear_error::pear_error", 5, 2);
         {
@@ -323,19 +323,19 @@ Variant c_pear_error::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
         }
       }
       break;
-    case 0x179:
+    case 0x15c:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("pear_error::getMode", 0, 1);
         return (t_getmode(), null);
       }
       break;
-    case 0x17a:
+    case 0x15d:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("pear_error::toString", 0, 1);
         return (t_tostring(), null);
       }
       break;
-    case 0xc7:
+    case 0x41:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("pear_error::getType", 0, 1);
         return (t_gettype(), null);
@@ -447,7 +447,7 @@ Variant c_pear_error::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
 Variant c_pear_error::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
-    case 0x173:
+    case 0x156:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("pear_error::getUserInfo", 0, 1);
         return (t_getuserinfo(), null);
@@ -459,25 +459,25 @@ Variant c_pear_error::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
         return (t_getmessage(), null);
       }
       break;
-    case 0x174:
+    case 0x157:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("pear_error::getCallback", 0, 1);
         return (t_getcallback(), null);
       }
       break;
-    case 0x175:
+    case 0x158:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("pear_error::getDebugInfo", 0, 1);
         return (t_getdebuginfo(), null);
       }
       break;
-    case 0x176:
+    case 0x159:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count != 1) return throw_wrong_arguments("pear_error::addUserInfo", count, 1, 1, 1);
         return (t_adduserinfo(a0), null);
       }
       break;
-    case 0x177:
+    case 0x15a:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("pear_error::getBacktrace", 1, 1);
         if (count <= 0) return (t_getbacktrace(), null);
@@ -490,7 +490,7 @@ Variant c_pear_error::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
         return (t_getcode(), null);
       }
       break;
-    case 0x178:
+    case 0x15b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 5) return throw_toomany_arguments("pear_error::pear_error", 5, 2);
         if (count <= 0) return (t_pear_error(), null);
@@ -501,19 +501,19 @@ Variant c_pear_error::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
         return (t_pear_error(a0, a1, a2, a3, a4), null);
       }
       break;
-    case 0x179:
+    case 0x15c:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("pear_error::getMode", 0, 1);
         return (t_getmode(), null);
       }
       break;
-    case 0x17a:
+    case 0x15d:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("pear_error::toString", 0, 1);
         return (t_tostring(), null);
       }
       break;
-    case 0xc7:
+    case 0x41:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("pear_error::getType", 0, 1);
         return (t_gettype(), null);
@@ -615,7 +615,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
 #ifdef FMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
-    case 0x173:
+    case 0x156:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -643,7 +643,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         return (t_getmessage(), null);
       }
       break;
-    case 0x174:
+    case 0x157:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -657,7 +657,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         return (t_getcallback(), null);
       }
       break;
-    case 0x175:
+    case 0x158:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -671,7 +671,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         return (t_getdebuginfo(), null);
       }
       break;
-    case 0x176:
+    case 0x159:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -689,7 +689,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         return (t_adduserinfo(a0), null);
       }
       break;
-    case 0x177:
+    case 0x15a:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -722,7 +722,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         return (t_getcode(), null);
       }
       break;
-    case 0x178:
+    case 0x15b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
         Variant a1;
@@ -761,7 +761,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         else return (t_pear_error(a0, a1, a2, a3, a4), null);
       }
       break;
-    case 0x179:
+    case 0x15c:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -775,7 +775,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         return (t_getmode(), null);
       }
       break;
-    case 0x17a:
+    case 0x15d:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -789,7 +789,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         return (t_tostring(), null);
       }
       break;
-    case 0xc7:
+    case 0x41:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();

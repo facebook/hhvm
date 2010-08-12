@@ -255,13 +255,13 @@ Variant c_directory::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0xab:
+    case 0x25:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
         return (t_close());
       }
       break;
-    case 0xac:
+    case 0x26:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
         return (t_read());
@@ -323,13 +323,13 @@ Variant c_directory::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
         return (t___construct(a0), null);
       }
       break;
-    case 0xab:
+    case 0x25:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
         return (t_close());
       }
       break;
-    case 0xac:
+    case 0x26:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
         return (t_read());
@@ -407,7 +407,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t___construct(a0), null);
       }
       break;
-    case 0xab:
+    case 0x25:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -421,7 +421,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_close());
       }
       break;
-    case 0xac:
+    case 0x26:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();

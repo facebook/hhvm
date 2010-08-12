@@ -6150,6 +6150,14 @@ bool TestCodeRun::TestErrorHandler() {
       "  echo 'Goodbye';"
       "  var_dump(error_get_last());"
       "}");
+  MVCR("<?php\n"
+      "function handler($code, $msg, $file, $line) { var_dump($line); }\n"
+      "set_error_handler('handler');\n"
+      "function f($a) {\n"
+      "  $b = $a[100];\n"
+      "  return $b;\n"
+      "}\n"
+      "f(array(1, 2, 3));\n");
 
   return true;
 }

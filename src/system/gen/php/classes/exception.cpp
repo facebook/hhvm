@@ -8256,7 +8256,7 @@ Variant c_errorexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
         return (t_gettraceasstring());
       }
       break;
-    case 0xc8:
+    case 0x42:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
         return (t_getseverity());
@@ -8410,7 +8410,7 @@ Variant c_errorexception::o_invoke_few_args(MethodIndex methodIndex, const char 
         return (t_gettraceasstring());
       }
       break;
-    case 0xc8:
+    case 0x42:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
         return (t_getseverity());
@@ -8648,7 +8648,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         return (t_gettraceasstring());
       }
       break;
-    case 0xc8:
+    case 0x42:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();

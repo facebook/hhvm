@@ -2949,19 +2949,19 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
   int count __attribute__((__unused__)) = params.size();
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
-    case 0xad:
+    case 0x27:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
-    case 0xae:
+    case 0x28:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
-    case 0xaf:
+    case 0x29:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         {
@@ -2973,7 +2973,7 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
         }
       }
       break;
-    case 0xb0:
+    case 0x2a:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
@@ -2985,7 +2985,7 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
         return (t_next());
       }
       break;
-    case 0xb1:
+    case 0x2b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
@@ -2997,7 +2997,7 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
         return (t_key());
       }
       break;
-    case 0xb2:
+    case 0x2c:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         {
@@ -3009,7 +3009,7 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
         }
       }
       break;
-    case 0xb3:
+    case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         {
@@ -3033,31 +3033,31 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
         return (t___tostring());
       }
       break;
-    case 0xb4:
+    case 0x2e:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
-    case 0xb5:
+    case 0x2f:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
-    case 0xb6:
+    case 0x30:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
       break;
-    case 0xf7:
+    case 0x44:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPathname", 0, 1);
         return (t_getsubpathname());
       }
       break;
-    case 0xf8:
+    case 0x45:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPath", 0, 1);
         return (t_getsubpath());
@@ -3076,7 +3076,7 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
         }
       }
       break;
-    case 0xb7:
+    case 0x31:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         {
@@ -3088,55 +3088,55 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
         }
       }
       break;
-    case 0xb8:
+    case 0x32:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
-    case 0xb9:
+    case 0x33:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       break;
-    case 0xba:
+    case 0x34:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
-    case 0xbb:
+    case 0x35:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
-    case 0xbc:
+    case 0x36:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
-    case 0xbe:
+    case 0x38:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
-    case 0xbd:
+    case 0x37:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
-    case 0xbf:
+    case 0x39:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
-    case 0xf9:
+    case 0x46:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::hasChildren", 0, 1);
         return (t_haschildren());
@@ -3153,19 +3153,19 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
         }
       }
       break;
-    case 0xc0:
+    case 0x3a:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
-    case 0xc1:
+    case 0x3b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
-    case 0xc2:
+    case 0x3c:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         {
@@ -3177,7 +3177,7 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
         }
       }
       break;
-    case 0xfa:
+    case 0x47:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getChildren", 0, 1);
         return (t_getchildren());
@@ -3189,19 +3189,19 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
         return (t_current());
       }
       break;
-    case 0xc4:
+    case 0x3e:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
-    case 0xc3:
+    case 0x3d:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
-    case 0xc5:
+    case 0x3f:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         {
@@ -3217,7 +3217,7 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
         }
       }
       break;
-    case 0xc6:
+    case 0x40:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("DirectoryIterator::isDot", 0, 1);
         return (t_isdot());
@@ -3229,7 +3229,7 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
         return (t_rewind());
       }
       break;
-    case 0xc7:
+    case 0x41:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
@@ -3526,26 +3526,26 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
 Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
-    case 0xad:
+    case 0x27:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
-    case 0xae:
+    case 0x28:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
-    case 0xaf:
+    case 0x29:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         if (count <= 0) return (t_getbasename());
         return (t_getbasename(a0));
       }
       break;
-    case 0xb0:
+    case 0x2a:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
@@ -3557,7 +3557,7 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex,
         return (t_next());
       }
       break;
-    case 0xb1:
+    case 0x2b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
@@ -3569,14 +3569,14 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex,
         return (t_key());
       }
       break;
-    case 0xb2:
+    case 0x2c:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         if (count <= 0) return (t_setfileclass());
         return (t_setfileclass(a0));
       }
       break;
-    case 0xb3:
+    case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
@@ -3595,31 +3595,31 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex,
         return (t___tostring());
       }
       break;
-    case 0xb4:
+    case 0x2e:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
-    case 0xb5:
+    case 0x2f:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
-    case 0xb6:
+    case 0x30:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
       break;
-    case 0xf7:
+    case 0x44:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPathname", 0, 1);
         return (t_getsubpathname());
       }
       break;
-    case 0xf8:
+    case 0x45:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPath", 0, 1);
         return (t_getsubpath());
@@ -3632,62 +3632,62 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex,
         return (t___construct(a0, a1), null);
       }
       break;
-    case 0xb7:
+    case 0x31:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
         return (t_getpathinfo(a0));
       }
       break;
-    case 0xb8:
+    case 0x32:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
-    case 0xb9:
+    case 0x33:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       break;
-    case 0xba:
+    case 0x34:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
-    case 0xbb:
+    case 0x35:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
-    case 0xbc:
+    case 0x36:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
-    case 0xbe:
+    case 0x38:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
-    case 0xbd:
+    case 0x37:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
-    case 0xbf:
+    case 0x39:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
-    case 0xf9:
+    case 0x46:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::hasChildren", 0, 1);
         return (t_haschildren());
@@ -3699,26 +3699,26 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex,
         return (t_seek(a0));
       }
       break;
-    case 0xc0:
+    case 0x3a:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
-    case 0xc1:
+    case 0x3b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
-    case 0xc2:
+    case 0x3c:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
         return (t_getfileinfo(a0));
       }
       break;
-    case 0xfa:
+    case 0x47:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getChildren", 0, 1);
         return (t_getchildren());
@@ -3730,19 +3730,19 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex,
         return (t_current());
       }
       break;
-    case 0xc4:
+    case 0x3e:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
-    case 0xc3:
+    case 0x3d:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
-    case 0xc5:
+    case 0x3f:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         if (count <= 0) return (t_openfile());
@@ -3751,7 +3751,7 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex,
         return (t_openfile(a0, a1, a2));
       }
       break;
-    case 0xc6:
+    case 0x40:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("DirectoryIterator::isDot", 0, 1);
         return (t_isdot());
@@ -3763,7 +3763,7 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex,
         return (t_rewind());
       }
       break;
-    case 0xc7:
+    case 0x41:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
@@ -4026,7 +4026,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
 #ifdef FMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
-    case 0xad:
+    case 0x27:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4040,7 +4040,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_getperms());
       }
       break;
-    case 0xae:
+    case 0x28:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4054,7 +4054,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_iswritable());
       }
       break;
-    case 0xaf:
+    case 0x29:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4073,7 +4073,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         else return (t_getbasename(a0));
       }
       break;
-    case 0xb0:
+    case 0x2a:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4101,7 +4101,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_next());
       }
       break;
-    case 0xb1:
+    case 0x2b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4129,7 +4129,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_key());
       }
       break;
-    case 0xb2:
+    case 0x2c:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4148,7 +4148,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         else return (t_setfileclass(a0));
       }
       break;
-    case 0xb3:
+    case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4195,7 +4195,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t___tostring());
       }
       break;
-    case 0xb4:
+    case 0x2e:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4209,7 +4209,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_getlinktarget());
       }
       break;
-    case 0xb5:
+    case 0x2f:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4223,7 +4223,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_isreadable());
       }
       break;
-    case 0xb6:
+    case 0x30:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4237,7 +4237,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_getrealpath());
       }
       break;
-    case 0xf7:
+    case 0x44:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4251,7 +4251,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_getsubpathname());
       }
       break;
-    case 0xf8:
+    case 0x45:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4288,7 +4288,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         else return (t___construct(a0, a1), null);
       }
       break;
-    case 0xb7:
+    case 0x31:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4307,7 +4307,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         else return (t_getpathinfo(a0));
       }
       break;
-    case 0xb8:
+    case 0x32:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4321,7 +4321,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_getctime());
       }
       break;
-    case 0xb9:
+    case 0x33:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4335,7 +4335,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_getpath());
       }
       break;
-    case 0xba:
+    case 0x34:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4349,7 +4349,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_getinode());
       }
       break;
-    case 0xbb:
+    case 0x35:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4363,7 +4363,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_islink());
       }
       break;
-    case 0xbc:
+    case 0x36:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4377,7 +4377,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_getsize());
       }
       break;
-    case 0xbe:
+    case 0x38:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4391,7 +4391,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_isfile());
       }
       break;
-    case 0xbd:
+    case 0x37:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4405,7 +4405,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_getfilename());
       }
       break;
-    case 0xbf:
+    case 0x39:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4419,7 +4419,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_getowner());
       }
       break;
-    case 0xf9:
+    case 0x46:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4451,7 +4451,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_seek(a0));
       }
       break;
-    case 0xc0:
+    case 0x3a:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4465,7 +4465,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_getmtime());
       }
       break;
-    case 0xc1:
+    case 0x3b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4479,7 +4479,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_isdir());
       }
       break;
-    case 0xc2:
+    case 0x3c:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4498,7 +4498,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         else return (t_getfileinfo(a0));
       }
       break;
-    case 0xfa:
+    case 0x47:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4526,7 +4526,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_current());
       }
       break;
-    case 0xc4:
+    case 0x3e:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4540,7 +4540,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_isexecutable());
       }
       break;
-    case 0xc3:
+    case 0x3d:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4554,7 +4554,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_getatime());
       }
       break;
-    case 0xc5:
+    case 0x3f:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
         Variant a1;
@@ -4583,7 +4583,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         else return (t_openfile(a0, a1, a2));
       }
       break;
-    case 0xc6:
+    case 0x40:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4611,7 +4611,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_rewind());
       }
       break;
-    case 0xc7:
+    case 0x41:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5463,19 +5463,19 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
   int count __attribute__((__unused__)) = params.size();
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
-    case 0xad:
+    case 0x27:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
-    case 0xae:
+    case 0x28:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
-    case 0xaf:
+    case 0x29:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         {
@@ -5487,7 +5487,7 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
         }
       }
       break;
-    case 0xb0:
+    case 0x2a:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
@@ -5499,7 +5499,7 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
         return (t_next());
       }
       break;
-    case 0xb1:
+    case 0x2b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
@@ -5511,7 +5511,7 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
         return (t_key());
       }
       break;
-    case 0xb2:
+    case 0x2c:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         {
@@ -5523,7 +5523,7 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
         }
       }
       break;
-    case 0xb3:
+    case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         {
@@ -5547,19 +5547,19 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
         return (t___tostring());
       }
       break;
-    case 0xb4:
+    case 0x2e:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
-    case 0xb5:
+    case 0x2f:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
-    case 0xb6:
+    case 0x30:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
@@ -5576,7 +5576,7 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
         }
       }
       break;
-    case 0xb7:
+    case 0x31:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         {
@@ -5588,49 +5588,49 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
         }
       }
       break;
-    case 0xb8:
+    case 0x32:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
-    case 0xb9:
+    case 0x33:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       break;
-    case 0xba:
+    case 0x34:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
-    case 0xbb:
+    case 0x35:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
-    case 0xbc:
+    case 0x36:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
-    case 0xbe:
+    case 0x38:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
-    case 0xbd:
+    case 0x37:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
-    case 0xbf:
+    case 0x39:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
@@ -5647,19 +5647,19 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
         }
       }
       break;
-    case 0xc0:
+    case 0x3a:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
-    case 0xc1:
+    case 0x3b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
-    case 0xc2:
+    case 0x3c:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         {
@@ -5677,19 +5677,19 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
         return (t_current());
       }
       break;
-    case 0xc4:
+    case 0x3e:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
-    case 0xc3:
+    case 0x3d:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
-    case 0xc5:
+    case 0x3f:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         {
@@ -5705,7 +5705,7 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
         }
       }
       break;
-    case 0xc6:
+    case 0x40:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("DirectoryIterator::isDot", 0, 1);
         return (t_isdot());
@@ -5717,7 +5717,7 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
         return (t_rewind());
       }
       break;
-    case 0xc7:
+    case 0x41:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
@@ -5988,26 +5988,26 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
 Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
-    case 0xad:
+    case 0x27:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
-    case 0xae:
+    case 0x28:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
-    case 0xaf:
+    case 0x29:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         if (count <= 0) return (t_getbasename());
         return (t_getbasename(a0));
       }
       break;
-    case 0xb0:
+    case 0x2a:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
@@ -6019,7 +6019,7 @@ Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const ch
         return (t_next());
       }
       break;
-    case 0xb1:
+    case 0x2b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
@@ -6031,14 +6031,14 @@ Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const ch
         return (t_key());
       }
       break;
-    case 0xb2:
+    case 0x2c:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         if (count <= 0) return (t_setfileclass());
         return (t_setfileclass(a0));
       }
       break;
-    case 0xb3:
+    case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
@@ -6057,19 +6057,19 @@ Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const ch
         return (t___tostring());
       }
       break;
-    case 0xb4:
+    case 0x2e:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
-    case 0xb5:
+    case 0x2f:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
-    case 0xb6:
+    case 0x30:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
@@ -6081,56 +6081,56 @@ Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const ch
         return (t___construct(a0), null);
       }
       break;
-    case 0xb7:
+    case 0x31:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
         return (t_getpathinfo(a0));
       }
       break;
-    case 0xb8:
+    case 0x32:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
-    case 0xb9:
+    case 0x33:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       break;
-    case 0xba:
+    case 0x34:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
-    case 0xbb:
+    case 0x35:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
-    case 0xbc:
+    case 0x36:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
-    case 0xbe:
+    case 0x38:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
-    case 0xbd:
+    case 0x37:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
-    case 0xbf:
+    case 0x39:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
@@ -6142,19 +6142,19 @@ Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const ch
         return (t_seek(a0));
       }
       break;
-    case 0xc0:
+    case 0x3a:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
-    case 0xc1:
+    case 0x3b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
-    case 0xc2:
+    case 0x3c:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
@@ -6167,19 +6167,19 @@ Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const ch
         return (t_current());
       }
       break;
-    case 0xc4:
+    case 0x3e:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
-    case 0xc3:
+    case 0x3d:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
-    case 0xc5:
+    case 0x3f:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         if (count <= 0) return (t_openfile());
@@ -6188,7 +6188,7 @@ Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const ch
         return (t_openfile(a0, a1, a2));
       }
       break;
-    case 0xc6:
+    case 0x40:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("DirectoryIterator::isDot", 0, 1);
         return (t_isdot());
@@ -6200,7 +6200,7 @@ Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const ch
         return (t_rewind());
       }
       break;
-    case 0xc7:
+    case 0x41:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
@@ -6438,7 +6438,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
 #ifdef FMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
-    case 0xad:
+    case 0x27:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6452,7 +6452,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_getperms());
       }
       break;
-    case 0xae:
+    case 0x28:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6466,7 +6466,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_iswritable());
       }
       break;
-    case 0xaf:
+    case 0x29:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -6485,7 +6485,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         else return (t_getbasename(a0));
       }
       break;
-    case 0xb0:
+    case 0x2a:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6513,7 +6513,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_next());
       }
       break;
-    case 0xb1:
+    case 0x2b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6541,7 +6541,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_key());
       }
       break;
-    case 0xb2:
+    case 0x2c:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -6560,7 +6560,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         else return (t_setfileclass(a0));
       }
       break;
-    case 0xb3:
+    case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -6607,7 +6607,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t___tostring());
       }
       break;
-    case 0xb4:
+    case 0x2e:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6621,7 +6621,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_getlinktarget());
       }
       break;
-    case 0xb5:
+    case 0x2f:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6635,7 +6635,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_isreadable());
       }
       break;
-    case 0xb6:
+    case 0x30:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6667,7 +6667,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t___construct(a0), null);
       }
       break;
-    case 0xb7:
+    case 0x31:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -6686,7 +6686,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         else return (t_getpathinfo(a0));
       }
       break;
-    case 0xb8:
+    case 0x32:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6700,7 +6700,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_getctime());
       }
       break;
-    case 0xb9:
+    case 0x33:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6714,7 +6714,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_getpath());
       }
       break;
-    case 0xba:
+    case 0x34:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6728,7 +6728,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_getinode());
       }
       break;
-    case 0xbb:
+    case 0x35:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6742,7 +6742,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_islink());
       }
       break;
-    case 0xbc:
+    case 0x36:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6756,7 +6756,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_getsize());
       }
       break;
-    case 0xbe:
+    case 0x38:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6770,7 +6770,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_isfile());
       }
       break;
-    case 0xbd:
+    case 0x37:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6784,7 +6784,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_getfilename());
       }
       break;
-    case 0xbf:
+    case 0x39:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6816,7 +6816,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_seek(a0));
       }
       break;
-    case 0xc0:
+    case 0x3a:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6830,7 +6830,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_getmtime());
       }
       break;
-    case 0xc1:
+    case 0x3b:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6844,7 +6844,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_isdir());
       }
       break;
-    case 0xc2:
+    case 0x3c:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -6877,7 +6877,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_current());
       }
       break;
-    case 0xc4:
+    case 0x3e:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6891,7 +6891,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_isexecutable());
       }
       break;
-    case 0xc3:
+    case 0x3d:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6905,7 +6905,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_getatime());
       }
       break;
-    case 0xc5:
+    case 0x3f:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
         Variant a1;
@@ -6934,7 +6934,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         else return (t_openfile(a0, a1, a2));
       }
       break;
-    case 0xc6:
+    case 0x40:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6962,7 +6962,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         return (t_rewind());
       }
       break;
-    case 0xc7:
+    case 0x41:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();

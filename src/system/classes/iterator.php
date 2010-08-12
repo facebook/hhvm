@@ -637,7 +637,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
  * @return     mixed   No value is returned.
  */
   public function valid() {
-    return current($this->arr) !== false;
+    return key($this->arr) !== null;
   }
 }
 

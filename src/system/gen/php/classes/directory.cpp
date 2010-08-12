@@ -73,7 +73,7 @@ Variant c_directory::o_get(CStrRef prop, int64 phash, bool error, const char *co
 #endif // OMIT_JUMP_TABLE_CLASS_get_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_directory
 Variant c_directory::o_getPublic(CStrRef s, int64 hash, bool error) {
-  if (hash < 0) hash = StringData::Hash(s.get());
+  if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 0:
       HASH_RETURN_STRING(0x1429F792A6880074LL, m_path,
@@ -101,7 +101,7 @@ bool c_directory::o_exists(CStrRef prop, int64 phash, const char *context, int64
 #endif // OMIT_JUMP_TABLE_CLASS_exists_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_directory
 bool c_directory::o_existsPublic(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = StringData::Hash(s.get());
+  if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 0:
       HASH_EXISTS_STRING(0x1429F792A6880074LL, "path", 4);
@@ -127,7 +127,7 @@ Variant c_directory::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, c
 #endif // OMIT_JUMP_TABLE_CLASS_set_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_directory
 Variant c_directory::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  if (hash < 0) hash = StringData::Hash(s.get());
+  if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 0:
       HASH_SET_STRING(0x1429F792A6880074LL, m_path,
@@ -155,7 +155,7 @@ Variant& c_directory::o_lval(CStrRef prop, int64 phash, const char *context, int
 #endif // OMIT_JUMP_TABLE_CLASS_lval_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_directory
 Variant& c_directory::o_lvalPublic(CStrRef s, int64 hash) {
-  if (hash < 0) hash = StringData::Hash(s.get());
+  if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 0:
       HASH_RETURN_STRING(0x1429F792A6880074LL, m_path,
@@ -255,13 +255,13 @@ Variant c_directory::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x25:
+    case 0xab:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
         return (t_close());
       }
       break;
-    case 0x26:
+    case 0xac:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
         return (t_read());
@@ -323,13 +323,13 @@ Variant c_directory::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
         return (t___construct(a0), null);
       }
       break;
-    case 0x25:
+    case 0xab:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
         return (t_close());
       }
       break;
-    case 0x26:
+    case 0xac:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
         return (t_read());
@@ -407,7 +407,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t___construct(a0), null);
       }
       break;
-    case 0x25:
+    case 0xab:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -421,7 +421,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_close());
       }
       break;
-    case 0x26:
+    case 0xac:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();

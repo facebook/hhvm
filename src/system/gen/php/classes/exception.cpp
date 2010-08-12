@@ -6938,7 +6938,7 @@ Variant c_exception::o_get(CStrRef prop, int64 phash, bool error, const char *co
 #endif // OMIT_JUMP_TABLE_CLASS_get_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_exception
 Variant c_exception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  if (hash < 0) hash = StringData::Hash(s.get());
+  if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 7:
       HASH_RETURN_STRING(0x3CCB986B2CF0A747LL, m_trace,
@@ -6978,7 +6978,7 @@ bool c_exception::o_exists(CStrRef prop, int64 phash, const char *context, int64
 #endif // OMIT_JUMP_TABLE_CLASS_exists_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_exception
 bool c_exception::o_existsPublic(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = StringData::Hash(s.get());
+  if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 7:
       HASH_EXISTS_STRING(0x3CCB986B2CF0A747LL, "trace", 5);
@@ -7013,7 +7013,7 @@ Variant c_exception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, c
 #endif // OMIT_JUMP_TABLE_CLASS_set_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_exception
 Variant c_exception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  if (hash < 0) hash = StringData::Hash(s.get());
+  if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 7:
       HASH_SET_STRING(0x3CCB986B2CF0A747LL, m_trace,
@@ -7053,7 +7053,7 @@ Variant& c_exception::o_lval(CStrRef prop, int64 phash, const char *context, int
 #endif // OMIT_JUMP_TABLE_CLASS_lval_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_exception
 Variant& c_exception::o_lvalPublic(CStrRef s, int64 hash) {
-  if (hash < 0) hash = StringData::Hash(s.get());
+  if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 7:
       HASH_RETURN_STRING(0x3CCB986B2CF0A747LL, m_trace,
@@ -7965,7 +7965,7 @@ Variant c_errorexception::o_get(CStrRef prop, int64 phash, bool error, const cha
 #endif // OMIT_JUMP_TABLE_CLASS_get_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_errorexception
 Variant c_errorexception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  if (hash < 0) hash = StringData::Hash(s.get());
+  if (hash < 0) hash = s->hash();
   switch (hash & 1) {
     case 1:
       HASH_RETURN_STRING(0x4FDAA620FA5F15F9LL, m_severity,
@@ -7989,7 +7989,7 @@ bool c_errorexception::o_exists(CStrRef prop, int64 phash, const char *context, 
 #endif // OMIT_JUMP_TABLE_CLASS_exists_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_errorexception
 bool c_errorexception::o_existsPublic(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = StringData::Hash(s.get());
+  if (hash < 0) hash = s->hash();
   switch (hash & 1) {
     case 1:
       HASH_EXISTS_STRING(0x4FDAA620FA5F15F9LL, "severity", 8);
@@ -8012,7 +8012,7 @@ Variant c_errorexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forIn
 #endif // OMIT_JUMP_TABLE_CLASS_set_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_errorexception
 Variant c_errorexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  if (hash < 0) hash = StringData::Hash(s.get());
+  if (hash < 0) hash = s->hash();
   switch (hash & 1) {
     case 1:
       HASH_SET_STRING(0x4FDAA620FA5F15F9LL, m_severity,
@@ -8036,7 +8036,7 @@ Variant& c_errorexception::o_lval(CStrRef prop, int64 phash, const char *context
 #endif // OMIT_JUMP_TABLE_CLASS_lval_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_errorexception
 Variant& c_errorexception::o_lvalPublic(CStrRef s, int64 hash) {
-  if (hash < 0) hash = StringData::Hash(s.get());
+  if (hash < 0) hash = s->hash();
   switch (hash & 1) {
     case 1:
       HASH_RETURN_STRING(0x4FDAA620FA5F15F9LL, m_severity,
@@ -8256,7 +8256,7 @@ Variant c_errorexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
         return (t_gettraceasstring());
       }
       break;
-    case 0x42:
+    case 0xc8:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
         return (t_getseverity());
@@ -8410,7 +8410,7 @@ Variant c_errorexception::o_invoke_few_args(MethodIndex methodIndex, const char 
         return (t_gettraceasstring());
       }
       break;
-    case 0x42:
+    case 0xc8:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
         return (t_getseverity());
@@ -8648,7 +8648,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         return (t_gettraceasstring());
       }
       break;
-    case 0x42:
+    case 0xc8:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();

@@ -145,7 +145,7 @@ bool ObjectData::o_exists(CStrRef propName, int64 hash,
     sd = context.get();
   }
   ASSERT(sd && sd->data());
-  return o_exists(propName, hash, sd->data(), StringData::Hash(sd));
+  return o_exists(propName, hash, sd->data(), sd->hash());
 }
 
 bool ObjectData::o_exists(CStrRef propName, int64 phash,
@@ -168,7 +168,7 @@ Variant ObjectData::o_get(CStrRef propName, int64 hash,
     sd = context.get();
   }
   ASSERT(sd && sd->data());
-  return o_get(propName, hash, error, sd->data(), StringData::Hash(sd));
+  return o_get(propName, hash, error, sd->data(), sd->hash());
 }
 
 Variant ObjectData::o_get(CStrRef propName, int64 phash, bool error,
@@ -201,7 +201,7 @@ Variant ObjectData::o_getUnchecked(CStrRef propName, int64 hash,
     sd = context.get();
   }
   ASSERT(sd && sd->data());
-  return o_getUnchecked(propName, hash, sd->data(), StringData::Hash(sd));
+  return o_getUnchecked(propName, hash, sd->data(), sd->hash());
 }
 
 Variant ObjectData::o_getUnchecked(CStrRef propName, int64 phash,
@@ -218,7 +218,7 @@ Variant ObjectData::o_set(CStrRef propName, int64 hash, CVarRef v,
     sd = context.get();
   }
   ASSERT(sd && sd->data());
-  return o_set(propName, hash, v, forInit, sd->data(), StringData::Hash(sd));
+  return o_set(propName, hash, v, forInit, sd->data(), sd->hash());
 }
 
 Variant ObjectData::o_set(CStrRef propName, int64 phash, CVarRef v,
@@ -279,7 +279,7 @@ Variant &ObjectData::o_lval(CStrRef propName, int64 hash,
     sd = context.get();
   }
   ASSERT(sd && sd->data());
-  return o_lval(propName, hash, sd->data(), StringData::Hash(sd));
+  return o_lval(propName, hash, sd->data(), sd->hash());
 }
 
 Variant &ObjectData::o_lval(CStrRef propName, int64 phash,
@@ -426,8 +426,7 @@ Variant ObjectData::o_invoke(CStrRef s, CArrRef params, int64 hash /* = -1 */,
                              bool fatal /* = true */) {
   StringData *sd = s.get();
   ASSERT(sd && sd->data());
-  return o_invoke_mil(sd->data(), params,
-                      hash < 0 ? StringData::Hash(sd) : hash,
+  return o_invoke_mil(sd->data(), params, hash < 0 ? sd->hash() : hash,
                       fatal);
 }
 
@@ -437,15 +436,14 @@ Variant ObjectData::o_root_invoke(CStrRef s, CArrRef params,
   StringData *sd = s.get();
   ASSERT(sd && sd->data());
   return o_root_invoke_mil(sd->data(), params,
-                           hash < 0 ? StringData::Hash(sd) : hash, fatal);
+                           hash < 0 ? sd->hash() : hash, fatal);
 }
 
 Variant ObjectData::o_invoke_few_args(CStrRef s, int64 hash, int count,
                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
   StringData *sd = s.get();
   ASSERT(sd && sd->data());
-  return o_invoke_few_args_mil(sd->data(),
-                               hash < 0 ? StringData::Hash(sd) : hash,
+  return o_invoke_few_args_mil(sd->data(), hash < 0 ? sd->hash() : hash,
                                count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
@@ -453,8 +451,7 @@ Variant ObjectData::o_root_invoke_few_args(CStrRef s, int64 hash, int count,
                                            INVOKE_FEW_ARGS_IMPL_ARGS) {
   StringData *sd = s.get();
   ASSERT(sd && sd->data());
-  return o_root_invoke_few_args_mil(sd->data(),
-                                    hash < 0 ? StringData::Hash(sd) : hash,
+  return o_root_invoke_few_args_mil(sd->data(), hash < 0 ? sd->hash() : hash,
                                     count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 

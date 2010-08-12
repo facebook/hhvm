@@ -162,28 +162,29 @@ class StringData {
   double toDouble () const;
   DataType toNumeric(int64 &ival, double &dval) const;
 
-  static size_t Hash(const StringData *s) {
-    ASSERT(s);
-    if (s->isStatic()) return s->getPrecomputedHash();
-    if (s->isShared()) return s->getSharedStringHash();
-    if (s->m_hash == 0) {
-      s->m_hash = hash_string(s->data(), s->size());
+  int64 hash() const {
+    if (isStatic()) return getPrecomputedHash();
+    if (isShared()) return getSharedStringHash();
+    if (m_hash == 0) {
+      m_hash = hash_string(data(), size());
     }
-    return s->m_hash;
+    return m_hash;
   }
 
-  static bool Equal(const StringData *s1, const StringData *s2) {
-    int len = s1->size();
-    if (s2->size() != len) return false;
-    if (s1->data() == s2->data()) return true;
-    return !memcmp(s1->data(), s2->data(), len);
+  bool equal(const StringData *s) const {
+    ASSERT(s);
+    int len = size();
+    if (s->size() != len) return false;
+    if (data() == s->data()) return true;
+    return !memcmp(data(), s->data(), len);
   }
 
-  static bool IEqual(const StringData *s1, const StringData *s2) {
-    int len = s1->size();
-    if (s2->size() != len) return false;
-    if (s1->data() == s2->data()) return true;
-    return !strncasecmp(s1->data(), s2->data(), len);
+  bool iequal(const StringData *s) const {
+    ASSERT(s);
+    int len = size();
+    if (s->size() != len) return false;
+    if (data() == s->data()) return true;
+    return !strncasecmp(data(), s->data(), len);
   }
 
   /**

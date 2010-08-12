@@ -75,7 +75,7 @@ JumpTable::JumpTable(CodeGenerator &cg,
     m_cg_printf("int64 ");
   }
   if (useString) {
-    m_cg_printf("hash = StringData::Hash(s.get());\n");
+    m_cg_printf("hash = s->hash();\n");
   } else {
     m_cg_printf("hash = hash_string(s);\n");
   }

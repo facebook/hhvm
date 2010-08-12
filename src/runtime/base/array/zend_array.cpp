@@ -345,7 +345,7 @@ Variant ZendArray::get(litstr k, int64 prehash /* = -1 */,
 Variant ZendArray::get(CStrRef k, int64 prehash /* = -1 */,
                        bool error /* = false */) const {
   StringData *key = k.get();
-  if (prehash < 0) prehash = StringData::Hash(key);
+  if (prehash < 0) prehash = key->hash();
   Bucket *p = find(key->data(), key->size(), prehash);
   if (p) {
     return p->data;
@@ -364,7 +364,7 @@ Variant ZendArray::get(CVarRef k, int64 prehash /* = -1 */,
   } else {
     String key = k.toString();
     StringData *strkey = key.get();
-    if (prehash < 0) prehash = StringData::Hash(strkey);
+    if (prehash < 0) prehash = strkey->hash();
     p = find(strkey->data(), strkey->size(), prehash);
   }
   if (p) {
@@ -378,7 +378,7 @@ Variant ZendArray::get(CVarRef k, int64 prehash /* = -1 */,
 
 Variant ZendArray::fetch(CStrRef k) const {
   StringData *key = k.get();
-  int64 prehash = StringData::Hash(key);
+  int64 prehash = key->hash();
   Bucket *p = find(key->data(), key->size(), prehash);
   if (p) {
     return p->data;
@@ -393,7 +393,7 @@ void ZendArray::load(CVarRef k, Variant &v) const {
   } else {
     String key = k.toString();
     StringData *strkey = key.get();
-    int64 prehash = StringData::Hash(strkey);
+    int64 prehash = strkey->hash();
     p = find(strkey->data(), strkey->size(), prehash);
   }
   if (p) {
@@ -709,7 +709,7 @@ bool ZendArray::update(litstr key, int64 h, CVarRef data) {
 }
 
 bool ZendArray::update(StringData *key, int64 h, CVarRef data) {
-  if (h < 0) h = StringData::Hash(key);
+  if (h < 0) h = key->hash();
   Bucket *p = find(key->data(), key->size(), h);
   if (p) {
     p->data = data;
@@ -774,7 +774,7 @@ ArrayData *ZendArray::lval(CStrRef k, Variant *&ret, bool copy,
                            int64 prehash /* = -1 */,
                            bool checkExist /* = false */) {
   StringData *key = k.get();
-  if (prehash < 0) prehash = StringData::Hash(key);
+  if (prehash < 0) prehash = key->hash();
   if (!copy) {
     addLval(key, prehash, &ret);
     return NULL;

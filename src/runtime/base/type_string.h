@@ -325,19 +325,21 @@ extern const String null_string;
 
 struct string_data_hash {
   size_t operator()(const StringData *s) const {
-    return StringData::Hash(s);
+    return s->hash();
   }
 };
 
 struct string_data_equal {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    return StringData::Equal(s1, s2);
+    ASSERT(s1 && s2);
+    return s1->equal(s2);
   }
 };
 
 struct string_data_iequal {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    return StringData::IEqual(s1, s2);
+    ASSERT(s1 && s2);
+    return s1->iequal(s2);
   }
 };
 
@@ -346,19 +348,19 @@ typedef hphp_hash_set<StringData *, string_data_hash, string_data_equal>
 
 struct hphp_string_hash {
   size_t operator()(CStrRef s) const {
-    return StringData::Hash(s.get());
+    return s->hash();
   }
 };
 
 struct hphp_string_equal {
   bool operator()(CStrRef s1, CStrRef s2) const {
-    return StringData::Equal(s1.get(), s2.get());
+    return s1->equal(s2.get());
   }
 };
 
 struct hphp_string_iequal {
   bool operator()(CStrRef s1, const CStrRef s2) const {
-    return StringData::IEqual(s1.get(), s2.get());
+    return s1->iequal(s2.get());
   }
 };
 

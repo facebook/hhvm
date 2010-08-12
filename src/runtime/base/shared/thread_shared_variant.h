@@ -59,7 +59,7 @@ public:
   size_t stringLength() const;
   virtual int64 stringHash() const {
     ASSERT(is(KindOfString));
-    return StringData::Hash(m_data.str);
+    return m_data.str->hash();
   }
 
   size_t arrSize() const;

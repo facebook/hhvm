@@ -60,7 +60,7 @@ Array Globals::getDynamicConstants() const {
 
 bool Globals::function_exists(CStrRef name) {
   return m_volatileFunctions.exists(Util::toLower(name.data()).c_str(),
-                                    StringData::Hash(name.get()), true);
+                                    name->hash(), true);
 }
 
 bool Globals::class_exists(const char *name) {

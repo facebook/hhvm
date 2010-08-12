@@ -195,7 +195,7 @@ Variant invoke(CStrRef function, CArrRef params, int64 hash /* = -1 */,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   StringData *sd = function.get();
   ASSERT(sd && sd->data());
-  return invoke(sd->data(), params, hash < 0 ? StringData::Hash(sd) : hash,
+  return invoke(sd->data(), params, hash < 0 ? sd->hash() : hash,
                 tryInterp, fatal);
 }
 

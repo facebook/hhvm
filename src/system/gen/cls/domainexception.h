@@ -25,10 +25,10 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 94 */
 class c_domainexception : public c_logicexception {
-  BEGIN_CLASS_MAP(domainexception)
-    PARENT_CLASS(exception)
-    PARENT_CLASS(logicexception)
-  END_CLASS_MAP(domainexception)
+  BEGIN_CLASS_MAP(DomainException)
+    PARENT_CLASS(Exception)
+    PARENT_CLASS(LogicException)
+  END_CLASS_MAP(DomainException)
   DECLARE_CLASS_COMMON(domainexception, DomainException)
   DECLARE_INVOKE_EX(domainexception, DomainException, logicexception)
 

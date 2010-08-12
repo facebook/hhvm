@@ -24,8 +24,8 @@ namespace HPHP {
 
 /* SRC: classes/directory.php line 3 */
 class c_directory : public ExtObjectData {
-  BEGIN_CLASS_MAP(directory)
-  END_CLASS_MAP(directory)
+  BEGIN_CLASS_MAP(Directory)
+  END_CLASS_MAP(Directory)
   DECLARE_CLASS_COMMON(directory, Directory)
   DECLARE_INVOKE_EX(directory, Directory, ObjectData)
 

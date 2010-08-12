@@ -733,7 +733,7 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
     serializer->writeOverflow((void*)this, true);
   } else if ((serializer->getType() == VariableSerializer::Serialize ||
               serializer->getType() == VariableSerializer::APCSerialize) &&
-             o_instanceof("serializable")) {
+             o_instanceof("Serializable")) {
     Variant ret =
       const_cast<ObjectData*>(this)->o_invoke_mil(
                                               "serialize", Array(), -1);

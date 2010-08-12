@@ -25,11 +25,11 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 272 */
 class c_filteriterator : public ExtObjectData {
-  BEGIN_CLASS_MAP(filteriterator)
-    PARENT_CLASS(iterator)
-    PARENT_CLASS(outeriterator)
-    PARENT_CLASS(traversable)
-  END_CLASS_MAP(filteriterator)
+  BEGIN_CLASS_MAP(FilterIterator)
+    PARENT_CLASS(Iterator)
+    PARENT_CLASS(OuterIterator)
+    PARENT_CLASS(Traversable)
+  END_CLASS_MAP(FilterIterator)
   DECLARE_CLASS_COMMON(filteriterator, FilterIterator)
   DECLARE_INVOKE_EX(filteriterator, FilterIterator, ObjectData)
 

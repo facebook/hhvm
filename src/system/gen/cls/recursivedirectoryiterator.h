@@ -26,14 +26,14 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 210 */
 class c_recursivedirectoryiterator : public c_directoryiterator {
-  BEGIN_CLASS_MAP(recursivedirectoryiterator)
-    PARENT_CLASS(directoryiterator)
-    PARENT_CLASS(iterator)
-    PARENT_CLASS(recursiveiterator)
-    PARENT_CLASS(seekableiterator)
-    PARENT_CLASS(splfileinfo)
-    PARENT_CLASS(traversable)
-  END_CLASS_MAP(recursivedirectoryiterator)
+  BEGIN_CLASS_MAP(RecursiveDirectoryIterator)
+    PARENT_CLASS(DirectoryIterator)
+    PARENT_CLASS(Iterator)
+    PARENT_CLASS(RecursiveIterator)
+    PARENT_CLASS(SeekableIterator)
+    PARENT_CLASS(SplFileInfo)
+    PARENT_CLASS(Traversable)
+  END_CLASS_MAP(RecursiveDirectoryIterator)
   DECLARE_CLASS_COMMON(recursivedirectoryiterator, RecursiveDirectoryIterator)
   DECLARE_INVOKE_EX(recursivedirectoryiterator, RecursiveDirectoryIterator, directoryiterator)
 

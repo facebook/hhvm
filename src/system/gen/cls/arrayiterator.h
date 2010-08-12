@@ -27,13 +27,13 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 69 */
 class c_arrayiterator : public ExtObjectData {
-  BEGIN_CLASS_MAP(arrayiterator)
-    PARENT_CLASS(arrayaccess)
-    PARENT_CLASS(countable)
-    PARENT_CLASS(iterator)
-    PARENT_CLASS(seekableiterator)
-    PARENT_CLASS(traversable)
-  END_CLASS_MAP(arrayiterator)
+  BEGIN_CLASS_MAP(ArrayIterator)
+    PARENT_CLASS(ArrayAccess)
+    PARENT_CLASS(Countable)
+    PARENT_CLASS(Iterator)
+    PARENT_CLASS(SeekableIterator)
+    PARENT_CLASS(Traversable)
+  END_CLASS_MAP(ArrayIterator)
   DECLARE_CLASS_COMMON(arrayiterator, ArrayIterator)
   DECLARE_INVOKE_EX(arrayiterator, ArrayIterator, ObjectData)
 

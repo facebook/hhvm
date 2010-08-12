@@ -24,8 +24,8 @@ namespace HPHP {
 
 /* SRC: classes/stdclass.php line 4 */
 class c_stdclass : public ExtObjectData {
-  BEGIN_CLASS_MAP(stdclass)
-  END_CLASS_MAP(stdclass)
+  BEGIN_CLASS_MAP(stdClass)
+  END_CLASS_MAP(stdClass)
   DECLARE_CLASS_COMMON(stdclass, stdClass)
   DECLARE_INVOKE_EX(stdclass, stdClass, ObjectData)
 

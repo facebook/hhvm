@@ -25,10 +25,10 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 95 */
 class c_invalidargumentexception : public c_logicexception {
-  BEGIN_CLASS_MAP(invalidargumentexception)
-    PARENT_CLASS(exception)
-    PARENT_CLASS(logicexception)
-  END_CLASS_MAP(invalidargumentexception)
+  BEGIN_CLASS_MAP(InvalidArgumentException)
+    PARENT_CLASS(Exception)
+    PARENT_CLASS(LogicException)
+  END_CLASS_MAP(InvalidArgumentException)
   DECLARE_CLASS_COMMON(invalidargumentexception, InvalidArgumentException)
   DECLARE_INVOKE_EX(invalidargumentexception, InvalidArgumentException, logicexception)
 

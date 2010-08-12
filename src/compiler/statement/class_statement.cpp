@@ -536,14 +536,17 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         bases.erase(unique(bases.begin(), bases.end()), bases.end());
 
         cg_indentBegin("BEGIN_CLASS_MAP(%s)\n",
-                       Util::toLower(classScope->getName()).c_str());
+                       classScope->getOriginalName().c_str());
         for (unsigned int i = 0; i < bases.size(); i++) {
-          cg_printf("PARENT_CLASS(%s)\n", bases[i].c_str());
+          ClassScopePtr baseCls = ar->findClass(bases[i]);
+          cg_printf("PARENT_CLASS(%s)\n",
+                    (baseCls ? baseCls->getOriginalName() : bases[i]).c_str());
         }
         if (classScope->derivesFromRedeclaring()) {
           cg_printf("CLASS_MAP_REDECLARED()\n");
         }
-        cg_indentEnd("END_CLASS_MAP(%s)\n", clsName);
+        cg_indentEnd("END_CLASS_MAP(%s)\n",
+                     classScope->getOriginalName().c_str());
       }
 
       if (Option::GenerateCPPMacros) {
@@ -555,7 +558,8 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         bool redec = classScope->isRedeclaring();
         if (!classScope->derivesFromRedeclaring()) {
           outputCPPClassDecl(cg, ar, clsName, m_originalName.c_str(),
-                             parCls ? parCls->getId(cg).c_str() : "ObjectData");
+                             parCls ? parCls->getId(cg).c_str()
+                                    : "ObjectData");
         } else {
           cg_printf("DECLARE_DYNAMIC_CLASS(%s, %s, %s)\n", clsName,
                     m_originalName.c_str(),

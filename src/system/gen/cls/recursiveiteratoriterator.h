@@ -26,11 +26,11 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 28 */
 class c_recursiveiteratoriterator : public ExtObjectData {
-  BEGIN_CLASS_MAP(recursiveiteratoriterator)
-    PARENT_CLASS(iterator)
-    PARENT_CLASS(outeriterator)
-    PARENT_CLASS(traversable)
-  END_CLASS_MAP(recursiveiteratoriterator)
+  BEGIN_CLASS_MAP(RecursiveIteratorIterator)
+    PARENT_CLASS(Iterator)
+    PARENT_CLASS(OuterIterator)
+    PARENT_CLASS(Traversable)
+  END_CLASS_MAP(RecursiveIteratorIterator)
   DECLARE_CLASS_COMMON(recursiveiteratoriterator, RecursiveIteratorIterator)
   DECLARE_INVOKE_EX(recursiveiteratoriterator, RecursiveIteratorIterator, ObjectData)
 

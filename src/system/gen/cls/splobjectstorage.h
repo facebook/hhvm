@@ -26,11 +26,11 @@ namespace HPHP {
 
 /* SRC: classes/splobjectstorage.php line 3 */
 class c_splobjectstorage : public ExtObjectData {
-  BEGIN_CLASS_MAP(splobjectstorage)
-    PARENT_CLASS(countable)
-    PARENT_CLASS(iterator)
-    PARENT_CLASS(traversable)
-  END_CLASS_MAP(splobjectstorage)
+  BEGIN_CLASS_MAP(SplObjectStorage)
+    PARENT_CLASS(Countable)
+    PARENT_CLASS(Iterator)
+    PARENT_CLASS(Traversable)
+  END_CLASS_MAP(SplObjectStorage)
   DECLARE_CLASS_COMMON(splobjectstorage, SplObjectStorage)
   DECLARE_INVOKE_EX(splobjectstorage, SplObjectStorage, ObjectData)
 

@@ -25,10 +25,10 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 101 */
 class c_rangeexception : public c_runtimeexception {
-  BEGIN_CLASS_MAP(rangeexception)
-    PARENT_CLASS(exception)
-    PARENT_CLASS(runtimeexception)
-  END_CLASS_MAP(rangeexception)
+  BEGIN_CLASS_MAP(RangeException)
+    PARENT_CLASS(Exception)
+    PARENT_CLASS(RuntimeException)
+  END_CLASS_MAP(RangeException)
   DECLARE_CLASS_COMMON(rangeexception, RangeException)
   DECLARE_INVOKE_EX(rangeexception, RangeException, runtimeexception)
 

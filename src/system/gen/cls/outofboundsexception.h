@@ -25,10 +25,10 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 99 */
 class c_outofboundsexception : public c_runtimeexception {
-  BEGIN_CLASS_MAP(outofboundsexception)
-    PARENT_CLASS(exception)
-    PARENT_CLASS(runtimeexception)
-  END_CLASS_MAP(outofboundsexception)
+  BEGIN_CLASS_MAP(OutOfBoundsException)
+    PARENT_CLASS(Exception)
+    PARENT_CLASS(RuntimeException)
+  END_CLASS_MAP(OutOfBoundsException)
   DECLARE_CLASS_COMMON(outofboundsexception, OutOfBoundsException)
   DECLARE_INVOKE_EX(outofboundsexception, OutOfBoundsException, runtimeexception)
 

@@ -25,9 +25,9 @@ namespace HPHP {
 
 /* SRC: classes/reflection.php line 11 */
 class c_reflectionexception : public c_exception {
-  BEGIN_CLASS_MAP(reflectionexception)
-    PARENT_CLASS(exception)
-  END_CLASS_MAP(reflectionexception)
+  BEGIN_CLASS_MAP(ReflectionException)
+    PARENT_CLASS(Exception)
+  END_CLASS_MAP(ReflectionException)
   DECLARE_CLASS_COMMON(reflectionexception, ReflectionException)
   DECLARE_INVOKE_EX(reflectionexception, ReflectionException, exception)
 

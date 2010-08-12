@@ -25,9 +25,9 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 91 */
 class c_logicexception : public c_exception {
-  BEGIN_CLASS_MAP(logicexception)
-    PARENT_CLASS(exception)
-  END_CLASS_MAP(logicexception)
+  BEGIN_CLASS_MAP(LogicException)
+    PARENT_CLASS(Exception)
+  END_CLASS_MAP(LogicException)
   DECLARE_CLASS_COMMON(logicexception, LogicException)
   DECLARE_INVOKE_EX(logicexception, LogicException, exception)
 

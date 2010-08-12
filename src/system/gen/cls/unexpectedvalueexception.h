@@ -25,10 +25,10 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 103 */
 class c_unexpectedvalueexception : public c_runtimeexception {
-  BEGIN_CLASS_MAP(unexpectedvalueexception)
-    PARENT_CLASS(exception)
-    PARENT_CLASS(runtimeexception)
-  END_CLASS_MAP(unexpectedvalueexception)
+  BEGIN_CLASS_MAP(UnexpectedValueException)
+    PARENT_CLASS(Exception)
+    PARENT_CLASS(RuntimeException)
+  END_CLASS_MAP(UnexpectedValueException)
   DECLARE_CLASS_COMMON(unexpectedvalueexception, UnexpectedValueException)
   DECLARE_INVOKE_EX(unexpectedvalueexception, UnexpectedValueException, runtimeexception)
 

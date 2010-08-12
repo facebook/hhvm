@@ -27,12 +27,12 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 168 */
 class c_directoryiterator : public c_splfileinfo {
-  BEGIN_CLASS_MAP(directoryiterator)
-    PARENT_CLASS(iterator)
-    PARENT_CLASS(seekableiterator)
-    PARENT_CLASS(splfileinfo)
-    PARENT_CLASS(traversable)
-  END_CLASS_MAP(directoryiterator)
+  BEGIN_CLASS_MAP(DirectoryIterator)
+    PARENT_CLASS(Iterator)
+    PARENT_CLASS(SeekableIterator)
+    PARENT_CLASS(SplFileInfo)
+    PARENT_CLASS(Traversable)
+  END_CLASS_MAP(DirectoryIterator)
   DECLARE_CLASS_COMMON(directoryiterator, DirectoryIterator)
   DECLARE_INVOKE_EX(directoryiterator, DirectoryIterator, splfileinfo)
 

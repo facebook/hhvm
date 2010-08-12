@@ -25,9 +25,9 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 98 */
 class c_runtimeexception : public c_exception {
-  BEGIN_CLASS_MAP(runtimeexception)
-    PARENT_CLASS(exception)
-  END_CLASS_MAP(runtimeexception)
+  BEGIN_CLASS_MAP(RuntimeException)
+    PARENT_CLASS(Exception)
+  END_CLASS_MAP(RuntimeException)
   DECLARE_CLASS_COMMON(runtimeexception, RuntimeException)
   DECLARE_INVOKE_EX(runtimeexception, RuntimeException, exception)
 

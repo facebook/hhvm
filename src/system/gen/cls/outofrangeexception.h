@@ -25,10 +25,10 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 97 */
 class c_outofrangeexception : public c_logicexception {
-  BEGIN_CLASS_MAP(outofrangeexception)
-    PARENT_CLASS(exception)
-    PARENT_CLASS(logicexception)
-  END_CLASS_MAP(outofrangeexception)
+  BEGIN_CLASS_MAP(OutOfRangeException)
+    PARENT_CLASS(Exception)
+    PARENT_CLASS(LogicException)
+  END_CLASS_MAP(OutOfRangeException)
   DECLARE_CLASS_COMMON(outofrangeexception, OutOfRangeException)
   DECLARE_INVOKE_EX(outofrangeexception, OutOfRangeException, logicexception)
 

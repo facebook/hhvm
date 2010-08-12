@@ -24,8 +24,8 @@ namespace HPHP {
 
 /* SRC: classes/splfile.php line 3 */
 class c_splfileinfo : public ExtObjectData {
-  BEGIN_CLASS_MAP(splfileinfo)
-  END_CLASS_MAP(splfileinfo)
+  BEGIN_CLASS_MAP(SplFileInfo)
+  END_CLASS_MAP(SplFileInfo)
   DECLARE_CLASS_COMMON(splfileinfo, SplFileInfo)
   DECLARE_INVOKE_EX(splfileinfo, SplFileInfo, ObjectData)
 

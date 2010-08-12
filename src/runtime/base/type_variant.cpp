@@ -1485,14 +1485,14 @@ ArrayIterPtr Variant::begin(CStrRef context /* = null_string */) const {
   }
   if (is(KindOfObject)) {
     ObjectData *obj = getObjectData();
-    if (obj->o_instanceof("iterator")) {
+    if (obj->o_instanceof("Iterator")) {
       return new ObjectArrayIter(obj);
     }
-    while (obj->o_instanceof("iteratoraggregate")) {
+    while (obj->o_instanceof("IteratorAggregate")) {
       Variant iterator = obj->o_invoke_mil(
                                        "getiterator", Array(), -1);
       if (!iterator.isObject()) break;
-      if (iterator.instanceof("iterator")) {
+      if (iterator.instanceof("Iterator")) {
         return new ObjectArrayIter(iterator.getObjectData(), &iterator);
       }
       obj = iterator.getObjectData();
@@ -1506,14 +1506,14 @@ ArrayIterPtr Variant::begin(CStrRef context /* = null_string */) const {
 MutableArrayIterPtr Variant::begin(Variant *key, Variant &val) {
   if (is(KindOfObject)) {
     ObjectData *obj = getObjectData();
-    if (obj->o_instanceof("iterator")) {
+    if (obj->o_instanceof("Iterator")) {
       throw FatalErrorException("An iterator cannot be used with "
                                 "foreach by reference");
     }
-    while (obj->o_instanceof("iteratoraggregate")) {
+    while (obj->o_instanceof("IteratorAggregate")) {
       Variant iterator = obj->o_invoke("getiterator", Array(), -1);
       if (!iterator.isObject()) break;
-      if (iterator.instanceof("iterator")) {
+      if (iterator.instanceof("Iterator")) {
         throw FatalErrorException("An iterator cannot be used with "
                                   "foreach by reference");
       }
@@ -1978,7 +1978,7 @@ ObjectData *Variant::getArrayAccess() const {
   ASSERT(is(KindOfObject));
   ObjectData *obj = getObjectData();
   ASSERT(obj);
-  if (!obj->o_instanceof("arrayaccess")) {
+  if (!obj->o_instanceof("ArrayAccess")) {
     throw InvalidOperandException("not ArrayAccess objects");
   }
   return obj;
@@ -3205,7 +3205,7 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
       }
 
       Object obj = create_object(clsName.data(), Array::Create(), false);
-      if (!obj->o_instanceof("serializable")) {
+      if (!obj->o_instanceof("Serializable")) {
         raise_error("%s didn't implement Serializable", clsName.data());
       }
       operator=(obj);

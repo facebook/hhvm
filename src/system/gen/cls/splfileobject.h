@@ -28,13 +28,13 @@ namespace HPHP {
 
 /* SRC: classes/splfile.php line 120 */
 class c_splfileobject : public c_splfileinfo {
-  BEGIN_CLASS_MAP(splfileobject)
-    PARENT_CLASS(iterator)
-    PARENT_CLASS(recursiveiterator)
-    PARENT_CLASS(seekableiterator)
-    PARENT_CLASS(splfileinfo)
-    PARENT_CLASS(traversable)
-  END_CLASS_MAP(splfileobject)
+  BEGIN_CLASS_MAP(SplFileObject)
+    PARENT_CLASS(Iterator)
+    PARENT_CLASS(RecursiveIterator)
+    PARENT_CLASS(SeekableIterator)
+    PARENT_CLASS(SplFileInfo)
+    PARENT_CLASS(Traversable)
+  END_CLASS_MAP(SplFileObject)
   DECLARE_CLASS_COMMON(splfileobject, SplFileObject)
   DECLARE_INVOKE_EX(splfileobject, SplFileObject, splfileinfo)
 

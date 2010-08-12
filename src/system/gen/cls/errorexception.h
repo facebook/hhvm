@@ -25,9 +25,9 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 105 */
 class c_errorexception : public c_exception {
-  BEGIN_CLASS_MAP(errorexception)
-    PARENT_CLASS(exception)
-  END_CLASS_MAP(errorexception)
+  BEGIN_CLASS_MAP(ErrorException)
+    PARENT_CLASS(Exception)
+  END_CLASS_MAP(ErrorException)
   DECLARE_CLASS_COMMON(errorexception, ErrorException)
   DECLARE_INVOKE_EX(errorexception, ErrorException, exception)
 

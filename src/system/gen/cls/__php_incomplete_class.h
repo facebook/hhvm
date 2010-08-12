@@ -24,8 +24,8 @@ namespace HPHP {
 
 /* SRC: classes/stdclass.php line 8 */
 class c___php_incomplete_class : public ExtObjectData {
-  BEGIN_CLASS_MAP(__php_incomplete_class)
-  END_CLASS_MAP(__php_incomplete_class)
+  BEGIN_CLASS_MAP(__PHP_Incomplete_Class)
+  END_CLASS_MAP(__PHP_Incomplete_Class)
   DECLARE_CLASS_COMMON(__php_incomplete_class, __PHP_Incomplete_Class)
   DECLARE_INVOKE_EX(__php_incomplete_class, __PHP_Incomplete_Class, ObjectData)
 

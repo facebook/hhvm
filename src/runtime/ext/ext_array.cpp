@@ -447,7 +447,7 @@ int f_count(CVarRef var, bool recursive /* = false */) {
   case KindOfObject:
     {
       Object obj = var.toObject();
-      if (obj.instanceof("countable")) {
+      if (obj.instanceof("Countable")) {
         return obj->o_invoke_mil( "count", Array(), -1);
       }
     }

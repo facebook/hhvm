@@ -25,9 +25,9 @@ namespace HPHP {
 
 /* SRC: classes/reflection.php line 756 */
 class c_reflectionextension : public ExtObjectData {
-  BEGIN_CLASS_MAP(reflectionextension)
-    PARENT_CLASS(reflector)
-  END_CLASS_MAP(reflectionextension)
+  BEGIN_CLASS_MAP(ReflectionExtension)
+    PARENT_CLASS(Reflector)
+  END_CLASS_MAP(ReflectionExtension)
   DECLARE_CLASS_COMMON(reflectionextension, ReflectionExtension)
   DECLARE_INVOKE_EX(reflectionextension, ReflectionExtension, ObjectData)
 

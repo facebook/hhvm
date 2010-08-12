@@ -25,10 +25,10 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 102 */
 class c_underflowexception : public c_runtimeexception {
-  BEGIN_CLASS_MAP(underflowexception)
-    PARENT_CLASS(exception)
-    PARENT_CLASS(runtimeexception)
-  END_CLASS_MAP(underflowexception)
+  BEGIN_CLASS_MAP(UnderflowException)
+    PARENT_CLASS(Exception)
+    PARENT_CLASS(RuntimeException)
+  END_CLASS_MAP(UnderflowException)
   DECLARE_CLASS_COMMON(underflowexception, UnderflowException)
   DECLARE_INVOKE_EX(underflowexception, UnderflowException, runtimeexception)
 

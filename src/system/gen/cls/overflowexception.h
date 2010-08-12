@@ -25,10 +25,10 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 100 */
 class c_overflowexception : public c_runtimeexception {
-  BEGIN_CLASS_MAP(overflowexception)
-    PARENT_CLASS(exception)
-    PARENT_CLASS(runtimeexception)
-  END_CLASS_MAP(overflowexception)
+  BEGIN_CLASS_MAP(OverflowException)
+    PARENT_CLASS(Exception)
+    PARENT_CLASS(RuntimeException)
+  END_CLASS_MAP(OverflowException)
   DECLARE_CLASS_COMMON(overflowexception, OverflowException)
   DECLARE_INVOKE_EX(overflowexception, OverflowException, runtimeexception)
 

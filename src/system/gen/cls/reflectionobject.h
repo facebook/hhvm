@@ -25,10 +25,10 @@ namespace HPHP {
 
 /* SRC: classes/reflection.php line 540 */
 class c_reflectionobject : public c_reflectionclass {
-  BEGIN_CLASS_MAP(reflectionobject)
-    PARENT_CLASS(reflectionclass)
-    PARENT_CLASS(reflector)
-  END_CLASS_MAP(reflectionobject)
+  BEGIN_CLASS_MAP(ReflectionObject)
+    PARENT_CLASS(ReflectionClass)
+    PARENT_CLASS(Reflector)
+  END_CLASS_MAP(ReflectionObject)
   DECLARE_CLASS_COMMON(reflectionobject, ReflectionObject)
   DECLARE_INVOKE_EX(reflectionobject, ReflectionObject, reflectionclass)
 

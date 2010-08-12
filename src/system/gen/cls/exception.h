@@ -24,8 +24,8 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 3 */
 class c_exception : public ExtObjectData {
-  BEGIN_CLASS_MAP(exception)
-  END_CLASS_MAP(exception)
+  BEGIN_CLASS_MAP(Exception)
+  END_CLASS_MAP(Exception)
   DECLARE_CLASS_COMMON(exception, Exception)
   DECLARE_INVOKE_EX(exception, Exception, ObjectData)
 

@@ -25,10 +25,10 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 96 */
 class c_lengthexception : public c_logicexception {
-  BEGIN_CLASS_MAP(lengthexception)
-    PARENT_CLASS(exception)
-    PARENT_CLASS(logicexception)
-  END_CLASS_MAP(lengthexception)
+  BEGIN_CLASS_MAP(LengthException)
+    PARENT_CLASS(Exception)
+    PARENT_CLASS(LogicException)
+  END_CLASS_MAP(LengthException)
   DECLARE_CLASS_COMMON(lengthexception, LengthException)
   DECLARE_INVOKE_EX(lengthexception, LengthException, logicexception)
 

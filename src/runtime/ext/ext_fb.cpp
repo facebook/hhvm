@@ -476,12 +476,12 @@ static void output_dataset(Array &ret, int affected, DBDataSet &ds,
 }
 
 void f_fb_load_local_databases(CArrRef servers) {
-  DBConn::clearLocalDatabases();
+  DBConn::ClearLocalDatabases();
   for (ArrayIter iter(servers); iter; ++iter) {
     int dbId = iter.first().toInt32();
     Array data = iter.second().toArray();
     if (!data.empty()) {
-      DBConn::addLocalDB(dbId, data["ip"].toString().data(),
+      DBConn::AddLocalDB(dbId, data["ip"].toString().data(),
                          data["db"].toString().data(),
                          data["port"].toInt32(),
                          data["username"].toString().data(),

@@ -99,24 +99,18 @@ unsigned int DBConn::DefaultConnectTimeout = 1000;
 unsigned int DBConn::DefaultReadTimeout = 1000;
 
 Mutex DBConn::s_mutex;
-ServerDataPtrVec DBConn::s_localDatabases;
+DBConn::DatabaseMap DBConn::s_localDatabases;
 
-void DBConn::clearLocalDatabases() {
+void DBConn::ClearLocalDatabases() {
   Lock lock(s_mutex);
   s_localDatabases.clear();
-  s_localDatabases.reserve(32 * 1024);
 }
 
-void DBConn::addLocalDB(unsigned int dbId, const char *ip, const char *db,
+void DBConn::AddLocalDB(int dbId, const char *ip, const char *db,
                         int port, const char *username, const char *password) {
-  if (dbId < 102400) {
-    Lock lock(s_mutex);
-    if (s_localDatabases.size() <= dbId) {
-      s_localDatabases.resize(dbId + 1);
-    }
-    s_localDatabases[dbId] =
-      ServerDataPtr(new ServerData(ip, db, port, username, password));
-  }
+  Lock lock(s_mutex);
+  s_localDatabases[dbId] =
+    ServerDataPtr(new ServerData(ip, db, port, username, password));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -245,13 +239,12 @@ int DBConn::parallelExecute(const char *sql, DBDataSet &ds,
   Mutex mutex;
   jobs.reserve(s_localDatabases.size());
   string ssql = sql; // so we have copy-on-write in the loop
-  for (unsigned int i = 0; i < s_localDatabases.size(); i++) {
-    ServerDataPtr server = s_localDatabases[i];
-    if (server) {
-      jobs.push_back(QueryJobPtr(new QueryJob(server, ssql, i, mutex, ds,
-                                              retryQueryOnFail, connectTimeout,
-                                              readTimeout)));
-    }
+  for (DatabaseMap::const_iterator iter = s_localDatabases.begin();
+       iter != s_localDatabases.end(); ++iter) {
+    jobs.push_back(QueryJobPtr(new QueryJob(iter->second, ssql, iter->first,
+                                            mutex, ds,
+                                            retryQueryOnFail, connectTimeout,
+                                            readTimeout)));
   }
   return parallelExecute(jobs, errors, maxThread);
 }

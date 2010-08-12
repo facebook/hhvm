@@ -134,13 +134,14 @@ class DBConn {
   void escapeString(const char *s, std::string &out);
   void escapeString(const char *s, int len, std::string &out);
 
-  static void clearLocalDatabases();
-  static void addLocalDB(unsigned int dbId, const char *ip, const char *db,
+  static void ClearLocalDatabases();
+  static void AddLocalDB(int dbId, const char *ip, const char *db,
                          int port, const char *username, const char *password);
 
  private:
   static Mutex s_mutex;
-  static ServerDataPtrVec s_localDatabases;
+  typedef std::map<int, ServerDataPtr> DatabaseMap;
+  static DatabaseMap s_localDatabases;
 
   MYSQL *m_conn;
   ServerDataPtr m_server;

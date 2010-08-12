@@ -5751,7 +5751,7 @@ bool TestCodeRun::TestReflection() {
       "class A extends B { public $p = 'g';} "
       "$obj = new A(); "
       "var_dump(get_class($obj)); "
-      "var_dump(strtolower(get_parent_class($obj))); " // glitch
+      "var_dump(get_parent_class($obj)); "
       "var_dump(is_a($obj, 'b')); "
       "var_dump(is_subclass_of($obj, 'b'));"
       "var_dump(method_exists($obj, 'f'));"

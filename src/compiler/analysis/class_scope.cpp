@@ -505,11 +505,19 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_kindOf == KindOfFinalClass) attribute |= ClassInfo::IsFinal;
   if (!m_docComment.empty()) attribute |= ClassInfo::HasDocComment;
   if (needLazyStaticInitializer()) attribute |= ClassInfo::IsLazyInit;
-
   attribute |= m_attributeClassInfo;
 
+  string parent;
+  if (!m_parent.empty()) {
+    ClassScopePtr parCls = ar->findClass(m_parent);
+    if (parCls) {
+      parent = parCls->getOriginalName();
+    } else {
+      parent = m_parent;
+    }
+  }
   cg_printf("(const char *)0x%04X, \"%s\", \"%s\",\n", attribute,
-            getOriginalName().c_str(), m_parent.c_str());
+            getOriginalName().c_str(), parent.c_str());
 
   if (!m_docComment.empty()) {
     char *dc = string_cplus_escape(m_docComment.c_str(), m_docComment.size());
@@ -519,7 +527,14 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   // parent interfaces
   for (unsigned int i = (m_parent.empty() ? 0 : 1); i < m_bases.size(); i++) {
-    cg_printf("\"%s\", ", m_bases[i].c_str());
+    string base;
+    ClassScopePtr baseCls = ar->findClass(m_bases[i]);
+    if (baseCls) {
+      base = baseCls->getOriginalName();
+    } else {
+      base = m_bases[i];
+    }
+    cg_printf("\"%s\", ", base.c_str());
   }
   cg_printf("NULL,\n");
 

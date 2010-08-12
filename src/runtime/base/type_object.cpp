@@ -72,6 +72,18 @@ ObjectOffset Object::o_lval(CStrRef propName, int64 hash /* = -1 */,
   return ObjectOffset(m_px, propName, hash, context);
 }
 
+bool Object::doIsSet(CStrRef propName, int64 hash,
+                     CStrRef context /* = null_string */) const {
+  if (!m_px) throw NullPointerException();
+  return m_px->doIsSet(propName, hash, context);
+}
+
+bool Object::doEmpty(CStrRef propName, int64 hash,
+                     CStrRef context /* = null_string */) const {
+  if (!m_px) throw NullPointerException();
+  return m_px->doEmpty(propName, hash, context);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // output
 

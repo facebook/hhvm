@@ -43,7 +43,7 @@ class DynamicObjectData : public ObjectData {
   virtual Array o_toArray() const;
   virtual Array o_getDynamicProperties() const;
   virtual bool o_exists(CStrRef prop, int64 phash,
-      const char *context, int64 hash) const;
+                        const char *context, int64 hash) const;
   virtual Variant o_get(CStrRef prop, int64 phash, bool error,
       const char *context, int64 hash);
   virtual Variant o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit,

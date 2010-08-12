@@ -138,7 +138,10 @@ class Object : public SmartPtr<ObjectData> {
                 CStrRef context = null_string) const;
   ObjectOffset o_lval(CStrRef propName, int64 hash = -1,
                       CStrRef context = null_string);
-
+  bool doIsSet(CStrRef propName, int64 hash,
+               CStrRef context = null_string) const;
+  bool doEmpty(CStrRef propName, int64 hash,
+               CStrRef context = null_string) const;
   /**
    * Input/Output
    */

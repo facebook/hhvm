@@ -85,7 +85,7 @@ ObjectData* DynamicObjectData::clone() {
 // instance methods and properties
 
 bool DynamicObjectData::o_exists(CStrRef propName, int64 phash,
-    const char *context, int64 hash) const {
+                                 const char *context, int64 hash) const {
   if (!parent.isNull()) {
     return parent->o_exists(propName, phash, context, hash);
   } else {
@@ -400,7 +400,6 @@ Variant DynamicObjectData::doGet(Variant v_name, bool error) {
   } else {
     return ObjectData::doGet(v_name, error);
   }
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////

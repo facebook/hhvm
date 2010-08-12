@@ -137,7 +137,7 @@ ObjectData::os_invoke_from_eval(const char *c, const char *s,
 // instance methods and properties
 
 bool ObjectData::o_exists(CStrRef propName, int64 hash,
-    CStrRef context /* = null_string */) const {
+                          CStrRef context /* = null_string */) const {
   StringData *sd;
   if (context.isNull()) {
     sd = FrameInjection::GetClassName(false).get();
@@ -149,7 +149,7 @@ bool ObjectData::o_exists(CStrRef propName, int64 hash,
 }
 
 bool ObjectData::o_exists(CStrRef propName, int64 phash,
-    const char *context, int64 hash) const {
+                          const char *context, int64 hash) const {
   return o_existsPublic(propName, phash);
 }
 
@@ -807,7 +807,8 @@ Variant ObjectData::doCall(Variant v_name, Variant v_arguments, bool fatal) {
   return o_invoke_failed(o_getClassName(), v_name.toString().data(), fatal);
 }
 
-Variant ObjectData::doRootCall(Variant v_name, Variant v_arguments, bool fatal) {
+Variant ObjectData::doRootCall(Variant v_name,
+                               Variant v_arguments, bool fatal) {
   return doCall(v_name, v_arguments, fatal);
 }
 
@@ -817,6 +818,22 @@ Variant ObjectData::doGet(Variant v_name, bool error) {
                  v_name.toString().data());
   }
   return null_variant;
+}
+
+bool ObjectData::doIsSet(CStrRef prop, int64 phash,
+                         CStrRef context) {
+  if (o_exists(prop, phash, context)) {
+    return !o_get(prop, phash, false, context).isNull();
+  }
+  return t___isset(prop);
+}
+
+bool ObjectData::doEmpty(CStrRef prop, int64 phash,
+                         CStrRef context) {
+  if (o_exists(prop, phash, context)) {
+    return empty(o_get(prop, phash, false, context));
+  }
+  return !t___isset(prop) || empty(t___get(prop));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -862,10 +879,7 @@ Variant &ObjectData::___offsetget_lval(Variant v_name) {
   return ___lval(v_name);
 }
 bool ObjectData::t___isset(Variant v_name) {
-  String sname = v_name.toString();
-  if (!o_exists(sname, -1)) return false;
-  Variant v = o_get(sname, -1, false);
-  return isset(v);
+  return false;
 }
 
 Variant ObjectData::t___unset(Variant v_name) {

@@ -245,7 +245,10 @@ class ObjectData : public Countable {
   virtual Variant doRootCall(Variant v_name, Variant v_arguments, bool fatal);
 
   virtual Variant doGet(Variant v_name, bool error);
-
+  virtual bool doIsSet(CStrRef prop, int64 phash,
+                       CStrRef context = null_string);
+  virtual bool doEmpty(CStrRef prop, int64 phash,
+                       CStrRef context = null_string);
   // magic methods
   // __construct is handled in a special way
   virtual Variant t___destruct();

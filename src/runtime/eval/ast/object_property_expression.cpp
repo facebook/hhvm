@@ -147,15 +147,13 @@ Variant ObjectPropertyExpression::setOp(VariableEnvironment &env, int op,
 }
 
 bool ObjectPropertyExpression::exist(VariableEnvironment &env, int op) const {
-  Variant obj(m_obj->evalExist(env));
+  Object obj(toObject(m_obj->evalExist(env)));
   String name(m_name->get(env));
   SET_LINE;
   if (op == T_ISSET) {
-    // isset will cast to object
-    return toObject(obj)->t___isset(name);
+    return obj->doIsSet(name, -1);
   } else {
-    // empty
-    return empty(toObject(obj).o_get(name, m_name->hash(), false));
+    return obj->doEmpty(name, -1);
   }
 }
 void ObjectPropertyExpression::unset(VariableEnvironment &env) const {

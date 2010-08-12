@@ -325,12 +325,13 @@ bool ObjectPropertyExpression::preOutputCPP(CodeGenerator &cg,
 
 void ObjectPropertyExpression::outputCPPImpl(CodeGenerator &cg,
                                              AnalysisResultPtr ar) {
-  outputCPPObjProperty(cg, ar, directVariantProxy(ar));
+  outputCPPObjProperty(cg, ar, directVariantProxy(ar), false);
 }
 
 void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
                                                     AnalysisResultPtr ar,
-                                                    bool directVariant) {
+                                                    bool directVariant,
+                                                    int doExist) {
   bool bThis = m_object->isThis();
   bool useGetThis = false;
   FunctionScopePtr funcScope = ar->getFunctionScope();
@@ -346,9 +347,6 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
   const char *op = ".";
   string func = Option::ObjectPrefix;
   const char *error = ", true";
-  if (m_context & ExistContext) {
-    error = ", false"; // suppress non-object property error
-  }
   ClassScopePtr cls = ar->getClassScope();
   const char *context = "";
   if (cg.getOutput() != CodeGenerator::SystemCPP) {
@@ -358,16 +356,23 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       context = ", empty_string";
     }
   }
-  if (bThis && funcScope && funcScope->isStatic()) {
-    func = Option::ObjectStaticPrefix;
-    error = "";
-    context = "";
-  }
-  if (m_context & (LValue | RefValue | UnsetContext)) {
-    func += "lval";
+  if (doExist) {
+    func = doExist > 0 ? "doIsSet" : "doEmpty";
     error = "";
   } else {
-    func += "get";
+    if (bThis && funcScope && funcScope->isStatic()) {
+      func = Option::ObjectStaticPrefix;
+      error = "";
+      context = "";
+    } else if (m_context & ExistContext) {
+      error = ", false";
+    }
+    if (m_context & (LValue | RefValue | UnsetContext)) {
+      func += "lval";
+      error = "";
+    } else {
+      func += "get";
+    }
   }
 
   if (m_property->getKindOf() == Expression::KindOfScalarExpression) {
@@ -378,9 +383,11 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       if (m_static) {
         if (!bThis) {
           ASSERT(m_class);
+          if (doExist) cg_printf(doExist > 0 ? "isset(" : "empty(");
           cg_printf("g->%s%s%s%s",
                     Option::StaticPropertyPrefix, m_class->getName().c_str(),
                     Option::IdPrefix.c_str(), propName);
+          if (doExist) cg_printf(")");
         } else {
           // if $val is a class static variable (static $val), then $val
           // cannot be declared as a class variable (var $val), $this->val
@@ -392,12 +399,14 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
           cg_printf(", 0x%016llXLL%s%s)", hash, error, context);
         }
       } else {
+        if (doExist) cg_printf(doExist > 0 ? "isset(" : "empty(");
         if (!bThis) {
           ASSERT(!directVariant);
           m_object->outputCPP(cg, ar);
           cg_printf("->");
         }
         cg_printf("%s%s", Option::PropertyPrefix, propName);
+        if (doExist) cg_printf(")");
       }
     } else {
       if (!bThis) {
@@ -445,32 +454,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
 void ObjectPropertyExpression::outputCPPExistTest(CodeGenerator &cg,
                                                   AnalysisResultPtr ar,
                                                   int op) {
-  if (op == T_ISSET) {
-    bool bThis = m_object->isThis();
-    if (bThis) {
-      FunctionScopePtr func = ar->getFunctionScope();
-      if (func && func->isStatic()) {
-        cg.printf("GET_THIS_ARROW()");
-      }
-    } else {
-      m_object->outputCPP(cg, ar);
-      cg_printf("->");
-    }
-    cg_printf("t___isset(");
-    bool direct = m_property->isUnquotedScalar();
-    if (direct) {
-      cg_printf("\"");
-    }
-    m_property->outputCPP(cg, ar);
-    if (direct) {
-      cg_printf("\"");
-    }
-    cg_printf(")");
-  } else {
-    cg_printf("empty(");
-    outputCPPObjProperty(cg, ar, false);
-    cg_printf(")");
-  }
+  outputCPPObjProperty(cg, ar, false, op == T_ISSET ? 1 : -1);
 }
 void ObjectPropertyExpression::outputCPPUnset(CodeGenerator &cg,
                                               AnalysisResultPtr ar) {

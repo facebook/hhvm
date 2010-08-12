@@ -61,7 +61,7 @@ private:
   // for avoiding code generate toObject(Variant)
   bool directVariantProxy(AnalysisResultPtr ar);
   void outputCPPObjProperty(CodeGenerator &cg, AnalysisResultPtr ar,
-                            bool directVariant);
+                            bool directVariant, int doExist);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
